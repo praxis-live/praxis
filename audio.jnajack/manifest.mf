@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module: net.neilcsmith.jnajack
+OpenIDE-Module-Localizing-Bundle: net/neilcsmith/jnajack/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+

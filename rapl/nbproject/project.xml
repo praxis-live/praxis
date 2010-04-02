@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.apisupport.project</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
+            <code-name-base>net.neilcsmith.rapl</code-name-base>
+            <suite-component/>
+            <module-dependencies>
+                <dependency>
+                    <code-name-base>net.neilcsmith.audioops</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>1.0</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
+                    <code-name-base>net.neilcsmith.audioservers</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>1.0</specification-version>
+                    </run-dependency>
+                </dependency>
+            </module-dependencies>
+            <public-packages>
+                <package>net.neilcsmith.rapl.components</package>
+                <package>net.neilcsmith.rapl.components.distortion</package>
+                <package>net.neilcsmith.rapl.components.filters</package>
+                <package>net.neilcsmith.rapl.components.mix</package>
+                <package>net.neilcsmith.rapl.components.test</package>
+                <package>net.neilcsmith.rapl.components.time</package>
+                <package>net.neilcsmith.rapl.core</package>
+                <package>net.neilcsmith.rapl.core.impl</package>
+                <package>net.neilcsmith.rapl.render</package>
+                <package>net.neilcsmith.rapl.util</package>
+            </public-packages>
+        </data>
+    </configuration>
+</project>
