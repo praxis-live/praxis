@@ -24,7 +24,6 @@ package net.neilcsmith.praxis.core.info;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.types.PMap;
-import net.neilcsmith.praxis.core.types.PString;
 
 /**
  * Info object for an Argument, usually used to define the valid input and output
@@ -36,18 +35,16 @@ import net.neilcsmith.praxis.core.types.PString;
  */
 public final class ArgumentInfo extends Argument {
 
-    /**
-     *
-     */
-    public final static PString TYPE_KEY = PString.valueOf("type");
-    /**
-     *
-     */
-    public final static PString PROPERTIES_KEY = PString.valueOf("properties");
-    private PMap data;
+    public static enum Presence { Always, Optional, Variable }
 
-    private ArgumentInfo(PMap data) {
-        this.data = data;
+    private String type;
+    private Presence presence;
+    private PMap properties;
+
+    private ArgumentInfo(String type, Presence presence, PMap properties) {
+        this.type = type;
+        this.presence = presence;
+        this.properties = properties;
     }
 
 //    public PString getType() {
@@ -59,7 +56,7 @@ public final class ArgumentInfo extends Argument {
      * @return String name of Argument subclass
      */
     public String getType() {
-        return data.get(TYPE_KEY).toString();
+        return type;
     }
 
     /**
@@ -67,34 +64,32 @@ public final class ArgumentInfo extends Argument {
      * @return PMap properties
      */
     public PMap getProperties() {
-        return (PMap) data.get(PROPERTIES_KEY);
+        return properties;
     }
     
-    /**
-     *
-     * @return
-     */
-    public PMap getData() {
-        return data;
-    }
 
     @Override
     public String toString() {
-        return data.toString();
+        return type + " {" + properties.toString() + "}";
     }
 
-    @Override
-    public int hashCode() {
-        return data.hashCode();
-    }
+
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof ArgumentInfo) {
             ArgumentInfo o = (ArgumentInfo) obj;
-            return data.equals(o.data);
+            return type.equals(o.type) && properties.equals(o.properties);
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 71 * hash + (this.type != null ? this.type.hashCode() : 0);
+        hash = 71 * hash + (this.properties != null ? this.properties.hashCode() : 0);
+        return hash;
     }
 
 
@@ -108,16 +103,28 @@ public final class ArgumentInfo extends Argument {
      */
     public static ArgumentInfo create(Class<? extends Argument> argClass,
             PMap properties) {
+        return create(argClass, Presence.Always, properties);
+
+    }
+
+    /**
+     * Create an ArgumentInfo from the Argument class and optional PMap of
+     * additional properties.
+     *
+     * @param argClass
+     * @param properties
+     * @return ArgumentInfo
+     */
+    public static ArgumentInfo create(Class<? extends Argument> argClass,
+            Presence presence, PMap properties) {
         if (argClass == null) {
             throw new NullPointerException();
         }
-        PString type = PString.valueOf(argClass.getName());
+        String type = argClass.getName();
         if (properties == null) {
             properties = PMap.EMPTY;
         }
-        PMap data = PMap.valueOf(TYPE_KEY, type,
-                PROPERTIES_KEY, properties);
-        return new ArgumentInfo(data);
+        return new ArgumentInfo(type, presence, properties);
 
     }
     
@@ -134,4 +141,6 @@ public final class ArgumentInfo extends Argument {
         }
         throw new ArgumentFormatException();
     }
+
+
 }

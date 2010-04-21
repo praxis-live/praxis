@@ -89,7 +89,7 @@ public class IntProperty extends AbstractSingleArgProperty {
         }
         ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.info(min, max)};
         Argument[] defaults = new Argument[]{PNumber.valueOf(def)};
-        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, 1, 0, null);
+        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
         return new IntProperty(component, binding, min, max, info);
     }
 

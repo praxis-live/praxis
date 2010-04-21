@@ -210,8 +210,10 @@ public class DefaultBinding extends BasicControl {
                     ComponentInfo compInfo = null;
                     try {
                         compInfo = ComponentInfo.coerce(args.getArg(0));
-                        bindingInfo = ControlInfo.coerce(compInfo.getControlsInfo().get(
-                                PString.valueOf(boundAddress.getID())));
+//                        bindingInfo = ControlInfo.coerce(compInfo.getControlsInfo().get(
+//                                PString.valueOf(boundAddress.getID())));
+                        // @TODO on null?
+                        bindingInfo = compInfo.getControlInfo(boundAddress.getID());
                         isProperty = bindingInfo.isProperty();
                         for (Adaptor a : adaptors) {
                             a.updateBindingConfiguration();

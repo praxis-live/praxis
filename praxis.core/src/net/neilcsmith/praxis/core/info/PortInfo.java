@@ -21,12 +21,11 @@
  */
 package net.neilcsmith.praxis.core.info;
 
+import java.util.Arrays;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.PortAddress;
-import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PMap;
-import net.neilcsmith.praxis.core.types.PString;
 
 /**
  *
@@ -34,96 +33,92 @@ import net.neilcsmith.praxis.core.types.PString;
  */
 public final class PortInfo extends Argument {
 
-    public final static PString TYPE_KEY = PString.valueOf("type");
-    public final static PString DIRECTION_KEY = PString.valueOf("direction");
-    public final static PString CONNECTIONS_KEY = PString.valueOf("connections");
-    public final static PString PROPERTIES_KEY = PString.valueOf("properties");
-    private PMap data;
+    private String type;
+    private Port.Direction direction;
+    private PortAddress[] connections;
+    private PMap properties;
 
-    private PortInfo(PMap data) {
-        this.data = data;
+    private PortInfo(String type, Port.Direction direction,
+            PortAddress[] connections, PMap properties) {
+        this.type = type;
+        this.direction = direction;
+        this.connections = connections;
+        this.properties = properties;
     }
 
-    public PMap getData() {
-        return data;
+    public String getType() {
+        return type;
     }
 
-    public PString getType() {
-        return (PString) data.get(TYPE_KEY);
+    public PortAddress[] getConnections() {
+        return Arrays.copyOf(connections, connections.length);
     }
 
-    public PArray getConnections() {
-        return (PArray) data.get(CONNECTIONS_KEY);
-    }
-
-    public PString getDirection() {
-        return (PString) data.get(DIRECTION_KEY);
+    public Port.Direction getDirection() {
+        return direction;
     }
 
     public PMap getProperties() {
-        return (PMap) data.get(PROPERTIES_KEY);
+        return properties;
     }
 
     @Override
     public String toString() {
-        return data.toString();
+        StringBuilder str = new StringBuilder();
+        str.append(type); str.append(" ");
+        str.append(direction.name()); str.append(" ");
+        for (PortAddress ad : connections) {
+            str.append(ad.toString()); str.append(" ");
+        }
+        str.append("{");
+        str.append(properties.toString());
+        str.append("}");
+        return str.toString();
     }
 
-    @Override
-    public int hashCode() {
-        return data.hashCode();
-    }
+
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof PortInfo) {
             PortInfo o = (PortInfo) obj;
-            return data.equals(o.data);
+            return type.equals(o.type) && direction.equals(o.direction) &&
+                    Arrays.equals(connections, o.connections) &&
+                    properties.equals(o.properties);
         }
         return false;
     }
-    
-//    public static PortInfo create(Port port, PortAddress[] connections, PMap properties) {
-//        Class<? extends Port> typeClass = port.getTypeClass();
-//        Port.Direction direction = port.getDirection();
-//        return create(typeClass, direction, connections, properties);
-//    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 89 * hash + (this.type != null ? this.type.hashCode() : 0);
+        hash = 89 * hash + (this.direction != null ? this.direction.hashCode() : 0);
+        hash = 89 * hash + Arrays.deepHashCode(this.connections);
+        hash = 89 * hash + (this.properties != null ? this.properties.hashCode() : 0);
+        return hash;
+    }
 
     public static PortInfo create(Class<? extends Port> typeClass, Port.Direction direction,
             PortAddress[] connections, PMap properties) {
         if (typeClass == null || direction == null || connections == null) {
             throw new NullPointerException();
         }
-        PString type = PString.valueOf(typeClass.getName());
-        PString dir = PString.valueOf(direction.name());
-        PArray con = PArray.valueOf(connections);
+        String type = typeClass.getName();
+        PortAddress[] con = Arrays.copyOf(connections, connections.length);
         if (properties == null) {
             properties = PMap.EMPTY;
         }
 
-        return create(type, dir, con, properties);
+        return new PortInfo(type, direction, connections, properties);
 
     }
 
     public static PortInfo create(PortInfo oldInfo, PortAddress[] connections) {
         
-        PArray con = PArray.valueOf(connections);
-        
-        PString type = oldInfo.getType();
-        PString dir = oldInfo.getDirection();
-        PMap properties = oldInfo.getProperties();
-        
-        return create(type, dir, con, properties);
+       return new PortInfo(oldInfo.type, oldInfo.direction,
+               Arrays.copyOf(connections, connections.length), oldInfo.properties);
     }
 
-    private static PortInfo create(PString type, PString direction,
-            PArray connections, PMap properties) {
 
-        PMap data = PMap.valueOf(TYPE_KEY, type,
-                DIRECTION_KEY, direction,
-                CONNECTIONS_KEY, connections,
-                PROPERTIES_KEY, properties);
-
-        return new PortInfo(data);
-    }
 }

@@ -60,8 +60,9 @@ public class Button extends AbstractGuiComponent {
         label = "";
         onClickArgs = CallArguments.create(PString.EMPTY);
         registerControl("label", StringProperty.create(this, new LabelBinding(), label));
+        // @TODO Fix ControlInfo here.
         onClickInfo = ControlInfo.createPropertyInfo(new ArgumentInfo[] {ControlAddress.info(), Argument.info()},
-                new Argument[] {PString.EMPTY}, 1, 1, null);
+                new Argument[] {PString.EMPTY}, null);
         registerControl("on-click", new OnClickProperty(this, onClickInfo));
     }
 

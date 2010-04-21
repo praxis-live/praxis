@@ -99,26 +99,15 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
     @Override
     public ComponentInfo getInfo() {
         if (info == null || !childInfoValid || !portInfoValid || !controlInfoValid) {
-            Map<PString, ControlInfo> controls = buildControlInfoMap();
+            Map<String, ControlInfo> controls = buildControlInfoMap();
             controlInfoValid = true;
-            Map<PString, PortInfo> ports = buildPortInfoMap();
+            Map<String, PortInfo> ports = buildPortInfoMap();
             portInfoValid = true;
-            PString[] children = buildChildArray();
+            String[] children = getChildIDs();
             childInfoValid = true;
             info = ComponentInfo.create(getClass(), controls, ports, children, null);
         }
         return info;
-    }
-
-    PString[] buildChildArray() {
-        Set<String> ids = childMap.keySet();
-        PString[] children = new PString[ids.size()];
-        int i = 0;
-        for (String id : ids) {
-            children[i] = PString.valueOf(id);
-            i++;
-        }
-        return children;
     }
 
     @Override

@@ -80,7 +80,7 @@ public class FloatRangeProperty extends AbstractProperty {
         ArgumentInfo inf = PNumber.info(min, max);
         ArgumentInfo[] arguments = new ArgumentInfo[]{inf, inf};
         Argument[] defaults = new Argument[]{PNumber.valueOf(low), PNumber.valueOf(high)};
-        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, 2, 0, null);
+        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
         return new FloatRangeProperty(component, binding, min, max, info);
     }
 

@@ -21,13 +21,10 @@
  */
 package net.neilcsmith.praxis.core.info;
 
+import java.util.Arrays;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
-import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PMap;
-import net.neilcsmith.praxis.core.types.PNumber;
-import net.neilcsmith.praxis.core.types.PBoolean;
-import net.neilcsmith.praxis.core.types.PString;
 
 /**
  *
@@ -36,246 +33,113 @@ import net.neilcsmith.praxis.core.types.PString;
  */
 public class ControlInfo extends Argument {
 
-    public static final PString IS_PROPERTY_KEY = PString.valueOf("is_property");
-    public static final PString INPUTS_REQUIRED_KEY = PString.valueOf("inputs_required");
-    public static final PString INPUTS_VARIABLE_KEY = PString.valueOf("inputs_variable");
-    public static final PString OUTPUTS_ASSURED_KEY = PString.valueOf("outputs_assured");
-    public static final PString OUTPUTS_VARIABLE_KEY = PString.valueOf("outputs_variable");
-    public static final PString INPUTS_INFO_KEY = PString.valueOf("inputs_info");
-    public static final PString OUTPUTS_INFO_KEY = PString.valueOf("outputs_info");
-    public static final PString DEFAULTS_KEY = PString.valueOf("defaults");
-    public final static PString PROPERTIES_KEY = PString.valueOf("properties");
+    private ArgumentInfo[] inputs;
+    private ArgumentInfo[] outputs;
+    private Argument[] defaults;
+    private boolean isProperty;
+    private PMap properties;
 
-    private PMap data;
+    private ControlInfo(ArgumentInfo[] inputs, ArgumentInfo[] outputs,
+            Argument[] defaults, boolean isProperty, PMap properties) {
 
-    private ControlInfo(PMap data) {
-        this.data = data;
+        this.inputs = inputs;
+        this.outputs = outputs;
+        this.defaults = defaults;
+        this.isProperty = isProperty;
+        this.properties = properties;
+
     }
 
     @Override
     public String toString() {
-        return data.toString();
-    }
-
-    @Override
-    public int hashCode() {
-        return data.hashCode();
+        return "ControlInfo toString() unsupported";
     }
 
     @Override
     public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
         if (obj instanceof ControlInfo) {
             ControlInfo o = (ControlInfo) obj;
-            return data.equals(o.data);
+            if (isProperty) {
+                return o.isProperty && Arrays.equals(inputs, o.inputs)
+                        && Arrays.equals(defaults, o.defaults)
+                        && properties.equals(o.properties);
+            } else {
+                return !o.isProperty && Arrays.equals(inputs, inputs)
+                        && Arrays.equals(outputs, outputs)
+                        && properties.equals(o.properties);
+            }
         }
         return false;
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 11 * hash + Arrays.deepHashCode(this.inputs);
+        hash = 11 * hash + Arrays.deepHashCode(this.outputs);
+        hash = 11 * hash + Arrays.deepHashCode(this.defaults);
+        hash = 11 * hash + (this.isProperty ? 1 : 0);
+        hash = 11 * hash + (this.properties != null ? this.properties.hashCode() : 0);
+        return hash;
+    }
+
     public boolean isProperty() {
-        try {
-            return PBoolean.coerce(data.get(IS_PROPERTY_KEY)).value();
-        } catch (Exception ex) {
-            return false;
-        }
-    }
-
-    public int getRequiredInputsCount() {
-        try {
-            return PNumber.coerce(data.get(INPUTS_REQUIRED_KEY)).toIntValue();
-        } catch (Exception ex) {
-            return 0;
-        }
-    }
-
-    public int getVariableInputsCount() {
-        try {
-            return PNumber.coerce(data.get(INPUTS_VARIABLE_KEY)).toIntValue();
-        } catch (Exception ex) {
-            return 0;
-        }
-    }
-
-    public int getAssuredOutputsCount() {
-        try {
-            return PNumber.coerce(data.get(OUTPUTS_ASSURED_KEY)).toIntValue();
-        } catch (Exception ex) {
-            return 0;
-        }
-    }
-
-    public int getVariableOutputsCount() {
-        try {
-            return PNumber.coerce(data.get(OUTPUTS_VARIABLE_KEY)).toIntValue();
-        } catch (Exception ex) {
-            return 0;
-        }
+        return isProperty;
     }
 
     public PMap getProperties() {
-        Argument arg = data.get(PROPERTIES_KEY);
-        if (arg == null || arg.isEmpty()) {
-            return PMap.EMPTY;
-        } else {
-            try {
-                return PMap.coerce(arg);
-            } catch (Exception ex) {
-                return PMap.EMPTY;
-            }
-        }
-
+        return properties;
     }
 
     public Argument[] getDefaults() {
-        Argument arg = data.get(DEFAULTS_KEY);
-        if (arg == null || arg.isEmpty()) {
-            return new Argument[0];
+        if (defaults == null) {
+            return null;
         } else {
-            try {
-                PArray a = PArray.coerce(arg);
-                Argument[] def = new Argument[a.getSize()];
-                for (int i = 0; i < def.length; i++) {
-                    def[i] = a.get(i);
-                }
-                return def;
-            } catch (Exception ex) {
-                return new Argument[0];
-            }
+            return Arrays.copyOf(defaults, defaults.length);
         }
     }
 
     public ArgumentInfo[] getInputsInfo() {
-        Argument arg = data.get(INPUTS_INFO_KEY);
-        if (arg == null || arg.isEmpty()) {
-            return new ArgumentInfo[0];
-        } else {
-            try {
-                PArray a = PArray.coerce(arg);
-                ArgumentInfo[] infos = new ArgumentInfo[a.getSize()];
-                for (int i = 0; i < a.getSize(); i++) {
-                    infos[i] = ArgumentInfo.coerce(a.get(i));
-                }
-                return infos;
-            } catch (Exception ex) {
-                return new ArgumentInfo[0];
-            }
-        }
+        return Arrays.copyOf(inputs, inputs.length);
     }
 
     public ArgumentInfo[] getOutputsInfo() {
-        Argument arg = data.get(OUTPUTS_INFO_KEY);
-        if (arg == null || arg.isEmpty()) {
-            return new ArgumentInfo[0];
-        } else {
-            try {
-                PArray a = PArray.coerce(arg);
-                ArgumentInfo[] infos = new ArgumentInfo[a.getSize()];
-                for (int i = 0; i < a.getSize(); i++) {
-                    infos[i] = ArgumentInfo.coerce(a.get(i));
-                }
-                return infos;
-            } catch (Exception ex) {
-                return new ArgumentInfo[0];
-            }
-        }
+        return Arrays.copyOf(outputs, outputs.length);
     }
 
     public static ControlInfo create(ArgumentInfo[] inputs,
             ArgumentInfo[] outputs, PMap properties) {
-        int inputCount = inputs.length;
-        int outputCount = outputs.length;
-        return create(inputs, outputs, null, false,
-                inputCount, 0, outputCount, 0, properties);
-    }
-
-    public static ControlInfo create(ArgumentInfo[] inputs,
-            ArgumentInfo[] outputs,
-            int inputsRequired, int inputsVariable,
-            int outputsAssured, int outputsVariable,
-            PMap properties) {
-        int inputCount = inputs.length;
-        int outputCount = outputs.length;
-        if (inputsRequired < 0 || inputsRequired > inputCount ||
-                outputsAssured < 0 || outputsAssured > outputCount) {
-            throw new IllegalArgumentException("Required / Assured count must be between 0 and number of arguments");
-        }
-        if (inputsVariable < 0 || inputsVariable > inputCount ||
-                outputsVariable < 0 || outputsVariable > outputCount) {
-            throw new IllegalArgumentException("Variable count must be between 0 and number of arguments");
-        }
-
-        return create(inputs, outputs, null, false,
-                inputsRequired, inputsVariable,
-                outputsAssured, outputsVariable,
-                properties);
-
-    }
-
-    public static ControlInfo createPropertyInfo(ArgumentInfo[] arguments, Argument[] defaults,
-            int assured, int variable, PMap properties) {
-        int argCount = arguments.length;
-        if (argCount < 1) {
-            throw new IllegalArgumentException("Property controls must have at least one argument");
-        }
-        if (defaults == null) {
-            throw new NullPointerException("Property controls must have defaults");
-        }
-        if (assured < 1 || assured > argCount) {
-            throw new IllegalArgumentException("Assured count must be between 1 and number of arguments");
-        }
-        if (variable < 0 || variable > argCount) {
-            throw new IllegalArgumentException("Variable count must be between 0 and number of arguments");
-        }
-
-        return create(arguments, arguments, defaults, true, 0, variable, assured, variable, properties);
+        return create(inputs, outputs, null, false, properties);
     }
 
     public static ControlInfo createPropertyInfo(ArgumentInfo[] arguments, Argument[] defaults, PMap properties) {
-        return createPropertyInfo(arguments, defaults, arguments.length, 0, properties);
+        return create(arguments, arguments, defaults, true, properties);
     }
 
     private static ControlInfo create(ArgumentInfo[] inputs,
             ArgumentInfo[] outputs,
             Argument[] defaults,
-            boolean is_property,
-            int inputsRequired, int inputsVariable,
-            int outputsAssured, int outputsVariable,
+            boolean isProperty,
             PMap properties) {
 
-        PArray ins = PArray.valueOf(inputs);
-        PArray outs;
+        ArgumentInfo[] ins = Arrays.copyOf(inputs, inputs.length);
+        ArgumentInfo[] outs;
         if (outputs == inputs) {
             // property - make same as inputs
             outs = ins;
         } else {
-            outs = PArray.valueOf(outputs);
-        }
-        PNumber in_req = PNumber.valueOf(inputsRequired);
-        PNumber in_var = PNumber.valueOf(inputsVariable);
-        PNumber out_ass = PNumber.valueOf(outputsAssured);
-        PNumber out_var = PNumber.valueOf(outputsVariable);
-        PBoolean is_prop = PBoolean.valueOf(is_property);
-        PArray defs = null;
-        if (defaults == null) {
-            defs = PArray.EMPTY;
-        } else {
-            defs = PArray.valueOf(defaults);
+            outs = Arrays.copyOf(outputs, outputs.length);
         }
         if (properties == null) {
             properties = PMap.EMPTY;
         }
 
-        PMap data = PMap.valueOf(INPUTS_INFO_KEY, ins,
-                INPUTS_REQUIRED_KEY, in_req,
-                INPUTS_VARIABLE_KEY, in_var,
-                OUTPUTS_INFO_KEY, outs,
-                OUTPUTS_ASSURED_KEY, out_ass,
-                OUTPUTS_VARIABLE_KEY, out_var,
-                IS_PROPERTY_KEY, is_prop,
-                DEFAULTS_KEY, defs,
-                PROPERTIES_KEY, properties);
+        return new ControlInfo(inputs, outputs, defaults, isProperty, properties);
 
 
-        return new ControlInfo(data);
     }
 
     public static ControlInfo coerce(Argument arg) throws ArgumentFormatException {

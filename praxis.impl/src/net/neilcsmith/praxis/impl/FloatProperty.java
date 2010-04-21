@@ -87,7 +87,7 @@ public class FloatProperty extends AbstractSingleArgProperty {
         }
         ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.info()};
         Argument[] defaults = new Argument[]{PNumber.valueOf(def)};
-        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, 1, 0, properties);
+        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new FloatProperty(component, binding, PNumber.MIN_VALUE, PNumber.MAX_VALUE, info);
     }
 
@@ -112,7 +112,7 @@ public class FloatProperty extends AbstractSingleArgProperty {
         }
         ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.info(min, max)};
         Argument[] defaults = new Argument[]{PNumber.valueOf(def)};
-        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, 1, 0, properties);
+        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new FloatProperty(component, binding, min, max, info);
     }
 

@@ -21,11 +21,10 @@
  */
 package net.neilcsmith.praxis.core.info;
 
-import net.neilcsmith.praxis.core.types.PArray;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import net.neilcsmith.praxis.core.types.PMap;
-import net.neilcsmith.praxis.core.types.PBoolean;
-import net.neilcsmith.praxis.core.types.PString;
-import java.util.List;
 import java.util.Map;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
@@ -37,172 +36,124 @@ import net.neilcsmith.praxis.core.Component;
  */
 public class ComponentInfo extends Argument {
 
-    public static final PString TYPE_KEY = PString.valueOf("type");
-    public static final PString CONTROLS_KEY = PString.valueOf("controls");
-    public static final PString PORTS_KEY = PString.valueOf("ports");
-    public static final PString PROPERTIES_KEY = PString.valueOf("properties");
-    public static final PString CHILDREN_KEY = PString.valueOf("children");
-    public static final PString IS_CONTAINER_KEY = PString.valueOf("is_container");
-    private PMap data;
+    private String type;
+    private Map<String, ControlInfo> controls;
+    private Map<String, PortInfo> ports;
+    private String[] children;
+    private PMap properties;
 
-    private ComponentInfo(PMap data) {
-        this.data = data;
+    private ComponentInfo(String type, Map<String, ControlInfo> controls,
+            Map<String, PortInfo> ports, String[] children, PMap properties) {
+        this.type = type;
+        this.controls = controls;
+        this.ports = ports;
+        this.children = children;
+        this.properties = properties;
     }
 
-    public PString getType() {
-        return (PString) data.get(TYPE_KEY);
+    public String getType() {
+        return type;
     }
 
-    public PMap getControlsInfo() {
-        return (PMap) data.get(CONTROLS_KEY);
+    public String[] getControls() {
+        return controls.keySet().toArray(new String[controls.size()]);
     }
 
-    public PMap getPortsInfo() {
-        return (PMap) data.get(PORTS_KEY);
+    public ControlInfo getControlInfo(String control) {
+        return controls.get(control);
+    }
+
+    public String[] getPorts() {
+        return ports.keySet().toArray(new String[controls.size()]);
     }
 
     public PMap getProperties() {
-        return (PMap) data.get(PROPERTIES_KEY);
+        return properties;
     }
 
-    public PBoolean isContainer() {
-        return (PBoolean) data.get(IS_CONTAINER_KEY);
+    public boolean isContainer() {
+        return (children != null);
     }
 
-    public PArray getChildren() {
-        return (PArray) data.get(CHILDREN_KEY);
+    public String[] getChildren() {
+        if (children == null) {
+            return new String[0];
+        } else {
+            return Arrays.copyOf(children, children.length);
+        }
     }
 
+    //@TODO implement toString
     @Override
     public String toString() {
-        return data.toString();
+        return "ComponentInfo toString() not implemented yet";
     }
 
-    @Override
-    public int hashCode() {
-        return data.hashCode();
-    }
+
 
     @Override
     public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
         if (obj instanceof ComponentInfo) {
             ComponentInfo o = (ComponentInfo) obj;
-            return data.equals(o.data);
+            return type.equals(o.type) &&
+                    controls.equals(o.controls) &&
+                    ports.equals(o.ports) &&
+                    Arrays.equals(children, o.children) &&
+                    properties.equals(o.properties);
         }
         return false;
     }
 
-    public static ComponentInfo create(
-            ComponentInfo oldInfo,
-            Map<PString, ControlInfo> controls,
-            Map<PString, PortInfo> ports,
-            PMap properties) {
-        return create(oldInfo, controls, ports, null, properties);
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 29 * hash + (this.type != null ? this.type.hashCode() : 0);
+        hash = 29 * hash + (this.controls != null ? this.controls.hashCode() : 0);
+        hash = 29 * hash + (this.ports != null ? this.ports.hashCode() : 0);
+        hash = 29 * hash + Arrays.deepHashCode(this.children);
+        hash = 29 * hash + (this.properties != null ? this.properties.hashCode() : 0);
+        return hash;
     }
-
-    public static ComponentInfo create(
-            ComponentInfo oldInfo,
-            Map<PString, ControlInfo> controls,
-            Map<PString, PortInfo> ports,
-            PString[] children,
-            PMap properties) {
-        PString type = oldInfo.getType();
-        PBoolean is_cont = oldInfo.isContainer();
-        PMap cts;
-        PMap pts;
-        PArray childs;
-        PMap props;
-        if (controls == null) {
-            cts = oldInfo.getControlsInfo();
-        } else {
-            cts = PMap.valueOf(controls);
-        }
-        if (ports == null) {
-            pts = oldInfo.getPortsInfo();
-        } else {
-            pts = PMap.valueOf(ports);
-        }
-        if (children == null) {
-            childs = PArray.EMPTY;
-        } else {
-            childs = PArray.valueOf(children);
-            is_cont = PBoolean.TRUE;
-        }
-        if (properties == null) {
-            props = oldInfo.getProperties();
-        } else {
-            props = properties;
-        }
-        PMap data = PMap.valueOf(TYPE_KEY, type,
-                CONTROLS_KEY, cts,
-                PORTS_KEY, pts,
-                IS_CONTAINER_KEY, is_cont,
-                CHILDREN_KEY, childs,
-                PROPERTIES_KEY, props);
-
-        return new ComponentInfo(data);
-    }
-
-    
 
     public static ComponentInfo create(
             Class<? extends Component> clas,
-            Map<PString, ControlInfo> controls,
-            Map<PString, PortInfo> ports,
+            Map<String, ControlInfo> controls,
+            Map<String, PortInfo> ports,
             PMap properties) {
         return create(clas, controls, ports, null, properties);
-
     }
 
     public static ComponentInfo create(
             Class<? extends Component> clas,
-            Map<PString, ControlInfo> controls,
-            Map<PString, PortInfo> ports,
-            PString[] children,
+            Map<String, ControlInfo> controls,
+            Map<String, PortInfo> ports,
+            String[] children,
             PMap properties) {
-                if (clas == null) {
+        if (clas == null) {
             throw new NullPointerException();
         }
-        PString type = PString.valueOf(clas.getName());
-        PMap cts;
+        String type = clas.getName();
         if (controls == null) {
-            cts = PMap.EMPTY;
+            controls = Collections.emptyMap();
         } else {
-            cts = PMap.valueOf(controls);
+            controls = new LinkedHashMap<String, ControlInfo>(controls);
         }
-        PMap pts;
         if (ports == null) {
-            pts = PMap.EMPTY;
+            ports = Collections.emptyMap();
         } else {
-            pts = PMap.valueOf(ports);
+            ports = new LinkedHashMap<String, PortInfo>(ports);
         }
-        PArray childs;
-        PBoolean is_cont;
-        if (children == null) {
-            childs = PArray.EMPTY;
-            is_cont = PBoolean.FALSE;
-        } else {
-            childs = PArray.valueOf(children);
-            is_cont = PBoolean.TRUE;
-        }
-        PMap props;
         if (properties == null) {
-            props = PMap.EMPTY;
-        } else {
-            props = properties;
+            properties = PMap.EMPTY;
         }
 
-        PMap data = PMap.valueOf(TYPE_KEY, type,
-                CONTROLS_KEY, cts,
-                PORTS_KEY, pts,
-                IS_CONTAINER_KEY, is_cont,
-                CHILDREN_KEY, childs,
-                PROPERTIES_KEY, props);
-
-        return new ComponentInfo(data);
+        return new ComponentInfo(type, controls, ports, children, properties);
 
     }
-    
+
     public static ComponentInfo coerce(Argument arg) throws ArgumentFormatException {
         if (arg instanceof ComponentInfo) {
             return (ComponentInfo) arg;

@@ -81,7 +81,7 @@ public class ArrayProperty extends AbstractSingleArgProperty {
         ArgumentInfo[] arguments = new ArgumentInfo[]{PArray.info()};
 
         Argument[] defaults = new Argument[]{def};
-        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, 1, 0, null);
+        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
         return new ArrayProperty(component, binding, info);
     }
 

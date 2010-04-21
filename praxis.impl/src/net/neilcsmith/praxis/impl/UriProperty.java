@@ -87,7 +87,7 @@ public class UriProperty extends AbstractSingleArgProperty {
         ArgumentInfo[] arguments = new ArgumentInfo[]{PUri.info()};
 
         Argument[] defaults = new Argument[]{def};
-        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, 1, 0, properties);
+        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new UriProperty(component, binding, info);
     }
 

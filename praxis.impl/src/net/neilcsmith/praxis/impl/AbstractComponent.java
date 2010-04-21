@@ -236,8 +236,8 @@ public abstract class AbstractComponent implements Component {
 
     public ComponentInfo getInfo() {
         if (info == null || !portInfoValid || !controlInfoValid) {
-            Map<PString, ControlInfo> controls = buildControlInfoMap();
-            Map<PString, PortInfo> ports = buildPortInfoMap();
+            Map<String, ControlInfo> controls = buildControlInfoMap();
+            Map<String, PortInfo> ports = buildPortInfoMap();
             info = ComponentInfo.create(getClass(), controls, ports, null);
             portInfoValid = true;
             controlInfoValid = true;
@@ -245,25 +245,25 @@ public abstract class AbstractComponent implements Component {
         return info;
     }
 
-    Map<PString, ControlInfo> buildControlInfoMap() {
-        Map<PString, ControlInfo> infos = new LinkedHashMap<PString, ControlInfo>();
+    Map<String, ControlInfo> buildControlInfoMap() {
+        Map<String, ControlInfo> infos = new LinkedHashMap<String, ControlInfo>();
         Set<Map.Entry<String, Control>> controls = controlMap.entrySet();
         for (Map.Entry<String, Control> entry : controls) {
             ControlInfo inf = entry.getValue().getInfo();
             if (inf != null) {
-                infos.put(PString.valueOf(entry.getKey()), inf);
+                infos.put(entry.getKey(), inf);
             }
         }
         return infos;
     }
 
-    Map<PString, PortInfo> buildPortInfoMap() {
-        Map<PString, PortInfo> infos = new LinkedHashMap<PString, PortInfo>();
+    Map<String, PortInfo> buildPortInfoMap() {
+        Map<String, PortInfo> infos = new LinkedHashMap<String, PortInfo>();
         Set<Map.Entry<String, Port>> ports = portMap.entrySet();
         for (Map.Entry<String, Port> entry : ports) {
             PortInfo inf = entry.getValue().getInfo();
             if (inf != null) {
-                infos.put(PString.valueOf(entry.getKey()), inf);
+                infos.put(entry.getKey(), inf);
             }
         }
         return infos;

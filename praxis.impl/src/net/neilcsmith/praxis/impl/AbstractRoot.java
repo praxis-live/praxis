@@ -540,7 +540,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             ArgumentInfo arg1 = ArgumentInfo.create(PReference.class, null);
             ArgumentInfo[] in = new ArgumentInfo[]{arg0, arg1};
             ArgumentInfo[] out = new ArgumentInfo[0];
-            info = ControlInfo.create(in, out, 2, 0, 0, 0, null);
+            info = ControlInfo.create(in, out, null);
         }
 
         @Override
@@ -600,7 +600,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             ArgumentInfo arg0 = ArgumentInfo.create(ComponentAddress.class, null);
             ArgumentInfo[] in = new ArgumentInfo[]{arg0};
             ArgumentInfo[] out = new ArgumentInfo[0];
-            info = ControlInfo.create(in, out, 1, 0, 0, 0, null);
+            info = ControlInfo.create(in, out, null);
         }
 
         @Override
@@ -642,7 +642,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             ArgumentInfo arg = ArgumentInfo.create(PortAddress.class, null);
             ArgumentInfo[] in = new ArgumentInfo[]{arg, arg};
             ArgumentInfo[] out = new ArgumentInfo[0];
-            info = ControlInfo.create(in, out, 2, 0, 0, 0, null);
+            info = ControlInfo.create(in, out, null);
             this.connect = connect;
         }
 
@@ -699,7 +699,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         private TransportControl(boolean start) {
             super(AbstractRoot.this);
             ArgumentInfo[] emptyArgs = new ArgumentInfo[0];
-            info = ControlInfo.create(emptyArgs, emptyArgs, 0, 0, 0, 0, null);
+            info = ControlInfo.create(emptyArgs, emptyArgs, null);
             this.start = start;
         }
 
@@ -733,12 +733,13 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         private InfoControl() {
             super(AbstractRoot.this);
             ArgumentInfo[] in = new ArgumentInfo[]{
-                ArgumentInfo.create(ComponentAddress.class, null)
+                ArgumentInfo.create(ComponentAddress.class,
+                        ArgumentInfo.Presence.Optional, null)
             };
             ArgumentInfo[] out = new ArgumentInfo[]{
                 ArgumentInfo.create(ComponentInfo.class, null)
             };
-            info = ControlInfo.create(in, out, 0, 0, 1, 0, null);
+            info = ControlInfo.create(in, out, null);
         }
 
         @Override

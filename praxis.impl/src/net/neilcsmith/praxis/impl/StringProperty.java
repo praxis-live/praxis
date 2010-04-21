@@ -121,7 +121,7 @@ public class StringProperty extends AbstractSingleArgProperty {
             arguments = new ArgumentInfo[]{PString.info(values)};
         }
         Argument[] defaults = new Argument[]{PString.valueOf(def)};
-        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, 1, 0, properties);
+        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new StringProperty(component, binding, allowedValues, info);
     }
 
