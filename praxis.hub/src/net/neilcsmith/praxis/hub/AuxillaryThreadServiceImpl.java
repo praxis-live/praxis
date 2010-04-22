@@ -36,12 +36,12 @@ import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.InvalidChildException;
-import net.neilcsmith.praxis.core.ServiceDescriptor;
-import net.neilcsmith.praxis.core.ServiceID;
-import net.neilcsmith.praxis.core.SystemExtension;
 import net.neilcsmith.praxis.core.Task;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.interfaces.AuxillaryThreadService;
+import net.neilcsmith.praxis.core.interfaces.InterfaceDefinition;
+import net.neilcsmith.praxis.core.interfaces.InterfaceProvider;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
@@ -50,14 +50,13 @@ import net.neilcsmith.praxis.impl.BasicControl;
  *
  * @author Neil C Smith
  */
-public class AuxillaryThreadService extends AbstractRoot implements SystemExtension {
+public class AuxillaryThreadServiceImpl extends AbstractRoot implements InterfaceProvider {
 
     private ExecutorService threadService;
     private Map<Future<Argument>, Call> futures;
     private List<Future> completed;
-    private ServiceDescriptor serviceInfo;
 
-    public AuxillaryThreadService() {
+    public AuxillaryThreadServiceImpl() {
         super(State.ACTIVE_RUNNING);
         threadService = Executors.newCachedThreadPool(new ThreadFactory() {
 
@@ -69,17 +68,16 @@ public class AuxillaryThreadService extends AbstractRoot implements SystemExtens
         });
         Control submitter = new SubmitControl();
         registerControl("submit", submitter);
-        serviceInfo = new ServiceDescriptor(
-                ServiceID.AUXILLARY_THREAD_SERVICE,
-                "submit",
-                submitter.getInfo());
         futures = new HashMap<Future<Argument>, Call>();
         completed = new ArrayList<Future>();
     }
 
-    public ServiceDescriptor[] getServices() {
-        return new ServiceDescriptor[]{serviceInfo};
+    public InterfaceDefinition[] getInterfaces() {
+        return new InterfaceDefinition[] {AuxillaryThreadService.getInstance()};
     }
+
+
+
 
     @Override
     public void addChild(String id, Component child) throws InvalidChildException {
@@ -115,7 +113,7 @@ public class AuxillaryThreadService extends AbstractRoot implements SystemExtens
         private ControlInfo info;
 
         private SubmitControl() {
-            super(AuxillaryThreadService.this);
+            super(AuxillaryThreadServiceImpl.this);
             ArgumentInfo input = ArgumentInfo.create(PReference.class, null);
             ArgumentInfo output = ArgumentInfo.create(Argument.class, null);
             info = ControlInfo.create(

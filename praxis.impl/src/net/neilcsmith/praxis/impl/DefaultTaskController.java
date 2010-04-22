@@ -25,13 +25,14 @@ package net.neilcsmith.praxis.impl;
 import java.util.HashMap;
 import java.util.Map;
 import net.neilcsmith.praxis.core.Call;
+import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.ControlAddress;
-import net.neilcsmith.praxis.core.ServiceID;
 import net.neilcsmith.praxis.core.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.Task;
 import net.neilcsmith.praxis.core.TaskListener;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.interfaces.AuxillaryThreadService;
 import net.neilcsmith.praxis.core.types.PReference;
 
 /**
@@ -56,8 +57,9 @@ class DefaultTaskController extends BasicControl {
     public long submitTask(Task task, TaskListener listener) throws ServiceUnavailableException {
         PReference taskRef = PReference.wrap(task);
         if (atsAddress == null) {
-            atsAddress = root.getServiceManager().getServiceAddress(
-                    ServiceID.AUXILLARY_THREAD_SERVICE);
+            ComponentAddress ats = root.getServiceManager().findService(
+                    AuxillaryThreadService.getInstance());
+            atsAddress = ControlAddress.create(ats, AuxillaryThreadService.SUBMIT);
         }
         Call call = Call.createCall(
                 atsAddress, address, root.getTime(), taskRef);

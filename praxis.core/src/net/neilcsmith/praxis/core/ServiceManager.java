@@ -21,7 +21,7 @@
  */
 package net.neilcsmith.praxis.core;
 
-import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.interfaces.InterfaceDefinition;
 
 /**
  *
@@ -29,7 +29,8 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
  */
 public interface ServiceManager {
 
-    public ControlAddress getServiceAddress(ServiceID desc) throws ServiceUnavailableException;
+   public ComponentAddress findService(InterfaceDefinition info) throws ServiceUnavailableException;
 
-    public ControlInfo getServiceInformation(ServiceID desc) throws ServiceUnavailableException;
+   public ComponentAddress[] findAllServices(InterfaceDefinition info) throws ServiceUnavailableException;
+
 }

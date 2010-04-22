@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.hub;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -34,19 +35,16 @@ import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.core.InvalidAddressException;
 import net.neilcsmith.praxis.core.Lookup;
-import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.Packet;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.RootHub;
-import net.neilcsmith.praxis.core.ServiceDescriptor;
-import net.neilcsmith.praxis.core.ServiceID;
 import net.neilcsmith.praxis.core.ServiceManager;
 import net.neilcsmith.praxis.core.ServiceUnavailableException;
-import net.neilcsmith.praxis.core.SystemExtension;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.interfaces.InterfaceDefinition;
+import net.neilcsmith.praxis.core.interfaces.InterfaceProvider;
 import net.neilcsmith.praxis.core.types.PReference;
-import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
 
@@ -60,20 +58,24 @@ public class DefaultHub extends AbstractRoot {
     private DefaultRootHub hub;
     private Root.Controller controller;
 //    private Set<SystemExtension> extensions;
-    private Map<ServiceID, ControlAddress> serviceAddresses;
-    private Map<ServiceID, ControlInfo> serviceInfo;
+//    private Map<ServiceID, ControlAddress> serviceAddresses;
+//    private Map<ServiceID, ControlInfo> serviceInfo;
     private final String EXT_PREFIX = "_sys_";
     private final String HUB_ID = "praxis";
     private ConcurrentMap<String, Root.Controller> roots;
-    private SystemExtension[] extensions;
+//    private SystemExtension[] extensions;
     private Thread hubThread;
     private ComponentFactory factory;
     private ServiceLoaderLookup lookup;
+    private Map<InterfaceDefinition, ComponentAddress[]> services;
+    private Root[] extensions;
 
-    public DefaultHub(SystemExtension... exts) {
+    public DefaultHub(Root... exts) {
         roots = new ConcurrentHashMap<String, Root.Controller>();
-        serviceAddresses = new ConcurrentHashMap<ServiceID, ControlAddress>();
-        serviceInfo = new ConcurrentHashMap<ServiceID, ControlInfo>();
+//        serviceAddresses = new ConcurrentHashMap<ServiceID, ControlAddress>();
+//        serviceInfo = new ConcurrentHashMap<ServiceID, ControlInfo>();
+//        extensions = exts;
+        services = new ConcurrentHashMap<InterfaceDefinition, ComponentAddress[]>();
         extensions = exts;
         lookup = new ServiceLoaderLookup();
         factory = LookupComponentFactory.getInstance(lookup);
@@ -89,7 +91,6 @@ public class DefaultHub extends AbstractRoot {
 //        this.factory = factory;
 //        hub = new DefaultRootHub();
 //    }
-
     public void activate() throws IllegalRootStateException {
 
         controller = initialize(HUB_ID, hub);
@@ -131,63 +132,89 @@ public class DefaultHub extends AbstractRoot {
 //    public void setInterrupt(Runnable task) {
 //        super.setInterrupt(task);
 //    }
-    public void eval(final String script) {
-        if (script == null) {
-            throw new NullPointerException();
-        }
-        try {
-            ControlAddress scriptService =
-                    getServiceManager().getServiceAddress(
-                    ServiceID.DEFAULT_SCRIPT_INTERPRETER);
-            ControlAddress from = ControlAddress.valueOf("/" + HUB_ID + ".log");
-            Call call = Call.createCall(
-                    scriptService, from, System.nanoTime(), PString.valueOf(script));
-            hub.dispatch(call);
-        } catch (Exception ex) {
-            logger.log(Level.SEVERE, null, ex);
-        }
-
-
-    }
-
+//    public void eval(final String script) {
+//        if (script == null) {
+//            throw new NullPointerException();
+//        }
+//        try {
+//            ControlAddress scriptService =
+//                    getServiceManager().getServiceAddress(
+//                    ServiceID.DEFAULT_SCRIPT_INTERPRETER);
+//            ControlAddress from = ControlAddress.valueOf("/" + HUB_ID + ".log");
+//            Call call = Call.createCall(
+//                    scriptService, from, System.nanoTime(), PString.valueOf(script));
+//            hub.dispatch(call);
+//        } catch (Exception ex) {
+//            logger.log(Level.SEVERE, null, ex);
+//        }
+//
+//
+//    }
     private void createDefaultControls() {
-            registerControl("create", new CreationControl(this, ControlAddress.create(getAddress(), "create"), factory));
-            registerControl("connect", new ConnectionControl(this, ControlAddress.create(getAddress(), "connect")));
-            registerControl("clear", new ClearControl());
-            registerControl("log", new LogControl());
+        registerControl("create", new CreationControl(this, ControlAddress.create(getAddress(), "create"), factory));
+        registerControl("connect", new ConnectionControl(this, ControlAddress.create(getAddress(), "connect")));
+        registerControl("clear", new ClearControl());
+        registerControl("log", new LogControl());
     }
 
     private void installExtensions() {
-        for (SystemExtension ext : extensions) {
-            ServiceDescriptor[] services = ext.getServices(); // get before we activate install - thread safety
+        for (Root ext : extensions) {
+//            ServiceDescriptor[] services = ext.getServices(); // get before we activate install - thread safety
+            InterfaceDefinition[] servs;
+            if (ext instanceof InterfaceProvider) {
+                servs = ((InterfaceProvider) ext).getInterfaces();
+            } else {
+                servs = new InterfaceDefinition[0];
+            }
             String extID = EXT_PREFIX + Integer.toHexString(ext.hashCode());
             try {
                 installRoot(extID, "sysex", ext);
             } catch (InvalidAddressException ex) {
-                logger.severe("Failed to install extension\n" +
-                        ext.getClass() + " to /" + extID + "\n" + ex);
+                logger.severe("Failed to install extension\n"
+                        + ext.getClass() + " to /" + extID + "\n" + ex);
                 continue;
             } catch (IllegalRootStateException ex) {
-                logger.severe("Failed to install extension\n" +
-                        ext.getClass() + " to /" + extID + "\n" + ex);
+                logger.severe("Failed to install extension\n"
+                        + ext.getClass() + " to /" + extID + "\n" + ex);
                 continue;
             }
             // safe to install services
-            for (ServiceDescriptor service : services) {
-                ServiceID serviceID = service.getServiceID();
-                String controlID = service.getControlID();
-                ControlAddress controlAddress;
-                try {
-                    controlAddress = ControlAddress.valueOf("/" + extID + "." + controlID);
-                } catch (ArgumentFormatException ex) {
-                    logger.severe("Failed to install service " + serviceID + " of /" +
-                            extID + " due to invalid control ID");
-                    continue;
-                }
-                serviceAddresses.put(serviceID, controlAddress);
-                serviceInfo.put(serviceID, service.getControlInfo());
+//            for (ServiceDescriptor service : services) {
+//                ServiceID serviceID = service.getServiceID();
+//                String controlID = service.getControlID();
+//                ControlAddress controlAddress;
+//                try {
+//                    controlAddress = ControlAddress.valueOf("/" + extID + "." + controlID);
+//                } catch (ArgumentFormatException ex) {
+//                    logger.severe("Failed to install service " + serviceID + " of /" +
+//                            extID + " due to invalid control ID");
+//                    continue;
+//                }
+//                serviceAddresses.put(serviceID, controlAddress);
+//                serviceInfo.put(serviceID, service.getControlInfo());
+//            }
+            // safe to install services - thread safe at this point
+            ComponentAddress root = ComponentAddress.create("/" + extID);
+            for (InterfaceDefinition serv : servs) {
+                installService(serv, root);
             }
         }
+    }
+
+    private void installService(InterfaceDefinition serv, ComponentAddress root) {
+        if (serv == null) {
+            return;
+        }
+        ComponentAddress[] provs = services.get(serv);
+        if (provs == null) {
+            services.put(serv, new ComponentAddress[]{root});
+        } else {
+            ComponentAddress[] nprovs = new ComponentAddress[provs.length + 1];
+            nprovs[0] = root;
+            System.arraycopy(provs, 0, nprovs, 1, provs.length);
+            services.put(serv, nprovs);
+        }
+
     }
 
     // NOT threadsafe - should only be called from single thread
@@ -238,7 +265,7 @@ public class DefaultHub extends AbstractRoot {
                     }
                 }
             }
-            }, rootID);
+        }, rootID);
         if ("root:audio".equals(typeID)) {
             thr.setPriority(Thread.MAX_PRIORITY);
         } else {
@@ -251,10 +278,8 @@ public class DefaultHub extends AbstractRoot {
     private class DefaultRootHub implements RootHub, ServiceManager {
 
         private final Logger logger = Logger.getLogger(DefaultRootHub.class.getName());
-        
 
         private DefaultRootHub() {
-
         }
 
         // THREAD SAFE
@@ -273,21 +298,23 @@ public class DefaultHub extends AbstractRoot {
         }
 
         // THREAD SAFE
-        public ControlAddress getServiceAddress(ServiceID desc) throws ServiceUnavailableException {
-            ControlAddress address = serviceAddresses.get(desc);
-            if (address == null) {
-                throw new ServiceUnavailableException();
-            }
-            return address;
+        public ComponentAddress findService(InterfaceDefinition info) throws ServiceUnavailableException {
+            return findServicesImpl(info)[0];
         }
 
         // THREAD SAFE
-        public ControlInfo getServiceInformation(ServiceID desc) throws ServiceUnavailableException {
-            ControlInfo info = serviceInfo.get(desc);
-            if (info == null) {
+        public ComponentAddress[] findAllServices(InterfaceDefinition info) throws ServiceUnavailableException {
+            ComponentAddress[] provs = findServicesImpl(info);
+            return Arrays.copyOf(provs, provs.length);
+        }
+
+        private ComponentAddress[] findServicesImpl(InterfaceDefinition info) throws ServiceUnavailableException {
+            ComponentAddress[] provs = services.get(info);
+            if (provs == null) {
                 throw new ServiceUnavailableException();
+            } else {
+                return provs;
             }
-            return info;
         }
 
         // THREAD SAFE

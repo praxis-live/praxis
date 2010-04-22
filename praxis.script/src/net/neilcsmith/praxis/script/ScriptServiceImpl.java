@@ -21,16 +21,16 @@
  */
 package net.neilcsmith.praxis.script;
 
-import net.neilcsmith.praxis.core.ServiceDescriptor;
 import java.util.LinkedList;
 import java.util.Queue;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ControlAddress;
-import net.neilcsmith.praxis.core.ServiceID;
-import net.neilcsmith.praxis.core.SystemExtension;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.interfaces.InterfaceDefinition;
+import net.neilcsmith.praxis.core.interfaces.InterfaceProvider;
+import net.neilcsmith.praxis.core.interfaces.ScriptService;
 import net.neilcsmith.praxis.core.syntax.InvalidSyntaxException;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
@@ -45,7 +45,7 @@ import net.neilcsmith.praxis.impl.BasicControl;
 
 /* @TODO Replace parser reference with control stack. Add second hidden control
  * to handle all internal responses. Can call self for continuations / sleeping. */
-public class ScriptService extends AbstractRoot implements SystemExtension { 
+public class ScriptServiceImpl extends AbstractRoot implements InterfaceProvider {
 
     public final static String EVAL_CONTROL_ID = "eval";
     
@@ -54,29 +54,26 @@ public class ScriptService extends AbstractRoot implements SystemExtension {
     private Call activeCall;
     private long matchID;
     private ControlAddress serviceAddress;
-    private ServiceDescriptor serviceInfo;
 
-    public ScriptService() {
+    public ScriptServiceImpl() {
         super(State.ACTIVE_RUNNING);
         evalQueue = new LinkedList<Call>();
         EvalControl control = new EvalControl();
         registerControl(EVAL_CONTROL_ID, control);
-        serviceInfo = new ServiceDescriptor(
-                ServiceID.DEFAULT_SCRIPT_INTERPRETER,
-                EVAL_CONTROL_ID,
-                control.getInfo());
     }
 
-    public ServiceDescriptor[] getServices() {
-        return new ServiceDescriptor[] {serviceInfo};
+    public InterfaceDefinition[] getInterfaces() {
+        return new InterfaceDefinition[] {ScriptService.getInstance()};
     }
+
+
 
     private class EvalControl extends BasicControl {
 
         private ControlInfo info;
 
         private EvalControl() {
-            super(ScriptService.this);
+            super(ScriptServiceImpl.this);
             ArgumentInfo input = ArgumentInfo.create(PString.class, null);
             info = ControlInfo.create(
                     new ArgumentInfo[]{input},
@@ -102,7 +99,7 @@ public class ScriptService extends AbstractRoot implements SystemExtension {
                 String script = ((PString) args.getArg(0)).toString();
                 try {
                     if (serviceAddress == null) {
-                        serviceAddress = ControlAddress.create(ScriptService.this.getAddress(), "eval");
+                        serviceAddress = ControlAddress.create(ScriptServiceImpl.this.getAddress(), "eval");
                     }
                     activeParser = new TempScriptParser(script);
                     Call response = activeParser.getNextCall(serviceAddress, getTime());
