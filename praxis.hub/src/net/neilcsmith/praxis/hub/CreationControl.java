@@ -83,6 +83,7 @@ class CreationControl extends BasicControl {
                         if (!callQueue.isEmpty()) {
                             processCall(callQueue.peek());
                         }
+                        return;
                     } else {
                         Call out = createComponent(ad, args.getArg(1).toString());
                         matchID = out.getMatchID();
