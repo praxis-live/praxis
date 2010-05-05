@@ -1,0 +1,43 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright 2010 - Neil C Smith. All rights reserved.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details.
+ *
+ * You should have received a copy of the GNU General Public License version 2
+ * along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please visit http://neilcsmith.net if you need additional information or
+ * have any questions.
+ */
+
+package net.neilcsmith.praxis.script.commands;
+
+import java.util.Map;
+import net.neilcsmith.praxis.script.Command;
+import net.neilcsmith.praxis.script.CommandInstaller;
+
+/**
+ *
+ * @author Neil C Smith (http://neilcsmith.net)
+ */
+public class DefaultCommandInstaller implements CommandInstaller {
+
+    public void install(Map<String, Command> commands) {
+        commands.put("eval", new EvalCommand(false));
+        commands.put("create", new CreateCommand());
+        commands.put("connect", new ConnectCommand());
+        commands.put("set", new SetCommand());
+        commands.put("file", new FileCommand());
+    }
+
+}
