@@ -75,6 +75,13 @@ public abstract class CallArguments {
             return 0;
         }
 
+        @Override
+        public String toString() {
+            return "{}";
+        }
+
+
+
 
     }
     
@@ -98,6 +105,13 @@ public abstract class CallArguments {
             }
             throw new IndexOutOfBoundsException();
         }
+
+        @Override
+        public String toString() {
+            return ("{{" + arg.toString() + "}}");
+        }
+
+
    
     }
     
@@ -119,6 +133,20 @@ public abstract class CallArguments {
         public Argument getArg(int index) {
             return args[index];
         }
+
+        @Override
+        public String toString() {
+            StringBuilder str = new StringBuilder("{");
+            for (Argument arg : args) {
+                str.append("{");
+                str.append(arg.toString());
+                str.append("}");
+            }
+            str.append("}");
+            return str.toString();
+        }
+
+
 
 
     }
