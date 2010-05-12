@@ -25,6 +25,9 @@ package net.neilcsmith.praxis.script.commands;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ControlAddress;
+import net.neilcsmith.praxis.core.ServiceUnavailableException;
+import net.neilcsmith.praxis.core.interfaces.InterfaceDefinition;
+import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.script.Command;
 import net.neilcsmith.praxis.script.Context;
 import net.neilcsmith.praxis.script.ExecutionException;
@@ -35,23 +38,30 @@ import net.neilcsmith.praxis.script.StackFrame;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ConnectCommand implements Command {
+public class InterfaceCommand implements Command {
 
-    private final static ControlAddress connectAddress = ControlAddress.create("/praxis.connect");
+    private InterfaceDefinition interfaceDefinition;
+    private String interfaceControl;
+
+    public InterfaceCommand(InterfaceDefinition interfaceDefinition,
+            String interfaceControl) {
+        this.interfaceDefinition = interfaceDefinition;
+        this.interfaceControl = interfaceControl;
+    }
 
     public StackFrame createStackFrame(Namespace namespace, CallArguments args) throws ExecutionException {
-        return new CreateStackFrame(args);
+        return new StackFrameImpl(args);
     }
 
 
-    private class CreateStackFrame implements StackFrame {
+    private class StackFrameImpl implements StackFrame {
 
-        CallArguments args;
-        State state;
-        Call call;
-        CallArguments result;
+        private CallArguments args;
+        private State state;
+        private Call call;
+        private CallArguments result;
 
-        private CreateStackFrame(CallArguments args) {
+        private StackFrameImpl(CallArguments args) {
             this.args = args;
             state = State.Incomplete;
         }
@@ -62,8 +72,15 @@ public class ConnectCommand implements Command {
 
         public StackFrame process(Context context) {
             if (state == State.Incomplete && call == null) {
-                call = Call.createCall(connectAddress, context.getAddress(), context.getTime(), args);
+                try {
+                call = Call.createCall(getSendAddress(context),
+                        context.getAddress(), context.getTime(), args);
                 context.getPacketRouter().route(call);
+                }
+                catch (Exception ex) {
+                    result = CallArguments.create(PReference.wrap(ex));
+                    state = State.Error;
+                }
             }
             return null;
         }
@@ -89,6 +106,13 @@ public class ConnectCommand implements Command {
                 throw new IllegalStateException();
             }
             return result;
+        }
+
+        private ControlAddress getSendAddress(Context ctxt)
+                throws ServiceUnavailableException {
+            return ControlAddress.create(
+                    ctxt.getServiceManager().findService(interfaceDefinition),
+                    interfaceControl);
         }
 
     }

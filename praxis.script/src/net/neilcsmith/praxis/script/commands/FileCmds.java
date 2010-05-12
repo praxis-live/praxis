@@ -23,8 +23,11 @@ package net.neilcsmith.praxis.script.commands;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Map;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.types.PUri;
+import net.neilcsmith.praxis.script.Command;
+import net.neilcsmith.praxis.script.CommandInstaller;
 import net.neilcsmith.praxis.script.Context;
 import net.neilcsmith.praxis.script.ExecutionException;
 import net.neilcsmith.praxis.script.Namespace;
@@ -34,25 +37,43 @@ import net.neilcsmith.praxis.script.Variable;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class FileCommand extends AbstractInlineCommand {
+public class FileCmds implements CommandInstaller {
 
-    public CallArguments process(Context context, Namespace namespace, CallArguments args) throws ExecutionException {
-        if (args.getCount() != 1) {
-            throw new ExecutionException();
-        }
-        try {
-            Variable pwd = namespace.getVariable("PWD");
-            URI base;
-            if (pwd == null) {
-                base = new File("").toURI();
-            } else {
-                base = PUri.coerce(pwd.getValue()).value();
+    private final static FileCmds instance = new FileCmds();
+    
+    private final static Command FILE = new FileCmd();
+
+    private FileCmds() {
+    }
+
+    public void install(Map<String, Command> commands) {
+        commands.put("file", FILE);
+    }
+
+    public static FileCmds getInstance() {
+        return instance;
+    }
+
+
+    private static class FileCmd extends AbstractInlineCommand {
+
+        public CallArguments process(Context context, Namespace namespace, CallArguments args) throws ExecutionException {
+            if (args.getCount() != 1) {
+                throw new ExecutionException();
             }
-            URI path = base.resolve(new URI(null, null, args.getArg(0).toString(), null));
-            return CallArguments.create(PUri.valueOf(path));
-        } catch (Exception ex) {
-            throw new ExecutionException(ex);
+            try {
+                Variable pwd = namespace.getVariable("PWD");
+                URI base;
+                if (pwd == null) {
+                    base = new File("").toURI();
+                } else {
+                    base = PUri.coerce(pwd.getValue()).value();
+                }
+                URI path = base.resolve(new URI(null, null, args.getArg(0).toString(), null));
+                return CallArguments.create(PUri.valueOf(path));
+            } catch (Exception ex) {
+                throw new ExecutionException(ex);
+            }
         }
-
     }
 }

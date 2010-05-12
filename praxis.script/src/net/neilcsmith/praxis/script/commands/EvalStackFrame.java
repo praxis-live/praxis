@@ -46,7 +46,6 @@ import net.neilcsmith.praxis.script.ast.RootNode;
 public class EvalStackFrame implements StackFrame {
 
     private final static Logger log = Logger.getLogger(EvalStackFrame.class.getName());
-
     private Namespace namespace;
     private RootNode rootNode;
     private State state;
@@ -90,7 +89,7 @@ public class EvalStackFrame implements StackFrame {
         } finally {
             doProcess = false;
         }
-        
+
     }
 
     public void postResponse(Call call) {
@@ -108,7 +107,7 @@ public class EvalStackFrame implements StackFrame {
         } else {
             log.finest("EvalStackFrame - Received invalid call : \n" + call);
         }
-        
+
     }
 
     public void postResponse(State state, CallArguments args) {
@@ -172,7 +171,7 @@ public class EvalStackFrame implements StackFrame {
         }
         if (cmdArg instanceof ComponentAddress) {
             // default command
-            throw new ExecutionException();
+            return tryDefault(namespace, argList);
         }
         String cmdStr = cmdArg.toString();
         if (cmdStr.isEmpty()) {
@@ -186,13 +185,9 @@ public class EvalStackFrame implements StackFrame {
         if (cmdStr.charAt(0) == '/' && cmdStr.lastIndexOf('.') > -1) {
             routeCall(context, argList);
             return null;
+        } else {
+            return tryDefault(namespace, argList);
         }
-
-
-        throw new ExecutionException();
-
-
-
 
     }
 
@@ -209,6 +204,13 @@ public class EvalStackFrame implements StackFrame {
         } catch (ArgumentFormatException ex) {
             throw new ExecutionException(ex);
         }
+    }
+
+    private StackFrame tryDefault(Namespace namespace, List<Argument> argList)
+            throws ExecutionException {
+        CallArguments args = CallArguments.create(argList);
+        return DefaultCommand.getInstance().createStackFrame(namespace, args);
+
     }
 
     private void argsToList(CallArguments args, List<Argument> list) {

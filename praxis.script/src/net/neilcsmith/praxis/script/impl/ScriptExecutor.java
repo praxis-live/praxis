@@ -21,7 +21,6 @@
  */
 package net.neilcsmith.praxis.script.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,8 +36,8 @@ import net.neilcsmith.praxis.script.Context;
 import net.neilcsmith.praxis.script.Namespace;
 import net.neilcsmith.praxis.script.StackFrame;
 import net.neilcsmith.praxis.script.Variable;
-import net.neilcsmith.praxis.script.commands.DefaultCommandInstaller;
-import net.neilcsmith.praxis.script.commands.EvalCommand;
+import net.neilcsmith.praxis.script.commands.CoreCommandsInstaller;
+import net.neilcsmith.praxis.script.commands.EvalCmds;
 
 /**
  *
@@ -50,7 +49,7 @@ public class ScriptExecutor {
     private List<StackFrame> stack;
     private Queue<Call> queue;
     private Context context;
-    private EvalCommand evaluator;
+    private Command evaluator;
     private Map<String, Command> commandMap;
     private Namespace rootNS;
 
@@ -58,14 +57,18 @@ public class ScriptExecutor {
         this.context = context;
         stack = new LinkedList<StackFrame>();
         queue = new LinkedList<Call>();
-        evaluator = new EvalCommand(inline);
+        if (inline) {
+            evaluator = EvalCmds.INLINE_EVAL;
+        } else {
+            evaluator = EvalCmds.EVAL;
+        }
         rootNS = new NS();
         buildCommandMap();
     }
 
     private void buildCommandMap() {
         commandMap = new HashMap<String, Command>();
-        CommandInstaller installer = new DefaultCommandInstaller();
+        CommandInstaller installer = new CoreCommandsInstaller();
         installer.install(commandMap);
     }
 
@@ -223,7 +226,7 @@ public class ScriptExecutor {
         }
 
         public Namespace createChild() {
-            return new NS();
+            return new NS(this);
         }
     }
 }

@@ -30,14 +30,13 @@ import net.neilcsmith.praxis.script.CommandInstaller;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class DefaultCommandInstaller implements CommandInstaller {
+public class CoreCommandsInstaller implements CommandInstaller {
 
     public void install(Map<String, Command> commands) {
-        commands.put("eval", new EvalCommand(false));
-        commands.put("create", new CreateCommand());
-        commands.put("connect", new ConnectCommand());
-        commands.put("set", new SetCommand());
-        commands.put("file", new FileCommand());
+        EvalCmds.getInstance().install(commands);
+        ComponentCmds.getInstance().install(commands);
+        FileCmds.getInstance().install(commands);
+        VariableCmds.getInstance().install(commands);
     }
 
 }

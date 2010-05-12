@@ -54,7 +54,10 @@ public class RootNode extends CompositeNode {
     @Override
     public void writeResult(List<Argument> args) throws ExecutionException {
         Node[] children = getChildren();
-        children[children.length - 1].writeResult(args);
+        if (children.length > 0) {
+            children[children.length - 1].writeResult(args);
+        }
+        
     }
 
 
