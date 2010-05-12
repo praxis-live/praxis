@@ -42,8 +42,11 @@ import net.neilcsmith.praxis.core.RootHub;
 import net.neilcsmith.praxis.core.ServiceManager;
 import net.neilcsmith.praxis.core.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.interfaces.ComponentManager;
+import net.neilcsmith.praxis.core.interfaces.ConnectionManager;
 import net.neilcsmith.praxis.core.interfaces.InterfaceDefinition;
 import net.neilcsmith.praxis.core.interfaces.InterfaceProvider;
+import net.neilcsmith.praxis.core.interfaces.RootManager;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
@@ -116,6 +119,7 @@ public class DefaultHub extends AbstractRoot {
         try {
             super.activating();
             createDefaultControls();
+            createDefaultServices();
             installExtensions();
             setRunning();
         } catch (IllegalRootStateException ex) {
@@ -157,9 +161,16 @@ public class DefaultHub extends AbstractRoot {
         registerControl("log", new LogControl());
     }
 
+    private void createDefaultServices() {
+        ComponentAddress address = ComponentAddress.create("/" + HUB_ID);
+        installService(ComponentManager.getInstance(), address);
+        // installService(RootManager.getInstance(), address);
+        installService(ConnectionManager.getInstance(), address);
+    }
+
     private void installExtensions() {
         for (Root ext : extensions) {
-//            ServiceDescriptor[] services = ext.getServices(); // get before we activate install - thread safety
+            // get before we activate install - thread safety
             InterfaceDefinition[] servs;
             if (ext instanceof InterfaceProvider) {
                 servs = ((InterfaceProvider) ext).getInterfaces();
@@ -178,21 +189,6 @@ public class DefaultHub extends AbstractRoot {
                         + ext.getClass() + " to /" + extID + "\n" + ex);
                 continue;
             }
-            // safe to install services
-//            for (ServiceDescriptor service : services) {
-//                ServiceID serviceID = service.getServiceID();
-//                String controlID = service.getControlID();
-//                ControlAddress controlAddress;
-//                try {
-//                    controlAddress = ControlAddress.valueOf("/" + extID + "." + controlID);
-//                } catch (ArgumentFormatException ex) {
-//                    logger.severe("Failed to install service " + serviceID + " of /" +
-//                            extID + " due to invalid control ID");
-//                    continue;
-//                }
-//                serviceAddresses.put(serviceID, controlAddress);
-//                serviceInfo.put(serviceID, service.getControlInfo());
-//            }
             // safe to install services - thread safe at this point
             ComponentAddress root = ComponentAddress.create("/" + extID);
             for (InterfaceDefinition serv : servs) {
