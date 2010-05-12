@@ -22,6 +22,9 @@
 
 package net.neilcsmith.praxis.core;
 
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.types.PMap;
+
 /**
  * @TODO Enforce String with regex
  * @author Neil C Smith (http://neilcsmith.net)
@@ -59,6 +62,19 @@ public class ComponentType extends Argument {
 
     public static ComponentType valueOf(String str) throws ArgumentFormatException {
         return create(str);
+    }
+
+    public static ArgumentInfo info() {
+        return ArgumentInfo.create(ComponentType.class, null);
+    }
+
+
+    public static ComponentType coerce(Argument arg) throws ArgumentFormatException {
+        if (arg instanceof ComponentType) {
+            return (ComponentType) arg;
+        } else {
+            return valueOf(arg.toString());
+        }
     }
 
 }

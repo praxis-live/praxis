@@ -24,6 +24,8 @@ package net.neilcsmith.praxis.core;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 
 /**
  *
@@ -121,5 +123,9 @@ public class PortAddress extends Argument {
 
     public static boolean isValidID(String id) {
         return idChecker.matcher(id).matches();
+    }
+
+    public static ArgumentInfo info() {
+        return ArgumentInfo.create(PortAddress.class, null);
     }
 }

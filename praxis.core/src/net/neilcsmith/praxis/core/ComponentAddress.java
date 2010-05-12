@@ -26,6 +26,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 
 /**
  * Address of a Component
@@ -184,6 +186,12 @@ public final class ComponentAddress extends Argument {
         return addressList.toArray(new String[addressList.size()]);
         
     }
+
+
+    public static ArgumentInfo info() {
+        return ArgumentInfo.create(ComponentAddress.class, PMap.EMPTY);
+    }
+
     
 //    private final static Pattern idChecker = Pattern.compile(ID_REGEX);
 //    public static boolean isValidID(String id) {
