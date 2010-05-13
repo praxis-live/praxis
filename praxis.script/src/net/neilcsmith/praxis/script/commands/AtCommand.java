@@ -21,18 +21,14 @@
  */
 package net.neilcsmith.praxis.script.commands;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ComponentType;
-import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.script.Command;
-import net.neilcsmith.praxis.script.Context;
+import net.neilcsmith.praxis.script.Env;
 import net.neilcsmith.praxis.script.ExecutionException;
 import net.neilcsmith.praxis.script.Namespace;
 import net.neilcsmith.praxis.script.StackFrame;
@@ -42,11 +38,11 @@ import net.neilcsmith.praxis.script.Variable;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class DefaultCommand implements Command {
+public class AtCommand implements Command {
 
-    private final static DefaultCommand instance = new DefaultCommand();
+    private final static AtCommand instance = new AtCommand();
 
-    private DefaultCommand() {
+    private AtCommand() {
     }
 
     public StackFrame createStackFrame(Namespace namespace, CallArguments args) throws ExecutionException {
@@ -69,7 +65,7 @@ public class DefaultCommand implements Command {
 
     }
 
-    public static DefaultCommand getInstance() {
+    public static AtCommand getInstance() {
         return instance;
     }
 
@@ -101,7 +97,7 @@ public class DefaultCommand implements Command {
             return state;
         }
 
-        public StackFrame process(Context context) {
+        public StackFrame process(Env context) {
             if (stage == 0) {
                 stage++;
                 try {
@@ -116,16 +112,7 @@ public class DefaultCommand implements Command {
                 stage++;
                 try {
                     Namespace child = namespace.createChild();
-                    child.addVariable("_CTXT", new Variable() {
-
-                        public void setValue(Argument value) {
-                            throw new UnsupportedOperationException();
-                        }
-
-                        public Argument getValue() {
-                            return ctxt;
-                        }
-                    });
+                    child.addVariable(Env.CONTEXT, new VariableImpl(ctxt));
                     return EvalCmds.INLINE_EVAL.createStackFrame(child, CallArguments.create(script));
                 } catch (Exception ex) {
                     state = State.Error;

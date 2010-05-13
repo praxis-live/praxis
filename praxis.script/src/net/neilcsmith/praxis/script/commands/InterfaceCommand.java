@@ -29,7 +29,7 @@ import net.neilcsmith.praxis.core.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.interfaces.InterfaceDefinition;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.script.Command;
-import net.neilcsmith.praxis.script.Context;
+import net.neilcsmith.praxis.script.Env;
 import net.neilcsmith.praxis.script.ExecutionException;
 import net.neilcsmith.praxis.script.Namespace;
 import net.neilcsmith.praxis.script.StackFrame;
@@ -70,7 +70,7 @@ public class InterfaceCommand implements Command {
             return state;
         }
 
-        public StackFrame process(Context context) {
+        public StackFrame process(Env context) {
             if (state == State.Incomplete && call == null) {
                 try {
                 call = Call.createCall(getSendAddress(context),
@@ -108,7 +108,7 @@ public class InterfaceCommand implements Command {
             return result;
         }
 
-        private ControlAddress getSendAddress(Context ctxt)
+        private ControlAddress getSendAddress(Env ctxt)
                 throws ServiceUnavailableException {
             return ControlAddress.create(
                     ctxt.getServiceManager().findService(interfaceDefinition),

@@ -27,6 +27,7 @@ import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.PortAddress;
+import net.neilcsmith.praxis.script.Env;
 import net.neilcsmith.praxis.script.Namespace;
 
 /**
@@ -69,7 +70,7 @@ public class AddressNode extends Node {
 
     private Argument parseAddress() {
         try {
-            ComponentAddress ctxt = ComponentAddress.coerce(namespace.getVariable("_CTXT").getValue());
+            ComponentAddress ctxt = ComponentAddress.coerce(namespace.getVariable(Env.CONTEXT).getValue());
             if (address.charAt(1) == '/') {
                 return parseComplexAddress(ctxt);
             } else {

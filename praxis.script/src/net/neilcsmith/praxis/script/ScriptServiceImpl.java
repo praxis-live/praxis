@@ -119,7 +119,7 @@ public class ScriptServiceImpl extends AbstractRoot implements InterfaceProvider
 
 
 
-    private class ScriptContext implements Context {
+    private class ScriptContext implements Env {
 
         private ControlAddress address;
         private Router router;

@@ -20,24 +20,29 @@
  * have any questions.
  */
 
+
 package net.neilcsmith.praxis.script.commands;
 
-import java.util.Map;
-import net.neilcsmith.praxis.script.Command;
-import net.neilcsmith.praxis.script.CommandInstaller;
+import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.script.Variable;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class CoreCommandsInstaller implements CommandInstaller {
+class ConstantImpl implements Variable {
 
-    public void install(Map<String, Command> commands) {
-        EvalCmds.getInstance().install(commands);
-        ComponentCmds.getInstance().install(commands);
-        FileCmds.getInstance().install(commands);
-        VariableCmds.getInstance().install(commands);
-        commands.put("@", AtCommand.getInstance());
+    Argument value;
+
+    ConstantImpl(Argument value) {
+        this.value = value;
     }
 
+    public void setValue(Argument value) {
+        throw new UnsupportedOperationException();
+    }
+
+    public Argument getValue() {
+        return value;
+    }
 }

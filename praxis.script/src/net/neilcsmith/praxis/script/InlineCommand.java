@@ -30,7 +30,7 @@ import net.neilcsmith.praxis.core.CallArguments;
  */
 public interface InlineCommand extends Command {
 
-    public CallArguments process(Context context, Namespace namespace, CallArguments args)
+    public CallArguments process(Env context, Namespace namespace, CallArguments args)
             throws ExecutionException;
 
 }

@@ -20,27 +20,29 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.script;
 
-import net.neilcsmith.praxis.core.ControlAddress;
-import net.neilcsmith.praxis.core.Lookup;
-import net.neilcsmith.praxis.core.PacketRouter;
-import net.neilcsmith.praxis.core.ServiceManager;
+package net.neilcsmith.praxis.script.commands;
+
+import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.script.Variable;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public interface Context {
+class VariableImpl implements Variable {
 
-    public abstract Lookup getLookup();
+    Argument value;
 
-    public abstract ServiceManager getServiceManager();
+    VariableImpl(Argument value) {
+        this.value = value;
+    }
 
-    public abstract long getTime();
+    public void setValue(Argument value) {
+        this.value = value;
+    }
 
-    public abstract PacketRouter getPacketRouter();
-
-    public abstract ControlAddress getAddress();
-
+    public Argument getValue() {
+        return value;
+    }
 }

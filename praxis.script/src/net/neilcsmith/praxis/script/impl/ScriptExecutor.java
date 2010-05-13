@@ -32,7 +32,7 @@ import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.script.Command;
 import net.neilcsmith.praxis.script.CommandInstaller;
-import net.neilcsmith.praxis.script.Context;
+import net.neilcsmith.praxis.script.Env;
 import net.neilcsmith.praxis.script.Namespace;
 import net.neilcsmith.praxis.script.StackFrame;
 import net.neilcsmith.praxis.script.Variable;
@@ -48,12 +48,12 @@ public class ScriptExecutor {
     private final static Logger log = Logger.getLogger(ScriptExecutor.class.getName());
     private List<StackFrame> stack;
     private Queue<Call> queue;
-    private Context context;
+    private Env context;
     private Command evaluator;
     private Map<String, Command> commandMap;
     private Namespace rootNS;
 
-    public ScriptExecutor(Context context, boolean inline) {
+    public ScriptExecutor(Env context, boolean inline) {
         this.context = context;
         stack = new LinkedList<StackFrame>();
         queue = new LinkedList<Call>();

@@ -33,7 +33,7 @@ import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.script.Command;
-import net.neilcsmith.praxis.script.Context;
+import net.neilcsmith.praxis.script.Env;
 import net.neilcsmith.praxis.script.ExecutionException;
 import net.neilcsmith.praxis.script.Namespace;
 import net.neilcsmith.praxis.script.StackFrame;
@@ -68,7 +68,7 @@ public class EvalStackFrame implements StackFrame {
         return state;
     }
 
-    public StackFrame process(Context context) {
+    public StackFrame process(Env context) {
         if (state != State.Incomplete) {
             throw new IllegalStateException();
         }
@@ -156,7 +156,7 @@ public class EvalStackFrame implements StackFrame {
 
     }
 
-    private StackFrame processNextCommand(Context context)
+    private StackFrame processNextCommand(Env context)
             throws ExecutionException {
 
         argList.clear();
@@ -169,10 +169,10 @@ public class EvalStackFrame implements StackFrame {
             routeCall(context, argList);
             return null;
         }
-        if (cmdArg instanceof ComponentAddress) {
-            // default command
-            return tryDefault(namespace, argList);
-        }
+//        if (cmdArg instanceof ComponentAddress) {
+//            // default command
+//            return tryDefault(namespace, argList);
+//        }
         String cmdStr = cmdArg.toString();
         if (cmdStr.isEmpty()) {
             throw new ExecutionException();
@@ -185,13 +185,16 @@ public class EvalStackFrame implements StackFrame {
         if (cmdStr.charAt(0) == '/' && cmdStr.lastIndexOf('.') > -1) {
             routeCall(context, argList);
             return null;
-        } else {
-            return tryDefault(namespace, argList);
         }
+
+        throw new ExecutionException();
+//        } else {
+//            return tryDefault(namespace, argList);
+//        }
 
     }
 
-    private void routeCall(Context context, List<Argument> argList)
+    private void routeCall(Env context, List<Argument> argList)
             throws ExecutionException {
         try {
             ControlAddress ad = ControlAddress.coerce(argList.get(0));
@@ -206,12 +209,12 @@ public class EvalStackFrame implements StackFrame {
         }
     }
 
-    private StackFrame tryDefault(Namespace namespace, List<Argument> argList)
-            throws ExecutionException {
-        CallArguments args = CallArguments.create(argList);
-        return DefaultCommand.getInstance().createStackFrame(namespace, args);
-
-    }
+//    private StackFrame tryDefault(Namespace namespace, List<Argument> argList)
+//            throws ExecutionException {
+//        CallArguments args = CallArguments.create(argList);
+//        return DefaultCommand.getInstance().createStackFrame(namespace, args);
+//
+//    }
 
     private void argsToList(CallArguments args, List<Argument> list) {
         for (int i = 0, count = args.getCount(); i < count; i++) {

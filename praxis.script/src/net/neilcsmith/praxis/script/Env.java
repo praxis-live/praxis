@@ -20,24 +20,30 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.script.commands;
+package net.neilcsmith.praxis.script;
 
-import java.util.Map;
-import net.neilcsmith.praxis.script.Command;
-import net.neilcsmith.praxis.script.CommandInstaller;
+import net.neilcsmith.praxis.core.ControlAddress;
+import net.neilcsmith.praxis.core.Lookup;
+import net.neilcsmith.praxis.core.PacketRouter;
+import net.neilcsmith.praxis.core.ServiceManager;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class CoreCommandsInstaller implements CommandInstaller {
+public interface Env {
 
-    public void install(Map<String, Command> commands) {
-        EvalCmds.getInstance().install(commands);
-        ComponentCmds.getInstance().install(commands);
-        FileCmds.getInstance().install(commands);
-        VariableCmds.getInstance().install(commands);
-        commands.put("@", AtCommand.getInstance());
-    }
+    public final static String CONTEXT = "_CTXT";
+    public final static String PWD = "_PWD";
+
+    public abstract Lookup getLookup();
+
+    public abstract ServiceManager getServiceManager();
+
+    public abstract long getTime();
+
+    public abstract PacketRouter getPacketRouter();
+
+    public abstract ControlAddress getAddress();
 
 }

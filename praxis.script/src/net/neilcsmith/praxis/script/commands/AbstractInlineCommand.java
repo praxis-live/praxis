@@ -25,7 +25,7 @@ package net.neilcsmith.praxis.script.commands;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.types.PReference;
-import net.neilcsmith.praxis.script.Context;
+import net.neilcsmith.praxis.script.Env;
 import net.neilcsmith.praxis.script.ExecutionException;
 import net.neilcsmith.praxis.script.InlineCommand;
 import net.neilcsmith.praxis.script.Namespace;
@@ -60,10 +60,10 @@ public abstract class AbstractInlineCommand implements InlineCommand {
             return state;
         }
 
-        public StackFrame process(Context context) {
+        public StackFrame process(Env env) {
             if (state == State.Incomplete) {
                 try {
-                    result = AbstractInlineCommand.this.process(context, namespace, args);
+                    result = AbstractInlineCommand.this.process(env, namespace, args);
                     state = State.OK;
                 } catch (ExecutionException ex) {
                     result = CallArguments.create(PReference.wrap(ex));

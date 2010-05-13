@@ -35,7 +35,7 @@ public interface StackFrame {
 
     public State getState();
 
-    public StackFrame process(Context context);
+    public StackFrame process(Env env);
 
     public void postResponse(Call call);
 

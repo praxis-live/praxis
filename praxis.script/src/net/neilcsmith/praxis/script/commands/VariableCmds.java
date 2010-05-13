@@ -27,7 +27,7 @@ import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.script.Command;
 import net.neilcsmith.praxis.script.CommandInstaller;
-import net.neilcsmith.praxis.script.Context;
+import net.neilcsmith.praxis.script.Env;
 import net.neilcsmith.praxis.script.ExecutionException;
 import net.neilcsmith.praxis.script.Namespace;
 import net.neilcsmith.praxis.script.Variable;
@@ -58,7 +58,7 @@ public class VariableCmds implements CommandInstaller {
 
     private static class Set extends AbstractInlineCommand {
 
-        public CallArguments process(Context context, Namespace namespace, CallArguments args) throws ExecutionException {
+        public CallArguments process(Env context, Namespace namespace, CallArguments args) throws ExecutionException {
             if (args.getCount() != 2) {
                 throw new ExecutionException();
             }
@@ -69,28 +69,11 @@ public class VariableCmds implements CommandInstaller {
                 var.setValue(val);
             } else {
                 log.finest("SET COMMAND : Adding variable " + varName + " to namespace " + namespace);
-                var = new VarImpl(val);
+                var = new VariableImpl(val);
                 namespace.addVariable(varName, var);
             }
             return CallArguments.create(val);
 
-        }
-    }
-
-    private static class VarImpl implements Variable {
-
-        Argument value;
-
-        private VarImpl(Argument value) {
-            this.value = value;
-        }
-
-        public void setValue(Argument value) {
-            this.value = value;
-        }
-
-        public Argument getValue() {
-            return value;
         }
     }
 }
