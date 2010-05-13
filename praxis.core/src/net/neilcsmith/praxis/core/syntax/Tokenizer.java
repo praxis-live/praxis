@@ -81,6 +81,7 @@ public class Tokenizer implements Iterable<Token> {
                     switch (ch) {
                         case '\r':
                         case '\n':
+                        case ';' :
                             next = parseEOL();
                             break;
                         case '"':
@@ -102,7 +103,7 @@ public class Tokenizer implements Iterable<Token> {
                             }
                         case '\\':
                             ch = text.charAt(index + 1);
-                            if (ch == '\r' || ch == '\n') {
+                            if (ch == '\r' || ch == '\n' || ch == ';') {
                                 consumeEscapedEOL();
                                 break;
                             }
@@ -182,7 +183,7 @@ public class Tokenizer implements Iterable<Token> {
                         break;
                     }
                     ch = parseEscape();
-                } else if (Character.isWhitespace(ch)) {
+                } else if (ch == ';' || Character.isWhitespace(ch)) {
                     break;
                 }
                 buf.append(ch);
