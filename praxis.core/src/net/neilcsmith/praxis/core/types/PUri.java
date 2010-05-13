@@ -32,7 +32,7 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
  *
  * @author Neil C Smith
  */
-public class PUri extends Argument {
+public class PUri extends Argument implements Comparable<PUri>{
     
     
     private URI uri;
@@ -96,6 +96,10 @@ public class PUri extends Argument {
     
     public static ArgumentInfo info() {
         return ArgumentInfo.create(PUri.class, null);
+    }
+
+    public int compareTo(PUri o) {
+        return uri.compareTo(o.uri);
     }
 
 }

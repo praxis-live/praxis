@@ -29,7 +29,7 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
  *
  * @author Neil C Smith
  */
-public class PString extends Argument {
+public class PString extends Argument implements Comparable<PString> {
     
     
     public final static PString EMPTY = PString.valueOf("");
@@ -96,6 +96,10 @@ public class PString extends Argument {
                     PArray.valueOf(arr));
             return ArgumentInfo.create(PString.class, props);
         }
+    }
+
+    public int compareTo(PString o) {
+        return value.compareTo(o.value);
     }
     
 }
