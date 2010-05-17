@@ -22,6 +22,8 @@
 package net.neilcsmith.ripl.gstreamer;
 
 import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
@@ -32,17 +34,16 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.neilcsmith.ripl.core.ResizeMode;
-import net.neilcsmith.ripl.core.Surface;
+import net.neilcsmith.ripl.Surface;
 import net.neilcsmith.ripl.delegates.VideoDelegate;
+import net.neilcsmith.ripl.ops.Blit;
+import net.neilcsmith.ripl.ops.GraphicsOp;
+import net.neilcsmith.ripl.utils.ResizeMode;
 import net.neilcsmith.ripl.utils.ResizeUtils;
 import org.gstreamer.Bus;
-import org.gstreamer.Format;
 import org.gstreamer.Gst;
 import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
-import org.gstreamer.SeekFlags;
-import org.gstreamer.SeekType;
 import org.gstreamer.elements.RGBDataSink;
 
 /**
@@ -139,8 +140,9 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
 
     protected void doPause() throws Exception {
         Gst.getExecutor().execute(new Runnable() {
+
             public void run() {
-                    pipe.pause();
+                pipe.pause();
 
             }
         });
@@ -190,7 +192,7 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
         pipe.setState(org.gstreamer.State.NULL);
         pipe.dispose();
 //        Gst.deinit();
-        
+
     }
 
     protected void error(String message, Exception ex) {
@@ -253,12 +255,10 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
         return pipe.queryPosition(TimeUnit.NANOSECONDS);
     }
 
-
-
     @Override
     public void process(Surface input, Surface output) {
         if (input != output) {
-            output.getGraphics().drawSurface(input, 0, 0);
+            output.process(Blit.op(), input);
         }
         State s = state.get();
         if (s == State.Playing || s == State.Paused) {
@@ -279,15 +279,20 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
         try {
             if (image != null) {
                 checkRegions(output);
-                int dx1 = destRegion.x;
-                int dy1 = destRegion.y;
-                int dx2 = dx1 + destRegion.width;
-                int dy2 = dy1 + destRegion.height;
-                int sx1 = srcRegion.x;
-                int sy1 = srcRegion.y;
-                int sx2 = sx1 + srcRegion.width;
-                int sy2 = sy1 + srcRegion.height;
-                output.getGraphics().drawImage(image, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2);
+                output.process(new GraphicsOp(new GraphicsOp.Callback() {
+                    public void draw(Graphics2D g2d, Image[] images) {
+                        
+                        int dx1 = destRegion.x;
+                        int dy1 = destRegion.y;
+                        int dx2 = dx1 + destRegion.width;
+                        int dy2 = dy1 + destRegion.height;
+                        int sx1 = srcRegion.x;
+                        int sy1 = srcRegion.y;
+                        int sx2 = sx1 + srcRegion.width;
+                        int sy2 = sy1 + srcRegion.height;
+                        g2d.drawImage(image, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
+                    }
+                }));
                 newFrameAvailable = false;
             }
 
@@ -297,9 +302,9 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
     }
 
     private void checkRegions(Surface output) {
-        if (srcRegion == null || destRegion == null ||
-                srcWidth != image.getWidth() || srcHeight != image.getHeight() ||
-                destWidth != output.getWidth() || destHeight != output.getHeight()) {
+        if (srcRegion == null || destRegion == null
+                || srcWidth != image.getWidth() || srcHeight != image.getHeight()
+                || destWidth != output.getWidth() || destHeight != output.getHeight()) {
             Rectangle src = new Rectangle();
             Rectangle dest = new Rectangle();
             Dimension srcDim = new Dimension(image.getWidth(), image.getHeight());
@@ -381,6 +386,4 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
         super.finalize();
         dispose();
     }
-    
-    
 }

@@ -23,7 +23,7 @@
 package net.neilcsmith.ripl.delegates;
 
 import javax.sound.sampled.AudioInputStream;
-import net.neilcsmith.ripl.core.ResizeMode;
+import net.neilcsmith.ripl.utils.ResizeMode;
 
 /**
  *

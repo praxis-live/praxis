@@ -22,8 +22,8 @@
 
 package net.neilcsmith.ripl.ops;
 
-import net.neilcsmith.ripl.core.PixelData;
-import net.neilcsmith.ripl.core.SurfaceOp;
+import net.neilcsmith.ripl.PixelData;
+import net.neilcsmith.ripl.SurfaceOp;
 import net.neilcsmith.ripl.rgbmath.RGBMath;
 
 /**

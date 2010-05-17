@@ -23,7 +23,7 @@
 package net.neilcsmith.praxis.video;
 
 import net.neilcsmith.praxis.core.Component;
-import net.neilcsmith.ripl.core.Source;
+import net.neilcsmith.ripl.Source;
 
 /**
  *

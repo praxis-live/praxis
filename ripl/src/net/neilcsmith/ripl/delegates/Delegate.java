@@ -22,8 +22,8 @@
 
 package net.neilcsmith.ripl.delegates;
 
-import net.neilcsmith.ripl.core.Surface;
-import net.neilcsmith.ripl.core.SurfaceOp;
+import net.neilcsmith.ripl.Surface;
+import net.neilcsmith.ripl.SurfaceOp;
 
 /**
  *

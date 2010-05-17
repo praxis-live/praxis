@@ -1,0 +1,75 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright 2010 - Neil C Smith. All rights reserved.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 2 only, as
+ * published by the Free Software Foundation.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 2 for more details.
+ *
+ * You should have received a copy of the GNU General Public License version 2
+ * along with this work; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ *
+ * Please visit http://neilcsmith.net if you need additional information or
+ * have any questions.
+ */
+
+package net.neilcsmith.ripl.ops;
+
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import net.neilcsmith.ripl.PixelData;
+import net.neilcsmith.ripl.SurfaceOp;
+import net.neilcsmith.ripl.utils.ImageUtils;
+
+/**
+ *
+ * @author Neil C Smith (http://neilcsmith.net)
+ */
+public class GraphicsOp implements SurfaceOp {
+
+    private static final Image[] EMPTY = new Image[0];
+
+    private Callback callback;
+
+    public GraphicsOp(Callback callback) {
+        if (callback == null) {
+            throw new NullPointerException();
+        }
+        this.callback = callback;
+    }
+
+    public void process(PixelData output, PixelData... inputs) {
+        BufferedImage dst = ImageUtils.toImage(output);
+        Image[] srcs;
+        if (inputs.length == 0) {
+            srcs = EMPTY;
+        } else {
+            srcs = new Image[inputs.length];
+            for (int i=0; i < inputs.length; i++) {
+                srcs[i] = ImageUtils.toImage(inputs[i]);
+            }
+        }
+        Graphics2D g2d = dst.createGraphics();
+        callback.draw(g2d, srcs);
+        g2d.dispose();
+    }
+
+    public Callback getCallback() {
+        return callback;
+    }
+
+    public static interface Callback {
+
+        public void draw(Graphics2D g2d, Image[] images);
+
+    }
+
+}

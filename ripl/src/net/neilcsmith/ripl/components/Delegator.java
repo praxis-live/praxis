@@ -23,9 +23,9 @@
 package net.neilcsmith.ripl.components;
 
 import java.awt.Dimension;
-import net.neilcsmith.ripl.core.Source;
-import net.neilcsmith.ripl.core.Surface;
-import net.neilcsmith.ripl.core.impl.SingleInOut;
+import net.neilcsmith.ripl.Source;
+import net.neilcsmith.ripl.Surface;
+import net.neilcsmith.ripl.impl.SingleInOut;
 import net.neilcsmith.ripl.delegates.Delegate;
 
 /**

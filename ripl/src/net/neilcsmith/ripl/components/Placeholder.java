@@ -22,8 +22,8 @@
 
 package net.neilcsmith.ripl.components;
 
-import net.neilcsmith.ripl.core.Surface;
-import net.neilcsmith.ripl.core.impl.SingleInOut;
+import net.neilcsmith.ripl.Surface;
+import net.neilcsmith.ripl.impl.SingleInOut;
 
 /**
  *

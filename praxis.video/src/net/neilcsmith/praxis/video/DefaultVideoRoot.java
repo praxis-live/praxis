@@ -27,9 +27,9 @@ import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.IntProperty;
-import net.neilcsmith.ripl.core.FrameRateListener;
-import net.neilcsmith.ripl.core.FrameRateSource;
-import net.neilcsmith.ripl.core.Player;
+import net.neilcsmith.ripl.FrameRateListener;
+import net.neilcsmith.ripl.FrameRateSource;
+import net.neilcsmith.ripl.Player;
 import net.neilcsmith.ripl.render.RiplPlayer;
 
 /**

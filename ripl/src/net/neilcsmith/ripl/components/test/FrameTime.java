@@ -1,16 +1,18 @@
 package net.neilcsmith.ripl.components.test;
 
-
 import java.awt.Color;
 import java.awt.Font;
-import net.neilcsmith.ripl.core.Surface;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import net.neilcsmith.ripl.Surface;
 
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-import net.neilcsmith.ripl.core.SurfaceGraphics;
-import net.neilcsmith.ripl.core.impl.SingleInOut;
+import net.neilcsmith.ripl.SurfaceGraphics;
+import net.neilcsmith.ripl.impl.SingleInOut;
+import net.neilcsmith.ripl.ops.GraphicsOp;
 
 /**
  *
@@ -18,24 +20,22 @@ import net.neilcsmith.ripl.core.impl.SingleInOut;
  */
 public class FrameTime extends SingleInOut {
 
-    private Font font = new Font("Monospaced", Font.PLAIN, 36);
+    private Font font = new Font("Monospaced", Font.PLAIN, 24);
 
     @Override
     protected void process(Surface surface, boolean render) {
         if (render) {
-            SurfaceGraphics g = surface.getGraphics();
-            g.setPaint(Color.BLUE);
-            g.setFont(font);
-            g.drawString("Frame: " + getTime(), 50, 50);
+
+            surface.process(new GraphicsOp(new GraphicsOp.Callback() {
+
+                public void draw(Graphics2D g, Image[] images) {
+                    g.setPaint(Color.BLUE);
+                    g.setFont(font);
+                    g.drawString("Frame: " + getTime(), 50, 50);
+                }
+            }));
         }
-        
-//                Graphics2D g2d = image.createGraphics();
-//        g2d.setColor(Color.BLUE);
-//        Font oldFont = g2d.getFont();
-//        g2d.setFont(font);
-//        g2d.drawString("Frame: " + getTime(), 50, 50);
-//        g2d.setColor(Color.BLACK);
-//        g2d.setFont(oldFont);
+
+
     }
-    
 }

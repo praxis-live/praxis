@@ -38,7 +38,7 @@ import net.neilcsmith.praxis.video.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
 //import net.neilcsmith.ripl.components.Still;
 import net.neilcsmith.ripl.components.Delegator;
-import net.neilcsmith.ripl.core.ResizeMode;
+import net.neilcsmith.ripl.utils.ResizeMode;
 import net.neilcsmith.ripl.delegates.ImageDelegate;
 
 /**

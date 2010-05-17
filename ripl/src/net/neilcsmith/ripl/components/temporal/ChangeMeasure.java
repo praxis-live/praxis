@@ -23,11 +23,11 @@ package net.neilcsmith.ripl.components.temporal;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import net.neilcsmith.ripl.core.PixelData;
-import net.neilcsmith.ripl.core.Surface;
-import net.neilcsmith.ripl.core.SurfaceCapabilities;
-import net.neilcsmith.ripl.core.SurfaceOp;
-import net.neilcsmith.ripl.core.impl.SingleInOut;
+import net.neilcsmith.ripl.PixelData;
+import net.neilcsmith.ripl.Surface;
+import net.neilcsmith.ripl.SurfaceCapabilities;
+import net.neilcsmith.ripl.SurfaceOp;
+import net.neilcsmith.ripl.impl.SingleInOut;
 import static net.neilcsmith.ripl.rgbmath.RGBMath.*;
 
 

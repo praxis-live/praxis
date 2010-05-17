@@ -21,12 +21,10 @@
  */
 package net.neilcsmith.ripl.components.temporal;
 
-import net.neilcsmith.ripl.core.Bounds;
-import net.neilcsmith.ripl.core.ImageData;
-import net.neilcsmith.ripl.core.PixelData;
-import net.neilcsmith.ripl.core.Surface;
-import net.neilcsmith.ripl.core.SurfaceOp;
-import net.neilcsmith.ripl.core.impl.MultiInputInOut;
+import net.neilcsmith.ripl.PixelData;
+import net.neilcsmith.ripl.Surface;
+import net.neilcsmith.ripl.SurfaceOp;
+import net.neilcsmith.ripl.impl.MultiInputInOut;
 import net.neilcsmith.ripl.rgbmath.RGBMath;
 
 /**
@@ -55,7 +53,8 @@ public class Ripple extends MultiInputInOut {
                 if (surface.hasAlpha()) {
                     surface.clear();
                 }
-                surface.getGraphics().drawSurface(getInputSurface(0), 0, 0);
+//                surface.getGraphics().drawSurface(getInputSurface(0), 0, 0);
+                surface.copy(getInputSurface(0));
             }
             return;
         } else {

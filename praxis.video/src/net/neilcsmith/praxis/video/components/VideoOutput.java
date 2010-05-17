@@ -31,7 +31,7 @@ import net.neilcsmith.praxis.video.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.VideoOutputClient;
 import net.neilcsmith.praxis.video.VideoServer;
 import net.neilcsmith.ripl.components.Placeholder;
-import net.neilcsmith.ripl.core.Source;
+import net.neilcsmith.ripl.Source;
 
 /**
  *

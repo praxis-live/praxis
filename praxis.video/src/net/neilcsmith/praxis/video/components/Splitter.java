@@ -28,8 +28,8 @@ import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.video.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
 import net.neilcsmith.ripl.components.Placeholder;
-import net.neilcsmith.ripl.core.SinkIsFullException;
-import net.neilcsmith.ripl.core.SourceIsFullException;
+import net.neilcsmith.ripl.SinkIsFullException;
+import net.neilcsmith.ripl.SourceIsFullException;
 
 /**
  *

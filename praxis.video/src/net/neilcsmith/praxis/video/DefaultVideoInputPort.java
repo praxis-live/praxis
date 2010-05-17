@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.*;
 import net.neilcsmith.praxis.core.info.PortInfo;
-import net.neilcsmith.ripl.core.Sink;
-import net.neilcsmith.ripl.core.Source;
+import net.neilcsmith.ripl.Sink;
+import net.neilcsmith.ripl.Source;
 
 /**
  *

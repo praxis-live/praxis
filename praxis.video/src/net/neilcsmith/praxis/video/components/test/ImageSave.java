@@ -44,7 +44,7 @@ import net.neilcsmith.praxis.impl.UriProperty;
 import net.neilcsmith.praxis.video.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
 import net.neilcsmith.ripl.components.Delegator;
-import net.neilcsmith.ripl.core.Surface;
+import net.neilcsmith.ripl.Surface;
 import net.neilcsmith.ripl.delegates.Delegate;
 
 /**

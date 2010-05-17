@@ -21,7 +21,7 @@
  */
 package net.neilcsmith.ripl.render;
 
-import net.neilcsmith.ripl.core.FrameRateListener;
+import net.neilcsmith.ripl.FrameRateListener;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -40,12 +40,12 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import net.neilcsmith.ripl.core.Player;
-import net.neilcsmith.ripl.core.Sink;
-import net.neilcsmith.ripl.core.SinkIsFullException;
-import net.neilcsmith.ripl.core.Source;
-import net.neilcsmith.ripl.core.SourceIsFullException;
-import net.neilcsmith.ripl.core.Surface;
+import net.neilcsmith.ripl.Player;
+import net.neilcsmith.ripl.Sink;
+import net.neilcsmith.ripl.SinkIsFullException;
+import net.neilcsmith.ripl.Source;
+import net.neilcsmith.ripl.SourceIsFullException;
+import net.neilcsmith.ripl.Surface;
 
 /**
  *

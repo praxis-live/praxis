@@ -1,8 +1,8 @@
 package net.neilcsmith.ripl.components;
 
 
-import net.neilcsmith.ripl.core.Surface;
-import net.neilcsmith.ripl.core.impl.MultiOutputInOut;
+import net.neilcsmith.ripl.Surface;
+import net.neilcsmith.ripl.impl.CachedInOut;
 
 /*
  * To change this template, choose Tools | Templates
@@ -13,10 +13,10 @@ import net.neilcsmith.ripl.core.impl.MultiOutputInOut;
  *
  * @author Neil C Smith
  */
-public class Splitter extends MultiOutputInOut {
+public class Splitter extends CachedInOut {
 
     public Splitter() {
-        super(2);
+        super(1,2,false);
     }
 
     @Override
@@ -25,10 +25,14 @@ public class Splitter extends MultiOutputInOut {
             if (getSourceCount() == 0) {
                 surface.clear();
             } else {
+                Surface input = getInputSurface(0);
+                if (surface == input) {
+                    return;
+                }
                 if (surface.hasAlpha()) {
                     surface.clear();
                 }
-                surface.getGraphics().drawSurface(getInputSurface(0), 0, 0);
+                surface.copy(getInputSurface(0));
             }
         }
     }
