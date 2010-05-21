@@ -73,9 +73,9 @@ public class ImageDelegate extends Delegate {
     }
 
     @Override
-    public void process(Surface input, Surface output) {
-        int outputWidth = output.getWidth();
-        int outputHeight = output.getHeight();
+    public void process(Surface surface) {
+        int outputWidth = surface.getWidth();
+        int outputHeight = surface.getHeight();
 //            SurfaceGraphics sg = output.getGraphics();
 //            // check cache
 //            if (cache == null || outputWidth != cache.outputWidth
@@ -99,15 +99,15 @@ public class ImageDelegate extends Delegate {
             createCache(outputWidth, outputHeight);
         }
         // check if we need to draw input on output
-        if (input != output) {
-            if (cache.surface.hasAlpha()
-                    || cache.surface.getWidth() != outputWidth
-                    || cache.surface.getHeight() != outputHeight) {
-                output.process(Blit.op(), input);
-            }
-        }
+//        if (input != surface) {
+//            if (cache.surface.hasAlpha()
+//                    || cache.surface.getWidth() != outputWidth
+//                    || cache.surface.getHeight() != outputHeight) {
+//                surface.process(Blit.op(), input);
+//            }
+//        }
         // render cache
-        output.process(Blit.op(cache.x, cache.y), cache.surface);
+        surface.process(Blit.op(cache.x, cache.y), cache.surface);
     }
 
     private void createCache(int outputWidth, int outputHeight) {

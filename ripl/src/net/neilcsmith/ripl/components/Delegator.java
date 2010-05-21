@@ -73,7 +73,7 @@ public class Delegator extends SingleInOut {
         if (rendering) {
             currentWidth = surface.getWidth();
             currentHeight = surface.getHeight();
-            delegate.process(surface, surface);
+            delegate.process(surface);
         }
         
     }
@@ -86,7 +86,7 @@ public class Delegator extends SingleInOut {
     private class EmptyDelegate extends Delegate {
 
         @Override
-        public void process(Surface input, Surface output) {
+        public void process( Surface output) {
             // no op
         }
         

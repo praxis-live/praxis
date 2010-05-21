@@ -256,10 +256,10 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
     }
 
     @Override
-    public void process(Surface input, Surface output) {
-        if (input != output) {
-            output.process(Blit.op(), input);
-        }
+    public void process( Surface output) {
+//        if (input != output) {
+//            output.process(Blit.op(), input);
+//        }
         State s = state.get();
         if (s == State.Playing || s == State.Paused) {
             drawVideo(output);

@@ -115,7 +115,7 @@ public class ImageSave extends AbstractComponent {
     
     private class SaveDelegate extends Delegate {
 
-        public void process(Surface input, Surface surface) {
+        public void process( Surface surface) {
 //            if (triggered) {
 ////                if (rendering) {
 //                    int width = surface.getWidth();

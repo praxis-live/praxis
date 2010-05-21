@@ -23,22 +23,21 @@
 package net.neilcsmith.ripl.delegates;
 
 import net.neilcsmith.ripl.Surface;
-import net.neilcsmith.ripl.SurfaceOp;
 
 /**
  *
  * @author Neil C Smith
  */
-public abstract class Delegate { //implements SurfaceOp {
+public abstract class Delegate {
     
-    public abstract void process(Surface input, Surface output);
+    public abstract void process(Surface surface);
     
     public boolean isInPlaceCapable() {
         return true;
     }
     
     public void update(long time) {
-        // no op - can be overridden for delegate that need to update on non rendering frames
+        // no op - can be overridden for delegates that need to update on non rendering frames
     }
     
     public boolean forceRender() {

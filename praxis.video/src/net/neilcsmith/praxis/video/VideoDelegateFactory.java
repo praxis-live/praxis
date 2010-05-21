@@ -22,7 +22,6 @@
 
 package net.neilcsmith.praxis.video;
 
-import net.neilcsmith.praxis.video.InvalidVideoResourceException;
 import java.net.URI;
 import net.neilcsmith.ripl.delegates.VideoDelegate;
 
