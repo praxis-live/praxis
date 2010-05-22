@@ -29,6 +29,7 @@ import net.neilcsmith.praxis.audio.AudioHub;
 import net.neilcsmith.praxis.audio.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.ParentVetoException;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.rapl.components.Placeholder;
 import net.neilcsmith.rapl.core.Sink;
@@ -45,8 +46,8 @@ public class AudioInput extends AbstractComponent implements AudioInputClient {
         placeholders = new Placeholder[2];
         placeholders[0] = new Placeholder();
         placeholders[1] = new Placeholder();
-        registerPort("output-1", new DefaultAudioOutputPort(this, placeholders[0]));
-        registerPort("output-2", new DefaultAudioOutputPort(this, placeholders[1]));
+        registerPort(Port.OUT + "-1", new DefaultAudioOutputPort(this, placeholders[0]));
+        registerPort(Port.OUT + "-2", new DefaultAudioOutputPort(this, placeholders[1]));
     }
 
     public int getInputCount() {

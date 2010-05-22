@@ -28,6 +28,7 @@ import net.neilcsmith.praxis.audio.AudioHub;
 import net.neilcsmith.praxis.audio.DefaultAudioInputPort;
 import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.ParentVetoException;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.rapl.components.Placeholder;
 import net.neilcsmith.rapl.core.Source;
@@ -44,8 +45,8 @@ public class AudioOutput extends AbstractComponent implements AudioOutputClient 
         placeholders = new Placeholder[2];
         placeholders[0] = new Placeholder();
         placeholders[1] = new Placeholder();
-        registerPort("input-1", new DefaultAudioInputPort(this, placeholders[0]));
-        registerPort("input-2", new DefaultAudioInputPort(this, placeholders[1]));
+        registerPort(Port.IN + "-1", new DefaultAudioInputPort(this, placeholders[0]));
+        registerPort(Port.IN + "-2", new DefaultAudioInputPort(this, placeholders[1]));
     }
 
     public int getOutputCount() {
