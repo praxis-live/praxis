@@ -52,7 +52,9 @@ public class PraxisLAFManager {
                         doInstall();
                     }
                 });
-            } catch (Exception ex) {}
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
     }
     

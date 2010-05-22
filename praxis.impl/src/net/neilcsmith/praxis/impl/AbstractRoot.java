@@ -516,7 +516,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         public void run() throws IllegalRootStateException {
             if (state.compareAndSet(Root.State.INITIALIZED, defaultRunState)) {
                 fireRootStateListeners(defaultRunState);
-                activating(); // moved velow listeners so that subclasses may change state
+                activating(); // moved below listeners so that subclasses may change state
                 AbstractRoot.this.run();
                 state.set(Root.State.TERMINATING); // in case run finished before shutdown called
                 terminating();

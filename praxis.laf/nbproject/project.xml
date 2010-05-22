@@ -7,6 +7,7 @@
             <suite-component/>
             <module-dependencies/>
             <public-packages>
+                <package>com.nilo.plaf.nimrod</package>
                 <package>net.neilcsmith.praxis.laf</package>
             </public-packages>
         </data>
