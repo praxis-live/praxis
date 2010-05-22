@@ -22,6 +22,7 @@
 
 package net.neilcsmith.praxis.video.components.test;
 
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.video.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
@@ -37,8 +38,8 @@ public class Hyp extends AbstractComponent {
     
     public Hyp() {
         hyp = new Hypnosis();
-        registerPort("input", new DefaultVideoInputPort(this, hyp));
-        registerPort("output", new DefaultVideoOutputPort(this, hyp));
+        registerPort(Port.IN, new DefaultVideoInputPort(this, hyp));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, hyp));
     }
 
 }

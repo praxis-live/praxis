@@ -25,6 +25,7 @@ package net.neilcsmith.praxis.components.test;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ComponentAddress;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.ArgumentInputPort;
 
@@ -38,7 +39,7 @@ public class Log extends AbstractComponent {
    
     
     public Log() {
-        registerPort("input", ArgumentInputPort.create(this, new InputBinding()));
+        registerPort(Port.IN, ArgumentInputPort.create(this, new InputBinding()));
     }
     
     private class InputBinding implements ArgumentInputPort.Binding {

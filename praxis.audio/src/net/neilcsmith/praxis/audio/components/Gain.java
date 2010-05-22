@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.audio.components;
 
 import net.neilcsmith.praxis.audio.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.DefaultAudioOutputPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
@@ -41,8 +42,8 @@ public class Gain extends AbstractComponent {
         FloatProperty level =  FloatProperty.create(this, new GainBinding(), 0, 2, gain.getGain(), PMap.valueOf("scale-hint", "Exponential"));
         registerControl("level", level);
         registerPort("level", level.createPort());
-        registerPort("input", new DefaultAudioInputPort(this, gain));
-        registerPort("output", new DefaultAudioOutputPort(this, gain));
+        registerPort(Port.IN, new DefaultAudioInputPort(this, gain));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, gain));
     }
     
     private class GainBinding implements FloatProperty.Binding {

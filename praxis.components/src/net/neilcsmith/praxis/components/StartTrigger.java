@@ -22,6 +22,7 @@
 
 package net.neilcsmith.praxis.components;
 
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.Root.State;
 import net.neilcsmith.praxis.impl.AbstractRootStateComponent;
@@ -37,7 +38,7 @@ public class StartTrigger extends AbstractRootStateComponent {
     
     public StartTrigger() {
         output = new DefaultControlOutputPort(this);
-        registerPort("output", output);
+        registerPort(Port.OUT, output);
     }
     
     public void rootStateChanged(Root source, State state) {

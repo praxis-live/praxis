@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.video.components.test;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
@@ -49,9 +50,9 @@ public class BackgroundDifference extends AbstractComponent {
             Placeholder pl2 = new Placeholder();
             diff.addSource(pl1);
             diff.addSource(pl2);
-            registerPort("input", new DefaultVideoInputPort(this, pl1));
+            registerPort(Port.IN, new DefaultVideoInputPort(this, pl1));
             registerPort("background", new DefaultVideoInputPort(this, pl2));
-            registerPort("output", new DefaultVideoOutputPort(this, diff));
+            registerPort(Port.OUT, new DefaultVideoOutputPort(this, diff));
             StringProperty mode = StringProperty.create(this, new ModeBinding(), getModeStrings(), diff.getMode().name());
             registerControl("mode", mode);
             FloatProperty threshold = FloatProperty.create(this, new ThresholdBinding(), 0, 1, 0);

@@ -22,6 +22,7 @@
 package net.neilcsmith.praxis.components.math;
 
 import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.FloatInputPort;
@@ -54,8 +55,8 @@ public class Scale extends AbstractComponent {
         registerPort("y1", y1.createPort());
         registerControl("y2", y2);
         registerPort("y2", y2.createPort());
-        registerPort("input", input);
-        registerPort("output", output);
+        registerPort(Port.IN, input);
+        registerPort(Port.OUT, output);
     }
 
     private class InputBinding implements FloatInputPort.Binding {

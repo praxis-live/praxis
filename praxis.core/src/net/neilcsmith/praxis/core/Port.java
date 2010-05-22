@@ -29,6 +29,9 @@ import net.neilcsmith.praxis.core.info.PortInfo;
  * @author Neil C Smith
  */
 public interface Port {
+
+    public final static String IN = "in";
+    public final static String OUT = "out";
     
     public void connect(Port port) throws PortConnectionException;
     
@@ -52,5 +55,5 @@ public interface Port {
     
     public Direction getDirection();
     
-    public static enum Direction { UNDEFINED, INPUT, OUTPUT, BIDI };
+    public static enum Direction { IN, OUT, BIDI };
 }

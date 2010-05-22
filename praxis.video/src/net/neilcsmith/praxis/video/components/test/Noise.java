@@ -22,6 +22,7 @@
 
 package net.neilcsmith.praxis.video.components.test;
 
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.video.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
@@ -36,8 +37,8 @@ public class Noise extends AbstractComponent {
     
     public Noise() {
         this.noise = new net.neilcsmith.ripl.components.test.Noise();
-        registerPort("input", new DefaultVideoInputPort(this, noise));
-        registerPort("output", new DefaultVideoOutputPort(this, noise));
+        registerPort(Port.IN, new DefaultVideoInputPort(this, noise));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, noise));
     }
     
 }

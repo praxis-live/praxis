@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.video.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.video.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
@@ -48,9 +49,9 @@ public class Splitter extends AbstractComponent {
             out2 = new Placeholder();
             out1.addSource(spl);
             out2.addSource(spl);
-            registerPort("input", new DefaultVideoInputPort(this, spl));
-            registerPort("output-1", new DefaultVideoOutputPort(this, out1));
-            registerPort("output-2", new DefaultVideoOutputPort(this, out2));
+            registerPort(Port.IN, new DefaultVideoInputPort(this, spl));
+            registerPort(Port.OUT + "-1", new DefaultVideoOutputPort(this, out1));
+            registerPort(Port.OUT + "-2", new DefaultVideoOutputPort(this, out2));
             
         } catch (SinkIsFullException ex) {
             Logger.getLogger(Splitter.class.getName()).log(Level.SEVERE, null, ex);

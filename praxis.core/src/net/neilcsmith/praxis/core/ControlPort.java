@@ -29,6 +29,11 @@ import net.neilcsmith.praxis.core.types.PString;
  */
 public abstract class ControlPort implements Port {
 
+    public final static String VALUE = "value";
+    public final static String TRIGGER = "trigger";
+    public final static String READY = "ready";
+    public final static String ERROR = "error";
+
     public final static PString BANG = PString.valueOf("");
 
     public final Class<? extends Port> getTypeClass() {
@@ -46,7 +51,7 @@ public abstract class ControlPort implements Port {
         }
 
         public final Direction getDirection() {
-            return Port.Direction.INPUT;
+            return Port.Direction.IN;
         }
 
         protected abstract void addControlOutputPort(Output port)
@@ -66,7 +71,7 @@ public abstract class ControlPort implements Port {
     public static abstract class Output extends ControlPort {
 
         public final Direction getDirection() {
-            return Port.Direction.OUTPUT;
+            return Port.Direction.OUT;
         }
 
         protected final void makeConnection(Input port) throws PortConnectionException {

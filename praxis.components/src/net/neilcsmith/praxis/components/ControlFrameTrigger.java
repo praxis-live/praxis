@@ -22,6 +22,7 @@
 
 package net.neilcsmith.praxis.components;
 
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.impl.AbstractControlFrameComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
@@ -36,7 +37,7 @@ public class ControlFrameTrigger extends AbstractControlFrameComponent {
     
     public ControlFrameTrigger() {
         output = new DefaultControlOutputPort(this);
-        registerPort("output", output);
+        registerPort(Port.OUT, output);
     }
 
     @Override

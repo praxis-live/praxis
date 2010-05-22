@@ -22,6 +22,7 @@
 
 package net.neilcsmith.praxis.video.components;
 
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
@@ -38,8 +39,8 @@ public class Snapshot extends AbstractComponent {
     
     public Snapshot() {
         snap = new net.neilcsmith.ripl.components.Snapshot();
-        registerPort("input", new DefaultVideoInputPort(this, snap));
-        registerPort("output", new DefaultVideoOutputPort(this, snap));
+        registerPort(Port.IN, new DefaultVideoInputPort(this, snap));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, snap));
         FloatProperty time = FloatProperty.create(this, new TimeBinding(), 0, 60 * 60, 0);
         registerControl("fade-time", time);
         registerPort("fade-time", time.createPort());

@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.video.components.test;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.video.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
@@ -48,9 +49,9 @@ public class Ripple extends AbstractComponent {
             disturbance = new Placeholder();
             rip.addSource(input);
             rip.addSource(disturbance);
-            registerPort("input", new DefaultVideoInputPort(this, input));
+            registerPort(Port.IN, new DefaultVideoInputPort(this, input));
             registerPort("disturbance", new DefaultVideoInputPort(this, disturbance));
-            registerPort("output", new DefaultVideoOutputPort(this, rip));
+            registerPort(Port.OUT, new DefaultVideoOutputPort(this, rip));
         } catch (SinkIsFullException ex) {
             Logger.getLogger(Ripple.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SourceIsFullException ex) {

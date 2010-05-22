@@ -23,6 +23,7 @@ package net.neilcsmith.praxis.video.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.Root.State;
 import net.neilcsmith.praxis.impl.AbstractRootStateComponent;
@@ -45,7 +46,7 @@ public class VideoPlayer extends AbstractRootStateComponent {
 
     public VideoPlayer() {
         delegator = new Delegator();
-        registerPort("output", new DefaultVideoOutputPort(this, delegator));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));
         loader = new VideoDelegateLoader(this, new VideoBinding());
         registerControl("uri", loader);
         TriggerControl play = TriggerControl.create(this, new PlayTrigger());

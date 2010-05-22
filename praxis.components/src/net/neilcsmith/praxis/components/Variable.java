@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.components;
 
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
@@ -48,7 +49,7 @@ public class Variable extends AbstractComponent {
         registerControl("trigger", t);
         registerPort("trigger", t.getPort());
         output = new DefaultControlOutputPort(this);
-        registerPort("output", output);
+        registerPort(Port.OUT, output);
     }
     
     private class ValueBinding implements ArgumentProperty.Binding {

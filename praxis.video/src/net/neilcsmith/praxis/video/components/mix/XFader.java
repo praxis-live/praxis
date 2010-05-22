@@ -23,6 +23,7 @@ package net.neilcsmith.praxis.video.components.mix;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
@@ -52,9 +53,9 @@ public class XFader extends AbstractComponent {
             pl2 = new Placeholder();
             mixer.addSource(pl1);
             mixer.addSource(pl2);
-            registerPort("output", new DefaultVideoOutputPort(this, mixer));
-            registerPort("input-1", new DefaultVideoInputPort(this, pl1));
-            registerPort("input-2", new DefaultVideoInputPort(this, pl2));
+            registerPort(Port.OUT, new DefaultVideoOutputPort(this, mixer));
+            registerPort(Port.IN + "-1", new DefaultVideoInputPort(this, pl1));
+            registerPort(Port.IN + "-2", new DefaultVideoInputPort(this, pl2));
 
 //            registerControl("mix", new MixControl());
             FloatProperty mix = createMixControl();

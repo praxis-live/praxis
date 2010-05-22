@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.ParentVetoException;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.video.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.VideoOutputClient;
@@ -45,7 +46,7 @@ public class VideoOutput extends AbstractComponent implements VideoOutputClient 
 
     public VideoOutput() {
         placeholder = new Placeholder();
-        registerPort("input", new DefaultVideoInputPort(this, placeholder));
+        registerPort(Port.IN, new DefaultVideoInputPort(this, placeholder));
     }
 
     @Override

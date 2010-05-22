@@ -22,6 +22,7 @@
 
 package net.neilcsmith.praxis.video.components.test;
 
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.video.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
@@ -37,8 +38,8 @@ public class FrameTimer extends AbstractComponent {
     
     public FrameTimer() {
         timer = new FrameTime();
-        registerPort("input", new DefaultVideoInputPort(this, timer));
-        registerPort("output", new DefaultVideoOutputPort(this, timer));
+        registerPort(Port.IN, new DefaultVideoInputPort(this, timer));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, timer));
     }
 
 }

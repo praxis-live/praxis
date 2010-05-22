@@ -22,6 +22,7 @@
 package net.neilcsmith.praxis.components.math;
 
 import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.FloatInputPort;
@@ -41,7 +42,7 @@ public class Threshold extends AbstractComponent {
         threshold = FloatProperty.create(this, 0);
         registerControl("threshold", threshold);
         registerPort("threshold", threshold.createPort());
-        registerPort("input", FloatInputPort.create(this, new InputBinding()));
+        registerPort(Port.IN, FloatInputPort.create(this, new InputBinding()));
         outputLow = new DefaultControlOutputPort(this);
         outputHigh = new DefaultControlOutputPort(this);
         registerPort("output-low", outputLow);

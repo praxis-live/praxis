@@ -25,6 +25,7 @@ package net.neilcsmith.praxis.audio.components.filter;
 
 import net.neilcsmith.praxis.audio.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.DefaultAudioOutputPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
@@ -58,8 +59,8 @@ public class IIRFilter extends AbstractComponent {
         mix = FloatProperty.create(this, new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
-        registerPort("input", new DefaultAudioInputPort(this, filter));
-        registerPort("output", new DefaultAudioOutputPort(this, filter));
+        registerPort(Port.IN, new DefaultAudioInputPort(this, filter));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, filter));
     }
 
     private StringProperty createTypeControl() {

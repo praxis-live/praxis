@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.components.timing;
 
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.Root.State;
 import net.neilcsmith.praxis.impl.AbstractControlFrameComponent;
@@ -50,9 +51,9 @@ public class SimpleDelay extends AbstractControlFrameComponent {
         FloatProperty delay = createDelayControl();
         registerControl("time", delay);
         registerPort("time", delay.createPort());
-        registerPort("input", createInputPort());
+        registerPort(Port.IN, createInputPort());
         output = new DefaultControlOutputPort(this);
-        registerPort("output", output);
+        registerPort(Port.OUT, output);
     }
     
     private FloatProperty createDelayControl() {

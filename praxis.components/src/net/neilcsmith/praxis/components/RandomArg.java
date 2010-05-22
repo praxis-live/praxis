@@ -25,6 +25,7 @@ package net.neilcsmith.praxis.components;
 import java.util.Random;
 import net.neilcsmith.praxis.core.ControlPort;
 //import net.neilcsmith.praxis.core.impl.MultiArgProperty;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractComponent;
@@ -52,7 +53,7 @@ public class RandomArg extends AbstractComponent {
         registerControl("trigger", trigger);
         registerPort("trigger", trigger.getPort());
         output = new DefaultControlOutputPort(this);
-        registerPort("output", output);
+        registerPort(Port.OUT, output);
     }
     
     private class TriggerBinding implements TriggerControl.Binding {

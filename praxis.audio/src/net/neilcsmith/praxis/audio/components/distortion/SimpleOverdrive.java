@@ -25,6 +25,7 @@ package net.neilcsmith.praxis.audio.components.distortion;
 
 import net.neilcsmith.praxis.audio.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.DefaultAudioOutputPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.rapl.components.distortion.Overdrive;
@@ -47,8 +48,8 @@ public class SimpleOverdrive extends AbstractComponent {
         mix = FloatProperty.create(this, new MixBinding(), 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
-        registerPort("input", new DefaultAudioInputPort(this, overdrive));
-        registerPort("output", new DefaultAudioOutputPort(this, overdrive));
+        registerPort(Port.IN, new DefaultAudioInputPort(this, overdrive));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, overdrive));
 
     }
 

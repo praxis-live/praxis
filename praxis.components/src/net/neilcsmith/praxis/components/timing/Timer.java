@@ -22,6 +22,7 @@
 package net.neilcsmith.praxis.components.timing;
 
 import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.Root.State;
 import net.neilcsmith.praxis.impl.AbstractControlFrameComponent;
@@ -44,7 +45,7 @@ public class Timer extends AbstractControlFrameComponent {
         registerControl("period", period);
         registerPort("period", period.createPort());
         output = new DefaultControlOutputPort(this);
-        registerPort("output", output);
+        registerPort(Port.OUT, output);
                 
     }
     

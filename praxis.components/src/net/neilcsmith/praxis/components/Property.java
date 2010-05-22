@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.components;
 
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.Root.State;
 import net.neilcsmith.praxis.core.types.PString;
@@ -45,7 +46,7 @@ public class Property extends AbstractRootStateComponent {
         arg = PString.EMPTY;
         ArgumentProperty value = ArgumentProperty.create(this, new Binding(), arg);
         registerControl("value", value);
-        registerPort("output", output);
+        registerPort(Port.OUT, output);
     }
     
     private class Binding implements ArgumentProperty.Binding {

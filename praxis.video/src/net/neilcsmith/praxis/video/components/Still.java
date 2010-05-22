@@ -26,6 +26,7 @@ import java.net.URI;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Task;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PUri;
@@ -68,8 +69,8 @@ public class Still extends AbstractComponent {
         registerControl("align-x", alignX);
         registerControl("align-y", alignY);
         registerControl("uri", loader);
-        registerPort("input", new DefaultVideoInputPort(this, delegator));
-        registerPort("output", new DefaultVideoOutputPort(this, delegator));
+        registerPort(Port.IN, new DefaultVideoInputPort(this, delegator));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));
         registerPort("uri", loader.getInputPort());
         rdyPort = new DefaultControlOutputPort(this);
         registerPort("ready", rdyPort);

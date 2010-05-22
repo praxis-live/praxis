@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.video.components.test;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.AbstractComponent;
@@ -49,8 +50,8 @@ public class DifferenceCalc extends AbstractComponent {
 
     public DifferenceCalc() {
         changeMeasure = new ChangeMeasure();
-        registerPort("input", new DefaultVideoInputPort(this, changeMeasure));
-        registerPort("output", new DefaultVideoOutputPort(this, changeMeasure));
+        registerPort(Port.IN, new DefaultVideoInputPort(this, changeMeasure));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, changeMeasure));
         diffOutput = new DefaultControlOutputPort(this);
 
         TriggerControl trigger = TriggerControl.create(this, new TriggerBinding());

@@ -23,6 +23,7 @@ package net.neilcsmith.praxis.video.components.mix;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.FloatProperty;
@@ -51,9 +52,9 @@ public class Composite extends AbstractComponent {
             src = new Placeholder();
             comp.addSource(dst);
             comp.addSource(src);
-            registerPort("output", new DefaultVideoOutputPort(this, comp));
-            registerPort("input-dst", new DefaultVideoInputPort(this, dst));
-            registerPort("input-src", new DefaultVideoInputPort(this, src));
+            registerPort(Port.OUT, new DefaultVideoOutputPort(this, comp));
+            registerPort(Port.IN, new DefaultVideoInputPort(this, dst));
+            registerPort("src", new DefaultVideoInputPort(this, src));
             
             registerControl("force-alpha", createAlphaControl());
             

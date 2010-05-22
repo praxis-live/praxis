@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Task;
 import net.neilcsmith.praxis.core.TaskListener;
 import net.neilcsmith.praxis.core.types.PReference;
@@ -45,6 +46,7 @@ import net.neilcsmith.praxis.video.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
 import net.neilcsmith.ripl.components.Delegator;
 import net.neilcsmith.ripl.Surface;
+import net.neilcsmith.ripl.delegates.AbstractDelegate;
 import net.neilcsmith.ripl.delegates.Delegate;
 
 /**
@@ -66,8 +68,8 @@ public class ImageSave extends AbstractComponent {
         listener = new ImageSaverListener();
         uri = UriProperty.create(this, PUri.valueOf(new File("image").toURI()));
         Delegator d = new Delegator(new SaveDelegate());
-        registerPort("input", new DefaultVideoInputPort(this, d));
-        registerPort("output", new DefaultVideoOutputPort(this, d));        
+        registerPort(Port.IN, new DefaultVideoInputPort(this, d));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, d));        
         registerControl("file", uri);
         TriggerControl trigger = TriggerControl.create(this, new TriggerBinding());
         registerControl("trigger", trigger);
@@ -113,7 +115,7 @@ public class ImageSave extends AbstractComponent {
         pool.add(new SoftReference<BufferedImage>(image));
     }
     
-    private class SaveDelegate extends Delegate {
+    private class SaveDelegate extends AbstractDelegate {
 
         public void process( Surface surface) {
 //            if (triggered) {

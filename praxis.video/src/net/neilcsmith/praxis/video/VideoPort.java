@@ -54,7 +54,7 @@ public abstract class VideoPort implements Port {
         }
 
         public final Direction getDirection() {
-            return Port.Direction.INPUT;
+            return Port.Direction.IN;
         }
 
         protected abstract void addImageOutputPort(Output port, Source source) throws PortConnectionException;
@@ -65,7 +65,7 @@ public abstract class VideoPort implements Port {
     public static abstract class Output extends VideoPort {
 
         public final Direction getDirection() {
-            return Port.Direction.OUTPUT;
+            return Port.Direction.OUT;
         }
 
         protected void makeConnection(Input port, Source source) throws PortConnectionException {

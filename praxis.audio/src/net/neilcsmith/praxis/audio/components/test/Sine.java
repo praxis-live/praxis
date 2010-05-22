@@ -23,6 +23,7 @@
 package net.neilcsmith.praxis.audio.components.test;
 
 import net.neilcsmith.praxis.audio.DefaultAudioOutputPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
 
@@ -40,7 +41,7 @@ public class Sine extends AbstractComponent {
                 110, 4 * 440, 440);
         registerControl("frequency", freq );
         registerPort("frequency", freq.createPort());
-        registerPort("output", new DefaultAudioOutputPort(this, sine));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, sine));
     }
     
     private class FrequencyBinding implements FloatProperty.Binding {

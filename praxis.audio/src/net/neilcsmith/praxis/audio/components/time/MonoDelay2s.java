@@ -25,6 +25,7 @@ package net.neilcsmith.praxis.audio.components.time;
 
 import net.neilcsmith.praxis.audio.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.DefaultAudioOutputPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.rapl.components.time.MonoDelay;
@@ -53,8 +54,8 @@ public class MonoDelay2s extends AbstractComponent {
         mix = FloatProperty.create(this, new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
-        registerPort("input", new DefaultAudioInputPort(this, delay));
-        registerPort("output", new DefaultAudioOutputPort(this, delay));
+        registerPort(Port.IN, new DefaultAudioInputPort(this, delay));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, delay));
     }
 
     private class MixBinding implements FloatProperty.Binding {

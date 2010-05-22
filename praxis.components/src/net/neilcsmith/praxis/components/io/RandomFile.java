@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.components.io;
 
 import java.util.Random;
 import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractComponent;
@@ -54,7 +55,7 @@ public class RandomFile extends AbstractComponent {
         registerControl("trigger", trigger);
         registerPort("trigger", trigger.getPort());
         output = new DefaultControlOutputPort(this);
-        registerPort("output", output);
+        registerPort(Port.OUT, output);
         rdyPort = new DefaultControlOutputPort(this);
         registerPort("ready", rdyPort);
         errPort = new DefaultControlOutputPort(this);

@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.components.math;
 
 import java.util.Random;
 import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
@@ -54,7 +55,7 @@ public class RandomFloat extends AbstractComponent {
         registerPort("range", range.createPort());
         registerControl("trigger", trigger);
         registerPort("trigger", trigger.getPort());
-        registerPort("output", output);
+        registerPort(Port.OUT, output);
     }
     
     

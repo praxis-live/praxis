@@ -22,6 +22,7 @@
 
 package net.neilcsmith.praxis.video.components.test;
 
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
@@ -39,8 +40,8 @@ public class Difference extends AbstractComponent {
     
     public Difference() {
         diff = new net.neilcsmith.ripl.components.temporal.Difference();
-        registerPort("input", new DefaultVideoInputPort(this, diff));
-        registerPort("output", new DefaultVideoOutputPort(this, diff));
+        registerPort(Port.IN, new DefaultVideoInputPort(this, diff));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, diff));
         StringProperty mode = StringProperty.create(this, new ModeBinding(),
                 getModeStrings(), diff.getMode().name());
         registerControl("mode", mode);

@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.audio.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.DefaultAudioOutputPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.FloatProperty;
@@ -50,8 +51,8 @@ public class SamplePlayer extends AbstractComponent {
         player = new net.neilcsmith.rapl.components.SamplePlayer();
         
         buildControls();
-        registerPort("input", new DefaultAudioInputPort(this, player));
-        registerPort("output", new DefaultAudioOutputPort(this, player));
+        registerPort(Port.IN, new DefaultAudioInputPort(this, player));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, player));
     }
     
     private void buildControls() {
