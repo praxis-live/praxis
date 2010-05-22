@@ -61,11 +61,11 @@ public class SamplePlayer extends AbstractComponent {
         registerControl("position", position);
         registerPort("position", position.createPort());
         FloatProperty in = FloatProperty.create(this, new InBinding(), 0, 1, 0);
-        registerControl("in", in);
-        registerPort("in", in.createPort());
+        registerControl("start", in);
+        registerPort("start", in.createPort());
         FloatProperty out = FloatProperty.create(this, new OutBinding(), 0, 1, 1);
-        registerControl("out", out);
-        registerPort("out", out.createPort());
+        registerControl("end", out);
+        registerPort("end", out.createPort());
         FloatRangeProperty range = FloatRangeProperty.create(this, new RangeBinding(),
                 0, 1, 0, 1);
         registerControl("range", range);
