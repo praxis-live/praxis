@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.ripl.ops;
+package net.neilcsmith.ripl.ops.impl;
 
 import java.awt.Composite;
 import java.awt.CompositeContext;
@@ -33,6 +33,7 @@ import java.awt.image.RasterFormatException;
 import java.awt.image.SinglePixelPackedSampleModel;
 import java.awt.image.WritableRaster;
 import net.neilcsmith.ripl.PixelData;
+import net.neilcsmith.ripl.ops.BlendFunction;
 import net.neilcsmith.ripl.rgbmath.RGBMath;
 
 /**

@@ -66,6 +66,10 @@ public final class Bounds {
         return height;
     }
 
+    public final Rectangle asRectangle() {
+        return new Rectangle(x, y, width, height);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

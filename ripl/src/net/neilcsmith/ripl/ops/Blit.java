@@ -22,6 +22,8 @@
 
 package net.neilcsmith.ripl.ops;
 
+import java.awt.Rectangle;
+import net.neilcsmith.ripl.ops.impl.SubPixels;
 import net.neilcsmith.ripl.PixelData;
 import net.neilcsmith.ripl.SurfaceOp;
 
@@ -31,23 +33,39 @@ import net.neilcsmith.ripl.SurfaceOp;
  */
 public final class Blit implements SurfaceOp {
 
-    private static Blit defaultBlit = new Blit(Blend.NORMAL, 0, 0);
+    private static Blit defaultBlit = new Blit(Blend.NORMAL);
 
+    private boolean identity;
     private BlendFunction blend;
     private int x;
     private int y;
+    private Bounds srcRegion;
 
     private Blit() {
-        this(Blend.NORMAL, 0, 0);
+        this(Blend.NORMAL);
     }
 
-    private Blit(BlendFunction blend, int x, int y) {
+    private Blit(BlendFunction blend) {
         if (blend == null) {
             throw new NullPointerException();
         }
         this.blend = blend;
+        identity = true;
+    }
+
+    private Blit(BlendFunction blend, int x, int y) {
+        this(blend, null, x, y);
+    }
+
+    private Blit(BlendFunction blend, Bounds srcRegion, int x, int y) {
+        if (blend == null) {
+            throw new NullPointerException();
+        }
+        this.blend = blend;
+        this.srcRegion = srcRegion;
         this.x = x;
         this.y = y;
+        identity = false;
     }
 
     public BlendFunction getBlendFunction() {
@@ -58,32 +76,58 @@ public final class Blit implements SurfaceOp {
         if (inputs.length < 1) {
             return;
         }
-        if (x == 0 && y == 0) {
+        if (identity) {
             blend.process(inputs[0], output);
         } else {
-            PixelData dst = SubPixels.create(output, x, y, output.getWidth() - x, output.getHeight() - y);
-            blend.process(inputs[0], dst);
+//            PixelData dst = SubPixels.create(output, x, y, output.getWidth() - x, output.getHeight() - y);
+//            blend.process(inputs[0], dst);
+            processComplex(inputs[0], output);
+        }       
+    }
+
+    private void processComplex(PixelData src, PixelData dst) {
+        Rectangle sRct = new Rectangle(0, 0, src.getWidth(), src.getHeight());
+        int srcX = 0, srcY = 0;
+        if (srcRegion != null) {
+            sRct = sRct.intersection(srcRegion.asRectangle());
+            if (sRct.isEmpty()) {
+                return;
+            }
+            srcX = sRct.x;
+            srcY = sRct.y;
         }
-        
+        Rectangle dRct = new Rectangle(0, 0, dst.getWidth(), dst.getHeight());
+        sRct.translate(x-srcX, y-srcY);
+        Rectangle intersection = dRct.intersection(sRct);
+        if (intersection.isEmpty()) {
+            return;
+        }
+        sRct.setBounds(intersection);
+        dRct.setBounds(intersection);
+        sRct.translate(srcX - x, srcY - y);
+        SubPixels srcPD = SubPixels.create(src, sRct.x, sRct.y, sRct.width, sRct.height);
+        SubPixels dstPD = SubPixels.create(dst, dRct.x, dRct.y, dRct.width, dRct.height);
+        blend.process(srcPD, dstPD);
     }
 
     public static SurfaceOp op() {
         return defaultBlit;
     }
+
+    public static SurfaceOp op(BlendFunction blend) {
+        return new Blit(blend);
+    }
     
     public static SurfaceOp op(int x, int y) {
-        if (x < 0 || y < 0) {
-            throw new IllegalArgumentException();
-        }
         return new Blit(Blend.NORMAL,x,y);
     }
 
-    public static SurfaceOp op(BlendFunction blend) {
-        if (blend == null) {
-            throw new NullPointerException();
-        }
-        return new Blit(blend,0,0);
+    public static SurfaceOp op(BlendFunction blend, int x, int y) {
+        return new Blit(blend, x, y);
     }
-
+    
+    public static SurfaceOp op(BlendFunction blend, Bounds srcRegion, int x, int y) {
+        return new Blit(blend, srcRegion, x, y);
+    }
 
 }

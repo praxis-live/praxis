@@ -27,6 +27,8 @@ package net.neilcsmith.ripl;
  */
 public abstract class Surface {
 
+    private final static Surface[] EMPTY = new Surface[0];
+
     private final int width;
     private final int height;
     private final boolean alpha;
@@ -58,11 +60,9 @@ public abstract class Surface {
 
     protected abstract PixelData getPixelData();
 
-    protected final int getModCount(Surface surface) {
-        return surface.getModCount();
+    public void process(SurfaceOp op) {
+        process(op, EMPTY);
     }
-
-    protected abstract int getModCount();
 
     public abstract void process(SurfaceOp op, Surface... inputs);
 

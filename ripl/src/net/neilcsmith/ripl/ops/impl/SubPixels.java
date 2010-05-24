@@ -19,9 +19,10 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.ripl.ops;
+package net.neilcsmith.ripl.ops.impl;
 
 import net.neilcsmith.ripl.PixelData;
+import net.neilcsmith.ripl.ops.Bounds;
 
 /**
  *
@@ -79,5 +80,7 @@ public class SubPixels implements PixelData {
         }
         return new SubPixels(pd, x, y, width, height);
     }
+
+
 
 }

@@ -124,18 +124,15 @@ public class BufferedImageSurface extends Surface {
         }
     }
 
-    @Override
-    protected int getModCount() {
-        return mod++;
-    }
+
 
     @Override
     public void process(SurfaceOp op, Surface... inputs) {
-        if (op instanceof GraphicsOp) {
-            Graphics2D g = image.createGraphics();
-            ((GraphicsOp) op).getCallback().draw(g, new Image[0]);
-            return;
-        }
+//        if (op instanceof GraphicsOp) {
+//            Graphics2D g = image.createGraphics();
+//            ((GraphicsOp) op).getCallback().draw(g, new Image[0]);
+//            return;
+//        }
         PixelData[] inputData;
         int inLen = inputs.length;
         if (inLen > 0) {
