@@ -29,7 +29,7 @@ import net.neilcsmith.ripl.utils.ResizeMode;
  *
  * @author Neil C Smith
  */
-public abstract class VideoDelegate extends Delegate {
+public abstract class VideoDelegate extends AbstractDelegate {
     
     public enum State {New, Ready, Playing, Paused, Error, Disposed}; 
     

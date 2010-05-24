@@ -25,6 +25,7 @@ package net.neilcsmith.ripl.components;
 import java.awt.Dimension;
 import net.neilcsmith.ripl.Source;
 import net.neilcsmith.ripl.Surface;
+import net.neilcsmith.ripl.delegates.AbstractDelegate;
 import net.neilcsmith.ripl.impl.SingleInOut;
 import net.neilcsmith.ripl.delegates.Delegate;
 
@@ -59,7 +60,9 @@ public class Delegator extends SingleInOut {
     public Delegate getDelegate() {
         return delegate;
     }
-    
+
+
+    // @TODO remove this method - it's a hack!
     public Dimension getCurrentDimensions() {
         if (currentWidth < 1 || currentHeight < 1) {
             return null;
@@ -83,7 +86,7 @@ public class Delegator extends SingleInOut {
         return delegate.forceRender() || super.isRenderRequired(source, time);
     }
     
-    private class EmptyDelegate extends Delegate {
+    private class EmptyDelegate extends AbstractDelegate {
 
         @Override
         public void process( Surface output) {

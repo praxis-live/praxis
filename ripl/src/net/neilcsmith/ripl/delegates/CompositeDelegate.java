@@ -28,9 +28,9 @@ import net.neilcsmith.ripl.Surface;
  *
  * @author Neil C Smith
  */
-public interface Delegate {
+public interface CompositeDelegate {
     
-    public void process(Surface surface);
+    public void process(Surface surface, Surface... sources);
 
     public void update(long time);
        

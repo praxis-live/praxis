@@ -39,7 +39,7 @@ import net.neilcsmith.ripl.utils.ResizeUtils;
  *
  * @author Neil C Smith
  */
-public class ImageDelegate extends Delegate {
+public class ImageDelegate extends AbstractDelegate {
 
 //    private static Logger logger = Logger.getLogger(ImageDelegate.class.getName());
     private BufferedImageSurface source;
