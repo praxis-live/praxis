@@ -105,8 +105,8 @@ public class Snapshot extends SingleInOut {
 //            g.setComposite(comp.derive(fAmount));
 //            g.drawSurface(src, 0, 0);
 
-            dest.process(Blit.op(Blend.ADD.derive(1 - fAmount)), destIn);
-            dest.process(Blit.op(Blend.ADD.derive(fAmount)), src);
+            dest.process(Blit.op(Blend.ADD.opacity(1 - fAmount)), destIn);
+            dest.process(Blit.op(Blend.ADD.opacity(fAmount)), src);
 
 
             if (dest != destOut) {
@@ -121,7 +121,7 @@ public class Snapshot extends SingleInOut {
             }
 //            g.setComposite(AlphaComposite.SrcOver.derive(fAmount));
 //            g.drawSurface(src,0,0);
-            destOut.process(Blit.op(Blend.NORMAL.derive(fAmount)), src);
+            destOut.process(Blit.op(Blend.NORMAL.opacity(fAmount)), src);
         }
     }
 

@@ -163,19 +163,19 @@ public class Composite extends AbstractInOut {
      private SurfaceOp createBlit(Mode mode, double mix) {
         switch (mode) {
             case Normal:
-                return Blit.op(Blend.NORMAL.derive(mix));
+                return Blit.op(Blend.NORMAL.opacity(mix));
             case Add:
-                return Blit.op(Blend.ADD.derive(mix));
+                return Blit.op(Blend.ADD.opacity(mix));
             case Sub:
-                return Blit.op(Blend.SUB.derive(mix));
+                return Blit.op(Blend.SUB.opacity(mix));
             case Difference:
-                return Blit.op(Blend.DIFFERENCE.derive(mix));
+                return Blit.op(Blend.DIFFERENCE.opacity(mix));
             case Multiply:
-                return Blit.op(Blend.MULTIPLY.derive(mix));
+                return Blit.op(Blend.MULTIPLY.opacity(mix));
             case Screen:
-                return Blit.op(Blend.SCREEN.derive(mix));
+                return Blit.op(Blend.SCREEN.opacity(mix));
             case BitXor:
-                return Blit.op(Blend.BITXOR.derive(mix));
+                return Blit.op(Blend.BITXOR.opacity(mix));
             
             default:
                 throw new IllegalArgumentException();

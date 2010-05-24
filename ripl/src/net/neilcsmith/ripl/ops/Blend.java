@@ -108,7 +108,7 @@ public class Blend implements BlendFunction {
         return extraAlpha;
     }
 
-    public Blend derive(double extraAlpha) {
+    public Blend opacity(double extraAlpha) {
         return new Blend(type, extraAlpha);
     }
 

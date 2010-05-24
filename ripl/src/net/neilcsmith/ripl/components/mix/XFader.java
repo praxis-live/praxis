@@ -88,7 +88,7 @@ public class XFader extends MultiInputInOut {
 //            surface.clear();
 //            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f - (float) mix));
 //            g.drawSurface(getInputSurface(0), 0, 0);
-            surface.process(Blit.op(Blend.NORMAL.derive(1 - mix)), getInputSurface(0));
+            surface.process(Blit.op(Blend.NORMAL.opacity(1 - mix)), getInputSurface(0));
         }
 
     }
@@ -130,15 +130,15 @@ public class XFader extends MultiInputInOut {
 //            comp.process(getInputSurface(0), surface, surface, 0, 0, true);
 //            comp = SurfaceComposite.create(SurfaceComposite.Mode.AddPin, mix);
 //            comp.process(getInputSurface(1), surface, surface, 0, 0, true);
-            surface.process(Blit.op(Blend.ADD.derive(1 - mix)), getInputSurface(0));
-            surface.process(Blit.op(Blend.ADD.derive(mix)), getInputSurface(1));
+            surface.process(Blit.op(Blend.ADD.opacity(1 - mix)), getInputSurface(0));
+            surface.process(Blit.op(Blend.ADD.opacity(mix)), getInputSurface(1));
 
         } else {
 //            g.drawSurface(getInputSurface(0), 0, 0);
 //            SurfaceComposite comp = SurfaceComposite.create(Mode.SrcOver, mix);
 //            comp.process(getInputSurface(1), surface, surface, 0, 0, true);
             surface.process(Blit.op(), getInputSurface(0));
-            surface.process(Blit.op(Blend.NORMAL.derive(mix)), getInputSurface(1));
+            surface.process(Blit.op(Blend.NORMAL.opacity(mix)), getInputSurface(1));
         }
 
 //        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) (1 - mix) ));
@@ -163,7 +163,7 @@ public class XFader extends MultiInputInOut {
 //        SurfaceComposite comp = SurfaceComposite.create(Mode.BitXor, alpha);
 //        comp.process(src, dst, surface, 0, 0, true);
 //        surface.getGraphics().drawSurface(dst, 0, 0);
-        dst.process(Blit.op(Blend.BITXOR.derive(alpha)), src);
+        dst.process(Blit.op(Blend.BITXOR.opacity(alpha)), src);
         surface.copy(dst);
     }
 
@@ -183,7 +183,7 @@ public class XFader extends MultiInputInOut {
 //        SurfaceComposite comp = SurfaceComposite.create(SurfaceComposite.Mode.AddPin, alpha);
 //        comp.process(src, dst, surface, 0, 0, true);
 //        surface.getGraphics().drawSurface(dst, 0, 0);
-        dst.process(Blit.op(Blend.ADD.derive(alpha)), src);
+        dst.process(Blit.op(Blend.ADD.opacity(alpha)), src);
         surface.copy(dst);
     }
 
@@ -203,7 +203,7 @@ public class XFader extends MultiInputInOut {
 //        SurfaceComposite comp = SurfaceComposite.create(SurfaceComposite.Mode.Difference, alpha);
 //        comp.process(src, dst, surface, 0, 0, true);
 //        surface.getGraphics().drawSurface(dst, 0, 0);
-        dst.process(Blit.op(Blend.DIFFERENCE.derive(alpha)), src);
+        dst.process(Blit.op(Blend.DIFFERENCE.opacity(alpha)), src);
         surface.copy(dst);
     }
 
