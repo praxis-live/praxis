@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module: org.codehaus.janino
+OpenIDE-Module-Localizing-Bundle: org/codehaus/janino/Bundle.properties
+OpenIDE-Module-Specification-Version: 2.5.16
+
