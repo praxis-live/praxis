@@ -36,7 +36,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.ripl.Surface;
 import net.neilcsmith.ripl.delegates.VideoDelegate;
-import net.neilcsmith.ripl.ops.Blit;
 import net.neilcsmith.ripl.ops.GraphicsOp;
 import net.neilcsmith.ripl.utils.ResizeMode;
 import net.neilcsmith.ripl.utils.ResizeUtils;
