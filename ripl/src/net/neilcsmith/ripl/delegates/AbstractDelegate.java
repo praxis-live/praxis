@@ -28,11 +28,9 @@ import net.neilcsmith.ripl.Surface;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class AbstractDelegate implements Delegate {
+public abstract class AbstractDelegate implements Delegate {
 
-    public void process(Surface surface) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    public abstract void process(Surface surface);
 
     public void update(long time) {
          // no op - can be overridden for delegates that need to update on non rendering frames

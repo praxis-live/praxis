@@ -157,7 +157,8 @@ public class ImageDelegate extends AbstractDelegate {
 //        cache = new Cache(image, dstDim.width, dstDim.height, dstBnds.x, dstBnds.y);
 //        g2d.dispose();
         BufferedImageSurface s = new BufferedImageSurface(dstBnds.width, dstBnds.height, source.hasAlpha());
-        SurfaceOp blit = ScaledBlit.op(Blend.NORMAL, new Bounds(srcBnds), new Bounds(dstBnds));
+        SurfaceOp blit = ScaledBlit.op(Blend.NORMAL, new Bounds(srcBnds),
+                new Bounds(0, 0, dstBnds.width, dstBnds.height));
         s.process(blit, source);
         cache = new Cache(s, dstDim.width, dstDim.height, dstBnds.x, dstBnds.y);
     }

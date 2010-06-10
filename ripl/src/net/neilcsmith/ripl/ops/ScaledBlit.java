@@ -58,8 +58,8 @@ public class ScaledBlit implements SurfaceOp {
         int sy2 = srcBnds == null ? in.getHeight() : sy1 + srcBnds.getHeight();
         int dx1 = dstBnds == null ? 0 : dstBnds.getX();
         int dy1 = dstBnds == null ? 0 : dstBnds.getY();
-        int dx2 = dstBnds == null ? in.getWidth() : dx1 + dstBnds.getWidth();
-        int dy2 = dstBnds == null ? in.getHeight() : dy1 + dstBnds.getHeight();
+        int dx2 = dstBnds == null ? out.getWidth() : dx1 + dstBnds.getWidth();
+        int dy2 = dstBnds == null ? out.getHeight() : dy1 + dstBnds.getHeight();
         g2d.drawImage(in, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
     }
 

@@ -26,6 +26,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import javax.imageio.ImageIO;
@@ -34,6 +35,7 @@ import net.neilcsmith.ripl.Surface;
 import net.neilcsmith.ripl.SurfaceCapabilities;
 import net.neilcsmith.ripl.SurfaceOp;
 import net.neilcsmith.ripl.ops.GraphicsOp;
+import net.neilcsmith.ripl.utils.ImageUtils;
 
 /**
  *
@@ -42,6 +44,7 @@ import net.neilcsmith.ripl.ops.GraphicsOp;
 public class BufferedImageSurface extends Surface {
 
     private final static PixelData[] EMPTY_INPUTS = new PixelData[0];
+    private final static Image[] EMPTY_IMAGES = new Image[0];
     private final static SurfaceCapabilities caps = new SurfaceCapabilities(true);
     private BufferedImage image;
     private PixelWrapper pixelData;
@@ -128,11 +131,11 @@ public class BufferedImageSurface extends Surface {
 
     @Override
     public void process(SurfaceOp op, Surface... inputs) {
-//        if (op instanceof GraphicsOp) {
-//            Graphics2D g = image.createGraphics();
-//            ((GraphicsOp) op).getCallback().draw(g, new Image[0]);
-//            return;
-//        }
+        if (op instanceof GraphicsOp) {
+            Graphics2D g = image.createGraphics();
+            ((GraphicsOp) op).getCallback().draw(g, createImageArray(inputs));
+            return;
+        }
         PixelData[] inputData;
         int inLen = inputs.length;
         if (inLen > 0) {
@@ -145,6 +148,31 @@ public class BufferedImageSurface extends Surface {
         }
         op.process(getPixelData(), inputData);
     }
+
+    private Image[] createImageArray(Surface[] inputs) {
+        if (inputs.length == 0) {
+            return EMPTY_IMAGES;
+        } else {
+            Image[] ret = new Image[inputs.length];
+            for (int i=0; i < ret.length; i++) {
+                Surface s = inputs[i];
+                if (s instanceof BufferedImageSurface) {
+                    ret[i] = ((BufferedImageSurface) s).image;
+                } else {
+                    ret[i] = ImageUtils.toImage(getPixelData(s));
+                }
+            }
+            return ret;
+        }
+    }
+
+    public void save(String type, File file) throws IOException {
+        boolean success = ImageIO.write(image, type, file);
+        if (!success) {
+            throw new IOException("Can't find writer for supplied type : " + type);
+        }
+    }
+
 
     private class PixelWrapper implements PixelData {
 
