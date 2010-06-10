@@ -75,10 +75,10 @@ public class SamplePlayer extends AbstractComponent {
         registerControl("loop", BooleanProperty.create(this, new LoopingBinding(), false));
         TriggerControl play = TriggerControl.create(this, new PlayBinding());
         registerControl("play", play);
-        registerPort("play", play.getPort());
+        registerPort("play", play.createPort());
         TriggerControl stop = TriggerControl.create(this, new StopBinding());
         registerControl("stop", stop);
-        registerPort("stop", stop.getPort());
+        registerPort("stop", stop.createPort());
         BooleanProperty playing = BooleanProperty.create(this, new PlayingBinding(), false);
         registerControl("playing", playing);
         registerPort("playing", playing.createPort());

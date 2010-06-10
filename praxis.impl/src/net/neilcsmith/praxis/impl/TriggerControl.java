@@ -53,7 +53,7 @@ public class TriggerControl extends BasicControl {
         return info;
     }
     
-    public Port getPort() {
+    public Port createPort() {
         return port;
     }
 

@@ -24,11 +24,14 @@ package net.neilcsmith.praxis.video.janino;
 import java.util.Arrays;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.Root;
+import net.neilcsmith.praxis.core.Root.State;
 import net.neilcsmith.praxis.core.Task;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
-import net.neilcsmith.praxis.impl.AbstractComponent;
+import net.neilcsmith.praxis.impl.AbstractControlFrameComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
+import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.ResourceLoader;
 import net.neilcsmith.praxis.impl.TriggerControl;
@@ -38,7 +41,7 @@ import org.codehaus.janino.ClassBodyEvaluator;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public abstract class AbstractJaninoComponent extends AbstractComponent {
+public abstract class AbstractJaninoComponent extends AbstractControlFrameComponent {
 
     private static final String[] imports = {
         "net.neilcsmith.ripl.*",
@@ -49,19 +52,25 @@ public abstract class AbstractJaninoComponent extends AbstractComponent {
     private double[] floats;
     private Argument[] params;
     private boolean[] triggers;
+    private Argument[] outs;
+    private DefaultControlOutputPort[] outPorts;
     private JaninoVideoDelegate installedDelegate;
 
     public AbstractJaninoComponent() {
         setupFloats(8);
         setupParams(4);
         setupTriggers(4);
+        setupOuts(4);
         setupCodeControl();
     }
 
     private void setupFloats(int count) {
         floats = new double[count];
         for (int i = 0; i < count; i++) {
-            registerControl("f" + (i + 1), FloatProperty.create(this, new FloatBinding(i), 0));
+            FloatProperty f = FloatProperty.create(this, new FloatBinding(i), 0);
+            String id = "f" + (i + 1);
+            registerControl(id, f);
+            registerPort(id, f.createPort());
         }
     }
 
@@ -76,7 +85,21 @@ public abstract class AbstractJaninoComponent extends AbstractComponent {
     private void setupTriggers(int count) {
         triggers = new boolean[count];
         for (int i = 0; i < count; i++) {
-            registerControl("t" + (i + 1), TriggerControl.create(this, new TriggerBinding(i)));
+            TriggerControl t = TriggerControl.create(this, new TriggerBinding(i));
+            String id = "t" + (i + 1);
+            registerControl(id, t);
+            registerPort(id, t.createPort());
+        }
+    }
+    
+    private void setupOuts(int count) {
+        outs = new Argument[count];
+        outPorts = new DefaultControlOutputPort[count];
+        for (int i = 0; i < count; i++) {
+            DefaultControlOutputPort port = new DefaultControlOutputPort(this);
+            outPorts[i] = port;
+            String id = "send-" + (i + 1);
+            registerPort(id, port);
         }
     }
 
@@ -84,15 +107,19 @@ public abstract class AbstractJaninoComponent extends AbstractComponent {
         registerControl("code", new DelegateCompiler());
     }
 
-    void preDraw() {
+    @Override
+    public void rootStateChanged(Root source, State state) {
+        Arrays.fill(outs, null);
     }
 
-    void postDraw() {
-        resetTriggers();
-    }
-
-    private void resetTriggers() {
-        Arrays.fill(triggers, false);
+    public void nextControlFrame(Root source) {
+        for (int i=0; i < outs.length; i++) {
+            Argument arg = outs[i];
+            if (arg != null) {
+                outPorts[i].send(source.getTime(), arg);
+            }
+            outs[i] = null;
+        }
     }
 
     private void install(JaninoVideoDelegate delegate) {
@@ -100,7 +127,7 @@ public abstract class AbstractJaninoComponent extends AbstractComponent {
             installedDelegate.dispose();
         }
         if (delegate != null) {
-            delegate.install(floats, params, triggers);
+            delegate.install(floats, params, triggers, outs);
         }
         installDelegate(delegate);
         installedDelegate = delegate;

@@ -52,10 +52,10 @@ public class VideoCapture extends AbstractRootStateComponent {
         registerControl("device", loader);
         TriggerControl start = TriggerControl.create(this, new StartBinding());
         registerControl("start", start);
-        registerPort("start", start.getPort());
+        registerPort("start", start.createPort());
         TriggerControl stop = TriggerControl.create(this, new StopBinding());
         registerControl("stop", stop);
-        registerPort("stop", stop.getPort());
+        registerPort("stop", stop.createPort());
         container = new Delegator();
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, container));
     }

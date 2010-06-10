@@ -47,7 +47,7 @@ public class Variable extends AbstractComponent {
         registerPort("value", p.createPort());
         TriggerControl t = TriggerControl.create(this, new TriggerBinding());
         registerControl("trigger", t);
-        registerPort("trigger", t.getPort());
+        registerPort("trigger", t.createPort());
         output = new DefaultControlOutputPort(this);
         registerPort(Port.OUT, output);
     }

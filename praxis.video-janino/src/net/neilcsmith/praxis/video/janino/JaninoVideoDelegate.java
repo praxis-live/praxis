@@ -24,6 +24,8 @@ package net.neilcsmith.praxis.video.janino;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.ripl.Surface;
 import net.neilcsmith.ripl.SurfaceOp;
@@ -44,11 +46,14 @@ public class JaninoVideoDelegate implements Delegate, CompositeDelegate {
     private double[] floats;
     private Argument[] params;
     private boolean[] triggers;
+    private Argument[] outs;
 
-    void install(double[] floats, Argument[] params, boolean[] triggers) {
+    void install(double[] floats, Argument[] params,
+            boolean[] triggers, Argument[] outs) {
         this.floats = floats;
         this.params = params;
         this.triggers = triggers;
+        this.outs = outs;
     }
 
     void dispose() {}
@@ -113,6 +118,14 @@ public class JaninoVideoDelegate implements Delegate, CompositeDelegate {
 
     public final boolean t(int i) {
         return triggers[i - 1];
+    }
+
+    public final void send(int i, double value) {
+        outs[i-1] = PNumber.valueOf(value);
+    }
+
+    public final void send(int i, String value) {
+        outs[i-1] = PString.valueOf(value);
     }
 
     public final void op(SurfaceOp op) {

@@ -49,7 +49,7 @@ public class Snapshot extends AbstractComponent {
         registerPort("mix", mix.createPort());
         TriggerControl trigger = TriggerControl.create(this, new TriggerBinding());
         registerControl("trigger", trigger);
-        registerPort("trigger", trigger.getPort());
+        registerPort("trigger", trigger.createPort());
     }
     
     private class TriggerBinding implements TriggerControl.Binding {

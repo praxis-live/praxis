@@ -19,22 +19,20 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.video.components.test;
 
-import java.awt.AlphaComposite;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.ref.SoftReference;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Port;
+import net.neilcsmith.praxis.core.Root;
+import net.neilcsmith.praxis.core.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.Task;
 import net.neilcsmith.praxis.core.TaskListener;
 import net.neilcsmith.praxis.core.types.PReference;
@@ -47,143 +45,124 @@ import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
 import net.neilcsmith.ripl.components.Delegator;
 import net.neilcsmith.ripl.Surface;
 import net.neilcsmith.ripl.delegates.AbstractDelegate;
-import net.neilcsmith.ripl.delegates.Delegate;
+import net.neilcsmith.ripl.impl.BufferedImageSurface;
 
 /**
  *
  * @author Neil C Smith
  */
 public class ImageSave extends AbstractComponent {
-    
+
     private static Logger logger = Logger.getLogger(ImageSave.class.getName());
-    
     private boolean triggered;
-    private List<SoftReference<BufferedImage>> pool;
+    private List<SoftReference<BufferedImageSurface>> pool;
     private ImageSaverListener listener;
     private UriProperty uri;
     private int uriIndex;
-    
+
     public ImageSave() {
-        pool = new ArrayList<SoftReference<BufferedImage>>();
+        pool = new ArrayList<SoftReference<BufferedImageSurface>>();
         listener = new ImageSaverListener();
         uri = UriProperty.create(this, PUri.valueOf(new File("image").toURI()));
         Delegator d = new Delegator(new SaveDelegate());
         registerPort(Port.IN, new DefaultVideoInputPort(this, d));
-        registerPort(Port.OUT, new DefaultVideoOutputPort(this, d));        
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, d));
         registerControl("file", uri);
         TriggerControl trigger = TriggerControl.create(this, new TriggerBinding());
         registerControl("trigger", trigger);
-        registerPort("trigger", trigger.getPort());
-        
+        registerPort("trigger", trigger.createPort());
+
     }
-    
-    
+
     private class TriggerBinding implements TriggerControl.Binding {
 
         public void trigger(long time) {
             triggered = true;
         }
-        
     }
-    
-    private BufferedImage getImage(int width, int height) {
+
+    private BufferedImageSurface getBISurface(int width, int height) {
         if (pool.isEmpty()) {
-            return new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            return new BufferedImageSurface(width, height, false);
         } else {
-            Iterator<SoftReference<BufferedImage>> itr = pool.iterator();
-            BufferedImage image = null;
+            Iterator<SoftReference<BufferedImageSurface>> itr = pool.iterator();
+            BufferedImageSurface ret = null;
             while (itr.hasNext()) {
-                SoftReference<BufferedImage> ref = itr.next();
-                BufferedImage im = ref.get();
+                SoftReference<BufferedImageSurface> ref = itr.next();
+                BufferedImageSurface im = ref.get();
                 if (im == null || im.getWidth() != width || im.getHeight() != height) {
                     itr.remove();
                     continue;
                 }
-                Graphics2D g2d = im.createGraphics();
-                g2d.setComposite(AlphaComposite.Clear);
-                g2d.fillRect(0, 0, width, height);
-                image = im;
+                im.clear();
+                ret = im;
             }
-            if (image == null) {
-                image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            if (ret == null) {
+                ret = new BufferedImageSurface(width, height, false);
             }
-            return image;
+            return ret;
         }
     }
-    
-    private void releaseImage(BufferedImage image) {
-        pool.add(new SoftReference<BufferedImage>(image));
+
+    private void release(BufferedImageSurface surface) {
+        pool.add(new SoftReference<BufferedImageSurface>(surface));
     }
-    
+
     private class SaveDelegate extends AbstractDelegate {
 
-        public void process( Surface surface) {
-//            if (triggered) {
-////                if (rendering) {
-//                    int width = surface.getWidth();
-//                    int height = surface.getHeight();
-//                    BufferedImage image = getImage(width, height);
-//                    Graphics2D g2d = image.createGraphics();
-////                    ImageData sData = surface.getImageData();
-//                    Image sImg = surface.getImage();
-////                    Bounds sBnds = sData.getBounds();
-////                    g2d.drawImage(sImg, 0, 0, width, height,
-////                            sBnds.getX(), sBnds.getY(),
-////                            sBnds.getX() + sBnds.getWidth(),
-////                            sBnds.getY() + sBnds.getHeight(), null);
-//                    g2d.drawImage(sImg, 0, 0, null); // @TODO fix to honour image bounds
-//                    Root root = getRoot();
-//                    if (root != null) {
-//                        try {
-//                            root.submitTask(new ImageSaver(image, uri.getValue().value(), uriIndex++), listener);
-//                        } catch (ServiceUnavailableException ex) {
-//                            Logger.getLogger(ImageSave.class.getName()).log(Level.SEVERE, null, ex);
-//                        }
-//                    }
-//                    triggered = false;
-////                }
-//            }
+        public void process(Surface surface) {
+            if (triggered) {
+                int width = surface.getWidth();
+                int height = surface.getHeight();
+                BufferedImageSurface bis = getBISurface(width, height);
+                bis.copy(surface);
+                Root root = getRoot();
+                if (root != null) {
+                    try {
+                        root.submitTask(new ImageSaver(bis, uri.getValue().value(), uriIndex++), listener);
+                    } catch (ServiceUnavailableException ex) {
+                        Logger.getLogger(ImageSave.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                triggered = false;
+            }
+
         }
 
         @Override
         public boolean forceRender() {
             return triggered;
         }
-        
     }
-    
+
     private class ImageSaver implements Task {
-        
-        private BufferedImage image;
+
+        private BufferedImageSurface bis;
         private URI filename;
         private int number;
-        
-        private ImageSaver(BufferedImage image, URI filename, int number) {
-            this.image = image;
+
+        private ImageSaver(BufferedImageSurface bis, URI filename, int number) {
+            this.bis = bis;
             this.filename = filename;
             this.number = number;
         }
 
         public Argument execute() throws Exception {
-            File file = new File(new URI(filename.toString() + number + ".png"));
-            ImageIO.write(image, "png", file);
-            return PReference.wrap(image);
+            bis.save("png", new File(new URI(filename.toString() + number + ".png")));
+            return PReference.wrap(bis);
         }
-        
     }
-    
+
     private class ImageSaverListener implements TaskListener {
 
         public void taskCompleted(long time, long id, Argument arg) {
             PReference ref = (PReference) arg;
-            BufferedImage image = (BufferedImage) ref.getReference();
-            releaseImage(image);
+            BufferedImageSurface bis = (BufferedImageSurface) ref.getReference();
+            release(bis);
         }
 
         public void taskError(long time, long id, Argument arg) {
             logger.warning("Unable to save image");
         }
-        
     }
-    
 }

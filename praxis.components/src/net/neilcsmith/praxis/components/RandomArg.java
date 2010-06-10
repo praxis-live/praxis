@@ -51,7 +51,7 @@ public class RandomArg extends AbstractComponent {
         registerControl("values", args);
         TriggerControl trigger = TriggerControl.create(this, new TriggerBinding());
         registerControl("trigger", trigger);
-        registerPort("trigger", trigger.getPort());
+        registerPort("trigger", trigger.createPort());
         output = new DefaultControlOutputPort(this);
         registerPort(Port.OUT, output);
     }

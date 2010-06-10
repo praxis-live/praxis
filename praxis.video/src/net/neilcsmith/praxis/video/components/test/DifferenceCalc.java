@@ -57,7 +57,7 @@ public class DifferenceCalc extends AbstractComponent {
         TriggerControl trigger = TriggerControl.create(this, new TriggerBinding());
         registerControl("bounds", ArrayProperty.create(this, new RegionBinding(), DEFAULTS));   
         registerControl("trigger", trigger);
-        registerPort("trigger", trigger.getPort());
+        registerPort("trigger", trigger.createPort());
         registerPort("measurement", diffOutput);
 
 

@@ -54,7 +54,7 @@ public class RandomFloat extends AbstractComponent {
         registerControl("range", range);
         registerPort("range", range.createPort());
         registerControl("trigger", trigger);
-        registerPort("trigger", trigger.getPort());
+        registerPort("trigger", trigger.createPort());
         registerPort(Port.OUT, output);
     }
     
