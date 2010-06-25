@@ -30,6 +30,7 @@ import net.neilcsmith.praxis.video.components.Still;
 import net.neilcsmith.praxis.video.components.VideoCapture;
 import net.neilcsmith.praxis.video.components.VideoOutput;
 import net.neilcsmith.praxis.video.components.VideoPlayer;
+import net.neilcsmith.praxis.video.components.filters.Blur;
 import net.neilcsmith.praxis.video.components.mix.Composite;
 import net.neilcsmith.praxis.video.components.mix.XFader;
 import net.neilcsmith.praxis.video.components.test.BackgroundDifference;
@@ -81,6 +82,8 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
 
             addComponent("video:player", VideoPlayer.class);
             addComponent("video:capture", VideoCapture.class);
+
+            addComponent("video:test:filter:blur", Blur.class);
         }
     }
 }

@@ -23,7 +23,7 @@
 package net.neilcsmith.ripl.ops;
 
 import java.awt.Rectangle;
-import net.neilcsmith.ripl.ops.impl.SubPixels;
+import net.neilcsmith.ripl.utils.SubPixels;
 import net.neilcsmith.ripl.PixelData;
 import net.neilcsmith.ripl.SurfaceOp;
 

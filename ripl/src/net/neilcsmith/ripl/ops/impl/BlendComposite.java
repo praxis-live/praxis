@@ -40,7 +40,7 @@ import net.neilcsmith.ripl.rgbmath.RGBMath;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-class BlendComposite implements Composite {
+public class BlendComposite implements Composite {
 
     private BlendFunction blend;
 

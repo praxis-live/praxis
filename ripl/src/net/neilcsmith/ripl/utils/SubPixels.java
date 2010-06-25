@@ -19,8 +19,9 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.ripl.ops.impl;
+package net.neilcsmith.ripl.utils;
 
+import java.awt.Rectangle;
 import net.neilcsmith.ripl.PixelData;
 import net.neilcsmith.ripl.ops.Bounds;
 
@@ -79,6 +80,10 @@ public class SubPixels implements PixelData {
             throw new IllegalArgumentException();
         }
         return new SubPixels(pd, x, y, width, height);
+    }
+
+    public static SubPixels create(PixelData pd, Rectangle bnds) {
+        return create(pd, bnds.x, bnds.y, bnds.width, bnds.height);
     }
 
 

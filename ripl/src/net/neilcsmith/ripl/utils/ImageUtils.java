@@ -58,9 +58,9 @@ public class ImageUtils {
         int h = pd.getHeight();
         int offset = pd.getOffset();
         int sl = pd.getScanline();
-        DataBufferInt db = new DataBufferInt(pd.getData(), sl * h);
+        DataBufferInt db = new DataBufferInt(pd.getData(), sl * h, offset);
         DirectColorModel cm = getColorModel(pd.hasAlpha());
-        WritableRaster raster = Raster.createPackedRaster(db, w, h, sl, cm.getMasks() ,null);
+        WritableRaster raster = Raster.createPackedRaster(db, w, h, sl, cm.getMasks(), null);
         return new BufferedImage(cm, raster, pd.hasAlpha(), null);
     }
 

@@ -20,8 +20,8 @@ public class XFader extends MultiInputInOut {
 
     public static enum MixMode {
 
-        Blend,
-        AddPin,
+        Normal,
+        Add,
         Difference,
         BitXor
     }
@@ -29,7 +29,7 @@ public class XFader extends MultiInputInOut {
     private MixMode mode;
 
     public XFader() {
-        this(MixMode.Blend);
+        this(MixMode.Normal);
     }
 
     public XFader(MixMode mode) {
@@ -106,7 +106,7 @@ public class XFader extends MultiInputInOut {
         } else {
 
             switch (mode) {
-                case AddPin:
+                case Add:
                     renderAddPin(surface);
                     break;
                 case Difference:

@@ -64,6 +64,10 @@ public abstract class Surface {
         process(op, EMPTY);
     }
 
+    public void process(SurfaceOp op, Surface input) {
+        process(op, new Surface[] {input} );
+    }
+
     public abstract void process(SurfaceOp op, Surface... inputs);
 
     public abstract void clear();

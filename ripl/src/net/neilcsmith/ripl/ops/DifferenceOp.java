@@ -29,6 +29,7 @@ import static net.neilcsmith.ripl.rgbmath.RGBMath.*;
  *
  * @author Neil C Smith
  */
+// @TODO - IMPORTANT - make immutable
 public class DifferenceOp implements SurfaceOp {
     
     public static enum Mode {Color, Mono, Threshold};

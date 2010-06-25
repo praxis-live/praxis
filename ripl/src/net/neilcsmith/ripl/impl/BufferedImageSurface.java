@@ -29,6 +29,7 @@ import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import net.neilcsmith.ripl.PixelData;
 import net.neilcsmith.ripl.Surface;
@@ -42,6 +43,8 @@ import net.neilcsmith.ripl.utils.ImageUtils;
  * @author Neil C Smith
  */
 public class BufferedImageSurface extends Surface {
+
+    private final static Logger LOG = Logger.getLogger(BufferedImageSurface.class.getName());
 
     private final static PixelData[] EMPTY_INPUTS = new PixelData[0];
     private final static Image[] EMPTY_IMAGES = new Image[0];
@@ -65,6 +68,7 @@ public class BufferedImageSurface extends Surface {
     }
 
     public Surface createSurface(int width, int height, boolean alpha, SurfaceCapabilities caps) {
+        LOG.finest("Creating new surface");
         return new BufferedImageSurface(width, height, alpha);
     }
 

@@ -18,13 +18,12 @@
             <public-packages>
                 <package>net.neilcsmith.ripl</package>
                 <package>net.neilcsmith.ripl.components</package>
+                <package>net.neilcsmith.ripl.components.filters</package>
                 <package>net.neilcsmith.ripl.components.mix</package>
                 <package>net.neilcsmith.ripl.components.temporal</package>
                 <package>net.neilcsmith.ripl.components.test</package>
-                <package>net.neilcsmith.ripl.composite</package>
                 <package>net.neilcsmith.ripl.delegates</package>
                 <package>net.neilcsmith.ripl.impl</package>
-                <package>net.neilcsmith.ripl.j2d</package>
                 <package>net.neilcsmith.ripl.ops</package>
                 <package>net.neilcsmith.ripl.render</package>
                 <package>net.neilcsmith.ripl.rgbmath</package>
