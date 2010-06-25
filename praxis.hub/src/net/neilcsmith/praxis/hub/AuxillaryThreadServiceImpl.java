@@ -30,6 +30,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Call;
@@ -51,6 +53,8 @@ import net.neilcsmith.praxis.impl.BasicControl;
  * @author Neil C Smith
  */
 public class AuxillaryThreadServiceImpl extends AbstractRoot implements InterfaceProvider {
+
+    private final static Logger LOG = Logger.getLogger(AuxillaryThreadServiceImpl.class.getName());
 
     private ExecutorService threadService;
     private Map<Future<Argument>, Call> futures;
@@ -95,6 +99,7 @@ public class AuxillaryThreadServiceImpl extends AbstractRoot implements Interfac
                         route(call);
                         completed.add(future);
                     } catch (Exception ex) {
+                        LOG.log(Level.FINEST, null, ex);
                         Call call = futures.get(future);
                         call = Call.createErrorCall(call, PReference.wrap(ex));
                         route(call);
