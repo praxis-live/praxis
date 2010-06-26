@@ -22,6 +22,7 @@
 
 package net.neilcsmith.ripl.ops;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import net.neilcsmith.ripl.PixelData;
@@ -37,6 +38,7 @@ public class ScaledBlit implements SurfaceOp {
     private BlendFunction blend;
     private Bounds srcBnds;
     private Bounds dstBnds;
+    private TempData tmp;
 
     private ScaledBlit(BlendFunction blend, Bounds srcBnds, Bounds dstBnds) {
         this.blend = blend;
@@ -48,10 +50,21 @@ public class ScaledBlit implements SurfaceOp {
         if (inputs.length < 1) {
             return;
         }
+        AlphaComposite cmp = compositeFromBlend(blend);
+        if (cmp != null) {
+            processDirect(cmp, output, inputs[0]);
+        } else {
+            processIndirect(output, inputs[0]);
+        }
+        
+        
+    }
+    
+    private void processDirect(AlphaComposite cmp, PixelData output, PixelData input) {
         BufferedImage out = ImageUtils.toImage(output);
-        BufferedImage in = ImageUtils.toImage(inputs[0]);
+        BufferedImage in = ImageUtils.toImage(input);
         Graphics2D g2d = out.createGraphics();
-//        g2d.setComposite(BlendComposite.create(blend));
+        g2d.setComposite(cmp);
         int sx1 = srcBnds == null ? 0 : srcBnds.getX();
         int sy1 = srcBnds == null ? 0 : srcBnds.getY();
         int sx2 = srcBnds == null ? in.getWidth() : sx1 + srcBnds.getWidth();
@@ -62,6 +75,50 @@ public class ScaledBlit implements SurfaceOp {
         int dy2 = dstBnds == null ? out.getHeight() : dy1 + dstBnds.getHeight();
         g2d.drawImage(in, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
     }
+
+    private AlphaComposite compositeFromBlend(BlendFunction blend) {
+        if (blend instanceof Blend) {
+            Blend b = (Blend) blend;
+            if (b.getType() == Blend.Type.Normal) {
+                return AlphaComposite.SrcOver.derive((float) b.getExtraAlpha());
+            }
+        }
+        return null;
+    }
+    
+    private void processIndirect(PixelData output, PixelData input) {
+        int sx1 = srcBnds == null ? 0 : srcBnds.getX();
+        int sy1 = srcBnds == null ? 0 : srcBnds.getY();
+        int sx2 = srcBnds == null ? input.getWidth() : sx1 + srcBnds.getWidth();
+        int sy2 = srcBnds == null ? input.getHeight() : sy1 + srcBnds.getHeight();
+        int dx = dstBnds == null ? 0 : dstBnds.getX();
+        int dy = dstBnds == null ? 0 : dstBnds.getY();
+        int dw = dstBnds == null ? output.getWidth() : dstBnds.getWidth();
+        int dh = dstBnds == null ? output.getHeight() : dstBnds.getHeight();
+        
+        // get temp data
+        if (tmp == null) {
+            tmp = TempData.create(dw, dh, input.hasAlpha());
+        } else if (tmp.width != dw || tmp.height != dh) {
+            tmp = TempData.create(dh, dh, input.hasAlpha(), tmp.data);
+        } else {
+            tmp.alpha = input.hasAlpha();
+        }
+
+        // draw to temp
+        BufferedImage tmpIm = ImageUtils.toImage(tmp);
+        BufferedImage in = ImageUtils.toImage(input);
+        Graphics2D g2d = tmpIm.createGraphics();
+        g2d.setComposite(AlphaComposite.Src);
+        g2d.drawImage(in, 0, 0, dw, dh, sx1, sy1, sx2, sy2, null);
+
+        Blit.op(blend, dx, dy).process(output, tmp);
+
+        
+    }
+
+    
+    
 
     public static SurfaceOp op(BlendFunction blend, Bounds srcBnds, Bounds dstBnds) {
         if (blend == null) {
