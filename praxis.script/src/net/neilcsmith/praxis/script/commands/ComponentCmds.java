@@ -23,8 +23,8 @@
 package net.neilcsmith.praxis.script.commands;
 
 import java.util.Map;
-import net.neilcsmith.praxis.core.interfaces.ComponentManager;
-import net.neilcsmith.praxis.core.interfaces.ConnectionManager;
+import net.neilcsmith.praxis.core.services.ComponentManager;
+import net.neilcsmith.praxis.core.services.ConnectionManager;
 import net.neilcsmith.praxis.script.Command;
 import net.neilcsmith.praxis.script.CommandInstaller;
 

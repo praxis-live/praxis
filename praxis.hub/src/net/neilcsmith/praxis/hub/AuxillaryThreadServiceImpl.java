@@ -41,9 +41,9 @@ import net.neilcsmith.praxis.core.InvalidChildException;
 import net.neilcsmith.praxis.core.Task;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.interfaces.AuxillaryThreadService;
-import net.neilcsmith.praxis.core.interfaces.InterfaceDefinition;
-import net.neilcsmith.praxis.core.interfaces.InterfaceProvider;
+import net.neilcsmith.praxis.core.services.AuxillaryThreadService;
+import net.neilcsmith.praxis.core.InterfaceDefinition;
+import net.neilcsmith.praxis.core.services.ServiceProvider;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
@@ -52,7 +52,7 @@ import net.neilcsmith.praxis.impl.BasicControl;
  *
  * @author Neil C Smith
  */
-public class AuxillaryThreadServiceImpl extends AbstractRoot implements InterfaceProvider {
+public class AuxillaryThreadServiceImpl extends AbstractRoot implements ServiceProvider {
 
     private final static Logger LOG = Logger.getLogger(AuxillaryThreadServiceImpl.class.getName());
 
@@ -76,7 +76,7 @@ public class AuxillaryThreadServiceImpl extends AbstractRoot implements Interfac
         completed = new ArrayList<Future>();
     }
 
-    public InterfaceDefinition[] getInterfaces() {
+    public InterfaceDefinition[] getServices() {
         return new InterfaceDefinition[] {AuxillaryThreadService.getInstance()};
     }
 

@@ -32,7 +32,7 @@ import net.neilcsmith.praxis.core.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.Task;
 import net.neilcsmith.praxis.core.TaskListener;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.interfaces.AuxillaryThreadService;
+import net.neilcsmith.praxis.core.services.AuxillaryThreadService;
 import net.neilcsmith.praxis.core.types.PReference;
 
 /**

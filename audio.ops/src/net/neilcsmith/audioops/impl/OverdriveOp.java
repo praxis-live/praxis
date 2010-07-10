@@ -23,7 +23,6 @@
 package net.neilcsmith.audioops.impl;
 
 import net.neilcsmith.audioops.AudioOp;
-import net.neilcsmith.audioops.AudioOp;
 
 
 /**

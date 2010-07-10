@@ -19,58 +19,46 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
+package net.neilcsmith.praxis.core.services;
 
-package net.neilcsmith.praxis.core.interfaces;
-
-import net.neilcsmith.praxis.core.ComponentAddress;
-import net.neilcsmith.praxis.core.ComponentType;
+import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PString;
 
 /**
- * NOT CURRENTLY IN USE
+ *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class RootManager extends InterfaceDefinition {
+public class ScriptService extends InterfaceDefinition {
 
-    public final static String CREATE = "create";
-    public final static String DESTROY = "destroy";
-    // public final static String ROOTS = "roots";
+    public final static String EVAL = "eval";
 
-    private final static RootManager instance = new RootManager();
+    private final static ScriptService instance = new ScriptService();
+    private ControlInfo evalInfo;
 
-    private ControlInfo createInfo;
-    private ControlInfo destroyInfo;
-
-    private RootManager() {
-        createInfo = ControlInfo.create(
-                new ArgumentInfo[] {ComponentAddress.info(), ComponentType.info()},
-                new ArgumentInfo[0], null);
-        destroyInfo = ControlInfo.create(
-                new ArgumentInfo[] {ComponentAddress.info()},
-                new ArgumentInfo[0], null);
-
+    private ScriptService() {
+        ArgumentInfo input = PString.info();
+        evalInfo = ControlInfo.create(
+                new ArgumentInfo[]{input},
+                new ArgumentInfo[0],
+                null);
     }
-
 
     @Override
     public String[] getControls() {
-        return new String[] {CREATE, DESTROY};
+        return new String[]{EVAL};
     }
 
     @Override
     public ControlInfo getControlInfo(String control) {
-        if (CREATE.equals(control)) {
-            return createInfo;
-        }
-        if (DESTROY.equals(control)) {
-            return destroyInfo;
+        if (EVAL.equals(control)) {
+            return evalInfo;
         }
         throw new IllegalArgumentException();
     }
 
-    public static RootManager getInstance() {
+    public static ScriptService getInstance() {
         return instance;
     }
-
 }

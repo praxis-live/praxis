@@ -75,6 +75,7 @@ public class DefaultGuiRoot extends AbstractRoot implements GuiRoot {
         return new DelegateController(ctrl);
     }
 
+    // @TODO should be activating?
     @Override
     protected void initializing() {
         super.initializing();

@@ -20,8 +20,9 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.core.interfaces;
+package net.neilcsmith.praxis.core.services;
 
+import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ComponentType;
 import net.neilcsmith.praxis.core.PortAddress;

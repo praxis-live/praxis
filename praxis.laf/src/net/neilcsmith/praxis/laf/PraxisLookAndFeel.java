@@ -37,6 +37,13 @@ public class PraxisLookAndFeel extends NimRODLookAndFeel {
     }
 
     @Override
+    public String getID() {
+        return "Praxis";
+    }
+
+
+
+    @Override
     protected void initComponentDefaults(UIDefaults table) {
         super.initComponentDefaults(table);
         table.put("ButtonUI", "net.neilcsmith.praxis.laf.PraxisButtonUI");

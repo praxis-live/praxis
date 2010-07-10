@@ -24,7 +24,6 @@ package net.neilcsmith.audioops.impl;
 
 import java.util.Arrays;
 import net.neilcsmith.audioops.AudioOp;
-import net.neilcsmith.audioops.AudioOp;
 
 /**
  * A basic delay op. Delay time and feedback are variable. Unlike VariableDelayOp

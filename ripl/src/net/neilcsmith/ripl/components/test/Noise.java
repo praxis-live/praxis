@@ -23,8 +23,8 @@
 package net.neilcsmith.ripl.components.test;
 
 import net.neilcsmith.ripl.Surface;
+import net.neilcsmith.ripl.SurfaceOp;
 import net.neilcsmith.ripl.impl.SingleInOut;
-import net.neilcsmith.ripl.ops.NoiseOp;
 
 /**
  *
@@ -32,10 +32,10 @@ import net.neilcsmith.ripl.ops.NoiseOp;
  */
 public class Noise extends SingleInOut {
     
-    private NoiseOp op;
+    private SurfaceOp op;
     
     public Noise() {
-        this.op = new NoiseOp();
+        this.op = net.neilcsmith.ripl.ops.Noise.op();
     }
 
     @Override

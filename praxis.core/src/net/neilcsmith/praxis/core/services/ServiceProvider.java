@@ -20,16 +20,17 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.core.interfaces;
+package net.neilcsmith.praxis.core.services;
 
+import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.Component;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public interface InterfaceProvider extends Component {
+public interface ServiceProvider extends Component {
 
-    public InterfaceDefinition[] getInterfaces();
+    public InterfaceDefinition[] getServices();
 
 }

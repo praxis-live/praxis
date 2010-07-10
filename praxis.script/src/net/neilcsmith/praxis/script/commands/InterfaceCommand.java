@@ -26,7 +26,7 @@ import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.ServiceUnavailableException;
-import net.neilcsmith.praxis.core.interfaces.InterfaceDefinition;
+import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.script.Command;
 import net.neilcsmith.praxis.script.Env;

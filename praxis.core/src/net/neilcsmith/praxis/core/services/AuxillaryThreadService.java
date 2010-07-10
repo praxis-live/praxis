@@ -19,57 +19,49 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
+package net.neilcsmith.praxis.core.services;
 
-package net.neilcsmith.praxis.core.interfaces;
-
-import net.neilcsmith.praxis.core.ComponentAddress;
-import net.neilcsmith.praxis.core.ComponentType;
+import net.neilcsmith.praxis.core.InterfaceDefinition;
+import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.Task;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PReference;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ComponentManager extends InterfaceDefinition {
+public class AuxillaryThreadService extends InterfaceDefinition {
 
-    public final static String CREATE = "create";
-    public final static String DESTROY = "destroy";
+    public final static String SUBMIT = "submit";
 
-    private final static ComponentManager instance = new ComponentManager();
+    private final static AuxillaryThreadService instance = new AuxillaryThreadService();
+    private ControlInfo submitInfo;
 
-    private ControlInfo createInfo;
-    private ControlInfo destroyInfo;
-
-    private ComponentManager() {
-        createInfo = ControlInfo.create(
-                new ArgumentInfo[] {ComponentAddress.info(), ComponentType.info()},
-                new ArgumentInfo[0], null);
-        destroyInfo = ControlInfo.create(
-                new ArgumentInfo[] {ComponentAddress.info()},
-                new ArgumentInfo[0], null);
-
+    private AuxillaryThreadService() {
+        ArgumentInfo input = PReference.info(Task.class);
+        ArgumentInfo output = Argument.info();
+        submitInfo = ControlInfo.create(
+                new ArgumentInfo[]{input},
+                new ArgumentInfo[]{output},
+                null);
     }
-
 
     @Override
     public String[] getControls() {
-        return new String[] {CREATE, DESTROY};
+        return new String[]{SUBMIT};
     }
 
     @Override
     public ControlInfo getControlInfo(String control) {
-        if (CREATE.equals(control)) {
-            return createInfo;
-        }
-        if (DESTROY.equals(control)) {
-            return destroyInfo;
+        if (SUBMIT.equals(control)) {
+            return submitInfo;
         }
         throw new IllegalArgumentException();
     }
 
-    public static ComponentManager getInstance() {
+    public static AuxillaryThreadService getInstance() {
         return instance;
     }
-
 }

@@ -28,9 +28,9 @@ import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.interfaces.InterfaceDefinition;
-import net.neilcsmith.praxis.core.interfaces.InterfaceProvider;
-import net.neilcsmith.praxis.core.interfaces.ScriptService;
+import net.neilcsmith.praxis.core.InterfaceDefinition;
+import net.neilcsmith.praxis.core.services.ServiceProvider;
+import net.neilcsmith.praxis.core.services.ScriptService;
 import net.neilcsmith.praxis.core.syntax.InvalidSyntaxException;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
@@ -45,7 +45,7 @@ import net.neilcsmith.praxis.impl.BasicControl;
 
 /* @TODO Replace parser reference with control stack. Add second hidden control
  * to handle all internal responses. Can call self for continuations / sleeping. */
-public class OldScriptServiceImpl extends AbstractRoot implements InterfaceProvider {
+public class OldScriptServiceImpl extends AbstractRoot implements ServiceProvider {
 
     public final static String EVAL_CONTROL_ID = "eval";
     
@@ -62,7 +62,7 @@ public class OldScriptServiceImpl extends AbstractRoot implements InterfaceProvi
         registerControl(EVAL_CONTROL_ID, control);
     }
 
-    public InterfaceDefinition[] getInterfaces() {
+    public InterfaceDefinition[] getServices() {
         return new InterfaceDefinition[] {ScriptService.getInstance()};
     }
 

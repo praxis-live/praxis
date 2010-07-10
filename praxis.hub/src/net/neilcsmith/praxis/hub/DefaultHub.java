@@ -42,11 +42,11 @@ import net.neilcsmith.praxis.core.RootHub;
 import net.neilcsmith.praxis.core.ServiceManager;
 import net.neilcsmith.praxis.core.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.interfaces.ComponentManager;
-import net.neilcsmith.praxis.core.interfaces.ConnectionManager;
-import net.neilcsmith.praxis.core.interfaces.InterfaceDefinition;
-import net.neilcsmith.praxis.core.interfaces.InterfaceProvider;
-import net.neilcsmith.praxis.core.interfaces.RootManager;
+import net.neilcsmith.praxis.core.services.ComponentManager;
+import net.neilcsmith.praxis.core.services.ConnectionManager;
+import net.neilcsmith.praxis.core.InterfaceDefinition;
+import net.neilcsmith.praxis.core.services.ServiceProvider;
+import net.neilcsmith.praxis.core.services.RootManager;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
@@ -172,8 +172,8 @@ public class DefaultHub extends AbstractRoot {
         for (Root ext : extensions) {
             // get before we activate install - thread safety
             InterfaceDefinition[] servs;
-            if (ext instanceof InterfaceProvider) {
-                servs = ((InterfaceProvider) ext).getInterfaces();
+            if (ext instanceof ServiceProvider) {
+                servs = ((ServiceProvider) ext).getServices();
             } else {
                 servs = new InterfaceDefinition[0];
             }

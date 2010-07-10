@@ -20,7 +20,7 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.core.interfaces;
+package net.neilcsmith.praxis.core;
 
 import net.neilcsmith.praxis.core.info.ControlInfo;
 
