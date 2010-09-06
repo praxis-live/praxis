@@ -21,12 +21,15 @@
  */
 package net.neilcsmith.praxis.components;
 
-import net.neilcsmith.praxis.components.io.RandomFile;
+import net.neilcsmith.praxis.components.array.ArrayRandom;
+import net.neilcsmith.praxis.components.file.RandomFile;
+import net.neilcsmith.praxis.components.file.Resolver;
 import net.neilcsmith.praxis.components.math.Add;
 import net.neilcsmith.praxis.components.math.Multiply;
 import net.neilcsmith.praxis.components.math.RandomFloat;
 import net.neilcsmith.praxis.components.math.Scale;
 import net.neilcsmith.praxis.components.math.Threshold;
+import net.neilcsmith.praxis.components.routing.Join;
 import net.neilcsmith.praxis.components.test.Log;
 import net.neilcsmith.praxis.components.timing.SimpleDelay;
 import net.neilcsmith.praxis.components.timing.Timer;
@@ -53,13 +56,17 @@ public class FactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-            addComponent("core:k-rate", ControlFrameTrigger.class);
-            addComponent("core:i-rate", StartTrigger.class);
-            addComponent("core:random-arg", RandomArg.class);
+            addComponent("core:control-rate", ControlFrameTrigger.class);
+            addComponent("core:start-trigger", StartTrigger.class);
             addComponent("core:property", Property.class);
             addComponent("core:variable", Variable.class);
 
-            addComponent("core:files:random", RandomFile.class);
+            // ARRAY
+            addComponent("core:array:random", ArrayRandom.class);
+
+            // FILE
+            //addComponent("core:file:random", RandomFile.class);
+            addComponent("core:file:resolver", Resolver.class);
 
             // MATH
             addComponent("core:math:random", RandomFloat.class);
@@ -68,8 +75,13 @@ public class FactoryProvider implements ComponentFactoryProvider {
             addComponent("core:math:add", Add.class);
             addComponent("core:math:scale", Scale.class);
 
+            //ROUTING
+            addComponent("core:routing:join", Join.class);
+
+            // TEST
             addComponent("core:test:log", Log.class);
 
+            // TIMING
             addComponent("core:timing:delay", SimpleDelay.class);
             addComponent("core:timing:timer", Timer.class);
 

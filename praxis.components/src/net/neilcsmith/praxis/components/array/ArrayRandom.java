@@ -20,87 +20,57 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.components.io;
+package net.neilcsmith.praxis.components.array;
 
 import java.util.Random;
 import net.neilcsmith.praxis.core.ControlPort;
+//import net.neilcsmith.praxis.core.impl.MultiArgProperty;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractComponent;
+import net.neilcsmith.praxis.impl.ArrayProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
-import net.neilcsmith.praxis.impl.ResourceListLoader;
 import net.neilcsmith.praxis.impl.TriggerControl;
 
 /**
  *
  * @author Neil C Smith
- * @TODO reimplement file listener when timecode added to resource loader
  */
-public class RandomFile extends AbstractComponent {
-    
+public class ArrayRandom extends AbstractComponent {
+
+//    private MultiArgProperty args;
+    ArrayProperty args;
     private ControlPort.Output output;
-    private PArray files;
     private Random random;
-    private ControlPort.Output rdyPort;
-    private ControlPort.Output errPort;
     
-    public RandomFile() {
-        files = PArray.EMPTY;
+    public ArrayRandom() {
         random = new Random();
-        ResourceListLoader fileControl = ResourceListLoader.create(this, new FilesListener());
-        registerControl("directory", fileControl);
-        registerPort("directory", fileControl.getInputPort());
+        args = ArrayProperty.create(this);
+        registerControl("values", args);
         TriggerControl trigger = TriggerControl.create(this, new TriggerBinding());
         registerControl("trigger", trigger);
         registerPort("trigger", trigger.createPort());
         output = new DefaultControlOutputPort(this);
         registerPort(Port.OUT, output);
-        rdyPort = new DefaultControlOutputPort(this);
-        registerPort("ready", rdyPort);
-        errPort = new DefaultControlOutputPort(this);
-        registerPort("error", errPort);
-//        registerPort("ready", fileControl.getCompletePort());
-//        registerPort("error", fileControl.getErrorPort());
-    }
-    
-    private class FilesListener implements ResourceListLoader.Listener {
-
-        public void listLoaded(ResourceListLoader source) {
-            setResourceList(source.getList());
-            rdyPort.send(getRoot().getTime());
-        }
-
-        public void listError(ResourceListLoader source) {
-            errPort.send(getRoot().getTime()); // @replace with timecode sent to message
-        }
-        
-        
-
-        public void setResourceList(PArray list) {
-            if (list == null) {
-                list = PArray.EMPTY;
-            }
-            System.out.println("Resource set to " + list);
-            files = list;
-        }
-        
     }
     
     private class TriggerBinding implements TriggerControl.Binding {
 
         public void trigger(long time) {
-            int count = files.getSize();
+            
+            PArray arr = args.getValue();
+            int count = arr.getSize();
             if (count == 0) {
                 output.send(time, PString.EMPTY);
             } else if (count == 1) {
-                output.send(time, files.get(0));
+                output.send(time, arr.get(0));
             } else {
-                int index = random.nextInt(count);
-                output.send(time, files.get(index));
+                output.send(time, arr.get(random.nextInt(count)));
             }
+            
         }
         
     }
-
+    
 }
