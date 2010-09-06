@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.video.janino;
 
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
@@ -68,7 +69,7 @@ public class JaninoVideoDelegate implements Delegate, CompositeDelegate {
         }
         this.surface = null;
         // reset triggers
-
+        Arrays.fill(triggers, false);
     }
 
     public final void process(Surface surface, Surface... sources) {
