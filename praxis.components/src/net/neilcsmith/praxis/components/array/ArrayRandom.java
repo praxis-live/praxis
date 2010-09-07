@@ -40,7 +40,7 @@ import net.neilcsmith.praxis.impl.TriggerControl;
 public class ArrayRandom extends AbstractComponent {
 
 //    private MultiArgProperty args;
-    ArrayProperty args;
+    private ArrayProperty args;
     private ControlPort.Output output;
     private Random random;
     

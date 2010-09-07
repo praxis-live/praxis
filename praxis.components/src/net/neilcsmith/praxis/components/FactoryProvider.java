@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.components;
 
+import net.neilcsmith.praxis.components.array.ArrayIterator;
 import net.neilcsmith.praxis.components.array.ArrayRandom;
 import net.neilcsmith.praxis.components.file.RandomFile;
 import net.neilcsmith.praxis.components.file.Resolver;
@@ -63,6 +64,7 @@ public class FactoryProvider implements ComponentFactoryProvider {
 
             // ARRAY
             addComponent("core:array:random", ArrayRandom.class);
+            addComponent("core:array:iterator", ArrayIterator.class);
 
             // FILE
             //addComponent("core:file:random", RandomFile.class);
