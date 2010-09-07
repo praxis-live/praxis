@@ -66,8 +66,11 @@ public class Still extends AbstractComponent {
         alignY = FloatProperty.create(this, new AlignYBinding(), 0, 1, 0.5);
         DelegateLoader loader = new DelegateLoader();
         registerControl("resize-mode", resizeType);
+        registerPort("resize-mode", resizeType.createPort());
         registerControl("align-x", alignX);
+        registerPort("align-x", alignX.createPort());
         registerControl("align-y", alignY);
+        registerPort("align-y", alignY.createPort());
         registerControl("uri", loader);
         registerPort(Port.IN, new DefaultVideoInputPort(this, delegator));
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));
