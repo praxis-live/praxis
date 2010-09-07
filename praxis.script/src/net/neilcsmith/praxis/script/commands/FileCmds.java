@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.types.PArray;
+import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.core.types.PUri;
 import net.neilcsmith.praxis.script.Command;
 import net.neilcsmith.praxis.script.CommandInstaller;
@@ -49,7 +50,8 @@ public class FileCmds implements CommandInstaller {
     private final static FileCmds instance = new FileCmds();
     
     private final static Command FILE = new FileCmd();
-    private final static Command FILE_LIST = new FileList();
+    private final static Command FILE_LIST = new FileListCmd();
+    private final static Command FILE_NAMES = new FileNamesCmd();
 
     private FileCmds() {
     }
@@ -57,6 +59,7 @@ public class FileCmds implements CommandInstaller {
     public void install(Map<String, Command> commands) {
         commands.put("file", FILE);
         commands.put("file-list", FILE_LIST);
+        commands.put("file-names", FILE_NAMES);
     }
 
     public static FileCmds getInstance() {
@@ -86,7 +89,7 @@ public class FileCmds implements CommandInstaller {
         }
     }
 
-    private static class FileList extends AbstractInlineCommand {
+    private static class FileListCmd extends AbstractInlineCommand {
 
         public CallArguments process(Env env, Namespace namespace, CallArguments args) throws ExecutionException {
             if (args.getCount() != 1) {
@@ -112,6 +115,36 @@ public class FileCmds implements CommandInstaller {
             }
             Collections.sort(uris);
             return PArray.valueOf(uris);
+        }
+
+    }
+
+    private static class FileNamesCmd extends AbstractInlineCommand {
+
+        public CallArguments process(Env env, Namespace namespace, CallArguments args) throws ExecutionException {
+            if (args.getCount() != 1) {
+                throw new ExecutionException();
+            }
+            try {
+                File dir = new File(PUri.coerce(args.getArg(0)).value());
+                if (dir.isDirectory()) {
+                    return CallArguments.create(buildFileList(dir));
+                }
+            } catch (ArgumentFormatException ex) {
+                throw new ExecutionException(ex);
+            }
+            throw new ExecutionException();
+
+        }
+
+        private PArray buildFileList(File dir) {
+            File[] files = dir.listFiles();
+            List<PString> names = new ArrayList<PString>();
+            for (File f : files) {
+                names.add(PString.valueOf(f.getName()));
+            }
+            Collections.sort(names);
+            return PArray.valueOf(names);
         }
 
     }
