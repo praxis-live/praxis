@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.ripl.render;
 
+import java.awt.event.KeyEvent;
 import net.neilcsmith.ripl.FrameRateListener;
 import java.awt.Canvas;
 import java.awt.Color;
@@ -34,12 +35,14 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridBagLayout;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.KeyAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import net.neilcsmith.ripl.Player;
 import net.neilcsmith.ripl.Sink;
 import net.neilcsmith.ripl.SinkIsFullException;
@@ -50,9 +53,10 @@ import net.neilcsmith.ripl.Surface;
 /**
  *
  * @author Neil C Smith
- * @TODO refactor into Player interface in core.
  */
 public class RiplPlayer implements Player {
+
+    private final static Logger log = Logger.getLogger(RiplPlayer.class.getName());
 
     private int noSleepsPerYield = 0; // maximum number of frames without sleep before yielding
     private int maxSkip = 2; // maximum number of frames that can be skipped before rendering
@@ -160,14 +164,12 @@ public class RiplPlayer implements Player {
             public void run() {
                 Dimension dim = new Dimension(width, height);
                 frame = new Frame(title);
-//                frame.setSize(dim);
-                frame.setIgnoreRepaint(true);
+//                frame.setIgnoreRepaint(true);
                 frame.setBackground(Color.BLACK);
                 frame.addWindowListener(new WindowAdapter() {
 
                     @Override
                     public void windowClosing(WindowEvent e) {
-//                        System.exit(0);
                         terminate();
                     }
                     });
@@ -183,18 +185,25 @@ public class RiplPlayer implements Player {
                 if (fullScreen) {
                     frame.setUndecorated(true);
 //                    frame.setAlwaysOnTop(true);
-//                    frame.setSize(Toolkit.getDefaultToolkit().getScreenSize());
+                    frame.setSize(Toolkit.getDefaultToolkit().getScreenSize());
+                    frame.validate();
                     GraphicsDevice gd =
                             GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
                     gd.setFullScreenWindow(frame);
+                    
                 } else {
                     frame.pack();
                     frame.setVisible(true);
                 }
 
+                log.info("Frame : " + frame.getBounds());
+                log.info("Canvas : " + canvas.getBounds());
 
-//                    canvas.createBufferStrategy(2);
-//                    bs = canvas.getBufferStrategy();
+                if (Boolean.getBoolean("ripl.exp.screensaver")) {
+                    ScreenSaverListener l = new ScreenSaverListener();
+                    frame.addKeyListener(l);
+                    canvas.addKeyListener(l);
+                }
 
             }
             });
@@ -374,6 +383,16 @@ public class RiplPlayer implements Player {
                 surface.clear();
             }
         }
+    }
+
+
+    private class ScreenSaverListener extends KeyAdapter {
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            System.exit(0);
+        }
+        
     }
 //    private class DirectSurface extends Surface {
 //
