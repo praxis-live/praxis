@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Component;
-import net.neilcsmith.praxis.core.Task;
+import net.neilcsmith.praxis.core.interfaces.Task;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PUri;
 

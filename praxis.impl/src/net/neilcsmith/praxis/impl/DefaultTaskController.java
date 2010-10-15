@@ -29,10 +29,10 @@ import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.ServiceUnavailableException;
-import net.neilcsmith.praxis.core.Task;
-import net.neilcsmith.praxis.core.TaskListener;
+import net.neilcsmith.praxis.core.interfaces.Task;
+import net.neilcsmith.praxis.core.interfaces.TaskListener;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.services.AuxillaryThreadService;
+import net.neilcsmith.praxis.core.interfaces.TaskProcessor;
 import net.neilcsmith.praxis.core.types.PReference;
 
 /**
@@ -53,13 +53,14 @@ class DefaultTaskController extends BasicControl {
         this.address = address;
         listenerMap = new HashMap<Long, TaskListener>();
     }
-    
+
+    @Deprecated
     public long submitTask(Task task, TaskListener listener) throws ServiceUnavailableException {
         PReference taskRef = PReference.wrap(task);
         if (atsAddress == null) {
             ComponentAddress ats = root.getServiceManager().findService(
-                    AuxillaryThreadService.getInstance());
-            atsAddress = ControlAddress.create(ats, AuxillaryThreadService.SUBMIT);
+                    TaskProcessor.DEFINITION);
+            atsAddress = ControlAddress.create(ats, TaskProcessor.SUBMIT);
         }
         Call call = Call.createCall(
                 atsAddress, address, root.getTime(), taskRef);

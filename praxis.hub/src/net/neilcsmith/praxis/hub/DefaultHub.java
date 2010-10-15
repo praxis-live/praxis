@@ -42,11 +42,9 @@ import net.neilcsmith.praxis.core.RootHub;
 import net.neilcsmith.praxis.core.ServiceManager;
 import net.neilcsmith.praxis.core.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.services.ComponentManager;
-import net.neilcsmith.praxis.core.services.ConnectionManager;
+import net.neilcsmith.praxis.core.interfaces.ComponentManager;
+import net.neilcsmith.praxis.core.interfaces.ConnectionManager;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.services.ServiceProvider;
-import net.neilcsmith.praxis.core.services.RootManager;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
@@ -171,12 +169,12 @@ public class DefaultHub extends AbstractRoot {
     private void installExtensions() {
         for (Root ext : extensions) {
             // get before we activate install - thread safety
-            InterfaceDefinition[] servs;
-            if (ext instanceof ServiceProvider) {
-                servs = ((ServiceProvider) ext).getServices();
-            } else {
-                servs = new InterfaceDefinition[0];
-            }
+            InterfaceDefinition[] servs = ext.getInterfaces();
+//            if (ext instanceof ServiceProvider) {
+//                servs = ((ServiceProvider) ext).getInterfaces();
+//            } else {
+//                servs = new InterfaceDefinition[0];
+//            }
             String extID = EXT_PREFIX + Integer.toHexString(ext.hashCode());
             try {
                 installRoot(extID, "sysex", ext);

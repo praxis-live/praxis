@@ -27,8 +27,10 @@ package net.neilcsmith.praxis.core;
  * @author Neil C Smith
  */
 public interface Lookup {
+
+    public <T> T get(Class<T> type);
     
-    public <T> Result<T> lookup(Class<T> type);
+    public <T> Result<T> getAll(Class<T> type);
     
     public interface Result<T> extends Iterable<T> {
         

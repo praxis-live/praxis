@@ -31,15 +31,14 @@ import net.neilcsmith.praxis.core.InvalidChildException;
 import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.services.ServiceProvider;
-import net.neilcsmith.praxis.core.services.ScriptService;
+import net.neilcsmith.praxis.core.interfaces.ScriptInterpreter;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ScriptRoot2 extends AbstractRoot implements ServiceProvider {
+public class ScriptRoot2 extends AbstractRoot {
 
     private ScriptComponent scriptComponent;
 
@@ -53,8 +52,9 @@ public class ScriptRoot2 extends AbstractRoot implements ServiceProvider {
         registerControl("eval", new DispatchControl("eval"));
     }
 
-    public InterfaceDefinition[] getServices() {
-        return new InterfaceDefinition[] {ScriptService.getInstance()};
+    @Override
+    public InterfaceDefinition[] getInterfaces() {
+        return new InterfaceDefinition[] {ScriptInterpreter.getInstance()};
     }
 
     private class DispatchControl implements Control {

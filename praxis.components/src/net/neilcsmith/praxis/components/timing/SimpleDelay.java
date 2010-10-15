@@ -28,6 +28,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.Root.State;
 import net.neilcsmith.praxis.impl.AbstractControlFrameComponent;
+import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.ArgumentInputPort;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.FloatProperty;
@@ -93,7 +94,7 @@ public class SimpleDelay extends AbstractControlFrameComponent {
         }
     }
 
-    public void nextControlFrame(Root root) {
+    public void nextControlFrame(AbstractRoot root) {
         if (message != null) {
             long time = root.getTime();
             if (((messageTime + delayNS) - time) <= 0) { // protect against overflow
@@ -106,7 +107,7 @@ public class SimpleDelay extends AbstractControlFrameComponent {
     }
 
     @Override
-    public void rootStateChanged(Root source, State state) {
+    public void rootStateChanged(AbstractRoot source, State state) {
         super.rootStateChanged(source, state);
         message = null;
     }

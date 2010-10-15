@@ -20,19 +20,16 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.core;
+package net.neilcsmith.praxis.impl;
+
+import net.neilcsmith.praxis.core.Root;
 
 /**
- * Background task to be passed to Root to be executed.
+ *
  * @author Neil C Smith
  */
-public interface Task {
+public interface RootStateListener extends OrderedListener {
     
-    /**
-     * Called to execute task.
-     * @return Argument (use PReference to wrap arbitrary Objects)
-     * @throws java.lang.Exception
-     */
-    public Argument execute() throws Exception;
+    public void rootStateChanged(AbstractRoot source, Root.State state);
 
 }

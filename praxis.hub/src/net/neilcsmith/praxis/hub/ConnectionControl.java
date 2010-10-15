@@ -41,7 +41,7 @@ class ConnectionControl extends BasicControl {
     private DefaultHub hub;
     private ControlInfo info;
     private Queue<Call> callQueue;
-    private long matchID;
+    private int matchID;
     private ControlAddress address;
 
     ConnectionControl(DefaultHub hub, ControlAddress address) {

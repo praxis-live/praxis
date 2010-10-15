@@ -32,11 +32,20 @@ import net.neilcsmith.praxis.core.Lookup;
  */
 public class ServiceLoaderLookup implements Lookup {
 
-    public <T> Result<T> lookup(Class<T> type) {
+    public <T> T get(Class<T> type) {
+        Iterator<T> results = getAll(type).iterator();
+        if (results.hasNext()) {
+            return results.next();
+        } else {
+            return null;
+        }
+    }
+
+    public <T> Result<T> getAll(Class<T> type) {
         ServiceLoader<T> serviceLoader = ServiceLoader.load(type);
         return new ServiceLoaderLookup.ServiceLoaderWrapper<T>(serviceLoader);
     }
-    
+
     private class ServiceLoaderWrapper<T> implements Lookup.Result<T> {
         
         private ServiceLoader<T> serviceLoader;

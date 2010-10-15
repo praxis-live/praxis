@@ -18,7 +18,7 @@
             <public-packages>
                 <package>net.neilcsmith.praxis.core</package>
                 <package>net.neilcsmith.praxis.core.info</package>
-                <package>net.neilcsmith.praxis.core.services</package>
+                <package>net.neilcsmith.praxis.core.interfaces</package>
                 <package>net.neilcsmith.praxis.core.syntax</package>
                 <package>net.neilcsmith.praxis.core.types</package>
             </public-packages>

@@ -20,29 +20,22 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.core;
+package net.neilcsmith.praxis.core.interfaces;
+
+import net.neilcsmith.praxis.core.Argument;
 
 /**
- * Interface to be informed when a Task has completed or thrown an exception.
+ * Background task to be passed to Root to be executed.
  * @author Neil C Smith
  */
-public interface TaskListener {
+@Deprecated
+public interface Task {
     
     /**
-     * Task complete.
-     *
-     * @param time
-     * @param id
-     * @param arg
+     * Called to execute task.
+     * @return Argument (use PReference to wrap arbitrary Objects)
+     * @throws java.lang.Exception
      */
-    public void taskCompleted(long time, long id, Argument arg);
-    
-    /**
-     * Task threw an Exception.
-     * @param time
-     * @param id
-     * @param arg
-     */
-    public void taskError(long time, long id, Argument arg);
+    public Argument execute() throws Exception;
 
 }

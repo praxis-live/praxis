@@ -23,15 +23,14 @@
 package net.neilcsmith.praxis.script.impl;
 
 import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.services.ServiceProvider;
-import net.neilcsmith.praxis.core.services.ScriptService;
+import net.neilcsmith.praxis.core.interfaces.ScriptInterpreter;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ScriptComponent extends AbstractComponent implements ServiceProvider {
+public class ScriptComponent extends AbstractComponent {
 
     private ScriptExecutor defaultExecutor;
 
@@ -41,8 +40,8 @@ public class ScriptComponent extends AbstractComponent implements ServiceProvide
 
 
 
-    public InterfaceDefinition[] getServices() {
-        return new InterfaceDefinition[] {ScriptService.getInstance()};
+    public InterfaceDefinition[] getInterfaces() {
+        return new InterfaceDefinition[] {ScriptInterpreter.getInstance()};
     }
 
 }

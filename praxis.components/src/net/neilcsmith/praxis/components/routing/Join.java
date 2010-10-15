@@ -26,6 +26,7 @@ import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.Root.State;
+import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.AbstractRootStateComponent;
 import net.neilcsmith.praxis.impl.ArgumentInputPort;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
@@ -87,7 +88,7 @@ public class Join extends AbstractRootStateComponent {
         in2 = null;
     }
 
-    public void rootStateChanged(Root source, State state) {
+    public void rootStateChanged(AbstractRoot source, State state) {
         reset();
     }
 

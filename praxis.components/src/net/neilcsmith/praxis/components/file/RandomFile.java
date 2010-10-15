@@ -28,6 +28,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractComponent;
+import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.ResourceListLoader;
 import net.neilcsmith.praxis.impl.TriggerControl;
@@ -68,11 +69,11 @@ public class RandomFile extends AbstractComponent {
 
         public void listLoaded(ResourceListLoader source) {
             setResourceList(source.getList());
-            rdyPort.send(getRoot().getTime());
+            rdyPort.send( ((AbstractRoot) getRoot()).getTime());
         }
 
         public void listError(ResourceListLoader source) {
-            errPort.send(getRoot().getTime()); // @replace with timecode sent to message
+            errPort.send(((AbstractRoot) getRoot()).getTime()); // @replace with timecode sent to message
         }
         
         

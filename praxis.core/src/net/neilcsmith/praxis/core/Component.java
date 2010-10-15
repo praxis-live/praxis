@@ -55,6 +55,7 @@ public interface Component {
      *
      * @return ComponentAddress
      */
+    @Deprecated
     public ComponentAddress getAddress();
 
     /**
@@ -90,6 +91,7 @@ public interface Component {
      * @param control
      * @return String ID or null
      */
+    @Deprecated
     public String getControlID(Control control);
 
     /**
@@ -112,6 +114,7 @@ public interface Component {
      * @param port
      * @return String ID or null
      */
+    @Deprecated
     public String getPortID(Port port);
 
     /**
@@ -125,4 +128,7 @@ public interface Component {
      * @return ComponentInfo
      */
     public ComponentInfo getInfo();
+
+    public InterfaceDefinition[] getInterfaces();
+
 }

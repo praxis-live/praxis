@@ -23,7 +23,6 @@
 package net.neilcsmith.praxis.impl;
 
 import net.neilcsmith.praxis.core.ComponentAddress;
-import net.neilcsmith.praxis.core.ControlFrameListener;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.Root.State;
 
@@ -36,24 +35,24 @@ public abstract class AbstractControlFrameComponent extends AbstractRootStateCom
     @Override
     public void hierarchyChanged() {
         Root root = getRoot();
-        if (root != null) {
-            root.removeControlFrameListener(this);
+        if (root instanceof AbstractRoot) {
+            ((AbstractRoot)root).removeControlFrameListener(this);
         }
         super.hierarchyChanged();
         root = getRoot();
-        if (root != null) {
-            root.addControlFrameListener(this);
+        if (root instanceof AbstractRoot) {
+            ((AbstractRoot)root).addControlFrameListener(this);
         }
     }
 
-    public void rootStateChanged(Root source, State state) {
+    public void rootStateChanged(AbstractRoot source, State state) {
         // no op hook
     }
 
     
     
     
-    public abstract void nextControlFrame(Root source);
+    public abstract void nextControlFrame(AbstractRoot source);
 
 
 }

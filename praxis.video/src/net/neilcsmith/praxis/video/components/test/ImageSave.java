@@ -33,11 +33,12 @@ import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.ServiceUnavailableException;
-import net.neilcsmith.praxis.core.Task;
-import net.neilcsmith.praxis.core.TaskListener;
+import net.neilcsmith.praxis.core.interfaces.Task;
+import net.neilcsmith.praxis.core.interfaces.TaskListener;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PUri;
 import net.neilcsmith.praxis.impl.AbstractComponent;
+import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import net.neilcsmith.praxis.impl.UriProperty;
 import net.neilcsmith.praxis.video.DefaultVideoInputPort;
@@ -119,7 +120,7 @@ public class ImageSave extends AbstractComponent {
                 Root root = getRoot();
                 if (root != null) {
                     try {
-                        root.submitTask(new ImageSaver(bis, uri.getValue().value(), uriIndex++), listener);
+                        ((AbstractRoot)root).submitTask(new ImageSaver(bis, uri.getValue().value(), uriIndex++), listener);
                     } catch (ServiceUnavailableException ex) {
                         Logger.getLogger(ImageSave.class.getName()).log(Level.SEVERE, null, ex);
                     }

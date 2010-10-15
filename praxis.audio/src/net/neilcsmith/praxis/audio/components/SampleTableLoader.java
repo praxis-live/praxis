@@ -25,7 +25,7 @@ package net.neilcsmith.praxis.audio.components;
 import java.net.URI;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Component;
-import net.neilcsmith.praxis.core.Task;
+import net.neilcsmith.praxis.core.interfaces.Task;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PUri;
 import net.neilcsmith.praxis.impl.ResourceLoader;

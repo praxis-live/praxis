@@ -19,11 +19,10 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.core.services;
+package net.neilcsmith.praxis.core.interfaces;
 
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.core.Task;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PReference;
@@ -32,14 +31,15 @@ import net.neilcsmith.praxis.core.types.PReference;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class AuxillaryThreadService extends InterfaceDefinition {
+public class TaskProcessor extends InterfaceDefinition {
+
+    public final static TaskProcessor DEFINITION = new TaskProcessor();
 
     public final static String SUBMIT = "submit";
 
-    private final static AuxillaryThreadService instance = new AuxillaryThreadService();
     private ControlInfo submitInfo;
 
-    private AuxillaryThreadService() {
+    private TaskProcessor() {
         ArgumentInfo input = PReference.info(Task.class);
         ArgumentInfo output = Argument.info();
         submitInfo = ControlInfo.create(
@@ -61,7 +61,7 @@ public class AuxillaryThreadService extends InterfaceDefinition {
         throw new IllegalArgumentException();
     }
 
-    public static AuxillaryThreadService getInstance() {
-        return instance;
+    public static TaskProcessor getInstance() {
+        return DEFINITION;
     }
 }

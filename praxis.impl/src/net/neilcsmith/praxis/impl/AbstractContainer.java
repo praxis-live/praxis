@@ -25,8 +25,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import net.neilcsmith.praxis.core.Component;
+import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.InvalidChildException;
+import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.ParentVetoException;
 import net.neilcsmith.praxis.core.info.ComponentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
@@ -91,6 +93,10 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         return null;
     }
 
+    public ComponentAddress getAddress(Component child) {
+        return ComponentAddress.create(getAddress(), getChildID(child));
+    }
+
     public String[] getChildIDs() {
         Set<String> keyset = childMap.keySet();
         return keyset.toArray(new String[keyset.size()]);
@@ -118,6 +124,17 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         }
 
     }
+
+    public Lookup getLookup() {
+        Container parent = getParent();
+        if (parent != null) {
+            return parent.getLookup();
+        } else {
+            return null; //@TODO empty lookup
+        }
+    }
+
+
 
 
 }

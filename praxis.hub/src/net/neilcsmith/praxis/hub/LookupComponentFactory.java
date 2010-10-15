@@ -93,7 +93,7 @@ public class LookupComponentFactory implements ComponentFactory {
                 new LinkedHashMap<ComponentType, ComponentFactory>();
 
         Lookup.Result<ComponentFactoryProvider> providers =
-                lookup.lookup(ComponentFactoryProvider.class);
+                lookup.getAll(ComponentFactoryProvider.class);
         for (ComponentFactoryProvider provider : providers) {
             ComponentFactory factory = provider.getFactory();
             logger.info("Adding components from : " + factory.getClass());

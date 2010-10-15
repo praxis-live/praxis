@@ -31,8 +31,8 @@ import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.ServiceUnavailableException;
-import net.neilcsmith.praxis.core.Task;
-import net.neilcsmith.praxis.core.TaskListener;
+import net.neilcsmith.praxis.core.interfaces.Task;
+import net.neilcsmith.praxis.core.interfaces.TaskListener;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PReference;
@@ -224,18 +224,23 @@ public abstract class ResourceLoader<T> extends BasicControl implements TaskList
         loadingIdentifier = id;
         taskActive = true;
         Root root = host.getRoot();
-        if (root == null) {
+        if (root instanceof AbstractRoot) {
+            AbstractRoot ar = (AbstractRoot) root;
+            try {
+                taskID = ar.submitTask(getLoadTask(id), this);
+            } catch (ServiceUnavailableException ex) {
+                loadingIdentifier = null;
+                taskActive = false;
+                throw ex;
+            }
+        } else {
             loadingIdentifier = null;
             taskActive = false;
             throw new ServiceUnavailableException();
+            
         }
-        try {
-            taskID = root.submitTask(getLoadTask(id), this);
-        } catch (ServiceUnavailableException ex) {
-            loadingIdentifier = null;
-            taskActive = false;
-            throw ex;
-        }
+
+
     }
 
     public void taskCompleted(long time, long id, Argument arg) {
@@ -309,7 +314,6 @@ public abstract class ResourceLoader<T> extends BasicControl implements TaskList
 
         }
     }
-    
 //    public static interface Listener {
 //        
 //        public void resourceReady(ResourceLoader source);

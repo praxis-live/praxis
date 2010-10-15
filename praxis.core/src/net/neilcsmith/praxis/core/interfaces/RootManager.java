@@ -20,56 +20,57 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.core.services;
+package net.neilcsmith.praxis.core.interfaces;
 
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ComponentType;
-import net.neilcsmith.praxis.core.PortAddress;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 
 /**
- *
+ * NOT CURRENTLY IN USE
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ConnectionManager extends InterfaceDefinition {
+public class RootManager extends InterfaceDefinition {
 
-    public final static String CONNECT = "connect";
-    public final static String DISCONNECT = "disconnect";
+    public final static String CREATE = "create";
+    public final static String DESTROY = "destroy";
+    // public final static String ROOTS = "roots";
 
-    private final static ConnectionManager instance = new ConnectionManager();
+    private final static RootManager instance = new RootManager();
 
-    private ControlInfo connectInfo;
-    private ControlInfo disconnectInfo;
+    private ControlInfo createInfo;
+    private ControlInfo destroyInfo;
 
-    private ConnectionManager() {
-        ArgumentInfo addressInfo = PortAddress.info();
-        ArgumentInfo[] inputs = new ArgumentInfo[] {addressInfo, addressInfo};
-        ArgumentInfo[] outputs = new ArgumentInfo[0];
-        connectInfo = ControlInfo.create(inputs, outputs, null);
-        disconnectInfo = ControlInfo.create(inputs, outputs, null);
+    private RootManager() {
+        createInfo = ControlInfo.create(
+                new ArgumentInfo[] {ComponentAddress.info(), ComponentType.info()},
+                new ArgumentInfo[0], null);
+        destroyInfo = ControlInfo.create(
+                new ArgumentInfo[] {ComponentAddress.info()},
+                new ArgumentInfo[0], null);
 
     }
 
 
     @Override
     public String[] getControls() {
-        return new String[] {CONNECT, DISCONNECT};
+        return new String[] {CREATE, DESTROY};
     }
 
     @Override
     public ControlInfo getControlInfo(String control) {
-        if (CONNECT.equals(control)) {
-            return connectInfo;
+        if (CREATE.equals(control)) {
+            return createInfo;
         }
-        if (DISCONNECT.equals(control)) {
-            return disconnectInfo;
+        if (DESTROY.equals(control)) {
+            return destroyInfo;
         }
         throw new IllegalArgumentException();
     }
 
-    public static ConnectionManager getInstance() {
+    public static RootManager getInstance() {
         return instance;
     }
 

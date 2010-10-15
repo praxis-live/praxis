@@ -25,6 +25,7 @@ package net.neilcsmith.praxis.components;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.impl.AbstractControlFrameComponent;
+import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 
 /**
@@ -41,7 +42,7 @@ public class ControlFrameTrigger extends AbstractControlFrameComponent {
     }
 
     @Override
-    public void nextControlFrame(Root source) {
+    public void nextControlFrame(AbstractRoot source) {
         output.send(source.getTime());
     }
 

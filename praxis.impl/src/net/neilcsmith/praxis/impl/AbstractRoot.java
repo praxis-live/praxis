@@ -21,6 +21,8 @@
  */
 package net.neilcsmith.praxis.impl;
 
+import net.neilcsmith.praxis.core.interfaces.TaskListener;
+import net.neilcsmith.praxis.core.interfaces.Task;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -135,6 +137,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         }
     }
 
+    @Deprecated
     public PacketRouter getPacketRouter() {
         return this;
     }
@@ -143,6 +146,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         return hub;
     }
 
+    @Deprecated
     public long submitTask(Task task, TaskListener listener) throws ServiceUnavailableException {
         // in place controller
 
@@ -156,6 +160,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         }
     }
 
+    @Deprecated
     public void addRootStateListener(RootStateListener listener) {
         if (listener == null) {
             throw new NullPointerException();
@@ -166,12 +171,14 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         stateListeners = list.toArray(new RootStateListener[list.size()]);
     }
 
+    @Deprecated
     public void removeRootStateListener(RootStateListener listener) {
         List<RootStateListener> list = new ArrayList<RootStateListener>(Arrays.asList(stateListeners));
         list.remove(listener);
         stateListeners = list.toArray(new RootStateListener[list.size()]);
     }
 
+    @Deprecated
     protected void fireRootStateListeners(Root.State state) {
         cachedState = state;
         RootStateListener[] listeners = stateListeners; // cache in case of changes
@@ -180,6 +187,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         }
     }
 
+    @Deprecated
     public void addControlFrameListener(ControlFrameListener listener) {
         if (listener == null) {
             throw new NullPointerException();
@@ -190,12 +198,14 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         frameListeners = list.toArray(new ControlFrameListener[list.size()]);
     }
 
+    @Deprecated
     public void removeControlFrameListener(ControlFrameListener listener) {
         List<ControlFrameListener> list = new ArrayList<ControlFrameListener>(Arrays.asList(frameListeners));
         list.remove(listener);
         frameListeners = list.toArray(new ControlFrameListener[list.size()]);
     }
 
+    @Deprecated
     protected void fireControlFrameListeners() {
         ControlFrameListener[] listeners = frameListeners; // cache
         for (ControlFrameListener listener : listeners) {
@@ -203,6 +213,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         }
     }
 
+    @Deprecated
     public long getTime() {
         return time;
     }
@@ -410,10 +421,12 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         return this;
     }
 
+    @Deprecated
     public ServiceManager getServiceManager() {
         return hub.getServiceManager();
     }
     
+    @Override
     public Lookup getLookup() {
         return hub.getLookup();
     }

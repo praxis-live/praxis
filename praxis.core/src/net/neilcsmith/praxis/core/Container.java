@@ -62,6 +62,7 @@ public interface Container extends Component {
      * @param child
      * @return String ID, or null if component is not a child of this container.
      */
+    @Deprecated
     public String getChildID(Component child);
     
     /**
@@ -69,7 +70,11 @@ public interface Container extends Component {
      * @return String array of IDs.
      */
     public String[] getChildIDs();
-    
+
+
+    public Lookup getLookup();
+
+    public ComponentAddress getAddress(Component child);
 
 
 }

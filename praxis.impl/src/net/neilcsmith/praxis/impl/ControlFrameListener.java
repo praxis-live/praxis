@@ -20,14 +20,16 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.core;
+package net.neilcsmith.praxis.impl;
+
+import net.neilcsmith.praxis.core.Root;
 
 /**
  *
  * @author Neil C Smith
  */
-public interface RootStateListener extends OrderedListener {
+public interface ControlFrameListener extends OrderedListener {
     
-    public void rootStateChanged(Root source, Root.State state);
+    public void nextControlFrame(AbstractRoot root);
 
 }

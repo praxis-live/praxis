@@ -27,7 +27,7 @@ import java.net.URI;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.Lookup;
-import net.neilcsmith.praxis.core.Task;
+import net.neilcsmith.praxis.core.interfaces.Task;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PUri;
 import net.neilcsmith.praxis.impl.ResourceLoader;
@@ -52,8 +52,9 @@ public class VideoDelegateLoader extends ResourceLoader<VideoDelegate> {
 
     @Override
     protected Task getLoadTask(Argument id) {
-        Lookup lookup = getComponent().getRoot().getLookup();
-        // @TODO - can we be called if root is null?
+//        Lookup getAll = getComponent().getRoot().getLookup();
+        Lookup lookup = getComponent().getParent().getLookup();
+        // @TODO - can we be called if parent is null?
         return new LoadTask(lookup, id);
     }
     
@@ -87,7 +88,7 @@ public class VideoDelegateLoader extends ResourceLoader<VideoDelegate> {
         public Argument execute() throws Exception {
             URI uri = PUri.coerce(id).value();
             Lookup.Result<VideoDelegateFactoryProvider> providers = 
-                    lookup.lookup(VideoDelegateFactoryProvider.class);
+                    lookup.getAll(VideoDelegateFactoryProvider.class);
             VideoDelegate delegate = null;
             for (VideoDelegateFactoryProvider provider : providers) {
                 if (provider.getSupportedSchemes().contains(uri.getScheme())) {

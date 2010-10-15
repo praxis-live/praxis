@@ -26,10 +26,11 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.Root.State;
-import net.neilcsmith.praxis.core.Task;
+import net.neilcsmith.praxis.core.interfaces.Task;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractControlFrameComponent;
+import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.FloatProperty;
@@ -108,11 +109,11 @@ public abstract class AbstractJaninoComponent extends AbstractControlFrameCompon
     }
 
     @Override
-    public void rootStateChanged(Root source, State state) {
+    public void rootStateChanged(AbstractRoot source, State state) {
         Arrays.fill(outs, null);
     }
 
-    public void nextControlFrame(Root source) {
+    public void nextControlFrame(AbstractRoot source) {
         for (int i=0; i < outs.length; i++) {
             Argument arg = outs[i];
             if (arg != null) {

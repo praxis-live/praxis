@@ -27,10 +27,11 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.core.Task;
+import net.neilcsmith.praxis.core.interfaces.Task;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PUri;
 import net.neilcsmith.praxis.impl.AbstractComponent;
+import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.ResourceLoader;
@@ -233,12 +234,12 @@ public class Still extends AbstractComponent {
         @Override
         protected void resourceLoaded() {
             setDelegate(getResource());
-            rdyPort.send(getRoot().getTime());
+            rdyPort.send( ((AbstractRoot) getRoot()).getTime());
         }
 
         @Override
         protected void resourceError() {
-            errPort.send(getRoot().getTime());
+            errPort.send( ((AbstractRoot) getRoot()).getTime());
         }
     }
 

@@ -26,6 +26,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.Root.State;
 import net.neilcsmith.praxis.impl.AbstractControlFrameComponent;
+import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.FloatProperty;
 
@@ -51,7 +52,7 @@ public class Timer extends AbstractControlFrameComponent {
     
 
     @Override
-    public void nextControlFrame(Root root) {
+    public void nextControlFrame(AbstractRoot root) {
         long time = root.getTime();
         if (((lastTime + periodNS) - time) <= 0) {
             output.send(time);
@@ -60,7 +61,7 @@ public class Timer extends AbstractControlFrameComponent {
     }
 
     @Override
-    public void rootStateChanged(Root source, State state) {
+    public void rootStateChanged(AbstractRoot source, State state) {
         super.rootStateChanged(source, state);
         if (state == Root.State.ACTIVE_RUNNING) {
             lastTime = source.getTime();
@@ -72,8 +73,8 @@ public class Timer extends AbstractControlFrameComponent {
     public void hierarchyChanged() {
         super.hierarchyChanged();
         Root root = getRoot();
-        if (root != null) {
-            lastTime = root.getTime();
+        if (root instanceof AbstractRoot) {
+            lastTime = ((AbstractRoot) root).getTime();
         }
     }
     

@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.Root.State;
+import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.AbstractRootStateComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
@@ -60,7 +61,7 @@ public class VideoCapture extends AbstractRootStateComponent {
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, container));
     }
 
-    public void rootStateChanged(Root source, State state) {
+    public void rootStateChanged(AbstractRoot source, State state) {
         if (state == State.ACTIVE_IDLE) {
             if (video != null) {
                 try {

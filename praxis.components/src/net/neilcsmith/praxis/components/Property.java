@@ -28,6 +28,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.Root.State;
 import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.AbstractRootStateComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
@@ -63,7 +64,7 @@ public class Property extends AbstractRootStateComponent {
         
     }
 
-    public void rootStateChanged(Root source, State state) {
+    public void rootStateChanged(AbstractRoot source, State state) {
 //        if (state == Root.State.ACTIVE_RUNNING) {
 //            output.send(arg);
 //        }

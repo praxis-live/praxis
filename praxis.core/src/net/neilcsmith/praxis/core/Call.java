@@ -200,7 +200,7 @@ public final class Call extends Packet {
         ControlAddress fromAddress = inwardCall.getToAddress();
         String root = toAddress.getComponentAddress().getComponentID(0);
         long timeCode = inwardCall.getTimecode();
-        long matchID = inwardCall.getID();
+        int matchID = inwardCall.getID();
         return new Call(root, toAddress, fromAddress, timeCode, args, type, matchID);
     }
     
@@ -215,7 +215,7 @@ public final class Call extends Packet {
     private CallArguments args;
     private ControlAddress toAddress;
     private ControlAddress fromAddress;
-    private long matchID;
+    private int matchID;
 
     private Call(
             String root,
@@ -224,7 +224,7 @@ public final class Call extends Packet {
             long timeCode,
             CallArguments args,
             Type type,
-            long matchID) {
+            int matchID) {
         super(root, timeCode);
         this.toAddress = toAddress;
         this.fromAddress = fromAddress;
@@ -293,7 +293,7 @@ public final class Call extends Packet {
      *
      * @return long ID
      */
-    public long getMatchID() {
+    public int getMatchID() {
         return this.matchID;
     }
 

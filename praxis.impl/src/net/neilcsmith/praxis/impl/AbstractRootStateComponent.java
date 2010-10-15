@@ -25,7 +25,6 @@ package net.neilcsmith.praxis.impl;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.Root.State;
-import net.neilcsmith.praxis.core.RootStateListener;
 
 /**
  *
@@ -37,13 +36,13 @@ public abstract class AbstractRootStateComponent extends AbstractComponent imple
     @Override
     public void hierarchyChanged() {
         Root root = getRoot();
-        if (root != null) {
-            root.removeRootStateListener(this);
+        if (root instanceof AbstractRoot) {
+            ((AbstractRoot)root).removeRootStateListener(this);
         }
         super.hierarchyChanged();
         root = getRoot();
-        if (root != null) {
-            root.addRootStateListener(this);
+        if (root instanceof AbstractRoot) {
+            ((AbstractRoot)root).addRootStateListener(this);
         }
     }
 

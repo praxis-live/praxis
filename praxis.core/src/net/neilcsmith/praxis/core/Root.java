@@ -30,24 +30,33 @@ public interface Root extends Component {
 
 //    public void routeCalls(CallPacket calls);
 
-    public long submitTask(Task task, TaskListener listener) throws ServiceUnavailableException;
+    //@Deprecated
+    //public long submitTask(Task task, TaskListener listener) throws ServiceUnavailableException;
 
-    public void addRootStateListener(RootStateListener listener);
+//    @Deprecated
+//    public void addRootStateListener(RootStateListener listener);
+//
+//    @Deprecated
+//    public void removeRootStateListener(RootStateListener listener);
+//
+//    @Deprecated
+//    public long getTime();
 
-    public void removeRootStateListener(RootStateListener listener);
-
-    public long getTime();
-
-    public void addControlFrameListener(ControlFrameListener listener);
-
-    public void removeControlFrameListener(ControlFrameListener listener);
+//    @Deprecated
+//    public void addControlFrameListener(ControlFrameListener listener);
+//
+//    @Deprecated
+//    public void removeControlFrameListener(ControlFrameListener listener);
     
     public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException;
-    
+
+    @Deprecated
     public ServiceManager getServiceManager();
-    
+
+    @Deprecated
     public Lookup getLookup();
-    
+
+    @Deprecated
     public PacketRouter getPacketRouter();
     
     public Root.State getState();

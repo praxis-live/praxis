@@ -34,8 +34,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.core.Task;
-import net.neilcsmith.praxis.core.TaskListener;
+import net.neilcsmith.praxis.core.interfaces.Task;
+import net.neilcsmith.praxis.core.interfaces.TaskListener;
 import net.neilcsmith.praxis.core.types.PReference;
 
 /**

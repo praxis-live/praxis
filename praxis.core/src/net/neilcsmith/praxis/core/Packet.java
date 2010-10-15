@@ -23,6 +23,7 @@
 package net.neilcsmith.praxis.core;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -32,11 +33,11 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class Packet implements Comparable<Packet>, Serializable {
 
-    private static AtomicLong idSource = new AtomicLong(0);
+    private static AtomicInteger idSource = new AtomicInteger(0);
 
     private String rootID;
     private long timeCode;
-    private long id;
+    private int id;
 
     Packet(String rootID, long timeCode) {
         this.rootID = rootID;
@@ -71,7 +72,7 @@ public class Packet implements Comparable<Packet>, Serializable {
      *
      * @return long ID
      */
-    public final long getID() {
+    public final int getID() {
         // should not be used for object equality
         // @TODO Change ID semantics to maintain uniqueness?
         return id;

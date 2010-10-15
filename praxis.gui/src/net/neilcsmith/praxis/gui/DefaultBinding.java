@@ -93,8 +93,8 @@ public class DefaultBinding extends BasicControl {
         private List<ControlBinding.Adaptor> adaptors;
         private ControlInfo bindingInfo;
         private Timer syncTimer;
-        private long lastCallID;
-        private long infoMatchID;
+        private int lastCallID;
+        private int infoMatchID;
         private boolean isProperty;
         private CallArguments arguments;
 

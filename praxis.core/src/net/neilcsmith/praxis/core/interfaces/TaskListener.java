@@ -20,15 +20,32 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.core;
+package net.neilcsmith.praxis.core.interfaces;
+
+import net.neilcsmith.praxis.core.Argument;
 
 /**
- *
+ * Interface to be informed when a Task has completed or thrown an exception.
  * @author Neil C Smith
  */
-public interface OrderedListener {
+@Deprecated
+public interface TaskListener {
     
-    public int getDepth();
+    /**
+     * Task complete.
+     *
+     * @param time
+     * @param id
+     * @param arg
+     */
+    public void taskCompleted(long time, long id, Argument arg);
     
-    public int getPriority();
+    /**
+     * Task threw an Exception.
+     * @param time
+     * @param id
+     * @param arg
+     */
+    public void taskError(long time, long id, Argument arg);
+
 }

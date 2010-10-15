@@ -25,6 +25,7 @@ package net.neilcsmith.praxis.components.timing;
 import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.impl.AbstractControlFrameComponent;
+import net.neilcsmith.praxis.impl.AbstractRoot;
 
 /**
  *
@@ -41,7 +42,7 @@ public class Interpolator extends AbstractControlFrameComponent {
     private ControlPort.Output output;
 
     @Override
-    public void nextControlFrame(Root source) {
+    public void nextControlFrame(AbstractRoot source) {
         if (!active) {
             return;
         }

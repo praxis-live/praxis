@@ -28,6 +28,7 @@ import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.Control;
+import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.ParentVetoException;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.PortConnectionListener;
@@ -200,18 +201,23 @@ public abstract class AbstractComponent implements Component {
     }
 
     public ComponentAddress getAddress() {
-        if (address == null) {
-            if (parent != null) {
-                ComponentAddress parentAddress = parent.getAddress();
-                String thisID = parent.getChildID(this);
-//                try {
-                    address = ComponentAddress.create(parentAddress, thisID);
-//                } catch (ArgumentFormatException ex) {
-//                    address = null;
-//                }
-            }
+//        if (address == null) {
+//            if (parent != null) {
+//                ComponentAddress parentAddress = parent.getAddress();
+//                String thisID = parent.getChildID(this);
+////                try {
+//                    address = ComponentAddress.create(parentAddress, thisID);
+////                } catch (ArgumentFormatException ex) {
+////                    address = null;
+////                }
+//            }
+//        }
+//        return address;
+        if (parent != null) {
+            return parent.getAddress(this);
+        } else {
+            return null;
         }
-        return address;
     }
 
     public void parentNotify(Container parent) throws ParentVetoException {
@@ -268,4 +274,11 @@ public abstract class AbstractComponent implements Component {
         }
         return infos;
     }
+
+    public InterfaceDefinition[] getInterfaces() {
+        return new InterfaceDefinition[0];
+    }
+
+
+
 }

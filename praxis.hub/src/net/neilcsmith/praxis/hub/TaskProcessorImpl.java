@@ -38,12 +38,11 @@ import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.InvalidChildException;
-import net.neilcsmith.praxis.core.Task;
+import net.neilcsmith.praxis.core.interfaces.Task;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.services.AuxillaryThreadService;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.services.ServiceProvider;
+import net.neilcsmith.praxis.core.interfaces.TaskProcessor;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
@@ -52,15 +51,15 @@ import net.neilcsmith.praxis.impl.BasicControl;
  *
  * @author Neil C Smith
  */
-public class AuxillaryThreadServiceImpl extends AbstractRoot implements ServiceProvider {
+public class TaskProcessorImpl extends AbstractRoot {
 
-    private final static Logger LOG = Logger.getLogger(AuxillaryThreadServiceImpl.class.getName());
+    private final static Logger LOG = Logger.getLogger(TaskProcessorImpl.class.getName());
 
     private ExecutorService threadService;
     private Map<Future<Argument>, Call> futures;
     private List<Future> completed;
 
-    public AuxillaryThreadServiceImpl() {
+    public TaskProcessorImpl() {
         super(State.ACTIVE_RUNNING);
         threadService = Executors.newCachedThreadPool(new ThreadFactory() {
 
@@ -76,8 +75,8 @@ public class AuxillaryThreadServiceImpl extends AbstractRoot implements ServiceP
         completed = new ArrayList<Future>();
     }
 
-    public InterfaceDefinition[] getServices() {
-        return new InterfaceDefinition[] {AuxillaryThreadService.getInstance()};
+    public InterfaceDefinition[] getInterfaces() {
+        return new InterfaceDefinition[] {TaskProcessor.DEFINITION};
     }
 
 
@@ -118,7 +117,7 @@ public class AuxillaryThreadServiceImpl extends AbstractRoot implements ServiceP
         private ControlInfo info;
 
         private SubmitControl() {
-            super(AuxillaryThreadServiceImpl.this);
+            super(TaskProcessorImpl.this);
             ArgumentInfo input = ArgumentInfo.create(PReference.class, null);
             ArgumentInfo output = ArgumentInfo.create(Argument.class, null);
             info = ControlInfo.create(

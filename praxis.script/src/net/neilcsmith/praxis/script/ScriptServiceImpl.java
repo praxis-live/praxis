@@ -30,8 +30,7 @@ import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.ServiceManager;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.services.ServiceProvider;
-import net.neilcsmith.praxis.core.services.ScriptService;
+import net.neilcsmith.praxis.core.interfaces.ScriptInterpreter;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
 import net.neilcsmith.praxis.script.impl.ScriptExecutor;
@@ -40,7 +39,7 @@ import net.neilcsmith.praxis.script.impl.ScriptExecutor;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ScriptServiceImpl extends AbstractRoot implements ServiceProvider {
+public class ScriptServiceImpl extends AbstractRoot {
 
     private static final Logger log = Logger.getLogger(ScriptServiceImpl.class.getName());
 
@@ -48,7 +47,7 @@ public class ScriptServiceImpl extends AbstractRoot implements ServiceProvider {
     private ScriptExecutor defaultExecutor;
 
     public ScriptServiceImpl() {
-        registerControl(ScriptService.EVAL, new EvalControl());
+        registerControl(ScriptInterpreter.EVAL, new EvalControl());
     }
 
     
@@ -62,8 +61,9 @@ public class ScriptServiceImpl extends AbstractRoot implements ServiceProvider {
         defaultExecutor = new ScriptExecutor(context, false);
     }
 
-    public InterfaceDefinition[] getServices() {
-        return new InterfaceDefinition[]{ScriptService.getInstance()};
+    @Override
+    public InterfaceDefinition[] getInterfaces() {
+        return new InterfaceDefinition[]{ScriptInterpreter.getInstance()};
     }
 
     private class EvalControl extends BasicControl {
