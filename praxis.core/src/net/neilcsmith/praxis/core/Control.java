@@ -33,5 +33,6 @@ public interface Control {
     
     public ControlInfo getInfo();
 
+    @Deprecated
     public Component getComponent();
 }

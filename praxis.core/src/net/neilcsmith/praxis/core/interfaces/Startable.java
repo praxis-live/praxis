@@ -19,60 +19,69 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
+
 package net.neilcsmith.praxis.core.interfaces;
 
 import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.types.PReference;
+import net.neilcsmith.praxis.core.types.PBoolean;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class TaskProcessor {
+public class Startable {
+    
+    public final static String START = "start";
+    public final static String STOP = "stop";
+    public final static String IS_RUNNING = "is-running";
+    public final static Definition DEFINITION = new Definition();
 
-    public final static TaskProcessor.Definition DEFINITION = new Definition();
-    public final static String SUBMIT = "submit";
+    private Startable() {}
 
-    private TaskProcessor() {
-    }
 
     public static class Definition extends InterfaceDefinition {
 
-        private ControlInfo submitInfo;
+        private ControlInfo startInfo;
+        private ControlInfo stopInfo;
+        private ControlInfo isRunningInfo;
 
         private Definition() {
-            ArgumentInfo input = PReference.info(Task.class);
-            ArgumentInfo output = Argument.info();
-            submitInfo = ControlInfo.createFunctionInfo(
-                    new ArgumentInfo[]{input},
-                    new ArgumentInfo[]{output},
+            startInfo = ControlInfo.createFunctionInfo(
+                    new ArgumentInfo[0],
+                    new ArgumentInfo[0],
                     null);
+            stopInfo = ControlInfo.createFunctionInfo(
+                    new ArgumentInfo[0],
+                    new ArgumentInfo[0],
+                    null);
+            isRunningInfo = ControlInfo.createFunctionInfo(
+                    new ArgumentInfo[0],
+                    new ArgumentInfo[]{PBoolean.info()},
+                    null);
+
         }
 
         @Override
         public String[] getControls() {
-            return new String[]{SUBMIT};
+            return new String[] {START, STOP, IS_RUNNING};
         }
 
         @Override
         public ControlInfo getControlInfo(String control) {
-            if (SUBMIT.equals(control)) {
-                return submitInfo;
+            if (START.equals(control)) {
+                return startInfo;
+            }
+            if (STOP.equals(control)) {
+                return stopInfo;
+            }
+            if (IS_RUNNING.equals(control)) {
+                return isRunningInfo;
             }
             throw new IllegalArgumentException();
         }
+
     }
 
-    public static interface Task {
-
-        /**
-         * Called to execute task.
-         * @return Argument (use PReference to wrap arbitrary Objects)
-         * @throws java.lang.Exception
-         */
-        public Argument execute() throws Exception;
-    }
 }

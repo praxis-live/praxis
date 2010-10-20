@@ -23,7 +23,6 @@
 package net.neilcsmith.praxis.core;
 
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
-import net.neilcsmith.praxis.core.types.PMap;
 
 /**
  * @TODO Enforce String with regex

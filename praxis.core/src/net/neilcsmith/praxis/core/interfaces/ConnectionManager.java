@@ -33,6 +33,7 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
+@Deprecated
 public class ConnectionManager extends InterfaceDefinition {
 
     public final static String CONNECT = "connect";
@@ -47,8 +48,8 @@ public class ConnectionManager extends InterfaceDefinition {
         ArgumentInfo addressInfo = PortAddress.info();
         ArgumentInfo[] inputs = new ArgumentInfo[] {addressInfo, addressInfo};
         ArgumentInfo[] outputs = new ArgumentInfo[0];
-        connectInfo = ControlInfo.create(inputs, outputs, null);
-        disconnectInfo = ControlInfo.create(inputs, outputs, null);
+        connectInfo = ControlInfo.createFunctionInfo(inputs, outputs, null);
+        disconnectInfo = ControlInfo.createFunctionInfo(inputs, outputs, null);
 
     }
 

@@ -21,8 +21,9 @@
  */
 package net.neilcsmith.praxis.core.interfaces;
 
+import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.ComponentType;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PReference;
@@ -31,48 +32,36 @@ import net.neilcsmith.praxis.core.types.PReference;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class TaskProcessor {
+public class ComponentFactoryService {
 
-    public final static TaskProcessor.Definition DEFINITION = new Definition();
-    public final static String SUBMIT = "submit";
+    public final static String NEW_INSTANCE = "new-instance";
+    public final static String TYPES = "types";
+    public final static ComponentFactoryService.Definition DEFINITION = new Definition();
 
-    private TaskProcessor() {
-    }
+    private ComponentFactoryService() {}
 
     public static class Definition extends InterfaceDefinition {
 
-        private ControlInfo submitInfo;
+        private ControlInfo instanceInfo;
 
         private Definition() {
-            ArgumentInfo input = PReference.info(Task.class);
-            ArgumentInfo output = Argument.info();
-            submitInfo = ControlInfo.createFunctionInfo(
-                    new ArgumentInfo[]{input},
-                    new ArgumentInfo[]{output},
+            instanceInfo = ControlInfo.createFunctionInfo(
+                    new ArgumentInfo[]{ComponentType.info()},
+                    new ArgumentInfo[]{PReference.info(Component.class)},
                     null);
         }
 
         @Override
         public String[] getControls() {
-            return new String[]{SUBMIT};
+            return new String[]{NEW_INSTANCE};
         }
 
         @Override
         public ControlInfo getControlInfo(String control) {
-            if (SUBMIT.equals(control)) {
-                return submitInfo;
+            if (NEW_INSTANCE.equals(control)) {
+                return instanceInfo;
             }
             throw new IllegalArgumentException();
         }
-    }
-
-    public static interface Task {
-
-        /**
-         * Called to execute task.
-         * @return Argument (use PReference to wrap arbitrary Objects)
-         * @throws java.lang.Exception
-         */
-        public Argument execute() throws Exception;
     }
 }

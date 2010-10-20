@@ -54,7 +54,7 @@ public class ScriptRoot2 extends AbstractRoot {
 
     @Override
     public InterfaceDefinition[] getInterfaces() {
-        return new InterfaceDefinition[] {ScriptInterpreter.getInstance()};
+        return new InterfaceDefinition[] {ScriptInterpreter.DEFINITION};
     }
 
     private class DispatchControl implements Control {

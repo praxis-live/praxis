@@ -25,7 +25,7 @@ package net.neilcsmith.praxis.script;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.PacketRouter;
-import net.neilcsmith.praxis.core.ServiceManager;
+import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 
 /**
  *
@@ -38,6 +38,7 @@ public interface Env {
 
     public abstract Lookup getLookup();
 
+    @Deprecated
     public abstract ServiceManager getServiceManager();
 
     public abstract long getTime();

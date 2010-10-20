@@ -36,22 +36,20 @@ import net.neilcsmith.praxis.core.Component;
  */
 public class ComponentInfo extends Argument {
 
-    private String type;
+    private Class<? extends Component> type;
     private Map<String, ControlInfo> controls;
     private Map<String, PortInfo> ports;
-    private String[] children;
     private PMap properties;
 
-    private ComponentInfo(String type, Map<String, ControlInfo> controls,
-            Map<String, PortInfo> ports, String[] children, PMap properties) {
+    private ComponentInfo(Class<? extends Component> type, Map<String, ControlInfo> controls,
+            Map<String, PortInfo> ports, PMap properties) {
         this.type = type;
         this.controls = controls;
         this.ports = ports;
-        this.children = children;
         this.properties = properties;
     }
 
-    public String getType() {
+    public Class<? extends Component> getType() {
         return type;
     }
 
@@ -70,18 +68,18 @@ public class ComponentInfo extends Argument {
     public PMap getProperties() {
         return properties;
     }
-
-    public boolean isContainer() {
-        return (children != null);
-    }
-
-    public String[] getChildren() {
-        if (children == null) {
-            return new String[0];
-        } else {
-            return Arrays.copyOf(children, children.length);
-        }
-    }
+//
+//    public boolean isContainer() {
+//        return (children != null);
+//    }
+//
+//    public String[] getChildren() {
+//        if (children == null) {
+//            return new String[0];
+//        } else {
+//            return Arrays.copyOf(children, children.length);
+//        }
+//    }
 
     //@TODO implement toString
     @Override
@@ -101,7 +99,6 @@ public class ComponentInfo extends Argument {
             return type.equals(o.type) &&
                     controls.equals(o.controls) &&
                     ports.equals(o.ports) &&
-                    Arrays.equals(children, o.children) &&
                     properties.equals(o.properties);
         }
         return false;
@@ -113,7 +110,6 @@ public class ComponentInfo extends Argument {
         hash = 29 * hash + (this.type != null ? this.type.hashCode() : 0);
         hash = 29 * hash + (this.controls != null ? this.controls.hashCode() : 0);
         hash = 29 * hash + (this.ports != null ? this.ports.hashCode() : 0);
-        hash = 29 * hash + Arrays.deepHashCode(this.children);
         hash = 29 * hash + (this.properties != null ? this.properties.hashCode() : 0);
         return hash;
     }
@@ -126,16 +122,16 @@ public class ComponentInfo extends Argument {
         return create(clas, controls, ports, null, properties);
     }
 
+    @Deprecated
     public static ComponentInfo create(
-            Class<? extends Component> clas,
+            Class<? extends Component> type,
             Map<String, ControlInfo> controls,
             Map<String, PortInfo> ports,
             String[] children,
             PMap properties) {
-        if (clas == null) {
+        if (type == null) {
             throw new NullPointerException();
         }
-        String type = clas.getName();
         if (controls == null) {
             controls = Collections.emptyMap();
         } else {
@@ -150,7 +146,7 @@ public class ComponentInfo extends Argument {
             properties = PMap.EMPTY;
         }
 
-        return new ComponentInfo(type, controls, ports, children, properties);
+        return new ComponentInfo(type, controls, ports, properties);
 
     }
 
@@ -159,5 +155,9 @@ public class ComponentInfo extends Argument {
             return (ComponentInfo) arg;
         }
         throw new ArgumentFormatException();
+    }
+
+    public static ArgumentInfo info() {
+        return ArgumentInfo.create(ComponentInfo.class, null);
     }
 }

@@ -28,7 +28,7 @@ import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.ControlAddress;
-import net.neilcsmith.praxis.core.ServiceUnavailableException;
+import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.interfaces.Task;
 import net.neilcsmith.praxis.core.interfaces.TaskListener;
 import net.neilcsmith.praxis.core.info.ControlInfo;

@@ -120,7 +120,7 @@ public class TaskProcessorImpl extends AbstractRoot {
             super(TaskProcessorImpl.this);
             ArgumentInfo input = ArgumentInfo.create(PReference.class, null);
             ArgumentInfo output = ArgumentInfo.create(Argument.class, null);
-            info = ControlInfo.create(
+            info = ControlInfo.createFunctionInfo(
                     new ArgumentInfo[]{input},
                     new ArgumentInfo[]{output},
                     null);

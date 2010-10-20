@@ -39,8 +39,8 @@ import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.Packet;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.RootHub;
-import net.neilcsmith.praxis.core.ServiceManager;
-import net.neilcsmith.praxis.core.ServiceUnavailableException;
+import net.neilcsmith.praxis.core.interfaces.ServiceManager;
+import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.ComponentManager;
 import net.neilcsmith.praxis.core.interfaces.ConnectionManager;
@@ -48,6 +48,7 @@ import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
+import net.neilcsmith.praxis.impl.InstanceLookup;
 
 /**
  *
@@ -56,7 +57,8 @@ import net.neilcsmith.praxis.impl.BasicControl;
 public class DefaultHub extends AbstractRoot {
 
     private static Logger logger = Logger.getLogger(DefaultHub.class.getName());
-    private DefaultRootHub hub;
+    private RootHubImpl hub;
+    private ServiceManagerImpl serviceManager;
     private Root.Controller controller;
 //    private Set<SystemExtension> extensions;
 //    private Map<ServiceID, ControlAddress> serviceAddresses;
@@ -67,7 +69,7 @@ public class DefaultHub extends AbstractRoot {
 //    private SystemExtension[] extensions;
     private Thread hubThread;
     private ComponentFactory factory;
-    private ServiceLoaderLookup lookup;
+    private Lookup lookup;
     private Map<InterfaceDefinition, ComponentAddress[]> services;
     private Root[] extensions;
 
@@ -76,11 +78,14 @@ public class DefaultHub extends AbstractRoot {
 //        serviceAddresses = new ConcurrentHashMap<ServiceID, ControlAddress>();
 //        serviceInfo = new ConcurrentHashMap<ServiceID, ControlInfo>();
 //        extensions = exts;
+        hub = new RootHubImpl();
+        serviceManager = new ServiceManagerImpl();
         services = new ConcurrentHashMap<InterfaceDefinition, ComponentAddress[]>();
         extensions = exts;
-        lookup = new ServiceLoaderLookup();
+        //lookup = new ServiceLoaderLookup();
+        lookup = InstanceLookup.create(new Object[]{serviceManager}, new ServiceLoaderLookup());
         factory = LookupComponentFactory.getInstance(lookup);
-        hub = new DefaultRootHub();
+        
     }
 
 //    public DefaultHub(ComponentFactory factory, SystemExtension... exts) {
@@ -90,7 +95,7 @@ public class DefaultHub extends AbstractRoot {
 //        serviceInfo = new ConcurrentHashMap<ServiceID, ControlInfo>();
 //        extensions = exts;
 //        this.factory = factory;
-//        hub = new DefaultRootHub();
+//        hub = new RootHubImpl();
 //    }
     public void activate() throws IllegalRootStateException {
 
@@ -269,11 +274,11 @@ public class DefaultHub extends AbstractRoot {
         thr.start();
     }
 
-    private class DefaultRootHub implements RootHub, ServiceManager {
+    private class RootHubImpl implements RootHub {
 
-        private final Logger logger = Logger.getLogger(DefaultRootHub.class.getName());
+        private final Logger logger = Logger.getLogger(RootHubImpl.class.getName());
 
-        private DefaultRootHub() {
+        private RootHubImpl() {
         }
 
         // THREAD SAFE
@@ -290,6 +295,21 @@ public class DefaultHub extends AbstractRoot {
                 throw new InvalidAddressException();
             }
         }
+
+        
+
+//        // THREAD SAFE
+//        public ServiceManager getServiceManager() {
+//            return serviceManager;
+//        }
+
+        // THREAD SAFE
+        public Lookup getLookup() {
+            return lookup;
+        }
+    }
+
+    private class ServiceManagerImpl implements ServiceManager {
 
         // THREAD SAFE
         public ComponentAddress findService(InterfaceDefinition info) throws ServiceUnavailableException {
@@ -311,15 +331,6 @@ public class DefaultHub extends AbstractRoot {
             }
         }
 
-        // THREAD SAFE
-        public ServiceManager getServiceManager() {
-            return this;
-        }
-
-        // THREAD SAFE
-        public Lookup getLookup() {
-            return lookup;
-        }
     }
 
     private class ClearControl extends BasicControl {

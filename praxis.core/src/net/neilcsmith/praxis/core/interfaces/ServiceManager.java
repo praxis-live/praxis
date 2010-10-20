@@ -19,7 +19,10 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.core;
+package net.neilcsmith.praxis.core.interfaces;
+
+import net.neilcsmith.praxis.core.ComponentAddress;
+import net.neilcsmith.praxis.core.InterfaceDefinition;
 
 /**
  *

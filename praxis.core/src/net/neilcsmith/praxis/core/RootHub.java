@@ -29,10 +29,7 @@ package net.neilcsmith.praxis.core;
  */
 public interface RootHub {
 
-    
     public void dispatch(Packet packet) throws InvalidAddressException;
-    
-    public ServiceManager getServiceManager();
     
     public Lookup getLookup();
     

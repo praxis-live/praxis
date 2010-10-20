@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
-import net.neilcsmith.praxis.core.ServiceUnavailableException;
+import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.interfaces.Task;
 import net.neilcsmith.praxis.core.interfaces.TaskListener;
 import net.neilcsmith.praxis.core.types.PReference;

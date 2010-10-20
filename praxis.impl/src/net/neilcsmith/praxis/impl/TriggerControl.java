@@ -44,7 +44,7 @@ public class TriggerControl extends BasicControl {
     private TriggerControl(Component host, Binding binding) {
         super(host);
         ArgumentInfo[] empty = new ArgumentInfo[0];
-        this.info = ControlInfo.create(empty, empty, null);
+        this.info = ControlInfo.createFunctionInfo(empty, empty, null);
         this.binding = binding;
         this.port = new InputPort(host);
     }

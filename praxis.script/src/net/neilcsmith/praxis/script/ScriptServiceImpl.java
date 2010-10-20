@@ -27,7 +27,7 @@ import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.Packet;
 import net.neilcsmith.praxis.core.PacketRouter;
-import net.neilcsmith.praxis.core.ServiceManager;
+import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.interfaces.ScriptInterpreter;
@@ -63,7 +63,7 @@ public class ScriptServiceImpl extends AbstractRoot {
 
     @Override
     public InterfaceDefinition[] getInterfaces() {
-        return new InterfaceDefinition[]{ScriptInterpreter.getInstance()};
+        return new InterfaceDefinition[]{ScriptInterpreter.DEFINITION};
     }
 
     private class EvalControl extends BasicControl {

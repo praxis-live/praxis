@@ -44,10 +44,10 @@ public class RootManager extends InterfaceDefinition {
     private ControlInfo destroyInfo;
 
     private RootManager() {
-        createInfo = ControlInfo.create(
+        createInfo = ControlInfo.createFunctionInfo(
                 new ArgumentInfo[] {ComponentAddress.info(), ComponentType.info()},
                 new ArgumentInfo[0], null);
-        destroyInfo = ControlInfo.create(
+        destroyInfo = ControlInfo.createFunctionInfo(
                 new ArgumentInfo[] {ComponentAddress.info()},
                 new ArgumentInfo[0], null);
 

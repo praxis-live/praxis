@@ -29,13 +29,7 @@ import net.neilcsmith.praxis.core.Argument;
  * @author Neil C Smith
  */
 @Deprecated
-public interface Task {
-    
-    /**
-     * Called to execute task.
-     * @return Argument (use PReference to wrap arbitrary Objects)
-     * @throws java.lang.Exception
-     */
-    public Argument execute() throws Exception;
+public interface Task extends TaskProcessor.Task {
+
 
 }

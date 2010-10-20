@@ -35,14 +35,11 @@ public final class PortInfo extends Argument {
 
     private String type;
     private Port.Direction direction;
-    private PortAddress[] connections;
     private PMap properties;
 
-    private PortInfo(String type, Port.Direction direction,
-            PortAddress[] connections, PMap properties) {
+    private PortInfo(String type, Port.Direction direction, PMap properties) {
         this.type = type;
         this.direction = direction;
-        this.connections = connections;
         this.properties = properties;
     }
 
@@ -50,8 +47,9 @@ public final class PortInfo extends Argument {
         return type;
     }
 
+    @Deprecated
     public PortAddress[] getConnections() {
-        return Arrays.copyOf(connections, connections.length);
+        return new PortAddress[0];
     }
 
     public Port.Direction getDirection() {
@@ -65,26 +63,22 @@ public final class PortInfo extends Argument {
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        str.append(type); str.append(" ");
-        str.append(direction.name()); str.append(" ");
-        for (PortAddress ad : connections) {
-            str.append(ad.toString()); str.append(" ");
-        }
+        str.append(type);
+        str.append(" ");
+        str.append(direction.name());
+        str.append(" ");
         str.append("{");
         str.append(properties.toString());
         str.append("}");
         return str.toString();
     }
 
-
-
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof PortInfo) {
             PortInfo o = (PortInfo) obj;
-            return type.equals(o.type) && direction.equals(o.direction) &&
-                    Arrays.equals(connections, o.connections) &&
-                    properties.equals(o.properties);
+            return type.equals(o.type) && direction.equals(o.direction)
+                    && properties.equals(o.properties);
         }
         return false;
     }
@@ -94,31 +88,33 @@ public final class PortInfo extends Argument {
         int hash = 7;
         hash = 89 * hash + (this.type != null ? this.type.hashCode() : 0);
         hash = 89 * hash + (this.direction != null ? this.direction.hashCode() : 0);
-        hash = 89 * hash + Arrays.deepHashCode(this.connections);
         hash = 89 * hash + (this.properties != null ? this.properties.hashCode() : 0);
         return hash;
     }
 
-    public static PortInfo create(Class<? extends Port> typeClass, Port.Direction direction,
-            PortAddress[] connections, PMap properties) {
-        if (typeClass == null || direction == null || connections == null) {
+    public static PortInfo create(Class<? extends Port> typeClass,
+            Port.Direction direction, PMap properties) {
+        if (typeClass == null || direction == null) {
             throw new NullPointerException();
         }
         String type = typeClass.getName();
-        PortAddress[] con = Arrays.copyOf(connections, connections.length);
         if (properties == null) {
             properties = PMap.EMPTY;
         }
-
-        return new PortInfo(type, direction, connections, properties);
+        return new PortInfo(type, direction, properties);
 
     }
 
+    @Deprecated
+    public static PortInfo create(Class<? extends Port> typeClass, Port.Direction direction,
+            PortAddress[] connections, PMap properties) {
+        return create(typeClass, direction, properties);
+
+    }
+
+    @Deprecated
     public static PortInfo create(PortInfo oldInfo, PortAddress[] connections) {
-        
-       return new PortInfo(oldInfo.type, oldInfo.direction,
-               Arrays.copyOf(connections, connections.length), oldInfo.properties);
+
+        return oldInfo;
     }
-
-
 }

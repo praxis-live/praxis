@@ -27,7 +27,24 @@ package net.neilcsmith.praxis.core;
  *
  * @author Neil C Smith
  */
-public interface PortProxyContainer extends Container {
+public interface ContainerContext {
+
+      /**
+     * Allows children to register a control on this container.
+     * @param id
+     * @param child
+     * @param control
+     * @throws RegistrationException
+     */
+    public void registerControl(String id, Control control) throws RegistrationException;
+
+    /**
+     * Unregister child control.
+     * @param id
+     * @param child
+     * @param control
+     */
+    public void unregisterControl(String id, Control control);
 
      /**
      * Allows children to register a port on this container.
@@ -36,7 +53,7 @@ public interface PortProxyContainer extends Container {
      * @param port
      * @throws net.neilcsmith.praxis.core.PortRegistrationException
      */
-    public void registerPortOnParent(String id, Component child, Port port) throws ProxyRegistrationException;
+    public void registerPort(String id, Port port) throws RegistrationException;
 
 
     /**
@@ -45,6 +62,6 @@ public interface PortProxyContainer extends Container {
      * @param child
      * @param port
      */
-    public void unregisterPortOnParent(String id, Component child, Port port);
+    public void unregisterPort(String id, Port port);
 
 }

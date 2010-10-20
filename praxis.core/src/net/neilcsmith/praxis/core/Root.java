@@ -21,6 +21,8 @@
  */
 package net.neilcsmith.praxis.core;
 
+import net.neilcsmith.praxis.core.interfaces.ServiceManager;
+
 
 /**
  *

@@ -20,7 +20,7 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.core;
+package net.neilcsmith.praxis.core.interfaces;
 
 /**
  *

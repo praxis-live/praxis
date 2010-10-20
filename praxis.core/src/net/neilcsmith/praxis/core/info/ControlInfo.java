@@ -29,23 +29,24 @@ import net.neilcsmith.praxis.core.types.PMap;
 /**
  *
  * @author Neil C Smith
- * @TODO handle possible null pointers in returns
  */
 public class ControlInfo extends Argument {
+
+    public static enum Type {FUNCTION, READ_WRITE_PROPERTY, READ_ONLY_PROPERTY};
 
     private ArgumentInfo[] inputs;
     private ArgumentInfo[] outputs;
     private Argument[] defaults;
-    private boolean isProperty;
     private PMap properties;
+    private Type type;
 
     private ControlInfo(ArgumentInfo[] inputs, ArgumentInfo[] outputs,
-            Argument[] defaults, boolean isProperty, PMap properties) {
+            Argument[] defaults, Type type, PMap properties) {
 
         this.inputs = inputs;
         this.outputs = outputs;
         this.defaults = defaults;
-        this.isProperty = isProperty;
+        this.type = type;
         this.properties = properties;
 
     }
@@ -62,13 +63,13 @@ public class ControlInfo extends Argument {
         }
         if (obj instanceof ControlInfo) {
             ControlInfo o = (ControlInfo) obj;
-            if (isProperty) {
-                return o.isProperty && Arrays.equals(inputs, o.inputs)
+            if (isProperty()) {
+                return o.isProperty() && Arrays.equals(inputs, o.inputs)
                         && Arrays.equals(defaults, o.defaults)
                         && properties.equals(o.properties);
             } else {
-                return !o.isProperty && Arrays.equals(inputs, inputs)
-                        && Arrays.equals(outputs, outputs)
+                return !o.isProperty() && Arrays.equals(inputs, o.inputs)
+                        && Arrays.equals(outputs, o.outputs)
                         && properties.equals(o.properties);
             }
         }
@@ -81,13 +82,18 @@ public class ControlInfo extends Argument {
         hash = 11 * hash + Arrays.deepHashCode(this.inputs);
         hash = 11 * hash + Arrays.deepHashCode(this.outputs);
         hash = 11 * hash + Arrays.deepHashCode(this.defaults);
-        hash = 11 * hash + (this.isProperty ? 1 : 0);
+        hash = 11 * hash + (this.type != null ? this.type.hashCode() : 0);
         hash = 11 * hash + (this.properties != null ? this.properties.hashCode() : 0);
         return hash;
     }
 
+    @Deprecated
     public boolean isProperty() {
-        return isProperty;
+        return type == Type.READ_WRITE_PROPERTY || type == Type.READ_ONLY_PROPERTY;
+    }
+
+    public Type getType() {
+        return type;
     }
 
     public PMap getProperties() {
@@ -110,19 +116,23 @@ public class ControlInfo extends Argument {
         return Arrays.copyOf(outputs, outputs.length);
     }
 
-    public static ControlInfo create(ArgumentInfo[] inputs,
+    public static ControlInfo createFunctionInfo(ArgumentInfo[] inputs,
             ArgumentInfo[] outputs, PMap properties) {
-        return create(inputs, outputs, null, false, properties);
+        return create(inputs, outputs, null, Type.FUNCTION, properties);
     }
 
     public static ControlInfo createPropertyInfo(ArgumentInfo[] arguments, Argument[] defaults, PMap properties) {
-        return create(arguments, arguments, defaults, true, properties);
+        return create(arguments, arguments, defaults, Type.READ_WRITE_PROPERTY, properties);
+    }
+
+    public static ControlInfo createReadOnlyPropertyInfo(ArgumentInfo[] arguments, Argument[] defaults, PMap properties) {
+        return create(arguments, arguments, defaults, Type.READ_ONLY_PROPERTY, properties);
     }
 
     private static ControlInfo create(ArgumentInfo[] inputs,
             ArgumentInfo[] outputs,
             Argument[] defaults,
-            boolean isProperty,
+            Type type,
             PMap properties) {
 
         ArgumentInfo[] ins = Arrays.copyOf(inputs, inputs.length);
@@ -133,11 +143,12 @@ public class ControlInfo extends Argument {
         } else {
             outs = Arrays.copyOf(outputs, outputs.length);
         }
+        Argument[] defs = defaults.clone();
         if (properties == null) {
             properties = PMap.EMPTY;
         }
 
-        return new ControlInfo(inputs, outputs, defaults, isProperty, properties);
+        return new ControlInfo(ins, outs, defs, type, properties);
 
 
     }

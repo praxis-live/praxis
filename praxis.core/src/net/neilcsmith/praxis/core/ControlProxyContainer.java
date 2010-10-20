@@ -33,9 +33,9 @@ public interface ControlProxyContainer {
      * @param id
      * @param child
      * @param control
-     * @throws ProxyRegistrationException
+     * @throws RegistrationException
      */
-    public void registerControlOnParent(String id, Component child, Control control) throws ProxyRegistrationException;
+    public void registerControlOnParent(String id, Component child, Control control) throws RegistrationException;
 
     /**
      * Unregister child port.

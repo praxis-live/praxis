@@ -229,7 +229,7 @@ public class SimplePlayer implements Bus, Runnable {
 
     private void init() throws Exception {
 
-        AudioFormat format = new AudioFormat((float)sampleRate, 16, nChannels, true, false);
+        AudioFormat format = new AudioFormat(sampleRate, 16, nChannels, true, false);
 //        AudioFormat fm2 = new AudioFormat((float)sampleRate, 16, 1, true, false);
         System.out.println("Format frame size = " + format.getFrameSize());
         System.out.println("Format frame rate = " + format.getFrameRate());

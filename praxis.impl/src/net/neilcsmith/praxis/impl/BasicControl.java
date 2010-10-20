@@ -44,6 +44,7 @@ public abstract class BasicControl extends AbstractControl {
     }
 
     //@TODO implements standard error message system.
+    @Deprecated
     protected Call createError(Call input, String msg) {
         return Call.createErrorCall(input, PString.valueOf(msg));
     }
@@ -85,8 +86,7 @@ public abstract class BasicControl extends AbstractControl {
 
     protected void processError(Call call) throws Exception {
         if (logger.isLoggable(Level.WARNING)) {
-            logger.warning(String.valueOf(getAddress()) +
-                    "\n" + call);
+            logger.warning(call.getFromAddress() + "\n" + call);
         }
     }
 
@@ -96,8 +96,7 @@ public abstract class BasicControl extends AbstractControl {
 
     protected void processReturn(Call call) throws Exception {
         if (logger.isLoggable(Level.INFO)) {
-            logger.warning(String.valueOf(getAddress()) +
-                    "\n" + call);
+            logger.warning(call.getFromAddress() + "\n" + call);
         }
     }
 

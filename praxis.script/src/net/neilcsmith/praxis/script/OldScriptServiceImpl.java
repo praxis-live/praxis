@@ -63,7 +63,7 @@ public class OldScriptServiceImpl extends AbstractRoot {
 
     @Override
     public InterfaceDefinition[] getInterfaces() {
-        return new InterfaceDefinition[] {ScriptInterpreter.getInstance()};
+        return new InterfaceDefinition[] {ScriptInterpreter.DEFINITION};
     }
 
 
@@ -75,7 +75,7 @@ public class OldScriptServiceImpl extends AbstractRoot {
         private EvalControl() {
             super(OldScriptServiceImpl.this);
             ArgumentInfo input = ArgumentInfo.create(PString.class, null);
-            info = ControlInfo.create(
+            info = ControlInfo.createFunctionInfo(
                     new ArgumentInfo[]{input},
                     new ArgumentInfo[0],
                     null);

@@ -30,7 +30,7 @@ import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.Root;
-import net.neilcsmith.praxis.core.ServiceUnavailableException;
+import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.interfaces.Task;
 import net.neilcsmith.praxis.core.interfaces.TaskListener;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;

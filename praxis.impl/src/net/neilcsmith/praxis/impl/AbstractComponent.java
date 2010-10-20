@@ -31,12 +31,10 @@ import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.ParentVetoException;
 import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.core.PortConnectionListener;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.info.ComponentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.info.PortInfo;
-import net.neilcsmith.praxis.core.types.PString;
 
 /**
  *
@@ -46,7 +44,7 @@ public abstract class AbstractComponent implements Component {
 
     private Map<String, Control> controlMap;
     private Map<String, Port> portMap;
-    private PortConnectionListener portListener;
+//    private PortConnectionListener portListener;
     private Container parent;
     private Root root;
     private ComponentAddress address;
@@ -61,12 +59,12 @@ public abstract class AbstractComponent implements Component {
     public AbstractComponent() {
         controlMap = new LinkedHashMap<String, Control>();
         portMap = new LinkedHashMap<String, Port>();
-        portListener = new PortConnectionListener() {
-
-            public void connectionsChanged(Port source) {
-                portInfoValid = false;
-            }
-        };
+//        portListener = new PortConnectionListener() {
+//
+//            public void connectionsChanged(Port source) {
+//                portInfoValid = false;
+//            }
+//        };
     }
 
     public Control getControl(String id) {
@@ -173,7 +171,7 @@ public abstract class AbstractComponent implements Component {
             throw new IllegalArgumentException();
         }
         portMap.put(id, port);
-        port.addConnectionListener(portListener);
+//        port.addConnectionListener(portListener);
         portInfoValid = false;
     }
 
@@ -185,7 +183,7 @@ public abstract class AbstractComponent implements Component {
     protected Port unregisterPort(String id) {
         Port port = portMap.remove(id);
         if (port != null) {
-            port.removeConnectionListener(portListener);
+//            port.removeConnectionListener(portListener);
             port.disconnectAll();
             portInfoValid = false;
         }

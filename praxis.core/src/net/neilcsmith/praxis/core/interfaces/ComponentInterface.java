@@ -19,60 +19,50 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
+
 package net.neilcsmith.praxis.core.interfaces;
 
 import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.info.ComponentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.types.PReference;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class TaskProcessor {
+public class ComponentInterface {
+    
+    public final static String INFO = "info";
+    public final static Definition DEFINITION = new Definition();
 
-    public final static TaskProcessor.Definition DEFINITION = new Definition();
-    public final static String SUBMIT = "submit";
+    private ComponentInterface() {}
 
-    private TaskProcessor() {
-    }
 
     public static class Definition extends InterfaceDefinition {
 
-        private ControlInfo submitInfo;
+        private ControlInfo infoInfo;
 
         private Definition() {
-            ArgumentInfo input = PReference.info(Task.class);
-            ArgumentInfo output = Argument.info();
-            submitInfo = ControlInfo.createFunctionInfo(
-                    new ArgumentInfo[]{input},
-                    new ArgumentInfo[]{output},
+            infoInfo = ControlInfo.createFunctionInfo(
+                    new ArgumentInfo[0],
+                    new ArgumentInfo[] {ComponentInfo.info()},
                     null);
         }
 
         @Override
         public String[] getControls() {
-            return new String[]{SUBMIT};
+            return new String[] {INFO};
         }
 
         @Override
         public ControlInfo getControlInfo(String control) {
-            if (SUBMIT.equals(control)) {
-                return submitInfo;
+            if (INFO.equals(control)) {
+                return infoInfo;
             }
             throw new IllegalArgumentException();
         }
+
     }
 
-    public static interface Task {
-
-        /**
-         * Called to execute task.
-         * @return Argument (use PReference to wrap arbitrary Objects)
-         * @throws java.lang.Exception
-         */
-        public Argument execute() throws Exception;
-    }
 }

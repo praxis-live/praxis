@@ -32,6 +32,7 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
+@Deprecated
 public class ComponentManager extends InterfaceDefinition {
 
     public final static String CREATE = "create";
@@ -43,10 +44,10 @@ public class ComponentManager extends InterfaceDefinition {
     private ControlInfo destroyInfo;
 
     private ComponentManager() {
-        createInfo = ControlInfo.create(
+        createInfo = ControlInfo.createFunctionInfo(
                 new ArgumentInfo[] {ComponentAddress.info(), ComponentType.info()},
                 new ArgumentInfo[0], null);
-        destroyInfo = ControlInfo.create(
+        destroyInfo = ControlInfo.createFunctionInfo(
                 new ArgumentInfo[] {ComponentAddress.info()},
                 new ArgumentInfo[0], null);
 

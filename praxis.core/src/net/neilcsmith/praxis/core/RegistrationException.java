@@ -26,12 +26,12 @@ package net.neilcsmith.praxis.core;
  *
  * @author Neil C Smith
  */
-public class ProxyRegistrationException extends Exception {
+public class RegistrationException extends Exception {
 
     /**
      * Creates a new instance of <code>PortRegistrationException</code> without detail message.
      */
-    public ProxyRegistrationException() {
+    public RegistrationException() {
     }
 
 
@@ -39,7 +39,7 @@ public class ProxyRegistrationException extends Exception {
      * Constructs an instance of <code>PortRegistrationException</code> with the specified detail message.
      * @param msg the detail message.
      */
-    public ProxyRegistrationException(String msg) {
+    public RegistrationException(String msg) {
         super(msg);
     }
 }

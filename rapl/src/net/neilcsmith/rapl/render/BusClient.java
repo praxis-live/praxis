@@ -171,7 +171,7 @@ public class BusClient implements Bus, AudioClient {
             float[] data = sinks[i].buffer.getData();
             FloatBuffer out = outputs.get(i);
             for (int f=0; f<nframes; f++) {
-                out.put(f, (float) data[f]);
+                out.put(f, data[f]);
             }
         }
     }

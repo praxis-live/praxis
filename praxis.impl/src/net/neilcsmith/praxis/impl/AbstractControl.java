@@ -46,7 +46,8 @@ public abstract class AbstractControl implements Control {
     public Component getComponent() {
         return host;
     }
-    
+
+    @Deprecated
     protected ControlAddress getAddress() {
 
             ComponentAddress hostAddress = host.getAddress();

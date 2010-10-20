@@ -21,6 +21,8 @@
  */
 package net.neilcsmith.praxis.impl;
 
+import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
+import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 import net.neilcsmith.praxis.core.interfaces.TaskListener;
 import net.neilcsmith.praxis.core.interfaces.Task;
 import java.util.ArrayList;
@@ -137,6 +139,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         }
     }
 
+    // make protected?
     @Deprecated
     public PacketRouter getPacketRouter() {
         return this;
@@ -213,11 +216,11 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         }
     }
 
-    @Deprecated
     public long getTime() {
         return time;
     }
 
+    @Deprecated
     protected void setTime(long time) {
         this.time = time;
     }
@@ -423,7 +426,8 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
 
     @Deprecated
     public ServiceManager getServiceManager() {
-        return hub.getServiceManager();
+//        return hub.getServiceManager();
+        return hub.getLookup().get(ServiceManager.class);
     }
     
     @Override
@@ -553,7 +557,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             ArgumentInfo arg1 = ArgumentInfo.create(PReference.class, null);
             ArgumentInfo[] in = new ArgumentInfo[]{arg0, arg1};
             ArgumentInfo[] out = new ArgumentInfo[0];
-            info = ControlInfo.create(in, out, null);
+            info = ControlInfo.createFunctionInfo(in, out, null);
         }
 
         @Override
@@ -613,7 +617,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             ArgumentInfo arg0 = ArgumentInfo.create(ComponentAddress.class, null);
             ArgumentInfo[] in = new ArgumentInfo[]{arg0};
             ArgumentInfo[] out = new ArgumentInfo[0];
-            info = ControlInfo.create(in, out, null);
+            info = ControlInfo.createFunctionInfo(in, out, null);
         }
 
         @Override
@@ -655,7 +659,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             ArgumentInfo arg = ArgumentInfo.create(PortAddress.class, null);
             ArgumentInfo[] in = new ArgumentInfo[]{arg, arg};
             ArgumentInfo[] out = new ArgumentInfo[0];
-            info = ControlInfo.create(in, out, null);
+            info = ControlInfo.createFunctionInfo(in, out, null);
             this.connect = connect;
         }
 
@@ -712,7 +716,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         private TransportControl(boolean start) {
             super(AbstractRoot.this);
             ArgumentInfo[] emptyArgs = new ArgumentInfo[0];
-            info = ControlInfo.create(emptyArgs, emptyArgs, null);
+            info = ControlInfo.createFunctionInfo(emptyArgs, emptyArgs, null);
             this.start = start;
         }
 
@@ -752,7 +756,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             ArgumentInfo[] out = new ArgumentInfo[]{
                 ArgumentInfo.create(ComponentInfo.class, null)
             };
-            info = ControlInfo.create(in, out, null);
+            info = ControlInfo.createFunctionInfo(in, out, null);
         }
 
         @Override
