@@ -49,7 +49,7 @@ public class Join extends AbstractRootStateComponent {
     }
 
     private void build() {
-        registerPort("in-1", ArgumentInputPort.create(this, new ArgumentInputPort.Binding() {
+        registerPort("in-1", ArgumentInputPort.create( new ArgumentInputPort.Binding() {
 
             public void receive(long time, Argument arg) {
                 if (in2 != null) {
@@ -60,7 +60,7 @@ public class Join extends AbstractRootStateComponent {
                 }
             }
         }));
-        registerPort("in-2", ArgumentInputPort.create(this, new ArgumentInputPort.Binding() {
+        registerPort("in-2", ArgumentInputPort.create( new ArgumentInputPort.Binding() {
 
             public void receive(long time, Argument arg) {
                 if (in1 != null) {
@@ -71,7 +71,7 @@ public class Join extends AbstractRootStateComponent {
                 }
             }
         }));
-        TriggerControl reset = TriggerControl.create(this, new TriggerControl.Binding() {
+        TriggerControl reset = TriggerControl.create( new TriggerControl.Binding() {
 
             public void trigger(long time) {
                 reset();

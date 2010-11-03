@@ -33,8 +33,7 @@ public class ArgumentInputPort extends AbstractControlInputPort {
 
     private Binding binding;
 
-    private ArgumentInputPort(Component host, Binding binding) {
-        super(host);
+    private ArgumentInputPort(Binding binding) {
         this.binding = binding;
     }
 
@@ -53,11 +52,11 @@ public class ArgumentInputPort extends AbstractControlInputPort {
         binding.receive(time, value);
     }
 
-    public static ArgumentInputPort create(Component host, Binding binding) {
-        if (host == null || binding == null) {
+    public static ArgumentInputPort create( Binding binding) {
+        if (binding == null) {
             throw new NullPointerException();
         }
-        return new ArgumentInputPort(host, binding);
+        return new ArgumentInputPort(binding);
 
     }
 

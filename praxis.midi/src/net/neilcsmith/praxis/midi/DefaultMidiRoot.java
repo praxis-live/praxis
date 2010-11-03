@@ -66,9 +66,9 @@ public class DefaultMidiRoot extends AbstractRoot {
     }
 
     private void buildControls() {
-        device = StringProperty.create(this, "");
+        device = StringProperty.create( "");
         registerControl("device", device);
-        mapping = StringProperty.create(this, new MappingBinding(), "");
+        mapping = StringProperty.create( new MappingBinding(), "");
         registerControl("mapping", mapping);
         registerControl("_log", new LogControl());
     }

@@ -44,7 +44,7 @@ public class BooleanProperty extends AbstractSingleArgProperty {
 //    }
     private BooleanProperty(Component component, Binding binding,
             ControlInfo info) {
-        super(component, info);
+        super(info);
         this.binding = binding;
 
     }

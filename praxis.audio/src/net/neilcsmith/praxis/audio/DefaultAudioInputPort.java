@@ -44,7 +44,6 @@ public class DefaultAudioInputPort extends AudioPort.Input {
     private Mixer mixer;
     private List<AudioPort.Output> connections;
     private Component component;
-    private List<PortConnectionListener> listeners;
     private boolean multiChannelCapable;
     private PortInfo info;
 
@@ -61,9 +60,8 @@ public class DefaultAudioInputPort extends AudioPort.Input {
         this.sink = sink;
         this.portSink = sink;
         this.multiChannelCapable = multiChannelCapable;
-        listeners = new ArrayList<PortConnectionListener>();
         connections = new ArrayList<AudioPort.Output>();
-        info = PortInfo.create(this.getTypeClass(), this.getDirection(), new PortAddress[0], null);
+        info = PortInfo.create(this.getTypeClass(), this.getDirection(), null);
     }
 
     public void disconnectAll() {
@@ -76,55 +74,14 @@ public class DefaultAudioInputPort extends AudioPort.Input {
         return connections.toArray(new Port[connections.size()]);
     }
 
-    public PortAddress getAddress() {
-//        try {
-            ComponentAddress ad = component.getAddress();
-            if (ad == null) {
-                return null;
-            } else {
-                return PortAddress.create(component.getAddress(), component.getPortID(this));
-            }
-//        } catch (ArgumentFormatException ex) {
-//            return null;
-//        }
-    }
-
     public PortInfo getInfo() {
-//        if (connection == null) {
-//            info = PortInfo.create(info, new PortAddress[0]);
-//        } else {
-//            info = PortInfo.create(info, new PortAddress[]{connection.getAddress()});
-//        }
-//        return info;
-        if (connections.isEmpty()) {
-            info = PortInfo.create(info, new PortAddress[0]);
-        } else {
-            int size = connections.size();
-            PortAddress[] addresses = new PortAddress[size];
-            for (int i = 0; i < size; i++) {
-                addresses[i] = connections.get(i).getAddress();
-            }
-            info = PortInfo.create(info, addresses);
-        }
         return info;
     }
 
-    public Component getComponent() {
-        return component;
-    }
+
 
     
 
-    public void addConnectionListener(PortConnectionListener listener) {
-        if (listener == null) {
-            throw new NullPointerException();
-        }
-        listeners.add(listener);
-    }
-
-    public void removeConnectionListener(PortConnectionListener listener) {
-        listeners.remove(listener);
-    }
 //
 //    @Override
 //    protected void addImageOutputPort(AudioPort.Output port, Source source) throws PortConnectionException {
@@ -149,11 +106,7 @@ public class DefaultAudioInputPort extends AudioPort.Input {
 //        }
 //        fireConnectionListeners();
 //    }
-    private void fireConnectionListeners() {
-        for (PortConnectionListener listener : listeners) {
-            listener.connectionsChanged(this);
-        }
-    }
+
 
     @Override
     protected void addAudioOutputPort(Output port, Source source) throws PortConnectionException {
@@ -171,7 +124,6 @@ public class DefaultAudioInputPort extends AudioPort.Input {
                 switchToSingleChannel();
             }
         }
-        fireConnectionListeners();
     }
 
     @Override
@@ -182,7 +134,6 @@ public class DefaultAudioInputPort extends AudioPort.Input {
                 switchToSingleChannel();
             }
         }
-        fireConnectionListeners();
     }
 
     private void switchToMultichannel() {
@@ -200,8 +151,7 @@ public class DefaultAudioInputPort extends AudioPort.Input {
             }
             portSink = mixer;
         } catch (Exception ex) {
-            logger.log(Level.WARNING, "Error converting port "
-                    + getAddress() + " to multi channel", ex);
+            logger.log(Level.WARNING, "Error converting port to multi channel", ex);
             removeSources(mixer);
             removeSources(sink);
             connections.clear();
@@ -219,8 +169,7 @@ public class DefaultAudioInputPort extends AudioPort.Input {
             }
             portSink = sink;
         } catch (Exception ex) {
-            logger.log(Level.WARNING, "Error converting port "
-                    + getAddress() + " to single channel", ex);
+            logger.log(Level.WARNING, "Error converting port to single channel", ex);
             removeSources(sink);
             removeSources(mixer);
             connections.clear();

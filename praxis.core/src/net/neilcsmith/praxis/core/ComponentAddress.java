@@ -45,8 +45,8 @@ public final class ComponentAddress extends Argument {
     
     private static final String ADDRESS_REGEX = "\\G/([_\\-\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*)";
     private static final String ID_REGEX = "[_\\-\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*";
-    private final static Pattern idPattern = Pattern.compile(ID_REGEX);
-    private final static Pattern addressPattern = Pattern.compile(ADDRESS_REGEX);
+    private static final Pattern idPattern = Pattern.compile(ID_REGEX);
+    private static final Pattern addressPattern = Pattern.compile(ADDRESS_REGEX);
     
     private String[] address;
     private String addressString;

@@ -19,36 +19,46 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.core.interfaces;
 
-import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.info.ArgumentInfo;
-import net.neilcsmith.praxis.core.info.ComponentInfo;
-import net.neilcsmith.praxis.core.info.ControlInfo;
+package net.neilcsmith.praxis.impl;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import net.neilcsmith.praxis.core.Lookup;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ComponentInterface extends InterfaceDefinition {
+public class EmptyLookup implements Lookup {
 
-    public final static String INFO = "info";
-    private final static ControlInfo INFO_INFO = ControlInfo.createReadOnlyPropertyInfo(
-                new ArgumentInfo[]{ComponentInfo.info()},
-                null);;
+    private final static EmptyResult EMPTY_RESULT = new EmptyResult<Object>();
+    private final static EmptyLookup INSTANCE = new EmptyLookup();
 
-    @Override
-    public String[] getControls() {
-        return new String[]{INFO};
+    private EmptyLookup() {}
+
+    public <T> T get(Class<T> type) {
+        return null;
     }
 
-    @Override
-    public ControlInfo getControlInfo(String control) {
-        if (INFO.equals(control)) {
-            return INFO_INFO;
+    @SuppressWarnings("unchecked")
+    public <T> Result<T> getAll(Class<T> type) {
+        return (Result<T>) EMPTY_RESULT;
+    }
+
+    public static EmptyLookup getInstance() {
+        return INSTANCE;
+    }
+
+    private static class EmptyResult<T> implements Lookup.Result<T> {
+
+        public Iterator<T> iterator() {
+            List<T> list = Collections.emptyList();
+            return list.iterator();
         }
-        throw new IllegalArgumentException();
+
     }
+
+
 }
-
-

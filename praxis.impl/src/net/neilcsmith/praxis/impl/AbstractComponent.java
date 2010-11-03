@@ -21,14 +21,18 @@
  */
 package net.neilcsmith.praxis.impl;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.Control;
+import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
+import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.ParentVetoException;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
@@ -44,12 +48,9 @@ public abstract class AbstractComponent implements Component {
 
     private Map<String, Control> controlMap;
     private Map<String, Port> portMap;
-//    private PortConnectionListener portListener;
     private Container parent;
-    private Root root;
     private ComponentAddress address;
     ComponentInfo info;
-//    boolean componentInfoValid;
     boolean controlInfoValid;
     boolean portInfoValid;
 
@@ -59,23 +60,19 @@ public abstract class AbstractComponent implements Component {
     public AbstractComponent() {
         controlMap = new LinkedHashMap<String, Control>();
         portMap = new LinkedHashMap<String, Port>();
-//        portListener = new PortConnectionListener() {
-//
-//            public void connectionsChanged(Port source) {
-//                portInfoValid = false;
-//            }
-//        };
     }
 
     public Control getControl(String id) {
         return controlMap.get(id);
     }
 
-
-    public String getControlID(Control control) {
-        for (Map.Entry<String, Control> entry : controlMap.entrySet()) {
-            if (entry.getValue() == control) {
-                return entry.getKey();
+    public ControlAddress getAddress(Control control) {
+        ComponentAddress thisAddress = getAddress();
+        if (thisAddress != null) {
+            for (Map.Entry<String, Control> entry : controlMap.entrySet()) {
+                if (entry.getValue() == control) {
+                    return ControlAddress.create(thisAddress, entry.getKey());
+                }
             }
         }
         return null;
@@ -99,6 +96,9 @@ public abstract class AbstractComponent implements Component {
             throw new IllegalArgumentException();
         }
         controlMap.put(id, control);
+        if (control instanceof ExtendedControl) {
+            ((ExtendedControl) control).addNotify(this);
+        }
         controlInfoValid = false;
     }
 
@@ -109,6 +109,9 @@ public abstract class AbstractComponent implements Component {
      */
     protected Control unregisterControl(String id) {
         Control control = controlMap.remove(id);
+        if (control instanceof ExtendedControl) {
+            ((ExtendedControl) control).removeNotify(this);
+        }
         if (control != null) {
             controlInfoValid = false;
         }
@@ -117,40 +120,6 @@ public abstract class AbstractComponent implements Component {
 
     public Port getPort(String id) {
         return portMap.get(id);
-    }
-
-
-    public String getPortID(Port port) {
-        for (Map.Entry<String, Port> entry : portMap.entrySet()) {
-            if (entry.getValue() == port) {
-                return entry.getKey();
-            }
-        }
-        return null;
-    }
-
-    /**
-     *
-     * @param port
-     * @param byType
-     * @param byDirection
-     * @return
-     */
-    public int getPortIndex(Port port, boolean byType, boolean byDirection) {
-        int val = -1;
-        Class<? extends Port> type = port.getTypeClass();
-        Port.Direction dir = port.getDirection();
-        for (Map.Entry<String, Port> entry : portMap.entrySet()) {
-            Port entryPort = entry.getValue();
-            if ((!byType || entryPort.getTypeClass().equals(type)) &&
-                    (!byDirection || entryPort.getDirection().equals(dir))) {
-                val++;
-            }
-            if (entryPort == port) {
-                return val;
-            }
-        }
-        return -1;
     }
 
     public String[] getPortIDs() {
@@ -193,24 +162,28 @@ public abstract class AbstractComponent implements Component {
     public Container getParent() {
         return parent;
     }
-    
+
+    @Deprecated
     public Root getRoot() {
-        return root;
+        Container c = getParent();
+        if (c == null) {
+            return null;
+        }
+//        while ((c = c.getParent()) != null) {
+//            if (c.getParent() == null && c instanceof Root) {
+//                return (Root) c;
+//            }
+//        }
+        do {
+            if (c.getParent() == null && c instanceof Root) {
+                return (Root) c;
+            }
+
+        } while ((c = c.getParent()) != null);
+        return null;
     }
 
     public ComponentAddress getAddress() {
-//        if (address == null) {
-//            if (parent != null) {
-//                ComponentAddress parentAddress = parent.getAddress();
-//                String thisID = parent.getChildID(this);
-////                try {
-//                    address = ComponentAddress.create(parentAddress, thisID);
-////                } catch (ArgumentFormatException ex) {
-////                    address = null;
-////                }
-//            }
-//        }
-//        return address;
         if (parent != null) {
             return parent.getAddress(this);
         } else {
@@ -234,8 +207,13 @@ public abstract class AbstractComponent implements Component {
     }
 
     public void hierarchyChanged() {
-        root = parent == null ? null : parent.getRoot(); 
         address = null;
+        for (Map.Entry<String, Control> entry : controlMap.entrySet()) {
+            Control c = entry.getValue();
+            if (c instanceof ExtendedControl) {
+                ((ExtendedControl) c).hierarchyChanged();
+            }
+        }
     }
 
     public ComponentInfo getInfo() {
@@ -277,6 +255,20 @@ public abstract class AbstractComponent implements Component {
         return new InterfaceDefinition[0];
     }
 
+    public Lookup getLookup() {
+        if (parent == null) {
+            return EmptyLookup.getInstance();
+        } else {
+            return parent.getLookup();
+        }
+    }
 
+    public static interface ExtendedControl extends Control {
 
+        public void addNotify(AbstractComponent component);
+
+        public void removeNotify(AbstractComponent component);
+
+        public void hierarchyChanged();
+    }
 }

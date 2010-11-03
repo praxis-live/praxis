@@ -64,15 +64,15 @@ public class XYController extends AbstractGuiComponent {
         xPrefs = new Preferences();
         yPrefs = new Preferences();
         labelText = "";
-        registerControl("label", StringProperty.create(this, new LabelBinding(), labelText));
-        registerControl("binding-x", ArgumentProperty.create(this, new XAddressBinding(), PString.EMPTY));
-        registerControl("binding-y", ArgumentProperty.create(this, new YAddressBinding(), PString.EMPTY));
-        registerControl("minimum-x", ArgumentProperty.create(this, new MinBinding(xPrefs), PString.EMPTY));
-        registerControl("minimum-y", ArgumentProperty.create(this, new MinBinding(yPrefs), PString.EMPTY));
-        registerControl("maximum-x", ArgumentProperty.create(this, new MaxBinding(xPrefs), PString.EMPTY));
-        registerControl("maximum-y", ArgumentProperty.create(this, new MaxBinding(yPrefs), PString.EMPTY));
-        registerControl("scale-x", ArgumentProperty.create(this, new ScaleBinding(xPrefs), PString.EMPTY));
-        registerControl("scale-y", ArgumentProperty.create(this, new ScaleBinding(yPrefs), PString.EMPTY));
+        registerControl("label", StringProperty.create( new LabelBinding(), labelText));
+        registerControl("binding-x", ArgumentProperty.create( new XAddressBinding(), PString.EMPTY));
+        registerControl("binding-y", ArgumentProperty.create( new YAddressBinding(), PString.EMPTY));
+        registerControl("minimum-x", ArgumentProperty.create( new MinBinding(xPrefs), PString.EMPTY));
+        registerControl("minimum-y", ArgumentProperty.create( new MinBinding(yPrefs), PString.EMPTY));
+        registerControl("maximum-x", ArgumentProperty.create( new MaxBinding(xPrefs), PString.EMPTY));
+        registerControl("maximum-y", ArgumentProperty.create( new MaxBinding(yPrefs), PString.EMPTY));
+        registerControl("scale-x", ArgumentProperty.create( new ScaleBinding(xPrefs), PString.EMPTY));
+        registerControl("scale-y", ArgumentProperty.create( new ScaleBinding(yPrefs), PString.EMPTY));
     }
 
     @Override

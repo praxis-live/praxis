@@ -52,7 +52,7 @@ public class RandomFile extends AbstractComponent {
         ResourceListLoader fileControl = ResourceListLoader.create(this, new FilesListener());
         registerControl("directory", fileControl);
         registerPort("directory", fileControl.getInputPort());
-        TriggerControl trigger = TriggerControl.create(this, new TriggerBinding());
+        TriggerControl trigger = TriggerControl.create( new TriggerBinding());
         registerControl("trigger", trigger);
         registerPort("trigger", trigger.createPort());
         output = new DefaultControlOutputPort(this);

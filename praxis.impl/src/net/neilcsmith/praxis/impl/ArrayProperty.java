@@ -38,8 +38,8 @@ public class ArrayProperty extends AbstractSingleArgProperty {
     private Binding binding;
 
 
-    private ArrayProperty(Component component, Binding binding, ControlInfo info) {
-        super(component, info);
+    private ArrayProperty(Binding binding, ControlInfo info) {
+        super(info);
         this.binding = binding;
     }
 
@@ -65,15 +65,15 @@ public class ArrayProperty extends AbstractSingleArgProperty {
 
     
 
-    public static ArrayProperty create(Component component) {
-        return create(component, null, PArray.EMPTY);
+    public static ArrayProperty create() {
+        return create(  PArray.EMPTY);
     }
 
-    public static ArrayProperty create(Component component, PArray def) {
-        return create(component, null, def);
+    public static ArrayProperty create(PArray def) {
+        return create(null, def);
     }
 
-    public static ArrayProperty create(Component component, Binding binding, PArray def) {
+    public static ArrayProperty create( Binding binding, PArray def) {
 
         if (binding == null) {
             binding = new DefaultBinding(def);
@@ -82,7 +82,7 @@ public class ArrayProperty extends AbstractSingleArgProperty {
 
         Argument[] defaults = new Argument[]{def};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
-        return new ArrayProperty(component, binding, info);
+        return new ArrayProperty(binding, info);
     }
 
     public static interface Binding {

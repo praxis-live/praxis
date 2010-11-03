@@ -38,9 +38,9 @@ public class FloatProperty extends AbstractSingleArgProperty {
     private double max;
     private Binding binding;
 
-    private FloatProperty(Component component, Binding binding,
-            double min, double max, ControlInfo info) {
-        super(component, info);
+    private FloatProperty(Binding binding, double min, double max,
+            ControlInfo info) {
+        super(info);
         this.binding = binding;
         this.min = min;
         this.max = max;
@@ -70,15 +70,15 @@ public class FloatProperty extends AbstractSingleArgProperty {
         return binding.getBoundValue();
     }
 
-    public static FloatProperty create(Component component, double def) {
-        return create(component, null, def, null);
+    public static FloatProperty create( double def) {
+        return create( null, def, null);
     }
 
-    public static FloatProperty create(Component component, Binding binding, double def) {
-        return create(component, binding, def, null);
+    public static FloatProperty create( Binding binding, double def) {
+        return create(binding, def, null);
     }
 
-    public static FloatProperty create(Component component, Binding binding, double def, PMap properties) {
+    public static FloatProperty create( Binding binding, double def, PMap properties) {
         if (def < PNumber.MIN_VALUE || def > PNumber.MAX_VALUE) {
             throw new IllegalArgumentException();
         }
@@ -88,21 +88,21 @@ public class FloatProperty extends AbstractSingleArgProperty {
         ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.info()};
         Argument[] defaults = new Argument[]{PNumber.valueOf(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
-        return new FloatProperty(component, binding, PNumber.MIN_VALUE, PNumber.MAX_VALUE, info);
+        return new FloatProperty(binding, PNumber.MIN_VALUE, PNumber.MAX_VALUE, info);
     }
 
-    public static FloatProperty create(Component component, double min,
+    public static FloatProperty create( double min,
             double max, double def) {
-        return create(component, null, min, max, def, null);
+        return create( null, min, max, def, null);
 
     }
 
-    public static FloatProperty create(Component component, Binding binding,
+    public static FloatProperty create( Binding binding,
             double min, double max, double def) {
-        return create(component, binding, min, max, def, null);
+        return create(binding, min, max, def, null);
     }
 
-    public static FloatProperty create(Component component, Binding binding,
+    public static FloatProperty create( Binding binding,
             double min, double max, double def, PMap properties) {
         if (min > max || def < min || def > max) {
             throw new IllegalArgumentException();
@@ -113,7 +113,7 @@ public class FloatProperty extends AbstractSingleArgProperty {
         ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.info(min, max)};
         Argument[] defaults = new Argument[]{PNumber.valueOf(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
-        return new FloatProperty(component, binding, min, max, info);
+        return new FloatProperty(binding, min, max, info);
     }
 
 

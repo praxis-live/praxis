@@ -53,9 +53,9 @@ public class BackgroundDifference extends AbstractComponent {
             registerPort(Port.IN, new DefaultVideoInputPort(this, pl1));
             registerPort("background", new DefaultVideoInputPort(this, pl2));
             registerPort(Port.OUT, new DefaultVideoOutputPort(this, diff));
-            StringProperty mode = StringProperty.create(this, new ModeBinding(), getModeStrings(), diff.getMode().name());
+            StringProperty mode = StringProperty.create( new ModeBinding(), getModeStrings(), diff.getMode().name());
             registerControl("mode", mode);
-            FloatProperty threshold = FloatProperty.create(this, new ThresholdBinding(), 0, 1, 0);
+            FloatProperty threshold = FloatProperty.create( new ThresholdBinding(), 0, 1, 0);
             registerControl("threshold", threshold);
             registerPort("threshold", threshold.createPort());
         } catch (SinkIsFullException ex) {

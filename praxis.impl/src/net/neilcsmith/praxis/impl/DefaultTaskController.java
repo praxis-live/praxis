@@ -32,7 +32,7 @@ import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.interfaces.Task;
 import net.neilcsmith.praxis.core.interfaces.TaskListener;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.interfaces.TaskProcessor;
+import net.neilcsmith.praxis.core.interfaces.TaskService;
 import net.neilcsmith.praxis.core.types.PReference;
 
 /**
@@ -59,8 +59,8 @@ class DefaultTaskController extends BasicControl {
         PReference taskRef = PReference.wrap(task);
         if (atsAddress == null) {
             ComponentAddress ats = root.getServiceManager().findService(
-                    TaskProcessor.DEFINITION);
-            atsAddress = ControlAddress.create(ats, TaskProcessor.SUBMIT);
+                    TaskService.INSTANCE);
+            atsAddress = ControlAddress.create(ats, TaskService.SUBMIT);
         }
         Call call = Call.createCall(
                 atsAddress, address, root.getTime(), taskRef);

@@ -39,19 +39,12 @@ import net.neilcsmith.praxis.core.info.PortInfo;
  */
 public abstract class AbstractControlInputPort extends ControlPort.Input {
 
-    private Component component;
     private ControlPort.Output[] connections;
-    private List<PortConnectionListener> listeners;
-    private final PortInfo emptyInfo;
+    private final PortInfo info;
 
-    public AbstractControlInputPort(Component component) {
-        if (component == null) {
-            throw new NullPointerException();
-        }
-        this.component = component;
+    public AbstractControlInputPort() {
         connections = new ControlPort.Output[0];
-        listeners = new ArrayList<PortConnectionListener>();
-        emptyInfo = PortInfo.create(getTypeClass(), getDirection(), new PortAddress[0], null);
+        info = PortInfo.create(getTypeClass(), getDirection(), null);
     }
 
     @Override
@@ -63,7 +56,6 @@ public abstract class AbstractControlInputPort extends ControlPort.Input {
         cons = new ArrayList<ControlPort.Output>(cons);
         cons.add(port);
         connections = cons.toArray(new ControlPort.Output[cons.size()]);
-        fireConnectionListeners();
     }
 
     @Override
@@ -74,7 +66,6 @@ public abstract class AbstractControlInputPort extends ControlPort.Input {
             cons = new ArrayList<ControlPort.Output>(cons);
             cons.remove(idx);
             connections = cons.toArray(new ControlPort.Output[cons.size()]);
-            fireConnectionListeners();
         }
     }
     
@@ -90,59 +81,13 @@ public abstract class AbstractControlInputPort extends ControlPort.Input {
         return Arrays.copyOf(connections, connections.length);
     }
 
-    public PortAddress getAddress() {
-//        try {
-            ComponentAddress ad = component.getAddress();
-            if (ad == null) {
-                return null;
-            } else {
-                return PortAddress.create(component.getAddress(), component.getPortID(this));
-            }
-//        } catch (ArgumentFormatException ex) {
-//            return null;
-//        }
-    }
 
     public PortInfo getInfo() {
-        if (connections.length == 0) {
-            return emptyInfo;
-        } else {
-            PortAddress[] ads = new PortAddress[connections.length];
-            for (int i=0, k=ads.length; i < k; i++) {
-                ads[i] = connections[i].getAddress();
-            }
-            return PortInfo.create(emptyInfo, ads);
-        }
+            return info;
     }
 
-    public Component getComponent() {
-        return component;
-    }
 
-    
 
-//    @Override
-//    public int getIndex() {
-//        return component.getPortIndex(this, true, true);
-//    }
-    
-    
 
-    public void addConnectionListener(PortConnectionListener listener) {
-        if (listener == null) {
-            throw new NullPointerException();
-        }
-        listeners.add(listener);
-    }
-
-    public void removeConnectionListener(PortConnectionListener listener) {
-        listeners.remove(listener);
-    }
-
-    private void fireConnectionListeners() {
-        for (PortConnectionListener listener : listeners) {
-            listener.connectionsChanged(this);
-        }
-    }
     
 }

@@ -63,9 +63,9 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
     }
 
     private void buildControls() {
-        registerControl("width", IntProperty.create(this, new WidthBinding(), 1, 2048, width));
-        registerControl("height", IntProperty.create(this, new HeightBinding(), 1, 2048, height));
-        registerControl("fps", FloatProperty.create(this, new FpsBinding(), 1, 100, fps));
+        registerControl("width", IntProperty.create( new WidthBinding(), 1, 2048, width));
+        registerControl("height", IntProperty.create( new HeightBinding(), 1, 2048, height));
+        registerControl("fps", FloatProperty.create( new FpsBinding(), 1, 100, fps));
         registerControl("full-screen", BooleanProperty.create(this, new FullScreenBinding(), fullScreen));
     }
     

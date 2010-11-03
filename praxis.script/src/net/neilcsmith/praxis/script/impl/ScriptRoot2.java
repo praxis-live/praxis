@@ -31,7 +31,7 @@ import net.neilcsmith.praxis.core.InvalidChildException;
 import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.interfaces.ScriptInterpreter;
+import net.neilcsmith.praxis.core.interfaces.ScriptService;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 
 /**
@@ -54,7 +54,7 @@ public class ScriptRoot2 extends AbstractRoot {
 
     @Override
     public InterfaceDefinition[] getInterfaces() {
-        return new InterfaceDefinition[] {ScriptInterpreter.DEFINITION};
+        return new InterfaceDefinition[] {ScriptService.INSTANCE};
     }
 
     private class DispatchControl implements Control {

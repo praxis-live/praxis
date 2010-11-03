@@ -55,10 +55,10 @@ class Slider extends SingleBindingGuiComponent {
     public Slider(boolean vertical) {
         labelText = "";
         this.vertical = vertical;
-        registerControl("label", StringProperty.create(this, new LabelBinding(), labelText));
-        registerControl("minimum", ArgumentProperty.create(this, new MinBinding(), PString.EMPTY));
-        registerControl("maximum", ArgumentProperty.create(this, new MaxBinding(), PString.EMPTY));
-        registerControl("scale", ArgumentProperty.create(this, new ScaleBinding(), PString.EMPTY));
+        registerControl("label", StringProperty.create( new LabelBinding(), labelText));
+        registerControl("minimum", ArgumentProperty.create( new MinBinding(), PString.EMPTY));
+        registerControl("maximum", ArgumentProperty.create( new MaxBinding(), PString.EMPTY));
+        registerControl("scale", ArgumentProperty.create( new ScaleBinding(), PString.EMPTY));
     }
 
     @Override

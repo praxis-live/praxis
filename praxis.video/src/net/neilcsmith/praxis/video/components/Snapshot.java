@@ -41,13 +41,13 @@ public class Snapshot extends AbstractComponent {
         snap = new net.neilcsmith.ripl.components.Snapshot();
         registerPort(Port.IN, new DefaultVideoInputPort(this, snap));
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, snap));
-        FloatProperty time = FloatProperty.create(this, new TimeBinding(), 0, 60 * 60, 0);
+        FloatProperty time = FloatProperty.create( new TimeBinding(), 0, 60 * 60, 0);
         registerControl("fade-time", time);
         registerPort("fade-time", time.createPort());
-        FloatProperty mix = FloatProperty.create(this, new MixBinding(), 0, 1, 1);
+        FloatProperty mix = FloatProperty.create( new MixBinding(), 0, 1, 1);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
-        TriggerControl trigger = TriggerControl.create(this, new TriggerBinding());
+        TriggerControl trigger = TriggerControl.create( new TriggerBinding());
         registerControl("trigger", trigger);
         registerPort("trigger", trigger.createPort());
     }

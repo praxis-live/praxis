@@ -56,9 +56,9 @@ public class ToggleButton extends SingleBindingGuiComponent {
         label = "";
         onArg = PString.EMPTY;
         offArg = PString.EMPTY;
-        registerControl("on-value", ArgumentProperty.create(this, new OnBinding(), onArg));
-        registerControl("off-value", ArgumentProperty.create(this, new OffBinding(), offArg));
-        registerControl("label", StringProperty.create(this, new LabelBinding(), label));
+        registerControl("on-value", ArgumentProperty.create( new OnBinding(), onArg));
+        registerControl("off-value", ArgumentProperty.create( new OffBinding(), offArg));
+        registerControl("label", StringProperty.create( new LabelBinding(), label));
 
     }
 

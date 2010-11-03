@@ -24,54 +24,92 @@ package net.neilcsmith.praxis.impl;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Component;
+import net.neilcsmith.praxis.core.Control;
+import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 
 /**
  *
  * @author Neil C Smith
  */
-public abstract class AbstractProperty extends BasicControl {
+public abstract class AbstractProperty implements Control {
 
     private ControlInfo info;
-    
-    protected AbstractProperty(Component host, ControlInfo info) {
-        super(host);
+    private long latest;
+    private boolean latestSet;
+
+    protected AbstractProperty(ControlInfo info) {
         this.info = info;
     }
-    
 
-    @Override
-    protected Call processInvoke(Call call, boolean quiet) throws Exception {
-        CallArguments args = call.getArgs();
-        int argCount = args.getCount();
-        long time = call.getTimecode();
-        if (argCount > 0) {
-            if (isLatest(time)) {
-                setArguments(time, args);
-                setLatest(time);
-            }
-            if (!quiet) {
-                return Call.createReturnCall(call, args);
+    @Deprecated
+    public Component getComponent() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void call(Call call, PacketRouter router) throws Exception {
+        Call.Type type = call.getType();
+        if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
+            CallArguments args = call.getArgs();
+            int argCount = args.getCount();
+            long time = call.getTimecode();
+            if (argCount > 0) {
+                if (isLatest(time)) {
+                    setArguments(time, args);
+                    setLatest(time);
+                }
+                if (type == Call.Type.INVOKE) {
+                    router.route(Call.createReturnCall(call, args));
+                }
             } else {
-                return null;
+                // ignore quiet hint?
+                router.route(Call.createReturnCall(call, getArguments()));
             }
         } else {
-            // ignore quiet hint?
-            return Call.createReturnCall(call, getArguments());
+            throw new IllegalArgumentException();
+        }
+    }
+
+//    protected Call processInvoke(Call call, boolean quiet) throws Exception {
+//        CallArguments args = call.getArgs();
+//        int argCount = args.getCount();
+//        long time = call.getTimecode();
+//        if (argCount > 0) {
+//            if (isLatest(time)) {
+//                setArguments(time, args);
+//                setLatest(time);
+//            }
+//            if (!quiet) {
+//                return Call.createReturnCall(call, args);
+//            } else {
+//                return null;
+//            }
+//        } else {
+//            // ignore quiet hint?
+//            return Call.createReturnCall(call, getArguments());
+//        }
+//
+//    }
+
+    protected void setLatest(long time) {
+        latestSet = true;
+        latest = time;
+    }
+
+    protected boolean isLatest(long time) {
+        if (latestSet) {
+            return (time - latest) > 0;
+        } else {
+            return true;
         }
 
     }
 
-
     public ControlInfo getInfo() {
         return info;
     }
-    
-    
+
     protected abstract void setArguments(long time, CallArguments args) throws Exception;
-    
+
     protected abstract CallArguments getArguments();
-    
-  
-  
 }

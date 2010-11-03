@@ -43,15 +43,15 @@ public class MonoDelay2s extends AbstractComponent {
 
     public MonoDelay2s() {
         delay = new MonoDelay(2);
-        time =  FloatProperty.create(this, new TimeBinding(),
+        time =  FloatProperty.create( new TimeBinding(),
                 0, 2, 0);
         registerControl("time", time);
         registerPort("time", time.createPort());
-        feedback = FloatProperty.create(this, new FeedbackBinding(),
+        feedback = FloatProperty.create( new FeedbackBinding(),
                 0, 1, 0);
         registerControl("feedback", feedback);
         registerPort("feedback", feedback.createPort());
-        mix = FloatProperty.create(this, new MixBinding(), 0, 1, 0);
+        mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
         registerPort(Port.IN, new DefaultAudioInputPort(this, delay));

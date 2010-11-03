@@ -25,11 +25,17 @@ import java.awt.Dimension;
 import java.net.URI;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.Port;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.interfaces.Task;
+import net.neilcsmith.praxis.core.interfaces.TaskService;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PReference;
+import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.core.types.PUri;
+import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
@@ -63,8 +69,8 @@ public class Still extends AbstractComponent {
         delegator = new Delegator();
         resizeMode = new ResizeMode(ResizeMode.Type.Stretch, 0.5, 0.5);
         resizeType = createTypeControl();
-        alignX = FloatProperty.create(this, new AlignXBinding(), 0, 1, 0.5);
-        alignY = FloatProperty.create(this, new AlignYBinding(), 0, 1, 0.5);
+        alignX = FloatProperty.create(new AlignXBinding(), 0, 1, 0.5);
+        alignY = FloatProperty.create(new AlignYBinding(), 0, 1, 0.5);
         DelegateLoader loader = new DelegateLoader();
         registerControl("resize-mode", resizeType);
         registerPort("resize-mode", resizeType.createPort());
@@ -75,7 +81,8 @@ public class Still extends AbstractComponent {
         registerControl("uri", loader);
         registerPort(Port.IN, new DefaultVideoInputPort(this, delegator));
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));
-        registerPort("uri", loader.getInputPort());
+//        registerPort("uri", loader.getInputPort());
+        registerPort("uri", loader.createPort());
         rdyPort = new DefaultControlOutputPort(this);
         registerPort("ready", rdyPort);
         errPort = new DefaultControlOutputPort(this);
@@ -99,7 +106,7 @@ public class Still extends AbstractComponent {
         for (int i = 0; i < types.length; i++) {
             allowed[i] = types[i].name();
         }
-        return StringProperty.create(this, new ResizeTypeBinding(), allowed,
+        return StringProperty.create(new ResizeTypeBinding(), allowed,
                 resizeMode.getType().name());
     }
 
@@ -120,7 +127,7 @@ public class Still extends AbstractComponent {
             return resizeMode.getType().name();
         }
     }
-    
+
     private class AlignXBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
@@ -136,9 +143,8 @@ public class Still extends AbstractComponent {
         public double getBoundValue() {
             return resizeMode.getHorizontalAlignment();
         }
-        
     }
-    
+
     private class AlignYBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
@@ -154,7 +160,6 @@ public class Still extends AbstractComponent {
         public double getBoundValue() {
             return resizeMode.getVerticalAlignment();
         }
-        
     }
 
 //    public void propertyChanged(Property source) {
@@ -187,7 +192,6 @@ public class Still extends AbstractComponent {
 //            }
 //        }
 //    }
-
 //    private class ImageBinding implements ImageLoader.Binding {
 //
 //        public void setImage(BufferedImage image) {
@@ -195,55 +199,83 @@ public class Still extends AbstractComponent {
 //        }
 //        
 //    }
-    private class DelegateLoader extends ResourceLoader<ImageDelegate> {
+//    private class DelegateLoader extends ResourceLoader<ImageDelegate> {
+//
+//        DelegateLoader() {
+//            super(Still.this, ImageDelegate.class);
+//        }
+////
+////        @Override
+////        protected Task getLoadTask(PUri uri) {
+////
+////        }
+//
+////        @Override
+////        protected void setResource(Argument arg) {
+////            if (arg == null) {
+////                setDelegate(null);
+////            } else {
+////                if (arg instanceof PReference) {
+////                    Object o = ((PReference) arg).getReference();
+////                    if (o instanceof ImageDelegate) {
+////                        setDelegate((ImageDelegate) o);
+////                    }
+////
+////                }
+////            }
+////        }
+//
+////        @Override
+////        protected void setResource(ImageDelegate resource) {
+////            setDelegate(resource);
+////        }
+//
+//        @Override
+//        protected Task getLoadTask(Argument identifier) {
+//            return new LoaderTask(identifier, resizeMode, delegator.getCurrentDimensions());
+//        }
+//
+//        @Override
+//        protected void resourceLoaded() {
+//            setDelegate(getResource());
+//            rdyPort.send( ((AbstractRoot) getRoot()).getTime());
+//        }
+//
+//        @Override
+//        protected void resourceError() {
+//            errPort.send( ((AbstractRoot) getRoot()).getTime());
+//        }
+//    }
+    private class DelegateLoader extends AbstractAsyncProperty<ImageDelegate> {
 
         DelegateLoader() {
-            super(Still.this, ImageDelegate.class);
-        }
-//
-//        @Override
-//        protected Task getLoadTask(PUri uri) {
-//            
-//        }
-
-//        @Override
-//        protected void setResource(Argument arg) {
-//            if (arg == null) {
-//                setDelegate(null);
-//            } else {
-//                if (arg instanceof PReference) {
-//                    Object o = ((PReference) arg).getReference();
-//                    if (o instanceof ImageDelegate) {
-//                        setDelegate((ImageDelegate) o);
-//                    }
-//
-//                }
-//            }
-//        }
-
-//        @Override
-//        protected void setResource(ImageDelegate resource) {
-//            setDelegate(resource);
-//        }
-
-        @Override
-        protected Task getLoadTask(Argument identifier) {
-            return new LoaderTask(identifier, resizeMode, delegator.getCurrentDimensions());
+            super(new ArgumentInfo[]{ArgumentInfo.create(PUri.class, null)},
+                    ImageDelegate.class,
+                    new Argument[]{PString.EMPTY}, PMap.EMPTY);
         }
 
         @Override
-        protected void resourceLoaded() {
-            setDelegate(getResource());
-            rdyPort.send( ((AbstractRoot) getRoot()).getTime());
+        protected TaskService.Task createTask(CallArguments keys) throws Exception {
+            return new LoaderTask(keys.getArg(0), resizeMode, delegator.getCurrentDimensions());
         }
 
         @Override
-        protected void resourceError() {
-            errPort.send( ((AbstractRoot) getRoot()).getTime());
+        protected void valueChanged(long time) {
+            setDelegate(getValue());
+            rdyPort.send(time);
         }
+
+        @Override
+        protected void taskError(long time) {
+            errPort.send(time);
+        }
+        
+        
+        
+        
     }
 
-    private class LoaderTask implements Task {
+    private class LoaderTask implements TaskService.Task {
 
         Argument uri;
         ResizeMode mode;

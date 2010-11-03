@@ -41,11 +41,11 @@ public class Scale extends AbstractComponent {
     private ControlPort.Output output;
 
     public Scale() {
-        x1 = FloatProperty.create(this, 0);
-        x2 = FloatProperty.create(this, 1);
-        y1 = FloatProperty.create(this, 0);
-        y2 = FloatProperty.create(this, 1);
-        FloatInputPort input = FloatInputPort.create(this, new InputBinding());
+        x1 = FloatProperty.create( 0);
+        x2 = FloatProperty.create( 1);
+        y1 = FloatProperty.create( 0);
+        y2 = FloatProperty.create( 1);
+        FloatInputPort input = FloatInputPort.create( new InputBinding());
         output = new DefaultControlOutputPort(this);
         registerControl("x1", x1);
         registerPort("x1", x1.createPort());

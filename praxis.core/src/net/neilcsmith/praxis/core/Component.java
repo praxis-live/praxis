@@ -41,22 +41,23 @@ public interface Component {
      */
     public Container getParent();
 
-    /**
-     * Return the Root component that is at the top of the Component hierarchy
-     * that contains this Component, or null if this Component is not currently
-     * contained within a Component hierarchy.
-     * @return Root
-     */
-    public Root getRoot();
+//    /**
+//     * Return the Root component that is at the top of the Component hierarchy
+//     * that contains this Component, or null if this Component is not currently
+//     * contained within a Component hierarchy.
+//     * @return Root
+//     */
+//    @Deprecated
+//    public Root getRoot();
 
-    /**
-     * Return the address of this Component, or null if this Component is not
-     * currently contained within a Component hierarchy.
-     *
-     * @return ComponentAddress
-     */
-    @Deprecated
-    public ComponentAddress getAddress();
+//    /**
+//     * Return the address of this Component, or null if this Component is not
+//     * currently contained within a Component hierarchy.
+//     *
+//     * @return ComponentAddress
+//     */
+//    @Deprecated
+//    public ComponentAddress getAddress();
 
     /**
      * Notify the Component that it has been added to the supplied Container, or
@@ -85,14 +86,14 @@ public interface Component {
     public Control getControl(String id);
 
 
-    /**
-     * Get the ID for the given control, or null if the control is not
-     * registered with this component.
-     * @param control
-     * @return String ID or null
-     */
-    @Deprecated
-    public String getControlID(Control control);
+//    /**
+//     * Get the ID for the given control, or null if the control is not
+//     * registered with this component.
+//     * @param control
+//     * @return String ID or null
+//     */
+//    @Deprecated
+//    public String getControlID(Control control);
 
     /**
      * Get an array of all the Control IDs from this component.
@@ -108,14 +109,14 @@ public interface Component {
     public Port getPort(String id);
 
 
-    /**
-     * Get the ID of the given port, or null if the port is not registered
-     * with this component.
-     * @param port
-     * @return String ID or null
-     */
-    @Deprecated
-    public String getPortID(Port port);
+//    /**
+//     * Get the ID of the given port, or null if the port is not registered
+//     * with this component.
+//     * @param port
+//     * @return String ID or null
+//     */
+//    @Deprecated
+//    public String getPortID(Port port);
 
     /**
      * Get an array of all the Port IDs from this component.

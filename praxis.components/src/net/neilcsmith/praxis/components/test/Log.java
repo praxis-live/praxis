@@ -39,7 +39,7 @@ public class Log extends AbstractComponent {
    
     
     public Log() {
-        registerPort(Port.IN, ArgumentInputPort.create(this, new InputBinding()));
+        registerPort(Port.IN, ArgumentInputPort.create( new InputBinding()));
     }
     
     private class InputBinding implements ArgumentInputPort.Binding {

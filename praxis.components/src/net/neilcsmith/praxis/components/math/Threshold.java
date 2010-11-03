@@ -39,10 +39,10 @@ public class Threshold extends AbstractComponent {
     private ControlPort.Output outputHigh;
 
     public Threshold() {
-        threshold = FloatProperty.create(this, 0);
+        threshold = FloatProperty.create( 0);
         registerControl("threshold", threshold);
         registerPort("threshold", threshold.createPort());
-        registerPort(Port.IN, FloatInputPort.create(this, new InputBinding()));
+        registerPort(Port.IN, FloatInputPort.create( new InputBinding()));
         outputLow = new DefaultControlOutputPort(this);
         outputHigh = new DefaultControlOutputPort(this);
         registerPort("output-low", outputLow);

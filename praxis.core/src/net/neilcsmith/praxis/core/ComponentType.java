@@ -22,6 +22,7 @@
 
 package net.neilcsmith.praxis.core;
 
+import java.util.regex.Pattern;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 
 /**
@@ -29,6 +30,11 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public class ComponentType extends Argument {
+    
+    private final static String TYPE_REGEX =
+            "([\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*\\:)+" + 
+            "([\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*)";
+    private final static Pattern TYPE_PATTERN = Pattern.compile(TYPE_REGEX);
 
     private String typeString;
 
@@ -56,11 +62,22 @@ public class ComponentType extends Argument {
     }
 
     public static ComponentType create(String str) {
-        return new ComponentType(str);
+        try {
+            return valueOf(str);
+        } catch (ArgumentFormatException ex) {
+            throw new IllegalArgumentException(ex);
+        }
+    }
+    
+    private static boolean isValidTypeString(String str) {
+        return TYPE_PATTERN.matcher(str).matches();
     }
 
     public static ComponentType valueOf(String str) throws ArgumentFormatException {
-        return create(str);
+        if (isValidTypeString(str)) {
+            return new ComponentType(str);
+        }
+        throw new ArgumentFormatException("Invalid String representation of Type");
     }
 
     public static ArgumentInfo info() {

@@ -68,7 +68,7 @@ public abstract class AbstractJaninoComponent extends AbstractControlFrameCompon
     private void setupFloats(int count) {
         floats = new double[count];
         for (int i = 0; i < count; i++) {
-            FloatProperty f = FloatProperty.create(this, new FloatBinding(i), 0);
+            FloatProperty f = FloatProperty.create( new FloatBinding(i), 0);
             String id = "f" + (i + 1);
             registerControl(id, f);
             registerPort(id, f.createPort());
@@ -79,14 +79,14 @@ public abstract class AbstractJaninoComponent extends AbstractControlFrameCompon
         params = new Argument[count];
         Arrays.fill(params, PString.EMPTY);
         for (int i = 0; i < count; i++) {
-            registerControl("p" + (i + 1), ArgumentProperty.create(this, new ParamBinding(i), PString.EMPTY));
+            registerControl("p" + (i + 1), ArgumentProperty.create( new ParamBinding(i), PString.EMPTY));
         }
     }
 
     private void setupTriggers(int count) {
         triggers = new boolean[count];
         for (int i = 0; i < count; i++) {
-            TriggerControl t = TriggerControl.create(this, new TriggerBinding(i));
+            TriggerControl t = TriggerControl.create( new TriggerBinding(i));
             String id = "t" + (i + 1);
             registerControl(id, t);
             registerPort(id, t.createPort());

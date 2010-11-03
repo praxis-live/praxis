@@ -40,8 +40,8 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
     private Binding binding;
 
 
-    private ArgumentProperty(Component component, Binding binding, ControlInfo info) {
-        super(component, info);
+    private ArgumentProperty( Binding binding, ControlInfo info) {
+        super(info);
         this.binding = binding;
     }
 
@@ -68,11 +68,11 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
     
     
     
-    public static ArgumentProperty create(Component component) {
-        return create(component, null, PString.EMPTY);
+    public static ArgumentProperty create() {
+        return create( null, PString.EMPTY);
     }
 
-    public static ArgumentProperty create(Component component, Binding binding, Argument def) {
+    public static ArgumentProperty create( Binding binding, Argument def) {
 
         if (binding == null) {
             binding = new DefaultBinding(def);
@@ -81,7 +81,7 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
 
         Argument[] defaults = new Argument[]{def};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
-        return new ArgumentProperty(component, binding, info);
+        return new ArgumentProperty(binding, info);
     }
 
     public static interface Binding {

@@ -42,10 +42,10 @@ public class Difference extends AbstractComponent {
         diff = new net.neilcsmith.ripl.components.temporal.Difference();
         registerPort(Port.IN, new DefaultVideoInputPort(this, diff));
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, diff));
-        StringProperty mode = StringProperty.create(this, new ModeBinding(),
+        StringProperty mode = StringProperty.create( new ModeBinding(),
                 getModeStrings(), diff.getMode().name());
         registerControl("mode", mode);
-        FloatProperty threshold = FloatProperty.create(this, new ThresholdBinding(), 0, 1, 0);
+        FloatProperty threshold = FloatProperty.create( new ThresholdBinding(), 0, 1, 0);
         registerControl("threshold", threshold);
         registerPort("threshold", threshold.createPort());
     }

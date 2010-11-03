@@ -25,22 +25,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.Component;
+import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.PacketRouter;
+import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PString;
 
 /**
  *
  * @author Neil C Smith
  */
+@Deprecated
 public abstract class BasicControl extends AbstractControl {
 
     private static Logger logger = Logger.getLogger(BasicControl.class.getName());
     private long latest;
 
 //    private AbstractComponent component;
-    protected BasicControl(Component component) {
-        super(component);
-        latest = System.nanoTime();
+    protected BasicControl(AbstractComponent host) {
+        latest = System.nanoTime(); //@TODO - set behind system time?
     }
 
     //@TODO implements standard error message system.
@@ -107,4 +109,7 @@ public abstract class BasicControl extends AbstractControl {
     protected boolean isLatest(long time) {
         return (time - latest) > 0;
     }
+
+
+
 }

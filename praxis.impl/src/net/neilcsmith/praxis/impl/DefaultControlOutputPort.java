@@ -21,16 +21,13 @@
  */
 package net.neilcsmith.praxis.impl;
 
-import net.neilcsmith.praxis.core.PortConnectionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Component;
-import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.core.PortAddress;
 import net.neilcsmith.praxis.core.PortConnectionException;
 import net.neilcsmith.praxis.core.info.PortInfo;
 
@@ -42,12 +39,8 @@ public class DefaultControlOutputPort extends ControlPort.Output {
 
     private ControlPort.Input[] connections;
     private Component component;
-//    private static PortSorter sorter = new PortSorter();
-//    private PortConnectionListener[] listeners;
-    private List<PortConnectionListener> listeners;
     private boolean sending;
-    private final PortInfo emptyInfo;
-
+    private final PortInfo info;
 
     public DefaultControlOutputPort(Component component) {
         if (component == null) {
@@ -55,8 +48,7 @@ public class DefaultControlOutputPort extends ControlPort.Output {
         }
         this.component = component;
         connections = new ControlPort.Input[0];
-        listeners = new ArrayList<PortConnectionListener>();
-        emptyInfo = PortInfo.create(getTypeClass(), getDirection(), new PortAddress[0], null);
+        info = PortInfo.create(getTypeClass(), getDirection(), null);
     }
 
     public void connect(Port port) throws PortConnectionException {
@@ -71,7 +63,6 @@ public class DefaultControlOutputPort extends ControlPort.Output {
             cons.add(cport);
 //            Collections.sort(cons, sorter);
             connections = cons.toArray(new ControlPort.Input[cons.size()]);
-            fireConnectionListeners();
         } else {
             throw new PortConnectionException();
         }
@@ -87,7 +78,6 @@ public class DefaultControlOutputPort extends ControlPort.Output {
                 cons = new ArrayList<ControlPort.Input>(cons);
                 cons.remove(idx);
                 connections = cons.toArray(new ControlPort.Input[cons.size()]);
-                fireConnectionListeners();
             }
         }
     }
@@ -98,60 +88,17 @@ public class DefaultControlOutputPort extends ControlPort.Output {
             breakConnection(port);
         }
         connections = new ControlPort.Input[0];
-        fireConnectionListeners();
     }
 
     public Port[] getConnections() {
         return Arrays.copyOf(connections, connections.length);
     }
 
-    public void addConnectionListener(PortConnectionListener listener) {
-        if (listener == null) {
-            throw new NullPointerException();
-        }
-        listeners.add(listener);
-    }
-
-    public void removeConnectionListener(PortConnectionListener listener) {
-        listeners.remove(listener);
-    }
-    
-    private void fireConnectionListeners() {
-        for (PortConnectionListener listener : listeners) {
-            listener.connectionsChanged(this);
-        }
-    }
-
-    public PortAddress getAddress() {
-//        try {
-            ComponentAddress ad = component.getAddress();
-            if (ad == null) {
-                return null;
-            } else {
-                return PortAddress.create(component.getAddress(), component.getPortID(this));
-            }
-//        } catch (ArgumentFormatException ex) {
-//            return null;
-//        }
-    }
-
     public PortInfo getInfo() {
-        if (connections.length == 0) {
-            return emptyInfo;
-        } else {
-            PortAddress[] ads = new PortAddress[connections.length];
-            for (int i=0, k=ads.length; i < k; i++) {
-                ads[i] = connections[i].getAddress();
-            }
-            return PortInfo.create(emptyInfo, ads);
-        }
+        return info;
     }
 
-    public Component getComponent() {
-        return component;
-    }
 
-    
 
     public void send(long time, double value) {
         if (sending) {
@@ -164,7 +111,7 @@ public class DefaultControlOutputPort extends ControlPort.Output {
             } catch (Exception ex) {
                 // @TODO log errors
             }
-            
+
         }
         sending = false;
     }
@@ -179,7 +126,6 @@ public class DefaultControlOutputPort extends ControlPort.Output {
 //        }
 //        sending = false;
 //    }
-
     public void send(long time, Argument value) {
         if (sending) {
             return;
@@ -195,10 +141,4 @@ public class DefaultControlOutputPort extends ControlPort.Output {
         sending = false;
     }
 
-//    private static class PortSorter implements Comparator<ControlPort.Input> {
-//
-//        public int compare(ControlPort.Input o1, ControlPort.Input o2) {
-//            return o1.getIndex() - o2.getIndex();
-//        }
-//    }
 }

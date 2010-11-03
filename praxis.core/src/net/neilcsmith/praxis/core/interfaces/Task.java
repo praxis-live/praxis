@@ -29,7 +29,7 @@ import net.neilcsmith.praxis.core.Argument;
  * @author Neil C Smith
  */
 @Deprecated
-public interface Task extends TaskProcessor.Task {
+public interface Task extends TaskService.Task {
 
 
 }

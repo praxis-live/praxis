@@ -33,16 +33,12 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
  */
 public abstract class AbstractSingleArgProperty extends AbstractProperty {
 
-    protected AbstractSingleArgProperty(Component host, ControlInfo info) {
-        super(host, info);
+    protected AbstractSingleArgProperty(ControlInfo info) {
+        super(info);
     }
 
     public ControlPort.Input createPort() {
-        return new InputPort(getComponent());
-    }
-
-    public ControlPort.Input createPort(Component host) {
-        return new InputPort(host);
+        return new InputPort();
     }
 
     protected void setArguments(long time, CallArguments args) throws Exception {
@@ -60,10 +56,6 @@ public abstract class AbstractSingleArgProperty extends AbstractProperty {
     protected abstract Argument get();
 
     private class InputPort extends AbstractControlInputPort {
-
-        private InputPort(Component host) {
-            super(host);
-        }
 
         @Override
         public void receive(long time, double value) {

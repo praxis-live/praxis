@@ -19,7 +19,6 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.core;
 
 import net.neilcsmith.praxis.core.info.ControlInfo;
@@ -34,4 +33,40 @@ public abstract class InterfaceDefinition {
 
     public abstract ControlInfo getControlInfo(String control);
 
+    @Override
+    public final boolean equals(Object obj) {
+        return obj == null ? false : this.getClass().equals(obj.getClass());
+    }
+
+    @Override
+    public final int hashCode() {
+        return this.getClass().hashCode();
+    }
+
+    @Override
+    public final String toString() {
+        return this.getClass().getName();
+    }
+
+
+
+// @TODO This belongs in ComponentInfo
+
+//    public static InterfaceDefinition valueOf(String str) throws ArgumentFormatException {
+//        try {
+//            Class<?> cl = Class.forName(str);
+//            Class<? extends InterfaceDefinition> c = cl.asSubclass(InterfaceDefinition.class);
+//            return c.newInstance();
+//        } catch (Exception ex) {
+//            throw new ArgumentFormatException(ex);
+//        }
+//    }
+//
+//    public static InterfaceDefinition coerce(Argument arg) throws ArgumentFormatException {
+//        if (arg instanceof InterfaceDefinition) {
+//            return (InterfaceDefinition) arg;
+//        } else {
+//            return valueOf(arg.toString());
+//        }
+//    }
 }

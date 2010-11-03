@@ -42,20 +42,8 @@ public interface Port {
     public Port[] getConnections();
     
     public Class<? extends Port> getTypeClass();
-
-    @Deprecated
-    public PortAddress getAddress();
     
     public PortInfo getInfo();
-
-    @Deprecated
-    public Component getComponent();
-
-    @Deprecated
-    public void addConnectionListener(PortConnectionListener listener);
-
-    @Deprecated
-    public void removeConnectionListener(PortConnectionListener listener);
     
     public Direction getDirection();
     

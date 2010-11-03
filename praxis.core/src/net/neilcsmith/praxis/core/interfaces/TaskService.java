@@ -31,39 +31,32 @@ import net.neilcsmith.praxis.core.types.PReference;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class TaskProcessor {
+public class TaskService extends InterfaceDefinition {
 
-    public final static TaskProcessor.Definition DEFINITION = new Definition();
+    public final static TaskService INSTANCE = new TaskService();
     public final static String SUBMIT = "submit";
+    private ControlInfo submitInfo;
 
-    private TaskProcessor() {
+    public TaskService() {
+        ArgumentInfo input = PReference.info(Task.class);
+        ArgumentInfo output = Argument.info();
+        submitInfo = ControlInfo.createFunctionInfo(
+                new ArgumentInfo[]{input},
+                new ArgumentInfo[]{output},
+                null);
     }
 
-    public static class Definition extends InterfaceDefinition {
+    @Override
+    public String[] getControls() {
+        return new String[]{SUBMIT};
+    }
 
-        private ControlInfo submitInfo;
-
-        private Definition() {
-            ArgumentInfo input = PReference.info(Task.class);
-            ArgumentInfo output = Argument.info();
-            submitInfo = ControlInfo.createFunctionInfo(
-                    new ArgumentInfo[]{input},
-                    new ArgumentInfo[]{output},
-                    null);
+    @Override
+    public ControlInfo getControlInfo(String control) {
+        if (SUBMIT.equals(control)) {
+            return submitInfo;
         }
-
-        @Override
-        public String[] getControls() {
-            return new String[]{SUBMIT};
-        }
-
-        @Override
-        public ControlInfo getControlInfo(String control) {
-            if (SUBMIT.equals(control)) {
-                return submitInfo;
-            }
-            throw new IllegalArgumentException();
-        }
+        throw new IllegalArgumentException();
     }
 
     public static interface Task {

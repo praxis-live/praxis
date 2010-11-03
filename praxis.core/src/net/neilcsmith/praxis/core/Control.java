@@ -29,10 +29,11 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
  * @author Neil C Smith
  */
 public interface Control {
+
+    public static enum Type {Function, RO_Property, RW_Property};
+
     public void call(Call call, PacketRouter router) throws Exception;
     
     public ControlInfo getInfo();
 
-    @Deprecated
-    public Component getComponent();
 }

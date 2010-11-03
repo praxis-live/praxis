@@ -29,6 +29,7 @@ import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.interfaces.Task;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PUri;
+import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.ResourceLoader;
 
 /**
@@ -39,7 +40,7 @@ public class ImageLoader extends ResourceLoader<BufferedImage> {
     
     private Binding binding;
 
-    private ImageLoader(Component host, Binding binding) {
+    private ImageLoader(AbstractComponent host, Binding binding) {
         super(host, BufferedImage.class);
         if (binding == null) {
             throw new NullPointerException();
@@ -81,13 +82,13 @@ public class ImageLoader extends ResourceLoader<BufferedImage> {
             return PReference.wrap(im);
         }
     }
-    
-    public static ImageLoader create(Component host, Binding binding) {
-        if (host == null || binding == null) {
-            throw new NullPointerException();
-        }
-        return new ImageLoader(host, binding);
-    }
+//
+//    public static ImageLoader create(Component host, Binding binding) {
+//        if (host == null || binding == null) {
+//            throw new NullPointerException();
+//        }
+//        return new ImageLoader(host, binding);
+//    }
 
     @Override
     protected void resourceLoaded() {

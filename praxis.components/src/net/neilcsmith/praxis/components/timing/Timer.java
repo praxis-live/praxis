@@ -42,7 +42,7 @@ public class Timer extends AbstractControlFrameComponent {
     private ControlPort.Output output;
     
     public Timer() {
-        FloatProperty period = FloatProperty.create(this, new PeriodBinding(), 0, 60 * 60, 1);
+        FloatProperty period = FloatProperty.create( new PeriodBinding(), 0, 60 * 60, 1);
         registerControl("period", period);
         registerPort("period", period.createPort());
         output = new DefaultControlOutputPort(this);

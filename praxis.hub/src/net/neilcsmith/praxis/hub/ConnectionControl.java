@@ -36,6 +36,7 @@ import net.neilcsmith.praxis.impl.BasicControl;
  *
  * @author Neil C Smith
  */
+@Deprecated
 class ConnectionControl extends BasicControl {
 
     private DefaultHub hub;

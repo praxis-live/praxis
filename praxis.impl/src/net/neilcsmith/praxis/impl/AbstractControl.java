@@ -19,48 +19,58 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.impl;
 
 import net.neilcsmith.praxis.core.Component;
-import net.neilcsmith.praxis.core.ComponentAddress;
-import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.ControlAddress;
-import net.neilcsmith.praxis.core.ArgumentFormatException;
+import net.neilcsmith.praxis.core.Lookup;
 
 /**
  *
  * @author Neil C Smith
  */
-public abstract class AbstractControl implements Control {
+public abstract class AbstractControl implements AbstractComponent.ExtendedControl {
 
-    private Component host;
-    
-    protected AbstractControl(Component component) {
-        if (component == null) {
-            throw new NullPointerException();
-        }
+    private AbstractComponent host;
+    private ControlAddress address;
+
+    public void addNotify(AbstractComponent component) {
         this.host = component;
+        hierarchyChanged();
+    }
+
+    public void removeNotify(AbstractComponent component) {
+        if (this.host == component) {
+            this.host = null;
+        }
+        hierarchyChanged();
+    }
+
+    public void hierarchyChanged() {
+        address = null;
     }
 
     public Component getComponent() {
         return host;
     }
 
-    @Deprecated
-    protected ControlAddress getAddress() {
-
-            ComponentAddress hostAddress = host.getAddress();
-            if (hostAddress == null) {
+    public ControlAddress getAddress() {
+        if (address == null) {
+            if (host == null) {
                 return null;
-            }
-            String id = host.getControlID(this);
-            if (id == null) {
-                return null;
-            }
-            return ControlAddress.create(hostAddress, id);
+            } else {
+                address = host.getAddress(this);
 
+            }
+        }
+        return address;
     }
 
-
+    public Lookup getLookup() {
+        if (host == null) {
+            return EmptyLookup.getInstance();
+        } else {
+            return host.getLookup();
+        }
+    }
 }

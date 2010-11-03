@@ -30,38 +30,25 @@ import net.neilcsmith.praxis.core.types.PString;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ScriptInterpreter {
+public class ScriptService extends InterfaceDefinition {
 
     public final static String EVAL = "eval";
-    public final static ScriptInterpreter.Definition DEFINITION = new Definition();
+    public final static ScriptService INSTANCE = new ScriptService();
+    private final static ControlInfo EVAL_INFO = ControlInfo.createFunctionInfo(
+                new ArgumentInfo[]{PString.info()},
+                new ArgumentInfo[0],
+                null);
 
-//    public static ScriptInterpreter getInstance() {
-//        return instance;
-//    }
+    @Override
+    public String[] getControls() {
+        return new String[]{EVAL};
+    }
 
-    public static class Definition extends InterfaceDefinition {
-
-        private ControlInfo evalInfo;
-
-        private Definition() {
-            ArgumentInfo input = PString.info();
-            evalInfo = ControlInfo.createFunctionInfo(
-                    new ArgumentInfo[]{input},
-                    new ArgumentInfo[0],
-                    null);
+    @Override
+    public ControlInfo getControlInfo(String control) {
+        if (EVAL.equals(control)) {
+            return EVAL_INFO;
         }
-
-        @Override
-        public String[] getControls() {
-            return new String[]{EVAL};
-        }
-
-        @Override
-        public ControlInfo getControlInfo(String control) {
-            if (EVAL.equals(control)) {
-                return evalInfo;
-            }
-            throw new IllegalArgumentException();
-        }
+        throw new IllegalArgumentException();
     }
 }

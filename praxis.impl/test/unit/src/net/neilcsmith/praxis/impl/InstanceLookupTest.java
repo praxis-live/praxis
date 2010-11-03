@@ -73,9 +73,8 @@ public class InstanceLookupTest {
     }
 
     private InstanceLookup create() {
-        return InstanceLookup.create(new Object[] {
-        "This", "Is", "Our", "Test", "String", new Object()},
-                new EmptyLookup());
+        return InstanceLookup.create(
+                new EmptyLookup(), new Object[]{"This", "Is", "Our", "Test", "String", new Object()});
     }
 
     private static class EmptyLookup implements Lookup {

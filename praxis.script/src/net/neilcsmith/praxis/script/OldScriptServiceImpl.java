@@ -29,7 +29,7 @@ import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.interfaces.ScriptInterpreter;
+import net.neilcsmith.praxis.core.interfaces.ScriptService;
 import net.neilcsmith.praxis.core.syntax.InvalidSyntaxException;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
@@ -63,7 +63,7 @@ public class OldScriptServiceImpl extends AbstractRoot {
 
     @Override
     public InterfaceDefinition[] getInterfaces() {
-        return new InterfaceDefinition[] {ScriptInterpreter.DEFINITION};
+        return new InterfaceDefinition[] {ScriptService.INSTANCE};
     }
 
 

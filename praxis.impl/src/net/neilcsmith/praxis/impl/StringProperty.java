@@ -45,9 +45,8 @@ public class StringProperty extends AbstractSingleArgProperty {
 
 
 
-    private StringProperty(Component component, Binding binding,
-            Set<String> allowed, ControlInfo info) {
-        super(component, info);
+    private StringProperty(Binding binding, Set<String> allowed, ControlInfo info) {
+        super(info);
         this.binding = binding;
         this.allowed = allowed;
     }
@@ -89,23 +88,23 @@ public class StringProperty extends AbstractSingleArgProperty {
 
  
 
-    public static StringProperty create(Component component, String def) {
-        return create(component, null, null, def, null);
+    public static StringProperty create( String def) {
+        return create( null, null, def, null);
     }
 
-    public static StringProperty create(Component component, Binding binding,
+    public static StringProperty create( Binding binding,
             String def) {
-        return create(component, binding, null, def, null);
+        return create(binding, null, def, null);
     }
 
 
-    public static StringProperty create(Component component, Binding binding,
+    public static StringProperty create( Binding binding,
             String[] values, String def) {
 
-        return create(component, binding, values, def, null);
+        return create(binding, values, def, null);
     }
     
-    public static StringProperty create(Component component, Binding binding,
+    public static StringProperty create( Binding binding,
             String[] values, String def, PMap properties) {
 
         if (binding == null) {
@@ -122,7 +121,7 @@ public class StringProperty extends AbstractSingleArgProperty {
         }
         Argument[] defaults = new Argument[]{PString.valueOf(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
-        return new StringProperty(component, binding, allowedValues, info);
+        return new StringProperty(binding, allowedValues, info);
     }
 
     public static interface Binding {

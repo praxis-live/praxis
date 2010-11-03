@@ -89,7 +89,7 @@ public class Composite extends AbstractComponent {
                 return comp.getMix();
             }
             };
-        return FloatProperty.create(this, binding, 0, 1, 0);
+        return FloatProperty.create(binding, 0, 1, 0);
     }
 
     private StringProperty createModeControl() {
@@ -110,7 +110,7 @@ public class Composite extends AbstractComponent {
                 return comp.getMode().name();
             }
         };
-        return StringProperty.create(this, binding, allowed, comp.getMode().name());
+        return StringProperty.create(binding, allowed, comp.getMode().name());
     }
     
     private BooleanProperty createAlphaControl() {

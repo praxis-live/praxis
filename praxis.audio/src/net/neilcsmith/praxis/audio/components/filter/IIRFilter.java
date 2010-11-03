@@ -48,15 +48,15 @@ public class IIRFilter extends AbstractComponent {
         filter = new net.neilcsmith.rapl.components.filters.IIRFilter();
         type = createTypeControl();
         registerControl("type", type);
-        frequency =  FloatProperty.create(this, new FrequencyBinding(),
+        frequency =  FloatProperty.create( new FrequencyBinding(),
                 20, 20000, 20, PMap.valueOf("scale-hint", "Exponential"));
         registerControl("frequency", frequency);
         registerPort("frequency", frequency.createPort());
-        resonance = FloatProperty.create(this, new ResonanceBinding(),
+        resonance = FloatProperty.create( new ResonanceBinding(),
                 0, 30, 0);
         registerControl("resonance", resonance);
         registerPort("resonance", resonance.createPort());
-        mix = FloatProperty.create(this, new MixBinding(), 0, 1, 0);
+        mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
         registerPort(Port.IN, new DefaultAudioInputPort(this, filter));
@@ -81,7 +81,7 @@ public class IIRFilter extends AbstractComponent {
                 return filter.getFilterType().name();
             }
         };
-        return StringProperty.create(this, binding, allowed, filter.getFilterType().name());
+        return StringProperty.create(binding, allowed, filter.getFilterType().name());
     }
 
     private class MixBinding implements FloatProperty.Binding {

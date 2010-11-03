@@ -42,7 +42,7 @@ public abstract class AbstractGuiComponent extends AbstractComponent implements 
 
     protected AbstractGuiComponent() {
         layout = new LayoutBinding();
-        registerControl("layout", StringProperty.create(this, layout, layout.layoutString));
+        registerControl("layout", StringProperty.create(layout, layout.layoutString));
     }
 
     public final JComponent getSwingComponent() {

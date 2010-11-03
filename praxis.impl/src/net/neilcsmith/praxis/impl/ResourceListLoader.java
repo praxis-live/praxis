@@ -43,7 +43,7 @@ public class ResourceListLoader extends ResourceLoader<PArray> {
     private Listener listener;
     private Filter filter;
 
-    private ResourceListLoader(Component host, Listener listener, Filter filter) {
+    private ResourceListLoader(AbstractComponent host, Listener listener, Filter filter) {
         super(host, PArray.class);
         if (listener == null) {
             throw new NullPointerException();
@@ -149,11 +149,11 @@ public class ResourceListLoader extends ResourceLoader<PArray> {
 //        });
 //        System.out.println(t.execute());
 //    }
-    public static ResourceListLoader create(Component host, Listener listener) {
+    public static ResourceListLoader create(AbstractComponent host, Listener listener) {
         return create(host, listener, null);
     }
 
-    public static ResourceListLoader create(Component host, Listener listener, Filter filter) {
+    public static ResourceListLoader create(AbstractComponent host, Listener listener, Filter filter) {
         if (host == null || listener == null) {
             throw new NullPointerException();
         }

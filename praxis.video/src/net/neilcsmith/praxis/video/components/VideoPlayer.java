@@ -50,11 +50,11 @@ public class VideoPlayer extends AbstractRootStateComponent {
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));
         loader = new VideoDelegateLoader(this, new VideoBinding());
         registerControl("uri", loader);
-        TriggerControl play = TriggerControl.create(this, new PlayTrigger());
+        TriggerControl play = TriggerControl.create( new PlayTrigger());
         registerControl("play", play);
-        TriggerControl pause = TriggerControl.create(this, new PauseTrigger());
+        TriggerControl pause = TriggerControl.create( new PauseTrigger());
         registerControl("pause", pause);
-        FloatProperty position = FloatProperty.create(this, new PositionBinding(), 0, 1, 0);
+        FloatProperty position = FloatProperty.create( new PositionBinding(), 0, 1, 0);
         registerControl("position", position);
 
 

@@ -54,8 +54,8 @@ public class DifferenceCalc extends AbstractComponent {
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, changeMeasure));
         diffOutput = new DefaultControlOutputPort(this);
 
-        TriggerControl trigger = TriggerControl.create(this, new TriggerBinding());
-        registerControl("bounds", ArrayProperty.create(this, new RegionBinding(), DEFAULTS));   
+        TriggerControl trigger = TriggerControl.create( new TriggerBinding());
+        registerControl("bounds", ArrayProperty.create( new RegionBinding(), DEFAULTS));   
         registerControl("trigger", trigger);
         registerPort("trigger", trigger.createPort());
         registerPort("measurement", diffOutput);

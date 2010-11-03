@@ -59,7 +59,7 @@ public class ArrayIterator extends AbstractComponent {
 
     private void build() {
         values = PArray.EMPTY;
-        registerControl("values", ArrayProperty.create(this, new ArrayProperty.Binding() {
+        registerControl("values", ArrayProperty.create( new ArrayProperty.Binding() {
 
             public void setBoundValue(long time, PArray value) {
                 values = value;
@@ -71,13 +71,13 @@ public class ArrayIterator extends AbstractComponent {
                 return values;
             }
         }, values));
-        minSkip = IntProperty.create(this, 0, 1024, 1);
+        minSkip = IntProperty.create( 0, 1024, 1);
         registerControl("min-skip", minSkip);
-        maxSkip = IntProperty.create(this, 0, 1024, 1);
+        maxSkip = IntProperty.create( 0, 1024, 1);
         registerControl("max-skip", maxSkip);
         pingPong = BooleanProperty.create(this, false);
         registerControl("ping-pong", pingPong);
-        TriggerControl trigger = TriggerControl.create(this, new TriggerControl.Binding() {
+        TriggerControl trigger = TriggerControl.create( new TriggerControl.Binding() {
 
             public void trigger(long time) {
                 send(time);

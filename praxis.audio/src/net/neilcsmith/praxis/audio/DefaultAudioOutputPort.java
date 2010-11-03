@@ -46,7 +46,6 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
     private List<AudioPort.Input> connections;
     private Component component;
     private boolean multiChannelCapable;
-    private List<PortConnectionListener> listeners;
     private PortInfo info;
 
     public DefaultAudioOutputPort(Component host, Source source) {
@@ -62,9 +61,8 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
         this.source = source;
         this.portSource = source;
         this.multiChannelCapable = multiChannelCapable;
-        listeners = new ArrayList<PortConnectionListener>();
         connections = new ArrayList<AudioPort.Input>();
-        info = PortInfo.create(getTypeClass(), getDirection(), new PortAddress[0], null);
+        info = PortInfo.create(getTypeClass(), getDirection(), null);
     }
 
     public void connect(Port port) throws PortConnectionException {
@@ -98,7 +96,6 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
         } else {
             throw new PortConnectionException();
         }
-        fireConnectionListeners();
     }
 
     public void disconnect(Port port) {
@@ -109,14 +106,9 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
                 switchToSingleChannel();
             }
         }
-        fireConnectionListeners();
     }
     
-    private void fireConnectionListeners() {
-        for (PortConnectionListener listener : listeners) {
-            listener.connectionsChanged(this);
-        }
-    }
+
 
     public void disconnectAll() {
         if (connection != null) {
@@ -128,25 +120,7 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
         return connection == null ? new Port[0] : new Port[]{connection};
     }
 
-    public PortAddress getAddress() {
-//        try {
-            ComponentAddress ad = component.getAddress();
-            if (ad == null) {
-                return null;
-            } else {
-                return PortAddress.create(component.getAddress(), component.getPortID(this));
-            }
-//        } catch (ArgumentFormatException ex) {
-//            return null;
-//        }
-    }
-
     public PortInfo getInfo() {
-        if (connection == null) {
-            info = PortInfo.create(info, new PortAddress[0]);
-        } else {
-            info = PortInfo.create(info, new PortAddress[] {connection.getAddress()});
-        }
         return info;
     }
 
@@ -154,17 +128,6 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
         return component;
     }
 
-
-    public void addConnectionListener(PortConnectionListener listener) {
-        if (listener == null) {
-            throw new NullPointerException();
-        }
-        listeners.add(listener);
-    }
-
-    public void removeConnectionListener(PortConnectionListener listener) {
-        listeners.remove(listener);
-    }
     
     private void switchToMultichannel() {
         if (multiChannelCapable || portSource == splitter) {
@@ -181,8 +144,7 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
             }
             portSource = splitter;
         } catch (Exception ex) {
-            logger.log(Level.WARNING, "Error converting port "
-                    + getAddress() + " to multi channel", ex);
+            logger.log(Level.WARNING, "Error converting port to multi channel", ex);
             removeSinks(splitter);
             removeSinks(source);
             portSource = source;
@@ -201,8 +163,7 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
             }
             portSource = source;
         } catch (Exception ex) {
-            logger.log(Level.WARNING, "Error converting port "
-                    + getAddress() + " to single channel", ex);
+            logger.log(Level.WARNING, "Error converting port to single channel", ex);
             removeSinks(source);
             removeSinks(splitter);
             portSource = source;

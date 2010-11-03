@@ -19,36 +19,21 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.core.interfaces;
+package net.neilcsmith.praxis.impl;
 
-import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.info.ArgumentInfo;
-import net.neilcsmith.praxis.core.info.ComponentInfo;
-import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.Component;
+import net.neilcsmith.praxis.core.Control;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ComponentInterface extends InterfaceDefinition {
+public interface ExtendedControl extends Control {
 
-    public final static String INFO = "info";
-    private final static ControlInfo INFO_INFO = ControlInfo.createReadOnlyPropertyInfo(
-                new ArgumentInfo[]{ComponentInfo.info()},
-                null);;
+    public void addNotify(Component component);
 
-    @Override
-    public String[] getControls() {
-        return new String[]{INFO};
-    }
+    public void removeNotify(Component component);
 
-    @Override
-    public ControlInfo getControlInfo(String control) {
-        if (INFO.equals(control)) {
-            return INFO_INFO;
-        }
-        throw new IllegalArgumentException();
-    }
+    public void hierarchyChanged();
+
 }
-
-

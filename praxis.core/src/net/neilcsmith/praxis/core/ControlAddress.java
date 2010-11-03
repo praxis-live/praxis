@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  */
 public class ControlAddress extends Argument {
 
-    public static final String SEPERATOR = ".";
+    public static final String SEPARATOR = ".";
     private static final String SEP_REGEX = "\\.";
     private static final String ID_REGEX = "[_\\-\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*";
     private ComponentAddress component;
@@ -102,7 +102,7 @@ public class ControlAddress extends Argument {
             throw new IllegalArgumentException();
         }
         id = id.intern();
-        String address = component.toString() + SEPERATOR + id;
+        String address = component.toString() + SEPARATOR + id;
         address = address.intern();
         return new ControlAddress(component, id, address);
 

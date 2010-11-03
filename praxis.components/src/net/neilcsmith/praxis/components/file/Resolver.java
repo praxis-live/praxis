@@ -47,13 +47,13 @@ public class Resolver extends AbstractComponent {
     }
 
     private void build() {
-        registerPort("in", ArgumentInputPort.create(this, new ArgumentInputPort.Binding() {
+        registerPort("in", ArgumentInputPort.create( new ArgumentInputPort.Binding() {
 
             public void receive(long time, Argument arg) {
                 resolve(time, arg);
             }
         }));
-        base = UriProperty.create(this, PUri.valueOf(new File("").toURI()));
+        base = UriProperty.create( PUri.valueOf(new File("").toURI()));
         registerControl("base", base);
         out = new DefaultControlOutputPort(this);
         error = new DefaultControlOutputPort(this);

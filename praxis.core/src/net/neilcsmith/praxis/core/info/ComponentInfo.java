@@ -132,12 +132,12 @@ public class ComponentInfo extends Argument {
         if (type == null) {
             throw new NullPointerException();
         }
-        if (controls == null) {
+        if (controls == null || controls.isEmpty()) {
             controls = Collections.emptyMap();
         } else {
             controls = new LinkedHashMap<String, ControlInfo>(controls);
         }
-        if (ports == null) {
+        if (ports == null || ports.isEmpty()) {
             ports = Collections.emptyMap();
         } else {
             ports = new LinkedHashMap<String, PortInfo>(ports);

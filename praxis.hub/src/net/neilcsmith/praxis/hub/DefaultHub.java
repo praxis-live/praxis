@@ -83,7 +83,7 @@ public class DefaultHub extends AbstractRoot {
         services = new ConcurrentHashMap<InterfaceDefinition, ComponentAddress[]>();
         extensions = exts;
         //lookup = new ServiceLoaderLookup();
-        lookup = InstanceLookup.create(new Object[]{serviceManager}, new ServiceLoaderLookup());
+        lookup = InstanceLookup.create( new ServiceLoaderLookup(), new Object[]{serviceManager});
         factory = LookupComponentFactory.getInstance(lookup);
         
     }

@@ -23,29 +23,53 @@ package net.neilcsmith.praxis.core.interfaces;
 
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
-import net.neilcsmith.praxis.core.info.ComponentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PBoolean;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ComponentInterface extends InterfaceDefinition {
+public class StartableInterface extends InterfaceDefinition {
 
-    public final static String INFO = "info";
-    private final static ControlInfo INFO_INFO = ControlInfo.createReadOnlyPropertyInfo(
-                new ArgumentInfo[]{ComponentInfo.info()},
-                null);;
+    public final static String START = "start";
+    public final static String STOP = "stop";
+    public final static String IS_RUNNING = "is-running";
+    private ControlInfo startInfo;
+    private ControlInfo stopInfo;
+    private ControlInfo isRunningInfo;
+
+    private StartableInterface() {
+        startInfo = ControlInfo.createFunctionInfo(
+                new ArgumentInfo[0],
+                new ArgumentInfo[0],
+                null);
+        stopInfo = ControlInfo.createFunctionInfo(
+                new ArgumentInfo[0],
+                new ArgumentInfo[0],
+                null);
+        isRunningInfo = ControlInfo.createFunctionInfo(
+                new ArgumentInfo[0],
+                new ArgumentInfo[]{PBoolean.info()},
+                null);
+
+    }
 
     @Override
     public String[] getControls() {
-        return new String[]{INFO};
+        return new String[]{START, STOP, IS_RUNNING};
     }
 
     @Override
     public ControlInfo getControlInfo(String control) {
-        if (INFO.equals(control)) {
-            return INFO_INFO;
+        if (START.equals(control)) {
+            return startInfo;
+        }
+        if (STOP.equals(control)) {
+            return stopInfo;
+        }
+        if (IS_RUNNING.equals(control)) {
+            return isRunningInfo;
         }
         throw new IllegalArgumentException();
     }

@@ -56,27 +56,27 @@ public class SamplePlayer extends AbstractComponent {
     }
     
     private void buildControls() {
-        registerControl("table", new SampleTableLoader(this, new LoaderListener()));
-        FloatProperty position = FloatProperty.create(this, new PositionBinding(), 0, 1, 0);
+        registerControl("table", new SampleTableLoader(new LoaderListener()));
+        FloatProperty position = FloatProperty.create( new PositionBinding(), 0, 1, 0);
         registerControl("position", position);
         registerPort("position", position.createPort());
-        FloatProperty in = FloatProperty.create(this, new InBinding(), 0, 1, 0);
+        FloatProperty in = FloatProperty.create( new InBinding(), 0, 1, 0);
         registerControl("start", in);
         registerPort("start", in.createPort());
-        FloatProperty out = FloatProperty.create(this, new OutBinding(), 0, 1, 1);
+        FloatProperty out = FloatProperty.create( new OutBinding(), 0, 1, 1);
         registerControl("end", out);
         registerPort("end", out.createPort());
-        FloatRangeProperty range = FloatRangeProperty.create(this, new RangeBinding(),
+        FloatRangeProperty range = FloatRangeProperty.create( new RangeBinding(),
                 0, 1, 0, 1);
         registerControl("range", range);
-        FloatProperty speed = FloatProperty.create(this, new SpeedBinding(), -2048, 2048, 1);
+        FloatProperty speed = FloatProperty.create( new SpeedBinding(), -2048, 2048, 1);
         registerControl("speed", speed);
         registerPort("speed", speed.createPort());
         registerControl("loop", BooleanProperty.create(this, new LoopingBinding(), false));
-        TriggerControl play = TriggerControl.create(this, new PlayBinding());
+        TriggerControl play = TriggerControl.create( new PlayBinding());
         registerControl("play", play);
         registerPort("play", play.createPort());
-        TriggerControl stop = TriggerControl.create(this, new StopBinding());
+        TriggerControl stop = TriggerControl.create( new StopBinding());
         registerControl("stop", stop);
         registerPort("stop", stop.createPort());
         BooleanProperty playing = BooleanProperty.create(this, new PlayingBinding(), false);
@@ -225,7 +225,7 @@ public class SamplePlayer extends AbstractComponent {
     
     private class LoaderListener implements SampleTableLoader.Listener {
 
-        public void tableLoaded(SampleTableLoader loader) {
+        public void tableLoaded(SampleTableLoader loader, long time) {
             SampleTable table = loader.getTable();
             if (table == null) {
                 tablesize = 1;
@@ -235,7 +235,7 @@ public class SamplePlayer extends AbstractComponent {
             player.setSampleTable(table);
         }
 
-        public void tableError(SampleTableLoader loader) {
+        public void tableError(SampleTableLoader loader, long time) {
             
         }
         

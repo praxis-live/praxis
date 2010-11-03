@@ -60,7 +60,7 @@ public class FileField extends SingleBindingGuiComponent {
 
     public FileField() {
         labelText = "";
-        registerControl("label", StringProperty.create(this, new LabelBinding(), labelText));
+        registerControl("label", StringProperty.create( new LabelBinding(), labelText));
     }
 
     @Override

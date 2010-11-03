@@ -49,7 +49,7 @@ import net.neilcsmith.praxis.core.types.PString;
 public abstract class ResourceLoader<T> extends BasicControl implements TaskListener {
 
     private static Logger logger = Logger.getLogger(ResourceLoader.class.getName());
-    private Component host;
+    private AbstractComponent host;
     private long taskID;
     private Call activeCall;
 //    private boolean portInvoked;
@@ -63,7 +63,7 @@ public abstract class ResourceLoader<T> extends BasicControl implements TaskList
     private T resource;
     private Class<T> resourceType;
 
-    protected ResourceLoader(Component host, Class<T> resourceType) {
+    protected ResourceLoader(AbstractComponent host, Class<T> resourceType) {
         super(host);
         this.host = host;
         this.resourceType = resourceType; // @TODO null check?
@@ -300,12 +300,12 @@ public abstract class ResourceLoader<T> extends BasicControl implements TaskList
     private class InputPort extends AbstractControlInputPort {
 
         private InputPort(Component host) {
-            super(host);
+//            super(host);
         }
 
         @Override
         public void receive(long time, double value) {
-            logger.warning(this.getAddress() + " received invalid argument");
+//            logger.warning(this.getAddress() + " received invalid argument");
         }
 
         @Override

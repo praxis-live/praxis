@@ -26,6 +26,8 @@ import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Component;
+import net.neilcsmith.praxis.core.Control;
+import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
@@ -35,18 +37,15 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
  * @author Neil C Smith
  * @TODO implement latest check
  */
-public class TriggerControl extends BasicControl {
+public class TriggerControl implements Control {
     
     private ControlInfo info;
     private Binding binding;
-    private InputPort port;
     
-    private TriggerControl(Component host, Binding binding) {
-        super(host);
+    private TriggerControl(Binding binding) {
         ArgumentInfo[] empty = new ArgumentInfo[0];
         this.info = ControlInfo.createFunctionInfo(empty, empty, null);
         this.binding = binding;
-        this.port = new InputPort(host);
     }
 
     public ControlInfo getInfo() {
@@ -54,36 +53,40 @@ public class TriggerControl extends BasicControl {
     }
     
     public Port createPort() {
-        return port;
+        return new InputPort();
     }
 
     @Override
-    protected Call processInvoke(Call call, boolean quiet) throws Exception {
-        binding.trigger(call.getTimecode());
-        if (!quiet) {
-            return Call.createReturnCall(call, CallArguments.EMPTY);
-        } else {
-            return null;
+    public void call(Call call, PacketRouter router) throws Exception {
+        switch (call.getType()) {
+            case INVOKE :
+                binding.trigger(call.getTimecode());
+                router.route(Call.createReturnCall(call, CallArguments.EMPTY));
+                break;
+            case INVOKE_QUIET :
+                binding.trigger(call.getTimecode());
+                break;
+            default :
+                throw new IllegalArgumentException();
         }
+    }
+
+    @Deprecated
+    public Component getComponent() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
     
     
     private class InputPort extends AbstractControlInputPort {
         
-        private InputPort(Component host) {
-            super(host);
+        private InputPort() {
         }
 
         @Override
         public void receive(long time, double value) {
             binding.trigger(time);
         }
-
-//        @Override
-//        public void receive(int value) {
-//            binding.trigger();
-//        }
 
         @Override
         public void receive(long time, Argument value) {
@@ -92,11 +95,11 @@ public class TriggerControl extends BasicControl {
         
     }
 
-    public static TriggerControl create(Component host, Binding binding) {
-        if (host == null || binding == null) {
+    public static TriggerControl create( Binding binding) {
+        if (binding == null) {
             throw new NullPointerException();
         }
-        return new TriggerControl(host, binding);
+        return new TriggerControl(binding);
     }
     
     public static interface Binding {

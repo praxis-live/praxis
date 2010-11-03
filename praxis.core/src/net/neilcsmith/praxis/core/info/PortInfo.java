@@ -21,7 +21,6 @@
  */
 package net.neilcsmith.praxis.core.info;
 
-import java.util.Arrays;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.PortAddress;
@@ -33,24 +32,24 @@ import net.neilcsmith.praxis.core.types.PMap;
  */
 public final class PortInfo extends Argument {
 
-    private String type;
+    private Class<? extends Port> type;
     private Port.Direction direction;
     private PMap properties;
 
-    private PortInfo(String type, Port.Direction direction, PMap properties) {
+    private PortInfo(Class<? extends Port> type, Port.Direction direction, PMap properties) {
         this.type = type;
         this.direction = direction;
         this.properties = properties;
     }
 
-    public String getType() {
+    public Class<? extends Port> getType() {
         return type;
     }
 
-    @Deprecated
-    public PortAddress[] getConnections() {
-        return new PortAddress[0];
-    }
+//    @Deprecated
+//    public PortAddress[] getConnections() {
+//        return new PortAddress[0];
+//    }
 
     public Port.Direction getDirection() {
         return direction;
@@ -63,7 +62,7 @@ public final class PortInfo extends Argument {
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
-        str.append(type);
+        str.append(type.getName());
         str.append(" ");
         str.append(direction.name());
         str.append(" ");
@@ -97,11 +96,11 @@ public final class PortInfo extends Argument {
         if (typeClass == null || direction == null) {
             throw new NullPointerException();
         }
-        String type = typeClass.getName();
+//        String type = typeClass.getName();
         if (properties == null) {
             properties = PMap.EMPTY;
         }
-        return new PortInfo(type, direction, properties);
+        return new PortInfo(typeClass, direction, properties);
 
     }
 

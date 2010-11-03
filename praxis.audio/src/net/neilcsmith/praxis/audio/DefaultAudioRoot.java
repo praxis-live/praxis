@@ -59,10 +59,10 @@ public class DefaultAudioRoot extends AbstractRoot implements AudioRoot, BufferR
     }
 
     private void buildControls() {
-        sampleRate = ArgumentProperty.create(this);
-        bufferSize = ArgumentProperty.create(this);
-        audioLib = ArgumentProperty.create(this);
-        device = ArgumentProperty.create(this);
+        sampleRate = ArgumentProperty.create();
+        bufferSize = ArgumentProperty.create();
+        audioLib = ArgumentProperty.create();
+        device = ArgumentProperty.create();
         registerControl("samplerate", sampleRate);
         registerControl("buffersize", bufferSize);
         registerControl("library", audioLib);

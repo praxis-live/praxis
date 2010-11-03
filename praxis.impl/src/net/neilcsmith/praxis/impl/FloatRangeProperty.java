@@ -25,7 +25,6 @@ package net.neilcsmith.praxis.impl;
 
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
-import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PNumber;
@@ -40,9 +39,9 @@ public class FloatRangeProperty extends AbstractProperty {
     private double max;
     private Binding binding;
 
-    private FloatRangeProperty(Component component, Binding binding,
+    private FloatRangeProperty(Binding binding,
             double min, double max, ControlInfo info) {
-        super(component, info);
+        super(info);
         this.binding = binding;
         this.min = min;
         this.max = max;
@@ -69,7 +68,7 @@ public class FloatRangeProperty extends AbstractProperty {
     }
 
 
-    public static FloatRangeProperty create(Component component, Binding binding,
+    public static FloatRangeProperty create( Binding binding,
             double min, double max, double low, double high) {
         if (min > max || low > high || low < min || low > max || high > max) {
             throw new IllegalArgumentException();
@@ -81,7 +80,7 @@ public class FloatRangeProperty extends AbstractProperty {
         ArgumentInfo[] arguments = new ArgumentInfo[]{inf, inf};
         Argument[] defaults = new Argument[]{PNumber.valueOf(low), PNumber.valueOf(high)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
-        return new FloatRangeProperty(component, binding, min, max, info);
+        return new FloatRangeProperty(binding, min, max, info);
     }
 
 

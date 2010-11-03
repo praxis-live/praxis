@@ -45,10 +45,10 @@ public class RandomFloat extends AbstractComponent {
     
     public RandomFloat() {
         rdm = new Random();
-        minimum = FloatProperty.create(this, 0);
-        range = FloatProperty.create(this, 0, PNumber.MAX_VALUE, 1);
+        minimum = FloatProperty.create( 0);
+        range = FloatProperty.create( 0, PNumber.MAX_VALUE, 1);
         output = new DefaultControlOutputPort(this);
-        trigger = TriggerControl.create(this, new TriggerBinding());
+        trigger = TriggerControl.create( new TriggerBinding());
         registerControl("minimum", minimum);
         registerPort("minimum", minimum.createPort());
         registerControl("range", range);

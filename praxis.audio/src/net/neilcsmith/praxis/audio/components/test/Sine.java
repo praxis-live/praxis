@@ -37,7 +37,7 @@ public class Sine extends AbstractComponent {
     
     public Sine() {
         sine = new net.neilcsmith.rapl.components.test.Sine(440);
-        FloatProperty freq = FloatProperty.create(this, new FrequencyBinding(),
+        FloatProperty freq = FloatProperty.create( new FrequencyBinding(),
                 110, 4 * 440, 440);
         registerControl("frequency", freq );
         registerPort("frequency", freq.createPort());

@@ -59,7 +59,7 @@ public class Button extends AbstractGuiComponent {
     public Button() {
         label = "";
         onClickArgs = CallArguments.create(PString.EMPTY);
-        registerControl("label", StringProperty.create(this, new LabelBinding(), label));
+        registerControl("label", StringProperty.create( new LabelBinding(), label));
         // @TODO Fix ControlInfo here.
         onClickInfo = ControlInfo.createPropertyInfo(new ArgumentInfo[] {ControlAddress.info(), Argument.info()},
                 new Argument[] {PString.EMPTY}, null);
@@ -144,7 +144,7 @@ public class Button extends AbstractGuiComponent {
         private CallArguments cache = unbound;
 
         OnClickProperty(AbstractComponent component, ControlInfo info) {
-            super(component, info);
+            super(info);
         }
 
         @Override

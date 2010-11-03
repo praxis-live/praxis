@@ -37,8 +37,7 @@ public class FloatInputPort extends AbstractControlInputPort {
     
     private Binding binding;
     
-    private FloatInputPort(Component host, Binding binding) {
-        super(host);
+    private FloatInputPort(Binding binding) {
         this.binding = binding;
     }
 
@@ -66,11 +65,11 @@ public class FloatInputPort extends AbstractControlInputPort {
         
     }
 
-    public static FloatInputPort create(Component host, Binding binding) {
-        if (host == null || binding == null) {
+    public static FloatInputPort create( Binding binding) {
+        if (binding == null) {
             throw new NullPointerException();
         }
-        return new FloatInputPort(host, binding);
+        return new FloatInputPort(binding);
     }
     
     public static interface Binding {

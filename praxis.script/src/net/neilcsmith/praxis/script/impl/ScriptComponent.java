@@ -23,7 +23,7 @@
 package net.neilcsmith.praxis.script.impl;
 
 import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.interfaces.ScriptInterpreter;
+import net.neilcsmith.praxis.core.interfaces.ScriptService;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 
 /**
@@ -41,7 +41,7 @@ public class ScriptComponent extends AbstractComponent {
 
 
     public InterfaceDefinition[] getInterfaces() {
-        return new InterfaceDefinition[] {ScriptInterpreter.DEFINITION};
+        return new InterfaceDefinition[] {ScriptService.INSTANCE};
     }
 
 }

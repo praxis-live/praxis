@@ -38,11 +38,11 @@ import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.InvalidChildException;
-import net.neilcsmith.praxis.core.interfaces.Task;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.interfaces.TaskProcessor;
+import net.neilcsmith.praxis.core.interfaces.TaskService;
+import net.neilcsmith.praxis.core.interfaces.TaskService.Task;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
@@ -75,8 +75,9 @@ public class TaskProcessorImpl extends AbstractRoot {
         completed = new ArrayList<Future>();
     }
 
+    @Override
     public InterfaceDefinition[] getInterfaces() {
-        return new InterfaceDefinition[] {TaskProcessor.DEFINITION};
+        return new InterfaceDefinition[] {TaskService.INSTANCE};
     }
 
 
@@ -147,7 +148,7 @@ public class TaskProcessorImpl extends AbstractRoot {
                     }
                 }
             }
-            return createError(call, "");
+            throw new IllegalArgumentException();
         }
 
         public ControlInfo getInfo() {

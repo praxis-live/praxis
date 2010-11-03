@@ -30,6 +30,7 @@ import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.interfaces.Task;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PUri;
+import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.ResourceLoader;
 import net.neilcsmith.ripl.delegates.VideoDelegate;
 
@@ -42,7 +43,7 @@ public class VideoDelegateLoader extends ResourceLoader<VideoDelegate> {
     
     private Listener listener;
 
-    public VideoDelegateLoader(Component component, Listener listener) {
+    public VideoDelegateLoader(AbstractComponent component, Listener listener) {
         super(component, VideoDelegate.class);
         if (listener == null) {
             throw new NullPointerException();

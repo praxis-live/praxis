@@ -32,36 +32,32 @@ import net.neilcsmith.praxis.core.types.PReference;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ComponentFactoryService {
+public class ComponentFactoryService extends InterfaceDefinition {
 
     public final static String NEW_INSTANCE = "new-instance";
     public final static String TYPES = "types";
-    public final static ComponentFactoryService.Definition DEFINITION = new Definition();
+    public final static ComponentFactoryService DEFINITION = new ComponentFactoryService();
+    private ControlInfo instanceInfo;
 
-    private ComponentFactoryService() {}
+    public ComponentFactoryService() {
+        instanceInfo = ControlInfo.createFunctionInfo(
+                new ArgumentInfo[]{ComponentType.info()},
+                new ArgumentInfo[]{PReference.info(Component.class)},
+                null);
+    }
 
-    public static class Definition extends InterfaceDefinition {
+    @Override
+    public String[] getControls() {
+        return new String[]{NEW_INSTANCE};
+    }
 
-        private ControlInfo instanceInfo;
-
-        private Definition() {
-            instanceInfo = ControlInfo.createFunctionInfo(
-                    new ArgumentInfo[]{ComponentType.info()},
-                    new ArgumentInfo[]{PReference.info(Component.class)},
-                    null);
+    @Override
+    public ControlInfo getControlInfo(String control) {
+        if (NEW_INSTANCE.equals(control)) {
+            return instanceInfo;
         }
-
-        @Override
-        public String[] getControls() {
-            return new String[]{NEW_INSTANCE};
-        }
-
-        @Override
-        public ControlInfo getControlInfo(String control) {
-            if (NEW_INSTANCE.equals(control)) {
-                return instanceInfo;
-            }
-            throw new IllegalArgumentException();
-        }
+        throw new IllegalArgumentException();
     }
 }
+
+

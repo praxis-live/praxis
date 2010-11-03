@@ -37,26 +37,27 @@ public final class ArgumentInfo extends Argument {
 
     public static enum Presence { Always, Optional, Variable }
 
-    private String type;
+    private Class<? extends Argument> type;
     private Presence presence;
     private PMap properties;
 
-    private ArgumentInfo(String type, Presence presence, PMap properties) {
+    private ArgumentInfo(Class<? extends Argument> type, Presence presence, PMap properties) {
         this.type = type;
         this.presence = presence;
         this.properties = properties;
     }
 
-//    public PString getType() {
-//        return (PString) data.get(TYPE_KEY);
-//    }
     
     /**
      *
      * @return String name of Argument subclass
      */
-    public String getType() {
+    public Class<? extends Argument> getType() {
         return type;
+    }
+
+    public Presence getPresence() {
+        return presence;
     }
 
     /**
@@ -120,11 +121,11 @@ public final class ArgumentInfo extends Argument {
         if (argClass == null) {
             throw new NullPointerException();
         }
-        String type = argClass.getName();
+//        String type = argClass.getName();
         if (properties == null) {
             properties = PMap.EMPTY;
         }
-        return new ArgumentInfo(type, presence, properties);
+        return new ArgumentInfo(argClass, presence, properties);
 
     }
     

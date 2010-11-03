@@ -34,6 +34,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.*;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
@@ -49,7 +50,7 @@ import net.neilcsmith.praxis.core.types.PString;
  */
 public abstract class AbstractRoot extends AbstractContainer implements Root, PacketRouter {
 
-    private static final Logger logger = Logger.getLogger(AbstractRoot.class.getName());
+    private static final Logger LOG = Logger.getLogger(AbstractRoot.class.getName());
     public static final int DEFAULT_FRAME_TIME = 100; // set in constructor?
     private static final ListenerSorter listenerSorter = new ListenerSorter();
     private AtomicReference<Root.State> state = new AtomicReference<Root.State>(Root.State.NEW);
@@ -67,6 +68,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
     private TaskController taskController;
     private Root.Controller controller;
     private Runnable interrupt;
+    private Lookup lookup;
 
     protected AbstractRoot() {
         this(Root.State.ACTIVE_IDLE);
@@ -103,6 +105,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             }
             this.ID = ID;
             this.hub = hub;
+            this.lookup = InstanceLookup.create(hub.getLookup(), this);
             // in place controller
             this.taskController = new TaskController();
             // task controller
@@ -368,11 +371,12 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             } else {
                 Call.Type type = call.getType();
                 if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
-                    route(Call.createErrorCall(call, PString.valueOf("Unknown control address")));
+                    route(Call.createErrorCall(call, PString.valueOf("Unknown control address : " + call.getToAddress())));
                 }
             }
         } catch (Exception ex) {
             Call.Type type = call.getType();
+            LOG.log(Level.WARNING, "Exception thrown from call\n" + call, ex);
             if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
                 route(Call.createErrorCall(call, PReference.wrap(ex)));
             }
@@ -432,7 +436,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
     
     @Override
     public Lookup getLookup() {
-        return hub.getLookup();
+        return lookup;
     }
 
     @Override

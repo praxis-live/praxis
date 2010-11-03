@@ -40,7 +40,7 @@ public abstract class SingleBindingGuiComponent extends AbstractGuiComponent {
     private GuiRoot root;
 
     protected SingleBindingGuiComponent() {
-        registerControl("binding", ArgumentProperty.create(this, new AddressBinding(), PString.EMPTY));
+        registerControl("binding", ArgumentProperty.create( new AddressBinding(), PString.EMPTY));
     }
 
     private class AddressBinding implements ArgumentProperty.Binding {

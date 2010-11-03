@@ -64,12 +64,12 @@ public class ImageSave extends AbstractComponent {
     public ImageSave() {
         pool = new ArrayList<SoftReference<BufferedImageSurface>>();
         listener = new ImageSaverListener();
-        uri = UriProperty.create(this, PUri.valueOf(new File("image").toURI()));
+        uri = UriProperty.create( PUri.valueOf(new File("image").toURI()));
         Delegator d = new Delegator(new SaveDelegate());
         registerPort(Port.IN, new DefaultVideoInputPort(this, d));
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, d));
         registerControl("file", uri);
-        TriggerControl trigger = TriggerControl.create(this, new TriggerBinding());
+        TriggerControl trigger = TriggerControl.create( new TriggerBinding());
         registerControl("trigger", trigger);
         registerPort("trigger", trigger.createPort());
 

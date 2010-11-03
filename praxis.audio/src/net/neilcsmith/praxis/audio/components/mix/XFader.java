@@ -53,7 +53,7 @@ public class XFader extends AbstractComponent {
         } catch (Exception ex) {
             throw new Error();
         }
-        FloatProperty mix = FloatProperty.create(this, new MixBinding(), 0, 1, 0);
+        FloatProperty mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
         registerPort(Port.IN + "-1", new DefaultAudioInputPort(this, g1));

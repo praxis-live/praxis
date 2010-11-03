@@ -39,8 +39,8 @@ public class UriProperty extends AbstractSingleArgProperty {
     private Binding binding;
 
 
-    private UriProperty(Component component, Binding binding, ControlInfo info) {
-        super(component, info);
+    private UriProperty(Binding binding, ControlInfo info) {
+        super(info);
         this.binding = binding;
     }
 
@@ -68,16 +68,15 @@ public class UriProperty extends AbstractSingleArgProperty {
 
 
     public static UriProperty create(
-            Component component, PUri def) {
-        return create(component, null, def, null);
+             PUri def) {
+        return create(null, def, null);
+    }
+
+    public static UriProperty create(Binding binding, PUri def) {
+         return create(binding, def, null);
     }
 
     public static UriProperty create(
-            Component component, Binding binding, PUri def) {
-         return create(component, binding, def, null);
-    }
-
-    public static UriProperty create(Component component,
             Binding binding, PUri def, PMap properties) {
 
         if (binding == null) {
@@ -88,7 +87,7 @@ public class UriProperty extends AbstractSingleArgProperty {
 
         Argument[] defaults = new Argument[]{def};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
-        return new UriProperty(component, binding, info);
+        return new UriProperty(binding, info);
     }
 
     public static interface Binding {

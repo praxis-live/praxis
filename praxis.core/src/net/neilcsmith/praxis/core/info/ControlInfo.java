@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.core.info;
 import java.util.Arrays;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
+import net.neilcsmith.praxis.core.Control.Type;
 import net.neilcsmith.praxis.core.types.PMap;
 
 /**
@@ -31,8 +32,6 @@ import net.neilcsmith.praxis.core.types.PMap;
  * @author Neil C Smith
  */
 public class ControlInfo extends Argument {
-
-    public static enum Type {FUNCTION, READ_WRITE_PROPERTY, READ_ONLY_PROPERTY};
 
     private ArgumentInfo[] inputs;
     private ArgumentInfo[] outputs;
@@ -63,15 +62,20 @@ public class ControlInfo extends Argument {
         }
         if (obj instanceof ControlInfo) {
             ControlInfo o = (ControlInfo) obj;
-            if (isProperty()) {
-                return o.isProperty() && Arrays.equals(inputs, o.inputs)
-                        && Arrays.equals(defaults, o.defaults)
-                        && properties.equals(o.properties);
-            } else {
-                return !o.isProperty() && Arrays.equals(inputs, o.inputs)
-                        && Arrays.equals(outputs, o.outputs)
-                        && properties.equals(o.properties);
-            }
+//            if (isProperty()) {
+//                return o.isProperty() && Arrays.equals(inputs, o.inputs)
+//                        && Arrays.equals(defaults, o.defaults)
+//                        && properties.equals(o.properties);
+//            } else {
+//                return !o.isProperty() && Arrays.equals(inputs, o.inputs)
+//                        && Arrays.equals(outputs, o.outputs)
+//                        && properties.equals(o.properties);
+//            }
+            return type == o.type &&
+                    Arrays.equals(inputs, o.inputs) &&
+                    Arrays.equals(outputs, o.outputs) &&
+                    Arrays.equals(defaults, o.defaults) &&
+                    properties.equals(o.properties);
         }
         return false;
     }
@@ -89,7 +93,7 @@ public class ControlInfo extends Argument {
 
     @Deprecated
     public boolean isProperty() {
-        return type == Type.READ_WRITE_PROPERTY || type == Type.READ_ONLY_PROPERTY;
+        return type == Type.RO_Property || type == Type.RW_Property;
     }
 
     public Type getType() {
@@ -118,15 +122,15 @@ public class ControlInfo extends Argument {
 
     public static ControlInfo createFunctionInfo(ArgumentInfo[] inputs,
             ArgumentInfo[] outputs, PMap properties) {
-        return create(inputs, outputs, null, Type.FUNCTION, properties);
+        return create(inputs, outputs, null, Type.Function, properties);
     }
 
     public static ControlInfo createPropertyInfo(ArgumentInfo[] arguments, Argument[] defaults, PMap properties) {
-        return create(arguments, arguments, defaults, Type.READ_WRITE_PROPERTY, properties);
+        return create(arguments, arguments, defaults, Type.RW_Property, properties);
     }
 
-    public static ControlInfo createReadOnlyPropertyInfo(ArgumentInfo[] arguments, Argument[] defaults, PMap properties) {
-        return create(arguments, arguments, defaults, Type.READ_ONLY_PROPERTY, properties);
+    public static ControlInfo createReadOnlyPropertyInfo(ArgumentInfo[] arguments, PMap properties) {
+        return create(new ArgumentInfo[0], arguments, null, Type.RO_Property, properties);
     }
 
     private static ControlInfo create(ArgumentInfo[] inputs,
@@ -143,12 +147,14 @@ public class ControlInfo extends Argument {
         } else {
             outs = Arrays.copyOf(outputs, outputs.length);
         }
-        Argument[] defs = defaults.clone();
+        if (defaults != null) {
+            defaults = defaults.clone();
+        }
         if (properties == null) {
             properties = PMap.EMPTY;
         }
 
-        return new ControlInfo(ins, outs, defs, type, properties);
+        return new ControlInfo(ins, outs, defaults, type, properties);
 
 
     }

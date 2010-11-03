@@ -69,7 +69,7 @@ public class SimpleDelay extends AbstractControlFrameComponent {
                 return delayS;
             }
         };
-        return FloatProperty.create(this, binding, 0, 60 * 60, 0);
+        return FloatProperty.create(binding, 0, 60 * 60, 0);
     }
     
     private ArgumentInputPort createInputPort() {
@@ -83,7 +83,7 @@ public class SimpleDelay extends AbstractControlFrameComponent {
                 }
             }
         };
-        return ArgumentInputPort.create(this, binding);
+        return ArgumentInputPort.create(binding);
     }
     
     private long secsToNS(double secs) {

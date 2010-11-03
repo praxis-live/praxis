@@ -37,9 +37,8 @@ public class IntProperty extends AbstractSingleArgProperty {
     private int max;
     private Binding binding;
 
-    private IntProperty(Component component, Binding binding,
-            int min, int max, ControlInfo info) {
-        super(component, info);
+    private IntProperty(Binding binding, int min, int max, ControlInfo info) {
+        super(info);
         this.binding = binding;
         this.min = min;
         this.max = max;
@@ -73,13 +72,13 @@ public class IntProperty extends AbstractSingleArgProperty {
         return binding.getBoundValue();
     }
 
-    public static IntProperty create(Component component, int min,
+    public static IntProperty create( int min,
             int max, int def) {
-        return create(component, null, min, max, def);
+        return create(  min, max, def);
 
     }
 
-    public static IntProperty create(Component component, Binding binding,
+    public static IntProperty create( Binding binding,
             int min, int max, int def) {
         if (min > max || def < min || def > max) {
             throw new IllegalArgumentException();
@@ -90,7 +89,7 @@ public class IntProperty extends AbstractSingleArgProperty {
         ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.info(min, max)};
         Argument[] defaults = new Argument[]{PNumber.valueOf(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
-        return new IntProperty(component, binding, min, max, info);
+        return new IntProperty(binding, min, max, info);
     }
 
     public static interface Binding {

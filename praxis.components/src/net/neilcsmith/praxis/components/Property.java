@@ -45,7 +45,7 @@ public class Property extends AbstractRootStateComponent {
     public Property() {
         output = new DefaultControlOutputPort(this);
         arg = PString.EMPTY;
-        ArgumentProperty value = ArgumentProperty.create(this, new Binding(), arg);
+        ArgumentProperty value = ArgumentProperty.create( new Binding(), arg);
         registerControl("value", value);
         registerPort(Port.OUT, output);
     }

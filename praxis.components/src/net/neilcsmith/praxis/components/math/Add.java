@@ -40,10 +40,10 @@ public class Add extends AbstractComponent {
     private ControlPort.Output output;
     
     public Add() {
-        value = FloatProperty.create(this, 0);
+        value = FloatProperty.create( 0);
         registerControl("value", value);
         registerPort("value", value.createPort());
-        registerPort(Port.IN, FloatInputPort.create(this, new InputBinding()));
+        registerPort(Port.IN, FloatInputPort.create( new InputBinding()));
         output = new DefaultControlOutputPort(this);
         registerPort(Port.OUT, output);
     }

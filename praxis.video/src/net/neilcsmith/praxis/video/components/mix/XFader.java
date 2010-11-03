@@ -84,7 +84,7 @@ public class XFader extends AbstractComponent {
                 return mixer.getMix();
             }
             };
-        return FloatProperty.create(this, binding, 0, 1, 0);
+        return FloatProperty.create(binding, 0, 1, 0);
     }
 
     private StringProperty createModeControl() {
@@ -105,7 +105,7 @@ public class XFader extends AbstractComponent {
                 return mixer.getMode().name();
             }
         };
-        return StringProperty.create(this, binding, allowed, mixer.getMode().name());
+        return StringProperty.create(binding, allowed, mixer.getMode().name());
     }
 //    private class MixControl extends BasicControl {
 //
