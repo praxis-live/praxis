@@ -40,12 +40,12 @@ import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.InvalidChildException;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.interfaces.TaskService;
 import net.neilcsmith.praxis.core.interfaces.TaskService.Task;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
+import net.neilcsmith.praxis.impl.RootState;
 
 /**
  *
@@ -60,7 +60,7 @@ public class TaskProcessorImpl extends AbstractRoot {
     private List<Future> completed;
 
     public TaskProcessorImpl() {
-        super(State.ACTIVE_RUNNING);
+        super(RootState.ACTIVE_RUNNING);
         threadService = Executors.newCachedThreadPool(new ThreadFactory() {
 
             public Thread newThread(Runnable r) {
@@ -70,15 +70,16 @@ public class TaskProcessorImpl extends AbstractRoot {
             }
         });
         Control submitter = new SubmitControl();
-        registerControl("submit", submitter);
+        registerControl(TaskService.SUBMIT, submitter);
+        registerInterface(TaskService.INSTANCE);
         futures = new HashMap<Future<Argument>, Call>();
         completed = new ArrayList<Future>();
     }
 
-    @Override
-    public InterfaceDefinition[] getInterfaces() {
-        return new InterfaceDefinition[] {TaskService.INSTANCE};
-    }
+//    @Override
+//    public InterfaceDefinition[] getInterfaces() {
+//        return new InterfaceDefinition[] {TaskService.INSTANCE};
+//    }
 
 
 

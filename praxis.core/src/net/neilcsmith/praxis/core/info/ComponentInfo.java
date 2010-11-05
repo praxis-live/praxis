@@ -26,9 +26,11 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import net.neilcsmith.praxis.core.types.PMap;
 import java.util.Map;
+import java.util.Set;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.Component;
+import net.neilcsmith.praxis.core.InterfaceDefinition;
 
 /**
  *
@@ -37,13 +39,15 @@ import net.neilcsmith.praxis.core.Component;
 public class ComponentInfo extends Argument {
 
     private Class<? extends Component> type;
+    private InterfaceDefinition[] interfaces;
     private Map<String, ControlInfo> controls;
     private Map<String, PortInfo> ports;
     private PMap properties;
 
-    private ComponentInfo(Class<? extends Component> type, Map<String, ControlInfo> controls,
-            Map<String, PortInfo> ports, PMap properties) {
+    private ComponentInfo(Class<? extends Component> type, InterfaceDefinition[] interfaces,
+            Map<String, ControlInfo> controls, Map<String, PortInfo> ports, PMap properties) {
         this.type = type;
+        this.interfaces = interfaces;
         this.controls = controls;
         this.ports = ports;
         this.properties = properties;
@@ -51,6 +55,10 @@ public class ComponentInfo extends Argument {
 
     public Class<? extends Component> getType() {
         return type;
+    }
+
+    public InterfaceDefinition[] getInterfaces() {
+        return interfaces.clone();
     }
 
     public String[] getControls() {
@@ -65,29 +73,19 @@ public class ComponentInfo extends Argument {
         return ports.keySet().toArray(new String[controls.size()]);
     }
 
+    public PortInfo getPortInfo(String port) {
+        return ports.get(port);
+    }
+
     public PMap getProperties() {
         return properties;
     }
-//
-//    public boolean isContainer() {
-//        return (children != null);
-//    }
-//
-//    public String[] getChildren() {
-//        if (children == null) {
-//            return new String[0];
-//        } else {
-//            return Arrays.copyOf(children, children.length);
-//        }
-//    }
 
     //@TODO implement toString
     @Override
     public String toString() {
         return "ComponentInfo toString() not implemented yet";
     }
-
-
 
     @Override
     public boolean equals(Object obj) {
@@ -97,6 +95,7 @@ public class ComponentInfo extends Argument {
         if (obj instanceof ComponentInfo) {
             ComponentInfo o = (ComponentInfo) obj;
             return type.equals(o.type) &&
+                    Arrays.equals(interfaces, interfaces) &&
                     controls.equals(o.controls) &&
                     ports.equals(o.ports) &&
                     properties.equals(o.properties);
@@ -106,31 +105,37 @@ public class ComponentInfo extends Argument {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 29 * hash + (this.type != null ? this.type.hashCode() : 0);
-        hash = 29 * hash + (this.controls != null ? this.controls.hashCode() : 0);
-        hash = 29 * hash + (this.ports != null ? this.ports.hashCode() : 0);
-        hash = 29 * hash + (this.properties != null ? this.properties.hashCode() : 0);
+        int hash = 5;
+        hash = 79 * hash + (this.type != null ? this.type.hashCode() : 0);
+        hash = 79 * hash + Arrays.deepHashCode(this.interfaces);
+        hash = 79 * hash + (this.controls != null ? this.controls.hashCode() : 0);
+        hash = 79 * hash + (this.ports != null ? this.ports.hashCode() : 0);
+        hash = 79 * hash + (this.properties != null ? this.properties.hashCode() : 0);
         return hash;
     }
 
-    public static ComponentInfo create(
-            Class<? extends Component> clas,
-            Map<String, ControlInfo> controls,
-            Map<String, PortInfo> ports,
-            PMap properties) {
-        return create(clas, controls, ports, null, properties);
-    }
 
-    @Deprecated
+//    public static ComponentInfo create(
+//            Class<? extends Component> clas,
+//            Map<String, ControlInfo> controls,
+//            Map<String, PortInfo> ports,
+//            PMap properties) {
+//        return create(clas, controls, ports, null, properties);
+//    }
+
+
     public static ComponentInfo create(
             Class<? extends Component> type,
+            Set<InterfaceDefinition> interfaces,
             Map<String, ControlInfo> controls,
             Map<String, PortInfo> ports,
-            String[] children,
             PMap properties) {
         if (type == null) {
             throw new NullPointerException();
+        }
+        InterfaceDefinition[] ids = new InterfaceDefinition[0];
+        if (interfaces != null && !interfaces.isEmpty()) {
+            ids = interfaces.toArray(ids);
         }
         if (controls == null || controls.isEmpty()) {
             controls = Collections.emptyMap();
@@ -146,7 +151,7 @@ public class ComponentInfo extends Argument {
             properties = PMap.EMPTY;
         }
 
-        return new ComponentInfo(type, controls, ports, properties);
+        return new ComponentInfo(type, ids, controls, ports, properties);
 
     }
 

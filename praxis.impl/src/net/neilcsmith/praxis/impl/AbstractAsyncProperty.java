@@ -58,6 +58,10 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
     private long latest;
     private ControlAddress taskSubmitAddress;
 
+    protected AbstractAsyncProperty(ArgumentInfo keyType, Class<T> valueType, Argument defaultKey) {
+        this(new ArgumentInfo[]{keyType}, valueType, new Argument[]{defaultKey}, null);
+    }
+
     protected AbstractAsyncProperty(ArgumentInfo[] keyTypes,
             Class<T> valueType, Argument[] defaultKeys, PMap properties) {
         if (valueType == null) {

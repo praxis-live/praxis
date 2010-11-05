@@ -21,11 +21,11 @@
  */
 package net.neilcsmith.praxis.impl;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.Container;
@@ -39,6 +39,7 @@ import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.info.ComponentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.info.PortInfo;
+import net.neilcsmith.praxis.core.interfaces.ComponentInterface;
 
 /**
  *
@@ -48,18 +49,37 @@ public abstract class AbstractComponent implements Component {
 
     private Map<String, Control> controlMap;
     private Map<String, Port> portMap;
+    private Set<InterfaceDefinition> interfaceSet;
     private Container parent;
     private ComponentAddress address;
-    ComponentInfo info;
-    boolean controlInfoValid;
-    boolean portInfoValid;
+    private ComponentInfo info;
 
     /**
      *
      */
-    public AbstractComponent() {
+    protected AbstractComponent() {
+        this(true);
+    }
+    
+    protected AbstractComponent(boolean componentInterface) {
         controlMap = new LinkedHashMap<String, Control>();
         portMap = new LinkedHashMap<String, Port>();
+        interfaceSet = new LinkedHashSet<InterfaceDefinition>();
+        if (componentInterface) {
+            buildComponentInterface();
+        }
+    }
+
+    private void buildComponentInterface() {
+        registerControl(ComponentInterface.INFO,
+                ArgumentProperty.createReadOnly(ComponentInfo.info(),
+                new ArgumentProperty.ReadBinding() {
+
+            public Argument getBoundValue() {
+                return getInfo();
+            }
+        }));
+        registerInterface(ComponentInterface.INSTANCE);
     }
 
     public Control getControl(String id) {
@@ -78,7 +98,7 @@ public abstract class AbstractComponent implements Component {
         return null;
     }
 
-    public String[] getControlIDs() {
+    public final String[] getControlIDs() {
         Set<String> keyset = controlMap.keySet();
         return keyset.toArray(new String[keyset.size()]);
     }
@@ -99,7 +119,7 @@ public abstract class AbstractComponent implements Component {
         if (control instanceof ExtendedControl) {
             ((ExtendedControl) control).addNotify(this);
         }
-        controlInfoValid = false;
+        info = null;
     }
 
     /**
@@ -113,7 +133,7 @@ public abstract class AbstractComponent implements Component {
             ((ExtendedControl) control).removeNotify(this);
         }
         if (control != null) {
-            controlInfoValid = false;
+            info = null;
         }
         return control;
     }
@@ -122,7 +142,7 @@ public abstract class AbstractComponent implements Component {
         return portMap.get(id);
     }
 
-    public String[] getPortIDs() {
+    public final String[] getPortIDs() {
         Set<String> keyset = portMap.keySet();
         return keyset.toArray(new String[keyset.size()]);
     }
@@ -140,8 +160,7 @@ public abstract class AbstractComponent implements Component {
             throw new IllegalArgumentException();
         }
         portMap.put(id, port);
-//        port.addConnectionListener(portListener);
-        portInfoValid = false;
+        info = null;
     }
 
     /**
@@ -154,9 +173,20 @@ public abstract class AbstractComponent implements Component {
         if (port != null) {
 //            port.removeConnectionListener(portListener);
             port.disconnectAll();
-            portInfoValid = false;
+            info = null;
         }
         return port;
+    }
+
+    protected void registerInterface(InterfaceDefinition id) {
+        if (id == null) {
+            throw new NullPointerException();
+        }
+        interfaceSet.add(id);
+    }
+
+    public final InterfaceDefinition[] getInterfaces() {
+        return interfaceSet.toArray(new InterfaceDefinition[interfaceSet.size()]);
     }
 
     public Container getParent() {
@@ -169,11 +199,6 @@ public abstract class AbstractComponent implements Component {
         if (c == null) {
             return null;
         }
-//        while ((c = c.getParent()) != null) {
-//            if (c.getParent() == null && c instanceof Root) {
-//                return (Root) c;
-//            }
-//        }
         do {
             if (c.getParent() == null && c instanceof Root) {
                 return (Root) c;
@@ -195,6 +220,7 @@ public abstract class AbstractComponent implements Component {
         if (parent == null) {
             if (this.parent != null) {
                 this.parent = null;
+                disconnectAll();
                 hierarchyChanged(); // defer to hierarchy changed for all uncaching
             }
         } else {
@@ -203,6 +229,12 @@ public abstract class AbstractComponent implements Component {
             }
             this.parent = parent;
             hierarchyChanged(); // as above
+        }
+    }
+
+    private void disconnectAll() {
+        for (Port p : portMap.values()) {
+            p.disconnectAll();
         }
     }
 
@@ -216,18 +248,16 @@ public abstract class AbstractComponent implements Component {
         }
     }
 
-    public ComponentInfo getInfo() {
-        if (info == null || !portInfoValid || !controlInfoValid) {
+    public final ComponentInfo getInfo() {
+        if (info == null) {
             Map<String, ControlInfo> controls = buildControlInfoMap();
             Map<String, PortInfo> ports = buildPortInfoMap();
-            info = ComponentInfo.create(getClass(), controls, ports, null);
-            portInfoValid = true;
-            controlInfoValid = true;
+            info = ComponentInfo.create(getClass(), interfaceSet, controls, ports, null);
         }
         return info;
     }
 
-    Map<String, ControlInfo> buildControlInfoMap() {
+    private Map<String, ControlInfo> buildControlInfoMap() {
         Map<String, ControlInfo> infos = new LinkedHashMap<String, ControlInfo>();
         Set<Map.Entry<String, Control>> controls = controlMap.entrySet();
         for (Map.Entry<String, Control> entry : controls) {
@@ -239,7 +269,7 @@ public abstract class AbstractComponent implements Component {
         return infos;
     }
 
-    Map<String, PortInfo> buildPortInfoMap() {
+    private Map<String, PortInfo> buildPortInfoMap() {
         Map<String, PortInfo> infos = new LinkedHashMap<String, PortInfo>();
         Set<Map.Entry<String, Port>> ports = portMap.entrySet();
         for (Map.Entry<String, Port> entry : ports) {
@@ -251,10 +281,6 @@ public abstract class AbstractComponent implements Component {
         return infos;
     }
 
-    public InterfaceDefinition[] getInterfaces() {
-        return new InterfaceDefinition[0];
-    }
-
     public Lookup getLookup() {
         if (parent == null) {
             return EmptyLookup.getInstance();
@@ -262,6 +288,7 @@ public abstract class AbstractComponent implements Component {
             return parent.getLookup();
         }
     }
+
 
     public static interface ExtendedControl extends Control {
 

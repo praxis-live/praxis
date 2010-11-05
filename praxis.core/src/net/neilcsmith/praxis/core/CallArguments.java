@@ -203,7 +203,7 @@ public abstract class CallArguments {
      * @param args
      * @return CallArguments
      */
-    public static CallArguments create(Argument[] args) {
+    public static CallArguments create(Argument ... args) {
         if (args.length == 0) {
             return EMPTY;
         } else if (args.length == 1) {
@@ -218,9 +218,11 @@ public abstract class CallArguments {
                     throw new NullPointerException();
                 }
             }
-            return new Multi(args);
+            return new Multi(args.clone());
         }
     }
+
+
     
 //    public static CallArguments create(Argument[] args) {
 //        int size = args.length;

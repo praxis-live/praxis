@@ -23,6 +23,7 @@ package net.neilcsmith.praxis.script;
 
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Call;
+import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.Packet;
@@ -41,13 +42,14 @@ import net.neilcsmith.praxis.script.impl.ScriptExecutor;
  */
 public class ScriptServiceImpl extends AbstractRoot {
 
-    private static final Logger log = Logger.getLogger(ScriptServiceImpl.class.getName());
+    private static final Logger LOG = Logger.getLogger(ScriptServiceImpl.class.getName());
 
     private ScriptContext context;
     private ScriptExecutor defaultExecutor;
 
     public ScriptServiceImpl() {
         registerControl(ScriptService.EVAL, new EvalControl());
+        registerInterface(ScriptService.INSTANCE);
     }
 
     
@@ -61,59 +63,101 @@ public class ScriptServiceImpl extends AbstractRoot {
         defaultExecutor = new ScriptExecutor(context, false);
     }
 
-    @Override
-    public InterfaceDefinition[] getInterfaces() {
-        return new InterfaceDefinition[]{ScriptService.INSTANCE};
-    }
+//    @Override
+//    public InterfaceDefinition[] getInterfaces() {
+//        return new InterfaceDefinition[]{ScriptService.INSTANCE};
+//    }
 
-    private class EvalControl extends BasicControl {
+//    private class EvalControl extends BasicControl {
+//
+//        private EvalControl() {
+//            super(ScriptServiceImpl.this);
+//        }
+//
+//        @Override
+//        protected void processInvoke(Call call, PacketRouter router, boolean quiet) throws Exception {
+//            defaultExecutor.queueEvalCall(call);
+//        }
+//
+//        public ControlInfo getInfo() {
+//            return null;
+//        }
+//    }
 
-        private EvalControl() {
-            super(ScriptServiceImpl.this);
-        }
+    private class EvalControl implements Control {
 
-        @Override
-        protected void processInvoke(Call call, PacketRouter router, boolean quiet) throws Exception {
-            defaultExecutor.queueEvalCall(call);
-        }
-
-        public ControlInfo getInfo() {
-            return null;
-        }
-    }
-
-    private class ScriptControl extends BasicControl {
-
-        private ScriptControl() {
-            super(ScriptServiceImpl.this);
-        }
-
-        @Override
-        protected void processReturn(Call call) throws Exception {
-            defaultExecutor.processScriptCall(call);
-        }
-
-        @Override
-        protected void processError(Call call) throws Exception {
-            defaultExecutor.processScriptCall(call);
-        }
-
-        @Override
-        protected Call processInvoke(Call call, boolean quiet) throws Exception {
-            if (call.getToAddress().equals(call.getFromAddress())) {
-                defaultExecutor.processScriptCall(call);
-                return null;
-            } else {
-                return super.processInvoke(call, quiet);
+        public void call(Call call, PacketRouter router) throws Exception {
+            switch (call.getType()) {
+                case INVOKE :
+                case INVOKE_QUIET :
+                    defaultExecutor.queueEvalCall(call);
+                    break;
+                default:
+                    LOG.warning("Eval control received unexpected call.");
             }
         }
 
+        public ControlInfo getInfo() {
+            return ScriptService.INSTANCE.getControlInfo(ScriptService.EVAL);
+        }
 
+    }
+//
+//    private class ScriptControl extends BasicControl {
+//
+//        private ScriptControl() {
+//            super(ScriptServiceImpl.this);
+//        }
+//
+//        @Override
+//        protected void processReturn(Call call) throws Exception {
+//            defaultExecutor.processScriptCall(call);
+//        }
+//
+//        @Override
+//        protected void processError(Call call) throws Exception {
+//            defaultExecutor.processScriptCall(call);
+//        }
+//
+//        @Override
+//        protected Call processInvoke(Call call, boolean quiet) throws Exception {
+//            if (call.getToAddress().equals(call.getFromAddress())) {
+//                defaultExecutor.processScriptCall(call);
+//                return null;
+//            } else {
+//                return super.processInvoke(call, quiet);
+//            }
+//        }
+//
+//
+//
+//        public ControlInfo getInfo() {
+//            return null;
+//        }
+//
+//
+//    }
+
+    private class ScriptControl implements Control {
+
+        public void call(Call call, PacketRouter router) throws Exception {
+            switch (call.getType()) {
+                case INVOKE :
+                case INVOKE_QUIET :
+                    if (call.getToAddress().equals(call.getFromAddress())) {
+                        defaultExecutor.processScriptCall(call);
+                    } else {
+                        throw new UnsupportedOperationException();
+                    }
+                    break;
+                default :
+                    defaultExecutor.processScriptCall(call);
+            }
+        }
 
         public ControlInfo getInfo() {
             return null;
         }
-
 
     }
 
@@ -133,10 +177,6 @@ public class ScriptServiceImpl extends AbstractRoot {
             return ScriptServiceImpl.this.getLookup();
         }
 
-        public ServiceManager getServiceManager() {
-            return ScriptServiceImpl.this.getServiceManager();
-        }
-
         public long getTime() {
             return ScriptServiceImpl.this.getTime();
         }
@@ -153,7 +193,7 @@ public class ScriptServiceImpl extends AbstractRoot {
     private class Router implements PacketRouter {
 
         public void route(Packet packet) {
-            log.finest("Sending Call : ---\n " + packet.toString());
+            LOG.finest("Sending Call : ---\n " + packet.toString());
             getPacketRouter().route(packet);
         }
 

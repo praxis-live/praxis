@@ -57,13 +57,13 @@ public interface Container extends Component {
      */
     public Component getChild(String id);
     
-    /**
-     * Get the ID for the given Component.
-     * @param child
-     * @return String ID, or null if component is not a child of this container.
-     */
-    @Deprecated
-    public String getChildID(Component child);
+//    /**
+//     * Get the ID for the given Component.
+//     * @param child
+//     * @return String ID, or null if component is not a child of this container.
+//     */
+//    @Deprecated
+//    public String getChildID(Component child);
     
     /**
      * Get the IDs of all child components of this container.

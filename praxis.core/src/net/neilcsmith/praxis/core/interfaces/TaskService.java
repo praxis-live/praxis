@@ -25,6 +25,7 @@ import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PReference;
 
 /**
@@ -35,16 +36,11 @@ public class TaskService extends InterfaceDefinition {
 
     public final static TaskService INSTANCE = new TaskService();
     public final static String SUBMIT = "submit";
-    private ControlInfo submitInfo;
-
-    public TaskService() {
-        ArgumentInfo input = PReference.info(Task.class);
-        ArgumentInfo output = Argument.info();
-        submitInfo = ControlInfo.createFunctionInfo(
-                new ArgumentInfo[]{input},
-                new ArgumentInfo[]{output},
-                null);
-    }
+    public final static ControlInfo SUBMIT_INFO =
+            ControlInfo.createFunctionInfo(
+            new ArgumentInfo[]{PReference.info(Task.class)},
+            new ArgumentInfo[]{Argument.info()},
+            PMap.EMPTY);
 
     @Override
     public String[] getControls() {
@@ -54,7 +50,7 @@ public class TaskService extends InterfaceDefinition {
     @Override
     public ControlInfo getControlInfo(String control) {
         if (SUBMIT.equals(control)) {
-            return submitInfo;
+            return SUBMIT_INFO;
         }
         throw new IllegalArgumentException();
     }

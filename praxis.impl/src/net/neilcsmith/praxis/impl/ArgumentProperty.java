@@ -24,9 +24,7 @@ package net.neilcsmith.praxis.impl;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
-import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
 
@@ -37,22 +35,28 @@ import net.neilcsmith.praxis.core.types.PString;
 public class ArgumentProperty extends AbstractSingleArgProperty {
 
     private static Logger logger = Logger.getLogger(ArgumentProperty.class.getName());
-    private Binding binding;
+    private ReadBinding reader;
+    private Binding writer;
 
 
-    private ArgumentProperty( Binding binding, ControlInfo info) {
+    private ArgumentProperty(ReadBinding reader, Binding writer, ControlInfo info) {
         super(info);
-        this.binding = binding;
+        this.reader = reader;
+        this.writer = writer;
     }
 
 
     public Argument getValue() {
-        return binding.getBoundValue();
+        return get();
     }
 
     @Override
     protected void set(long time, Argument value) throws Exception {
-        binding.setBoundValue(time, value);
+        if (writer == null) {
+            throw new UnsupportedOperationException("Read Only Property");
+        } else {
+            writer.setBoundValue(time, value);
+        }
     }
 
     @Override
@@ -62,33 +66,50 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
 
     @Override
     protected Argument get() {
-        return binding.getBoundValue();
+        return reader.getBoundValue();
     }
 
     
     
     
     public static ArgumentProperty create() {
-        return create( null, PString.EMPTY);
+        return create(Argument.info(), PString.EMPTY, null);
     }
 
     public static ArgumentProperty create( Binding binding, Argument def) {
-
+        return create(Argument.info(), def, binding);
+        
+    }
+    
+    public static ArgumentProperty create(ArgumentInfo typeInfo, Argument def, Binding binding) {
         if (binding == null) {
             binding = new DefaultBinding(def);
         }
-        ArgumentInfo[] arguments = new ArgumentInfo[]{PArray.info()};
-
+        ArgumentInfo[] arguments = new ArgumentInfo[]{typeInfo};
         Argument[] defaults = new Argument[]{def};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
-        return new ArgumentProperty(binding, info);
+        return new ArgumentProperty(binding, binding, info);
     }
 
-    public static interface Binding {
-
-        public void setBoundValue(long time, Argument value);
-
+    public static ArgumentProperty createReadOnly(ArgumentInfo typeInfo, ReadBinding binding) {
+        if (binding == null) {
+            throw new NullPointerException();
+        }
+        ControlInfo info = ControlInfo.createReadOnlyPropertyInfo(new ArgumentInfo[]{typeInfo}, null);
+        return new ArgumentProperty(binding, null, info);
+    }
+    
+    
+    public static interface ReadBinding {
+        
         public Argument getBoundValue();
+        
+    }
+
+    public static interface Binding extends ReadBinding {
+
+        public void setBoundValue(long time, Argument value) throws Exception;
+     
     }
 
     private static class DefaultBinding implements Binding {

@@ -132,6 +132,7 @@ public final class PArray extends Argument implements Iterable<Argument> {
         }
     }
 
+    //@TODO optimize this.
     public static PArray valueOf(Collection<? extends Argument> collection) {
         return valueOf(collection.toArray(new Argument[collection.size()]));
 

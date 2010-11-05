@@ -22,6 +22,7 @@
 package net.neilcsmith.praxis.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -82,6 +83,17 @@ public final class ComponentAddress extends Argument {
      */
     public String getRootID() {
         return address[0];
+    }
+
+    public ComponentAddress getParentAddress() {
+        if (address.length == 1) {
+            return null;
+        } else {
+            String s = addressString;
+            s = s.substring(0, s.lastIndexOf('/')).intern();
+            String[] a = Arrays.copyOfRange(address, 0, address.length - 1);
+            return new ComponentAddress(a, s);
+        }
     }
 
     @Override

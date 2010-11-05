@@ -32,8 +32,9 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
  */
 public class ComponentInterface extends InterfaceDefinition {
 
+    public final static ComponentInterface INSTANCE = new ComponentInterface();
     public final static String INFO = "info";
-    private final static ControlInfo INFO_INFO = ControlInfo.createReadOnlyPropertyInfo(
+    public final static ControlInfo INFO_INFO = ControlInfo.createReadOnlyPropertyInfo(
                 new ArgumentInfo[]{ComponentInfo.info()},
                 null);;
 

@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
-import net.neilcsmith.praxis.core.Root.State;
+import net.neilcsmith.praxis.impl.RootState;
 import net.neilcsmith.praxis.impl.AbstractControlFrameComponent;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.ArgumentInputPort;
@@ -107,7 +107,7 @@ public class SimpleDelay extends AbstractControlFrameComponent {
     }
 
     @Override
-    public void rootStateChanged(AbstractRoot source, State state) {
+    public void rootStateChanged(AbstractRoot source, RootState state) {
         super.rootStateChanged(source, state);
         message = null;
     }

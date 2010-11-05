@@ -49,6 +49,7 @@ import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.RootHub;
 import net.neilcsmith.praxis.gui.ControlBinding.Adaptor;
 import net.neilcsmith.praxis.impl.AbstractRoot;
+import net.neilcsmith.praxis.impl.RootState;
 
 /**
  *
@@ -65,7 +66,7 @@ public class DefaultGuiRoot extends AbstractRoot implements GuiRoot {
     private Map<ControlAddress, DefaultBinding> bindingCache;
 
     public DefaultGuiRoot() {
-        super(State.ACTIVE_IDLE);
+        super(RootState.ACTIVE_IDLE);
         bindingCache = new HashMap<ControlAddress, DefaultBinding>();
     }
 
@@ -98,8 +99,8 @@ public class DefaultGuiRoot extends AbstractRoot implements GuiRoot {
         
         timer = new Timer(50, new TimerProcessor());
         timer.start();
-        State st;
-        while ((st = getState()) == State.ACTIVE_IDLE || st == State.ACTIVE_RUNNING) {
+        RootState st;
+        while ((st = getState()) == RootState.ACTIVE_IDLE || st == RootState.ACTIVE_RUNNING) {
 //            System.out.println("Called Once");
             synchronized (lock) {
                 try {

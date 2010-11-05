@@ -1,51 +1,52 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 2008 - Neil C Smith. All rights reserved.
- * 
+ *
+ * Copyright 2010 - Neil C Smith. All rights reserved.
+ *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
  * published by the Free Software Foundation.
- * 
+ *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
  * version 2 for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License version 2
  * along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
- * 
+ *
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
 
-package net.neilcsmith.praxis.components;
-
-import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.core.Root;
-import net.neilcsmith.praxis.impl.RootState;
-import net.neilcsmith.praxis.impl.AbstractRoot;
-import net.neilcsmith.praxis.impl.AbstractRootStateComponent;
-import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
+package net.neilcsmith.praxis.core;
 
 /**
  *
- * @author Neil C Smith
+ * @author Neil C Smith (http://neilcsmith.net)
  */
-public class StartTrigger extends AbstractRootStateComponent {
+public abstract class ClockContext {
 
-    private DefaultControlOutputPort output;
+    public abstract void addListener(Listener listener);
+
+    public abstract void removeListener(Listener listener);
+
+    public abstract long getTime();
     
-    public StartTrigger() {
-        output = new DefaultControlOutputPort(this);
-        registerPort(Port.OUT, output);
+    public abstract boolean isRunning();
+
+    public long getPeriod() {
+        return -1;
     }
-    
-    public void rootStateChanged(AbstractRoot source, RootState state) {
-        if (state == RootState.ACTIVE_RUNNING) {
-            output.send(source.getTime());
-        }
+
+
+    public static interface Listener {
+
+        public void tick(ClockContext source);
+
+        public void stateChanged(ClockContext source);
+
     }
 
 }

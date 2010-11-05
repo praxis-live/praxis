@@ -23,7 +23,6 @@ package net.neilcsmith.praxis.core.info;
 
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.core.PortAddress;
 import net.neilcsmith.praxis.core.types.PMap;
 
 /**
@@ -45,11 +44,6 @@ public final class PortInfo extends Argument {
     public Class<? extends Port> getType() {
         return type;
     }
-
-//    @Deprecated
-//    public PortAddress[] getConnections() {
-//        return new PortAddress[0];
-//    }
 
     public Port.Direction getDirection() {
         return direction;
@@ -102,18 +96,5 @@ public final class PortInfo extends Argument {
         }
         return new PortInfo(typeClass, direction, properties);
 
-    }
-
-    @Deprecated
-    public static PortInfo create(Class<? extends Port> typeClass, Port.Direction direction,
-            PortAddress[] connections, PMap properties) {
-        return create(typeClass, direction, properties);
-
-    }
-
-    @Deprecated
-    public static PortInfo create(PortInfo oldInfo, PortAddress[] connections) {
-
-        return oldInfo;
     }
 }

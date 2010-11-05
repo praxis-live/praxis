@@ -36,6 +36,7 @@ import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.info.ComponentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.interfaces.ComponentInterface;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.BasicControl;
 
@@ -193,11 +194,16 @@ public class DefaultBinding extends BasicControl {
 
                 PacketRouter router = host.getPacketRouter();
                 ControlAddress returnAddress = getReturnAddress();
-                ComponentAddress compAd = boundAddress.getComponentAddress();
-                String rootID = compAd.getRootID();
-                ControlAddress toAddress = ControlAddress.create("/" + rootID + ".info");
+//                ComponentAddress compAd = boundAddress.getComponentAddress();
+//                String rootID = compAd.getRootID();
+//                ControlAddress toAddress = ControlAddress.create("/" + rootID + ".info");
+//                Call call = Call.createCall(toAddress, returnAddress,
+//                        System.nanoTime(), compAd);
+                ControlAddress toAddress = ControlAddress.create(
+                        boundAddress.getComponentAddress(), ComponentInterface.INFO);
                 Call call = Call.createCall(toAddress, returnAddress,
-                        System.nanoTime(), compAd);
+                        System.nanoTime(), CallArguments.EMPTY);
+                        
                 infoMatchID = call.getMatchID();
                 router.route(call);
 

@@ -25,7 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
-import net.neilcsmith.praxis.core.Root.State;
+import net.neilcsmith.praxis.impl.RootState;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.AbstractRootStateComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
@@ -125,11 +125,11 @@ public class VideoPlayer extends AbstractRootStateComponent {
             
         }
 
-        public void delegateLoaded(VideoDelegateLoader source) {
+        public void delegateLoaded(VideoDelegateLoader source, long time) {
             setDelegate(source.getDelegate());
         }
 
-        public void delegateError(VideoDelegateLoader source) {
+        public void delegateError(VideoDelegateLoader source, long time) {
             
         }
         
@@ -186,8 +186,8 @@ public class VideoPlayer extends AbstractRootStateComponent {
 //
 //    protected abstract Task getDelegateLoaderTask(PUri uri);
 //
-    public void rootStateChanged(AbstractRoot source, State state) {
-        if (state == State.ACTIVE_IDLE) {
+    public void rootStateChanged(AbstractRoot source, RootState state) {
+        if (state == RootState.ACTIVE_IDLE) {
             if (video != null) {
                 try {
                     video.stop();
@@ -195,7 +195,7 @@ public class VideoPlayer extends AbstractRootStateComponent {
                     // no op
                 }
             }
-        } else if (state == State.TERMINATING) {
+        } else if (state == RootState.TERMINATING) {
             if (video != null) {
                 delegator.setDelegate(null);
                 video.dispose();

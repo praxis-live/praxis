@@ -23,55 +23,56 @@
 package net.neilcsmith.praxis.core.interfaces;
 
 import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ComponentType;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PArray;
+import net.neilcsmith.praxis.core.types.PMap;
+import net.neilcsmith.praxis.core.types.PString;
 
 /**
- * NOT CURRENTLY IN USE
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class RootManager extends InterfaceDefinition {
+public class RootManagerService extends InterfaceDefinition {
 
-    public final static String CREATE = "create";
-    public final static String DESTROY = "destroy";
-    // public final static String ROOTS = "roots";
+    public final static RootManagerService INSTANCE = new RootManagerService();
 
-    private final static RootManager instance = new RootManager();
-
-    private ControlInfo createInfo;
-    private ControlInfo destroyInfo;
-
-    private RootManager() {
-        createInfo = ControlInfo.createFunctionInfo(
-                new ArgumentInfo[] {ComponentAddress.info(), ComponentType.info()},
-                new ArgumentInfo[0], null);
-        destroyInfo = ControlInfo.createFunctionInfo(
-                new ArgumentInfo[] {ComponentAddress.info()},
-                new ArgumentInfo[0], null);
-
-    }
+    public final static String ADD_ROOT = "add-root";
+    public final static String REMOVE_ROOT = "remove-root";
+    public final static String ROOTS = "roots";
+    public final static ControlInfo ADD_ROOT_INFO =
+            ControlInfo.createFunctionInfo(
+                new ArgumentInfo[] {PString.info(), ComponentType.info()},
+                new ArgumentInfo[0],
+                PMap.EMPTY);
+    public final static ControlInfo REMOVE_ROOT_INFO =
+            ControlInfo.createFunctionInfo(
+            new ArgumentInfo[]{PString.info()},
+            new ArgumentInfo[0],
+            PMap.EMPTY);
+    public final static ControlInfo ROOTS_INFO =
+            ControlInfo.createReadOnlyPropertyInfo(
+            new ArgumentInfo[]{PArray.info()},
+            PMap.EMPTY);
 
 
     @Override
     public String[] getControls() {
-        return new String[] {CREATE, DESTROY};
+        return new String[] {ADD_ROOT, REMOVE_ROOT, ROOTS};
     }
 
     @Override
     public ControlInfo getControlInfo(String control) {
-        if (CREATE.equals(control)) {
-            return createInfo;
+        if (ADD_ROOT.equals(control)) {
+            return ADD_ROOT_INFO;
         }
-        if (DESTROY.equals(control)) {
-            return destroyInfo;
+        if (REMOVE_ROOT.equals(control)) {
+            return REMOVE_ROOT_INFO;
+        }
+        if (ROOTS.equals(control)) {
+            return ROOTS_INFO;
         }
         throw new IllegalArgumentException();
-    }
-
-    public static RootManager getInstance() {
-        return instance;
     }
 
 }

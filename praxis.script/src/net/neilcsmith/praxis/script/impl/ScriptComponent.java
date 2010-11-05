@@ -39,9 +39,9 @@ public class ScriptComponent extends AbstractComponent {
     }
 
 
-
-    public InterfaceDefinition[] getInterfaces() {
-        return new InterfaceDefinition[] {ScriptService.INSTANCE};
-    }
+//
+//    public InterfaceDefinition[] getInterfaces() {
+//        return new InterfaceDefinition[] {ScriptService.INSTANCE};
+//    }
 
 }

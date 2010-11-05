@@ -21,14 +21,12 @@
  */
 package net.neilcsmith.praxis.core;
 
-import net.neilcsmith.praxis.core.interfaces.ServiceManager;
-
 
 /**
  *
  * @author Neil C Smith
  */
-public interface Root extends Component {
+public interface Root { //extends Component {
 
 //    public void routeCalls(CallPacket calls);
 
@@ -52,18 +50,8 @@ public interface Root extends Component {
     
     public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException;
 
-    @Deprecated
-    public ServiceManager getServiceManager();
-
-    @Deprecated
-    public Lookup getLookup();
-
-    @Deprecated
-    public PacketRouter getPacketRouter();
-    
-    public Root.State getState();
-    
-    public static enum State {NEW, INITIALIZING, INITIALIZED, ACTIVE_IDLE, ACTIVE_RUNNING, TERMINATING, TERMINATED};
+    public InterfaceDefinition[] getInterfaces();
+;
     
     public interface Controller {
         

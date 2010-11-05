@@ -26,6 +26,8 @@ import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.ComponentType;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PArray;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PReference;
 
 /**
@@ -34,17 +36,18 @@ import net.neilcsmith.praxis.core.types.PReference;
  */
 public class ComponentFactoryService extends InterfaceDefinition {
 
+    public final static ComponentFactoryService INSTANCE = new ComponentFactoryService();
     public final static String NEW_INSTANCE = "new-instance";
     public final static String TYPES = "types";
-    public final static ComponentFactoryService DEFINITION = new ComponentFactoryService();
-    private ControlInfo instanceInfo;
-
-    public ComponentFactoryService() {
-        instanceInfo = ControlInfo.createFunctionInfo(
-                new ArgumentInfo[]{ComponentType.info()},
-                new ArgumentInfo[]{PReference.info(Component.class)},
-                null);
-    }
+    public final static ControlInfo NEW_INSTANCE_INFO =
+            ControlInfo.createFunctionInfo(
+            new ArgumentInfo[]{ComponentType.info()},
+            new ArgumentInfo[]{PReference.info(Component.class)},
+            PMap.EMPTY);
+    public final static ControlInfo TYPES_INFO =
+            ControlInfo.createReadOnlyPropertyInfo(
+            new ArgumentInfo[]{PArray.info()},
+            PMap.EMPTY);
 
     @Override
     public String[] getControls() {
@@ -54,7 +57,10 @@ public class ComponentFactoryService extends InterfaceDefinition {
     @Override
     public ControlInfo getControlInfo(String control) {
         if (NEW_INSTANCE.equals(control)) {
-            return instanceInfo;
+            return NEW_INSTANCE_INFO;
+        }
+        if (TYPES.equals(control)) {
+            return TYPES_INFO;
         }
         throw new IllegalArgumentException();
     }

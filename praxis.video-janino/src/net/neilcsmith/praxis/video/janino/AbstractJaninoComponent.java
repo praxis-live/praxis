@@ -24,17 +24,17 @@ package net.neilcsmith.praxis.video.janino;
 import java.util.Arrays;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.core.Root;
-import net.neilcsmith.praxis.core.Root.State;
-import net.neilcsmith.praxis.core.interfaces.Task;
+import net.neilcsmith.praxis.core.CallArguments;
+import net.neilcsmith.praxis.impl.RootState;
+import net.neilcsmith.praxis.core.interfaces.TaskService;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
 import net.neilcsmith.praxis.impl.AbstractControlFrameComponent;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.FloatProperty;
-import net.neilcsmith.praxis.impl.ResourceLoader;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import org.codehaus.janino.ClassBodyEvaluator;
 
@@ -109,7 +109,7 @@ public abstract class AbstractJaninoComponent extends AbstractControlFrameCompon
     }
 
     @Override
-    public void rootStateChanged(AbstractRoot source, State state) {
+    public void rootStateChanged(AbstractRoot source, RootState state) {
         Arrays.fill(outs, null);
     }
 
@@ -136,29 +136,61 @@ public abstract class AbstractJaninoComponent extends AbstractControlFrameCompon
 
     abstract void installDelegate(JaninoVideoDelegate delegate);
 
-    private class DelegateCompiler extends ResourceLoader<JaninoVideoDelegate> {
+//    private class DelegateCompiler extends ResourceLoader<JaninoVideoDelegate> {
+//
+//        private DelegateCompiler() {
+//            super(AbstractJaninoComponent.this, JaninoVideoDelegate.class);
+//        }
+//
+//        @Override
+//        protected Task getLoadTask(Argument code) {
+//            return new CompilerTask(code.toString());
+//        }
+//
+//        @Override
+//        protected void resourceLoaded() {
+//            install(getResource());
+//        }
+//
+//        @Override
+//        protected void resourceError() {
+//            Logger.getLogger(getClass().getName()).warning("Error loading class");
+//        }
+//    }
+
+    private class DelegateCompiler extends AbstractAsyncProperty<JaninoVideoDelegate> {
 
         private DelegateCompiler() {
-            super(AbstractJaninoComponent.this, JaninoVideoDelegate.class);
+            super(PString.info(), JaninoVideoDelegate.class, PString.EMPTY);
         }
 
         @Override
-        protected Task getLoadTask(Argument code) {
-            return new CompilerTask(code.toString());
+        protected TaskService.Task createTask(CallArguments keys) throws Exception {
+            Argument code;
+            if (keys.getCount() < 1 || (code = keys.getArg(0)).isEmpty()) {
+                return null;
+            } else {
+                return new CompilerTask(code.toString());
+            }
+
         }
 
         @Override
-        protected void resourceLoaded() {
-            install(getResource());
+        protected void valueChanged(long time) {
+            install(getValue());
         }
 
         @Override
-        protected void resourceError() {
+        protected void taskError(long time) {
             Logger.getLogger(getClass().getName()).warning("Error loading class");
         }
+
+
+
+
     }
 
-    private class CompilerTask implements Task {
+    private class CompilerTask implements TaskService.Task {
 
         private final String code;
 

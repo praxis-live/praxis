@@ -32,28 +32,25 @@ import net.neilcsmith.praxis.core.types.PBoolean;
  */
 public class StartableInterface extends InterfaceDefinition {
 
+    public final static StartableInterface INSTANCE = new StartableInterface();
+
     public final static String START = "start";
     public final static String STOP = "stop";
     public final static String IS_RUNNING = "is-running";
-    private ControlInfo startInfo;
-    private ControlInfo stopInfo;
-    private ControlInfo isRunningInfo;
-
-    private StartableInterface() {
-        startInfo = ControlInfo.createFunctionInfo(
+    public final static ControlInfo START_INFO = ControlInfo.createFunctionInfo(
                 new ArgumentInfo[0],
                 new ArgumentInfo[0],
-                null);
-        stopInfo = ControlInfo.createFunctionInfo(
+                null);;
+    public final static ControlInfo STOP_INFO = ControlInfo.createFunctionInfo(
                 new ArgumentInfo[0],
                 new ArgumentInfo[0],
-                null);
-        isRunningInfo = ControlInfo.createFunctionInfo(
+                null);;
+    public final static ControlInfo IS_RUNNING_INFO = ControlInfo.createFunctionInfo(
                 new ArgumentInfo[0],
                 new ArgumentInfo[]{PBoolean.info()},
-                null);
+                null);;
 
-    }
+ 
 
     @Override
     public String[] getControls() {
@@ -63,13 +60,13 @@ public class StartableInterface extends InterfaceDefinition {
     @Override
     public ControlInfo getControlInfo(String control) {
         if (START.equals(control)) {
-            return startInfo;
+            return START_INFO;
         }
         if (STOP.equals(control)) {
-            return stopInfo;
+            return STOP_INFO;
         }
         if (IS_RUNNING.equals(control)) {
-            return isRunningInfo;
+            return IS_RUNNING_INFO;
         }
         throw new IllegalArgumentException();
     }

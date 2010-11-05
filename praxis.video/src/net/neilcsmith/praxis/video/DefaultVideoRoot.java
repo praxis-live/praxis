@@ -22,11 +22,11 @@
 package net.neilcsmith.praxis.video;
 
 import net.neilcsmith.praxis.core.IllegalRootStateException;
-import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.IntProperty;
+import net.neilcsmith.praxis.impl.RootState;
 import net.neilcsmith.ripl.FrameRateListener;
 import net.neilcsmith.ripl.FrameRateSource;
 import net.neilcsmith.ripl.Player;
@@ -57,7 +57,7 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
     private VideoOutputClient outputClient;
 
     public DefaultVideoRoot() {
-        super(State.ACTIVE_IDLE);
+        super(RootState.ACTIVE_IDLE);
 //        placeholder = new Placeholder();
         buildControls();
     }
@@ -199,7 +199,7 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
     private class WidthBinding implements IntProperty.Binding {
 
         public void setBoundValue(long time, int value) {
-            if (getState() == Root.State.ACTIVE_RUNNING) {
+            if (getState() == RootState.ACTIVE_RUNNING) {
                 throw new UnsupportedOperationException("Can't set width while running");
             }
             width = value;
@@ -214,7 +214,7 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
     private class HeightBinding implements IntProperty.Binding {
 
         public void setBoundValue(long time, int value) {
-            if (getState() == Root.State.ACTIVE_RUNNING) {
+            if (getState() == RootState.ACTIVE_RUNNING) {
                 throw new UnsupportedOperationException("Can't set height while running");
             }
             height = value;
@@ -229,7 +229,7 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
     private class FpsBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            if (getState() == Root.State.ACTIVE_RUNNING) {
+            if (getState() == RootState.ACTIVE_RUNNING) {
                 throw new UnsupportedOperationException("Can't set fps while running");
             }
             fps = value;
@@ -244,7 +244,7 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
     private class FullScreenBinding implements BooleanProperty.Binding {
 
         public void setBoundValue(long time, boolean value) {
-            if (getState() == Root.State.ACTIVE_RUNNING) {
+            if (getState() == RootState.ACTIVE_RUNNING) {
                 throw new UnsupportedOperationException("Can't set full screen state while running");
             }
             fullScreen = value;

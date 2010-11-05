@@ -38,8 +38,8 @@ public interface Env {
 
     public abstract Lookup getLookup();
 
-    @Deprecated
-    public abstract ServiceManager getServiceManager();
+//    @Deprecated
+//    public abstract ServiceManager getServiceManager();
 
     public abstract long getTime();
 

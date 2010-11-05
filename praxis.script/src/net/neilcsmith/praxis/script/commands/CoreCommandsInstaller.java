@@ -34,7 +34,8 @@ public class CoreCommandsInstaller implements CommandInstaller {
 
     public void install(Map<String, Command> commands) {
         EvalCmds.getInstance().install(commands);
-        ComponentCmds.getInstance().install(commands);
+//        ComponentCmds.getInstance().install(commands);
+        ConnectionCmds.getInstance().install(commands);
         FileCmds.getInstance().install(commands);
         VariableCmds.getInstance().install(commands);
         commands.put("@", AtCommand.getInstance());

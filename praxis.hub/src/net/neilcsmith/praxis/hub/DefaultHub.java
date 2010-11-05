@@ -30,12 +30,14 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
+import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.core.InvalidAddressException;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.ComponentFactory;
+import net.neilcsmith.praxis.core.ComponentType;
 import net.neilcsmith.praxis.core.Packet;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.RootHub;
@@ -45,10 +47,13 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.ComponentManager;
 import net.neilcsmith.praxis.core.interfaces.ConnectionManager;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
+import net.neilcsmith.praxis.core.interfaces.ComponentFactoryService;
+import net.neilcsmith.praxis.core.interfaces.RootManagerService;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
 import net.neilcsmith.praxis.impl.InstanceLookup;
+import net.neilcsmith.praxis.impl.SimpleControl;
 
 /**
  *
@@ -158,10 +163,15 @@ public class DefaultHub extends AbstractRoot {
 //
 //    }
     private void createDefaultControls() {
+        // TEMPORARY
+        unregisterControl("connect");
+
         registerControl("create", new CreationControl(this, ControlAddress.create(getAddress(), "create"), factory));
         registerControl("connect", new ConnectionControl(this, ControlAddress.create(getAddress(), "connect")));
         registerControl("clear", new ClearControl());
         registerControl("log", new LogControl());
+        registerControl(RootManagerService.ADD_ROOT, new AddRootControl());
+        registerControl(ComponentFactoryService.NEW_INSTANCE, new NewInstanceControl());
     }
 
     private void createDefaultServices() {
@@ -169,6 +179,8 @@ public class DefaultHub extends AbstractRoot {
         installService(ComponentManager.getInstance(), address);
         // installService(RootManager.getInstance(), address);
         installService(ConnectionManager.getInstance(), address);
+        installService(RootManagerService.INSTANCE, address);
+        installService(ComponentFactoryService.INSTANCE, address);
     }
 
     private void installExtensions() {
@@ -396,4 +408,35 @@ public class DefaultHub extends AbstractRoot {
             return null;
         }
     }
+    
+    private class NewInstanceControl extends SimpleControl {
+
+        @Override
+        protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
+            Component c = factory.createComponent(ComponentType.coerce(args.getArg(0)));
+            return CallArguments.create(PReference.wrap(c));
+        }
+
+        public ControlInfo getInfo() {
+            return ComponentFactoryService.NEW_INSTANCE_INFO;
+        }
+        
+    }
+
+    private class AddRootControl extends SimpleControl {
+
+        @Override
+        protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
+            String id = args.getArg(0).toString();
+            Root r = factory.createRootComponent(ComponentType.coerce(args.getArg(1)));
+            installRoot(id, args.getArg(1).toString(), r);
+            return CallArguments.EMPTY;
+        }
+
+        public ControlInfo getInfo() {
+            return RootManagerService.ADD_ROOT_INFO;
+        }
+
+    }
+
 }

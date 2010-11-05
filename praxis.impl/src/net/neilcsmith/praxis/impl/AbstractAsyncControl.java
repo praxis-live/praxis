@@ -40,12 +40,8 @@ public abstract class AbstractAsyncControl extends AbstractControl {
     private final static Logger LOG = Logger.getLogger(AbstractAsyncControl.class.getName());
     private Queue<Call> callQueue;
     private Call pending;
-    private AbstractComponent host;
-    private ControlAddress address;
 
-    protected AbstractAsyncControl(AbstractComponent host) {
-//        super(host);
-        this.host = host;
+    protected AbstractAsyncControl() {
         callQueue = new LinkedList<Call>();
 
     }

@@ -52,10 +52,10 @@ public class ScriptRoot2 extends AbstractRoot {
         registerControl("eval", new DispatchControl("eval"));
     }
 
-    @Override
-    public InterfaceDefinition[] getInterfaces() {
-        return new InterfaceDefinition[] {ScriptService.INSTANCE};
-    }
+//    @Override
+//    public InterfaceDefinition[] getInterfaces() {
+//        return new InterfaceDefinition[] {ScriptService.INSTANCE};
+//    }
 
     private class DispatchControl implements Control {
 

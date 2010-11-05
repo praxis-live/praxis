@@ -24,7 +24,6 @@ package net.neilcsmith.praxis.impl;
 
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.Root;
-import net.neilcsmith.praxis.core.Root.State;
 
 /**
  *
@@ -45,7 +44,7 @@ public abstract class AbstractControlFrameComponent extends AbstractRootStateCom
         }
     }
 
-    public void rootStateChanged(AbstractRoot source, State state) {
+    public void rootStateChanged(AbstractRoot source, RootState state) {
         // no op hook
     }
 

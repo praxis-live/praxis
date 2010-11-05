@@ -24,7 +24,6 @@ package net.neilcsmith.praxis.impl;
 
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.Root;
-import net.neilcsmith.praxis.core.Root.State;
 
 /**
  *

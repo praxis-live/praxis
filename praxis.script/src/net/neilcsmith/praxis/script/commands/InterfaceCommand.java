@@ -27,6 +27,7 @@ import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
+import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.script.Command;
 import net.neilcsmith.praxis.script.Env;
@@ -110,8 +111,12 @@ public class InterfaceCommand implements Command {
 
         private ControlAddress getSendAddress(Env ctxt)
                 throws ServiceUnavailableException {
+            ServiceManager sm = ctxt.getLookup().get(ServiceManager.class);
+            if (sm == null) {
+                throw new ServiceUnavailableException("No ServiceManager in Lookup");
+            }
             return ControlAddress.create(
-                    ctxt.getServiceManager().findService(interfaceDefinition),
+                    sm.findService(interfaceDefinition),
                     interfaceControl);
         }
 

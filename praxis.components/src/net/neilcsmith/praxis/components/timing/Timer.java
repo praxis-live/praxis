@@ -24,7 +24,7 @@ package net.neilcsmith.praxis.components.timing;
 import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
-import net.neilcsmith.praxis.core.Root.State;
+import net.neilcsmith.praxis.impl.RootState;
 import net.neilcsmith.praxis.impl.AbstractControlFrameComponent;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
@@ -61,9 +61,9 @@ public class Timer extends AbstractControlFrameComponent {
     }
 
     @Override
-    public void rootStateChanged(AbstractRoot source, State state) {
+    public void rootStateChanged(AbstractRoot source, RootState state) {
         super.rootStateChanged(source, state);
-        if (state == Root.State.ACTIVE_RUNNING) {
+        if (state == RootState.ACTIVE_RUNNING) {
             lastTime = source.getTime();
             output.send(lastTime);
         }

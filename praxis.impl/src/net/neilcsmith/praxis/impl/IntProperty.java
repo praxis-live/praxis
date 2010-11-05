@@ -72,9 +72,9 @@ public class IntProperty extends AbstractSingleArgProperty {
         return binding.getBoundValue();
     }
 
-    public static IntProperty create( int min,
+    public static IntProperty create(int min,
             int max, int def) {
-        return create(  min, max, def);
+        return create(null, min, max, def);
 
     }
 

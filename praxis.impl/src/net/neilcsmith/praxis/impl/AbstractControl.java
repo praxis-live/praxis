@@ -22,8 +22,12 @@
 package net.neilcsmith.praxis.impl;
 
 import net.neilcsmith.praxis.core.Component;
+import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ControlAddress;
+import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.Lookup;
+import net.neilcsmith.praxis.core.interfaces.ServiceManager;
+import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 
 /**
  *
@@ -72,5 +76,15 @@ public abstract class AbstractControl implements AbstractComponent.ExtendedContr
         } else {
             return host.getLookup();
         }
+    }
+
+    public ComponentAddress findService(InterfaceDefinition service)
+            throws ServiceUnavailableException {
+        ServiceManager sm = getLookup().get(ServiceManager.class);
+        if (sm == null) {
+            throw new ServiceUnavailableException("No ServiceManager in Lookup");
+        }
+        return sm.findService(service);
+
     }
 }

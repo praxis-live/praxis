@@ -28,13 +28,16 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public abstract class InterfaceDefinition {
-
+    
     public abstract String[] getControls();
 
     public abstract ControlInfo getControlInfo(String control);
 
     @Override
     public final boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
         return obj == null ? false : this.getClass().equals(obj.getClass());
     }
 

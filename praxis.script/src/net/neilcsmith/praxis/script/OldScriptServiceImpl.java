@@ -35,6 +35,7 @@ import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
+import net.neilcsmith.praxis.impl.RootState;
 
 /**
  * Praxis System Extension to provide a default script service.
@@ -55,16 +56,16 @@ public class OldScriptServiceImpl extends AbstractRoot {
     private ControlAddress serviceAddress;
 
     public OldScriptServiceImpl() {
-        super(State.ACTIVE_RUNNING);
+        super(RootState.ACTIVE_RUNNING);
         evalQueue = new LinkedList<Call>();
         EvalControl control = new EvalControl();
         registerControl(EVAL_CONTROL_ID, control);
     }
-
-    @Override
-    public InterfaceDefinition[] getInterfaces() {
-        return new InterfaceDefinition[] {ScriptService.INSTANCE};
-    }
+//
+//    @Override
+//    public InterfaceDefinition[] getInterfaces() {
+//        return new InterfaceDefinition[] {ScriptService.INSTANCE};
+//    }
 
 
 

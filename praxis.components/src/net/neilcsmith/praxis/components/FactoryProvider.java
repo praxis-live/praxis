@@ -23,7 +23,6 @@ package net.neilcsmith.praxis.components;
 
 import net.neilcsmith.praxis.components.array.ArrayIterator;
 import net.neilcsmith.praxis.components.array.ArrayRandom;
-import net.neilcsmith.praxis.components.file.RandomFile;
 import net.neilcsmith.praxis.components.file.Resolver;
 import net.neilcsmith.praxis.components.math.Add;
 import net.neilcsmith.praxis.components.math.Multiply;

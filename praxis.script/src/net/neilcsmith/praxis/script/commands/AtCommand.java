@@ -26,7 +26,12 @@ import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ComponentType;
+import net.neilcsmith.praxis.core.ControlAddress;
+import net.neilcsmith.praxis.core.interfaces.ContainerInterface;
+import net.neilcsmith.praxis.core.interfaces.RootManagerService;
+import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 import net.neilcsmith.praxis.core.types.PReference;
+import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.script.Command;
 import net.neilcsmith.praxis.script.Env;
 import net.neilcsmith.praxis.script.ExecutionException;
@@ -78,6 +83,8 @@ public class AtCommand implements Command {
         private Argument script;
         private int stage;
         private CallArguments result;
+        
+        private Call active;
 
         private DefaultStackFrame(Namespace namespace, ComponentAddress ctxt,
                 ComponentType type, Argument script) {
@@ -97,12 +104,32 @@ public class AtCommand implements Command {
             return state;
         }
 
-        public StackFrame process(Env context) {
+        public StackFrame process(Env env) {
             if (stage == 0) {
                 stage++;
                 try {
-                    CallArguments ca = CallArguments.create(new Argument[]{ctxt, type});
-                    return namespace.getCommand("create").createStackFrame(namespace, ca);
+//                    CallArguments ca = CallArguments.create(new Argument[]{ctxt, type});
+//                    return namespace.getCommand("create").createStackFrame(namespace, ca);
+                    
+                    ControlAddress to;
+                    CallArguments args;
+                    int depth = ctxt.getDepth();
+                    if (depth == 1) {
+                        to = ControlAddress.create(
+                                env.getLookup().get(ServiceManager.class).
+                                findService(RootManagerService.INSTANCE),
+                                RootManagerService.ADD_ROOT);
+                        args = CallArguments.create(new Argument[] {
+                        PString.valueOf(ctxt.getRootID()), type});
+                    } else {
+                        to = ControlAddress.create(ctxt.getParentAddress(),
+                                ContainerInterface.ADD_CHILD);
+                        args = CallArguments.create(new Argument[] {
+                        PString.valueOf(ctxt.getComponentID(depth-1)), type});
+                    }
+                    active = Call.createCall(to, env.getAddress(), env.getTime(), args);
+                    env.getPacketRouter().route(active);
+
                 } catch (Exception ex) {
                     state = State.Error;
                     result = CallArguments.create(PReference.wrap(ex));
@@ -124,14 +151,23 @@ public class AtCommand implements Command {
         }
 
         public void postResponse(Call call) {
-            // no op
+            if (active != null && call.getMatchID() == active.getMatchID()) {
+                active = null;
+                if (call.getType() == Call.Type.RETURN && stage == 1) {
+                    stage++;
+                } else {
+                    result = call.getArgs();
+                    this.state = State.Error;
+                }
+            }
         }
 
         public void postResponse(State state, CallArguments args) {
             if (state == State.OK) {
-                if (stage == 1) {
-                    stage++;
-                } else if (stage == 3) {
+//                if (stage == 1) {
+//                    stage++;
+//                } else
+                    if (stage == 3) {
                     this.state = State.OK;
                     result = args;
                 }

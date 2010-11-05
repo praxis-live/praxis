@@ -50,12 +50,14 @@ import net.neilcsmith.praxis.core.types.PString;
  */
 public abstract class AbstractRoot extends AbstractContainer implements Root, PacketRouter {
 
+    
+
     private static final Logger LOG = Logger.getLogger(AbstractRoot.class.getName());
     public static final int DEFAULT_FRAME_TIME = 100; // set in constructor?
     private static final ListenerSorter listenerSorter = new ListenerSorter();
-    private AtomicReference<Root.State> state = new AtomicReference<Root.State>(Root.State.NEW);
-    private Root.State cachedState = Root.State.NEW; // cache to pass to listeners because for thread safety
-    private Root.State defaultRunState;
+    private AtomicReference<RootState> state = new AtomicReference<RootState>(RootState.NEW);
+    private RootState cachedState = RootState.NEW; // cache to pass to listeners because for thread safety
+    private RootState defaultRunState;
     private RootHub hub;
     private String ID;
     private ComponentAddress address;
@@ -71,12 +73,12 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
     private Lookup lookup;
 
     protected AbstractRoot() {
-        this(Root.State.ACTIVE_IDLE);
+        this(RootState.ACTIVE_IDLE);
     }
 
-    protected AbstractRoot(Root.State defaultRunState) {
-        if (defaultRunState != Root.State.ACTIVE_IDLE &&
-                defaultRunState != Root.State.ACTIVE_RUNNING) {
+    protected AbstractRoot(RootState defaultRunState) {
+        if (defaultRunState != RootState.ACTIVE_IDLE &&
+                defaultRunState != RootState.ACTIVE_RUNNING) {
             throw new IllegalArgumentException("Default run state must be ACTIVE_IDLE or ACTIVE_RUNNING");
         }
         this.defaultRunState = defaultRunState;
@@ -90,11 +92,11 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         registerControl("_disconnect", new PortControl(false));
         registerControl("start", new TransportControl(true));
         registerControl("stop", new TransportControl(false));
-        registerControl("info", new InfoControl());
+//        registerControl("info", new InfoControl());
     }
 
     public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException {
-        if (state.compareAndSet(Root.State.NEW, Root.State.INITIALIZING)) {
+        if (state.compareAndSet(RootState.NEW, RootState.INITIALIZING)) {
             if (ID == null || hub == null) {
                 throw new NullPointerException();
             }
@@ -118,9 +120,9 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
 //
 //            }
             initializing(); // hook for subclasses
-            if (state.compareAndSet(Root.State.INITIALIZING, Root.State.INITIALIZED)) {
+            if (state.compareAndSet(RootState.INITIALIZING, RootState.INITIALIZED)) {
                 controller = new Controller();
-                fireRootStateListeners(Root.State.INITIALIZED);
+                fireRootStateListeners(RootState.INITIALIZED);
                 return controller;
             }
         }
@@ -185,7 +187,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
     }
 
     @Deprecated
-    protected void fireRootStateListeners(Root.State state) {
+    protected void fireRootStateListeners(RootState state) {
         cachedState = state;
         RootStateListener[] listeners = stateListeners; // cache in case of changes
         for (RootStateListener listener : listeners) {
@@ -247,12 +249,12 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
     protected void processingControlFrame() {
     }
 
-    public State getState() {
+    public RootState getState() {
         return state.get();
     }
 
     protected final void setRunning() throws IllegalRootStateException {
-        if (state.compareAndSet(Root.State.ACTIVE_IDLE, Root.State.ACTIVE_RUNNING)) {
+        if (state.compareAndSet(RootState.ACTIVE_IDLE, RootState.ACTIVE_RUNNING)) {
 //            fireRootStateListeners();
             starting();
             return;
@@ -261,7 +263,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
     }
 
     protected final void setIdle() throws IllegalRootStateException {
-        if (state.compareAndSet(Root.State.ACTIVE_RUNNING, Root.State.ACTIVE_IDLE)) {
+        if (state.compareAndSet(RootState.ACTIVE_RUNNING, RootState.ACTIVE_IDLE)) {
 //            fireRootStateListeners();
             stopping();
             return;
@@ -272,8 +274,8 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
     protected void run() {
 //        while (activeStates.contains(state.get())) {
         while (true) {
-            Root.State currentState = state.get();
-            if (currentState != Root.State.ACTIVE_IDLE && currentState != Root.State.ACTIVE_RUNNING) {
+            RootState currentState = state.get();
+            if (currentState != RootState.ACTIVE_IDLE && currentState != RootState.ACTIVE_RUNNING) {
                 break;
             }
             Packet packet = null;
@@ -303,8 +305,8 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
     }
 
     protected final void processControlFrame(Call call) throws IllegalRootStateException {
-        Root.State currentState = state.get();
-        if (currentState == Root.State.ACTIVE_RUNNING || currentState == Root.State.ACTIVE_IDLE) {
+        RootState currentState = state.get();
+        if (currentState == RootState.ACTIVE_RUNNING || currentState == RootState.ACTIVE_IDLE) {
             processControlFrame(null, currentState);
         } else {
             throw new IllegalRootStateException();
@@ -316,7 +318,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         }
     }
 
-    private void processControlFrame(Packet packet, Root.State currentState) {
+    private void processControlFrame(Packet packet, RootState currentState) {
         long t = getTime();
         if (currentState != cachedState) {
             cachedState = currentState;
@@ -344,7 +346,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         // check tasks
         taskController.checkTasks(t);
         // fire listeners after all calls have been made
-        if (currentState == Root.State.ACTIVE_RUNNING) {
+        if (currentState == RootState.ACTIVE_RUNNING) {
             fireControlFrameListeners();
         }
 //        // invoke tasks
@@ -519,12 +521,12 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         }
 
         public void shutdown() {
-            Root.State s = state.get();
+            RootState s = state.get();
             while (true) {
-                if (s == Root.State.TERMINATED) {
+                if (s == RootState.TERMINATED) {
                     return;
                 } else {
-                    if (state.compareAndSet(s, Root.State.TERMINATING)) {
+                    if (state.compareAndSet(s, RootState.TERMINATING)) {
                         // System.out.println("State set to terminated");
                         return;
                     } else {
@@ -535,15 +537,15 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         }
 
         public void run() throws IllegalRootStateException {
-            if (state.compareAndSet(Root.State.INITIALIZED, defaultRunState)) {
+            if (state.compareAndSet(RootState.INITIALIZED, defaultRunState)) {
                 fireRootStateListeners(defaultRunState);
                 activating(); // moved below listeners so that subclasses may change state
                 AbstractRoot.this.run();
-                state.set(Root.State.TERMINATING); // in case run finished before shutdown called
+                state.set(RootState.TERMINATING); // in case run finished before shutdown called
                 terminating();
-                fireRootStateListeners(Root.State.TERMINATING);
+                fireRootStateListeners(RootState.TERMINATING);
                 // disconnect all children?
-                state.set(Root.State.TERMINATED);
+                state.set(RootState.TERMINATED);
             } else {
                 throw new IllegalRootStateException();
             }
