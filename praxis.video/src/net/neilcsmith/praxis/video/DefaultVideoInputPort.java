@@ -21,11 +21,9 @@
  */
 package net.neilcsmith.praxis.video;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.*;
 import net.neilcsmith.praxis.core.info.PortInfo;
+import net.neilcsmith.praxis.impl.PortListenerSupport;
 import net.neilcsmith.ripl.Sink;
 import net.neilcsmith.ripl.Source;
 
@@ -35,35 +33,28 @@ import net.neilcsmith.ripl.Source;
  */
 public class DefaultVideoInputPort extends VideoPort.Input {
 
-    private final static Logger logger = Logger.getLogger(DefaultVideoInputPort.class.getName());
     private Sink sink;
     private VideoPort.Output connection;
-    private Component component;
-    PortInfo info;
+    private PortListenerSupport pls;
 
     public DefaultVideoInputPort(Component host, Sink sink) {
-        if (host == null || sink == null) {
+        if (sink == null) {
             throw new NullPointerException();
         }
-        this.component = host;
         this.sink = sink;
-        info = PortInfo.create(this.getTypeClass(), this.getDirection(), null);
+        pls = new PortListenerSupport(this);
     }
 
     public void disconnectAll() {
         if (connection != null) {
             connection.disconnect(this);
+//            pls.fireListeners();
         }
     }
 
     public Port[] getConnections() {
         return connection == null ? new Port[0] : new Port[]{connection};
     }
-
-    public PortInfo getInfo() {
-        return info;
-    }
-
 
 
     @Override
@@ -78,6 +69,7 @@ public class DefaultVideoInputPort extends VideoPort.Input {
             connection = null;
             throw new PortConnectionException(); // wrap!
         }
+        pls.fireListeners();
     }
 
     @Override
@@ -85,7 +77,16 @@ public class DefaultVideoInputPort extends VideoPort.Input {
         if (connection == port) {
             connection = null;
             sink.removeSource(source);
+            pls.fireListeners();
         }
+    }
+
+    public void addListener(PortListener listener) {
+        pls.addListener(listener);
+    }
+
+    public void removeListener(PortListener listener) {
+        pls.removeListener(listener);
     }
     
 

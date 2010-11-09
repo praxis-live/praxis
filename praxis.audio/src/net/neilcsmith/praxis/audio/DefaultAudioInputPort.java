@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.*;
 import net.neilcsmith.praxis.core.info.PortInfo;
+import net.neilcsmith.praxis.impl.PortListenerSupport;
 import net.neilcsmith.rapl.components.Mixer;
 import net.neilcsmith.rapl.core.Sink;
 import net.neilcsmith.rapl.core.Source;
@@ -43,9 +44,8 @@ public class DefaultAudioInputPort extends AudioPort.Input {
     private Sink portSink;
     private Mixer mixer;
     private List<AudioPort.Output> connections;
-    private Component component;
     private boolean multiChannelCapable;
-    private PortInfo info;
+    private PortListenerSupport pls;
 
     public DefaultAudioInputPort(Component host, Sink sink) {
         this(host, sink, false);
@@ -53,64 +53,37 @@ public class DefaultAudioInputPort extends AudioPort.Input {
 
     public DefaultAudioInputPort(Component host, Sink sink,
             boolean multiChannelCapable) {
-        if (host == null || sink == null) {
+        if (sink == null) {
             throw new NullPointerException();
         }
-        this.component = host;
         this.sink = sink;
         this.portSink = sink;
         this.multiChannelCapable = multiChannelCapable;
         connections = new ArrayList<AudioPort.Output>();
-        info = PortInfo.create(this.getTypeClass(), this.getDirection(), null);
+        pls = new PortListenerSupport(this);
     }
 
     public void disconnectAll() {
-        for (AudioPort.Output connection : connections) {
+        for (AudioPort.Output connection : getConnections()) {
             disconnect(connection);
         }
     }
 
-    public Port[] getConnections() {
-        return connections.toArray(new Port[connections.size()]);
+    public AudioPort.Output[] getConnections() {
+        return connections.toArray(new AudioPort.Output[connections.size()]);
     }
 
-    public PortInfo getInfo() {
-        return info;
+    public void addListener(PortListener listener) {
+        pls.addListener(listener);
     }
 
-
-
-    
-
-//
-//    @Override
-//    protected void addImageOutputPort(AudioPort.Output port, Source source) throws PortConnectionException {
-//        if (connection != null) {
-//            throw new PortConnectionException();
-//        }
-//        connection = port;
-//        try {
-//            sink.addSource(source);
-//        } catch (Exception ex) {
-//            connection = null;
-//            throw new PortConnectionException(); // wrap!
-//        }
-//        fireConnectionListeners();
-//    }
-
-//    @Override
-//    protected void removeImageOutputPort(AudioPort.Output port, Source source) {
-//        if (connection == port) {
-//            connection = null;
-//            sink.removeSource(source);
-//        }
-//        fireConnectionListeners();
-//    }
-
+    public void removeListener(PortListener listener) {
+        pls.removeListener(listener);
+    }
 
     @Override
     protected void addAudioOutputPort(Output port, Source source) throws PortConnectionException {
-        if (connections.contains(source)) {
+        if (connections.contains(port)) {
             throw new PortConnectionException();
         }
         if (connections.size() == 1) {
@@ -119,32 +92,35 @@ public class DefaultAudioInputPort extends AudioPort.Input {
         try {
             portSink.addSource(source);
             connections.add(port);
+            pls.fireListeners();
         } catch (Exception ex) {
             if (connections.size() == 1) {
                 switchToSingleChannel();
             }
+            throw new PortConnectionException();
         }
     }
 
     @Override
-    protected void removeAudioOutputPort(Output port, net.neilcsmith.rapl.core.Source source) {
+    protected void removeAudioOutputPort(Output port, Source source) {
         if (connections.remove(port)) {
             portSink.removeSource(source);
             if (connections.size() == 1) {
                 switchToSingleChannel();
             }
+            pls.fireListeners();
         }
     }
 
     private void switchToMultichannel() {
         if (multiChannelCapable || portSink == mixer) {
             return;
-        }    
-        Source[] sources = removeSources(portSink);      
+        }
+        Source[] sources = removeSources(portSink);
         try {
             if (mixer == null) {
                 mixer = new Mixer(16); // @TODO make channels configurable
-            }         
+            }
             sink.addSource(mixer);
             for (Source source : sources) {
                 mixer.addSource(source);
@@ -174,9 +150,9 @@ public class DefaultAudioInputPort extends AudioPort.Input {
             removeSources(mixer);
             connections.clear();
         }
-        
+
     }
-    
+
     private Source[] removeSources(Sink sink) {
         Source[] sources = sink.getSources();
         for (Source source : sources) {
@@ -184,4 +160,4 @@ public class DefaultAudioInputPort extends AudioPort.Input {
         }
         return sources;
     }
- }
+}

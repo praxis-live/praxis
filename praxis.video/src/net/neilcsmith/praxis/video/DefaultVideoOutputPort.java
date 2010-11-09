@@ -21,11 +21,9 @@
  */
 package net.neilcsmith.praxis.video;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.*;
 import net.neilcsmith.praxis.core.info.PortInfo;
+import net.neilcsmith.praxis.impl.PortListenerSupport;
 import net.neilcsmith.ripl.Source;
 
 /**
@@ -34,19 +32,16 @@ import net.neilcsmith.ripl.Source;
  */
 public class DefaultVideoOutputPort extends VideoPort.Output {
 
-    private final static Logger logger = Logger.getLogger(DefaultVideoOutputPort.class.getName());
     private Source source;
     private VideoPort.Input connection;
-    private Component component;
-    private PortInfo info;
+    private PortListenerSupport pls;
 
     public DefaultVideoOutputPort(Component host, Source source) {
-        if (host == null || source == null) {
+        if (source == null) {
             throw new NullPointerException();
         }
-        this.component = host;
         this.source = source;
-        info = PortInfo.create(getTypeClass(), getDirection(), null);
+        pls = new PortListenerSupport(this);
     }
 
     public void connect(Port port) throws PortConnectionException {
@@ -57,6 +52,7 @@ public class DefaultVideoOutputPort extends VideoPort.Output {
             VideoPort.Input ip = (VideoPort.Input) port;
             makeConnection(ip, source);
             connection = ip;
+            pls.fireListeners();
         } else {
             throw new PortConnectionException();
         }
@@ -66,14 +62,14 @@ public class DefaultVideoOutputPort extends VideoPort.Output {
         if (connection != null && connection == port) {
             breakConnection(connection, source);
             connection = null;
+            pls.fireListeners();
         }
     }
-    
-
 
     public void disconnectAll() {
         if (connection != null) {
             disconnect(connection);
+            pls.fireListeners();
         }
     }
 
@@ -81,8 +77,12 @@ public class DefaultVideoOutputPort extends VideoPort.Output {
         return connection == null ? new Port[0] : new Port[]{connection};
     }
 
-    public PortInfo getInfo() {
-        return info;
+    public void addListener(PortListener listener) {
+        pls.addListener(listener);
+    }
+
+    public void removeListener(PortListener listener) {
+        pls.removeListener(listener);
     }
 
 

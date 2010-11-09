@@ -21,14 +21,12 @@
  */
 package net.neilcsmith.praxis.impl;
 
-import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.interfaces.ServiceManager;
-import net.neilcsmith.praxis.core.interfaces.TaskListener;
-import net.neilcsmith.praxis.core.interfaces.Task;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -37,9 +35,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.*;
-import net.neilcsmith.praxis.core.info.ArgumentInfo;
-import net.neilcsmith.praxis.core.info.ComponentInfo;
-import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.interfaces.StartableInterface;
+import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
 
@@ -50,8 +47,10 @@ import net.neilcsmith.praxis.core.types.PString;
  */
 public abstract class AbstractRoot extends AbstractContainer implements Root, PacketRouter {
 
-    
+    public static enum Caps {
 
+        Component, Container, Startable
+    };
     private static final Logger LOG = Logger.getLogger(AbstractRoot.class.getName());
     public static final int DEFAULT_FRAME_TIME = 100; // set in constructor?
     private static final ListenerSorter listenerSorter = new ListenerSorter();
@@ -73,26 +72,44 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
     private Lookup lookup;
 
     protected AbstractRoot() {
-        this(RootState.ACTIVE_IDLE);
+        this(EnumSet.allOf(Caps.class));
     }
 
-    protected AbstractRoot(RootState defaultRunState) {
-        if (defaultRunState != RootState.ACTIVE_IDLE &&
-                defaultRunState != RootState.ACTIVE_RUNNING) {
-            throw new IllegalArgumentException("Default run state must be ACTIVE_IDLE or ACTIVE_RUNNING");
+//    @Deprecated
+//    protected AbstractRoot(RootState defaultRunState) {
+//        if (defaultRunState != RootState.ACTIVE_IDLE
+//                && defaultRunState != RootState.ACTIVE_RUNNING) {
+//            throw new IllegalArgumentException("Default run state must be ACTIVE_IDLE or ACTIVE_RUNNING");
+//        }
+//        this.defaultRunState = defaultRunState;
+//        createStartableControls();
+//    }
+
+    protected AbstractRoot(EnumSet<Caps> caps) {
+        super(caps.contains(Caps.Container), caps.contains(Caps.Component));
+        if (caps.contains(Caps.Startable)) {
+            createStartableControls();
+            defaultRunState = RootState.ACTIVE_IDLE;
+        } else {
+            defaultRunState = RootState.ACTIVE_RUNNING;
         }
-        this.defaultRunState = defaultRunState;
-        createDefaultControls();
     }
 
-    private void createDefaultControls() {
-        registerControl("_add", new AddControl());
-        registerControl("_remove", new RemoveControl());
-        registerControl("_connect", new PortControl(true));
-        registerControl("_disconnect", new PortControl(false));
-        registerControl("start", new TransportControl(true));
-        registerControl("stop", new TransportControl(false));
-//        registerControl("info", new InfoControl());
+    private void createStartableControls() {
+        registerControl(StartableInterface.START, new TransportControl(true));
+        registerControl(StartableInterface.STOP, new TransportControl(false));
+        registerControl(StartableInterface.IS_RUNNING,
+                ArgumentProperty.createReadOnly(PBoolean.info(),
+                new ArgumentProperty.ReadBinding() {
+
+            public Argument getBoundValue() {
+                if (state.get() == RootState.ACTIVE_RUNNING) {
+                    return PBoolean.TRUE;
+                } else {
+                    return PBoolean.FALSE;
+                }
+            }
+        }));
     }
 
     public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException {
@@ -113,9 +130,9 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             // task controller
             String managerID = "_ats_" + Integer.toHexString(hashCode());
 //            try {
-                ControlAddress taskAddress = ControlAddress.create(this.address, managerID);
-                defaultTaskController = new DefaultTaskController(this, taskAddress);
-                registerControl(taskAddress.getID(), defaultTaskController);
+            ControlAddress taskAddress = ControlAddress.create(this.address, managerID);
+            defaultTaskController = new DefaultTaskController(this, taskAddress);
+            registerControl(taskAddress.getID(), defaultTaskController);
 //            } catch (ArgumentFormatException ex) {
 //
 //            }
@@ -135,11 +152,11 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         } catch (InvalidAddressException ex) {
             if (packet instanceof Call) {
                 controller.submitPacket(
-                    Call.createErrorCall((Call) packet, PReference.wrap(ex)));
+                        Call.createErrorCall((Call) packet, PReference.wrap(ex)));
             } else {
                 throw new UnsupportedOperationException();
             }
-            
+
 
         }
     }
@@ -154,20 +171,19 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         return hub;
     }
 
-    @Deprecated
-    public long submitTask(Task task, TaskListener listener) throws ServiceUnavailableException {
-        // in place controller
-
-//            return taskController.submitTask(task, listener);
-
-        // service controller
-        if (defaultTaskController != null) {
-            return defaultTaskController.submitTask(task, listener);
-        } else {
-            throw new ServiceUnavailableException();
-        }
-    }
-
+//    @Deprecated
+//    public long submitTask(Task task, TaskListener listener) throws ServiceUnavailableException {
+//        // in place controller
+//
+////            return taskController.submitTask(task, listener);
+//
+//        // service controller
+//        if (defaultTaskController != null) {
+//            return defaultTaskController.submitTask(task, listener);
+//        } else {
+//            throw new ServiceUnavailableException();
+//        }
+//    }
     @Deprecated
     public void addRootStateListener(RootStateListener listener) {
         if (listener == null) {
@@ -435,7 +451,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
 //        return hub.getServiceManager();
         return hub.getLookup().get(ServiceManager.class);
     }
-    
+
     @Override
     public Lookup getLookup() {
         return lookup;
@@ -538,7 +554,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
 
         public void run() throws IllegalRootStateException {
             if (state.compareAndSet(RootState.INITIALIZED, defaultRunState)) {
-                fireRootStateListeners(defaultRunState);
                 activating(); // moved below listeners so that subclasses may change state
                 AbstractRoot.this.run();
                 state.set(RootState.TERMINATING); // in case run finished before shutdown called
@@ -553,242 +568,27 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         }
     }
 
-    private class AddControl extends BasicControl {
+    private class TransportControl extends SimpleControl {
 
-        private ControlInfo info;
-
-        private AddControl() {
-            super(AbstractRoot.this);
-            ArgumentInfo arg0 = ArgumentInfo.create(ComponentAddress.class, null);
-            ArgumentInfo arg1 = ArgumentInfo.create(PReference.class, null);
-            ArgumentInfo[] in = new ArgumentInfo[]{arg0, arg1};
-            ArgumentInfo[] out = new ArgumentInfo[0];
-            info = ControlInfo.createFunctionInfo(in, out, null);
-        }
-
-        @Override
-        public Call processInvoke(Call call, boolean quiet) throws Exception {
-            CallArguments args = call.getArgs();
-            if (args.getCount() != 2) {
-                return createError(call, "Two arguments required");
-//                router.routeCall(createError(call, "Two arguments required"));
-//                return;
-            }
-            ComponentAddress address = null;
-            Component comp = null;
-            Argument arg = args.getArg(0);
-            if (arg instanceof ComponentAddress) {
-                address = (ComponentAddress) arg;
-            } else {
-                try {
-                    address = ComponentAddress.valueOf(arg.toString());
-                } catch (ArgumentFormatException ex) {
-//                    return createError(call, "First argument must be a valid component address");
-//                    router.routeCall(createError(call, "First argument must be a valid component address"));
-//                    return;
-                }
-            }
-            arg = args.getArg(1);
-            if (arg instanceof PReference) {
-                Object ref = ((PReference) arg).getReference();
-                if (ref instanceof Component) {
-                    comp = (Component) ref;
-                }
-            }
-            if (comp == null) {
-                return createError(call, "Second argument must be a valid component reference");
-//                router.routeCall(createError(call, "Second argument must be a valid component reference"));
-            // return;
-            }
-            addComponent(address, comp);
-            if (quiet) {
-                return null;
-//                return;
-            }
-            return Call.createReturnCall(call, CallArguments.EMPTY);
-//            router.routeCall(Call.createReturnCall(call, CallArguments.EMPTY));
-        }
-
-        public ControlInfo getInfo() {
-            return info;
-        }
-    }
-
-    private class RemoveControl extends BasicControl {
-
-        private ControlInfo info;
-
-        private RemoveControl() {
-            super(AbstractRoot.this);
-            ArgumentInfo arg0 = ArgumentInfo.create(ComponentAddress.class, null);
-            ArgumentInfo[] in = new ArgumentInfo[]{arg0};
-            ArgumentInfo[] out = new ArgumentInfo[0];
-            info = ControlInfo.createFunctionInfo(in, out, null);
-        }
-
-        @Override
-        public Call processInvoke(Call call, boolean quiet) throws Exception {
-            CallArguments args = call.getArgs();
-            if (args.getCount() != 1) {
-                return createError(call, "One argument required");
-            }
-            Argument arg = args.getArg(0);
-            ComponentAddress address;
-            if (arg instanceof ComponentAddress) {
-                address = (ComponentAddress) arg;
-            } else {
-                try {
-                    address = ComponentAddress.valueOf(arg.toString());
-                } catch (ArgumentFormatException ex) {
-                    return createError(call, "Argument must be a valid component address");
-                }
-            }
-            removeComponent(address);
-            if (quiet) {
-                return null;
-            }
-            return Call.createReturnCall(call, CallArguments.EMPTY);
-        }
-
-        public ControlInfo getInfo() {
-            return info;
-        }
-    }
-
-    private class PortControl extends BasicControl {
-
-        private ControlInfo info;
-        private boolean connect;
-
-        private PortControl(boolean connect) {
-            super(AbstractRoot.this);
-            ArgumentInfo arg = ArgumentInfo.create(PortAddress.class, null);
-            ArgumentInfo[] in = new ArgumentInfo[]{arg, arg};
-            ArgumentInfo[] out = new ArgumentInfo[0];
-            info = ControlInfo.createFunctionInfo(in, out, null);
-            this.connect = connect;
-        }
-
-        @Override
-        public Call processInvoke(Call call, boolean quiet) throws Exception {
-            CallArguments args = call.getArgs();
-            if (args.getCount() != 2) {
-                return createError(call, "Two arguments required");
-            }
-//            PortAddress port1, port2;
-//            Argument arg = args.getArg(0);
-//            if (arg instanceof PortAddress) {
-//                port1 = (PortAddress) arg;
-//            } else {
-//                try {
-//                    port1 = PortAddress.wrap(String.valueOf(arg));
-//                } catch (ArgumentFormatException ex) {
-//                    return createError(call, "First argument must be a valid port address");
-//                }
-//            }
-//            arg = args.getArg(1);
-//            if (arg instanceof PortAddress) {
-//                port2 = (PortAddress) arg;
-//            } else {
-//                try {
-//                    port2 = PortAddress.wrap(String.valueOf(arg));
-//                } catch (ArgumentFormatException ex) {
-//                    return createError(call, "Second argument must be a valid port address");
-//                }
-//            }
-            PortAddress port1 = PortAddress.coerce(args.getArg(0));
-            PortAddress port2 = PortAddress.coerce(args.getArg(1));
-            if (connect) {
-                connectPorts(port1, port2);
-            } else {
-                disconnectPorts(port1, port2);
-            }
-            if (quiet) {
-                return null;
-            }
-            return Call.createReturnCall(call, CallArguments.EMPTY);
-        }
-
-        public ControlInfo getInfo() {
-            return info;
-        }
-    }
-
-    private class TransportControl extends BasicControl {
-
-        private ControlInfo info;
         private boolean start;
 
         private TransportControl(boolean start) {
-            super(AbstractRoot.this);
-            ArgumentInfo[] emptyArgs = new ArgumentInfo[0];
-            info = ControlInfo.createFunctionInfo(emptyArgs, emptyArgs, null);
+            super(start ? StartableInterface.START_INFO :
+                StartableInterface.STOP_INFO);
             this.start = start;
         }
 
         @Override
-        public Call processInvoke(Call call, boolean quiet) throws Exception {
+        protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
             if (start) {
                 setRunning();
-                if (!quiet) {
-                    route(Call.createReturnCall(call, CallArguments.EMPTY));
-                }
-//                runDelegate();
+                return CallArguments.EMPTY;
             } else {
                 setIdle();
-                if (!quiet) {
-                    route(Call.createReturnCall(call, CallArguments.EMPTY));
-                }
-//                terminateDelegate();
-            }
-            return null;
-        }
-
-        public ControlInfo getInfo() {
-            return info;
-        }
-    }
-
-    private class InfoControl extends BasicControl {
-
-        private ControlInfo info;
-
-        private InfoControl() {
-            super(AbstractRoot.this);
-            ArgumentInfo[] in = new ArgumentInfo[]{
-                ArgumentInfo.create(ComponentAddress.class,
-                        ArgumentInfo.Presence.Optional, null)
-            };
-            ArgumentInfo[] out = new ArgumentInfo[]{
-                ArgumentInfo.create(ComponentInfo.class, null)
-            };
-            info = ControlInfo.createFunctionInfo(in, out, null);
-        }
-
-        @Override
-        public Call processInvoke(Call call, boolean quiet) throws Exception {
-            CallArguments args = call.getArgs();
-            if (args.getCount() == 0) {
-                return Call.createReturnCall(call, AbstractRoot.this.getInfo());
-            } else if (args.getCount() == 1) {
-                Argument arg = args.getArg(0);
-                ComponentAddress ad;
-                ad = ComponentAddress.coerce(arg);
-                Component comp = AbstractRoot.this.getComponent(ad);
-                if (comp == null) {
-                    return createError(call, "Unknown component");
-                } else {
-                    return Call.createReturnCall(call, comp.getInfo());
-                }
-
-            } else {
-                return createError(call, "Invalid number of arguments");
+                return CallArguments.EMPTY;
             }
         }
 
-        public ControlInfo getInfo() {
-            return info;
-        }
     }
 
 

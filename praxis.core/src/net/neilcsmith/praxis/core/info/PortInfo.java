@@ -31,11 +31,13 @@ import net.neilcsmith.praxis.core.types.PMap;
  */
 public final class PortInfo extends Argument {
 
+    public static enum Direction { IN, OUT, BIDI };
+
     private Class<? extends Port> type;
-    private Port.Direction direction;
+    private Direction direction;
     private PMap properties;
 
-    private PortInfo(Class<? extends Port> type, Port.Direction direction, PMap properties) {
+    private PortInfo(Class<? extends Port> type, Direction direction, PMap properties) {
         this.type = type;
         this.direction = direction;
         this.properties = properties;
@@ -45,7 +47,7 @@ public final class PortInfo extends Argument {
         return type;
     }
 
-    public Port.Direction getDirection() {
+    public Direction getDirection() {
         return direction;
     }
 
@@ -86,7 +88,7 @@ public final class PortInfo extends Argument {
     }
 
     public static PortInfo create(Class<? extends Port> typeClass,
-            Port.Direction direction, PMap properties) {
+            Direction direction, PMap properties) {
         if (typeClass == null || direction == null) {
             throw new NullPointerException();
         }

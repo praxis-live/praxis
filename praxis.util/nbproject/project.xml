@@ -17,6 +17,7 @@
             </module-dependencies>
             <public-packages>
                 <package>net.neilcsmith.praxis.util</package>
+                <package>net.neilcsmith.praxis.util.interpolation</package>
             </public-packages>
         </data>
     </configuration>

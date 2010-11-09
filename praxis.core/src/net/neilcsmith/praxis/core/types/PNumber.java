@@ -21,8 +21,6 @@
  */
 package net.neilcsmith.praxis.core.types;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
@@ -51,7 +49,6 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
         this.string = str;
     }
 
-//    public final static ArgumentInfo INFO = ArgumentInfo.create(PNumber.class, null);
     public double value() {
         return value;
     }
@@ -100,20 +97,12 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
         }
     }
 
-
-
     public int compareTo(PNumber o) {
-//          if (o instanceof Float) {
-//                return Double.compare(value, ((Float) o).value());
-//            } else {
-//                int ret = Double.compare(value, o.floatValue());
-//                if (ret == 0) {
-//                    ret = 1;
-//                }
-//                return ret;
-//            }
-//        }
         return Double.compare(value, o.value);
+    }
+
+    public boolean isInteger() {
+        return isInteger;
     }
 
     public static PNumber valueOf(double val) {
@@ -128,7 +117,7 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
         } else if (Double.isInfinite(val) || Double.isNaN(val)) {
             val = 0;
         }
-        return new PNumber(val, null);
+        return new PNumber(val, str);
     }
 
     public static PNumber valueOf(int val) {
@@ -138,7 +127,6 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
     public static PNumber valueOf(String str) throws ArgumentFormatException {
         try {
             if (str.indexOf('.') > -1) {
-//                return new PNumber(Double.parseDouble(str), str);
                 return valueOf(Double.parseDouble(str), str);
             } else {
                 return new PNumber(Integer.parseInt(str), str);
@@ -178,137 +166,5 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
                 PString.valueOf("maximum"), max);
         return ArgumentInfo.create(PNumber.class, map);
     }
-//    public static float floatValueOf(Argument arg) throws ArgumentFormatException {
-//        if (arg instanceof PNumber) {
-//            return ((PNumber) arg).floatValue();
-//        } else {
-//            try {
-//                return java.lang.Float.valueOf(arg.toString());
-//
-//            } catch (NumberFormatException numberFormatException) {
-//                throw new ArgumentFormatException(numberFormatException);
-//            }
-//        }
-//    }
-//    
-//    public static int intValueOf(Argument arg) throws ArgumentFormatException {
-//        if (arg instanceof PNumber) {
-//            return ((PNumber) arg).intValue();
-//        } else {
-//            try {
-//                return Integer.valueOf(arg.toString());
-//
-//            } catch (NumberFormatException numberFormatException) {
-//                throw new ArgumentFormatException(numberFormatException);
-//            }
-//        }
-//    }
-//    public static final class Float extends PNumber {
-//
-//        private double value = 0.0F;
-//
-//        private Float(double value) {
-//            this.value = value;
-//        }
-//
-//        public double value() {
-//            return value;
-//        }
-//
-//        @Override
-//        public String toString() {
-//            return Double.toString(value);
-//        }
-//
-//        @Override
-//        public int hashCode() {
-//            long bits = Double.doubleToLongBits(value);
-//            return (int) (bits ^ (bits >>> 32));
-//        }
-//
-//        @Override
-//        public boolean equals(Object obj) {
-//            if (obj instanceof Float) {
-//                return Double.doubleToLongBits(((Float) obj).value()) == Double.doubleToLongBits(value);
-//            }
-//            return false;
-//        }
-//
-//        @Override
-//        public double floatValue() {
-//            return value;
-//        }
-//
-//        @Override
-//        public int intValue() {
-//            return (int) value;
-//        }
-//
-//        public int compareTo(PNumber o) {
-//            if (o instanceof Float) {
-//                return Double.compare(value, ((Float) o).value());
-//            } else {
-//                int ret = Double.compare(value, o.floatValue());
-//                if (ret == 0) {
-//                    ret = 1;
-//                }
-//                return ret;
-//            }
-//        }
-//    }
-//
-//    public static class Int extends PNumber {
-//
-//        private int value = 0;
-//
-//        private Int(int value) {
-//            this.value = value;
-//        }
-//
-//        public int value() {
-//            return value;
-//        }
-//
-//        @Override
-//        public String toString() {
-//            return Integer.toString(value);
-//        }
-//
-//        @Override
-//        public int hashCode() {
-//            return value;
-//        }
-//
-//        @Override
-//        public boolean equals(Object obj) {
-//            if (obj instanceof Int) {
-//                return ((Int) obj).value() == value;
-//            }
-//            return false;
-//        }
-//
-//        @Override
-//        public double floatValue() {
-//            return (double) value;
-//        }
-//
-//        @Override
-//        public int intValue() {
-//            return value;
-//        }
-//
-//        public int compareTo(PNumber o) {
-//            if (o instanceof Int) {
-//                int oVal = ((Int) o).value();
-//                return (value < oVal ? -1 : (value == oVal ? 0 : 1));
-//            } else {
-//                int oVal = o.intValue();
-//                int ret = (value < oVal ? -1 : (value == oVal ? 0 : 1));
-//                if (ret == 0) {
-//                    ret = -1; //int always sorts before float
-//                }
-//                return ret;
-//            }
-//        }
-//    }
+
 }

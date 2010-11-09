@@ -21,9 +21,14 @@
  */
 package net.neilcsmith.praxis.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Component;
@@ -33,10 +38,13 @@ import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.InvalidChildException;
 import net.neilcsmith.praxis.core.ParentVetoException;
 import net.neilcsmith.praxis.core.Port;
+import net.neilcsmith.praxis.core.PortListener;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.ComponentFactoryService;
 import net.neilcsmith.praxis.core.interfaces.ContainerInterface;
+import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PReference;
+import net.neilcsmith.praxis.core.types.PString;
 
 /**
  *
@@ -44,7 +52,10 @@ import net.neilcsmith.praxis.core.types.PReference;
  */
 public abstract class AbstractContainer extends AbstractComponent implements Container {
 
+    private final static Logger LOG = Logger.getLogger(AbstractContainer.class.getName());
+
     private Map<String, Component> childMap;
+    private Set<PArray> connections;
     boolean childInfoValid;
 
     protected AbstractContainer() {
@@ -54,6 +65,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
     protected AbstractContainer(boolean containerInterface, boolean componentInterface) {
         super(componentInterface);
         childMap = new LinkedHashMap<String, Component>();
+        connections = new LinkedHashSet<PArray>();
         if (containerInterface) {
             buildContainerInterface();
         }
@@ -62,8 +74,10 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
     private void buildContainerInterface() {
         registerControl(ContainerInterface.ADD_CHILD, new AddChildControl());
         registerControl(ContainerInterface.REMOVE_CHILD, new RemoveChildControl());
+        registerControl(ContainerInterface.CHILDREN, new ChildrenControl());
         registerControl(ContainerInterface.CONNECT, new ConnectionControl(true));
         registerControl(ContainerInterface.DISCONNECT, new ConnectionControl(false));
+        registerControl(ContainerInterface.CONNECTIONS, new ConnectionListControl());
         registerInterface(ContainerInterface.INSTANCE);
 
     }
@@ -168,6 +182,9 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
 
     private class RemoveChildControl extends SimpleControl {
 
+        private RemoveChildControl() {
+            super(ContainerInterface.REMOVE_CHILD_INFO);
+        }
 
         @Override
         protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
@@ -175,9 +192,26 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             return CallArguments.EMPTY;
         }
 
-        public ControlInfo getInfo() {
-            return ContainerInterface.REMOVE_CHILD_INFO;
+    }
+
+    private class ChildrenControl extends SimpleControl {
+
+        private ChildrenControl() {
+            super(ContainerInterface.CHILDREN_INFO);
         }
+
+        @Override
+        protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
+            if (childMap.isEmpty()) {
+                return CallArguments.create(PArray.EMPTY);
+            }
+            List<PString> children = new ArrayList<PString>(childMap.size());
+            for (String child : childMap.keySet()) {
+                children.add(PString.valueOf(child));
+            }
+            return CallArguments.create(PArray.valueOf(children));
+        }
+
     }
 
     private class ConnectionControl extends SimpleControl {
@@ -185,6 +219,8 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         private final boolean connect;
 
         private ConnectionControl(boolean connect) {
+            super(connect ? ContainerInterface.CONNECT_INFO :
+                ContainerInterface.DISCONNECT_INFO);
             this.connect = connect;
         }
 
@@ -193,25 +229,72 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             if (args.getCount() < 4) {
                 throw new IllegalArgumentException();
             }
-            Component c1 = getChild(args.getArg(0).toString());
-            Port p1 = c1.getPort(args.getArg(1).toString());
-            Component c2 = getChild(args.getArg(2).toString());
-            Port p2 = c2.getPort(args.getArg(3).toString());
+            PString c1id = PString.coerce(args.getArg(0));
+            PString p1id = PString.coerce(args.getArg(1));
+            PString c2id = PString.coerce(args.getArg(2));
+            PString p2id = PString.coerce(args.getArg(3));
+
+            Component c1 = getChild(c1id.toString());
+            final Port p1 = c1.getPort(p1id.toString());
+            Component c2 = getChild(c2id.toString());
+            final Port p2 = c2.getPort(p2id.toString());
+            
+            final PArray connection = PArray.valueOf(c1id, p1id, c2id, p2id);
+
             if (connect) {
                 p1.connect(p2);
+                connections.add(connection);
+                PortListener listener = new ConnectionListener(p1, p2, connection);
+                p1.addListener(listener);
+                p2.addListener(listener);
             } else {
                 p1.disconnect(p2);
+                connections.remove(connection);
             }
             return CallArguments.EMPTY;
         }
 
-        public ControlInfo getInfo() {
-            return connect ? ContainerInterface.CONNECT_INFO :
-                ContainerInterface.DISCONNECT_INFO;
+    }
+
+    private class ConnectionListener implements PortListener {
+
+        Port p1;
+        Port p2;
+        PArray connection;
+
+        private ConnectionListener(Port p1, Port p2, PArray connection) {
+            this.p1 = p1;
+            this.p2 = p2;
+            this.connection = connection;
+        }
+
+        public void connectionsChanged(Port source) {
+            if (Arrays.asList(p1.getConnections()).contains(p2) &&
+                    Arrays.asList(p2.getConnections()).contains(p1)) {
+                return;
+            } else {
+                LOG.finest("Removing connection\n" + connection);
+                connections.remove(connection);
+                p1.removeListener(this);
+                p2.removeListener(this);
+            }
         }
 
     }
 
+    private class ConnectionListControl extends SimpleControl {
+
+        private ConnectionListControl() {
+            super(ContainerInterface.CONNECTIONS_INFO);
+        }
+
+        @Override
+        protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
+            return CallArguments.create(PArray.valueOf(connections));
+        }
+
+
+    }
 
 
 

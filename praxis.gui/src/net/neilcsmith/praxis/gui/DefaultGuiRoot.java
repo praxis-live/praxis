@@ -66,7 +66,6 @@ public class DefaultGuiRoot extends AbstractRoot implements GuiRoot {
     private Map<ControlAddress, DefaultBinding> bindingCache;
 
     public DefaultGuiRoot() {
-        super(RootState.ACTIVE_IDLE);
         bindingCache = new HashMap<ControlAddress, DefaultBinding>();
     }
 
@@ -145,6 +144,7 @@ public class DefaultGuiRoot extends AbstractRoot implements GuiRoot {
                 Object constraints = comp.getClientProperty(ClientKeys.LayoutConstraint);
                 container.add(comp, constraints);
                 container.revalidate();
+                container.repaint();
                 comp.addPropertyChangeListener(ClientKeys.LayoutConstraint, layoutListener);
             } catch (Exception e) {
                 super.removeChild(id);
@@ -160,6 +160,7 @@ public class DefaultGuiRoot extends AbstractRoot implements GuiRoot {
             JComponent comp = ((GuiComponent) child).getSwingComponent();
             container.remove(comp);
             container.revalidate();
+            container.repaint();
             comp.removePropertyChangeListener(ClientKeys.LayoutConstraint, layoutListener);
         }
         return child;

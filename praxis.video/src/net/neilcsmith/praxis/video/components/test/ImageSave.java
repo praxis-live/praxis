@@ -31,14 +31,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
-import net.neilcsmith.praxis.core.interfaces.Task;
-import net.neilcsmith.praxis.core.interfaces.TaskListener;
+import net.neilcsmith.praxis.core.interfaces.TaskService;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PUri;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.impl.AbstractRoot;
+import net.neilcsmith.praxis.impl.TaskControl;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import net.neilcsmith.praxis.impl.UriProperty;
 import net.neilcsmith.praxis.video.DefaultVideoInputPort;
@@ -56,22 +54,26 @@ public class ImageSave extends AbstractComponent {
 
     private static Logger logger = Logger.getLogger(ImageSave.class.getName());
     private boolean triggered;
+    private long triggerTime;
     private List<SoftReference<BufferedImageSurface>> pool;
-    private ImageSaverListener listener;
+    private SaveCallback callback;
     private UriProperty uri;
     private int uriIndex;
+    private TaskControl tasks;
 
     public ImageSave() {
         pool = new ArrayList<SoftReference<BufferedImageSurface>>();
-        listener = new ImageSaverListener();
-        uri = UriProperty.create( PUri.valueOf(new File("image").toURI()));
+        callback = new SaveCallback();
+        uri = UriProperty.create(PUri.valueOf(new File("image").toURI()));
         Delegator d = new Delegator(new SaveDelegate());
         registerPort(Port.IN, new DefaultVideoInputPort(this, d));
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, d));
         registerControl("file", uri);
-        TriggerControl trigger = TriggerControl.create( new TriggerBinding());
+        TriggerControl trigger = TriggerControl.create(new TriggerBinding());
         registerControl("trigger", trigger);
         registerPort("trigger", trigger.createPort());
+        tasks = new TaskControl();
+        registerControl("__tasks", tasks);
 
     }
 
@@ -79,6 +81,7 @@ public class ImageSave extends AbstractComponent {
 
         public void trigger(long time) {
             triggered = true;
+            triggerTime = time;
         }
     }
 
@@ -117,13 +120,12 @@ public class ImageSave extends AbstractComponent {
                 int height = surface.getHeight();
                 BufferedImageSurface bis = getBISurface(width, height);
                 bis.copy(surface);
-                Root root = getRoot();
-                if (root != null) {
-                    try {
-                        ((AbstractRoot)root).submitTask(new ImageSaver(bis, uri.getValue().value(), uriIndex++), listener);
-                    } catch (ServiceUnavailableException ex) {
-                        Logger.getLogger(ImageSave.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                try {
+                    tasks.submitTask(triggerTime,
+                            new ImageSaver(bis, uri.getValue().value(), uriIndex++),
+                            callback);
+                } catch (ServiceUnavailableException ex) {
+                    Logger.getLogger(ImageSave.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 triggered = false;
             }
@@ -136,7 +138,7 @@ public class ImageSave extends AbstractComponent {
         }
     }
 
-    private class ImageSaver implements Task {
+    private class ImageSaver implements TaskService.Task {
 
         private BufferedImageSurface bis;
         private URI filename;
@@ -154,7 +156,7 @@ public class ImageSave extends AbstractComponent {
         }
     }
 
-    private class ImageSaverListener implements TaskListener {
+    private class SaveCallback implements TaskControl.Callback {
 
         public void taskCompleted(long time, long id, Argument arg) {
             PReference ref = (PReference) arg;

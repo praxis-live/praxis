@@ -83,7 +83,17 @@ public class AbstractComponentFactory implements ComponentFactory {
     }
 
     public ComponentType getTypeForClass(Class<? extends Component> clazz) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        for (Map.Entry<ComponentType, Class<? extends Root>> entry : rootMap.entrySet()) {
+            if (entry.getValue().equals(clazz)) {
+                return entry.getKey();
+            }
+        }
+        for (Map.Entry<ComponentType, Class<? extends Component>> entry : componentMap.entrySet()) {
+            if (entry.getValue().equals(clazz)) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
     protected void addComponent(ComponentType type, Class<? extends Component> cl) {

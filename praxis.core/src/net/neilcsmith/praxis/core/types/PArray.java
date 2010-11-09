@@ -132,20 +132,23 @@ public final class PArray extends Argument implements Iterable<Argument> {
         }
     }
 
-    //@TODO optimize this.
     public static PArray valueOf(Collection<? extends Argument> collection) {
-        return valueOf(collection.toArray(new Argument[collection.size()]));
+//        return valueOf(collection.toArray(new Argument[collection.size()]));
+        if (collection.contains(null)) {
+            throw new NullPointerException();
+        }
+        return new PArray(collection.toArray(new Argument[collection.size()]), null);
 
     }
 
-    public static PArray valueOf(Argument[] array) {
-        int size = array.length;
+    public static PArray valueOf(Argument ... args) {
+        int size = args.length;
         if (size == 0) {
             return PArray.EMPTY;
         }
         Argument[] copy = new Argument[size];
         for (int i = 0; i < size; i++) {
-            Argument arg = array[i];
+            Argument arg = args[i];
             if (arg == null) {
                 throw new NullPointerException();
             }

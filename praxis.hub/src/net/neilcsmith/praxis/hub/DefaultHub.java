@@ -411,19 +411,23 @@ public class DefaultHub extends AbstractRoot {
     
     private class NewInstanceControl extends SimpleControl {
 
+        private NewInstanceControl() {
+            super(ComponentFactoryService.NEW_INSTANCE_INFO);
+        }
+
         @Override
         protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
             Component c = factory.createComponent(ComponentType.coerce(args.getArg(0)));
             return CallArguments.create(PReference.wrap(c));
         }
 
-        public ControlInfo getInfo() {
-            return ComponentFactoryService.NEW_INSTANCE_INFO;
-        }
-        
     }
 
     private class AddRootControl extends SimpleControl {
+
+        private AddRootControl() {
+            super(RootManagerService.ADD_ROOT_INFO);
+        }
 
         @Override
         protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
@@ -433,9 +437,6 @@ public class DefaultHub extends AbstractRoot {
             return CallArguments.EMPTY;
         }
 
-        public ControlInfo getInfo() {
-            return RootManagerService.ADD_ROOT_INFO;
-        }
 
     }
 

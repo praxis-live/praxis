@@ -27,10 +27,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.*;
 import net.neilcsmith.praxis.core.info.PortInfo;
+import net.neilcsmith.praxis.impl.PortListenerSupport;
 import net.neilcsmith.rapl.components.Splitter;
 import net.neilcsmith.rapl.core.Sink;
 import net.neilcsmith.rapl.core.Source;
-
 
 /**
  *
@@ -42,44 +42,32 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
     private Source source;
     private Source portSource;
     private Splitter splitter;
-    private AudioPort.Input connection;
     private List<AudioPort.Input> connections;
-    private Component component;
     private boolean multiChannelCapable;
-    private PortInfo info;
+    private PortListenerSupport pls;
 
     public DefaultAudioOutputPort(Component host, Source source) {
         this(host, source, false);
     }
-    
+
     public DefaultAudioOutputPort(Component host, Source source,
             boolean multiChannelCapable) {
-        if (host == null || source == null) {
+        if (source == null) {
             throw new NullPointerException();
         }
-        this.component = host;
         this.source = source;
         this.portSource = source;
         this.multiChannelCapable = multiChannelCapable;
         connections = new ArrayList<AudioPort.Input>();
-        info = PortInfo.create(getTypeClass(), getDirection(), null);
+        pls = new PortListenerSupport(this);
     }
 
     public void connect(Port port) throws PortConnectionException {
-//        if (connection != null) {
-//            throw new PortConnectionException();
-//        }
-//        if (port instanceof AudioPort.Input) {
-//            AudioPort.Input ip = (AudioPort.Input) port;
-//            makeConnection(ip, source);
-//        } else {
-//            throw new PortConnectionException();
-//        }
-//        fireConnectionListeners();
-        if (connections.contains(port)) {
-            throw new PortConnectionException();
-        }
         if (port instanceof AudioPort.Input) {
+            AudioPort.Input aport = (AudioPort.Input) port;
+            if (connections.contains(aport)) {
+                throw new PortConnectionException();
+            }
             if (connections.size() == 1) {
                 switchToMultichannel();
             }
@@ -93,51 +81,53 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
                 }
                 throw ex;
             }
+            pls.fireListeners();
         } else {
             throw new PortConnectionException();
         }
     }
 
     public void disconnect(Port port) {
-        if (connections.contains(port)) {
-            breakConnection(connection, source);
-            connections.remove(port);
-            if (connections.size() == 1) {
-                switchToSingleChannel();
+        if (port instanceof AudioPort.Input) {
+            AudioPort.Input aport = (AudioPort.Input) port;
+            if (connections.contains(aport)) {
+                breakConnection(aport, source);
+                connections.remove(aport);
+                if (connections.size() == 1) {
+                    switchToSingleChannel();
+                }
+                pls.fireListeners();
             }
         }
     }
-    
-
 
     public void disconnectAll() {
-        if (connection != null) {
-            disconnect(connection);
+        for (AudioPort.Output port : getConnections()) {
+            disconnect(port);
         }
     }
 
-    public Port[] getConnections() {
-        return connection == null ? new Port[0] : new Port[]{connection};
+    public AudioPort.Output[] getConnections() {
+        return connections.toArray(new AudioPort.Output[connections.size()]);
     }
 
-    public PortInfo getInfo() {
-        return info;
+    public void addListener(PortListener listener) {
+        pls.addListener(listener);
     }
 
-    public Component getComponent() {
-        return component;
+    public void removeListener(PortListener listener) {
+        pls.removeListener(listener);
     }
 
-    
     private void switchToMultichannel() {
         if (multiChannelCapable || portSource == splitter) {
             return;
-        }    
-        Sink[] sinks = removeSinks(portSource);      
+        }
+        Sink[] sinks = removeSinks(portSource);
         try {
             if (splitter == null) {
                 splitter = new Splitter(16); // @TODO make channels configurable
-            }         
+            }
             splitter.addSource(source);
             for (Sink sink : sinks) {
                 sink.addSource(splitter);
@@ -151,7 +141,7 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
             connections.clear();
         }
     }
-    
+
     private void switchToSingleChannel() {
         if (portSource == source) {
             return;
@@ -169,9 +159,9 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
             portSource = source;
             connections.clear();
         }
-        
+
     }
-    
+
     private Sink[] removeSinks(Source source) {
         Sink[] sinks = source.getSinks();
         for (Sink sink : sinks) {

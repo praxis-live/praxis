@@ -22,8 +22,8 @@
  */
 package net.neilcsmith.praxis.gui;
 
-import net.neilcsmith.praxis.util.Interpolator;
-import net.neilcsmith.praxis.util.LinearInterpolator;
+import net.neilcsmith.praxis.util.interpolation.Interpolator;
+import net.neilcsmith.praxis.util.interpolation.LinearInterpolator;
 import java.util.logging.Logger;
 import javax.swing.BoundedRangeModel;
 import javax.swing.event.ChangeEvent;
@@ -35,7 +35,7 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
-import net.neilcsmith.praxis.util.ExponentialInterpolator;
+import net.neilcsmith.praxis.util.interpolation.ExponentialInterpolator;
 import net.neilcsmith.praxis.util.PMath;
 
 /**

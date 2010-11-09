@@ -22,6 +22,7 @@
 package net.neilcsmith.praxis.hub;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,29 +39,27 @@ import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.InvalidChildException;
-import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.TaskService;
 import net.neilcsmith.praxis.core.interfaces.TaskService.Task;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.impl.AbstractRoot;
-import net.neilcsmith.praxis.impl.BasicControl;
-import net.neilcsmith.praxis.impl.RootState;
 
 /**
  *
  * @author Neil C Smith
  */
-public class TaskProcessorImpl extends AbstractRoot {
+public class TaskServiceImpl extends AbstractRoot {
 
-    private final static Logger LOG = Logger.getLogger(TaskProcessorImpl.class.getName());
+    private final static Logger LOG = Logger.getLogger(TaskServiceImpl.class.getName());
 
     private ExecutorService threadService;
     private Map<Future<Argument>, Call> futures;
     private List<Future> completed;
 
-    public TaskProcessorImpl() {
-        super(RootState.ACTIVE_RUNNING);
+    public TaskServiceImpl() {
+        super(EnumSet.noneOf(Caps.class));
         threadService = Executors.newCachedThreadPool(new ThreadFactory() {
 
             public Thread newThread(Runnable r) {
@@ -114,22 +113,20 @@ public class TaskProcessorImpl extends AbstractRoot {
             }
         }
 
-    private class SubmitControl extends BasicControl {
+    private class SubmitControl implements Control {
 
-        private ControlInfo info;
-
-        private SubmitControl() {
-            super(TaskProcessorImpl.this);
-            ArgumentInfo input = ArgumentInfo.create(PReference.class, null);
-            ArgumentInfo output = ArgumentInfo.create(Argument.class, null);
-            info = ControlInfo.createFunctionInfo(
-                    new ArgumentInfo[]{input},
-                    new ArgumentInfo[]{output},
-                    null);
+        public void call(Call call, PacketRouter router) throws Exception {
+            switch (call.getType()) {
+                case INVOKE :
+                case INVOKE_QUIET :
+                    submitTask(call);
+                    break;
+                default :
+                    throw new IllegalArgumentException("Unexpected call\n" + call);
+            }
         }
 
-        @Override
-        protected Call processInvoke(Call call, boolean quiet) throws Exception {
+        private void submitTask(Call call) throws Exception {
             CallArguments args = call.getArgs();
             if (args.getCount() == 1) {
                 Argument arg = args.getArg(0);
@@ -145,16 +142,62 @@ public class TaskProcessorImpl extends AbstractRoot {
                                     }
                                 });
                         futures.put(future, call);
-                        return null;
                     }
                 }
+            } else {
+                throw new IllegalArgumentException();
             }
-            throw new IllegalArgumentException();
+            
         }
 
         public ControlInfo getInfo() {
-            return info;
+            return TaskService.SUBMIT_INFO;
         }
+
     }
+
+
+//    private class SubmitControl extends BasicControl {
+//
+//        private ControlInfo info;
+//
+//        private SubmitControl() {
+//            super(TaskServiceImpl.this);
+//            ArgumentInfo input = ArgumentInfo.create(PReference.class, null);
+//            ArgumentInfo output = ArgumentInfo.create(Argument.class, null);
+//            info = ControlInfo.createFunctionInfo(
+//                    new ArgumentInfo[]{input},
+//                    new ArgumentInfo[]{output},
+//                    null);
+//        }
+//
+//        @Override
+//        protected Call processInvoke(Call call, boolean quiet) throws Exception {
+//            CallArguments args = call.getArgs();
+//            if (args.getCount() == 1) {
+//                Argument arg = args.getArg(0);
+//                if (arg instanceof PReference) {
+//                    Object ref = ((PReference) arg).getReference();
+//                    if (ref instanceof Task) {
+//                        final Task task = (Task) ref;
+//                        Future<Argument> future = threadService.submit(
+//                                new Callable<Argument>() {
+//
+//                                    public Argument call() throws Exception {
+//                                        return task.execute();
+//                                    }
+//                                });
+//                        futures.put(future, call);
+//                        return null;
+//                    }
+//                }
+//            }
+//            throw new IllegalArgumentException();
+//        }
+//
+//        public ControlInfo getInfo() {
+//            return info;
+//        }
+//    }
 
 }

@@ -26,6 +26,7 @@ import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.PacketRouter;
+import net.neilcsmith.praxis.core.info.ControlInfo;
 
 /**
  *
@@ -34,8 +35,14 @@ import net.neilcsmith.praxis.core.PacketRouter;
 public abstract class SimpleControl implements Control {
 
     private final static Logger LOG = Logger.getLogger(SimpleControl.class.getName());
+    
+    private ControlInfo info;
 
-    public void call(Call call, PacketRouter router) throws Exception {
+    protected SimpleControl(ControlInfo info) {
+        this.info = info;
+    }
+
+    public final void call(Call call, PacketRouter router) throws Exception {
         CallArguments out = null;
         switch (call.getType()) {
             case INVOKE:
@@ -53,6 +60,10 @@ public abstract class SimpleControl implements Control {
         if (out != null) {
             router.route(Call.createReturnCall(call, out));
         }
+    }
+
+    public final ControlInfo getInfo() {
+        return info;
     }
 
     protected abstract CallArguments process(CallArguments args, boolean quiet) throws Exception;

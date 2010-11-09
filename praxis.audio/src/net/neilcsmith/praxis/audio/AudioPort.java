@@ -23,6 +23,8 @@ package net.neilcsmith.praxis.audio;
 
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.PortConnectionException;
+import net.neilcsmith.praxis.core.info.PortInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.rapl.core.Source;
 
 /**
@@ -31,30 +33,34 @@ import net.neilcsmith.rapl.core.Source;
  */
 public abstract class AudioPort implements Port {
 
-    public final Class<? extends Port> getTypeClass() {
-        return AudioPort.class;
-    }
-
     public static abstract class Input extends AudioPort {
+        
+        private PortInfo info;
 
-        public void connect(Port port) throws PortConnectionException {
+        public Input() {
+            this(PMap.EMPTY);
+        }
+
+        public Input(PMap properties) {
+            info = PortInfo.create(AudioPort.class, PortInfo.Direction.IN, properties);
+        }
+
+        public final void connect(Port port) throws PortConnectionException {
             if (port instanceof Output) {
                 port.connect(this);
             } else {
                 throw new PortConnectionException();
-            }
-            
+            } 
         }
 
-        public void disconnect(Port port) {
+        public final void disconnect(Port port) {
             if (port instanceof Output) {
                 port.disconnect(this);
             }
-            
         }
 
-        public final Direction getDirection() {
-            return Port.Direction.IN;
+        public final PortInfo getInfo() {
+            return info;
         }
 
         protected abstract void addAudioOutputPort(Output port, Source source) throws PortConnectionException;
@@ -64,15 +70,25 @@ public abstract class AudioPort implements Port {
 
     public static abstract class Output extends AudioPort {
 
-        public final Direction getDirection() {
-            return Port.Direction.OUT;
+        private PortInfo info;
+
+        public Output() {
+            this(PMap.EMPTY);
         }
 
-        protected void makeConnection(Input port, Source source) throws PortConnectionException {
+        public Output(PMap properties) {
+            info = PortInfo.create(AudioPort.class, PortInfo.Direction.OUT, properties);
+        }
+
+        public final PortInfo getInfo() {
+            return info;
+        }
+
+        protected final void makeConnection(Input port, Source source) throws PortConnectionException {
             port.addAudioOutputPort(this, source);
         }
 
-        protected void breakConnection(Input port, Source source) {
+        protected final void breakConnection(Input port, Source source) {
             port.removeAudioOutputPort(this, source);
         }
     }

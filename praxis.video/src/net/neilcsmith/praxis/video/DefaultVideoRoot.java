@@ -57,7 +57,6 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
     private VideoOutputClient outputClient;
 
     public DefaultVideoRoot() {
-        super(RootState.ACTIVE_IDLE);
 //        placeholder = new Placeholder();
         buildControls();
     }

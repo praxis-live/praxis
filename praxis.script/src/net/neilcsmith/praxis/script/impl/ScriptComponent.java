@@ -22,8 +22,6 @@
 
 package net.neilcsmith.praxis.script.impl;
 
-import net.neilcsmith.praxis.core.InterfaceDefinition;
-import net.neilcsmith.praxis.core.interfaces.ScriptService;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 
 /**

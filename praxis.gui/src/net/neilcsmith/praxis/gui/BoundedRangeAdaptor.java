@@ -23,8 +23,8 @@
 package net.neilcsmith.praxis.gui;
 
 import java.util.logging.Level;
-import net.neilcsmith.praxis.util.Interpolator;
-import net.neilcsmith.praxis.util.LinearInterpolator;
+import net.neilcsmith.praxis.util.interpolation.Interpolator;
+import net.neilcsmith.praxis.util.interpolation.LinearInterpolator;
 import java.util.logging.Logger;
 import javax.swing.BoundedRangeModel;
 import javax.swing.event.ChangeEvent;

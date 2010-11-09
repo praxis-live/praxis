@@ -23,6 +23,7 @@
 package net.neilcsmith.praxis.core.types;
 
 import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 
 /**
@@ -64,6 +65,14 @@ public class PString extends Argument implements Comparable<PString> {
            return false; 
         }
         
+    }
+
+    public static PString coerce(Argument arg) {
+        if (arg instanceof PString) {
+            return (PString) arg;
+        } else {
+            return new PString(arg.toString());
+        }
     }
     
     public static PString valueOf(String str) {

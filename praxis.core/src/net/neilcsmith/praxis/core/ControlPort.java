@@ -36,10 +36,6 @@ public abstract class ControlPort implements Port {
 
     public final static PString BANG = PString.valueOf("");
 
-    public final Class<? extends Port> getTypeClass() {
-        return ControlPort.class;
-    }
-
     public static abstract class Input extends ControlPort {
 
         public void connect(Port port) throws PortConnectionException {
@@ -50,29 +46,17 @@ public abstract class ControlPort implements Port {
             port.disconnect(this);
         }
 
-        public final Direction getDirection() {
-            return Port.Direction.IN;
-        }
-
         protected abstract void addControlOutputPort(Output port)
                 throws PortConnectionException;
 
         protected abstract void removeControlOutputPort(Output port);
 
-//        public abstract int getIndex();
-
         public abstract void receive(long time, double value);
-
-//        public abstract void receive(int value);
 
         public abstract void receive(long time, Argument value);
     }
 
     public static abstract class Output extends ControlPort {
-
-        public final Direction getDirection() {
-            return Port.Direction.OUT;
-        }
 
         protected final void makeConnection(Input port) throws PortConnectionException {
             port.addControlOutputPort(this);
@@ -83,8 +67,6 @@ public abstract class ControlPort implements Port {
         }
 
         public abstract void send(long time, double value);
-
-//        public abstract void send(int value);
 
         public abstract void send(long time, Argument value);
 

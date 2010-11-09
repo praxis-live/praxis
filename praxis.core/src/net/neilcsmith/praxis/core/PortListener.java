@@ -27,7 +27,7 @@ package net.neilcsmith.praxis.core;
  *
  * @author Neil C Smith
  */
-public interface PortConnectionListener {
+public interface PortListener {
 
     public void connectionsChanged(Port source);
     

@@ -20,7 +20,7 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.util;
+package net.neilcsmith.praxis.util.interpolation;
 
 /**
  *

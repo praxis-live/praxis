@@ -21,7 +21,7 @@
  */
 package net.neilcsmith.praxis.impl;
 
-import net.neilcsmith.praxis.core.PortConnectionListener;
+import net.neilcsmith.praxis.core.PortListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,11 +40,13 @@ import net.neilcsmith.praxis.core.info.PortInfo;
 public abstract class AbstractControlInputPort extends ControlPort.Input {
 
     private ControlPort.Output[] connections;
+    private PortListenerSupport pls;
     private final PortInfo info;
 
     public AbstractControlInputPort() {
         connections = new ControlPort.Output[0];
-        info = PortInfo.create(getTypeClass(), getDirection(), null);
+        pls = new PortListenerSupport(this);
+        info = PortInfo.create(ControlPort.class, PortInfo.Direction.IN, null);
     }
 
     @Override
@@ -56,6 +58,7 @@ public abstract class AbstractControlInputPort extends ControlPort.Input {
         cons = new ArrayList<ControlPort.Output>(cons);
         cons.add(port);
         connections = cons.toArray(new ControlPort.Output[cons.size()]);
+        pls.fireListeners();
     }
 
     @Override
@@ -66,16 +69,30 @@ public abstract class AbstractControlInputPort extends ControlPort.Input {
             cons = new ArrayList<ControlPort.Output>(cons);
             cons.remove(idx);
             connections = cons.toArray(new ControlPort.Output[cons.size()]);
+            pls.fireListeners();
         }
     }
     
     
     public void disconnectAll() {
-        ControlPort.Output[] cons = connections;
-        for (ControlPort.Output port : cons) {
+        if (connections.length == 0) {
+            return;
+        }
+        for (ControlPort.Output port : connections) {
             port.disconnect(this);
         }
+        pls.fireListeners();
     }
+
+    public void addListener(PortListener listener) {
+        pls.addListener(listener);
+    }
+
+    public void removeListener(PortListener listener) {
+        pls.removeListener(listener);
+    }
+
+    
 
     public Port[] getConnections() {
         return Arrays.copyOf(connections, connections.length);

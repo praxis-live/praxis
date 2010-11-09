@@ -24,7 +24,7 @@ package net.neilcsmith.praxis.core.info;
 import java.util.Arrays;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
-import net.neilcsmith.praxis.core.Control.Type;
+//import net.neilcsmith.praxis.core.Control.Type;
 import net.neilcsmith.praxis.core.types.PMap;
 
 /**
@@ -33,6 +33,10 @@ import net.neilcsmith.praxis.core.types.PMap;
  */
 public class ControlInfo extends Argument {
 
+    public static enum Type {
+
+        Function, RO_Property, RW_Property
+    };
     private ArgumentInfo[] inputs;
     private ArgumentInfo[] outputs;
     private Argument[] defaults;
@@ -71,11 +75,11 @@ public class ControlInfo extends Argument {
 //                        && Arrays.equals(outputs, o.outputs)
 //                        && properties.equals(o.properties);
 //            }
-            return type == o.type &&
-                    Arrays.equals(inputs, o.inputs) &&
-                    Arrays.equals(outputs, o.outputs) &&
-                    Arrays.equals(defaults, o.defaults) &&
-                    properties.equals(o.properties);
+            return type == o.type
+                    && Arrays.equals(inputs, o.inputs)
+                    && Arrays.equals(outputs, o.outputs)
+                    && Arrays.equals(defaults, o.defaults)
+                    && properties.equals(o.properties);
         }
         return false;
     }

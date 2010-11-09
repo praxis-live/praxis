@@ -23,6 +23,8 @@ package net.neilcsmith.praxis.video;
 
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.PortConnectionException;
+import net.neilcsmith.praxis.core.info.PortInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.ripl.Source;
 
 /**
@@ -31,13 +33,19 @@ import net.neilcsmith.ripl.Source;
  */
 public abstract class VideoPort implements Port {
 
-    public final Class<? extends Port> getTypeClass() {
-        return VideoPort.class;
-    }
-
     public static abstract class Input extends VideoPort {
+        
+        private PortInfo info;
+        
+        public Input() {
+            this(PMap.EMPTY);
+        }
+        
+        public Input(PMap properties) {
+            info = PortInfo.create(VideoPort.class, PortInfo.Direction.IN, properties);
+        }
 
-        public void connect(Port port) throws PortConnectionException {
+        public final void connect(Port port) throws PortConnectionException {
             if (port instanceof Output) {
                 port.connect(this);
             } else {
@@ -46,15 +54,15 @@ public abstract class VideoPort implements Port {
             
         }
 
-        public void disconnect(Port port) {
+        public final void disconnect(Port port) {
             if (port instanceof Output) {
                 port.disconnect(this);
             }
             
         }
-
-        public final Direction getDirection() {
-            return Port.Direction.IN;
+        
+        public final PortInfo getInfo() {
+            return info;
         }
 
         protected abstract void addImageOutputPort(Output port, Source source) throws PortConnectionException;
@@ -63,16 +71,26 @@ public abstract class VideoPort implements Port {
     }
 
     public static abstract class Output extends VideoPort {
-
-        public final Direction getDirection() {
-            return Port.Direction.OUT;
+        
+        private PortInfo info;
+        
+        public Output() {
+            this(PMap.EMPTY);
+        }
+        
+        public Output(PMap properties) {
+            info = PortInfo.create(VideoPort.class, PortInfo.Direction.OUT, properties);
+        }
+        
+        public final PortInfo getInfo() {
+            return info;
         }
 
-        protected void makeConnection(Input port, Source source) throws PortConnectionException {
+        protected final void makeConnection(Input port, Source source) throws PortConnectionException {
             port.addImageOutputPort(this, source);
         }
 
-        protected void breakConnection(Input port, Source source) {
+        protected final void breakConnection(Input port, Source source) {
             port.removeImageOutputPort(this, source);
         }
     }
