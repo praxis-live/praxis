@@ -23,11 +23,9 @@ package net.neilcsmith.praxis.video.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.core.Root;
-import net.neilcsmith.praxis.impl.RootState;
-import net.neilcsmith.praxis.impl.AbstractRoot;
-import net.neilcsmith.praxis.impl.AbstractRootStateComponent;
+import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
@@ -39,7 +37,7 @@ import net.neilcsmith.ripl.delegates.VideoDelegate.StateException;
  *
  * @author Neil C Smith
  */
-public class VideoCapture extends AbstractRootStateComponent {
+public class VideoCapture extends AbstractExecutionContextComponent {
 
 //    private final static String DEFAULT_DEVICE = "v4l2://0?width=640&height=480";
     private VideoDelegate video;
@@ -61,8 +59,8 @@ public class VideoCapture extends AbstractRootStateComponent {
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, container));
     }
 
-    public void rootStateChanged(AbstractRoot source, RootState state) {
-        if (state == RootState.ACTIVE_IDLE) {
+    public void stateChanged(ExecutionContext source) {
+        if (source.getState() == ExecutionContext.State.IDLE) {
             if (video != null) {
                 try {
                     video.stop();
@@ -70,7 +68,7 @@ public class VideoCapture extends AbstractRootStateComponent {
                 // no op
                 }
             }
-        } else if (state == RootState.TERMINATING) {
+        } else if (source.getState() == ExecutionContext.State.TERMINATED) {
             if (video != null) {
                 container.setDelegate(null);
                 video.dispose();

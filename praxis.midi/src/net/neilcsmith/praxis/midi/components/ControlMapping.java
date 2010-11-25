@@ -20,7 +20,7 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.midi;
+package net.neilcsmith.praxis.midi.components;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -166,17 +166,17 @@ public class DefaultGuiRoot extends AbstractRoot implements GuiRoot {
         return child;
     }
 
-    @Override
-    protected void addComponent(ComponentAddress address, Component component) throws Exception {
-        super.addComponent(address, component);
-        frame.pack();
-    }
-
-    @Override
-    protected void removeComponent(ComponentAddress address) throws Exception {
-        super.removeComponent(address);
-        frame.pack();
-    }
+//    @Override
+//    protected void addComponent(ComponentAddress address, Component component) throws Exception {
+//        super.addComponent(address, component);
+//        frame.pack();
+//    }
+//
+//    @Override
+//    protected void removeComponent(ComponentAddress address) throws Exception {
+//        super.removeComponent(address);
+//        frame.pack();
+//    }
 
     @Override
     protected void starting() {

@@ -24,10 +24,10 @@ package net.neilcsmith.praxis.components.routing;
 
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlPort;
-import net.neilcsmith.praxis.core.Root;
+import net.neilcsmith.praxis.core.ExecutionContext;
+import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
 import net.neilcsmith.praxis.impl.RootState;
 import net.neilcsmith.praxis.impl.AbstractRoot;
-import net.neilcsmith.praxis.impl.AbstractRootStateComponent;
 import net.neilcsmith.praxis.impl.ArgumentInputPort;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.TriggerControl;
@@ -38,7 +38,7 @@ import net.neilcsmith.praxis.impl.TriggerControl;
  * 
  */
 // @TODO deactivate when root state inactive?
-public class Join extends AbstractRootStateComponent {
+public class Join extends AbstractExecutionContextComponent {
 
     private Argument in1;
     private Argument in2;
@@ -88,7 +88,7 @@ public class Join extends AbstractRootStateComponent {
         in2 = null;
     }
 
-    public void rootStateChanged(AbstractRoot source, RootState state) {
+    public void stateChanged(ExecutionContext source) {
         reset();
     }
 

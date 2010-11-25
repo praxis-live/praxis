@@ -22,12 +22,7 @@
 package net.neilcsmith.praxis.impl;
 
 import net.neilcsmith.praxis.core.interfaces.ServiceManager;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +40,7 @@ import net.neilcsmith.praxis.core.types.PString;
  * @author Neil C Smith
  * @TODO Add Control address caching
  */
-public abstract class AbstractRoot extends AbstractContainer implements Root, PacketRouter {
+public abstract class AbstractRoot extends AbstractContainer implements Root {
 
     public static enum Caps {
 
@@ -53,7 +48,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
     };
     private static final Logger LOG = Logger.getLogger(AbstractRoot.class.getName());
     public static final int DEFAULT_FRAME_TIME = 100; // set in constructor?
-    private static final ListenerSorter listenerSorter = new ListenerSorter();
     private AtomicReference<RootState> state = new AtomicReference<RootState>(RootState.NEW);
     private RootState cachedState = RootState.NEW; // cache to pass to listeners because for thread safety
     private RootState defaultRunState;
@@ -62,29 +56,16 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
     private ComponentAddress address;
     private PacketQueue orderedQueue = new PacketQueue();
     private BlockingQueue<Packet> blockingQueue = new LinkedBlockingQueue<Packet>();
-    private RootStateListener[] stateListeners = new RootStateListener[0];
-    private ControlFrameListener[] frameListeners = new ControlFrameListener[0];
     private long time;
-//    private DefaultTaskController defaultTaskController;
-//    private TaskController taskController;
     private Root.Controller controller;
     private Runnable interrupt;
     private Lookup lookup;
     private ExecutionContextImpl context;
+    private Router router;
 
     protected AbstractRoot() {
         this(EnumSet.allOf(Caps.class));
     }
-
-//    @Deprecated
-//    protected AbstractRoot(RootState defaultRunState) {
-//        if (defaultRunState != RootState.ACTIVE_IDLE
-//                && defaultRunState != RootState.ACTIVE_RUNNING) {
-//            throw new IllegalArgumentException("Default run state must be ACTIVE_IDLE or ACTIVE_RUNNING");
-//        }
-//        this.defaultRunState = defaultRunState;
-//        createStartableControls();
-//    }
 
     protected AbstractRoot(EnumSet<Caps> caps) {
         super(caps.contains(Caps.Container), caps.contains(Caps.Component));
@@ -103,14 +84,14 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
                 ArgumentProperty.createReadOnly(PBoolean.info(),
                 new ArgumentProperty.ReadBinding() {
 
-            public Argument getBoundValue() {
-                if (state.get() == RootState.ACTIVE_RUNNING) {
-                    return PBoolean.TRUE;
-                } else {
-                    return PBoolean.FALSE;
-                }
-            }
-        }));
+                    public Argument getBoundValue() {
+                        if (state.get() == RootState.ACTIVE_RUNNING) {
+                            return PBoolean.TRUE;
+                        } else {
+                            return PBoolean.FALSE;
+                        }
+                    }
+                }));
     }
 
     public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException {
@@ -126,104 +107,25 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             this.ID = ID;
             this.hub = hub;
             this.context = new ExecutionContextImpl(System.nanoTime());
-            this.lookup = InstanceLookup.create(hub.getLookup(), this, context);
-            // in place controller
-//            this.taskController = new TaskController();
-            // task controller
-            String managerID = "_ats_" + Integer.toHexString(hashCode());
-//            try {
-            ControlAddress taskAddress = ControlAddress.create(this.address, managerID);
-//            defaultTaskController = new DefaultTaskController(this, taskAddress);
-//            registerControl(taskAddress.getID(), defaultTaskController);
-//            } catch (ArgumentFormatException ex) {
-//
-//            }
+            this.router = new Router();
+            this.lookup = InstanceLookup.create(hub.getLookup(), router, context);
             initializing(); // hook for subclasses
             if (state.compareAndSet(RootState.INITIALIZING, RootState.INITIALIZED)) {
                 controller = new Controller();
-//                fireRootStateListeners(RootState.INITIALIZED);
                 return controller;
             }
         }
         throw new IllegalRootStateException();
     }
 
-    public void route(Packet packet) {
-        try {
-            hub.dispatch(packet);
-        } catch (InvalidAddressException ex) {
-            if (packet instanceof Call) {
-                controller.submitPacket(
-                        Call.createErrorCall((Call) packet, PReference.wrap(ex)));
-            } else {
-                throw new UnsupportedOperationException();
-            }
 
-
-        }
-    }
-
-    // make protected?
-    @Deprecated
+    //@TODO make protected.
     public PacketRouter getPacketRouter() {
-        return this;
+        return router;
     }
 
     protected RootHub getRootHub() {
         return hub;
-    }
-
-    @Deprecated
-    public void addRootStateListener(RootStateListener listener) {
-        if (listener == null) {
-            throw new NullPointerException();
-        }
-        List<RootStateListener> list = new ArrayList<RootStateListener>(Arrays.asList(stateListeners));
-        list.add(listener);
-        Collections.sort(list, listenerSorter);
-        stateListeners = list.toArray(new RootStateListener[list.size()]);
-    }
-
-    @Deprecated
-    public void removeRootStateListener(RootStateListener listener) {
-        List<RootStateListener> list = new ArrayList<RootStateListener>(Arrays.asList(stateListeners));
-        list.remove(listener);
-        stateListeners = list.toArray(new RootStateListener[list.size()]);
-    }
-
-    @Deprecated
-    protected void fireRootStateListeners(RootState state) {
-        cachedState = state;
-        RootStateListener[] listeners = stateListeners; // cache in case of changes
-        for (RootStateListener listener : listeners) {
-            listener.rootStateChanged(this, state);
-        }
-    }
-
-    @Deprecated
-    public void addControlFrameListener(ControlFrameListener listener) {
-        if (listener == null) {
-            throw new NullPointerException();
-        }
-        List<ControlFrameListener> list = new ArrayList<ControlFrameListener>(Arrays.asList(frameListeners));
-        list.add(listener);
-        Collections.sort(list, listenerSorter);
-        frameListeners = list.toArray(new ControlFrameListener[list.size()]);
-    }
-
-    @Deprecated
-    public void removeControlFrameListener(ControlFrameListener listener) {
-        List<ControlFrameListener> list = new ArrayList<ControlFrameListener>(Arrays.asList(frameListeners));
-        list.remove(listener);
-        frameListeners = list.toArray(new ControlFrameListener[list.size()]);
-    }
-
-    @Deprecated
-    protected void fireControlFrameListeners() {
-        ControlFrameListener[] listeners = frameListeners; // cache
-        for (ControlFrameListener listener : listeners) {
-            listener.nextControlFrame(this);
-        }
     }
 
     public long getTime() {
@@ -260,7 +162,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
 
     protected final void setRunning() throws IllegalRootStateException {
         if (state.compareAndSet(RootState.ACTIVE_IDLE, RootState.ACTIVE_RUNNING)) {
-//            fireRootStateListeners();
             starting();
             return;
         }
@@ -269,7 +170,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
 
     protected final void setIdle() throws IllegalRootStateException {
         if (state.compareAndSet(RootState.ACTIVE_RUNNING, RootState.ACTIVE_IDLE)) {
-//            fireRootStateListeners();
             stopping();
             return;
         }
@@ -277,7 +177,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
     }
 
     protected void run() {
-//        while (activeStates.contains(state.get())) {
         while (true) {
             RootState currentState = state.get();
             if (currentState != RootState.ACTIVE_IDLE && currentState != RootState.ACTIVE_RUNNING) {
@@ -289,7 +188,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             } catch (InterruptedException ex) {
                 continue; // check state again if interrupted
             }
-//            setTime(System.nanoTime());
             time = System.nanoTime();
             processControlFrame(packet, currentState);
             if (interrupt != null) {
@@ -329,7 +227,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
 
         if (currentState != cachedState) {
             cachedState = currentState;
-            fireRootStateListeners(cachedState);
             if (cachedState == RootState.ACTIVE_RUNNING) {
                 context.setState(ExecutionContext.State.ACTIVE);
             } else {
@@ -359,17 +256,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             }
             packet = orderedQueue.poll();
         }
-        // check tasks
-//        taskController.checkTasks(t);
-        // fire listeners after all calls have been made
-        if (currentState == RootState.ACTIVE_RUNNING) {
-            fireControlFrameListeners();
-        }
-
-//        // invoke tasks
-//        while (!invocationQueue.isEmpty()) {
-//            invocationQueue.poll().run();
-//        }
     }
 
     protected void processPacket(Packet packet) {
@@ -386,22 +272,20 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         Control control = getControl(call.getToAddress());
         try {
             if (control != null) {
-                control.call(call, this);
+                control.call(call, router);
             } else {
                 Call.Type type = call.getType();
                 if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
-                    route(Call.createErrorCall(call, PString.valueOf("Unknown control address : " + call.getToAddress())));
+                    router.route(Call.createErrorCall(call, PString.valueOf("Unknown control address : " + call.getToAddress())));
                 }
             }
         } catch (Exception ex) {
             Call.Type type = call.getType();
             LOG.log(Level.WARNING, "Exception thrown from call\n" + call, ex);
             if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
-                route(Call.createErrorCall(call, PReference.wrap(ex)));
+                router.route(Call.createErrorCall(call, PReference.wrap(ex)));
             }
         }
-
-
     }
 
     protected Control getControl(ControlAddress address) {
@@ -412,15 +296,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             return null;
         }
     }
-
-//    protected Port getPort(PortAddress address) {
-//        Component comp = getComponent(address.getComponentAddress());
-//        if (comp != null) {
-//            return comp.getPort(address.getID());
-//        } else {
-//            return null;
-//        }
-//    }
 
     protected Component getComponent(ComponentAddress address) {
         // add caching
@@ -472,36 +347,36 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         }
     }
 
-    protected void addComponent(ComponentAddress address, Component component)
-            throws Exception {
-        if (address == null || component == null) {
-            throw new NullPointerException();
-        }
-        Component parent = findComponent(address, address.getDepth() - 1);
-        if (parent instanceof Container) {
-            ((Container) parent).addChild(
-                    address.getComponentID(address.getDepth() - 1),
-                    component);
-        } else {
-            throw new InvalidAddressException();
-        }
-    }
-
-    protected void removeComponent(ComponentAddress address) throws Exception {
-        if (address == null) {
-            throw new NullPointerException();
-        }
-        Component parent = findComponent(address, address.getDepth() - 1);
-        if (parent instanceof Container) {
-            Component child = ((Container) parent).removeChild(
-                    address.getComponentID(address.getDepth() - 1));
-            if (child == null) {
-                throw new InvalidAddressException();
-            }
-        } else {
-            throw new InvalidAddressException();
-        }
-    }
+//    protected void addComponent(ComponentAddress address, Component component)
+//            throws Exception {
+//        if (address == null || component == null) {
+//            throw new NullPointerException();
+//        }
+//        Component parent = findComponent(address, address.getDepth() - 1);
+//        if (parent instanceof Container) {
+//            ((Container) parent).addChild(
+//                    address.getComponentID(address.getDepth() - 1),
+//                    component);
+//        } else {
+//            throw new InvalidAddressException();
+//        }
+//    }
+//
+//    protected void removeComponent(ComponentAddress address) throws Exception {
+//        if (address == null) {
+//            throw new NullPointerException();
+//        }
+//        Component parent = findComponent(address, address.getDepth() - 1);
+//        if (parent instanceof Container) {
+//            Component child = ((Container) parent).removeChild(
+//                    address.getComponentID(address.getDepth() - 1));
+//            if (child == null) {
+//                throw new InvalidAddressException();
+//            }
+//        } else {
+//            throw new InvalidAddressException();
+//        }
+//    }
 
     public class Controller implements Root.Controller {
 
@@ -534,7 +409,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
                 AbstractRoot.this.run();
                 state.set(RootState.TERMINATING); // in case run finished before shutdown called
                 terminating();
-                fireRootStateListeners(RootState.TERMINATING);
                 context.setState(ExecutionContext.State.TERMINATED);
                 // disconnect all children?
                 state.set(RootState.TERMINATED);
@@ -550,8 +424,8 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         private boolean start;
 
         private TransportControl(boolean start) {
-            super(start ? StartableInterface.START_INFO :
-                StartableInterface.STOP_INFO);
+            super(start ? StartableInterface.START_INFO
+                    : StartableInterface.STOP_INFO);
             this.start = start;
         }
 
@@ -565,16 +439,26 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
                 return CallArguments.EMPTY;
             }
         }
-
     }
 
+    private class Router implements PacketRouter {
 
-    private static class ListenerSorter implements Comparator<OrderedListener> {
-
-        public int compare(OrderedListener o1, OrderedListener o2) {
-            int val = o2.getDepth() - o1.getDepth();
-            return val == 0 ? o2.getPriority() - o1.getPriority() : val;
-
+        public void route(Packet packet) {
+            try {
+                hub.dispatch(packet);
+            } catch (InvalidAddressException ex) {
+                if (packet instanceof Call) {
+                    Call call = (Call) packet;
+                    Call.Type type = call.getType();
+                    if ( (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) &&
+                            call.getFromAddress().getComponentAddress().getRootID().equals(ID)) {
+                        controller.submitPacket(
+                            Call.createErrorCall((Call) packet, PReference.wrap(ex)));
+                    }                 
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+            }
         }
     }
 

@@ -286,6 +286,10 @@ public class DefaultHub extends AbstractRoot {
         thr.start();
     }
 
+    void route(Packet packet) {
+        getPacketRouter().route(packet);
+    }
+
     private class RootHubImpl implements RootHub {
 
         private final Logger logger = Logger.getLogger(RootHubImpl.class.getName());

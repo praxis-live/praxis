@@ -96,13 +96,13 @@ public class TaskServiceImpl extends AbstractRoot {
                         Argument value = future.get();
                         Call call = futures.get(future);
                         call = Call.createReturnCall(call, value);
-                        route(call);
+                        getPacketRouter().route(call);
                         completed.add(future);
                     } catch (Exception ex) {
                         LOG.log(Level.FINEST, null, ex);
                         Call call = futures.get(future);
                         call = Call.createErrorCall(call, PReference.wrap(ex));
-                        route(call);
+                        getPacketRouter().route(call);
                         completed.add(future);
                     }
                 }

@@ -23,11 +23,9 @@ package net.neilcsmith.praxis.video.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.core.Root;
-import net.neilcsmith.praxis.impl.RootState;
-import net.neilcsmith.praxis.impl.AbstractRoot;
-import net.neilcsmith.praxis.impl.AbstractRootStateComponent;
+import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
@@ -39,7 +37,7 @@ import net.neilcsmith.ripl.delegates.VideoDelegate.StateException;
  *
  * @author Neil C Smith
  */
-public class VideoPlayer extends AbstractRootStateComponent {
+public class VideoPlayer extends AbstractExecutionContextComponent {
 
     VideoDelegate video;
     Delegator delegator;
@@ -59,6 +57,7 @@ public class VideoPlayer extends AbstractRootStateComponent {
 
 
     }
+
 
     private class PositionBinding implements FloatProperty.Binding {
 
@@ -186,8 +185,11 @@ public class VideoPlayer extends AbstractRootStateComponent {
 //
 //    protected abstract Task getDelegateLoaderTask(PUri uri);
 //
-    public void rootStateChanged(AbstractRoot source, RootState state) {
-        if (state == RootState.ACTIVE_IDLE) {
+
+    
+    
+    public void stateChanged(ExecutionContext source) {
+        if (source.getState() == ExecutionContext.State.IDLE) {
             if (video != null) {
                 try {
                     video.stop();
@@ -195,7 +197,7 @@ public class VideoPlayer extends AbstractRootStateComponent {
                     // no op
                 }
             }
-        } else if (state == RootState.TERMINATING) {
+        } else if (source.getState() == ExecutionContext.State.TERMINATED) {
             if (video != null) {
                 delegator.setDelegate(null);
                 video.dispose();

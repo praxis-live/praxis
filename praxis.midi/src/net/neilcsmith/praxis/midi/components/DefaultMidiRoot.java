@@ -20,7 +20,7 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.midi;
+package net.neilcsmith.praxis.midi.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,7 +47,9 @@ import net.neilcsmith.praxis.impl.StringProperty;
 /**
  *
  * @author Neil C Smith
+ * @Deprecated
  */
+@Deprecated
 public class DefaultMidiRoot extends AbstractRoot {
 
     private static Logger logger = Logger.getLogger(DefaultMidiRoot.class.getName());

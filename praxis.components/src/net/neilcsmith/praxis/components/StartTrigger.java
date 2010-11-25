@@ -22,17 +22,16 @@
 
 package net.neilcsmith.praxis.components;
 
+import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.impl.RootState;
-import net.neilcsmith.praxis.impl.AbstractRoot;
-import net.neilcsmith.praxis.impl.AbstractRootStateComponent;
+import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 
 /**
  *
  * @author Neil C Smith
  */
-public class StartTrigger extends AbstractRootStateComponent {
+public class StartTrigger extends AbstractExecutionContextComponent {
 
     private DefaultControlOutputPort output;
     
@@ -40,9 +39,9 @@ public class StartTrigger extends AbstractRootStateComponent {
         output = new DefaultControlOutputPort(this);
         registerPort(Port.OUT, output);
     }
-    
-    public void rootStateChanged(AbstractRoot source, RootState state) {
-        if (state == RootState.ACTIVE_RUNNING) {
+
+    public void stateChanged(ExecutionContext source) {
+        if (source.getState() == ExecutionContext.State.ACTIVE) {
             output.send(source.getTime());
         }
     }

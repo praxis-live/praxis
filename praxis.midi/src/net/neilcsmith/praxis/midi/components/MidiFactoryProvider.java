@@ -20,7 +20,7 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.midi;
+package net.neilcsmith.praxis.midi.components;
 
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
@@ -31,6 +31,8 @@ import net.neilcsmith.praxis.impl.AbstractComponentFactory;
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public class MidiFactoryProvider implements ComponentFactoryProvider {
+
+    private final static String OLD_API = "praxis.midi.adv.oldapi";
 
     private final static ComponentFactory factory = new Factory();
 
