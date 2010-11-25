@@ -1,20 +1,20 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2008 - Neil C Smith. All rights reserved.
+ * Copyright 2010 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
+ * under the terms of the GNU General Public License version 3 only, as
  * published by the Free Software Foundation.
  * 
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details.
+ * version 3 for more details.
  * 
- * You should have received a copy of the GNU General Public License version 2
- * along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License version 3
+ * along with this work; if not, see http://www.gnu.org/licenses/
+ * 
  * 
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
@@ -65,11 +65,12 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
     private RootStateListener[] stateListeners = new RootStateListener[0];
     private ControlFrameListener[] frameListeners = new ControlFrameListener[0];
     private long time;
-    private DefaultTaskController defaultTaskController;
-    private TaskController taskController;
+//    private DefaultTaskController defaultTaskController;
+//    private TaskController taskController;
     private Root.Controller controller;
     private Runnable interrupt;
     private Lookup lookup;
+    private ExecutionContextImpl context;
 
     protected AbstractRoot() {
         this(EnumSet.allOf(Caps.class));
@@ -124,22 +125,23 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             }
             this.ID = ID;
             this.hub = hub;
-            this.lookup = InstanceLookup.create(hub.getLookup(), this);
+            this.context = new ExecutionContextImpl(System.nanoTime());
+            this.lookup = InstanceLookup.create(hub.getLookup(), this, context);
             // in place controller
-            this.taskController = new TaskController();
+//            this.taskController = new TaskController();
             // task controller
             String managerID = "_ats_" + Integer.toHexString(hashCode());
 //            try {
             ControlAddress taskAddress = ControlAddress.create(this.address, managerID);
-            defaultTaskController = new DefaultTaskController(this, taskAddress);
-            registerControl(taskAddress.getID(), defaultTaskController);
+//            defaultTaskController = new DefaultTaskController(this, taskAddress);
+//            registerControl(taskAddress.getID(), defaultTaskController);
 //            } catch (ArgumentFormatException ex) {
 //
 //            }
             initializing(); // hook for subclasses
             if (state.compareAndSet(RootState.INITIALIZING, RootState.INITIALIZED)) {
                 controller = new Controller();
-                fireRootStateListeners(RootState.INITIALIZED);
+//                fireRootStateListeners(RootState.INITIALIZED);
                 return controller;
             }
         }
@@ -171,19 +173,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         return hub;
     }
 
-//    @Deprecated
-//    public long submitTask(Task task, TaskListener listener) throws ServiceUnavailableException {
-//        // in place controller
-//
-////            return taskController.submitTask(task, listener);
-//
-//        // service controller
-//        if (defaultTaskController != null) {
-//            return defaultTaskController.submitTask(task, listener);
-//        } else {
-//            throw new ServiceUnavailableException();
-//        }
-//    }
     @Deprecated
     public void addRootStateListener(RootStateListener listener) {
         if (listener == null) {
@@ -300,7 +289,8 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             } catch (InterruptedException ex) {
                 continue; // check state again if interrupted
             }
-            setTime(System.nanoTime());
+//            setTime(System.nanoTime());
+            time = System.nanoTime();
             processControlFrame(packet, currentState);
             if (interrupt != null) {
                 Runnable task = interrupt;
@@ -336,11 +326,21 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
 
     private void processControlFrame(Packet packet, RootState currentState) {
         long t = getTime();
+
         if (currentState != cachedState) {
             cachedState = currentState;
             fireRootStateListeners(cachedState);
+            if (cachedState == RootState.ACTIVE_RUNNING) {
+                context.setState(ExecutionContext.State.ACTIVE);
+            } else {
+                context.setState(ExecutionContext.State.IDLE);
+            }
         }
+
         processingControlFrame();
+
+        context.setTime(time);
+
         if (packet == null) {
             packet = blockingQueue.poll();
         }
@@ -360,11 +360,12 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
             packet = orderedQueue.poll();
         }
         // check tasks
-        taskController.checkTasks(t);
+//        taskController.checkTasks(t);
         // fire listeners after all calls have been made
         if (currentState == RootState.ACTIVE_RUNNING) {
             fireControlFrameListeners();
         }
+
 //        // invoke tasks
 //        while (!invocationQueue.isEmpty()) {
 //            invocationQueue.poll().run();
@@ -412,14 +413,14 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         }
     }
 
-    protected Port getPort(PortAddress address) {
-        Component comp = getComponent(address.getComponentAddress());
-        if (comp != null) {
-            return comp.getPort(address.getID());
-        } else {
-            return null;
-        }
-    }
+//    protected Port getPort(PortAddress address) {
+//        Component comp = getComponent(address.getComponentAddress());
+//        if (comp != null) {
+//            return comp.getPort(address.getID());
+//        } else {
+//            return null;
+//        }
+//    }
 
     protected Component getComponent(ComponentAddress address) {
         // add caching
@@ -463,11 +464,11 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
     }
 
     @Override
-    public void parentNotify(Container parent) throws ParentVetoException {
+    public void parentNotify(Container parent) throws VetoException {
         // should always throw exception, but keep in line with API and only throw
         // if parent isn't null
         if (parent != null) {
-            throw new ParentVetoException();
+            throw new VetoException();
         }
     }
 
@@ -502,31 +503,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
         }
     }
 
-    protected void connectPorts(PortAddress port1, PortAddress port2) throws Exception {
-        Port pt1 = getPort(port1);
-        Port pt2 = getPort(port2);
-        if (pt1 == null) {
-            throw new NullPointerException("Can't find port " + port1);
-        }
-        if (pt2 == null) {
-            throw new NullPointerException("Can't find port " + port2);
-        }
-        pt1.connect(pt2);
-    }
-
-    protected void disconnectPorts(PortAddress port1, PortAddress port2) throws Exception {
-        Port pt1 = getPort(port1);
-        Port pt2 = getPort(port2);
-        if (pt1 == null) {
-            throw new NullPointerException("Can't find port 1");
-        }
-        if (pt2 == null) {
-            throw new NullPointerException("Can't find port 2");
-        }
-        pt1.disconnect(pt2);
-
-    }
-
     public class Controller implements Root.Controller {
 
         private Controller() {
@@ -554,11 +530,12 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
 
         public void run() throws IllegalRootStateException {
             if (state.compareAndSet(RootState.INITIALIZED, defaultRunState)) {
-                activating(); // moved below listeners so that subclasses may change state
+                activating();
                 AbstractRoot.this.run();
                 state.set(RootState.TERMINATING); // in case run finished before shutdown called
                 terminating();
                 fireRootStateListeners(RootState.TERMINATING);
+                context.setState(ExecutionContext.State.TERMINATED);
                 // disconnect all children?
                 state.set(RootState.TERMINATED);
             } else {
@@ -600,4 +577,5 @@ public abstract class AbstractRoot extends AbstractContainer implements Root, Pa
 
         }
     }
+
 }

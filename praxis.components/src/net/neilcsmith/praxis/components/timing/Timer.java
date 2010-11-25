@@ -1,20 +1,20 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2008 - Neil C Smith. All rights reserved.
+ * Copyright 2010 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
+ * under the terms of the GNU General Public License version 3 only, as
  * published by the Free Software Foundation.
  * 
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details.
+ * version 3 for more details.
  * 
- * You should have received a copy of the GNU General Public License version 2
- * along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License version 3
+ * along with this work; if not, see http://www.gnu.org/licenses/
+ * 
  * 
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
@@ -22,11 +22,9 @@
 package net.neilcsmith.praxis.components.timing;
 
 import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.core.Root;
-import net.neilcsmith.praxis.impl.RootState;
-import net.neilcsmith.praxis.impl.AbstractControlFrameComponent;
-import net.neilcsmith.praxis.impl.AbstractRoot;
+import net.neilcsmith.praxis.impl.AbstractClockComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.FloatProperty;
 
@@ -34,12 +32,13 @@ import net.neilcsmith.praxis.impl.FloatProperty;
  *
  * @author Neil C Smith
  */
-public class Timer extends AbstractControlFrameComponent {
+public class Timer extends AbstractClockComponent {
 
     private long lastTime = 0;
     private long periodNS = 1000000000;
     private double periodS = 1;
     private ControlPort.Output output;
+    private boolean first;
     
     public Timer() {
         FloatProperty period = FloatProperty.create( new PeriodBinding(), 0, 60 * 60, 1);
@@ -49,35 +48,54 @@ public class Timer extends AbstractControlFrameComponent {
         registerPort(Port.OUT, output);
                 
     }
-    
 
-    @Override
-    public void nextControlFrame(AbstractRoot root) {
-        long time = root.getTime();
-        if (((lastTime + periodNS) - time) <= 0) {
+    public void tick(ExecutionContext source) {
+        long time = source.getTime();
+        if (first) {
+            lastTime = time;
+            first = false;
+            output.send(time);
+        } else if (((lastTime + periodNS) - time) <= 0) {
             output.send(time);
             lastTime += ((time - lastTime) / periodNS) * periodNS;
         }
     }
 
     @Override
-    public void rootStateChanged(AbstractRoot source, RootState state) {
-        super.rootStateChanged(source, state);
-        if (state == RootState.ACTIVE_RUNNING) {
-            lastTime = source.getTime();
-            output.send(lastTime);
-        }
-    }
-
-    @Override
-    public void hierarchyChanged() {
-        super.hierarchyChanged();
-        Root root = getRoot();
-        if (root instanceof AbstractRoot) {
-            lastTime = ((AbstractRoot) root).getTime();
-        }
+    public void stateChanged(ExecutionContext source) {
+        first = true;
     }
     
+//
+//    @Override
+//    public void nextControlFrame(AbstractRoot root) {
+//        long time = root.getTime();
+//        if (((lastTime + periodNS) - time) <= 0) {
+//            output.send(time);
+//            lastTime += ((time - lastTime) / periodNS) * periodNS;
+//        }
+//    }
+//
+//    @Override
+//    public void rootStateChanged(AbstractRoot source, RootState state) {
+//        super.rootStateChanged(source, state);
+//        if (state == RootState.ACTIVE_RUNNING) {
+//            lastTime = source.getTime();
+//            output.send(lastTime);
+//        }
+//    }
+//
+//    @Override
+//    public void hierarchyChanged() {
+//        super.hierarchyChanged();
+//        Root root = getRoot();
+//        if (root instanceof AbstractRoot) {
+//            lastTime = ((AbstractRoot) root).getTime();
+//        }
+//    }
+
+
+
     
     
     

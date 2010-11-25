@@ -1,20 +1,20 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2008 - Neil C Smith. All rights reserved.
+ * Copyright 2010 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
+ * under the terms of the GNU General Public License version 3 only, as
  * published by the Free Software Foundation.
  * 
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details.
+ * version 3 for more details.
  * 
- * You should have received a copy of the GNU General Public License version 2
- * along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License version 3
+ * along with this work; if not, see http://www.gnu.org/licenses/
+ * 
  * 
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
@@ -41,35 +41,17 @@ public interface Component {
      */
     public Container getParent();
 
-//    /**
-//     * Return the Root component that is at the top of the Component hierarchy
-//     * that contains this Component, or null if this Component is not currently
-//     * contained within a Component hierarchy.
-//     * @return Root
-//     */
-//    @Deprecated
-//    public Root getRoot();
-
-//    /**
-//     * Return the address of this Component, or null if this Component is not
-//     * currently contained within a Component hierarchy.
-//     *
-//     * @return ComponentAddress
-//     */
-//    @Deprecated
-//    public ComponentAddress getAddress();
-
     /**
      * Notify the Component that it has been added to the supplied Container, or
      * removed from its parent if the supplied argument is null. The
-     * Component may throw a ParentVetoException if it should not be added to
-     * the Container provided. It should also throw this exception if the existing
+     * Component may throw a VetoException if it should not be added to or removed
+     * from the Container provided. It should also throw this exception if the existing
      * parent has not been nulled prior to a new parent being notified.
      *
      * @param parent
-     * @throws net.neilcsmith.praxis.core.ParentVetoException
+     * @throws net.neilcsmith.praxis.core.VetoException
      */
-    public void parentNotify(Container parent) throws ParentVetoException;
+    public void parentNotify(Container parent) throws VetoException;
 
     /**
      * Notify the component that a change has happened further up its component
@@ -86,15 +68,6 @@ public interface Component {
     public Control getControl(String id);
 
 
-//    /**
-//     * Get the ID for the given control, or null if the control is not
-//     * registered with this component.
-//     * @param control
-//     * @return String ID or null
-//     */
-//    @Deprecated
-//    public String getControlID(Control control);
-
     /**
      * Get an array of all the Control IDs from this component.
      * @return String[]
@@ -108,15 +81,6 @@ public interface Component {
      */
     public Port getPort(String id);
 
-
-//    /**
-//     * Get the ID of the given port, or null if the port is not registered
-//     * with this component.
-//     * @param port
-//     * @return String ID or null
-//     */
-//    @Deprecated
-//    public String getPortID(Port port);
 
     /**
      * Get an array of all the Port IDs from this component.

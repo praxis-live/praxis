@@ -1,20 +1,20 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2008 - Neil C Smith. All rights reserved.
+ * Copyright 2010 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
+ * under the terms of the GNU General Public License version 3 only, as
  * published by the Free Software Foundation.
  * 
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details.
+ * version 3 for more details.
  * 
- * You should have received a copy of the GNU General Public License version 2
- * along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License version 3
+ * along with this work; if not, see http://www.gnu.org/licenses/
+ * 
  * 
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
@@ -38,17 +38,18 @@ public interface Container extends Component {
      *
      * @param id
      * @param child
-     * @throws net.neilcsmith.praxis.core.InvalidChildException
+     * @throws net.neilcsmith.praxis.core.VetoException
      */
-    public void addChild(String id, Component child) throws InvalidChildException;
+    public void addChild(String id, Component child) throws VetoException;
     
     /**
      * Remove child with given ID.
      *
      * @param id
      * @return Component, or null if no component of that ID.
+     * @throws net.neilcsmith.praxis.core.VetoException
      */
-    public Component removeChild(String id); // throws InvalidChildException;
+    public Component removeChild(String id) throws VetoException; // throws InvalidChildException;
     
     /**
      * Get child component with specific ID.
@@ -57,13 +58,6 @@ public interface Container extends Component {
      */
     public Component getChild(String id);
     
-//    /**
-//     * Get the ID for the given Component.
-//     * @param child
-//     * @return String ID, or null if component is not a child of this container.
-//     */
-//    @Deprecated
-//    public String getChildID(Component child);
     
     /**
      * Get the IDs of all child components of this container.

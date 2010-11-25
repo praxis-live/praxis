@@ -35,6 +35,7 @@ import java.awt.event.*;
 import java.beans.*;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.plaf.*;
 import javax.swing.plaf.metal.*;
 import javax.swing.event.*;
@@ -58,7 +59,8 @@ public class NimRODButtonUI extends MetalButtonUI {
   public void installDefaults( AbstractButton button) {
     super.installDefaults( button);
 
-    button.setBorder( NimRODBorders.getButtonBorder());
+//    button.setBorder( NimRODBorders.getButtonBorder());
+    setBorderSafe(button, NimRODBorders.getButtonBorder());
     
     selectColor = NimRODLookAndFeel.getFocusColor();
   }
@@ -141,10 +143,12 @@ public class NimRODButtonUI extends MetalButtonUI {
       
       if ( c.getParent() instanceof JToolBar ) {
         if ( mod.isRollover() || mod.isPressed() || mod.isSelected()) {
-          c.setBorder( NimRODBorders.getGenBorder());
+//          c.setBorder( NimRODBorders.getGenBorder());
+            setBorderSafe(c, NimRODBorders.getGenBorder());
         }
         else {
-          c.setBorder( NimRODBorders.getEmptyGenBorder());
+//          c.setBorder( NimRODBorders.getEmptyGenBorder());
+            setBorderSafe(c, NimRODBorders.getEmptyGenBorder());
         }
         
         if ( mod.isPressed() || mod.isSelected() ) {
@@ -189,6 +193,13 @@ public class NimRODButtonUI extends MetalButtonUI {
     boton.archeight = 8;
     
     return boton;
+  }
+
+  private void setBorderSafe(JComponent c, Border b) {
+      Border existing = c.getBorder();
+      if (existing == null || existing instanceof UIResource) {
+          c.setBorder(b);
+      }
   }
   
   /////////////////////////////////////

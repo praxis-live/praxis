@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2009 Neil C Smith. All rights reserved.
+ * Copyright 2010 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -14,8 +14,8 @@
  * for more details.
  * 
  * You should have received a copy of the GNU Lesser General Public License
- * along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ * along with this work; if not, see http://www.gnu.org/licenses/
+ * 
  * 
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.

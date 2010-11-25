@@ -1,20 +1,20 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2008 - Neil C Smith. All rights reserved.
+ * Copyright 2010 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 2 only, as
+ * under the terms of the GNU General Public License version 3 only, as
  * published by the Free Software Foundation.
  * 
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 2 for more details.
+ * version 3 for more details.
  * 
- * You should have received a copy of the GNU General Public License version 2
- * along with this work; if not, write to the Free Software Foundation,
- * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+ * You should have received a copy of the GNU General Public License version 3
+ * along with this work; if not, see http://www.gnu.org/licenses/
+ * 
  * 
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
@@ -35,8 +35,7 @@ import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.ControlAddress;
-import net.neilcsmith.praxis.core.InvalidChildException;
-import net.neilcsmith.praxis.core.ParentVetoException;
+import net.neilcsmith.praxis.core.VetoException;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.PortListener;
 import net.neilcsmith.praxis.core.info.ControlInfo;
@@ -82,19 +81,19 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
 
     }
 
-    public void addChild(String id, Component child) throws InvalidChildException {
+    public void addChild(String id, Component child) throws VetoException {
         if (id == null || child == null) {
             throw new NullPointerException();
         }
         if (childMap.containsKey(id)) {
-            throw new InvalidChildException("Child ID already in use");
+            throw new VetoException("Child ID already in use");
         }
         childMap.put(id, child);
         try {
             child.parentNotify(this);
-        } catch (ParentVetoException ex) {
+        } catch (VetoException ex) {
             childMap.remove(id);
-            throw new InvalidChildException();
+            throw new VetoException();
         }
         childInfoValid = false;
     }
@@ -104,7 +103,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         if (child != null) {
             try {
                 child.parentNotify(null);
-            } catch (ParentVetoException ex) {
+            } catch (VetoException ex) {
             // it is an error for children to throw exception on removal
             // should we throw an error?
             }

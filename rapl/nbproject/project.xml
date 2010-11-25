@@ -15,6 +15,22 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
+                    <code-name-base>net.neilcsmith.audioops.impl</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>1.0</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
+                    <code-name-base>net.neilcsmith.audioops.impl.gpl</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>1.0</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
                     <code-name-base>net.neilcsmith.audioservers</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
