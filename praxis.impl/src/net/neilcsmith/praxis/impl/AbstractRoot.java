@@ -120,6 +120,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 
 
     //@TODO make protected.
+    @Override
     public PacketRouter getPacketRouter() {
         return router;
     }
@@ -204,11 +205,26 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         }
     }
 
-    protected final void processControlFrame() throws IllegalRootStateException {
-        processControlFrame(null);
-    }
+//    protected final void processControlFrame(long time) throws IllegalRootStateException {
+//        processControlFrame(null);
+//    }
 
-    protected final void processControlFrame(Call call) throws IllegalRootStateException {
+//    protected final void processControlFrame(Call call) throws IllegalRootStateException {
+//        RootState currentState = state.get();
+//        if (currentState == RootState.ACTIVE_RUNNING || currentState == RootState.ACTIVE_IDLE) {
+//            processControlFrame(null, currentState);
+//        } else {
+//            throw new IllegalRootStateException();
+//        }
+//        if (interrupt != null) {
+//            Runnable task = interrupt;
+//            interrupt = null;
+//            task.run();
+//        }
+//    }
+
+    protected void nextControlFrame(long time) throws IllegalRootStateException {
+        this.time = time;
         RootState currentState = state.get();
         if (currentState == RootState.ACTIVE_RUNNING || currentState == RootState.ACTIVE_IDLE) {
             processControlFrame(null, currentState);
@@ -222,7 +238,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         }
     }
 
-    private void processControlFrame(Packet packet, RootState currentState) {
+    protected void processControlFrame(Packet packet, RootState currentState) {
         long t = getTime();
 
         if (currentState != cachedState) {
@@ -234,9 +250,9 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             }
         }
 
-        processingControlFrame();
-
         context.setTime(time);
+
+        processingControlFrame();
 
         if (packet == null) {
             packet = blockingQueue.poll();

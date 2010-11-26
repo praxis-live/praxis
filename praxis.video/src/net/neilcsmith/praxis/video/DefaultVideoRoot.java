@@ -118,8 +118,7 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
                 skipcount++;
 //                System.out.println("Frame skipped " + skipcount);
             }
-            setTime(source.getTime());
-            processControlFrame();
+            nextControlFrame(source.getTime());
         } catch (IllegalRootStateException ex) {
             // @TODO remove source
             player.terminate();

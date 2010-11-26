@@ -42,48 +42,53 @@ public class ExecutionContextImpl extends ExecutionContext {
 
     @Override
     public void addStateListener(StateListener listener) {
-        if (listener == null) {
-            throw new NullPointerException();
-        }
-        List<StateListener> list = Arrays.asList(stateListeners);
-        if (list.contains(listener)) {
-            return;
-        }
-        list = new ArrayList<StateListener>(list);
-        list.add(listener);
-        stateListeners = list.toArray(new StateListener[list.size()]);
+        stateListeners = ListenerUtils.add(stateListeners, listener);
+
+//        if (listener == null) {
+//            throw new NullPointerException();
+//        }
+//        List<StateListener> list = Arrays.asList(stateListeners);
+//        if (list.contains(listener)) {
+//            return;
+//        }
+//        list = new ArrayList<StateListener>(list);
+//        list.add(listener);
+//        stateListeners = list.toArray(new StateListener[list.size()]);
     }
 
     @Override
     public void removeStateListener(StateListener listener) {
-        List<StateListener> list = new ArrayList(Arrays.asList(stateListeners));
-        boolean changed = list.remove(listener);
-        if (changed) {
-            stateListeners = list.toArray(new StateListener[list.size()]);
-        }
+        stateListeners = ListenerUtils.add(stateListeners, listener);
+//        List<StateListener> list = new ArrayList(Arrays.asList(stateListeners));
+//        boolean changed = list.remove(listener);
+//        if (changed) {
+//            stateListeners = list.toArray(new StateListener[list.size()]);
+//        }
     }
 
     @Override
     public void addClockListener(ClockListener listener) {
-        if (listener == null) {
-            throw new NullPointerException();
-        }
-        List<ClockListener> list = Arrays.asList(clockListeners);
-        if (list.contains(listener)) {
-            return;
-        }
-        list = new ArrayList<ClockListener>(list);
-        list.add(listener);
-        clockListeners = list.toArray(new ClockListener[list.size()]);
+        clockListeners = ListenerUtils.add(clockListeners, listener);
+//        if (listener == null) {
+//            throw new NullPointerException();
+//        }
+//        List<ClockListener> list = Arrays.asList(clockListeners);
+//        if (list.contains(listener)) {
+//            return;
+//        }
+//        list = new ArrayList<ClockListener>(list);
+//        list.add(listener);
+//        clockListeners = list.toArray(new ClockListener[list.size()]);
     }
 
     @Override
     public void removeClockListener(ClockListener listener) {
-        List<ClockListener> list = new ArrayList(Arrays.asList(clockListeners));
-        boolean changed = list.remove(listener);
-        if (changed) {
-            clockListeners = list.toArray(new ClockListener[list.size()]);
-        }
+        clockListeners = ListenerUtils.remove(clockListeners, listener);
+//        List<ClockListener> list = new ArrayList(Arrays.asList(clockListeners));
+//        boolean changed = list.remove(listener);
+//        if (changed) {
+//            clockListeners = list.toArray(new ClockListener[list.size()]);
+//        }
     }
 
     public void setState(State state) {

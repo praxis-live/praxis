@@ -33,6 +33,7 @@ import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.Lookup;
+import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.VetoException;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
@@ -53,6 +54,7 @@ public abstract class AbstractComponent implements Component {
     private Container parent;
     private ComponentAddress address;
     private ComponentInfo info;
+    private PacketRouter router;
 
     /**
      *
@@ -240,6 +242,7 @@ public abstract class AbstractComponent implements Component {
 
     public void hierarchyChanged() {
         address = null;
+        router = null;
         for (Map.Entry<String, Control> entry : controlMap.entrySet()) {
             Control c = entry.getValue();
             if (c instanceof ExtendedControl) {
@@ -281,12 +284,20 @@ public abstract class AbstractComponent implements Component {
         return infos;
     }
 
-    public Lookup getLookup() {
+    protected Lookup getLookup() {
         if (parent == null) {
             return EmptyLookup.getInstance();
         } else {
             return parent.getLookup();
         }
+    }
+
+    protected PacketRouter getPacketRouter() {
+        if (router == null) {
+            router = getLookup().get(PacketRouter.class);
+            // @TODO what to do on null? Empty router?
+        }
+        return router;
     }
 
 

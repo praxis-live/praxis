@@ -207,8 +207,7 @@ public class DefaultGuiRoot extends AbstractRoot implements GuiRoot {
 
     private void nextControlFrame() {
         try {
-            setTime(System.nanoTime());
-            processControlFrame();
+            nextControlFrame(System.nanoTime());
         } catch (IllegalRootStateException ex) {
             timer.stop();
             synchronized (lock) {

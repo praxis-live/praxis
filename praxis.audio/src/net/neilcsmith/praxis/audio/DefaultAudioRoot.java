@@ -97,8 +97,7 @@ public class DefaultAudioRoot extends AbstractRoot implements AudioRoot, BufferR
 
     public void nextBuffer(BufferRateSource source) {
         try {
-            setTime(source.getTime());
-            processControlFrame();
+            nextControlFrame(source.getTime());
         } catch (IllegalRootStateException ex) {
             server.shutdown();
         }

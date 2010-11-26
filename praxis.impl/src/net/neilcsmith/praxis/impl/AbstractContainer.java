@@ -35,6 +35,7 @@ import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.ControlAddress;
+import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.VetoException;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.PortListener;
@@ -144,6 +145,11 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
 
     }
 
+    @Override
+    public Lookup getLookup() {
+        return super.getLookup();
+    }
+    
     private class AddChildControl extends AbstractAsyncControl {
         
         @Override

@@ -47,7 +47,13 @@ public class MidiFactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-            addRoot("root:midi", DefaultMidiRoot.class);
+            if (Boolean.getBoolean(OLD_API)) {
+                addRoot("root:midi", DefaultMidiRoot.class);
+            } else {
+                addRoot("root:midi", MidiRoot.class);
+                addComponent("midi:control-in", MidiControlIn.class);
+            }
+            
         }
 
     }
