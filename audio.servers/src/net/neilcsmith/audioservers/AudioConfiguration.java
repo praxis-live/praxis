@@ -16,10 +16,10 @@
 package net.neilcsmith.audioservers;
 
 /**
- * Provides details of the context within which an AudioClient will be called.
+ * Provides details of the configuration of the server from which an AudioClient will be called.
  * @author Neil C Smith
  */
-public class AudioContext {
+public class AudioConfiguration {
 
     private float sampleRate;
     private int inputChannelCount;
@@ -28,14 +28,14 @@ public class AudioContext {
     private boolean fixedBufferSize;
 
     /**
-     * Create an AudioContext.
+     * Create an AudioConfiguration.
      * @param sampleRate
      * @param inputChannelCount
      * @param outputChannelCount
      * @param maxBufferSize
      * @param fixedBufferSize
      */
-    public AudioContext(float sampleRate, int inputChannelCount, int outputChannelCount, int maxBufferSize, boolean fixedBufferSize) {
+    public AudioConfiguration(float sampleRate, int inputChannelCount, int outputChannelCount, int maxBufferSize, boolean fixedBufferSize) {
         this.sampleRate = sampleRate;
         this.inputChannelCount = inputChannelCount;
         this.outputChannelCount = outputChannelCount;
@@ -86,7 +86,7 @@ public class AudioContext {
 
     @Override
     public String toString() {
-        return "AudioContext --- \n" +
+        return "Audio Configuration --- \n" +
                 "Sample Rate : " + sampleRate + "\n" +
                 "Input Channels : " + inputChannelCount + "\n" +
                 "Output Channels : " + outputChannelCount + "\n" +

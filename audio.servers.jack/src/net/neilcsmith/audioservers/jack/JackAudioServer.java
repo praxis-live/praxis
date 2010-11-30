@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.audioservers.AudioClient;
-import net.neilcsmith.audioservers.AudioContext;
+import net.neilcsmith.audioservers.AudioConfiguration;
 import net.neilcsmith.audioservers.AudioServer;
 import net.neilcsmith.jnajack.Jack;
 import net.neilcsmith.jnajack.JackClient;
@@ -56,7 +56,7 @@ public class JackAudioServer implements AudioServer {
         New, Initialising, Active, Closing, Terminated
     };
     private String id;
-    private AudioContext context;
+    private AudioConfiguration context;
     private AudioClient client;
     private Jack jack;
     private JackClient jackclient;
@@ -68,7 +68,7 @@ public class JackAudioServer implements AudioServer {
     private Callback callback;
     private boolean autoconnect;
 
-    private JackAudioServer(String id, AudioContext ctxt,
+    private JackAudioServer(String id, AudioConfiguration ctxt,
             boolean autoconnect, AudioClient client) {
         this.id = id;
         this.context = ctxt;
@@ -123,7 +123,7 @@ public class JackAudioServer implements AudioServer {
     private void runImpl() {
         try {
             // make sure context is correct.
-            context = new AudioContext(jackclient.getSampleRate(),
+            context = new AudioConfiguration(jackclient.getSampleRate(),
                     inputPorts.length,
                     outputPorts.length,
                     jackclient.getBufferSize(),
@@ -196,7 +196,7 @@ public class JackAudioServer implements AudioServer {
         }
     }
 
-    public AudioContext getAudioContext() {
+    public AudioConfiguration getAudioContext() {
         return context;
     }
 
@@ -233,7 +233,7 @@ public class JackAudioServer implements AudioServer {
      * @param client
      * @return
      */
-    public static JackAudioServer create(String id, AudioContext ctxt,
+    public static JackAudioServer create(String id, AudioConfiguration ctxt,
             boolean autoconnect, AudioClient client) {
         if (id == null || ctxt == null || client == null) {
             throw new NullPointerException();

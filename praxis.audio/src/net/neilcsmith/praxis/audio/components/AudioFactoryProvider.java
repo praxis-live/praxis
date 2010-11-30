@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.audio;
+package net.neilcsmith.praxis.audio.components;
 
 import net.neilcsmith.praxis.audio.components.AudioInput;
 import net.neilcsmith.praxis.audio.components.AudioOutput;

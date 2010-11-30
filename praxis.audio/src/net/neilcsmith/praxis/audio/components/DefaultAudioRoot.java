@@ -19,17 +19,21 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.audio;
+package net.neilcsmith.praxis.audio.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.neilcsmith.audioservers.AudioContext;
+import net.neilcsmith.audioservers.AudioConfiguration;
 import net.neilcsmith.audioservers.AudioServer;
+import net.neilcsmith.praxis.audio.AudioContext;
+import net.neilcsmith.praxis.audio.ClientRegistrationException;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
+import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
+import net.neilcsmith.praxis.impl.InstanceLookup;
 import net.neilcsmith.rapl.core.BufferRateListener;
 import net.neilcsmith.rapl.core.BufferRateSource;
 import net.neilcsmith.rapl.core.Bus;
@@ -39,20 +43,21 @@ import net.neilcsmith.rapl.render.BusClient;
  *
  * @author Neil C Smith
  */
-public class DefaultAudioRoot extends AbstractRoot implements AudioRoot, BufferRateListener {
+public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener {
 
     private static double DEFAULT_SAMPLERATE = 48000;
     private static int DEFAULT_BUFFERSIZE = 512;
     private static String DEFAULT_LIBRARY = "JavaSound";
-
-    private AudioInputClient inputClient;
-    private AudioOutputClient outputClient;
+    private AudioContext.InputClient inputClient;
+    private AudioContext.OutputClient outputClient;
     private BusClient bus;
     private AudioServer server;
     private ArgumentProperty sampleRate;
     private ArgumentProperty bufferSize;
     private ArgumentProperty audioLib;
     private ArgumentProperty device;
+    private AudioContext hub;
+    private Lookup lookup;
 
     public DefaultAudioRoot() {
         buildControls();
@@ -67,33 +72,18 @@ public class DefaultAudioRoot extends AbstractRoot implements AudioRoot, BufferR
         registerControl("buffersize", bufferSize);
         registerControl("library", audioLib);
         registerControl("device", device);
+        hub = new Hub();
     }
 
-    public int registerAudioInputClient(AudioInputClient client) throws ClientRegistrationException {
-        if (inputClient == null) {
-            inputClient = client;
-            return 2;
-        } else {
-            throw new ClientRegistrationException();
+    @Override
+    public Lookup getLookup() {
+        if (lookup == null) {
+            lookup = InstanceLookup.create(super.getLookup(), hub);
         }
+        return lookup;
     }
 
-    public void unregisterAudioInputClient(AudioInputClient client) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 
-    public int registerAudioOutputClient(AudioOutputClient client) throws ClientRegistrationException {
-        if (outputClient == null) {
-            outputClient = client;
-            return 2;
-        } else {
-            throw new ClientRegistrationException();
-        }
-    }
-
-    public void unregisterAudioOutputClient(AudioOutputClient client) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 
     public void nextBuffer(BufferRateSource source) {
         try {
@@ -105,7 +95,7 @@ public class DefaultAudioRoot extends AbstractRoot implements AudioRoot, BufferR
 
     @Override
     protected void starting() {
-        bus = new BusClient(2,2);
+        bus = new BusClient(2, 2);
         bus.addBufferRateListener(this);
         makeConnections(bus);
         server = createServer(bus);
@@ -126,21 +116,22 @@ public class DefaultAudioRoot extends AbstractRoot implements AudioRoot, BufferR
         });
     }
 
-
     private AudioServer createServer(BusClient bus) {
         double srate = DEFAULT_SAMPLERATE;
         Argument arg = sampleRate.getValue();
         if (!arg.isEmpty()) {
             try {
                 srate = PNumber.coerce(arg).value();
-            } catch (Exception ex) {}
+            } catch (Exception ex) {
+            }
         }
         int bsize = DEFAULT_BUFFERSIZE;
         arg = bufferSize.getValue();
         if (!arg.isEmpty()) {
             try {
                 bsize = PNumber.coerce(arg).toIntValue();
-            } catch (Exception ex) {}
+            } catch (Exception ex) {
+            }
         }
         String lib = DEFAULT_LIBRARY;
         arg = audioLib.getValue();
@@ -153,11 +144,11 @@ public class DefaultAudioRoot extends AbstractRoot implements AudioRoot, BufferR
             dev = arg.toString();
         }
 
-        AudioContext ctxt = new AudioContext((float) srate, 2, 2, bsize, true);
+        AudioConfiguration ctxt = new AudioConfiguration((float) srate, 2, 2, bsize, true);
         return AudioServerLoader.getInstance().load(getLookup(), lib, dev,
                 getAddress().getRootID(), ctxt, bus, null);
     }
-    
+
     // @TODO fix this!
     private void makeConnections(Bus bus) {
         if (outputClient == null) {
@@ -186,7 +177,6 @@ public class DefaultAudioRoot extends AbstractRoot implements AudioRoot, BufferR
             }
 
         } catch (Exception ex) {
-
         }
     }
 
@@ -218,6 +208,32 @@ public class DefaultAudioRoot extends AbstractRoot implements AudioRoot, BufferR
         }
     }
 
-    
-    
+    private class Hub extends AudioContext {
+
+        public int registerAudioInputClient(AudioContext.InputClient client) throws ClientRegistrationException {
+            if (inputClient == null) {
+                inputClient = client;
+                return 2;
+            } else {
+                throw new ClientRegistrationException();
+            }
+        }
+
+        public void unregisterAudioInputClient(AudioContext.InputClient client) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public int registerAudioOutputClient(AudioContext.OutputClient client) throws ClientRegistrationException {
+            if (outputClient == null) {
+                outputClient = client;
+                return 2;
+            } else {
+                throw new ClientRegistrationException();
+            }
+        }
+
+        public void unregisterAudioOutputClient(AudioContext.OutputClient client) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
 }

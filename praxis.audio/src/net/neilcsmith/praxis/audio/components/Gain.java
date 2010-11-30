@@ -22,8 +22,8 @@
 
 package net.neilcsmith.praxis.audio.components;
 
-import net.neilcsmith.praxis.audio.DefaultAudioInputPort;
-import net.neilcsmith.praxis.audio.DefaultAudioOutputPort;
+import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
+import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractComponent;

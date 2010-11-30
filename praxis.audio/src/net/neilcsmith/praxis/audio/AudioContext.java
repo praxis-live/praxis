@@ -19,26 +19,42 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.audio;
 
-import net.neilcsmith.praxis.core.Component;
+import net.neilcsmith.rapl.core.Sink;
+import net.neilcsmith.rapl.core.Source;
 
 /**
  *
  * @author Neil C Smith
  */
-public interface AudioHub {
+public abstract class AudioContext {
 
     // return is max potential channels, not guaranteed to be available!
-    public int registerAudioInputClient(AudioInputClient client) 
-            throws ClientRegistrationException;
-    
-    public void unregisterAudioInputClient(AudioInputClient client);
-
-    public int registerAudioOutputClient(AudioOutputClient client)
+    public abstract int registerAudioInputClient(InputClient client)
             throws ClientRegistrationException;
 
-    public void unregisterAudioOutputClient(AudioOutputClient client);
-    
+    public abstract void unregisterAudioInputClient(InputClient client);
+
+    public abstract int registerAudioOutputClient(OutputClient client)
+            throws ClientRegistrationException;
+
+    public abstract void unregisterAudioOutputClient(OutputClient client);
+
+    public static abstract class Client {
+    }
+
+    public static abstract class InputClient extends Client {
+
+        public abstract int getInputCount();
+
+        public abstract Sink getInputSink(int index);
+    }
+
+    public static abstract class OutputClient extends Client {
+
+        public abstract int getOutputCount();
+
+        public abstract Source getOutputSource(int index);
+    }
 }

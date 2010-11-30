@@ -19,12 +19,12 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.audio;
+package net.neilcsmith.praxis.audio.components;
 
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
 import net.neilcsmith.audioservers.AudioClient;
-import net.neilcsmith.audioservers.AudioContext;
+import net.neilcsmith.audioservers.AudioConfiguration;
 import net.neilcsmith.audioservers.AudioServer;
 import net.neilcsmith.audioservers.jack.JackAudioServer;
 import net.neilcsmith.audioservers.javasound.JavasoundAudioServer;
@@ -36,7 +36,7 @@ import net.neilcsmith.praxis.core.types.PMap;
  * @author Neil C Smith
  * @TODO Use AudioServerFactoryProvider mechanism
  */
-public class AudioServerLoader {
+class AudioServerLoader {
 
     private static AudioServerLoader instance = new AudioServerLoader();
 
@@ -44,7 +44,7 @@ public class AudioServerLoader {
     }
 
     public AudioServer load(Lookup lookup, String libName, String device,
-            String id, AudioContext context, AudioClient client, PMap properties) {
+            String id, AudioConfiguration context, AudioClient client, PMap properties) {
         if ("Jack".equalsIgnoreCase(libName)) {
             return createJackServer(id, context, client);
         } else {
@@ -52,12 +52,12 @@ public class AudioServerLoader {
         }
     }
 
-    private AudioServer createJackServer(String id, AudioContext context,
+    private AudioServer createJackServer(String id, AudioConfiguration context,
             AudioClient client) {
         return JackAudioServer.create(id, context, false, client);
     }
 
-    private AudioServer createJavaSoundServer(String device, AudioContext context,
+    private AudioServer createJavaSoundServer(String device, AudioConfiguration context,
             AudioClient client) {
 //        Mixer mixer = getMixer(device);
         Mixer mixer = AudioSystem.getMixer(AudioSystem.getMixerInfo()[0]);

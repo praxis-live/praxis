@@ -48,7 +48,7 @@ import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 import net.neilcsmith.audioservers.AudioClient;
-import net.neilcsmith.audioservers.AudioContext;
+import net.neilcsmith.audioservers.AudioConfiguration;
 import net.neilcsmith.audioservers.AudioServer;
 
 /**
@@ -96,7 +96,7 @@ public class JavasoundAudioServer implements AudioServer {
     private boolean bigEndian = false;
     //
     private AtomicReference<State> state;
-    private AudioContext context;
+    private AudioConfiguration context;
     private Mixer mixer;
     private AudioClient client;
     private TimingMode mode;
@@ -113,7 +113,7 @@ public class JavasoundAudioServer implements AudioServer {
     private AudioFloatConverter converter;
 
     private JavasoundAudioServer(Mixer mixer, TimingMode mode,
-            AudioContext context, AudioClient client) {
+            AudioConfiguration context, AudioClient client) {
         this.mixer = mixer;
         this.context = context;
         this.mode = mode;
@@ -142,7 +142,7 @@ public class JavasoundAudioServer implements AudioServer {
         state.set(State.Terminated);
     }
 
-    public AudioContext getAudioContext() {
+    public AudioConfiguration getAudioContext() {
         return context;
     }
 
@@ -311,7 +311,7 @@ public class JavasoundAudioServer implements AudioServer {
         }
     }
 
-    public static JavasoundAudioServer create(Mixer mixer, AudioContext context,
+    public static JavasoundAudioServer create(Mixer mixer, AudioConfiguration context,
             TimingMode mode, AudioClient client) {
         if (mixer == null || mode == null ||
                 context == null || client == null) {
@@ -323,7 +323,7 @@ public class JavasoundAudioServer implements AudioServer {
         }
         // always fixed buffer size
         if (!context.isFixedBufferSize()) {
-            context = new AudioContext(context.getSampleRate(),
+            context = new AudioConfiguration(context.getSampleRate(),
                     context.getInputChannelCount(),
                     context.getOutputChannelCount(),
                     context.getMaxBufferSize(),

@@ -22,7 +22,7 @@
 package net.neilcsmith.rapl.render;
 
 import java.nio.FloatBuffer;
-import net.neilcsmith.audioservers.AudioContext;
+import net.neilcsmith.audioservers.AudioConfiguration;
 import net.neilcsmith.rapl.core.BufferRateListener;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,7 +116,7 @@ public class BusClient implements Bus, AudioClient {
         }
     }
 
-    public void configure(AudioContext context) throws Exception {
+    public void configure(AudioConfiguration context) throws Exception {
         this.sampleRate = context.getSampleRate();
         this.bufferSize = context.getMaxBufferSize();
         for (OutputSink sink : sinks) {

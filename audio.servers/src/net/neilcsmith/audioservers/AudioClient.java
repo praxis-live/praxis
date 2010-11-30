@@ -31,7 +31,7 @@ public interface AudioClient {
 
     /**
      * This method will be called by the server implementation prior to any call
-     * to process(). The supplied AudioContext object provides information on
+     * to process(). The supplied AudioConfiguration object provides information on
      * sample rate, buffer size, etc. required by the client. An Exception may be
      * thrown if the client is unable to be configured to match the requirements of
      * the server. The type of the Exception is deliberately unspecified and left to
@@ -40,7 +40,7 @@ public interface AudioClient {
      * @param context encapsulates information required for configuring the client
      * @throws Exception
      */
-    public void configure(AudioContext context) throws Exception;
+    public void configure(AudioConfiguration context) throws Exception;
 
     /**
      * The method that actually processes the audio. The client is provided with

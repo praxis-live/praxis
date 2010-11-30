@@ -36,11 +36,11 @@ public interface AudioServer {
     public void run() throws Exception;
 
     /**
-     * Get the current AudioContext. This value should remain constant while the
+     * Get the current AudioConfiguration. This value should remain constant while the
      * server is processing audio.
-     * @return AudioContext
+     * @return AudioConfiguration
      */
-    public AudioContext getAudioContext();
+    public AudioConfiguration getAudioContext();
 
     /**
      * Check whether the server is active. This method can be called from another

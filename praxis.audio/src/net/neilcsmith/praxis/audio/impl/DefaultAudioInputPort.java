@@ -19,13 +19,14 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.audio;
+package net.neilcsmith.praxis.audio.impl;
 
 import net.neilcsmith.praxis.audio.AudioPort.Output;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.audio.AudioPort;
 import net.neilcsmith.praxis.core.*;
 import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.impl.PortListenerSupport;

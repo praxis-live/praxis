@@ -23,11 +23,9 @@ package net.neilcsmith.praxis.audio.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.neilcsmith.praxis.audio.AudioOutputClient;
-import net.neilcsmith.praxis.audio.AudioHub;
-import net.neilcsmith.praxis.audio.DefaultAudioInputPort;
-import net.neilcsmith.praxis.core.Container;
-import net.neilcsmith.praxis.core.VetoException;
+import net.neilcsmith.praxis.audio.AudioContext;
+import net.neilcsmith.praxis.audio.ClientRegistrationException;
+import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.rapl.components.Placeholder;
@@ -37,9 +35,10 @@ import net.neilcsmith.rapl.core.Source;
  *
  * @author Neil C Smith
  */
-public class AudioOutput extends AbstractComponent implements AudioOutputClient {
+public class AudioOutput extends AbstractComponent {
 
     private Placeholder[] placeholders;
+    private AudioContext.OutputClient client;
 
     public AudioOutput() {
         placeholders = new Placeholder[2];
@@ -47,26 +46,45 @@ public class AudioOutput extends AbstractComponent implements AudioOutputClient 
         placeholders[1] = new Placeholder();
         registerPort(Port.IN + "-1", new DefaultAudioInputPort(this, placeholders[0]));
         registerPort(Port.IN + "-2", new DefaultAudioInputPort(this, placeholders[1]));
+        client = new AudioContext.OutputClient() {
+
+            @Override
+            public int getOutputCount() {
+                return 2;
+            }
+
+            @Override
+            public Source getOutputSource(int index) {
+                return placeholders[index];
+            }
+        };
     }
 
-    public int getOutputCount() {
-        return 2;
-    }
-
-    public Source getOutputSource(int index) {
-        return placeholders[index];
-    }
-
-    @Override // @TODO implement unregister
-    public void parentNotify(Container parent) throws VetoException {
-        super.parentNotify(parent);
-        if (parent instanceof AudioHub) {
+    @Override
+    public void hierarchyChanged() {
+        super.hierarchyChanged();
+        AudioContext ctxt = getLookup().get(AudioContext.class);
+        if (ctxt != null) {
             try {
-                ((AudioHub) parent).registerAudioOutputClient(this);
-            } catch (Exception ex) {
-                Logger.getLogger(AudioOutput.class.getName()).log(Level.SEVERE, null, ex);
-                throw new VetoException();
+                ctxt.registerAudioOutputClient(client);
+            } catch (ClientRegistrationException ex) {
+                Logger.getLogger(AudioInput.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
+
+
+
+//    @Override // @TODO implement unregister
+//    public void parentNotify(Container parent) throws VetoException {
+//        super.parentNotify(parent);
+//        if (parent instanceof AudioContext) {
+//            try {
+//                ((AudioContext) parent).registerAudioOutputClient(this);
+//            } catch (Exception ex) {
+//                Logger.getLogger(AudioOutput.class.getName()).log(Level.SEVERE, null, ex);
+//                throw new VetoException();
+//            }
+//        }
+//    }
 }
