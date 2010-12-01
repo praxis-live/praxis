@@ -23,7 +23,6 @@
 
 package net.neilcsmith.praxis.midi.impl;
 
-import javax.sound.midi.ShortMessage;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.midi.MidiInputContext;
 

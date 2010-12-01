@@ -20,8 +20,9 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.gui;
+package net.neilcsmith.praxis.gui.impl;
 
+import java.util.logging.Level;
 import net.neilcsmith.praxis.util.interpolation.Interpolator;
 import net.neilcsmith.praxis.util.interpolation.LinearInterpolator;
 import java.util.logging.Logger;
@@ -34,38 +35,38 @@ import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PNumber;
-import net.neilcsmith.praxis.core.types.PString;
-import net.neilcsmith.praxis.util.interpolation.ExponentialInterpolator;
+import net.neilcsmith.praxis.gui.ControlBinding;
 import net.neilcsmith.praxis.util.PMath;
 
 /**
  *
  * @author Neil C Smith
  */
-public class BoundedValueAdaptor extends ControlBinding.Adaptor {
+public class BoundedRangeAdaptor extends ControlBinding.Adaptor implements ChangeListener {
 
     private final static double DEFAULT_MINIMUM = 0;
     private final static double DEFAULT_MAXIMUM = 1;
-    private static Logger logger = Logger.getLogger(BoundedValueAdaptor.class.getName());
+    private static Logger logger = Logger.getLogger(BoundedRangeAdaptor.class.getName());
     private BoundedRangeModel model;
     private ControlInfo info;
     private boolean isUpdating;
+    private boolean isRange;
     private double minimum;
     private double maximum;
     private PNumber prefMin;
     private PNumber prefMax;
-    private PString prefScale;
-    private double value;
+    private double low;
+    private double high;
     private Interpolator interpolator;
 
-    public BoundedValueAdaptor(BoundedRangeModel model) {
+    public BoundedRangeAdaptor(BoundedRangeModel model) {
         if (model == null) {
             throw new NullPointerException();
         }
         this.model = model;
-        model.addChangeListener(new ChangeHandler());
+        model.addChangeListener(this);
         interpolator = LinearInterpolator.getInstance();
-        this.value = DEFAULT_MINIMUM;
+        isRange = true;
         this.minimum = DEFAULT_MINIMUM;
         this.maximum = DEFAULT_MAXIMUM;
         updateModel();
@@ -91,52 +92,32 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
         return prefMax;
     }
 
-    public void setPreferredScale(PString scale) {
-        prefScale = scale;
-        updateScale();
-    }
-
-    public PString getInterpolator() {
-        return prefScale;
-    }
-
     private void updateAllowedRange() {
-        PNumber infMin = null;
-        PNumber infMax = null;
+        PNumber infMinL = null;
+        PNumber infMaxL = null;
+        PNumber infMinH = null;
+        PNumber infMaxH = null;
         if (info != null) {
             ArgumentInfo[] aIn = info.getInputsInfo();
             if (aIn.length > 0) {
-                infMin = coerce(aIn[0].getProperties().get("minimum"));
-                infMax = coerce(aIn[0].getProperties().get("maximum"));
+                infMinL = coerce(aIn[0].getProperties().get("minimum"));
+                infMaxL = coerce(aIn[0].getProperties().get("maximum"));
+            }
+            if (aIn.length > 1) {
+                infMinH = coerce(aIn[1].getProperties().get("minimum"));
+                infMaxH = coerce(aIn[1].getProperties().get("maximum"));
             }
         }
-        PNumber calcMin = PMath.getMaximum(infMin, prefMin);
+
+        PNumber calcMin = PMath.getMaximum(infMinL, infMinH, prefMin);
         double min = calcMin == null ? DEFAULT_MINIMUM : calcMin.value();
-        PNumber calcMax = PMath.getMinimum(infMax, prefMax);
+        PNumber calcMax = PMath.getMinimum(infMaxL, infMaxH, prefMax);
         double max = calcMax == null ? DEFAULT_MAXIMUM : calcMax.value();
         if (max < min || min > max) {
             min = max = 0;
         }
         minimum = min;
         maximum = max;
-        updateModel();
-    }
-
-    private void updateScale() {
-        Argument intHint = prefScale;
-        if (intHint == null || intHint.isEmpty()) {
-            if (info != null) {
-                intHint = info.getProperties().get("scale-hint");
-            }
-            
-        }
-        if (intHint == null) {
-            interpolator = LinearInterpolator.getInstance();
-        } else if (intHint.toString().equalsIgnoreCase("Exponential")) {
-            interpolator = ExponentialInterpolator.getInstance();
-        } else {
-            interpolator = LinearInterpolator.getInstance();
-        }
         updateModel();
     }
 
@@ -159,11 +140,13 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
         }
         CallArguments args = binding.getArguments();
         if (!model.getValueIsAdjusting()) {
-            if (args.getCount() > 0) {
+            if (args.getCount() >= 2) {
                 try {
-                    double val = PNumber.coerce(args.getArg(0)).value();
-                    if (val != value) {
-                        value = val;
+                    double lo = PNumber.coerce(args.getArg(0)).value();
+                    double hi = PNumber.coerce(args.getArg(1)).value();
+                    if (lo != low || hi != high) {
+                        low = lo;
+                        high = hi;
                         updateModel();
                     }
                 } catch (Exception ex) {
@@ -173,12 +156,19 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
     }
 
     private void updateModel() {
-        value = value < minimum ? minimum : (value > maximum ? maximum : value);
-        int val = convertToInt(value);
+        low = low < minimum ? minimum : (low > maximum ? maximum : low);
+        high = high < low ? low : (high > maximum ? maximum : high);
+        int val = convertToInt(low);
+        int ext = convertToInt(high) - val;
         isUpdating = true;
-        model.setValue(val);
-        model.setExtent(0);
+        // must set values together otherwise extent might go out of range
+        model.setRangeProperties(val, ext,
+                model.getMinimum(), model.getMaximum(), model.getValueIsAdjusting());
         isUpdating = false;
+        if (logger.isLoggable(Level.FINEST)) {
+            logger.finest("Model Updated : Low - " + low + " High - " + high +
+                    " Value - " + model.getValue() + " Extent - " + model.getExtent());
+        }
     }
 
     @Override
@@ -188,20 +178,18 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
             return;
         }
         info = binding.getBindingInfo();
-        if (info != null) {
-            updateAllowedRange();
-            updateScale();
-        }
 
     }
 
-    private class ChangeHandler implements ChangeListener {
-
-        public void stateChanged(ChangeEvent e) {
-            if (!isUpdating) {
-                value = convertToDouble(model.getValue());
-                send(CallArguments.create(PNumber.valueOf(value)));
-            }
+    public void stateChanged(ChangeEvent e) {
+        if (!isUpdating) {
+            int val = model.getValue();
+            int ext = model.getExtent();
+            low = convertToDouble(val);
+            high = convertToDouble(val + ext);
+            send(CallArguments.create(new Argument[]{
+                        PNumber.valueOf(low), PNumber.valueOf(high)
+                    }));
         }
     }
 
@@ -214,9 +202,6 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
     }
 
     private int convertToInt(double value) {
-        if (maximum == minimum) {
-            return 0;
-        }
         double ratio = (value - minimum) / (maximum - minimum);
         ratio = interpolator.reverseInterpolate(ratio);
         int mMin = model.getMinimum();

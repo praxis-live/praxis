@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2010 Neil C Smith. All rights reserved.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,16 +21,21 @@
  *
  */
 
-package net.neilcsmith.praxis.gui.components;
+package net.neilcsmith.praxis.gui;
 
 /**
+ * Keys for storage of client properties in JComponents
  *
  * @author Neil C Smith
  */
-public class HPanel extends Panel {
+public class Keys {
 
-    public HPanel() {
-        super(false);
-    }
+    private Keys() {}
+
+    public final static String LayoutConstraint = "Praxis.LayoutConstraint";
+
+    public final static String Address = "Praxis.Address";
+
+
 
 }

@@ -35,9 +35,9 @@ import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
-import net.neilcsmith.praxis.gui.AbstractGuiComponent;
-import net.neilcsmith.praxis.gui.BoundedValueAdaptor;
-import net.neilcsmith.praxis.gui.GuiRoot;
+import net.neilcsmith.praxis.gui.impl.AbstractGuiComponent;
+import net.neilcsmith.praxis.gui.impl.BoundedValueAdaptor;
+import net.neilcsmith.praxis.gui.BindingContext;
 import net.neilcsmith.praxis.swing.JXYController;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
@@ -49,7 +49,7 @@ import net.neilcsmith.praxis.impl.StringProperty;
 public class XYController extends AbstractGuiComponent {
 
     private static Logger logger = Logger.getLogger(XYController.class.getName());
-    private GuiRoot root;
+    private BindingContext root;
     private Box container;
     private JXYController controller;
     private BoundedValueAdaptor xAdaptor;
@@ -123,8 +123,8 @@ public class XYController extends AbstractGuiComponent {
     public void hierarchyChanged() {
         super.hierarchyChanged();
         Root r = getRoot();
-        if (r instanceof GuiRoot) {
-            root = (GuiRoot) r;
+        if (r instanceof BindingContext) {
+            root = (BindingContext) r;
         } else {
             if (xBinding != null) {
                 root.unbind(xAdaptor);

@@ -70,7 +70,7 @@ public abstract class AbstractControl implements AbstractComponent.ExtendedContr
         return address;
     }
 
-    public Lookup getLookup() {
+    protected Lookup getLookup() {
         if (host == null) {
             return EmptyLookup.getInstance();
         } else {
@@ -78,7 +78,7 @@ public abstract class AbstractControl implements AbstractComponent.ExtendedContr
         }
     }
 
-    public ComponentAddress findService(InterfaceDefinition service)
+    protected ComponentAddress findService(InterfaceDefinition service)
             throws ServiceUnavailableException {
         ServiceManager sm = getLookup().get(ServiceManager.class);
         if (sm == null) {

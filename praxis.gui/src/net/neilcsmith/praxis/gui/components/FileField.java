@@ -41,7 +41,7 @@ import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.types.PUri;
 import net.neilcsmith.praxis.gui.ControlBinding;
 import net.neilcsmith.praxis.gui.ControlBinding.Adaptor;
-import net.neilcsmith.praxis.gui.SingleBindingGuiComponent;
+import net.neilcsmith.praxis.gui.impl.SingleBindingGuiComponent;
 import net.neilcsmith.praxis.impl.StringProperty;
 
 /**

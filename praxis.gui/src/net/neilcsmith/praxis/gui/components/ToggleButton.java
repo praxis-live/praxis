@@ -34,9 +34,9 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.types.PString;
-import net.neilcsmith.praxis.gui.SingleBindingGuiComponent;
+import net.neilcsmith.praxis.gui.impl.SingleBindingGuiComponent;
 import net.neilcsmith.praxis.gui.ControlBinding.Adaptor;
-import net.neilcsmith.praxis.gui.ToggleButtonModelAdaptor;
+import net.neilcsmith.praxis.gui.impl.ToggleButtonModelAdaptor;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
 

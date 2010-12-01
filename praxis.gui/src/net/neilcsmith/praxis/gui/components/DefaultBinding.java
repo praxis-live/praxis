@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.gui;
+package net.neilcsmith.praxis.gui.components;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,13 +31,12 @@ import javax.swing.Timer;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.PacketRouter;
-import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.info.ComponentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.ComponentInterface;
-import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.gui.ControlBinding;
 import net.neilcsmith.praxis.impl.BasicControl;
 
 /**
@@ -45,7 +44,7 @@ import net.neilcsmith.praxis.impl.BasicControl;
  * @author Neil C Smith
  */
 // @TODO sync on error?
-public class DefaultBinding extends BasicControl {
+class DefaultBinding extends BasicControl {
 
     private final static int LOW_SYNC_DELAY = 1000;
     private final static int MED_SYNC_DELAY = 200;

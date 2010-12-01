@@ -34,9 +34,9 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PString;
-import net.neilcsmith.praxis.gui.AbstractGuiComponent;
-import net.neilcsmith.praxis.gui.ActionAdaptor;
-import net.neilcsmith.praxis.gui.GuiRoot;
+import net.neilcsmith.praxis.gui.impl.AbstractGuiComponent;
+import net.neilcsmith.praxis.gui.impl.ActionAdaptor;
+import net.neilcsmith.praxis.gui.BindingContext;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.AbstractProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
@@ -54,7 +54,7 @@ public class Button extends AbstractGuiComponent {
     private ControlAddress onClickAddress;
     private CallArguments onClickArgs;
     private ControlInfo onClickInfo;
-    private GuiRoot root;
+    private BindingContext bindingContext;
 
     public Button() {
         label = "";
@@ -97,10 +97,10 @@ public class Button extends AbstractGuiComponent {
     }
 
     private void updateAdaptor() {
-        if (root != null && adaptor != null) {
-            root.unbind(adaptor);
+        if (bindingContext != null && adaptor != null) {
+            bindingContext.unbind(adaptor);
             if (onClickAddress != null) {
-                root.bind(onClickAddress, adaptor);
+                bindingContext.bind(onClickAddress, adaptor);
                 adaptor.setCallArguments(onClickArgs);
             }
         }
@@ -109,16 +109,26 @@ public class Button extends AbstractGuiComponent {
     @Override
     public void hierarchyChanged() {
         super.hierarchyChanged();
-        Root r = getRoot();
-        if (r instanceof GuiRoot) {
-            root = (GuiRoot) r;
+//        Root r = getRoot();
+//        if (r instanceof BindingContext) {
+//            bindingContext = (BindingContext) r;
+//        } else {
+//            if (bindingContext != null) {
+//                if (adaptor != null) {
+//                    bindingContext.unbind(adaptor);
+//                }
+//                bindingContext = null;
+//            }
+//        }
+        BindingContext ctxt = getLookup().get(BindingContext.class);
+        if (ctxt != null) {
+            bindingContext = ctxt;
         } else {
-            if (root != null) {
-                if (adaptor != null) {
-                    root.unbind(adaptor);
-                }
-                root = null;
+            if (adaptor != null) {
+                bindingContext.unbind(adaptor);
+                adaptor = null;
             }
+            bindingContext = null;
         }
     }
 

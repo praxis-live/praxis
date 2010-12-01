@@ -28,14 +28,10 @@ import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.Packet;
 import net.neilcsmith.praxis.core.PacketRouter;
-import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.interfaces.ScriptService;
 import net.neilcsmith.praxis.impl.AbstractRoot;
-import net.neilcsmith.praxis.impl.BasicControl;
 import net.neilcsmith.praxis.script.Env;
-import net.neilcsmith.praxis.script.impl.ScriptExecutor;
 import net.neilcsmith.praxis.script.impl.ScriptExecutor;
 
 /**

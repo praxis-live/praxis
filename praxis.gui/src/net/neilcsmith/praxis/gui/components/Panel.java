@@ -22,30 +22,34 @@
  */
 package net.neilcsmith.praxis.gui.components;
 
-import java.awt.LayoutManager;
+import java.awt.event.ContainerEvent;
+import java.awt.event.ContainerListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import net.miginfocom.layout.AC;
+import net.miginfocom.layout.ConstraintParser;
+import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
-import net.neilcsmith.praxis.gui.AbstractGuiContainer;
-import net.neilcsmith.praxis.gui.ClientKeys;
+import net.neilcsmith.praxis.gui.impl.AbstractGuiContainer;
+import net.neilcsmith.praxis.gui.Keys;
+import net.neilcsmith.praxis.impl.StringProperty;
 
 /**
  *
  * @author Neil C Smith
  */
-abstract class Panel extends AbstractGuiContainer {
+public class Panel extends AbstractGuiContainer {
 
-//    private Box box;
     private JPanel panel;
     private MigLayout layout;
-    private boolean vertical;
-    private LayoutChangeListener layoutListener;
 
-    protected Panel(boolean vertical) {
-        this.vertical = vertical;
+
+    public Panel() {
+        registerControl("setup", StringProperty.create(new SetupBinding(), "fill"));
+        registerControl("rows", StringProperty.create(new AxisBinding(false), "[fill]"));
+        registerControl("columns", StringProperty.create(new AxisBinding(true), "[fill]"));
     }
 
     @Override
@@ -53,11 +57,12 @@ abstract class Panel extends AbstractGuiContainer {
         if (panel != null) {
             throw new IllegalStateException();
         }
-        layout = vertical ? new MigLayout("flowy, fill", "[fill]") //, "[grow]")
-                : new MigLayout("fill", "[fill]");//, "[grow,fill]", "[grow]");
+//        layout = vertical ? new MigLayout("flowy, fill", "[fill]") //, "[grow]")
+//                : new MigLayout("fill", "[fill]");//, "[grow,fill]", "[grow]");
+        layout = new MigLayout("fill", "[fill]");
         panel = new JPanel(layout);
-        layoutListener = new LayoutChangeListener(panel);
-        panel.putClientProperty(ClientKeys.LayoutConstraint, "grow");
+        panel.addContainerListener(new ChildrenListener());
+//        panel.putClientProperty(Keys.LayoutConstraint, "grow");
         return panel;
     }
 
@@ -72,50 +77,125 @@ abstract class Panel extends AbstractGuiContainer {
 //    private void createBox() {
 //        box = vertical ? Box.createVerticalBox() : Box.createHorizontalBox();
 //    }
-    @Override
-    protected void addToContainer(String id, JComponent component) throws Exception {
-//        if (box == null) {
-//            createBox();
+//    @Override
+//    protected void addToContainer(String id, JComponent component) throws Exception {
+////        if (box == null) {
+////            createBox();
+////        }
+//        if (vertical) {
+//            component.setAlignmentX(JComponent.LEFT_ALIGNMENT);
+//        } else {
+//            component.setAlignmentY(JComponent.TOP_ALIGNMENT);
 //        }
-        if (vertical) {
-            component.setAlignmentX(JComponent.LEFT_ALIGNMENT);
-        } else {
-            component.setAlignmentY(JComponent.TOP_ALIGNMENT);
-        }
-//        box.add(component);
-        Object constraints = component.getClientProperty(ClientKeys.LayoutConstraint);
-        panel.add(component, constraints);
+////        box.add(component);
+//        Object constraints = component.getClientProperty(Keys.LayoutConstraint);
+//        panel.add(component, constraints);
+//        panel.revalidate();
+//        component.addPropertyChangeListener(Keys.LayoutConstraint, layoutListener);
+//    }
+//
+//    @Override
+//    protected void removeFromContainer(String id, JComponent component) {
+////        if (box != null) {
+////            box.remove(component);
+////        }
+//        panel.remove(component);
+//        panel.revalidate();
+//        component.removePropertyChangeListener(Keys.LayoutConstraint, layoutListener);
+//    }
+    private void setLayoutConstraint(JComponent child) {
+        layout.setComponentConstraints(child, child.getClientProperty(Keys.LayoutConstraint));
         panel.revalidate();
-        component.addPropertyChangeListener(ClientKeys.LayoutConstraint, layoutListener);
+        panel.repaint();
     }
 
-    @Override
-    protected void removeFromContainer(String id, JComponent component) {
-//        if (box != null) {
-//            box.remove(component);
-//        }
-        panel.remove(component);
-        panel.revalidate();
-        component.removePropertyChangeListener(ClientKeys.LayoutConstraint, layoutListener);
-    }
+    private class ChildrenListener implements ContainerListener {
 
-    private class LayoutChangeListener implements PropertyChangeListener {
+        private PropertyChangeListener listener;
 
-        private JComponent container;
+        public void componentAdded(ContainerEvent e) {
+            if (listener == null) {
+                listener = new PropertyChangeListener() {
 
-        public LayoutChangeListener(JComponent container) {
-            this.container = container;
+                    public void propertyChange(PropertyChangeEvent evt) {
+                        if (evt.getSource() instanceof JComponent) {
+                            setLayoutConstraint((JComponent) evt.getSource());
+                        }
+                    }
+                };
+            }
+            if (e.getChild() instanceof JComponent) {
+                JComponent child = (JComponent) e.getChild();
+                child.addPropertyChangeListener(
+                        Keys.LayoutConstraint, listener);
+                setLayoutConstraint(child);
+            }
         }
 
-        public void propertyChange(PropertyChangeEvent evt) {
-            if (evt.getSource() instanceof JComponent) {
-                JComponent comp = (JComponent) evt.getSource();
-                LayoutManager lm = container.getLayout();
-                if (lm instanceof MigLayout) {
-                    ((MigLayout) lm).setComponentConstraints(comp, evt.getNewValue());
-                    container.revalidate();
-                }
+        public void componentRemoved(ContainerEvent e) {
+            if (listener == null) {
+                return;
+            }
+            if (e.getChild() instanceof JComponent) {
+                ((JComponent) e.getChild()).removePropertyChangeListener(
+                        Keys.LayoutConstraint, listener);
             }
         }
     }
+
+
+    private class SetupBinding implements StringProperty.Binding {
+
+        private String consString = "";
+        private LC constraint = null;
+
+        public void setBoundValue(long time, String value) {
+            if (layout == null) {
+                throw new IllegalStateException("Layout not yet initialised");
+            }
+            constraint = ConstraintParser.parseLayoutConstraint(value);
+            layout.setLayoutConstraints(constraint);
+            panel.revalidate();
+            panel.repaint();
+            consString = value;
+        }
+
+        public String getBoundValue() {
+            return consString;
+        }
+
+    }
+
+    private class AxisBinding implements StringProperty.Binding {
+
+        private final boolean column;
+        private String consString = "";
+        private AC constraint = null;
+
+        private AxisBinding(boolean column) {
+            this.column = column;
+        }
+
+        public void setBoundValue(long time, String value) {
+            if (layout == null) {
+                throw new IllegalStateException("Layout not yet initialised");
+            }
+            if (column) {
+                constraint = ConstraintParser.parseColumnConstraints(value);
+                layout.setColumnConstraints(constraint);
+            } else {
+                constraint = ConstraintParser.parseRowConstraints(value);
+                layout.setRowConstraints(constraint);
+            }
+            panel.revalidate();
+            panel.repaint();
+            consString = value;
+        }
+
+        public String getBoundValue() {
+            return consString;
+        }
+
+    }
+
 }

@@ -19,21 +19,10 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.gui;
+package net.neilcsmith.praxis.gui.components;
 
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
-import net.neilcsmith.praxis.gui.components.Button;
-import net.neilcsmith.praxis.gui.components.FileField;
-import net.neilcsmith.praxis.gui.components.HPanel;
-import net.neilcsmith.praxis.gui.components.HRangeSlider;
-import net.neilcsmith.praxis.gui.components.HSlider;
-import net.neilcsmith.praxis.gui.components.Tabs;
-import net.neilcsmith.praxis.gui.components.ToggleButton;
-import net.neilcsmith.praxis.gui.components.VPanel;
-import net.neilcsmith.praxis.gui.components.VRangeSlider;
-import net.neilcsmith.praxis.gui.components.VSlider;
-import net.neilcsmith.praxis.gui.components.XYController;
 import net.neilcsmith.praxis.impl.AbstractComponentFactory;
 
 /**
@@ -68,8 +57,9 @@ public class GuiFactoryProvider implements ComponentFactoryProvider {
             addComponent("gui:xy-pad", XYController.class);
             addComponent("gui:filefield", FileField.class);
             // GUI containers
-            addComponent("gui:h-panel", HPanel.class);
-            addComponent("gui:v-panel", VPanel.class);
+//            addComponent("gui:h-panel", HPanel.class);
+//            addComponent("gui:v-panel", VPanel.class);
+            addComponent("gui:panel", Panel.class);
             addComponent("gui:tabs", Tabs.class);
 
         }

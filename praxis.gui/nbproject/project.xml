@@ -47,7 +47,9 @@
                     </run-dependency>
                 </dependency>
             </module-dependencies>
-            <public-packages/>
+            <public-packages>
+                <package>net.neilcsmith.praxis.gui</package>
+            </public-packages>
         </data>
     </configuration>
 </project>

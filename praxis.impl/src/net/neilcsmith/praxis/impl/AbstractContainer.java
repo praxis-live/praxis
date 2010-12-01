@@ -53,7 +53,6 @@ import net.neilcsmith.praxis.core.types.PString;
 public abstract class AbstractContainer extends AbstractComponent implements Container {
 
     private final static Logger LOG = Logger.getLogger(AbstractContainer.class.getName());
-
     private Map<String, Component> childMap;
     private Set<PArray> connections;
     boolean childInfoValid;
@@ -61,7 +60,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
     protected AbstractContainer() {
         this(true, true);
     }
-    
+
     protected AbstractContainer(boolean containerInterface, boolean componentInterface) {
         super(componentInterface);
         childMap = new LinkedHashMap<String, Component>();
@@ -105,8 +104,8 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             try {
                 child.parentNotify(null);
             } catch (VetoException ex) {
-            // it is an error for children to throw exception on removal
-            // should we throw an error?
+                // it is an error for children to throw exception on removal
+                // should we throw an error?
             }
             childInfoValid = false;
         }
@@ -149,9 +148,9 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
     public Lookup getLookup() {
         return super.getLookup();
     }
-    
+
     private class AddChildControl extends AbstractAsyncControl {
-        
+
         @Override
         protected Call processInvoke(Call call) throws Exception {
             CallArguments args = call.getArgs();
@@ -182,7 +181,6 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         public ControlInfo getInfo() {
             return ContainerInterface.ADD_CHILD_INFO;
         }
-        
     }
 
     private class RemoveChildControl extends SimpleControl {
@@ -196,7 +194,6 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             removeChild(args.getArg(0).toString());
             return CallArguments.EMPTY;
         }
-
     }
 
     private class ChildrenControl extends SimpleControl {
@@ -216,7 +213,6 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             }
             return CallArguments.create(PArray.valueOf(children));
         }
-
     }
 
     private class ConnectionControl extends SimpleControl {
@@ -224,8 +220,8 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         private final boolean connect;
 
         private ConnectionControl(boolean connect) {
-            super(connect ? ContainerInterface.CONNECT_INFO :
-                ContainerInterface.DISCONNECT_INFO);
+            super(connect ? ContainerInterface.CONNECT_INFO
+                    : ContainerInterface.DISCONNECT_INFO);
             this.connect = connect;
         }
 
@@ -243,7 +239,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             final Port p1 = c1.getPort(p1id.toString());
             Component c2 = getChild(c2id.toString());
             final Port p2 = c2.getPort(p2id.toString());
-            
+
             final PArray connection = PArray.valueOf(c1id, p1id, c2id, p2id);
 
             if (connect) {
@@ -258,7 +254,6 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             }
             return CallArguments.EMPTY;
         }
-
     }
 
     private class ConnectionListener implements PortListener {
@@ -274,8 +269,8 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         }
 
         public void connectionsChanged(Port source) {
-            if (Arrays.asList(p1.getConnections()).contains(p2) &&
-                    Arrays.asList(p2.getConnections()).contains(p1)) {
+            if (Arrays.asList(p1.getConnections()).contains(p2)
+                    && Arrays.asList(p2.getConnections()).contains(p1)) {
                 return;
             } else {
                 LOG.finest("Removing connection\n" + connection);
@@ -284,7 +279,6 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
                 p2.removeListener(this);
             }
         }
-
     }
 
     private class ConnectionListControl extends SimpleControl {
@@ -297,10 +291,5 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
             return CallArguments.create(PArray.valueOf(connections));
         }
-
-
     }
-
-
-
 }

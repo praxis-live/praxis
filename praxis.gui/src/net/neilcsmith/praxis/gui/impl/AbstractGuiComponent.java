@@ -20,7 +20,7 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.gui;
+package net.neilcsmith.praxis.gui.impl;
 
 import java.awt.EventQueue;
 import javax.swing.JComponent;
@@ -28,6 +28,9 @@ import net.miginfocom.layout.CC;
 import net.miginfocom.layout.ConstraintParser;
 import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.VetoException;
+import net.neilcsmith.praxis.gui.Keys;
+import net.neilcsmith.praxis.gui.GuiComponent;
+import net.neilcsmith.praxis.gui.GuiContext;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.StringProperty;
 
@@ -39,6 +42,8 @@ public abstract class AbstractGuiComponent extends AbstractComponent implements 
 
     private JComponent component;
     private LayoutBinding layout;
+//    private JComponent container;
+    private GuiContext context;
 
     protected AbstractGuiComponent() {
         layout = new LayoutBinding();
@@ -50,7 +55,7 @@ public abstract class AbstractGuiComponent extends AbstractComponent implements 
             if (component == null) {
                 component = createSwingComponent();
                 if (layout.constraint != null) {
-                    component.putClientProperty(ClientKeys.LayoutConstraint, layout.constraint);
+                    component.putClientProperty(Keys.LayoutConstraint, layout.constraint);
                 }
             }
             return component;
@@ -64,12 +69,40 @@ public abstract class AbstractGuiComponent extends AbstractComponent implements 
         if (EventQueue.isDispatchThread()) {
             super.parentNotify(parent);
             // call getSwingComponent() early to ensure JComponent creation
-            getSwingComponent();
+//            getSwingComponent();
+//            GuiContext ctxt = findLookup().get(GuiContext.class);
+//            if (ctxt == null && container != null) {
+//                container.remove(getSwingComponent());
+//                container = null;
+//            } else {
+//                container = ctxt.getContainer();
+//                container.add(getSwingComponent());
+//            }
+
         } else {
             throw new VetoException("Trying to install GUI component in GUI incompatible container.");
         }
 
     }
+
+    @Override
+    public void hierarchyChanged() {
+        super.hierarchyChanged();
+        getSwingComponent().putClientProperty(Keys.Address, getAddress());
+        GuiContext ctxt = getLookup().get(GuiContext.class);
+        if (context != ctxt) {
+            if (context != null) {
+                context.getContainer().remove(getSwingComponent());
+            }
+            if (ctxt != null) {
+                ctxt.getContainer().add(getSwingComponent());
+            }
+            context = ctxt;
+        }
+        getSwingComponent().putClientProperty(Keys.Address, getAddress());
+    }
+
+
 
     protected abstract JComponent createSwingComponent();
 
@@ -85,9 +118,10 @@ public abstract class AbstractGuiComponent extends AbstractComponent implements 
                 constraint = ConstraintParser.parseComponentConstraint(value);
             }
 
-            if (EventQueue.isDispatchThread() && component != null) {
-                component.putClientProperty(ClientKeys.LayoutConstraint, constraint);
-            }
+//            if (EventQueue.isDispatchThread() && component != null) {
+//                component.putClientProperty(Keys.LayoutConstraint, constraint);
+//            }
+            getSwingComponent().putClientProperty(Keys.LayoutConstraint, constraint);
 
             layoutString = value;
 

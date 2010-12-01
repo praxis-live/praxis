@@ -20,7 +20,7 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.gui;
+package net.neilcsmith.praxis.gui.impl;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,6 +30,7 @@ import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.gui.ControlBinding;
 
 /**
  *

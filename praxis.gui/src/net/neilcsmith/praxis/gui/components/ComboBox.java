@@ -25,7 +25,7 @@ package net.neilcsmith.praxis.gui.components;
 
 import javax.swing.JComponent;
 import net.neilcsmith.praxis.gui.ControlBinding.Adaptor;
-import net.neilcsmith.praxis.gui.SingleBindingGuiComponent;
+import net.neilcsmith.praxis.gui.impl.SingleBindingGuiComponent;
 
 /**
  *

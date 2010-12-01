@@ -21,6 +21,8 @@
  */
 package net.neilcsmith.praxis.gui.components;
 
+import net.neilcsmith.praxis.gui.impl.SingleBindingGuiComponent;
+import net.neilcsmith.praxis.gui.impl.BoundedValueAdaptor;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.gui.*;
