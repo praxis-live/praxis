@@ -52,15 +52,15 @@ import org.openide.util.lookup.ServiceProvider;
 public class CLIProcessor extends OptionProcessor {
 
     private final static Option ALWAYS = Option.always();
-    private final static Option NO_PLAYER =
-            Option.withoutArgument(Option.NO_SHORT_NAME, "noplayer");
+    private final static Option PLAYER =
+            Option.withoutArgument(Option.NO_SHORT_NAME, "player");
     private final static Option FILE = Option.defaultArguments();
 
     @Override
     protected Set<Option> getOptions() {
         Set<Option> opts = new HashSet<Option>(3);
         opts.add(ALWAYS);
-        opts.add(NO_PLAYER);
+        opts.add(PLAYER);
         opts.add(FILE);
         return opts;
     }
@@ -73,7 +73,7 @@ public class CLIProcessor extends OptionProcessor {
 
         env.getOutputStream().println("Current Directory : " + env.getCurrentDirectory());
 
-        boolean noplayer = optionValues.containsKey(NO_PLAYER);
+        boolean player = optionValues.containsKey(PLAYER);
         String script = null;
 
         if (optionValues.containsKey(FILE)) {
@@ -99,7 +99,7 @@ public class CLIProcessor extends OptionProcessor {
         }
 
         try {
-            if (noplayer) {
+            if (!player) {
                 if (script == null) {
                     throw new CommandException(1,
                             "When using the --noplayer option you must pass in a valid script.");
