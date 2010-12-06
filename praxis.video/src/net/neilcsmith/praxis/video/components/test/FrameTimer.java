@@ -24,8 +24,8 @@ package net.neilcsmith.praxis.video.components.test;
 
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.video.DefaultVideoInputPort;
-import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
+import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
+import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
 import net.neilcsmith.ripl.components.test.FrameTime;
 
 /**

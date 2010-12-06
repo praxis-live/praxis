@@ -19,20 +19,44 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.video;
 
-import net.neilcsmith.praxis.core.Component;
+import net.neilcsmith.ripl.Sink;
 import net.neilcsmith.ripl.Source;
 
 /**
  *
  * @author Neil C Smith
  */
-public interface VideoOutputClient extends Component {
+public abstract class VideoContext {
+    
+    public abstract int registerVideoInputClient(InputClient client)
+            throws ClientRegistrationException;
+    
+    public abstract void unregisterVideoInputClient(InputClient client);
 
-    public int getOutputCount();
-    
-    public Source getOutputSource(int index);
-    
+    public abstract int registerVideoOutputClient(OutputClient client)
+            throws ClientRegistrationException;
+
+    public abstract void unregisterVideoOutputClient(OutputClient client);
+
+    public static abstract class Client {
+
+    }
+
+    public static abstract class InputClient extends Client {
+
+        public abstract int getInputCount();
+
+        public abstract Sink getInputSink(int index);
+
+    }
+
+    public static abstract class OutputClient extends Client {
+
+        public abstract int getOutputCount();
+
+        public abstract Source getOutputSource(int index);
+
+    }
 }

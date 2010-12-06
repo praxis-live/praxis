@@ -19,18 +19,15 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.video.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.neilcsmith.praxis.core.Container;
-import net.neilcsmith.praxis.core.VetoException;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.video.DefaultVideoInputPort;
-import net.neilcsmith.praxis.video.VideoOutputClient;
-import net.neilcsmith.praxis.video.VideoServer;
+import net.neilcsmith.praxis.video.ClientRegistrationException;
+import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
+import net.neilcsmith.praxis.video.VideoContext;
 import net.neilcsmith.ripl.components.Placeholder;
 import net.neilcsmith.ripl.Source;
 
@@ -38,42 +35,42 @@ import net.neilcsmith.ripl.Source;
  *
  * @author Neil C Smith
  */
-public class VideoOutput extends AbstractComponent implements VideoOutputClient {
-    
-//    private VideoOutputProxy proxy;
-//    private Sink sink;
+public class VideoOutput extends AbstractComponent {
+
     private Placeholder placeholder;
+//    private VideoContext ctxt;
+    private VideoContext.OutputClient client;
 
     public VideoOutput() {
         placeholder = new Placeholder();
         registerPort(Port.IN, new DefaultVideoInputPort(this, placeholder));
+        client = new VideoContext.OutputClient() {
+
+            public int getOutputCount() {
+                return 1;
+            }
+
+            public Source getOutputSource(int index) {
+                if (index == 0) {
+                    return placeholder;
+                } else {
+                    throw new IndexOutOfBoundsException();
+                }
+            }
+        };
     }
 
     @Override
-    public void parentNotify(Container parent) throws VetoException {
-        super.parentNotify(parent);
-        if (parent instanceof VideoServer) {
+    public void hierarchyChanged() {
+        super.hierarchyChanged();
+        VideoContext ctxt = getLookup().get(VideoContext.class);
+        if (ctxt != null) {
             try {
-                ((VideoServer) parent).registerVideoOutputClient(this);
-            } catch (Exception ex) {
+                ctxt.registerVideoOutputClient(client);
+            } catch (ClientRegistrationException ex) {
                 Logger.getLogger(VideoOutput.class.getName()).log(Level.SEVERE, null, ex);
-                throw new VetoException();
             }
         }
     }
 
-    public int getOutputCount() {
-        return 1;
-    }
-
-    public Source getOutputSource(int index) {
-        if (index == 0) {
-            return placeholder;
-        } else {
-            throw new IndexOutOfBoundsException();
-        }
-    }
-    
-    
-    
 }

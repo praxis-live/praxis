@@ -28,7 +28,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
-import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
+import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
 import net.neilcsmith.ripl.components.Delegator;
 import net.neilcsmith.ripl.delegates.VideoDelegate;
 import net.neilcsmith.ripl.delegates.VideoDelegate.StateException;

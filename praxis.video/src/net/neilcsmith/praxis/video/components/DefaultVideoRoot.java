@@ -19,14 +19,18 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.video;
+package net.neilcsmith.praxis.video.components;
 
 import net.neilcsmith.praxis.core.IllegalRootStateException;
+import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.InstanceLookup;
 import net.neilcsmith.praxis.impl.IntProperty;
 import net.neilcsmith.praxis.impl.RootState;
+import net.neilcsmith.praxis.video.ClientRegistrationException;
+import net.neilcsmith.praxis.video.VideoContext;
 import net.neilcsmith.ripl.FrameRateListener;
 import net.neilcsmith.ripl.FrameRateSource;
 import net.neilcsmith.ripl.Player;
@@ -36,25 +40,24 @@ import net.neilcsmith.ripl.render.RiplPlayer;
  *
  * @author Neil C Smith
  */
-public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRateListener {
+public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener {
 
     private final static int WIDTH_DEFAULT = 640;
     private final static int HEIGHT_DEFAULT = 480;
     private final static double FPS_DEFAULT = 24;
     private final static boolean FULL_SCREEN_DEFAULT = false;
-    
     private int skipcount;
-    
     private int width = WIDTH_DEFAULT;
     private int height = HEIGHT_DEFAULT;
     private double fps = FPS_DEFAULT;
     private boolean fullScreen = FULL_SCREEN_DEFAULT;
 //    private String title;
-    
     private Player player;
 //    private Placeholder placeholder;
 //    private OutputServer outputServer;
-    private VideoOutputClient outputClient;
+    private VideoContext.OutputClient outputClient;
+    private Context ctxt;
+    private Lookup lookup;
 
     public DefaultVideoRoot() {
 //        placeholder = new Placeholder();
@@ -62,55 +65,21 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
     }
 
     private void buildControls() {
-        registerControl("width", IntProperty.create( new WidthBinding(), 1, 2048, width));
-        registerControl("height", IntProperty.create( new HeightBinding(), 1, 2048, height));
-        registerControl("fps", FloatProperty.create( new FpsBinding(), 1, 100, fps));
+        registerControl("width", IntProperty.create(new WidthBinding(), 1, 2048, width));
+        registerControl("height", IntProperty.create(new HeightBinding(), 1, 2048, height));
+        registerControl("fps", FloatProperty.create(new FpsBinding(), 1, 100, fps));
         registerControl("full-screen", BooleanProperty.create(this, new FullScreenBinding(), fullScreen));
-    }
-    
-//    public VideoInputProxy registerImageInputClient(Component client) throws ClientRegistrationException {
-//        throw new ClientRegistrationException();
-//    }
-//
-//    public void unregisterImageInputClient(Component client) {
-//        throw new UnsupportedOperationException();
-//    }
-//
-//    public VideoOutputProxy registerImageOutputClient(Component client) throws ClientRegistrationException {
-//        if (outputServer == null) {
-//            outputServer = new OutputServer();
-//            return outputServer;
-//        }
-//        throw new ClientRegistrationException();
-//    }
-//
-//    public void unregisterImageOutputClient(Component proxy) {
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
-    
-    public int registerVideoInputClient(VideoInputClient client) throws ClientRegistrationException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        ctxt = new Context();
     }
 
-    public void unregisterVideoInputClient(VideoInputClient client) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    public int registerVideoOutputClient(VideoOutputClient client) throws ClientRegistrationException {
-        if (outputClient == null) {
-            outputClient = client;
-            return 1;
-        } else {
-            throw new ClientRegistrationException();
+    @Override
+    public Lookup getLookup() {
+        if (lookup == null) {
+            lookup = InstanceLookup.create(super.getLookup(), ctxt);
         }
+        return lookup;
     }
 
-    // @TODO should not allow while running!
-    public void unregisterVideoOutputClient(VideoOutputClient client) {
-        if (outputClient == client) {
-            outputClient = null;
-        }
-    }
 
     public void nextFrame(FrameRateSource source) {
         try {
@@ -147,7 +116,6 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
                 }
             });
         } catch (Exception ex) {
-
         }
     }
 
@@ -163,7 +131,32 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
 
     }
 
-    
+       private class Context extends VideoContext {
+
+        public int registerVideoInputClient(InputClient client) throws ClientRegistrationException {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public void unregisterVideoInputClient(InputClient client) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public int registerVideoOutputClient(OutputClient client) throws ClientRegistrationException {
+            if (outputClient == null) {
+                outputClient = client;
+                return 1;
+            } else {
+                throw new ClientRegistrationException();
+            }
+        }
+
+        // @TODO should not allow while running!
+        public void unregisterVideoOutputClient(OutputClient client) {
+            if (outputClient == client) {
+                outputClient = null;
+            }
+        }
+    }
 
 //    private class OutputServer implements VideoOutputProxy {
 //
@@ -178,7 +171,6 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
 //            return 1;
 //        }
 //    }
-    
 //    private class TitleBinding implements StringProperty.Binding {
 //
 //        public void setBoundValue(String value) {
@@ -193,7 +185,6 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
 //        }
 //        
 //    }
-    
     private class WidthBinding implements IntProperty.Binding {
 
         public void setBoundValue(long time, int value) {
@@ -206,9 +197,8 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
         public int getBoundValue() {
             return width;
         }
-        
     }
-    
+
     private class HeightBinding implements IntProperty.Binding {
 
         public void setBoundValue(long time, int value) {
@@ -221,9 +211,8 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
         public int getBoundValue() {
             return height;
         }
-        
     }
-    
+
     private class FpsBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
@@ -236,9 +225,8 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
         public double getBoundValue() {
             return fps;
         }
-        
     }
-    
+
     private class FullScreenBinding implements BooleanProperty.Binding {
 
         public void setBoundValue(long time, boolean value) {
@@ -251,8 +239,5 @@ public class DefaultVideoRoot extends AbstractRoot implements VideoRoot, FrameRa
         public boolean getBoundValue() {
             return fullScreen;
         }
-        
     }
-
-
 }

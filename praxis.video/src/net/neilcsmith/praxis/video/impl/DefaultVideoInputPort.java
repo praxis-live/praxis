@@ -19,11 +19,12 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.video;
+package net.neilcsmith.praxis.video.impl;
 
 import net.neilcsmith.praxis.core.*;
 import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.impl.PortListenerSupport;
+import net.neilcsmith.praxis.video.VideoPort;
 import net.neilcsmith.ripl.Sink;
 import net.neilcsmith.ripl.Source;
 

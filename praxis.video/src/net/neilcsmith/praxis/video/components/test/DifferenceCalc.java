@@ -31,8 +31,8 @@ import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.ArrayProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.TriggerControl;
-import net.neilcsmith.praxis.video.DefaultVideoInputPort;
-import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
+import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
+import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
 import net.neilcsmith.ripl.components.temporal.ChangeMeasure;
 
 /**

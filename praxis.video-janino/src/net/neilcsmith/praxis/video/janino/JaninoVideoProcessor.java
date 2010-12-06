@@ -21,8 +21,8 @@
  */
 package net.neilcsmith.praxis.video.janino;
 
-import net.neilcsmith.praxis.video.DefaultVideoInputPort;
-import net.neilcsmith.praxis.video.DefaultVideoOutputPort;
+import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
+import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
 import net.neilcsmith.ripl.components.Delegator;
 
 /**
