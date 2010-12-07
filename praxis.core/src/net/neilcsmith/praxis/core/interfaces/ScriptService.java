@@ -33,21 +33,29 @@ import net.neilcsmith.praxis.core.types.PString;
 public class ScriptService extends InterfaceDefinition {
 
     public final static String EVAL = "eval";
+    public final static String CLEAR = "clear";
     public final static ScriptService INSTANCE = new ScriptService();
     private final static ControlInfo EVAL_INFO = ControlInfo.createFunctionInfo(
                 new ArgumentInfo[]{PString.info()},
                 new ArgumentInfo[0],
                 null);
+    private final static ControlInfo CLEAR_INFO = ControlInfo.createFunctionInfo(
+            new ArgumentInfo[0],
+            new ArgumentInfo[0],
+            null);
 
     @Override
     public String[] getControls() {
-        return new String[]{EVAL};
+        return new String[]{EVAL, CLEAR};
     }
 
     @Override
     public ControlInfo getControlInfo(String control) {
         if (EVAL.equals(control)) {
             return EVAL_INFO;
+        }
+        if (CLEAR.equals(control)) {
+            return CLEAR_INFO;
         }
         throw new IllegalArgumentException();
     }

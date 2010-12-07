@@ -35,7 +35,7 @@ import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.hub.TaskServiceImpl;
 import net.neilcsmith.praxis.hub.DefaultHub;
 import net.neilcsmith.praxis.laf.PraxisLAFManager;
-import net.neilcsmith.praxis.script.ScriptServiceImpl;
+import net.neilcsmith.praxis.script.impl.ScriptServiceImpl;
 import org.netbeans.api.sendopts.CommandException;
 import org.netbeans.spi.sendopts.Env;
 import org.netbeans.spi.sendopts.Option;
@@ -102,7 +102,7 @@ public class CLIProcessor extends OptionProcessor {
             if (!player) {
                 if (script == null) {
                     throw new CommandException(1,
-                            "When using the --noplayer option you must pass in a valid script.");
+                            "When not using the --player option you must pass in a valid script.");
                 }
                 startNonGuiPlayer(script);
 

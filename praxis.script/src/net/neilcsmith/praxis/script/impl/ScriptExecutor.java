@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.logging.Logger;
+import javax.script.ScriptContext;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.types.PReference;
@@ -79,6 +80,16 @@ public class ScriptExecutor {
         }
     }
 
+    public void flushEvalQueue() {
+        // flush stack
+        stack.clear();
+        while (!queue.isEmpty()) {
+            Call call = queue.poll();
+            context.getPacketRouter().route(Call.createErrorCall(call, CallArguments.EMPTY));
+        }
+
+    }
+
     public void processScriptCall(Call call) {
         log.finest("processScriptCall - received :\n" + call);
         if (!stack.isEmpty()) {
@@ -91,43 +102,6 @@ public class ScriptExecutor {
     }
 
     private void processStack() {
-//        StackFrame current = stack.get(0);
-//        log.finest("Processing stack : " + current.getClass() +
-//                "\n  Stack Size : " + stack.size());
-//        // if incomplete do round of processing
-//        if (current.getState() == StackFrame.State.Incomplete) {
-//            log.finest("Calling process() on : " + current.getClass());
-//            StackFrame child = current.process(context);
-//            if (child != null) {
-//                log.finest("Pushing to stack" + child.getClass());
-//                stack.add(0, child);
-//                processStack();
-//            }
-//        }
-//        // now check state again and pop if necessary
-//        StackFrame.State state = current.getState();
-//        if (state != StackFrame.State.Incomplete) {
-//            CallArguments args = current.getResult();
-//            log.finest("Stack frame complete : " + current.getClass() +
-//                    "\n  Result : " + args + "\n  Stack Size : " + stack.size());
-//            stack.remove(0);
-//            if (!stack.isEmpty()) {
-//                log.finest("Posting result up stack");
-//                stack.get(0).postResponse(state, args);
-//                processStack();
-//            } else {
-//                Call call = queue.poll();
-//                if (state == StackFrame.State.OK) {
-//                    log.finest("Sending OK return call");
-//                    call = Call.createReturnCall(call, args);
-//                } else {
-//                    log.finest("Sending Error return call");
-//                    call = Call.createErrorCall(call, args);
-//                }
-//                context.getPacketRouter().route(call);
-//                checkAndStartEval();
-//            }
-//        }
         while (!stack.isEmpty()) {
             StackFrame current = stack.get(0);
             log.finest("Processing stack : " + current.getClass()

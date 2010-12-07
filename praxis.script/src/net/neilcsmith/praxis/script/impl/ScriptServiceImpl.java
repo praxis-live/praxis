@@ -19,10 +19,13 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.script;
+package net.neilcsmith.praxis.script.impl;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Call;
+import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.Lookup;
@@ -32,7 +35,6 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.ScriptService;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.script.Env;
-import net.neilcsmith.praxis.script.impl.ScriptExecutor;
 
 /**
  *
@@ -42,45 +44,52 @@ public class ScriptServiceImpl extends AbstractRoot {
 
     private static final Logger LOG = Logger.getLogger(ScriptServiceImpl.class.getName());
 
-    private ScriptContext context;
-    private ScriptExecutor defaultExecutor;
+//    private ScriptContext context;
+//    private ScriptExecutor defaultExecutor;
+    private Map<ControlAddress, ScriptContext> contexts;
+    private int exID;
 
     public ScriptServiceImpl() {
         registerControl(ScriptService.EVAL, new EvalControl());
+        registerControl(ScriptService.CLEAR, new ClearControl());
         registerInterface(ScriptService.INSTANCE);
+        contexts = new HashMap<ControlAddress, ScriptContext>();
     }
 
     
 
-    @Override
-    protected void initializing() {
-        super.initializing();
-        String id = "__default__";
-        registerControl(id, new ScriptControl());
-        context = new ScriptContext(ControlAddress.create(getAddress(), id));
-        defaultExecutor = new ScriptExecutor(context, false);
+//    @Override
+//    protected void initializing() {
+//        super.initializing();
+//        String id = "__default__";
+//        registerControl(id, new ScriptControl());
+//        context = new ScriptContext(ControlAddress.create(getAddress(), id));
+//        defaultExecutor = new ScriptExecutor(context, false);
+//    }
+
+    private ScriptExecutor getExecutor(ControlAddress from) {
+        ScriptContext ctxt = contexts.get(from);
+        if (ctxt != null) {
+            return ctxt.executor;
+        }
+        exID++;
+        String id = "_exec_" + exID;  
+        EnvImpl env = new EnvImpl(ControlAddress.create(getAddress(), id));
+        ScriptExecutor ex = new ScriptExecutor(env, true);
+        registerControl(id, new ScriptControl(ex));
+        contexts.put(from, new ScriptContext(id, ex));
+        return ex;
     }
 
-//    @Override
-//    public InterfaceDefinition[] getInterfaces() {
-//        return new InterfaceDefinition[]{ScriptService.INSTANCE};
-//    }
+    private void clearContext(ControlAddress from) {
+        ScriptContext ctxt = contexts.remove(from);
+        if (ctxt == null) {
+            return;
+        }
+        ctxt.executor.flushEvalQueue();
+        unregisterControl(ctxt.id);
+    }
 
-//    private class EvalControl extends BasicControl {
-//
-//        private EvalControl() {
-//            super(ScriptServiceImpl.this);
-//        }
-//
-//        @Override
-//        protected void processInvoke(Call call, PacketRouter router, boolean quiet) throws Exception {
-//            defaultExecutor.queueEvalCall(call);
-//        }
-//
-//        public ControlInfo getInfo() {
-//            return null;
-//        }
-//    }
 
     private class EvalControl implements Control {
 
@@ -88,10 +97,11 @@ public class ScriptServiceImpl extends AbstractRoot {
             switch (call.getType()) {
                 case INVOKE :
                 case INVOKE_QUIET :
-                    defaultExecutor.queueEvalCall(call);
+//                    defaultExecutor.queueEvalCall(call);
+                    getExecutor(call.getFromAddress()).queueEvalCall(call);
                     break;
                 default:
-                    LOG.warning("Eval control received unexpected call.");
+                    LOG.warning("Eval control received unexpected call.\n" + call);
             }
         }
 
@@ -100,56 +110,50 @@ public class ScriptServiceImpl extends AbstractRoot {
         }
 
     }
-//
-//    private class ScriptControl extends BasicControl {
-//
-//        private ScriptControl() {
-//            super(ScriptServiceImpl.this);
-//        }
-//
-//        @Override
-//        protected void processReturn(Call call) throws Exception {
-//            defaultExecutor.processScriptCall(call);
-//        }
-//
-//        @Override
-//        protected void processError(Call call) throws Exception {
-//            defaultExecutor.processScriptCall(call);
-//        }
-//
-//        @Override
-//        protected Call processInvoke(Call call, boolean quiet) throws Exception {
-//            if (call.getToAddress().equals(call.getFromAddress())) {
-//                defaultExecutor.processScriptCall(call);
-//                return null;
-//            } else {
-//                return super.processInvoke(call, quiet);
-//            }
-//        }
-//
-//
-//
-//        public ControlInfo getInfo() {
-//            return null;
-//        }
-//
-//
-//    }
+
+    private class ClearControl implements Control {
+
+        public void call(Call call, PacketRouter router) throws Exception {
+            switch (call.getType()) {
+                case INVOKE :
+                    clearContext(call.getFromAddress());
+                    router.route(Call.createReturnCall(call, CallArguments.EMPTY));
+                    break;
+                case INVOKE_QUIET :
+                    clearContext(call.getFromAddress());
+                    break;
+                default :
+                    LOG.warning("Clear control received unexpected call.\n" + call);
+            }
+        }
+
+        public ControlInfo getInfo() {
+            return ScriptService.INSTANCE.getControlInfo(ScriptService.CLEAR);
+        }
+
+    }
+
 
     private class ScriptControl implements Control {
+
+        private ScriptExecutor executor;
+
+        private ScriptControl(ScriptExecutor executor) {
+            this.executor = executor;
+        }
 
         public void call(Call call, PacketRouter router) throws Exception {
             switch (call.getType()) {
                 case INVOKE :
                 case INVOKE_QUIET :
                     if (call.getToAddress().equals(call.getFromAddress())) {
-                        defaultExecutor.processScriptCall(call);
+                        executor.processScriptCall(call);
                     } else {
                         throw new UnsupportedOperationException();
                     }
                     break;
                 default :
-                    defaultExecutor.processScriptCall(call);
+                    executor.processScriptCall(call);
             }
         }
 
@@ -159,14 +163,27 @@ public class ScriptServiceImpl extends AbstractRoot {
 
     }
 
+    private class ScriptContext {
+
+        private String id;
+        private ScriptExecutor executor;
+
+        private ScriptContext(String id, ScriptExecutor executor) {
+            this.id = id;
+            this.executor = executor;
+        }
 
 
-    private class ScriptContext implements Env {
+    }
+
+
+
+    private class EnvImpl implements Env {
 
         private ControlAddress address;
         private Router router;
 
-        private ScriptContext(ControlAddress address) {
+        private EnvImpl(ControlAddress address) {
             this.address = address;
             router = new Router();
         }

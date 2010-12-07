@@ -26,6 +26,7 @@ import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.Lookup;
+import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 

@@ -27,7 +27,7 @@ import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.hub.TaskServiceImpl;
 import net.neilcsmith.praxis.hub.DefaultHub;
 import net.neilcsmith.praxis.laf.PraxisLAFManager;
-import net.neilcsmith.praxis.script.ScriptServiceImpl;
+import net.neilcsmith.praxis.script.impl.ScriptServiceImpl;
 import org.openide.modules.ModuleInstall;
 
 /**

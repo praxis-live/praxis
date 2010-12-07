@@ -61,11 +61,13 @@ import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.ComponentAddress;
+import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.ScriptService;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.impl.AbstractControl;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
 import net.neilcsmith.praxis.impl.RootState;
@@ -79,12 +81,15 @@ public class Player extends AbstractRoot {
     private final Object lock = new Object();
     private JFrame mainFrame;
     private JFrame scriptFrame;
+    private JFrame terminalFrame;
+    private Terminal terminal;
 //    private JComponent container;
     private Timer timer;
     private Action newAction;
     private Action openAction;
     private Action clearAction;
     private Action quitAction;
+    private Action terminalAction;
     private Action aboutAction;
     private ScriptControl scriptControl;
     private File currentFile;
@@ -92,13 +97,11 @@ public class Player extends AbstractRoot {
     private String script;
 
     public Player() {
-
     }
 
     public Player(String script) {
         this.script = script;
     }
-
 
     @Override
     protected final void run() {
@@ -126,9 +129,8 @@ public class Player extends AbstractRoot {
         }
     }
 
-
     protected void initialize() {
-        
+
         scriptControl = new ScriptControl();
         registerControl("_script-control", scriptControl);
         buildActions();
@@ -137,7 +139,7 @@ public class Player extends AbstractRoot {
         if (script != null) {
             scriptControl.runScript(script, false);
         }
-        
+
     }
 
     private void buildActions() {
@@ -145,6 +147,7 @@ public class Player extends AbstractRoot {
         openAction = new OpenAction();
         clearAction = new ClearAction();
         quitAction = new QuitAction();
+        terminalAction = new TerminalAction();
         aboutAction = new AboutAction();
     }
 
@@ -163,11 +166,15 @@ public class Player extends AbstractRoot {
         JMenuBar menu = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         fileMenu.setMnemonic(KeyEvent.VK_F);
-        fileMenu.add(newAction);
+//        fileMenu.add(newAction);
         fileMenu.add(openAction);
         fileMenu.add(clearAction);
         fileMenu.add(quitAction);
         menu.add(fileMenu);
+        JMenu toolsMenu = new JMenu("Tools");
+        toolsMenu.setMnemonic(KeyEvent.VK_T);
+        toolsMenu.add(terminalAction);
+        menu.add(toolsMenu);
         JMenu helpMenu = new JMenu("Help");
         helpMenu.setMnemonic(KeyEvent.VK_H);
         helpMenu.add(aboutAction);
@@ -198,6 +205,23 @@ public class Player extends AbstractRoot {
         return bx;
     }
 
+    private void showTerminal() {
+        if (terminalFrame == null) {
+            terminalFrame = new JFrame("Praxis - Terminal");
+            TerminalContext ctxt = new TerminalContext();
+            registerControl("_terminal", ctxt);
+            terminal = new Terminal(ctxt);
+            terminalFrame.add(terminal);
+            terminalFrame.pack();
+
+        }
+        terminalFrame.setVisible(true);
+        terminalFrame.toFront();
+        terminal.requestFocusInWindow();
+
+
+    }
+
     private void showScriptDialog(boolean openFile) {
         final JTextArea script = new JTextArea(12, 40);
         if (openFile) {
@@ -221,7 +245,7 @@ public class Player extends AbstractRoot {
             public void hierarchyChanged(HierarchyEvent e) {
                 Window window = SwingUtilities.getWindowAncestor(script);
                 if (window instanceof Dialog) {
-                    Dialog dialog = (Dialog)window;
+                    Dialog dialog = (Dialog) window;
                     if (!dialog.isResizable()) {
                         dialog.setResizable(true);
                     }
@@ -417,6 +441,65 @@ public class Player extends AbstractRoot {
 
         public void actionPerformed(ActionEvent e) {
             System.exit(0);
+        }
+    }
+
+    private class TerminalAction extends AbstractAction {
+
+        private TerminalAction() {
+            super("Terminal");
+            putValue(Action.MNEMONIC_KEY, KeyEvent.VK_T);
+            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("control T"));
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            showTerminal();
+        }
+    }
+
+    private class TerminalContext extends AbstractControl implements Terminal.Context {
+
+        private Call activeCall;
+
+        public void eval(String script) throws Exception {
+            ControlAddress to = ControlAddress.create(
+                    findService(ScriptService.INSTANCE),
+                    ScriptService.EVAL);
+            Call call = Call.createCall(to, getAddress(), System.nanoTime(), PString.valueOf(script));
+            getPacketRouter().route(call);
+            activeCall = call;
+        }
+
+        public void clear() throws Exception {
+            ControlAddress to = ControlAddress.create(
+                    findService(ScriptService.INSTANCE),
+                    ScriptService.CLEAR);
+            Call call = Call.createQuietCall(to, getAddress(), System.nanoTime(), CallArguments.EMPTY);
+            getPacketRouter().route(call);
+            activeCall = null;
+        }
+
+        public void call(Call call, PacketRouter router) throws Exception {
+            switch (call.getType()) {
+                case RETURN :
+                    if (call.getMatchID() == activeCall.getMatchID()) {
+                        terminal.processResponse(call.getArgs());
+                        activeCall = null;
+                    }
+                    break;
+                case ERROR :
+                    if (call.getMatchID() == activeCall.getMatchID()) {
+                        terminal.processError(call.getArgs());
+                        activeCall = null;
+                    }
+                    break;
+                default :
+
+            }
+        }
+
+        public ControlInfo getInfo() {
+            return null;
         }
     }
 
