@@ -72,11 +72,11 @@ class CreationControl extends BasicControl {
     private void processCall(Call call) {
         try {
             CallArguments args = call.getArgs();
-            if (args.getCount() == 2) {
-                ComponentAddress ad = coerceArgument(args.getArg(0));
+            if (args.getSize() == 2) {
+                ComponentAddress ad = coerceArgument(args.get(0));
                 if (ad != null) {
                     if (ad.getDepth() == 1) {
-                        createRoot(ad.getRootID(), args.getArg(1).toString());
+                        createRoot(ad.getRootID(), args.get(1).toString());
                         Call ret = Call.createReturnCall(call, CallArguments.EMPTY);
                         hub.route(ret);
                         callQueue.remove(call);
@@ -85,7 +85,7 @@ class CreationControl extends BasicControl {
                         }
                         return;
                     } else {
-                        Call out = createComponent(ad, args.getArg(1).toString());
+                        Call out = createComponent(ad, args.get(1).toString());
                         matchID = out.getMatchID();
                         hub.route(out);
                         return;

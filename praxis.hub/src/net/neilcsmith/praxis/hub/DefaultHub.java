@@ -393,8 +393,8 @@ public class DefaultHub extends AbstractRoot {
         @Override
         protected void processError(Call call) {
             CallArguments args = call.getArgs();
-            if (args.getCount() == 1) {
-                Argument arg = args.getArg(0);
+            if (args.getSize() == 1) {
+                Argument arg = args.get(0);
                 if (arg instanceof PReference) {
                     Object o = ((PReference) arg).getReference();
                     if (o instanceof Exception) {
@@ -424,7 +424,7 @@ public class DefaultHub extends AbstractRoot {
 
         @Override
         protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
-            Component c = factory.createComponent(ComponentType.coerce(args.getArg(0)));
+            Component c = factory.createComponent(ComponentType.coerce(args.get(0)));
             return CallArguments.create(PReference.wrap(c));
         }
 
@@ -438,9 +438,9 @@ public class DefaultHub extends AbstractRoot {
 
         @Override
         protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
-            String id = args.getArg(0).toString();
-            Root r = factory.createRootComponent(ComponentType.coerce(args.getArg(1)));
-            installRoot(id, args.getArg(1).toString(), r);
+            String id = args.get(0).toString();
+            Root r = factory.createRootComponent(ComponentType.coerce(args.get(1)));
+            installRoot(id, args.get(1).toString(), r);
             return CallArguments.EMPTY;
         }
 
@@ -455,7 +455,7 @@ public class DefaultHub extends AbstractRoot {
 
         @Override
         protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
-            String id = args.getArg(0).toString();
+            String id = args.get(0).toString();
             uninstallRoot(id);
             return CallArguments.EMPTY;
         }

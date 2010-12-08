@@ -86,8 +86,8 @@ public class ConnectionCmds implements CommandInstaller {
 
         @Override
         protected Call createCall(Env env, CallArguments args) throws Exception {
-            PortAddress p1 = PortAddress.coerce(args.getArg(0));
-            PortAddress p2 = PortAddress.coerce(args.getArg(1));
+            PortAddress p1 = PortAddress.coerce(args.get(0));
+            PortAddress p2 = PortAddress.coerce(args.get(1));
             ComponentAddress c1 = p1.getComponentAddress();
             ComponentAddress c2 = p2.getComponentAddress();
             ComponentAddress container = c1.getParentAddress();

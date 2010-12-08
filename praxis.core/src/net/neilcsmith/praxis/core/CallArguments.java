@@ -34,7 +34,7 @@ public abstract class CallArguments {
     
 //    public final static CallArguments EMPTY = new CallArguments(new Argument[0]);
     /**
-     * EMPTY CallArguments, returns 0 for getCount().
+     * EMPTY CallArguments, returns 0 for getSize().
      */
     public final static CallArguments EMPTY = new Empty();
     
@@ -43,7 +43,7 @@ public abstract class CallArguments {
      *
      * @return int Count
      */
-    public abstract int getCount();
+    public abstract int getSize();
 
     /**
      * Get Argument. Index must be between 0 and count-1.
@@ -51,19 +51,29 @@ public abstract class CallArguments {
      * @param index int position in Argument array
      * @return Argument
      */
-    public abstract Argument getArg(int index);
+    public abstract Argument get(int index);
+
+    public abstract Argument[] getAll();
     
     private static class Empty extends CallArguments {
 
+        private static Argument[] NONE = new Argument[0];
+
         @Override
-        public int getCount() {
+        public int getSize() {
             return 0;
         }
 
         @Override
-        public Argument getArg(int index) {
+        public Argument get(int index) {
             throw new IndexOutOfBoundsException();
         }
+
+        @Override
+        public Argument[] getAll() {
+            return NONE;
+        }
+
 
         @Override
         public boolean equals(Object obj) {
@@ -94,17 +104,23 @@ public abstract class CallArguments {
         }
 
         @Override
-        public int getCount() {
+        public int getSize() {
             return 1;
         }
 
         @Override
-        public Argument getArg(int index) {
+        public Argument get(int index) {
             if (index == 0) {
                 return arg;
             }
             throw new IndexOutOfBoundsException();
         }
+
+        @Override
+        public Argument[] getAll() {
+            return new Argument[] {arg};
+        }
+
 
         @Override
         public String toString() {
@@ -125,13 +141,18 @@ public abstract class CallArguments {
         }
 
         @Override
-        public int getCount() {
+        public int getSize() {
             return args.length;
         }
 
         @Override
-        public Argument getArg(int index) {
+        public Argument get(int index) {
             return args[index];
+        }
+
+        @Override
+        public Argument[] getAll() {
+            return args.clone();
         }
 
         @Override
@@ -158,11 +179,11 @@ public abstract class CallArguments {
 //        this.args = args;
 //    }
     
-//    public int getCount() {
+//    public int getSize() {
 //        return args.length;
 //    }
 //
-//    public Argument getArg(int index) {
+//    public Argument get(int index) {
 //        return args[index];
 //    }
 

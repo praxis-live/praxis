@@ -51,7 +51,7 @@ public abstract class AbstractProperty implements Control {
         Call.Type type = call.getType();
         if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
             CallArguments args = call.getArgs();
-            int argCount = args.getCount();
+            int argCount = args.getSize();
             long time = call.getTimecode();
             if (argCount > 0) {
                 if (isLatest(time)) {
@@ -72,7 +72,7 @@ public abstract class AbstractProperty implements Control {
 
 //    protected Call processInvoke(Call call, boolean quiet) throws Exception {
 //        CallArguments args = call.getArgs();
-//        int argCount = args.getCount();
+//        int argCount = args.getSize();
 //        long time = call.getTimecode();
 //        if (argCount > 0) {
 //            if (isLatest(time)) {

@@ -49,11 +49,11 @@ public class FloatRangeProperty extends AbstractProperty {
 
     @Override
     protected void setArguments(long time, CallArguments args) throws Exception {
-        if (args.getCount() != 2) {
+        if (args.getSize() != 2) {
             throw new IllegalArgumentException();
         }
-        PNumber low = PNumber.coerce(args.getArg(0));
-        PNumber high = PNumber.coerce(args.getArg(1));
+        PNumber low = PNumber.coerce(args.get(0));
+        PNumber high = PNumber.coerce(args.get(1));
         binding.setBoundLowValue(time, low.value());
         binding.setBoundHighValue(time, high.value());
     }

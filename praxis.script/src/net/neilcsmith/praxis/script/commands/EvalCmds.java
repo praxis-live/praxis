@@ -60,10 +60,10 @@ public class EvalCmds implements CommandInstaller {
 
         public StackFrame createStackFrame(Namespace namespace, CallArguments args)
                 throws ExecutionException {
-            if (args.getCount() != 1) {
+            if (args.getSize() != 1) {
                 throw new ExecutionException();
             }
-            String script = args.getArg(0).toString();
+            String script = args.get(0).toString();
             try {
                 RootNode astRoot = ScriptParser.getInstance().parse(script);
                 return new EvalStackFrame(namespace.createChild(), astRoot);
@@ -77,10 +77,10 @@ public class EvalCmds implements CommandInstaller {
 
         public StackFrame createStackFrame(Namespace namespace, CallArguments args)
                 throws ExecutionException {
-            if (args.getCount() != 1) {
+            if (args.getSize() != 1) {
                 throw new ExecutionException();
             }
-            String script = args.getArg(0).toString();
+            String script = args.get(0).toString();
             try {
                 RootNode astRoot = ScriptParser.getInstance().parse(script);
                 return new EvalStackFrame(namespace, astRoot);

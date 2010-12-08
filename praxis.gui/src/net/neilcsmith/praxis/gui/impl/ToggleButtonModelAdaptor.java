@@ -112,8 +112,8 @@ public class ToggleButtonModelAdaptor extends ControlBinding.Adaptor {
             return false;
         }
         CallArguments args = binding.getArguments();
-        if (args.getCount() > 0) {
-            Argument arg = args.getArg(0);
+        if (args.getSize() > 0) {
+            Argument arg = args.get(0);
 //            if (onArg.toString().equals(arg.toString())) {
 //                return true;
 //            }

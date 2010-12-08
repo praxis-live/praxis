@@ -67,7 +67,7 @@ public class VideoDelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
     @Override
     protected TaskService.Task createTask(CallArguments keys) throws Exception {
         Argument key;
-        if (keys.getCount() < 1 || (key = keys.getArg(0)).isEmpty()) {
+        if (keys.getSize() < 1 || (key = keys.get(0)).isEmpty()) {
             return null;
         } else {
             return new LoadTask(getLookup(), key);

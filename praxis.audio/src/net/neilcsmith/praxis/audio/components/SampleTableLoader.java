@@ -60,7 +60,7 @@ public class SampleTableLoader extends AbstractAsyncProperty<SampleTable> {
 
     @Override
     protected TaskService.Task createTask(CallArguments keys) throws Exception {
-        return new LoaderTask(keys.getArg(0));
+        return new LoaderTask(keys.get(0));
     }
 
     @Override

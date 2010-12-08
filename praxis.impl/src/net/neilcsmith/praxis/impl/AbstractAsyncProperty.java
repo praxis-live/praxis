@@ -95,7 +95,7 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
     private void processInvoke(Call call, PacketRouter router) throws Exception {
         CallArguments args = call.getArgs();
         long time = call.getTimecode();
-        if (args.getCount() > 0 && isLatest(time)) {
+        if (args.getSize() > 0 && isLatest(time)) {
             TaskService.Task task = createTask(args);
             // no exception so valid args
             if (task == null) {
@@ -126,7 +126,7 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
             return;
         }
         taskCall = null;
-        castAndSetValue(call.getArgs().getArg(0));
+        castAndSetValue(call.getArgs().get(0));
         if (activeCall != null) {
             keys = activeCall.getArgs();
             respond(activeCall, keys, router);

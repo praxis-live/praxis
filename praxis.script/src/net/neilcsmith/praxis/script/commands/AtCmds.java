@@ -66,17 +66,17 @@ public class AtCmds implements CommandInstaller {
 
         public StackFrame createStackFrame(Namespace namespace, CallArguments args) throws ExecutionException {
 
-            if (args.getCount() < 2) {
+            if (args.getSize() < 2) {
                 throw new ExecutionException();
             }
 
             try {
-                ComponentAddress ctxt = ComponentAddress.coerce(args.getArg(0));
-                if (args.getCount() == 3) {
-                    ComponentType type = ComponentType.coerce(args.getArg(1));
-                    return new AtStackFrame(namespace, ctxt, type, args.getArg(2));
+                ComponentAddress ctxt = ComponentAddress.coerce(args.get(0));
+                if (args.getSize() == 3) {
+                    ComponentType type = ComponentType.coerce(args.get(1));
+                    return new AtStackFrame(namespace, ctxt, type, args.get(2));
                 } else {
-                    return new AtStackFrame(namespace, ctxt, null, args.getArg(1));
+                    return new AtStackFrame(namespace, ctxt, null, args.get(1));
                 }
             } catch (Exception ex) {
                 throw new ExecutionException(ex);
@@ -211,7 +211,7 @@ public class AtCmds implements CommandInstaller {
 
         @Override
         protected Call createCall(Env env, CallArguments args) throws Exception {
-            ComponentAddress comp = ComponentAddress.coerce(args.getArg(0));
+            ComponentAddress comp = ComponentAddress.coerce(args.get(0));
             if (comp.getDepth() == 1) {
                 return createRootRemovalCall(env, comp.getRootID());
             } else {

@@ -22,48 +22,55 @@
  */
 package net.neilcsmith.praxis.gui.components;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
-import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
+import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.ControlAddress;
-import net.neilcsmith.praxis.core.Root;
-import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.interfaces.ScriptService;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PString;
-import net.neilcsmith.praxis.gui.impl.AbstractGuiComponent;
+import net.neilcsmith.praxis.gui.ControlBinding.Adaptor;
 import net.neilcsmith.praxis.gui.impl.ActionAdaptor;
-import net.neilcsmith.praxis.gui.BindingContext;
-import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.impl.AbstractProperty;
+import net.neilcsmith.praxis.gui.impl.SingleBindingGuiComponent;
+import net.neilcsmith.praxis.impl.ArrayProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
 
 /**
  *
  * @author Neil C Smith
  */
-public class Button extends AbstractGuiComponent {
+public class Button extends SingleBindingGuiComponent {
+
+    private final static Logger LOG = Logger.getLogger(Button.class.getName());
 
     private JButton button;
-    private PArray argsArray;
     private ActionAdaptor adaptor;
     private String label;
-    private ControlAddress onClickAddress;
-    private CallArguments onClickArgs;
-    private ControlInfo onClickInfo;
-    private BindingContext bindingContext;
+    private CallArguments values;
+    private StringProperty onClick;
 
     public Button() {
         label = "";
-        onClickArgs = CallArguments.create(PString.EMPTY);
-        registerControl("label", StringProperty.create( new LabelBinding(), label));
+        values = CallArguments.EMPTY;
+        registerControl("values", ArrayProperty.create(new ValuesBinding(), PArray.EMPTY));
+        registerControl("label", StringProperty.create(new LabelBinding(), label));
+        onClick = StringProperty.create("");
+        registerControl("on-click", onClick);
+        registerControl("_on-click-log", new OnClickLog());
         // @TODO Fix ControlInfo here.
-        onClickInfo = ControlInfo.createPropertyInfo(new ArgumentInfo[] {ControlAddress.info(), Argument.info()},
-                new Argument[] {PString.EMPTY}, null);
-        registerControl("on-click", new OnClickProperty(this, onClickInfo));
+//        onClickInfo = ControlInfo.createPropertyInfo(new ArgumentInfo[] {ControlAddress.info(), Argument.info()},
+//                new Argument[] {PString.EMPTY}, null);
+//        registerControl("on-click", new OnClickProperty(this, onClickInfo));
     }
 
     @Override
@@ -74,12 +81,25 @@ public class Button extends AbstractGuiComponent {
         return button;
     }
 
+    @Override
+    protected Adaptor getBindingAdaptor() {
+        if (adaptor == null) {
+            createComponentAndAdaptor();
+        }
+        return adaptor;
+    }
+
     private void createComponentAndAdaptor() {
         button = new JButton(label);
         adaptor = new ActionAdaptor();
         button.addActionListener(adaptor);
-//        setAdaptorArguments();
-        updateAdaptor();
+        adaptor.setCallArguments(values);
+        button.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                processOnClick();
+            }
+        });
         button.addAncestorListener(new AncestorListener() {
 
             public void ancestorAdded(AncestorEvent event) {
@@ -96,39 +116,22 @@ public class Button extends AbstractGuiComponent {
         });
     }
 
-    private void updateAdaptor() {
-        if (bindingContext != null && adaptor != null) {
-            bindingContext.unbind(adaptor);
-            if (onClickAddress != null) {
-                bindingContext.bind(onClickAddress, adaptor);
-                adaptor.setCallArguments(onClickArgs);
+    private void processOnClick() {
+        try {
+            String script = onClick.getValue().trim();
+            if (script.isEmpty()) {
+                return;
             }
-        }
-    }
-
-    @Override
-    public void hierarchyChanged() {
-        super.hierarchyChanged();
-//        Root r = getRoot();
-//        if (r instanceof BindingContext) {
-//            bindingContext = (BindingContext) r;
-//        } else {
-//            if (bindingContext != null) {
-//                if (adaptor != null) {
-//                    bindingContext.unbind(adaptor);
-//                }
-//                bindingContext = null;
-//            }
-//        }
-        BindingContext ctxt = getLookup().get(BindingContext.class);
-        if (ctxt != null) {
-            bindingContext = ctxt;
-        } else {
-            if (adaptor != null) {
-                bindingContext.unbind(adaptor);
-                adaptor = null;
-            }
-            bindingContext = null;
+            ControlAddress to = ControlAddress.create(
+                    findService(ScriptService.INSTANCE),
+                    ScriptService.EVAL);
+            ControlAddress from = ControlAddress.create(
+                    getAddress(), "_on-click-log");
+            Call call = Call.createQuietCall(to, from, System.nanoTime(), PString.valueOf(script));
+            getPacketRouter().route(call);
+            
+        } catch (Exception ex) {
+            Logger.getLogger(Button.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -147,51 +150,81 @@ public class Button extends AbstractGuiComponent {
         }
     }
 
+    private class ValuesBinding implements ArrayProperty.Binding {
 
-    private class OnClickProperty extends AbstractProperty {
+        private PArray value = PArray.EMPTY;
 
-        private final CallArguments unbound = CallArguments.create(PString.EMPTY);
-        private CallArguments cache = unbound;
-
-        OnClickProperty(AbstractComponent component, ControlInfo info) {
-            super(info);
-        }
-
-        @Override
-        protected void setArguments(long time, CallArguments args) throws Exception {
-            Argument arg = args.getArg(0);
-            if (arg.isEmpty()) {
-                onClickAddress = null;
-                onClickArgs = null;
-                cache = unbound;
+        public void setBoundValue(long time, PArray value) {
+            if (value.isEmpty()) {
+                values = CallArguments.EMPTY;
             } else {
-                try {
-                    onClickAddress = ControlAddress.coerce(arg);
-                    int argCount = args.getCount();
-                    if (argCount > 1) {
-                        Argument[] clArgs = new Argument[argCount - 1];
-                        for (int i = 0; i < clArgs.length; i++) {
-                            clArgs[i] = args.getArg(i + 1);
-                        }
-                        onClickArgs = CallArguments.create(clArgs);
-                    } else {
-                        onClickArgs = CallArguments.EMPTY;
-                    }
-                    cache = args;
-                } catch (Exception ex) {
-                    onClickAddress = null;
-                    onClickArgs = null;
-                    cache = unbound;
-                }
+                values = CallArguments.create(value.getAll());
             }
-            updateAdaptor();
+            this.value = value;
+            adaptor.setCallArguments(values);
         }
 
-        @Override
-        protected CallArguments getArguments() {
-            return cache;
+        public PArray getBoundValue() {
+            return this.value;
         }
     }
 
+    private class OnClickLog implements Control {
 
+        public void call(Call call, PacketRouter router) throws Exception {
+            if (call.getType() == Call.Type.ERROR) {
+                LOG.warning(call.toString());
+            }
+        }
+
+        public ControlInfo getInfo() {
+            return null;
+        }
+
+    }
+
+//    private class OnClickProperty extends AbstractProperty {
+//
+//        private final CallArguments unbound = CallArguments.create(PString.EMPTY);
+//        private CallArguments cache = unbound;
+//
+//        OnClickProperty(AbstractComponent component, ControlInfo info) {
+//            super(info);
+//        }
+//
+//        @Override
+//        protected void setArguments(long time, CallArguments args) throws Exception {
+//            Argument arg = args.get(0);
+//            if (arg.isEmpty()) {
+//                onClickAddress = null;
+//                onClickArgs = null;
+//                cache = unbound;
+//            } else {
+//                try {
+//                    onClickAddress = ControlAddress.coerce(arg);
+//                    int argCount = args.getSize();
+//                    if (argCount > 1) {
+//                        Argument[] clArgs = new Argument[argCount - 1];
+//                        for (int i = 0; i < clArgs.length; i++) {
+//                            clArgs[i] = args.get(i + 1);
+//                        }
+//                        onClickArgs = CallArguments.create(clArgs);
+//                    } else {
+//                        onClickArgs = CallArguments.EMPTY;
+//                    }
+//                    cache = args;
+//                } catch (Exception ex) {
+//                    onClickAddress = null;
+//                    onClickArgs = null;
+//                    cache = unbound;
+//                }
+//            }
+//            updateAdaptor();
+//        }
+//
+//        @Override
+//        protected CallArguments getArguments() {
+//            return cache;
+//        }
+//    }
 }

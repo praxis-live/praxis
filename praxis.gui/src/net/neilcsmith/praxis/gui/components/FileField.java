@@ -166,8 +166,8 @@ public class FileField extends SingleBindingGuiComponent {
                 return;
             }
             CallArguments args = binding.getArguments();
-            if (args.getCount() > 0) {
-                Argument arg = args.getArg(0);
+            if (args.getSize() > 0) {
+                Argument arg = args.get(0);
                 if (arg.isEmpty()) {
                     if (uri != null) {
                         uri = null;
@@ -176,7 +176,7 @@ public class FileField extends SingleBindingGuiComponent {
                 } else {
                     PResource u;
                     try {
-                        u = PResource.coerce(args.getArg(0));
+                        u = PResource.coerce(args.get(0));
                         if (!u.equals(uri)) {
                             uri = u;
                             updateField();

@@ -175,11 +175,11 @@ public class Terminal extends JComponent {
 
     private String argsToString(CallArguments args, String prefix) {
         StringBuilder builder = new StringBuilder(prefix);
-        for (int i=0; i < args.getCount(); i++) {
+        for (int i=0; i < args.getSize(); i++) {
             if (i != 0) {
                 builder.append(" ");
             }
-            builder.append(args.getArg(i));
+            builder.append(args.get(i));
         }
         builder.append("\n");
         return builder.toString();

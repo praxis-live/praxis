@@ -59,11 +59,11 @@ public class VariableCmds implements CommandInstaller {
     private static class Set extends AbstractInlineCommand {
 
         public CallArguments process(Env context, Namespace namespace, CallArguments args) throws ExecutionException {
-            if (args.getCount() != 2) {
+            if (args.getSize() != 2) {
                 throw new ExecutionException();
             }
-            String varName = args.getArg(0).toString();
-            Argument val = args.getArg(1);
+            String varName = args.get(0).toString();
+            Argument val = args.get(1);
             Variable var = namespace.getVariable(varName);
             if (var != null) {
                 var.setValue(val);

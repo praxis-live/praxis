@@ -42,7 +42,7 @@ public abstract class AbstractSingleArgProperty extends AbstractProperty {
     }
 
     protected void setArguments(long time, CallArguments args) throws Exception {
-        set(time, args.getArg(0));
+        set(time, args.get(0));
     }
 
     protected CallArguments getArguments() {

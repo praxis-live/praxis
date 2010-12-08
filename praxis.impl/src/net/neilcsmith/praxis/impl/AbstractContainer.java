@@ -154,27 +154,27 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         @Override
         protected Call processInvoke(Call call) throws Exception {
             CallArguments args = call.getArgs();
-            if (args.getCount() < 2) {
+            if (args.getSize() < 2) {
                 throw new IllegalArgumentException("Invalid arguments");
             }
-            if (!ComponentAddress.isValidID(args.getArg(0).toString())) {
+            if (!ComponentAddress.isValidID(args.get(0).toString())) {
                 throw new IllegalArgumentException("Invalid Component ID");
             }
             ControlAddress to = ControlAddress.create(
                     findService(ComponentFactoryService.INSTANCE),
                     ComponentFactoryService.NEW_INSTANCE);
-            return Call.createCall(to, getAddress(), call.getTimecode(), args.getArg(1));
+            return Call.createCall(to, getAddress(), call.getTimecode(), args.get(1));
         }
 
         @Override
         protected Call processResponse(Call call) throws Exception {
             CallArguments args = call.getArgs();
-            if (args.getCount() < 1) {
+            if (args.getSize() < 1) {
                 throw new IllegalArgumentException("Invalid response");
             }
-            Component c = (Component) ((PReference) args.getArg(0)).getReference();
+            Component c = (Component) ((PReference) args.get(0)).getReference();
             Call active = getActiveCall();
-            addChild(active.getArgs().getArg(0).toString(), c);
+            addChild(active.getArgs().get(0).toString(), c);
             return Call.createReturnCall(active, CallArguments.EMPTY);
         }
 
@@ -191,7 +191,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
 
         @Override
         protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
-            removeChild(args.getArg(0).toString());
+            removeChild(args.get(0).toString());
             return CallArguments.EMPTY;
         }
     }
@@ -227,13 +227,13 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
 
         @Override
         protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
-            if (args.getCount() < 4) {
+            if (args.getSize() < 4) {
                 throw new IllegalArgumentException();
             }
-            PString c1id = PString.coerce(args.getArg(0));
-            PString p1id = PString.coerce(args.getArg(1));
-            PString c2id = PString.coerce(args.getArg(2));
-            PString p2id = PString.coerce(args.getArg(3));
+            PString c1id = PString.coerce(args.get(0));
+            PString p1id = PString.coerce(args.get(1));
+            PString c2id = PString.coerce(args.get(2));
+            PString p2id = PString.coerce(args.get(3));
 
             Component c1 = getChild(c1id.toString());
             final Port p1 = c1.getPort(p1id.toString());

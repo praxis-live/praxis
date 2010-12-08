@@ -101,8 +101,8 @@ public class NonGuiPlayer extends AbstractRoot {
             if (activeCall != null && call.getMatchID() == activeCall.getMatchID()) {
                 activeCall = null;
                 CallArguments args = call.getArgs();
-                if (args.getCount() > 0) {
-                    Argument err = args.getArg(0);
+                if (args.getSize() > 0) {
+                    Argument err = args.get(0);
                     if (err instanceof PReference) {
                         Object o = ((PReference) err).getReference();
                         if (o instanceof Throwable) {

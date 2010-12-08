@@ -66,9 +66,9 @@ class ConnectionControl extends BasicControl {
     private void processCall(Call call) {
         boolean valid = false;
         CallArguments args = call.getArgs();
-        if (args.getCount() == 2) {
-            PortAddress pt1 = coerceArgument(args.getArg(0));
-            PortAddress pt2 = coerceArgument(args.getArg(1));
+        if (args.getSize() == 2) {
+            PortAddress pt1 = coerceArgument(args.get(0));
+            PortAddress pt2 = coerceArgument(args.get(1));
             if (pt1 != null && pt2 != null) {
                 args = CallArguments.create(new Argument[]{pt1, pt2});
                 String root = pt1.getComponentAddress().getRootID();

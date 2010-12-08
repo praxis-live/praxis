@@ -67,9 +67,9 @@ public class TaskControl extends AbstractControl {
         Callback callback = callbacks.remove(id);
         if (callback != null) {
             if (error) {
-                callback.taskError(call.getTimecode(), id, call.getArgs().getArg(0));
+                callback.taskError(call.getTimecode(), id, call.getArgs().get(0));
             } else {
-                callback.taskCompleted(call.getTimecode(), id, call.getArgs().getArg(0));
+                callback.taskCompleted(call.getTimecode(), id, call.getArgs().get(0));
             }
         }
     }

@@ -78,7 +78,7 @@ public class ActionAdaptor extends ControlBinding.Adaptor implements ActionListe
     }
 
     public void actionPerformed(ActionEvent e) {
-        if (isProperty && args.getCount() == 0) {
+        if (isProperty && args.getSize() == 0) {
                 logger.warning("Can't send zero length arguments to property control");
             } else {
                 send(args);

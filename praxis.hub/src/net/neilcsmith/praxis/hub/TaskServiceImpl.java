@@ -128,8 +128,8 @@ public class TaskServiceImpl extends AbstractRoot {
 
         private void submitTask(Call call) throws Exception {
             CallArguments args = call.getArgs();
-            if (args.getCount() == 1) {
-                Argument arg = args.getArg(0);
+            if (args.getSize() == 1) {
+                Argument arg = args.get(0);
                 if (arg instanceof PReference) {
                     Object ref = ((PReference) arg).getReference();
                     if (ref instanceof Task) {
@@ -174,8 +174,8 @@ public class TaskServiceImpl extends AbstractRoot {
 //        @Override
 //        protected Call processInvoke(Call call, boolean quiet) throws Exception {
 //            CallArguments args = call.getArgs();
-//            if (args.getCount() == 1) {
-//                Argument arg = args.getArg(0);
+//            if (args.getSize() == 1) {
+//                Argument arg = args.get(0);
 //                if (arg instanceof PReference) {
 //                    Object ref = ((PReference) arg).getReference();
 //                    if (ref instanceof Task) {

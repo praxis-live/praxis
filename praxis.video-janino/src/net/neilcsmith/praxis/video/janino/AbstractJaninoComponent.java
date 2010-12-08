@@ -165,7 +165,7 @@ public abstract class AbstractJaninoComponent extends AbstractClockComponent {
         @Override
         protected TaskService.Task createTask(CallArguments keys) throws Exception {
             Argument code;
-            if (keys.getCount() < 1 || (code = keys.getArg(0)).isEmpty()) {
+            if (keys.getSize() < 1 || (code = keys.get(0)).isEmpty()) {
                 return null;
             } else {
                 return new CompilerTask(code.toString());

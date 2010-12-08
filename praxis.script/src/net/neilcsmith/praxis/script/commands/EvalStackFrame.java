@@ -217,8 +217,8 @@ public class EvalStackFrame implements StackFrame {
 //    }
 
     private void argsToList(CallArguments args, List<Argument> list) {
-        for (int i = 0, count = args.getCount(); i < count; i++) {
-            list.add(args.getArg(i));
+        for (int i = 0, count = args.getSize(); i < count; i++) {
+            list.add(args.get(i));
         }
     }
 }

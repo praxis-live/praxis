@@ -160,9 +160,9 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
         }
         CallArguments args = binding.getArguments();
         if (!model.getValueIsAdjusting()) {
-            if (args.getCount() > 0) {
+            if (args.getSize() > 0) {
                 try {
-                    double val = PNumber.coerce(args.getArg(0)).value();
+                    double val = PNumber.coerce(args.get(0)).value();
                     if (val != value) {
                         value = val;
                         updateModel();

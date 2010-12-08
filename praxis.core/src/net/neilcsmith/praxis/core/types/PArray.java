@@ -52,6 +52,10 @@ public final class PArray extends Argument implements Iterable<Argument> {
         return data[index];
     }
 
+    public Argument[] getAll() {
+        return data.clone();
+    }
+
     public int getSize() {
         return data.length;
     }

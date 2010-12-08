@@ -211,10 +211,10 @@ class DefaultBinding extends BasicControl {
         private void processInfoResponse(Call call) {
             if (call.getMatchID() == infoMatchID) {
                 CallArguments args = call.getArgs();
-                if (args.getCount() > 0) {
+                if (args.getSize() > 0) {
                     ComponentInfo compInfo = null;
                     try {
-                        compInfo = ComponentInfo.coerce(args.getArg(0));
+                        compInfo = ComponentInfo.coerce(args.get(0));
 //                        bindingInfo = ControlInfo.coerce(compInfo.getControlsInfo().get(
 //                                PString.valueOf(boundAddress.getID())));
                         // @TODO on null?

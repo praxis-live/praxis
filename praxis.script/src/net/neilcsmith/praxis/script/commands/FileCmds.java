@@ -70,7 +70,7 @@ public class FileCmds implements CommandInstaller {
     private static class FileCmd extends AbstractInlineCommand {
 
         public CallArguments process(Env env, Namespace namespace, CallArguments args) throws ExecutionException {
-            if (args.getCount() != 1) {
+            if (args.getSize() != 1) {
                 throw new ExecutionException();
             }
             try {
@@ -81,7 +81,7 @@ public class FileCmds implements CommandInstaller {
                 } else {
                     base = PResource.coerce(pwd.getValue()).value();
                 }
-                URI path = base.resolve(new URI(null, null, args.getArg(0).toString(), null));
+                URI path = base.resolve(new URI(null, null, args.get(0).toString(), null));
                 return CallArguments.create(PResource.valueOf(path));
             } catch (Exception ex) {
                 throw new ExecutionException(ex);
@@ -92,11 +92,11 @@ public class FileCmds implements CommandInstaller {
     private static class FileListCmd extends AbstractInlineCommand {
 
         public CallArguments process(Env env, Namespace namespace, CallArguments args) throws ExecutionException {
-            if (args.getCount() != 1) {
+            if (args.getSize() != 1) {
                 throw new ExecutionException();
             }
             try {
-                File dir = new File(PResource.coerce(args.getArg(0)).value());
+                File dir = new File(PResource.coerce(args.get(0)).value());
                 if (dir.isDirectory()) {
                     return CallArguments.create(buildFileList(dir));
                 }
@@ -122,11 +122,11 @@ public class FileCmds implements CommandInstaller {
     private static class FileNamesCmd extends AbstractInlineCommand {
 
         public CallArguments process(Env env, Namespace namespace, CallArguments args) throws ExecutionException {
-            if (args.getCount() != 1) {
+            if (args.getSize() != 1) {
                 throw new ExecutionException();
             }
             try {
-                File dir = new File(PResource.coerce(args.getArg(0)).value());
+                File dir = new File(PResource.coerce(args.get(0)).value());
                 if (dir.isDirectory()) {
                     return CallArguments.create(buildFileList(dir));
                 }

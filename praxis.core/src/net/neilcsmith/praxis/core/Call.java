@@ -315,10 +315,10 @@ public final class Call extends Packet {
         sb.append("\nID : " + getID());
         sb.append("\nMatch ID : " + matchID);
         sb.append("\nArguments {");
-        int count = args.getCount();
+        int count = args.getSize();
         if (count > 0) {
-            for (int i = 0; i < args.getCount(); i++) {
-                sb.append("\n    " + args.getArg(i));
+            for (int i = 0; i < args.getSize(); i++) {
+                sb.append("\n    " + args.get(i));
             }
             sb.append("\n}");
         } else {

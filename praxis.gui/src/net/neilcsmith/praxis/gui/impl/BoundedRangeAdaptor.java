@@ -140,10 +140,10 @@ public class BoundedRangeAdaptor extends ControlBinding.Adaptor implements Chang
         }
         CallArguments args = binding.getArguments();
         if (!model.getValueIsAdjusting()) {
-            if (args.getCount() >= 2) {
+            if (args.getSize() >= 2) {
                 try {
-                    double lo = PNumber.coerce(args.getArg(0)).value();
-                    double hi = PNumber.coerce(args.getArg(1)).value();
+                    double lo = PNumber.coerce(args.get(0)).value();
+                    double hi = PNumber.coerce(args.get(1)).value();
                     if (lo != low || hi != high) {
                         low = lo;
                         high = hi;

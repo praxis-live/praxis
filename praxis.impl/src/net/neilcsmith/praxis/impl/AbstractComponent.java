@@ -41,6 +41,8 @@ import net.neilcsmith.praxis.core.info.ComponentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.core.interfaces.ComponentInterface;
+import net.neilcsmith.praxis.core.interfaces.ServiceManager;
+import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 
 /**
  *
@@ -298,6 +300,16 @@ public abstract class AbstractComponent implements Component {
             // @TODO what to do on null? Empty router?
         }
         return router;
+    }
+
+     protected ComponentAddress findService(InterfaceDefinition service)
+            throws ServiceUnavailableException {
+        ServiceManager sm = getLookup().get(ServiceManager.class);
+        if (sm == null) {
+            throw new ServiceUnavailableException("No ServiceManager in Lookup");
+        }
+        return sm.findService(service);
+
     }
 
 

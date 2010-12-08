@@ -253,7 +253,7 @@ public class Still extends AbstractComponent {
 
         @Override
         protected TaskService.Task createTask(CallArguments keys) throws Exception {
-            return new LoaderTask(keys.getArg(0), resizeMode, delegator.getCurrentDimensions());
+            return new LoaderTask(keys.get(0), resizeMode, delegator.getCurrentDimensions());
         }
 
         @Override
