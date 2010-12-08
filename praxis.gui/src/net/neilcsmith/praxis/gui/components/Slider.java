@@ -82,6 +82,7 @@ class Slider extends SingleBindingGuiComponent {
 
     private void createComponentAndAdaptor() {
         slider = new JSlider(vertical ? JSlider.VERTICAL : JSlider.HORIZONTAL, 0, 500, 0);
+        slider.putClientProperty("JSlider.isFilled", Boolean.TRUE);
         adaptor = new BoundedValueAdaptor(slider.getModel());
         if (prefMin != null) {
             adaptor.setPreferredMinimum(prefMin);
