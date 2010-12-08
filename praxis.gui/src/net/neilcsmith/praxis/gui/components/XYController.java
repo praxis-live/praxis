@@ -49,7 +49,7 @@ import net.neilcsmith.praxis.impl.StringProperty;
 public class XYController extends AbstractGuiComponent {
 
     private static Logger logger = Logger.getLogger(XYController.class.getName());
-    private BindingContext root;
+    private BindingContext bindingContext;
     private Box container;
     private JXYController controller;
     private BoundedValueAdaptor xAdaptor;
@@ -122,19 +122,39 @@ public class XYController extends AbstractGuiComponent {
     @Override
     public void hierarchyChanged() {
         super.hierarchyChanged();
-        Root r = getRoot();
-        if (r instanceof BindingContext) {
-            root = (BindingContext) r;
-        } else {
-            if (xBinding != null) {
-                root.unbind(xAdaptor);
-                xBinding = null;
+//        Root r = getRoot();
+//        if (r instanceof BindingContext) {
+//            ctxt = (BindingContext) r;
+//        } else {
+//            if (xBinding != null) {
+//                ctxt.unbind(xAdaptor);
+//                xBinding = null;
+//            }
+//            if (yBinding != null) {
+//                ctxt.unbind(yAdaptor);
+//                yBinding = null;
+//            }
+//            ctxt = null;
+//        }
+        BindingContext ctxt = getLookup().get(BindingContext.class);
+        if (bindingContext != ctxt) {
+            if (bindingContext != null) {
+                if (xBinding != null) {
+                    bindingContext.unbind(xAdaptor);
+                }
+                if (yBinding != null) {
+                    bindingContext.unbind(yAdaptor);
+                }
             }
-            if (yBinding != null) {
-                root.unbind(yAdaptor);
-                yBinding = null;
+            if (ctxt != null) {
+                if (xBinding != null) {
+                    ctxt.bind(xBinding, xAdaptor);
+                }
+                if (yBinding != null) {
+                    ctxt.bind(yBinding, yAdaptor);
+                }
             }
-            root = null;
+            bindingContext = ctxt;
         }
     }
 
@@ -180,14 +200,14 @@ public class XYController extends AbstractGuiComponent {
             if (xAdaptor == null) {
                 createComponentAndAdaptors();
             }
-            if (root != null) {
-                root.unbind(xAdaptor);
+            if (bindingContext != null) {
+                bindingContext.unbind(xAdaptor);
                 if (value.isEmpty()) {
                     xBinding = null;
                 } else {
                     try {
                         xBinding = ControlAddress.coerce(value);
-                        root.bind(xBinding, xAdaptor);
+                        bindingContext.bind(xBinding, xAdaptor);
                     } catch (ArgumentFormatException ex) {
                         logger.log(Level.WARNING, "Could not create binding-x", ex);
                         xBinding = null;
@@ -208,14 +228,14 @@ public class XYController extends AbstractGuiComponent {
             if (yAdaptor == null) {
                 createComponentAndAdaptors();
             }
-            if (root != null) {
-                root.unbind(yAdaptor);
+            if (bindingContext != null) {
+                bindingContext.unbind(yAdaptor);
                 if (value.isEmpty()) {
                     yBinding = null;
                 } else {
                     try {
                         yBinding = ControlAddress.coerce(value);
-                        root.bind(yBinding, yAdaptor);
+                        bindingContext.bind(yBinding, yAdaptor);
                     } catch (ArgumentFormatException ex) {
                         logger.log(Level.WARNING, "Could not create binding-y", ex);
                         yBinding = null;
