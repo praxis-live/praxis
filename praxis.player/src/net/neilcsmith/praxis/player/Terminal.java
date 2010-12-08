@@ -51,9 +51,9 @@ public class Terminal extends JComponent {
 
     private final static String SCRIPT = "script";
     private final static String OK = "response";
-    private final static String OK_PREFIX = " -- OK : ";
+    private final static String OK_PREFIX = " -- ";
     private final static String ERROR = "error";
-    private final static String ERROR_PREFIX = " -- ERROR : ";
+    private final static String ERROR_PREFIX = " -- ERROR -- ";
 
 
     private Context context;
@@ -64,15 +64,27 @@ public class Terminal extends JComponent {
     private Action evalAction;
     private JButton clearButton;
     private Action clearAction;
+    
+    public Terminal() {
+        this(null);
+    }
 
     public Terminal(Context context) {
-        if (context == null) {
-            throw new NullPointerException();
-        }
-        this.context = context;
         buildActions();
         buildUI();
         buildStyles();
+        setContext(context);
+    }
+    
+    public void setContext(Context context) {
+        if (context != this.context) {
+            this.context = context;
+            evalAction.setEnabled(true);
+        }
+    }
+    
+    public Context getContext() {
+        return context;
     }
 
     private void buildActions() {
@@ -105,9 +117,9 @@ public class Terminal extends JComponent {
         add(splPane, "grow, push, wrap");
 
         clearButton = new JButton(clearAction);
-        add(clearButton, "split, growprio 0, align right");
+        add(clearButton, "split, align right");
         evalButton = new JButton(evalAction);
-        add(evalButton, "growprio 0");
+        add(evalButton, "");
 
         input.getKeymap().addActionForKeyStroke(KeyStroke.getKeyStroke("control ENTER"), evalAction);
 
@@ -119,11 +131,11 @@ public class Terminal extends JComponent {
         Style s = history.addStyle(SCRIPT, def);
 
         s = history.addStyle(OK, def);
-        StyleConstants.setItalic(s, true);
+//        StyleConstants.setItalic(s, true);
         StyleConstants.setForeground(s, Color.GREEN);
 
         s = history.addStyle(ERROR, def);
-        StyleConstants.setItalic(s, true);
+//        StyleConstants.setItalic(s, true);
         StyleConstants.setForeground(s, Color.RED);
 
 

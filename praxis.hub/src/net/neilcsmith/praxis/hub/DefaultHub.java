@@ -22,6 +22,7 @@
 package net.neilcsmith.praxis.hub;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -79,6 +80,7 @@ public class DefaultHub extends AbstractRoot {
     private Root[] extensions;
 
     public DefaultHub(Root... exts) {
+        super(EnumSet.noneOf(AbstractRoot.Caps.class));
         roots = new ConcurrentHashMap<String, Root.Controller>();
 //        serviceAddresses = new ConcurrentHashMap<ServiceID, ControlAddress>();
 //        serviceInfo = new ConcurrentHashMap<ServiceID, ControlInfo>();
@@ -124,15 +126,15 @@ public class DefaultHub extends AbstractRoot {
 
     @Override
     protected void activating() {
-        try {
+//        try {
             super.activating();
             createDefaultControls();
             createDefaultServices();
             installExtensions();
-            setRunning();
-        } catch (IllegalRootStateException ex) {
-            Logger.getLogger(DefaultHub.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//            setRunning();
+//        } catch (IllegalRootStateException ex) {
+//            Logger.getLogger(DefaultHub.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
 
     @Override
@@ -164,21 +166,22 @@ public class DefaultHub extends AbstractRoot {
 //    }
     private void createDefaultControls() {
         // TEMPORARY
-        unregisterControl("connect");
+//        unregisterControl("connect");
 
-        registerControl("create", new CreationControl(this, ControlAddress.create(getAddress(), "create"), factory));
-        registerControl("connect", new ConnectionControl(this, ControlAddress.create(getAddress(), "connect")));
+//        registerControl("create", new CreationControl(this, ControlAddress.create(getAddress(), "create"), factory));
+//        registerControl("connect", new ConnectionControl(this, ControlAddress.create(getAddress(), "connect")));
         registerControl("clear", new ClearControl());
         registerControl("log", new LogControl());
         registerControl(RootManagerService.ADD_ROOT, new AddRootControl());
+        registerControl(RootManagerService.REMOVE_ROOT, new RemoveRootControl());
         registerControl(ComponentFactoryService.NEW_INSTANCE, new NewInstanceControl());
     }
 
     private void createDefaultServices() {
         ComponentAddress address = ComponentAddress.create("/" + HUB_ID);
-        installService(ComponentManager.getInstance(), address);
+//        installService(ComponentManager.getInstance(), address);
         // installService(RootManager.getInstance(), address);
-        installService(ConnectionManager.getInstance(), address);
+//        installService(ConnectionManager.getInstance(), address);
         installService(RootManagerService.INSTANCE, address);
         installService(ComponentFactoryService.INSTANCE, address);
     }
@@ -441,6 +444,21 @@ public class DefaultHub extends AbstractRoot {
             return CallArguments.EMPTY;
         }
 
+
+    }
+
+    private class RemoveRootControl extends SimpleControl {
+
+        private RemoveRootControl() {
+            super(RootManagerService.REMOVE_ROOT_INFO);
+        }
+
+        @Override
+        protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
+            String id = args.getArg(0).toString();
+            uninstallRoot(id);
+            return CallArguments.EMPTY;
+        }
 
     }
 

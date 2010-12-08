@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.script.commands;
 
+import java.util.Map;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
@@ -33,48 +34,66 @@ import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.script.Command;
+import net.neilcsmith.praxis.script.CommandInstaller;
 import net.neilcsmith.praxis.script.Env;
 import net.neilcsmith.praxis.script.ExecutionException;
 import net.neilcsmith.praxis.script.Namespace;
 import net.neilcsmith.praxis.script.StackFrame;
-import net.neilcsmith.praxis.script.Variable;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class AtCommand implements Command {
+public class AtCmds implements CommandInstaller {
 
-    private final static AtCommand instance = new AtCommand();
+    private final static AtCmds INSTANCE = new AtCmds();
+    private final static At AT = new At();
+    private final static NotAt NOT_AT = new NotAt();
 
-    private AtCommand() {
+    private AtCmds() {
     }
 
-    public StackFrame createStackFrame(Namespace namespace, CallArguments args) throws ExecutionException {
-        
-        if (args.getCount() < 2) {
-            throw new ExecutionException();
-        }
-        
-        try {
-            ComponentAddress ctxt = ComponentAddress.coerce(args.getArg(0));
-            if (args.getCount() == 3) {
-                ComponentType type = ComponentType.coerce(args.getArg(1));
-                return new DefaultStackFrame(namespace, ctxt, type, args.getArg(2));
-            } else {
-                return new DefaultStackFrame(namespace, ctxt, null, args.getArg(1));
+    public void install(Map<String, Command> commands) {
+        commands.put("@", AT);
+        commands.put("!@", NOT_AT);
+    }
+
+    public final static AtCmds getInstance() {
+        return INSTANCE;
+    }
+
+    private static class At implements Command {
+
+        public StackFrame createStackFrame(Namespace namespace, CallArguments args) throws ExecutionException {
+
+            if (args.getCount() < 2) {
+                throw new ExecutionException();
             }
-        } catch (Exception ex) {
-            throw new ExecutionException(ex);
+
+            try {
+                ComponentAddress ctxt = ComponentAddress.coerce(args.getArg(0));
+                if (args.getCount() == 3) {
+                    ComponentType type = ComponentType.coerce(args.getArg(1));
+                    return new AtStackFrame(namespace, ctxt, type, args.getArg(2));
+                } else {
+                    return new AtStackFrame(namespace, ctxt, null, args.getArg(1));
+                }
+            } catch (Exception ex) {
+                throw new ExecutionException(ex);
+            }
+
+        }
+    }
+
+    private static class NotAt implements Command {
+
+        public StackFrame createStackFrame(Namespace namespace, CallArguments args) throws ExecutionException {
+            return new NotAtStackFrame(namespace, args);
         }
 
     }
 
-    public static AtCommand getInstance() {
-        return instance;
-    }
-
-    private class DefaultStackFrame implements StackFrame {
+    private static class AtStackFrame implements StackFrame {
 
         private State state;
         private Namespace namespace;
@@ -83,10 +102,9 @@ public class AtCommand implements Command {
         private Argument script;
         private int stage;
         private CallArguments result;
-        
         private Call active;
 
-        private DefaultStackFrame(Namespace namespace, ComponentAddress ctxt,
+        private AtStackFrame(Namespace namespace, ComponentAddress ctxt,
                 ComponentType type, Argument script) {
             this.namespace = namespace;
             this.ctxt = ctxt;
@@ -110,7 +128,7 @@ public class AtCommand implements Command {
                 try {
 //                    CallArguments ca = CallArguments.create(new Argument[]{ctxt, type});
 //                    return namespace.getCommand("create").createStackFrame(namespace, ca);
-                    
+
                     ControlAddress to;
                     CallArguments args;
                     int depth = ctxt.getDepth();
@@ -119,13 +137,13 @@ public class AtCommand implements Command {
                                 env.getLookup().get(ServiceManager.class).
                                 findService(RootManagerService.INSTANCE),
                                 RootManagerService.ADD_ROOT);
-                        args = CallArguments.create(new Argument[] {
-                        PString.valueOf(ctxt.getRootID()), type});
+                        args = CallArguments.create(new Argument[]{
+                                    PString.valueOf(ctxt.getRootID()), type});
                     } else {
                         to = ControlAddress.create(ctxt.getParentAddress(),
                                 ContainerInterface.ADD_CHILD);
-                        args = CallArguments.create(new Argument[] {
-                        PString.valueOf(ctxt.getComponentID(depth-1)), type});
+                        args = CallArguments.create(new Argument[]{
+                                    PString.valueOf(ctxt.getComponentID(depth - 1)), type});
                     }
                     active = Call.createCall(to, env.getAddress(), env.getTime(), args);
                     env.getPacketRouter().route(active);
@@ -167,7 +185,7 @@ public class AtCommand implements Command {
 //                if (stage == 1) {
 //                    stage++;
 //                } else
-                    if (stage == 3) {
+                if (stage == 3) {
                     this.state = State.OK;
                     result = args;
                 }
@@ -182,6 +200,39 @@ public class AtCommand implements Command {
                 throw new IllegalStateException();
             }
             return result;
+        }
+    }
+
+    private static class NotAtStackFrame extends AbstractSingleCallFrame {
+
+        private NotAtStackFrame(Namespace ns, CallArguments args) {
+            super(ns, args);
+        }
+
+        @Override
+        protected Call createCall(Env env, CallArguments args) throws Exception {
+            ComponentAddress comp = ComponentAddress.coerce(args.getArg(0));
+            if (comp.getDepth() == 1) {
+                return createRootRemovalCall(env, comp.getRootID());
+            } else {
+                return createChildRemovalCall(env, comp);
+            }
+        }
+
+        private Call createRootRemovalCall(Env env, String id) throws Exception {
+            ControlAddress to = ControlAddress.create(
+                    env.getLookup().get(ServiceManager.class).
+                    findService(RootManagerService.INSTANCE),
+                    RootManagerService.REMOVE_ROOT);
+            return Call.createCall(to, env.getAddress(), env.getTime(), PString.valueOf(id));
+
+        }
+
+        private Call createChildRemovalCall(Env env, ComponentAddress comp) throws Exception {
+            ControlAddress to = ControlAddress.create(comp.getParentAddress(),
+                    ContainerInterface.REMOVE_CHILD);
+            return Call.createCall(to, env.getAddress(), env.getTime(),
+                    PString.valueOf(comp.getComponentID(comp.getDepth() - 1)));
         }
     }
 }

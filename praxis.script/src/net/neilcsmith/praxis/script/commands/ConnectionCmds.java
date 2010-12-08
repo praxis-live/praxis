@@ -43,8 +43,8 @@ import net.neilcsmith.praxis.script.StackFrame;
 public class ConnectionCmds implements CommandInstaller {
 
     private final static ConnectionCmds instance = new ConnectionCmds();
-    private final static Command CONNECT = new Connect();
-    private final static Command DISCONNECT = new Disconnect();
+    private final static Connect CONNECT = new Connect();
+    private final static Disconnect DISCONNECT = new Disconnect();
 
     private ConnectionCmds() {
     }
