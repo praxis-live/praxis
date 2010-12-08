@@ -23,6 +23,7 @@ package net.neilcsmith.praxis.script.commands;
 
 import java.util.Map;
 import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ComponentAddress;
@@ -76,7 +77,16 @@ public class AtCmds implements CommandInstaller {
                     ComponentType type = ComponentType.coerce(args.get(1));
                     return new AtStackFrame(namespace, ctxt, type, args.get(2));
                 } else {
-                    return new AtStackFrame(namespace, ctxt, null, args.get(1));
+                    Argument arg = args.get(1);
+                    if (! arg.toString().contains(" ")) {
+                        try {
+                            ComponentType type = ComponentType.coerce(arg);
+                            return new AtStackFrame(namespace, ctxt, type, PString.EMPTY);
+                        } catch (ArgumentFormatException ex) {
+                            // fall through
+                        }
+                    }
+                    return new AtStackFrame(namespace, ctxt, null, arg);
                 }
             } catch (Exception ex) {
                 throw new ExecutionException(ex);
