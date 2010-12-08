@@ -26,7 +26,7 @@ import java.io.File;
 import java.net.URI;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlPort;
-import net.neilcsmith.praxis.core.types.PUri;
+import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.ArgumentInputPort;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
@@ -53,7 +53,7 @@ public class Resolver extends AbstractComponent {
                 resolve(time, arg);
             }
         }));
-        base = UriProperty.create( PUri.valueOf(new File("").toURI()));
+        base = UriProperty.create( PResource.valueOf(new File("").toURI()));
         registerControl("base", base);
         out = new DefaultControlOutputPort(this);
         error = new DefaultControlOutputPort(this);
@@ -65,7 +65,7 @@ public class Resolver extends AbstractComponent {
         try {
             URI res = base.getValue().value();
             res = res.resolve(new URI(null, null, arg.toString(), null));
-            out.send(time, PUri.valueOf(res));
+            out.send(time, PResource.valueOf(res));
         } catch (Exception ex) {
             error.send(time, arg);
         }

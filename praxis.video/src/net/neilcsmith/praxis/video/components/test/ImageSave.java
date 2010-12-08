@@ -34,7 +34,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.interfaces.TaskService;
 import net.neilcsmith.praxis.core.types.PReference;
-import net.neilcsmith.praxis.core.types.PUri;
+import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.TaskControl;
 import net.neilcsmith.praxis.impl.TriggerControl;
@@ -64,7 +64,7 @@ public class ImageSave extends AbstractComponent {
     public ImageSave() {
         pool = new ArrayList<SoftReference<BufferedImageSurface>>();
         callback = new SaveCallback();
-        uri = UriProperty.create(PUri.valueOf(new File("image").toURI()));
+        uri = UriProperty.create(PResource.valueOf(new File("image").toURI()));
         Delegator d = new Delegator(new SaveDelegate());
         registerPort(Port.IN, new DefaultVideoInputPort(this, d));
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, d));

@@ -33,7 +33,7 @@ import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PString;
-import net.neilcsmith.praxis.core.types.PUri;
+import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.script.Command;
 import net.neilcsmith.praxis.script.CommandInstaller;
 import net.neilcsmith.praxis.script.Env;
@@ -79,10 +79,10 @@ public class FileCmds implements CommandInstaller {
                 if (pwd == null) {
                     base = new File("").toURI();
                 } else {
-                    base = PUri.coerce(pwd.getValue()).value();
+                    base = PResource.coerce(pwd.getValue()).value();
                 }
                 URI path = base.resolve(new URI(null, null, args.getArg(0).toString(), null));
-                return CallArguments.create(PUri.valueOf(path));
+                return CallArguments.create(PResource.valueOf(path));
             } catch (Exception ex) {
                 throw new ExecutionException(ex);
             }
@@ -96,7 +96,7 @@ public class FileCmds implements CommandInstaller {
                 throw new ExecutionException();
             }
             try {
-                File dir = new File(PUri.coerce(args.getArg(0)).value());
+                File dir = new File(PResource.coerce(args.getArg(0)).value());
                 if (dir.isDirectory()) {
                     return CallArguments.create(buildFileList(dir));
                 }
@@ -109,9 +109,9 @@ public class FileCmds implements CommandInstaller {
 
         private PArray buildFileList(File dir) {
             File[] files = dir.listFiles();
-            List<PUri> uris = new ArrayList<PUri>();
+            List<PResource> uris = new ArrayList<PResource>();
             for (File f : files) {
-                uris.add(PUri.valueOf(f.toURI()));
+                uris.add(PResource.valueOf(f.toURI()));
             }
             Collections.sort(uris);
             return PArray.valueOf(uris);
@@ -126,7 +126,7 @@ public class FileCmds implements CommandInstaller {
                 throw new ExecutionException();
             }
             try {
-                File dir = new File(PUri.coerce(args.getArg(0)).value());
+                File dir = new File(PResource.coerce(args.getArg(0)).value());
                 if (dir.isDirectory()) {
                     return CallArguments.create(buildFileList(dir));
                 }

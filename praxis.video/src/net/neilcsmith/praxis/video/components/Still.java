@@ -33,7 +33,7 @@ import net.neilcsmith.praxis.core.interfaces.TaskService;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
-import net.neilcsmith.praxis.core.types.PUri;
+import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
@@ -203,7 +203,7 @@ public class Still extends AbstractComponent {
 //        }
 ////
 ////        @Override
-////        protected Task getLoadTask(PUri uri) {
+////        protected Task getLoadTask(PResource uri) {
 ////
 ////        }
 //
@@ -246,7 +246,7 @@ public class Still extends AbstractComponent {
     private class DelegateLoader extends AbstractAsyncProperty<ImageDelegate> {
 
         DelegateLoader() {
-            super(new ArgumentInfo[]{ArgumentInfo.create(PUri.class, null)},
+            super(new ArgumentInfo[]{ArgumentInfo.create(PResource.class, null)},
                     ImageDelegate.class,
                     new Argument[]{PString.EMPTY}, PMap.EMPTY);
         }
@@ -285,7 +285,7 @@ public class Still extends AbstractComponent {
         }
 
         public Argument execute() throws Exception {
-            URI loc = PUri.coerce(uri).value();
+            URI loc = PResource.coerce(uri).value();
             ImageDelegate del = ImageDelegate.create(loc, mode, guide);
             return PReference.wrap(del);
         }

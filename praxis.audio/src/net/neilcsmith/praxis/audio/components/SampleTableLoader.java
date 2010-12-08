@@ -31,7 +31,7 @@ import net.neilcsmith.praxis.core.interfaces.TaskService.Task;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
-import net.neilcsmith.praxis.core.types.PUri;
+import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
 import net.neilcsmith.rapl.util.SampleTable;
 
@@ -44,7 +44,7 @@ public class SampleTableLoader extends AbstractAsyncProperty<SampleTable> {
     private Listener listener;
     
     public SampleTableLoader(Listener listener) {
-        super(new ArgumentInfo[]{ArgumentInfo.create(PUri.class, PMap.EMPTY)},
+        super(new ArgumentInfo[]{ArgumentInfo.create(PResource.class, PMap.EMPTY)},
                 SampleTable.class,
                 new Argument[]{PString.EMPTY},
                 null);
@@ -86,7 +86,7 @@ public class SampleTableLoader extends AbstractAsyncProperty<SampleTable> {
         }
 
         public Argument execute() throws Exception {
-            URI file = PUri.coerce(uri).value();
+            URI file = PResource.coerce(uri).value();
             SampleTable table = SampleTable.fromURL(file.toURL());
             return PReference.wrap(table);
         }

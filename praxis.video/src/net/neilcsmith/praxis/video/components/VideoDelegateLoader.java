@@ -30,7 +30,7 @@ import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
-import net.neilcsmith.praxis.core.types.PUri;
+import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.ripl.delegates.VideoDelegate;
@@ -45,7 +45,7 @@ public class VideoDelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
     private Listener listener;
 
     public VideoDelegateLoader(AbstractComponent component, Listener listener) {
-        super(PUri.info(), VideoDelegate.class, PString.EMPTY);
+        super(PResource.info(), VideoDelegate.class, PString.EMPTY);
         if (listener == null) {
             throw new NullPointerException();
         }
@@ -96,7 +96,7 @@ public class VideoDelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
         }
 
         public Argument execute() throws Exception {
-            URI uri = PUri.coerce(id).value();
+            URI uri = PResource.coerce(id).value();
             Lookup.Result<VideoDelegateFactoryProvider> providers =
                     lookup.getAll(VideoDelegateFactoryProvider.class);
             VideoDelegate delegate = null;

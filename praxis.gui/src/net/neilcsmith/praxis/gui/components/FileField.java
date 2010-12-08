@@ -38,7 +38,7 @@ import javax.swing.event.AncestorListener;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.CallArguments;
-import net.neilcsmith.praxis.core.types.PUri;
+import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.gui.ControlBinding;
 import net.neilcsmith.praxis.gui.ControlBinding.Adaptor;
 import net.neilcsmith.praxis.gui.impl.SingleBindingGuiComponent;
@@ -56,7 +56,7 @@ public class FileField extends SingleBindingGuiComponent {
     private Box box;
     private JTextField field;
     private JButton button;
-    private PUri uri;
+    private PResource uri;
 
     public FileField() {
         labelText = "";
@@ -145,7 +145,7 @@ public class FileField extends SingleBindingGuiComponent {
             System.out.println("File Dialog returned " + ret);
             if (ret == JFileChooser.APPROVE_OPTION) {
                 URI u = chooser.getSelectedFile().toURI();
-                uri = PUri.valueOf(u);
+                uri = PResource.valueOf(u);
                 adaptor.send(uri);
                 updateField();
 
@@ -174,9 +174,9 @@ public class FileField extends SingleBindingGuiComponent {
                         updateField();
                     }
                 } else {
-                    PUri u;
+                    PResource u;
                     try {
-                        u = PUri.coerce(args.getArg(0));
+                        u = PResource.coerce(args.getArg(0));
                         if (!u.equals(uri)) {
                             uri = u;
                             updateField();
@@ -197,7 +197,7 @@ public class FileField extends SingleBindingGuiComponent {
         public void updateBindingConfiguration() {
         }
 
-        public void send(PUri uri) {
+        public void send(PResource uri) {
             super.send(CallArguments.create(uri));
         }
 

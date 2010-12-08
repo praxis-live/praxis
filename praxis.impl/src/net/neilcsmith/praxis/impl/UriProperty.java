@@ -27,7 +27,7 @@ import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PMap;
-import net.neilcsmith.praxis.core.types.PUri;
+import net.neilcsmith.praxis.core.types.PResource;
 
 /**
  *
@@ -46,7 +46,7 @@ public class UriProperty extends AbstractSingleArgProperty {
 
     @Override
     protected void set(long time, Argument value) throws Exception {
-        binding.setBoundValue(time, PUri.coerce(value));
+        binding.setBoundValue(time, PResource.coerce(value));
     }
 
     @Override
@@ -61,29 +61,29 @@ public class UriProperty extends AbstractSingleArgProperty {
     
 
 
-    public PUri getValue() {
+    public PResource getValue() {
         return binding.getBoundValue();
     }
 
 
 
     public static UriProperty create(
-             PUri def) {
+             PResource def) {
         return create(null, def, null);
     }
 
-    public static UriProperty create(Binding binding, PUri def) {
+    public static UriProperty create(Binding binding, PResource def) {
          return create(binding, def, null);
     }
 
     public static UriProperty create(
-            Binding binding, PUri def, PMap properties) {
+            Binding binding, PResource def, PMap properties) {
 
         if (binding == null) {
             binding = new DefaultBinding(def);
         }
 
-        ArgumentInfo[] arguments = new ArgumentInfo[]{PUri.info()};
+        ArgumentInfo[] arguments = new ArgumentInfo[]{PResource.info()};
 
         Argument[] defaults = new Argument[]{def};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
@@ -92,26 +92,26 @@ public class UriProperty extends AbstractSingleArgProperty {
 
     public static interface Binding {
 
-        public void setBoundValue(long time, PUri value);
+        public void setBoundValue(long time, PResource value);
 
-        public PUri getBoundValue();
+        public PResource getBoundValue();
     }
 
     private static class DefaultBinding implements Binding {
 
-        private PUri value;
+        private PResource value;
 
-        private DefaultBinding(PUri value) {
+        private DefaultBinding(PResource value) {
             this.value = value;
         }
 
         @Override
-        public void setBoundValue(long time, PUri value) {
+        public void setBoundValue(long time, PResource value) {
             this.value = value;
         }
 
         @Override
-        public PUri getBoundValue() {
+        public PResource getBoundValue() {
             return value;
         }
     }

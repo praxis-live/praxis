@@ -32,12 +32,12 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
  *
  * @author Neil C Smith
  */
-public class PUri extends Argument implements Comparable<PUri>{
+public class PResource extends Argument implements Comparable<PResource>{
     
     
     private URI uri;
     
-    private PUri(URI uri) {
+    private PResource(URI uri) {
         this.uri = uri;
     }
 
@@ -60,25 +60,25 @@ public class PUri extends Argument implements Comparable<PUri>{
         if (obj == this) {
             return true;
         }
-        if (obj instanceof PUri) {
-            PUri o = (PUri) obj;
+        if (obj instanceof PResource) {
+            PResource o = (PResource) obj;
             return this.uri.equals(o.uri);
         }
         return false;
     }
     
-    public static PUri valueOf(URI uri) {
+    public static PResource valueOf(URI uri) {
         if (uri.isAbsolute()) {
-            return new PUri(uri);
+            return new PResource(uri);
         }
         throw new IllegalArgumentException();
     }
     
-    public static PUri valueOf(String str) throws ArgumentFormatException {
+    public static PResource valueOf(String str) throws ArgumentFormatException {
         try {
             URI uri = new URI(str);
             if (uri.isAbsolute()) {
-                return new PUri(uri);
+                return new PResource(uri);
             }
             throw new ArgumentFormatException();
         } catch (URISyntaxException ex) {
@@ -86,19 +86,19 @@ public class PUri extends Argument implements Comparable<PUri>{
         }
     }
     
-    public static PUri coerce(Argument arg) throws ArgumentFormatException {
-        if (arg instanceof PUri) {
-            return (PUri) arg;
+    public static PResource coerce(Argument arg) throws ArgumentFormatException {
+        if (arg instanceof PResource) {
+            return (PResource) arg;
         } else {
             return valueOf(arg.toString());
         }
     }
     
     public static ArgumentInfo info() {
-        return ArgumentInfo.create(PUri.class, null);
+        return ArgumentInfo.create(PResource.class, null);
     }
 
-    public int compareTo(PUri o) {
+    public int compareTo(PResource o) {
         return uri.compareTo(o.uri);
     }
 
