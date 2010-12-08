@@ -134,13 +134,14 @@ public class DefaultGuiRoot extends AbstractRoot {
         });
 //        container = Box.createVerticalBox();
 //        layout = new MigLayout("fill", "[fill,grow]", "[fill,grow]");
-        layout = new MigLayout("fill", "[fill]", "[fill]");
+        frame.getContentPane().setLayout(new MigLayout("fill", "[fill, grow]"));
+        layout = new MigLayout("fill", "[fill]");
 //        layout = new MigLayout();
         container = new JPanel(layout);
         container.addContainerListener(new ChildrenListener());
         layoutListener = new LayoutChangeListener();
         
-        frame.add(new JScrollPane(container));
+        frame.getContentPane().add(new JScrollPane(container), "grow, push");
     }
 
     @Override
