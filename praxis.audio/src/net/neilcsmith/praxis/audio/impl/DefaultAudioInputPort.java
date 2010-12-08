@@ -117,7 +117,7 @@ public class DefaultAudioInputPort extends AudioPort.Input {
         if (multiChannelCapable || portSink == mixer) {
             return;
         }
-        Source[] sources = removeSources(portSink);
+        Source[] sources = removeSources(sink);
         try {
             if (mixer == null) {
                 mixer = new Mixer(16); // @TODO make channels configurable
@@ -141,6 +141,7 @@ public class DefaultAudioInputPort extends AudioPort.Input {
         }
         Source[] sources = removeSources(mixer);
         try {
+            sink.removeSource(mixer);
             for (Source source : sources) {
                 sink.addSource(source);
             }

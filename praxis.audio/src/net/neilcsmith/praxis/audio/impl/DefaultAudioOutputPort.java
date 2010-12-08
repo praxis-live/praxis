@@ -92,7 +92,7 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
         if (port instanceof AudioPort.Input) {
             AudioPort.Input aport = (AudioPort.Input) port;
             if (connections.contains(aport)) {
-                breakConnection(aport, source);
+                breakConnection(aport, portSource);
                 connections.remove(aport);
                 if (connections.size() == 1) {
                     switchToSingleChannel();
@@ -124,7 +124,7 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
         if (multiChannelCapable || portSource == splitter) {
             return;
         }
-        Sink[] sinks = removeSinks(portSource);
+        Sink[] sinks = removeSinks(source);
         try {
             if (splitter == null) {
                 splitter = new Splitter(16); // @TODO make channels configurable
@@ -149,6 +149,7 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
         }
         Sink[] sinks = removeSinks(splitter);
         try {
+            splitter.removeSource(source);
             for (Sink sink : sinks) {
                 sink.addSource(source);
             }
