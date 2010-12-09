@@ -44,7 +44,7 @@ class AudioServerLoader {
     }
 
     public AudioServer load(Lookup lookup, String libName, String device,
-            String id, AudioConfiguration context, AudioClient client, PMap properties) {
+            String id, AudioConfiguration context, AudioClient client, PMap properties) throws Exception {
         if ("Jack".equalsIgnoreCase(libName)) {
             return createJackServer(id, context, client);
         } else {
@@ -58,11 +58,12 @@ class AudioServerLoader {
     }
 
     private AudioServer createJavaSoundServer(String device, AudioConfiguration context,
-            AudioClient client) {
+            AudioClient client) throws Exception {
 //        Mixer mixer = getMixer(device);
-        Mixer mixer = AudioSystem.getMixer(AudioSystem.getMixerInfo()[0]);
-        return JavasoundAudioServer.create(mixer, context,
-                JavasoundAudioServer.TimingMode.Estimated, client);
+//        Mixer mixer = AudioSystem.getMixer(AudioSystem.getMixerInfo()[0]);
+//        return JavasoundAudioServer.create(mixer, context,
+//                JavasoundAudioServer.TimingMode.Estimated, client);
+        return JavasoundAudioServer.create(device, context, JavasoundAudioServer.TimingMode.Blocking, client);
     }
 
     private Mixer getMixer(String device) {

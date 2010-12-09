@@ -98,7 +98,15 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
         bus = new BusClient(2, 2);
         bus.addBufferRateListener(this);
         makeConnections(bus);
-        server = createServer(bus);
+        try {
+            server = createServer(bus);
+        } catch (Exception ex) {
+            Logger.getLogger(DefaultAudioRoot.class.getName()).log(Level.SEVERE, null, ex);
+            try {
+                setIdle();
+            } catch (IllegalRootStateException ex1) {}
+            return;
+        }
         setInterrupt(new Runnable() {
 
             public void run() {
@@ -116,7 +124,7 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
         });
     }
 
-    private AudioServer createServer(BusClient bus) {
+    private AudioServer createServer(BusClient bus) throws Exception {
         double srate = DEFAULT_SAMPLERATE;
         Argument arg = sampleRate.getValue();
         if (!arg.isEmpty()) {

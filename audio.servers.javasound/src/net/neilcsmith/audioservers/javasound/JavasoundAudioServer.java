@@ -43,7 +43,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.Line;
+import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
@@ -56,6 +59,8 @@ import net.neilcsmith.audioservers.AudioServer;
  * @author Neil C Smith
  */
 public class JavasoundAudioServer implements AudioServer {
+
+    private final static Logger LOG = Logger.getLogger(JavasoundAudioServer.class.getName());
 
     /**
      * Timing mode used by the server.
@@ -97,7 +102,9 @@ public class JavasoundAudioServer implements AudioServer {
     //
     private AtomicReference<State> state;
     private AudioConfiguration context;
-    private Mixer mixer;
+//    private Mixer mixer;
+    private Mixer inputMixer;
+    private Mixer outputMixer;
     private AudioClient client;
     private TimingMode mode;
     private TargetDataLine inputLine;
@@ -112,9 +119,19 @@ public class JavasoundAudioServer implements AudioServer {
     private List<FloatBuffer> outputBuffers;
     private AudioFloatConverter converter;
 
-    private JavasoundAudioServer(Mixer mixer, TimingMode mode,
+//    private JavasoundAudioServer(Mixer mixer, TimingMode mode,
+//            AudioConfiguration context, AudioClient client) {
+//        this.mixer = mixer;
+//        this.context = context;
+//        this.mode = mode;
+//        this.client = client;
+//        state = new AtomicReference<State>(State.New);
+//    }
+
+    private JavasoundAudioServer(Mixer inputMixer, Mixer outputMixer, TimingMode mode,
             AudioConfiguration context, AudioClient client) {
-        this.mixer = mixer;
+        this.inputMixer = inputMixer;
+        this.outputMixer = outputMixer;
         this.context = context;
         this.mode = mode;
         this.client = client;
@@ -170,7 +187,7 @@ public class JavasoundAudioServer implements AudioServer {
         if (inputChannels > 0) {
             AudioFormat inputFormat = new AudioFormat(srate, lineBitSize,
                     inputChannels, signed, bigEndian);
-            inputLine = (TargetDataLine) mixer.getLine(
+            inputLine = (TargetDataLine) inputMixer.getLine(
                     new DataLine.Info(TargetDataLine.class, inputFormat));
             inputFloatBuffer = new float[buffersize * inputChannels];
             int byteBufferSize = buffersize * inputFormat.getFrameSize();
@@ -182,7 +199,7 @@ public class JavasoundAudioServer implements AudioServer {
         // open output line and create internal buffers
         AudioFormat outputFormat = new AudioFormat(srate, lineBitSize,
                 outputChannels, signed, bigEndian);
-        outputLine = (SourceDataLine) mixer.getLine(
+        outputLine = (SourceDataLine) outputMixer.getLine(
                 new DataLine.Info(SourceDataLine.class, outputFormat));
         outputFloatBuffer = new float[buffersize * outputChannels];
         int byteBufferSize = buffersize * outputFormat.getFrameSize();
@@ -311,6 +328,7 @@ public class JavasoundAudioServer implements AudioServer {
         }
     }
 
+    @Deprecated
     public static JavasoundAudioServer create(Mixer mixer, AudioConfiguration context,
             TimingMode mode, AudioClient client) {
         if (mixer == null || mode == null ||
@@ -329,6 +347,94 @@ public class JavasoundAudioServer implements AudioServer {
                     context.getMaxBufferSize(),
                     true);
         }
-        return new JavasoundAudioServer(mixer, mode, context, client);
+        return new JavasoundAudioServer(mixer, mixer, mode, context, client);
     }
+
+    public static JavasoundAudioServer create(Mixer inputMixer, Mixer outputMixer,
+            AudioConfiguration context, TimingMode mode, AudioClient client) {
+        if (outputMixer == null || mode == null ||
+                context == null || client == null) {
+            throw new NullPointerException();
+        }
+        if (inputMixer == null && context.getInputChannelCount() > 0) {
+            throw new NullPointerException();
+        }
+        // must have real time output
+        if (context.getOutputChannelCount() == 0) {
+            throw new IllegalArgumentException();
+        }
+        // always fixed buffer size
+        if (!context.isFixedBufferSize()) {
+            context = new AudioConfiguration(context.getSampleRate(),
+                    context.getInputChannelCount(),
+                    context.getOutputChannelCount(),
+                    context.getMaxBufferSize(),
+                    true);
+        }
+        return new JavasoundAudioServer(inputMixer, outputMixer, mode, context, client);
+    }
+
+    public static JavasoundAudioServer create(String device, AudioConfiguration context,
+            TimingMode mode, AudioClient client) throws Exception {
+        if (mode == null || client == null) {
+            throw new NullPointerException();
+        }
+        if (device == null) {
+            device = "";
+        }
+        // must have real time output
+        if (context.getOutputChannelCount() == 0) {
+            throw new IllegalArgumentException();
+        }
+        Mixer in = null;
+        if (context.getInputChannelCount() > 0) {
+            in = findInputMixer(device);
+        }
+        Mixer out = findOutputMixer(device);
+        // always fixed buffer size
+        if (!context.isFixedBufferSize()) {
+            context = new AudioConfiguration(context.getSampleRate(),
+                    context.getInputChannelCount(),
+                    context.getOutputChannelCount(),
+                    context.getMaxBufferSize(),
+                    true);
+        }
+        return new JavasoundAudioServer(in, out, mode, context, client);
+    }
+
+    private static Mixer findInputMixer(String device) throws Exception {
+        Mixer.Info[] infos = AudioSystem.getMixerInfo();
+        Mixer mixer;
+        Line.Info[] lines;
+        for (int i = 0; i < infos.length; i++) {
+            mixer = AudioSystem.getMixer(infos[i]);
+            lines = mixer.getTargetLineInfo();
+            if ( lines.length > 0 ) {
+                if ( infos[i].getName().indexOf(device) >= 0 ) {
+                    LOG.finest("Found input mixer :\n" + infos[i]);
+                        return mixer;
+                }
+            }
+        }
+        throw new Exception();
+    }
+
+    private static Mixer findOutputMixer(String device) throws LineUnavailableException {
+        Mixer.Info[] infos = AudioSystem.getMixerInfo();
+        Mixer mixer;
+        Line.Info[] lines;
+        for (int i = 0; i < infos.length; i++) {
+            mixer = AudioSystem.getMixer(infos[i]);
+            lines = mixer.getSourceLineInfo();
+            if ( lines.length > 0 ) {
+                if ( infos[i].getName().indexOf(device) >= 0 ) {
+                    LOG.finest("Found output mixer :\n" + infos[i]);
+                        return mixer;
+                }
+            }
+        }
+        throw new LineUnavailableException();
+    }
+
+
 }
