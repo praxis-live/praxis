@@ -28,8 +28,10 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.logging.Logger;
 import javax.script.ScriptContext;
+import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
+import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.script.Command;
 import net.neilcsmith.praxis.script.CommandInstaller;
@@ -49,13 +51,13 @@ public class ScriptExecutor {
     private final static Logger log = Logger.getLogger(ScriptExecutor.class.getName());
     private List<StackFrame> stack;
     private Queue<Call> queue;
-    private Env context;
+    private Env env;
     private Command evaluator;
     private Map<String, Command> commandMap;
     private Namespace rootNS;
 
-    public ScriptExecutor(Env context, boolean inline) {
-        this.context = context;
+    public ScriptExecutor(Env env, boolean inline) {
+        this.env = env;
         stack = new LinkedList<StackFrame>();
         queue = new LinkedList<Call>();
         if (inline) {
@@ -65,6 +67,11 @@ public class ScriptExecutor {
         }
         rootNS = new NS();
         buildCommandMap();
+    }
+
+    public ScriptExecutor(Env context, final ComponentAddress ctxt) {
+        this(context, true);
+        rootNS.addVariable(Env.CONTEXT, new ConstantImpl(ctxt));
     }
 
     private void buildCommandMap() {
@@ -85,7 +92,7 @@ public class ScriptExecutor {
         stack.clear();
         while (!queue.isEmpty()) {
             Call call = queue.poll();
-            context.getPacketRouter().route(Call.createErrorCall(call, CallArguments.EMPTY));
+            env.getPacketRouter().route(Call.createErrorCall(call, CallArguments.EMPTY));
         }
 
     }
@@ -109,7 +116,7 @@ public class ScriptExecutor {
 
             // if incomplete do round of processing
             if (current.getState() == StackFrame.State.Incomplete) {
-                StackFrame child = current.process(context);
+                StackFrame child = current.process(env);
                 if (child != null) {
                     log.finest("Pushing to stack" + child.getClass());
                     stack.add(0, child);
@@ -139,7 +146,7 @@ public class ScriptExecutor {
                         log.finest("Sending Error return call");
                         call = Call.createErrorCall(call, args);
                     }
-                    context.getPacketRouter().route(call);
+                    env.getPacketRouter().route(call);
                 }
             }
         }
@@ -155,7 +162,7 @@ public class ScriptExecutor {
                 break;
             } catch (Exception ex) {
                 queue.poll();
-                context.getPacketRouter().route(
+                env.getPacketRouter().route(
                         Call.createErrorCall(call, PReference.wrap(ex)));
             }
         }

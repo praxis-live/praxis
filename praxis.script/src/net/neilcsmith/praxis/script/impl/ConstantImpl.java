@@ -21,7 +21,7 @@
  */
 
 
-package net.neilcsmith.praxis.script.commands;
+package net.neilcsmith.praxis.script.impl;
 
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.script.Variable;
@@ -30,11 +30,11 @@ import net.neilcsmith.praxis.script.Variable;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-class ConstantImpl implements Variable {
+public class ConstantImpl implements Variable {
 
     Argument value;
 
-    ConstantImpl(Argument value) {
+    public ConstantImpl(Argument value) {
         this.value = value;
     }
 

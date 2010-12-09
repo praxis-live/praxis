@@ -34,6 +34,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
+import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
@@ -97,6 +98,7 @@ public class Player extends AbstractRoot {
     private String script;
 
     public Player() {
+        super(EnumSet.noneOf(Caps.class));
     }
 
     public Player(String script) {
