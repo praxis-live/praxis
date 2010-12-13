@@ -514,9 +514,10 @@ public class Player extends AbstractRoot {
             putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
             String previewVersion = System.getProperty("net.neilcsmith.praxisplayer.version");
             if (previewVersion == null) {
-                aboutText = "Praxis\n© 2010 Neil C Smith";
+                aboutText = "Praxis\n© 2010 Neil C Smith\nhttp://neilcsmith.net";
             } else {
-                aboutText = "Praxis - v." + previewVersion + "\n© 2010 Neil C Smith";
+                aboutText = "Praxis - build:" + previewVersion + "\n© 2010 Neil C Smith\n" +
+                        "http://neilcsmith.net";
             }
         }
 
