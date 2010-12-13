@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
- * 
+ *
  *
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
@@ -23,23 +23,40 @@
 package net.neilcsmith.praxis.script.commands;
 
 import java.util.Map;
+import net.neilcsmith.praxis.core.CallArguments;
+import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.script.Command;
 import net.neilcsmith.praxis.script.CommandInstaller;
+import net.neilcsmith.praxis.script.Env;
+import net.neilcsmith.praxis.script.ExecutionException;
+import net.neilcsmith.praxis.script.Namespace;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class CoreCommandsInstaller implements CommandInstaller {
+public class ArrayCmds implements CommandInstaller {
+    
+    private final static ArrayCmds INSTANCE = new ArrayCmds();
+
+    private final static Array ARRAY = new Array();
+
+    private ArrayCmds() {}
 
     public void install(Map<String, Command> commands) {
-        EvalCmds.getInstance().install(commands);
-//        ComponentCmds.getInstance().install(commands);
-        ConnectionCmds.getInstance().install(commands);
-        FileCmds.getInstance().install(commands);
-        VariableCmds.getInstance().install(commands);
-        AtCmds.getInstance().install(commands);
-        ArrayCmds.getInstance().install(commands);
+        commands.put("array", ARRAY);
+    }
+
+    public final static ArrayCmds getInstance() {
+        return INSTANCE;
+    }
+
+    private static class Array extends AbstractInlineCommand {
+
+        public CallArguments process(Env context, Namespace namespace, CallArguments args) throws ExecutionException {
+            return CallArguments.create(PArray.valueOf(args));
+        }
+
     }
 
 }

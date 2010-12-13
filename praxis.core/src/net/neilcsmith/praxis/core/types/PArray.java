@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
+import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.syntax.Token;
 import net.neilcsmith.praxis.core.syntax.Tokenizer;
@@ -159,6 +160,10 @@ public final class PArray extends Argument implements Iterable<Argument> {
             copy[i] = arg;
         }
         return new PArray(copy, null);
+    }
+
+    public static PArray valueOf(CallArguments args) {
+        return new PArray(args.getAll(), null);
     }
 
     public static PArray valueOf(String str) throws ArgumentFormatException {
