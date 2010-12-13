@@ -88,7 +88,7 @@ public class Terminal extends JComponent {
     }
 
     private void buildActions() {
-        evalAction = new EvalAction();
+        evalAction = new RunAction();
         clearAction = new ClearAction();
     }
 
@@ -185,10 +185,10 @@ public class Terminal extends JComponent {
         return builder.toString();
     }
 
-    private class EvalAction extends AbstractAction {
+    private class RunAction extends AbstractAction {
 
-        private EvalAction() {
-            super("Evaluate (Ctrl+ENTER)");
+        private RunAction() {
+            super("Run (Ctrl+ENTER)");
 
         }
 
