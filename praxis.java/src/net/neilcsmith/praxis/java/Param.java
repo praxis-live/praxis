@@ -99,4 +99,14 @@ public class Param implements ArgumentProperty.Binding {
 
     }
 
+    public static interface Animator {
+
+        public long getTime();
+
+        public void connect(Param p);
+
+        public void disconnect(Param p);
+
+    }
+
 }

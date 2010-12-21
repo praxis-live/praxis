@@ -29,6 +29,7 @@ import net.neilcsmith.ripl.Surface;
 import net.neilcsmith.ripl.SurfaceOp;
 import net.neilcsmith.ripl.delegates.CompositeDelegate;
 import net.neilcsmith.ripl.delegates.Delegate;
+import net.neilcsmith.ripl.ops.BlendFunction;
 
 /**
  *
@@ -89,8 +90,7 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
             dst = new PImage(surface);
             g = new PGraphics(dst);
         } else if (dst.getSurface() != surface) {
-            dst = new PImage(surface);
-            g.setImage(dst);
+            dst.setSurface(surface);
         }
     }
 
@@ -112,8 +112,26 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
 
 
     // PGraphics impl
+
+    public void blendMode(BlendFunction blend) {
+        g.blendMode(blend);
+    }
+
+    public void clear() {
+        g.clear();
+    }
+
     public void image(PImage image, double x, double y) {
         g.image(image, x, y);
+    }
+
+    public void image(PImage src, double x, double y, double c, double d) {
+        g.image(src, x, y, c, d);
+    }
+
+    public void image(PImage src, double x, double y, double w, double h,
+            int u1, int v1, int u2, int v2) {
+        g.image(src, x, y, w, h, u1, v1, u2, v2);
     }
 
     public void op(SurfaceOp op) {
@@ -121,6 +139,10 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
     }
 
     public void op(SurfaceOp op, Surface src) {
+        g.op(op, src);
+    }
+
+    public void op(SurfaceOp op, PImage src) {
         g.op(op, src);
     }
 

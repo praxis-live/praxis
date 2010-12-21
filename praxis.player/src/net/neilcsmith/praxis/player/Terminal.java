@@ -24,6 +24,8 @@ package net.neilcsmith.praxis.player;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -40,7 +42,9 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import net.miginfocom.swing.MigLayout;
+import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
+import net.neilcsmith.praxis.core.types.PReference;
 import org.openide.util.Exceptions;
 
 /**
@@ -170,6 +174,21 @@ public class Terminal extends JComponent {
         } catch (BadLocationException ex) {
             Exceptions.printStackTrace(ex);
         }
+        if (args.getSize() > 0) {
+                Argument err = args.get(0);
+                if (err instanceof PReference) {
+                    Object o = ((PReference) err).getReference();
+                    if (o instanceof Throwable) {
+                        Logger.getLogger(Terminal.class.getName()).log(
+                                Level.SEVERE, "ERROR: ", (Throwable) o);
+                    } else {
+                        Logger.getLogger(Terminal.class.getName()).severe("ERROR: " + o.toString());
+                    }
+                } else {
+                    Logger.getLogger(Terminal.class.getName()).severe("ERROR: " + err.toString());
+                }
+            }
+
         evalAction.setEnabled(true);
     }
 

@@ -44,7 +44,9 @@ public abstract class AbstractJavaVideoComponent extends AbstractJavaComponent {
 
     private static final String[] IMPORTS = {
         "net.neilcsmith.ripl.*",
-        "net.neilcsmith.ripl.ops.*"
+        "net.neilcsmith.ripl.ops.*",
+        "static net.neilcsmith.praxis.java.Constants.*",
+        "static net.neilcsmith.praxis.video.java.VideoConstants.*"
     };
 
     protected void setupCodeControl() {

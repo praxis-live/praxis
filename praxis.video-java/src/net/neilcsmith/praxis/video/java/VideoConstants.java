@@ -22,43 +22,16 @@
 
 package net.neilcsmith.praxis.video.java;
 
-import net.neilcsmith.ripl.Surface;
-import net.neilcsmith.ripl.SurfaceOp;
+import net.neilcsmith.ripl.ops.Blend;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class PImage {
+public class VideoConstants {
 
-    private Surface surface;
-    public int width;
-    public int height;
+    private VideoConstants() {}
 
-    public PImage(Surface surface) {
-        setSurface(surface);
-    }
-
-    public void setSurface(Surface surface) {
-        if (surface == null) {
-            throw new NullPointerException();
-        }
-        this.surface = surface;
-        this.width = surface.getWidth();
-        this.height = surface.getHeight();
-    }
-
-    public Surface getSurface() {
-        return surface;
-    }
-
-    public void process(SurfaceOp op) {
-        surface.process(op);
-    }
-
-    public void process(SurfaceOp op, PImage image) {
-        surface.process(op, image.surface);
-    }
-    
+    public final static Blend NORMAL = Blend.NORMAL;
 
 }

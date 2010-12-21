@@ -22,6 +22,7 @@
 
 package net.neilcsmith.praxis.java;
 
+import java.util.Random;
 import net.neilcsmith.praxis.core.Argument;
 
 /**
@@ -33,13 +34,14 @@ public class CodeDelegate {
     private CodeContext context;
     private long time;
     private boolean installable;
+    private Random rnd;
 
     public CodeDelegate() {
         this(true);
     }
 
     public CodeDelegate(boolean installable) {
-
+        rnd = new Random();
     }
 
     public void init(CodeContext context, long time) throws Exception {
@@ -84,6 +86,18 @@ public class CodeDelegate {
 
     public long getTime() {
         return time;
+    }
+
+
+    public final double random(double max) {
+        return rnd.nextDouble() * max;
+    }
+
+    public final double random(double min, double max) {
+        if (min >= max) {
+            return min;
+        }
+        return random(max - min) + min;
     }
 
 

@@ -20,45 +20,16 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.video.java;
-
-import net.neilcsmith.ripl.Surface;
-import net.neilcsmith.ripl.SurfaceOp;
+package net.neilcsmith.praxis.java;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class PImage {
+public class Constants {
 
-    private Surface surface;
-    public int width;
-    public int height;
+    private Constants() {}
 
-    public PImage(Surface surface) {
-        setSurface(surface);
-    }
-
-    public void setSurface(Surface surface) {
-        if (surface == null) {
-            throw new NullPointerException();
-        }
-        this.surface = surface;
-        this.width = surface.getWidth();
-        this.height = surface.getHeight();
-    }
-
-    public Surface getSurface() {
-        return surface;
-    }
-
-    public void process(SurfaceOp op) {
-        surface.process(op);
-    }
-
-    public void process(SurfaceOp op, PImage image) {
-        surface.process(op, image.surface);
-    }
-    
+    public final static double PI = Math.PI;
 
 }
