@@ -38,6 +38,7 @@ import net.neilcsmith.praxis.impl.TriggerControl;
  *
  * @author Neil C Smith
  */
+//@TODO add reset control / port
 public class ArrayIterator extends AbstractComponent {
 
     private static enum LoopMode {
