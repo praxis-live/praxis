@@ -19,7 +19,6 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.java;
 
 import java.util.Random;
@@ -58,7 +57,8 @@ public class CodeDelegate {
         this.time = time;
     }
 
-    public void dispose() {}
+    public void dispose() {
+    }
 
     public Param p(int idx) {
         return context.getParam(idx - 1);
@@ -88,7 +88,6 @@ public class CodeDelegate {
         return time;
     }
 
-
     public final double random(double max) {
         return rnd.nextDouble() * max;
     }
@@ -100,6 +99,35 @@ public class CodeDelegate {
         return random(max - min) + min;
     }
 
+    public final double abs(double n) {
+        return (n < 0) ? -n : n;
+    }
 
+    public final double sq(double a) {
+        return a * a;
+    }
 
+    public final double sqrt(double a) {
+        return Math.sqrt(a);
+    }
+
+    public final double log(double a) {
+        return Math.log(a);
+    }
+
+    public final double exp(double a) {
+        return Math.exp(a);
+    }
+
+    public final double pow(double a, double b) {
+        return Math.pow(a, b);
+    }
+
+    public final double max(double a, double b) {
+        return (a > b) ? a : b;
+    }
+
+    public final double max(double a, double b, double c) {
+        return (a > b) ? ((a > c) ? a : c) : ((b > c) ? b : c);
+    }
 }

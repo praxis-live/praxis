@@ -19,7 +19,6 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.video.java;
 
 import java.util.logging.Level;
@@ -29,7 +28,7 @@ import net.neilcsmith.ripl.Surface;
 import net.neilcsmith.ripl.SurfaceOp;
 import net.neilcsmith.ripl.delegates.CompositeDelegate;
 import net.neilcsmith.ripl.delegates.Delegate;
-import net.neilcsmith.ripl.ops.BlendFunction;
+import net.neilcsmith.ripl.ops.Blend;
 
 /**
  *
@@ -39,18 +38,18 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
 
     private final static Logger LOG = Logger.getLogger(VideoCodeDelegate.class.getName());
     private final static Surface[] EMPTY_SOURCES = new Surface[0];
-
     private PImage dst;
-    private PGraphics g;
+    private PGraphics pg;
     private boolean inited;
-
     public PImage src;
     public Surface[] sources;
+    public int width;
+    public int height;
 
     public final void update(long time) {
         // ignore - tick() provides same function earlier in update cycle.
     }
-    
+
     public final void process(Surface surface) {
         validateGraphics(surface);
         sources = EMPTY_SOURCES;
@@ -59,6 +58,8 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
 
     public final void process(Surface surface, Surface... sources) {
         validateGraphics(surface);
+        width = surface.getWidth();
+        height = surface.getHeight();
         if (sources.length > 0) {
             Surface s = sources[0];
             if (src == null || src.getSurface() != s) {
@@ -88,13 +89,11 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
     private void validateGraphics(Surface surface) {
         if (dst == null) {
             dst = new PImage(surface);
-            g = new PGraphics(dst);
+            pg = new PGraphics(dst);
         } else if (dst.getSurface() != surface) {
             dst.setSurface(surface);
         }
     }
-
-
 
     public boolean forceRender() {
         return false;
@@ -104,46 +103,114 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
         return true;
     }
 
-    public void setup() {}
+    public void setup() {
+    }
 
-    public void draw() {process();} //old API used process()
+    public void draw() {
+        process();
+    } //old API used process()
 
-    public void process() {}
-
+    public void process() {
+    }
 
     // PGraphics impl
-
-    public void blendMode(BlendFunction blend) {
-        g.blendMode(blend);
+    public void blendMode(Blend blend) {
+        pg.blendMode(blend);
     }
 
     public void clear() {
-        g.clear();
+        pg.clear();
+    }
+
+    public void ellipse(double x, double y, double w, double h) {
+        pg.ellipse(x, y, w, h);
+    }
+
+    public void fill(double r, double g, double b) {
+        pg.fill(r, g, b);
+    }
+
+    public void fill(double r, double g, double b, double a) {
+        pg.fill(r, g, b, a);
     }
 
     public void image(PImage image, double x, double y) {
-        g.image(image, x, y);
-    }
-
-    public void image(PImage src, double x, double y, double c, double d) {
-        g.image(src, x, y, c, d);
+        pg.image(image, x, y);
     }
 
     public void image(PImage src, double x, double y, double w, double h,
-            int u1, int v1, int u2, int v2) {
-        g.image(src, x, y, w, h, u1, v1, u2, v2);
+            double u, double v) {
+        pg.image(src, x, y, w, h, u, v);
+    }
+
+    public void image(PImage src, double x, double y, double w, double h) {
+        pg.image(src, x, y, w, h);
+    }
+
+    public void image(PImage src, double x, double y, double w, double h,
+            double u1, double v1, double u2, double v2) {
+        pg.image(src, x, y, w, h, u1, v1, u2, v2);
+    }
+
+    public void line(double x1, double y1, double x2, double y2) {
+        pg.line(x1, y1, x2, y2);
+    }
+
+    public void noFill() {
+        pg.noFill();
+    }
+
+    public void noSmooth() {
+        pg.noSmooth();
+    }
+
+    public void noStroke() {
+        pg.noStroke();
     }
 
     public void op(SurfaceOp op) {
-        g.op(op);
+        pg.op(op);
     }
 
     public void op(SurfaceOp op, Surface src) {
-        g.op(op, src);
+        pg.op(op, src);
     }
 
     public void op(SurfaceOp op, PImage src) {
-        g.op(op, src);
+        pg.op(op, src);
     }
 
+    public void point(double x, double y) {
+        pg.point(x, y);
+    }
+
+    public void quad(double x1, double y1, double x2, double y2,
+            double x3, double y3, double x4, double y4) {
+        pg.quad(x1, y1, x2, y2, x3, y3, x4, y4);
+    }
+
+    public void rect(double x, double y, double w, double h) {
+        pg.rect(x, y, w, h);
+    }
+
+    public void smooth() {
+        pg.smooth();
+    }
+
+    public void stroke(double r, double g, double b) {
+        pg.stroke(r, g, b);
+    }
+
+    public void stroke(double r, double g, double b, double a) {
+        pg.stroke(r, g, b, a);
+    }
+
+    public void strokeWeight(double weight) {
+        pg.strokeWeight(weight);
+    }
+
+    public void triangle(double x1, double y1, double x2, double y2,
+            double x3, double y3) {
+        pg.triangle(x1, y1, x2, y2, x3, y3);
+    }
 }

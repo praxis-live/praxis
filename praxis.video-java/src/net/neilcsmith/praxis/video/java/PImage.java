@@ -36,10 +36,14 @@ public class PImage {
     public int height;
 
     public PImage(Surface surface) {
-        setSurface(surface);
+        setSurfaceImpl(surface);
     }
 
     public void setSurface(Surface surface) {
+        setSurfaceImpl(surface);
+    }
+
+    private void setSurfaceImpl(Surface surface) {
         if (surface == null) {
             throw new NullPointerException();
         }
