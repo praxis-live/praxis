@@ -44,6 +44,7 @@ import net.neilcsmith.praxis.impl.BasicControl;
  * @author Neil C Smith
  */
 // @TODO sync on error?
+// @TODO take router rather than host in constructor
 class DefaultBinding extends BasicControl {
 
     private final static int LOW_SYNC_DELAY = 1000;

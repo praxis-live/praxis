@@ -45,7 +45,7 @@ import net.neilcsmith.praxis.impl.StringProperty;
  */
 class Slider extends SingleBindingGuiComponent {
 
-    private static Logger logger = Logger.getLogger(Slider.class.getName());
+    private static final Logger LOG = Logger.getLogger(Slider.class.getName());
     private String labelText;
     private Box box;
     private JSlider slider;

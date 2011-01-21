@@ -47,7 +47,7 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
 
     private final static double DEFAULT_MINIMUM = 0;
     private final static double DEFAULT_MAXIMUM = 1;
-    private static Logger logger = Logger.getLogger(BoundedValueAdaptor.class.getName());
+    private static final Logger LOG = Logger.getLogger(BoundedValueAdaptor.class.getName());
     private BoundedRangeModel model;
     private ControlInfo info;
     private boolean isUpdating;
@@ -205,6 +205,13 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
             }
         }
     }
+
+    @Override
+    public boolean getValueIsAdjusting() {
+        return model.getValueIsAdjusting();
+    }
+
+
 
     private double convertToDouble(int value) {
         int mMin = model.getMinimum();

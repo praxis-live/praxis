@@ -49,6 +49,7 @@
             </module-dependencies>
             <public-packages>
                 <package>net.neilcsmith.praxis.gui</package>
+                <package>net.neilcsmith.praxis.gui.impl</package>
             </public-packages>
         </data>
     </configuration>

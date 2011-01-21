@@ -52,6 +52,7 @@ import net.neilcsmith.praxis.gui.ControlBinding;
 import net.neilcsmith.praxis.gui.ControlBinding.Adaptor;
 import net.neilcsmith.praxis.gui.BindingContext;
 import net.neilcsmith.praxis.gui.GuiContext;
+import net.neilcsmith.praxis.gui.impl.DefaultBindingControl;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.InstanceLookup;
 import net.neilcsmith.praxis.impl.RootState;
@@ -68,13 +69,13 @@ public class DefaultGuiRoot extends AbstractRoot {
     private MigLayout layout;
     private LayoutChangeListener layoutListener;
     private Timer timer;
-    private Map<ControlAddress, DefaultBinding> bindingCache;
+    private Map<ControlAddress, DefaultBindingControl> bindingCache;
     private Bindings bindings;
     private Context context;
     private Lookup lookup;
 
     public DefaultGuiRoot() {
-        bindingCache = new HashMap<ControlAddress, DefaultBinding>();
+        bindingCache = new HashMap<ControlAddress, DefaultBindingControl>();
     }
 
     @Override
@@ -239,9 +240,11 @@ public class DefaultGuiRoot extends AbstractRoot {
     private class Bindings extends BindingContext {
 
         public void bind(ControlAddress address, Adaptor adaptor) {
-            DefaultBinding binding = bindingCache.get(address);
+//            DefaultBinding binding = bindingCache.get(address);
+            DefaultBindingControl binding = bindingCache.get(address);
             if (binding == null) {
-                binding = new DefaultBinding(DefaultGuiRoot.this, address);
+//                binding = new DefaultBinding(DefaultGuiRoot.this, address);
+                binding = new DefaultBindingControl(address);
                 registerControl("_binding_" + Integer.toHexString(binding.hashCode()),
                         binding);
                 bindingCache.put(address, binding);
@@ -254,7 +257,8 @@ public class DefaultGuiRoot extends AbstractRoot {
             if (cBinding == null) {
                 return;
             }
-            DefaultBinding binding = bindingCache.get(cBinding.getAddress());
+//            DefaultBinding binding = bindingCache.get(cBinding.getAddress());
+            DefaultBindingControl binding = bindingCache.get(cBinding.getAddress());
             if (binding != null) {
                 binding.unbind(adaptor);
             }
@@ -347,7 +351,11 @@ public class DefaultGuiRoot extends AbstractRoot {
 
         public boolean submitPacket(Packet packet) {
             boolean ret = ctrl.submitPacket(packet);
-            EventQueue.invokeLater(runner);
+            RootState state = getState();
+            if (state == RootState.ACTIVE_RUNNING ||
+                    state == RootState.ACTIVE_IDLE) {
+                EventQueue.invokeLater(runner);
+            }
             return ret;
         }
 

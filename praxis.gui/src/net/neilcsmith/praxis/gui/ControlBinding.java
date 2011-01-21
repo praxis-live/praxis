@@ -98,7 +98,13 @@ public abstract class ControlBinding {
                 binding.send(this, args);
             }
         }
-        
+
+        public boolean getValueIsAdjusting() {
+            return false;
+        }
+
+        public void onError(CallArguments args) {}
+
         public abstract void update();
         
         public abstract void updateBindingConfiguration();

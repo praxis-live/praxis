@@ -193,6 +193,13 @@ public class BoundedRangeAdaptor extends ControlBinding.Adaptor implements Chang
         }
     }
 
+    @Override
+    public boolean getValueIsAdjusting() {
+        return model.getValueIsAdjusting();
+    }
+
+    
+
     private double convertToDouble(int value) {
         int mMin = model.getMinimum();
         int mMax = model.getMaximum();
