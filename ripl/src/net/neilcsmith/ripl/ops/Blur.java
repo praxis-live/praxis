@@ -18,6 +18,43 @@
  *
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
+ *
+ *
+ *
+ *
+ *
+ * Partially derived from code by Florent Dupont
+ *
+ * /*
+ * Copyright (c) 2008, Florent Dupont
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of the PulpCore project nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
  */
 
 package net.neilcsmith.ripl.ops;
@@ -36,7 +73,7 @@ public class Blur implements SurfaceOp {
     
     private int xRadius;
     private int yRadius;
-    private TmpData tmp;
+    private TempData tmp;
 
     private Blur(int radius) {
         this.xRadius = radius;
@@ -46,14 +83,12 @@ public class Blur implements SurfaceOp {
     public void process(PixelData output, PixelData... inputs) {
         int dstH = output.getWidth();
         int dstW = output.getHeight();
-        if (tmp == null) {
-            tmp = new TmpData(dstW, dstH, null);
-        } else if (tmp.width != dstW || tmp.height != dstH) {
-            tmp = new TmpData(dstW, dstH, tmp.data);
+        if (tmp == null || tmp.getWidth() != dstW || tmp.getHeight() != dstH) {
+            tmp = TempData.create(dstW, dstH, true);
         }
         blur(output, tmp, xRadius);
         blur(tmp, output, yRadius);
-
+        tmp.release();
     }
 
     private void blur(PixelData src, PixelData dst, int radius) {
@@ -149,49 +184,6 @@ public class Blur implements SurfaceOp {
 	        srcIndex += src.getScanline();
 	    }
 	}
-
-
-
-    private class TmpData implements PixelData {
-
-        private int[] data;
-        private int width;
-        private int height;
-
-        private TmpData(int width, int height, int[] data){
-            this.width = width;
-            this.height = height;
-            if (data == null || data.length < (width * height)) {
-                data = new int[width * height];
-            }
-            this.data = data;
-        }
-
-        public int[] getData() {
-            return data;
-        }
-
-        public int getOffset() {
-            return 0;
-        }
-
-        public int getScanline() {
-            return width;
-        }
-
-        public int getWidth() {
-            return width;
-        }
-
-        public int getHeight() {
-            return height;
-        }
-
-        public boolean hasAlpha() {
-            return true;
-        }
-
-    }
 
     public static SurfaceOp op(int radius) {
         if (radius < 0) {

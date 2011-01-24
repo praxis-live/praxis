@@ -95,14 +95,15 @@ public class ScaledBlit implements SurfaceOp {
         int dy = dstBnds == null ? 0 : dstBnds.getY();
         int dw = dstBnds == null ? output.getWidth() : dstBnds.getWidth();
         int dh = dstBnds == null ? output.getHeight() : dstBnds.getHeight();
-        
+
+        if (dw <= 0 || dh <= 0) {
+            return;
+        }
+
         // get temp data
-        if (tmp == null) {
+        if (tmp == null || tmp.getWidth() != dw || tmp.getHeight() != dh ||
+                tmp.hasAlpha() != input.hasAlpha()) {
             tmp = TempData.create(dw, dh, input.hasAlpha());
-        } else if (tmp.width != dw || tmp.height != dh) {
-            tmp = TempData.create(dh, dh, input.hasAlpha(), tmp.data);
-        } else {
-            tmp.alpha = input.hasAlpha();
         }
 
         // draw to temp
@@ -114,7 +115,7 @@ public class ScaledBlit implements SurfaceOp {
 
         Blit.op(blend, dx, dy).process(output, tmp);
 
-        
+        tmp.release();
     }
 
     

@@ -23,6 +23,7 @@
 package net.neilcsmith.ripl.ops;
 
 import net.neilcsmith.ripl.PixelData;
+import net.neilcsmith.ripl.utils.PixelArrayCache;
 
 /**
  *
@@ -30,23 +31,24 @@ import net.neilcsmith.ripl.PixelData;
  */
 class TempData implements PixelData {
     
-    int[] data;
-    int offset;
-    int scanline;
-    int width;
-    int height;
-    boolean alpha;
+    private int[] data;
+    private int width;
+    private int height;
+    private boolean alpha;
 
     public int[] getData() {
+        if (data == null) {
+            data = PixelArrayCache.acquire(width*height, true);
+        }
         return data;
     }
 
     public int getOffset() {
-        return offset;
+        return 0;
     }
 
     public int getScanline() {
-        return scanline;
+        return width;
     }
 
     public int getWidth() {
@@ -61,21 +63,16 @@ class TempData implements PixelData {
         return alpha;
     }
 
-    static TempData create(int width, int height, boolean alpha) {
-        return create(width, height, alpha, null);
+    void release() {
+        PixelArrayCache.release(data);
+        data = null;
     }
-    
-    static TempData create(int width, int height, boolean alpha, int[] data) {
+
+    static TempData create(int width, int height, boolean alpha) {
         TempData tmp = new TempData();
         tmp.width = width;
         tmp.height = height;
-        tmp.scanline = width;
-        tmp.offset = 0;
         tmp.alpha = alpha;
-        if (data == null || data.length < (width * height)) {
-            data = new int[width * height];
-        }
-        tmp.data = data;
         return tmp;
     }
 
