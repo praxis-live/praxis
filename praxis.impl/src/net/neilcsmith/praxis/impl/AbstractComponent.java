@@ -112,6 +112,7 @@ public abstract class AbstractComponent implements Component {
      * @param id
      * @param control
      */
+    // @TODO only nullify info if control is visible
     protected void registerControl(String id, Control control) {
         if (id == null || control == null) {
             throw new NullPointerException();
