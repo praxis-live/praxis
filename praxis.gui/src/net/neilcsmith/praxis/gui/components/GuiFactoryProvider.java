@@ -61,6 +61,7 @@ public class GuiFactoryProvider implements ComponentFactoryProvider {
 //            addComponent("gui:v-panel", VPanel.class);
             addComponent("gui:panel", Panel.class);
             addComponent("gui:tabs", Tabs.class);
+            addComponent("gui:textarea", TextArea.class);
 
         }
     }
