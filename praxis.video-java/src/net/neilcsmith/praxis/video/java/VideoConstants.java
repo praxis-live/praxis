@@ -33,5 +33,13 @@ public class VideoConstants {
     private VideoConstants() {}
 
     public final static Blend NORMAL = Blend.NORMAL;
+    public final static Blend BLEND = NORMAL;
+    public final static Blend ADD = Blend.ADD;
+    public final static Blend SUB = Blend.SUB;
+    public final static Blend SUBTRACT = SUB;
+    public final static Blend DIFFERENCE = Blend.DIFFERENCE;
+    public final static Blend MULTIPLY = Blend.MULTIPLY;
+    public final static Blend SCREEN = Blend.SCREEN;
+    public final static Blend BITXOR = Blend.BITXOR;
 
 }
