@@ -80,7 +80,7 @@ public class Terminal extends JComponent {
         setContext(context);
     }
     
-    public void setContext(Context context) {
+    public final void setContext(Context context) {
         if (context != this.context) {
             this.context = context;
             evalAction.setEnabled(true);
@@ -111,7 +111,7 @@ public class Terminal extends JComponent {
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         iPane.setMinimumSize(new Dimension(200, 100));
-        hPane.setPreferredSize(new Dimension(450, 250));
+        // iPane.setPreferredSize(new Dimension(450, 250));
         JSplitPane splPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 hPane, iPane);
         splPane.setContinuousLayout(true);
