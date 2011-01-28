@@ -171,18 +171,6 @@ public class DefaultBindingControl extends AbstractControl {
 
         @Override
         protected void send(Adaptor adaptor, CallArguments args) {
-//            PacketRouter router = getRouter();
-//            ControlAddress returnAddress = getReturnAddress();
-//            Call call = Call.createQuietCall(boundAddress, returnAddress,
-//                    System.nanoTime(), args);
-//            router.route(call);
-//            lastCallID = call.getMatchID();
-//            this.arguments = args;
-//            for (Adaptor ad : adaptors) {
-//                if (ad != adaptor) {
-//                    ad.update();
-//                }
-//            }
             PacketRouter router = getRouter();
             ControlAddress returnAddress = getReturnAddress();
             Call call;
@@ -303,6 +291,10 @@ public class DefaultBindingControl extends AbstractControl {
 
         private void processResponse(Call call) {
             if (activeCall != null && call.getMatchID() == activeCall.getMatchID()) {
+                if (activeAdaptor != null) {
+                    activeAdaptor.onResponse(call.getArgs());
+                    activeAdaptor = null;
+                }
                 if (isProperty) {
                     arguments = call.getArgs();
                     for (Adaptor a : adaptors) {
@@ -310,15 +302,7 @@ public class DefaultBindingControl extends AbstractControl {
                     }
                 }
                 activeCall = null;
-                activeAdaptor = null;
             }
-//            if (syncable && call.getMatchID() == lastCallID) {
-//                arguments = call.getArgs();
-//                for (Adaptor a : adaptors) {
-//                    a.update();
-//                }
-//            }
-
         }
 
         private void processError(Call call) {

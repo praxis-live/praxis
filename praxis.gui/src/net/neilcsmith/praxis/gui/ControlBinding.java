@@ -103,6 +103,8 @@ public abstract class ControlBinding {
             return false;
         }
 
+        public void onResponse(CallArguments args) {}
+
         public void onError(CallArguments args) {}
 
         public abstract void update();
