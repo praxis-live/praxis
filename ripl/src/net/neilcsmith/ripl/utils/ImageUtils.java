@@ -53,7 +53,7 @@ public class ImageUtils {
 
     private ImageUtils() {}
 
-    public final static BufferedImage toImage(PixelData pd) {
+    public static BufferedImage toImage(PixelData pd) {
         int w = pd.getWidth();
         int h = pd.getHeight();
         int offset = pd.getOffset();

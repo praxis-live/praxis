@@ -51,7 +51,7 @@ public class BufferedImageSurface extends Surface {
     private final static SurfaceCapabilities caps = new SurfaceCapabilities(true);
     private BufferedImage image;
     private PixelWrapper pixelData;
-    private int mod;
+    private boolean clear = true;
 
     public BufferedImageSurface(int width, int height, boolean alpha) {
         super(width, height, alpha);
@@ -85,12 +85,20 @@ public class BufferedImageSurface extends Surface {
         return image;
     }
 
-    protected PixelData getPixelData() {
+    private PixelData getPixelData() {
         if (pixelData == null) {
             int[] data = ((DataBufferInt) (image.getRaster().getDataBuffer())).getData();
             pixelData = new PixelWrapper(data, getWidth(), getHeight(), hasAlpha());
         }
         return pixelData;
+    }
+
+    private PixelData getPixelData(Surface surface) {
+        if (surface instanceof BufferedImageSurface) {
+            return ((BufferedImageSurface) surface).getPixelData();
+        } else {
+            throw new RuntimeException();
+        }
     }
 
     @Override
@@ -114,10 +122,17 @@ public class BufferedImageSurface extends Surface {
         g.setComposite(AlphaComposite.Clear);
         g.fillRect(0, 0, getWidth(), getHeight());
         g.dispose();
+        clear = true;
+    }
+
+    @Override
+    public boolean isClear() {
+        return clear;
     }
 
     @Override
     public void copy(Surface source) {
+        clear = false;
         if (source.hasAlpha() || source.getWidth() < getWidth() ||
                 source.getHeight() < getHeight()) {
             clear();
@@ -135,11 +150,11 @@ public class BufferedImageSurface extends Surface {
 
     @Override
     public void process(SurfaceOp op, Surface... inputs) {
-        if (op instanceof GraphicsOp) {
-            Graphics2D g = image.createGraphics();
-            ((GraphicsOp) op).getCallback().draw(g, createImageArray(inputs));
-            return;
-        }
+//        if (op instanceof GraphicsOp) {
+//            Graphics2D g = image.createGraphics();
+//            ((GraphicsOp) op).getCallback().draw(g, createImageArray(inputs));
+//            return;
+//        }
         PixelData[] inputData;
         int inLen = inputs.length;
         if (inLen > 0) {
@@ -151,6 +166,7 @@ public class BufferedImageSurface extends Surface {
             inputData = EMPTY_INPUTS;
         }
         op.process(getPixelData(), inputData);
+        clear = false;
     }
 
     private Image[] createImageArray(Surface[] inputs) {

@@ -4,6 +4,7 @@
  */
 package net.neilcsmith.ripl.render;
 
+import net.neilcsmith.ripl.render.reference.ReferencePlayer;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -50,7 +51,7 @@ public class RiplPlayerTest {
 
     @Test
     public void testPlayer() throws Exception {
-        RiplPlayer player = new RiplPlayer("Test", 640, 480, 20, false);
+        ReferencePlayer player = new ReferencePlayer("Test", 640, 480, 20, false);
         Delegator d = new Delegator(ImageDelegate.create(new URI("file:///home/nsigma/Pictures/P4060324.JPG"), new ResizeMode(ResizeMode.Type.Stretch, 0, 0), null));
         player.getSink(0).addSource(d);
         player.addFrameRateListener(new Listener());

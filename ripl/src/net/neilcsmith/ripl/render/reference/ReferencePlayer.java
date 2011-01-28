@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.ripl.render;
+package net.neilcsmith.ripl.render.reference;
 
 import java.awt.event.KeyEvent;
 import net.neilcsmith.ripl.FrameRateListener;
@@ -54,9 +54,9 @@ import net.neilcsmith.ripl.Surface;
  *
  * @author Neil C Smith
  */
-public class RiplPlayer implements Player {
+public class ReferencePlayer implements Player {
 
-    private final static Logger log = Logger.getLogger(RiplPlayer.class.getName());
+    private final static Logger log = Logger.getLogger(ReferencePlayer.class.getName());
 
     private int noSleepsPerYield = 0; // maximum number of frames without sleep before yielding
     private int maxSkip = 2; // maximum number of frames that can be skipped before rendering
@@ -77,12 +77,12 @@ public class RiplPlayer implements Player {
     private String title;
     private boolean fullScreen;
 
-    public RiplPlayer(int width, int height, double fps) {
+    public ReferencePlayer(int width, int height, double fps) {
         this("RIPL", width, height, fps, false);
 
     }
 
-    public RiplPlayer(String title, int width, int height, double fps, boolean fullScreen) {
+    public ReferencePlayer(String title, int width, int height, double fps, boolean fullScreen) {
         if (width <= 0 || height <= 0 || fps <= 0) {
             throw new IllegalArgumentException();
         }
@@ -394,99 +394,5 @@ public class RiplPlayer implements Player {
         }
         
     }
-//    private class DirectSurface extends Surface {
-//
-//        private Graphics2D g2d;
-//
-//        public DirectSurface(int width, int height) {
-//            super(width, height, false);
-//        }
-//
-//        public Image getImage() {
-//            throw new UnsupportedOperationException();
-//        }
-//
-//        public int[] getPixels() {
-//            throw new UnsupportedOperationException();
-//        }
-//
-//        private void setGraphics(Graphics2D g2d) {
-//            this.g2d = g2d;
-//        }
-//
-//        public Graphics2D getGraphics() {
-//            return g2d;
-//        }
-//
-//        public boolean isCompatible(Surface surface) {
-//            throw new UnsupportedOperationException("Not supported yet.");
-//        }
-//
-//        public Surface createSurface(int width, int height, boolean alpha, SurfaceCapabilities caps) {
-//            throw new UnsupportedOperationException("Not supported yet.");
-//        }
-//
-//        public SurfaceCapabilities getCapabilities() {
-//            throw new UnsupportedOperationException("Not supported yet.");
-//        }
-//
-//        public void clear() {
-//            g2d.setColor(Color.BLACK);
-//            g2d.fillRect(0, 0, width, height);
-//        }
-//
-//        @Override
-//        public void release() {
-//            throw new UnsupportedOperationException("Not supported yet.");
-//        }
-//    }
 
-//    private class VolatileImageSurface extends Surface {
-//
-//        VolatileImage image;
-//        GraphicsConfiguration gc;
-//
-//        public VolatileImageSurface(int width, int height, GraphicsConfiguration gc) {
-//            super(width, height, false);
-//            this.gc = gc;
-//            this.image = gc.createCompatibleVolatileImage(width, height);
-//            System.out.println("Image is Accelerated : " + image.getCapabilities().isAccelerated());
-//            System.out.println("Image is true volatile : " + image.getCapabilities().isTrueVolatile());
-//        }
-//
-//        public Image getImage() {
-//            return image;
-//        }
-//
-//        public int[] getPixels() {
-//            throw new UnsupportedOperationException("Not supported yet.");
-//        }
-//
-//        public Graphics2D getGraphics() {
-//            return image.createGraphics();
-//        }
-//
-//        public boolean isCompatible(Surface surface) {
-//            return surface instanceof ImageSurface;
-//        }
-//
-//        public Surface createSurface(int width, int height, boolean alpha, SurfaceCapabilities caps) {
-//            return new ImageSurface(width, height, alpha);
-//        }
-//
-//        public SurfaceCapabilities getCapabilities() {
-//            throw new UnsupportedOperationException("Not supported yet.");
-//        }
-//
-//        public void clear() {
-//            Graphics2D g2d = image.createGraphics();
-//            g2d.setColor(Color.BLACK);
-//            g2d.fillRect(0, 0, image.getWidth(), image.getHeight());
-//        }
-//
-//        @Override
-//        public void release() {
-//            throw new UnsupportedOperationException("Not supported yet.");
-//        }
-//    }
 }

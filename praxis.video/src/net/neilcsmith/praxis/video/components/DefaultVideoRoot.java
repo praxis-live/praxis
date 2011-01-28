@@ -34,7 +34,8 @@ import net.neilcsmith.praxis.video.VideoContext;
 import net.neilcsmith.ripl.FrameRateListener;
 import net.neilcsmith.ripl.FrameRateSource;
 import net.neilcsmith.ripl.Player;
-import net.neilcsmith.ripl.render.RiplPlayer;
+import net.neilcsmith.ripl.render.reference.ReferencePlayer;
+import net.neilcsmith.ripl.render.sw.SWPlayer;
 
 /**
  *
@@ -98,7 +99,12 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     protected void starting() {
         try {
             skipcount = 0;
-            player = new RiplPlayer("PRAXIS : " + getAddress(), width, height, fps, fullScreen);
+            if ("SWPlayer".equals(System.getProperty("praxis.video.exp.renderer"))) {
+                player = new SWPlayer("PRAXIS : " + getAddress(), width, height, fps, fullScreen);
+            } else {
+                player = new ReferencePlayer("PRAXIS : " + getAddress(), width, height, fps, fullScreen);
+            }
+            
             player.addFrameRateListener(this);
 //            player.getSink(0).addSource(placeholder);
             if (outputClient != null && outputClient.getOutputCount() > 0) {

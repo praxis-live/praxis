@@ -54,12 +54,6 @@ public abstract class Surface {
         return alpha;
     }
 
-    protected final PixelData getPixelData(Surface surface) {
-        return surface.getPixelData();
-    }
-
-    protected abstract PixelData getPixelData();
-
     public void process(SurfaceOp op) {
         process(op, EMPTY);
     }
@@ -71,6 +65,8 @@ public abstract class Surface {
     public abstract void process(SurfaceOp op, Surface... inputs);
 
     public abstract void clear();
+
+    public abstract boolean isClear();
 
     public abstract void release();
 

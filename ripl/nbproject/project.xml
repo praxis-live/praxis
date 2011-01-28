@@ -25,7 +25,8 @@
                 <package>net.neilcsmith.ripl.delegates</package>
                 <package>net.neilcsmith.ripl.impl</package>
                 <package>net.neilcsmith.ripl.ops</package>
-                <package>net.neilcsmith.ripl.render</package>
+                <package>net.neilcsmith.ripl.render.reference</package>
+                <package>net.neilcsmith.ripl.render.sw</package>
                 <package>net.neilcsmith.ripl.rgbmath</package>
                 <package>net.neilcsmith.ripl.utils</package>
             </public-packages>

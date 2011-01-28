@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.ripl.render;
+package net.neilcsmith.ripl.render.reference;
 
 import java.awt.image.BufferedImage;
 import net.neilcsmith.ripl.impl.BufferedImageSurface;
