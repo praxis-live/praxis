@@ -109,7 +109,7 @@ public class PGraphics {
     }
 
     public void fill(double r, double g, double b) {
-        fill(r, g, b, 1);
+        fill(r, g, b, 255);
     }
 
     public void fill(double r, double g, double b, double a) {
@@ -253,7 +253,7 @@ public class PGraphics {
     }
 
     public void stroke(double r, double g, double b) {
-        stroke(r, g, b, 1);
+        stroke(r, g, b, 255);
     }
 
     public void stroke(double r, double g, double b, double a) {
