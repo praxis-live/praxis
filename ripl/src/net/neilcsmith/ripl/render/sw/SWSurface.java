@@ -43,7 +43,8 @@ class SWSurface extends Surface {
     private final static PixelData[] EMPTY_DATA = new PixelData[0];
 
 
-    private SWSurfaceData data;
+    private SWSurfaceData sd;
+    private boolean clear = true;
     
     SWSurface(int width, int height, boolean alpha) {
         super(width, height, alpha);
@@ -51,7 +52,6 @@ class SWSurface extends Surface {
     
     @Override
     public void process(SurfaceOp op, Surface... inputs) {
-        checkWritableData();
         switch (inputs.length) {
             case 0:
                 processImpl(op);
@@ -62,48 +62,49 @@ class SWSurface extends Surface {
             default:
                 processImpl(op, inputs);
         }
+        clear = false;
+    }
+
+    private SWSurfaceData getReadableData() {
+        if (sd == null) {
+            sd = SWSurfaceData.createSurfaceData(this, getWidth(), getHeight(), hasAlpha(), clear);
+        }
+        return sd;
     }
     
-    private void checkWritableData() {
-        if (data == null) {
-            data = SWSurfaceData.createSurfaceData(this, getWidth(), getHeight(), hasAlpha());
+    private SWSurfaceData getWritableData() {
+        if (sd == null) {
+            sd = SWSurfaceData.createSurfaceData(this, getWidth(), getHeight(), hasAlpha(), clear);
         } else {
-            data = data.getUnshared(this);
+            sd = sd.getUnshared(this);
         }
+        return sd;
     }
 
     private void processImpl(SurfaceOp op) {
-        op.process(data, EMPTY_DATA);
+        op.process(getWritableData(), EMPTY_DATA);
     }
 
     private void processImpl(SurfaceOp op, Surface input) {
         if (input instanceof SWSurface) {
             SWSurface in = (SWSurface) input;
-            if (in.data != null) {
-                op.process(data, in.data);
-            }
+            op.process(getWritableData(), in.getReadableData());
         } else {
-            SurfaceOp rev = new ReverseOp(op, data);
+            SurfaceOp rev = new ReverseOp(op, getWritableData());
             input.process(rev);
         }
     }
 
     private void processImpl(SurfaceOp op, Surface[] inputs) {
-//        PixelData[] pixelInputs = new PixelData[inputs.length];
-//        for (int i=0; i<inputs.length; i++) {
-//            if (inputs[i] instanceof SWSurface) {
-//                SWSurface in = (SWSurface) inputs[i];
-//                if (in.data != null) {
-//                    pixelInputs[i] = in.data;
-//                } else {
-//                    pixelInputs[i] = SWSurfaceData.createSurfaceData(in, i, i, true);
-//                }
-//
-//            } else {
+        PixelData[] pixelInputs = new PixelData[inputs.length];
+        for (int i=0; i<inputs.length; i++) {
+            if (inputs[i] instanceof SWSurface) {
+                pixelInputs[i] = ((SWSurface) inputs[i]).getReadableData();
+            } else {
                 throw new UnsupportedOperationException("not yet implemented");
-//            }
-//        }
-//        op.process(data, pixelInputs);
+            }
+        }
+        op.process(getWritableData(), pixelInputs);
     }
 
 
@@ -111,18 +112,19 @@ class SWSurface extends Surface {
     @Override
     public void clear() {
         release();
+        clear = true;
     }
 
     @Override
     public boolean isClear() {
-        return data == null;
+        return clear;
     }
 
     @Override
     public void release() {
-        if (data != null) {
-            data.release(this);
-            data = null;
+        if (sd != null) {
+            sd.release();
+            sd = null;
         }
     }
 
@@ -131,8 +133,8 @@ class SWSurface extends Surface {
         if (checkCompatible(source, true, true)) {
             release();
             SWSurface src = (SWSurface) source;
-            if (src.data != null) {
-                data = src.data.acquire(this);
+            if (src.sd != null) {
+                sd = src.sd.acquire();
             }
         } else {
             process(Blit.op(), source);
@@ -162,10 +164,10 @@ class SWSurface extends Surface {
 
 
     void draw(Graphics2D g2d, int x, int y) {
-        if (data == null) {
+        if (sd == null) {
             return;
         }
-        BufferedImage im = ImageUtils.toImage(data);
+        BufferedImage im = ImageUtils.toImage(sd);
         g2d.drawImage(im, x, y, null);
     }
 

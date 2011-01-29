@@ -35,17 +35,19 @@ class SWSurfaceData implements PixelData {
     private boolean alpha;
     private int[] pixels;
     private int usage;
+    private boolean clear;
 
-    private SWSurfaceData(int w, int h, boolean a) {
+    private SWSurfaceData(int w, int h, boolean a, boolean c) {
         width = w;
         height = h;
         alpha = a;
+        clear = c;
         usage = 1;
     }
 
     public int[] getData() {
         if (pixels == null) {
-            pixels = PixelArrayCache.acquire(width * height, true);
+            pixels = PixelArrayCache.acquire(width * height, clear);
         }
         return pixels;
     }
@@ -70,12 +72,12 @@ class SWSurfaceData implements PixelData {
         return alpha;
     }
 
-    SWSurfaceData acquire(SWSurface surface) {
+    SWSurfaceData acquire() {
         usage++;
         return this;
     }
 
-    void release(SWSurface surface) {
+    void release() {
         usage--;
         if (usage <= 0 && pixels != null) {
             PixelArrayCache.release(pixels);
@@ -85,12 +87,11 @@ class SWSurfaceData implements PixelData {
 
     SWSurfaceData getUnshared(SWSurface owner) {
         if (usage > 1) {
-            SWSurfaceData copy = new SWSurfaceData(width, height, alpha);
+            SWSurfaceData copy = new SWSurfaceData(width, height, alpha, false);
             if (pixels != null) {
-                copy.pixels = PixelArrayCache.acquire(width * height, false);
-                System.arraycopy(pixels, 0, copy.pixels, 0, width * height);
+                System.arraycopy(pixels, 0, copy.getData(), 0, width * height);
             }
-            release(null);
+            release();
             return copy;
 
         } else if (usage == 1) {
@@ -100,7 +101,8 @@ class SWSurfaceData implements PixelData {
         }
     }
 
-    static SWSurfaceData createSurfaceData(SWSurface owner, int width, int height, boolean alpha) {
-        return new SWSurfaceData(width, height, alpha);
+    static SWSurfaceData createSurfaceData(SWSurface owner, int width, int height,
+            boolean alpha, boolean clear) {
+        return new SWSurfaceData(width, height, alpha, clear);
     }
 }

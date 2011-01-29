@@ -27,13 +27,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public class PixelArrayCache {
-    
+
+    private final static Logger LOG = Logger.getLogger(PixelArrayCache.class.getName());
     private final static int SMALL_THRESHOLD = 512;
 
     private static ThreadLocal<CacheImpl> cache = new ThreadLocal<CacheImpl>() {
@@ -51,6 +54,7 @@ public class PixelArrayCache {
         if (size > SMALL_THRESHOLD) {
             return cache.get().acquire(size, clear);
         } else {
+            LOG.log(Level.FINEST, "Creating array below threshold of size : {0}", size);
             return new int[size];
         }
         
@@ -76,6 +80,9 @@ public class PixelArrayCache {
                 SoftReference<int[]> entry = itr.next();
                 int[] ar = entry.get();
                 if (ar == null) {
+                    LOG.log(Level.FINEST,
+                            "Pixel array collected, removing SoftReference.\nList size : {0}",
+                            arrays.size());
                     itr.remove();
                     continue;
                 }
@@ -104,11 +111,18 @@ public class PixelArrayCache {
                 return chosen;
             } else {
                 biggest *= 2;
+                int[] ret;
                 if (biggest >= size) {
-                    return new int[biggest];
+                    ret = new int[biggest];
                 } else {
-                    return new int[size];
+                    ret = new int[size];
                 }
+                if (LOG.isLoggable(Level.FINEST)) {
+                    LOG.log(Level.FINEST,
+                            "Creating new array of size : {0}.\nCache list size : {1}",
+                            new Object[]{ret.length, arrays.size()});
+                }
+                return ret;
             }
             
             
