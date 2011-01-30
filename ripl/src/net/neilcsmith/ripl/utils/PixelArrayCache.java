@@ -37,7 +37,8 @@ import java.util.logging.Logger;
 public class PixelArrayCache {
 
     private final static Logger LOG = Logger.getLogger(PixelArrayCache.class.getName());
-    private final static int SMALL_THRESHOLD = 512;
+    private final static int SMALL_THRESHOLD = 256;
+    private final static int TILE_SIZE = 256 * 256;
 
     private static ThreadLocal<CacheImpl> cache = new ThreadLocal<CacheImpl>() {
 
@@ -71,10 +72,9 @@ public class PixelArrayCache {
         private List<SoftReference<int[]>> arrays = new ArrayList<SoftReference<int[]>>();
 
         private int[] acquire(int size, boolean clear) {
-            int[] chosen = null;
-            SoftReference<int[]> chosenRef = null;
+            int[] array = null;
+            SoftReference<int[]> ref = null;
             int minDiff = Integer.MAX_VALUE;
-            int biggest = 0;
             Iterator<SoftReference<int[]>> itr = arrays.iterator();
             while (itr.hasNext()) {
                 SoftReference<int[]> entry = itr.next();
@@ -88,44 +88,49 @@ public class PixelArrayCache {
                 }
                 if (ar.length >= size) {
                     int diff = ar.length - size;
-                    if (diff == 0) {
-                        chosen = ar;
-                        chosenRef = entry;
-                        break;
-                    } else if (chosen == null || minDiff < diff) {
-                        chosen = ar;
-                        chosenRef = entry;
+                    if (array == null || diff < minDiff) {
+                        array = ar;
+                        ref = entry;
                         minDiff = diff;
                     }
-                } else {
-                    if (ar.length > biggest) {
-                        biggest = ar.length;
+                    if (diff == 0) {
+                        break;
                     }
                 }
             }
-            if (chosen != null) {
-                arrays.remove(chosenRef);
+            if ( (array != null) && (minDiff < (calculateSize(size)) ) ) {
+                arrays.remove(ref);
                 if (clear) {
-                    Arrays.fill(chosen, 0);
+                    Arrays.fill(array, 0);
                 }
-                return chosen;
+                return array;
             } else {
-                biggest *= 2;
-                int[] ret;
-                if (biggest >= size) {
-                    ret = new int[biggest];
-                } else {
-                    ret = new int[size];
-                }
+                array = new int[calculateSize(size)];
                 if (LOG.isLoggable(Level.FINEST)) {
                     LOG.log(Level.FINEST,
-                            "Creating new array of size : {0}.\nCache list size : {1}",
-                            new Object[]{ret.length, arrays.size()});
+                            "Creating new array of size : " + array.length +
+                            "\n - Requested size : " + size +
+                            "\n - Cache list size : " + arrays.size() +
+                            "\n - Minimum Difference found : " + minDiff);
+
                 }
-                return ret;
-            }
-            
-            
+                return array;
+            }      
+        }
+
+        private int calculateSize(int minSize) {
+//            if (minSize < TILE_SIZE) {
+                int size = SMALL_THRESHOLD * 2;
+                while (size < minSize) {
+                    size *= 2;
+                }
+                return size;
+//            } else {
+//                int size = minSize / TILE_SIZE;
+//                size += 1;
+//                size *= TILE_SIZE;
+//                return size;
+//            }
         }
 
         private void release(int[] array) {
