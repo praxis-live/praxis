@@ -20,7 +20,7 @@
  * have any questions.
  */
 
-package net.neilcsmith.ripl.render.sw;
+package net.neilcsmith.ripl.ops;
 
 import net.neilcsmith.ripl.PixelData;
 import net.neilcsmith.ripl.SurfaceOp;
@@ -29,18 +29,25 @@ import net.neilcsmith.ripl.SurfaceOp;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-class ReverseOp implements SurfaceOp {
+public class Reverse implements SurfaceOp {
 
     private SurfaceOp op;
     private PixelData target;
 
-    ReverseOp(SurfaceOp op, PixelData target) {
+    private Reverse(SurfaceOp op, PixelData target) {
         this.op = op;
         this.target = target;
     }
 
     public void process(PixelData output, PixelData... inputs) {
         op.process(target, output);
+    }
+
+    public static SurfaceOp op(SurfaceOp op, PixelData target) {
+        if (op == null || target == null) {
+            throw new NullPointerException();
+        }
+        return new Reverse(op, target);
     }
 
 }

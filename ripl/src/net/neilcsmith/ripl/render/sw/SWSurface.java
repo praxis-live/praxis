@@ -29,6 +29,7 @@ import net.neilcsmith.ripl.Surface;
 import net.neilcsmith.ripl.SurfaceCapabilities;
 import net.neilcsmith.ripl.SurfaceOp;
 import net.neilcsmith.ripl.ops.Blit;
+import net.neilcsmith.ripl.ops.Reverse;
 import net.neilcsmith.ripl.utils.ImageUtils;
 
 /**
@@ -90,7 +91,7 @@ class SWSurface extends Surface {
             SWSurface in = (SWSurface) input;
             op.process(getWritableData(), in.getReadableData());
         } else {
-            SurfaceOp rev = new ReverseOp(op, getWritableData());
+            SurfaceOp rev = Reverse.op(op, getWritableData());
             input.process(rev);
         }
     }
