@@ -38,10 +38,10 @@ import net.neilcsmith.ripl.SurfaceOp;
 import net.neilcsmith.ripl.ops.Blend;
 import net.neilcsmith.ripl.ops.Blit;
 import net.neilcsmith.ripl.ops.Bounds;
-import net.neilcsmith.ripl.ops.GraphicsOp;
 import net.neilcsmith.ripl.ops.RectFill;
 import net.neilcsmith.ripl.ops.ScaledBlit;
 import net.neilcsmith.ripl.ops.ShapeRender;
+import static net.neilcsmith.praxis.video.java.VideoConstants.*;
 
 /**
  *
@@ -57,6 +57,7 @@ public class PGraphics {
     private Color fillColor = Color.WHITE;
     private Color strokeColor = Color.BLACK;
     private BasicStroke stroke = new BasicStroke(1);
+    private PShape shape;
 
     public PGraphics(PImage image) {
         if (image == null) {
@@ -76,11 +77,52 @@ public class PGraphics {
         }
     }
 
+    // BEGINNING OF PUBLIC DRAWING METHODS
+
+    public void background(double grey) {
+        background(grey, grey, grey, 255);
+    }
+
+    public void background(double grey, double alpha) {
+        background(grey, grey, grey, alpha);
+    }
+
+    public void background(double r, double g, double b) {
+        background(r, g, b, 255);
+    }
+
+    public void background(double r, double g, double b, double a) {
+        image.getSurface().clear();
+        int ir = round(r);
+        int ig = round(g);
+        int ib = round(b);
+        if (ir == 0 && ig == 0 && ib == 0) {
+            return;
+        }
+        int ia = round(a);
+        Color bg = new Color(ir, ig, ib, ia);
+        image.process(RectFill.op(bg, NORMAL, 0, 0,
+                image.getSurface().getWidth(), image.getSurface().getHeight()));
+    }
+
+    public void beginShape() {
+        shape = PShape.beginShape();
+    }
+
+    public void bezierVertex(double x1, double y1,
+            double x2, double y2, double x3, double y3) {
+        shape.bezierVertex(x1, y1, x2, y2, x3, y3);
+    }
+
     public void blendMode(Blend blend) {
         if (blend == null) {
             throw new NullPointerException();
         }
         this.blend = blend;
+    }
+
+    public void breakShape() {
+        shape.breakShape();
     }
 
     public void clear() {
@@ -93,16 +135,29 @@ public class PGraphics {
         renderShape(new Ellipse2D.Double(x, y, w, h));
     }
 
+    public void endShape() {
+        endShape(OPEN);
+    }
+
+    public void endShape(boolean close) {
+        shape.endShape(close);
+        renderShape(shape.getShape());
+    }
+
+    public void fill(double grey) {
+        fill(grey, grey, grey, 255);
+    }
+
+    public void fill(double grey, double alpha) {
+        fill(grey, grey, grey, alpha);
+    }
+
     public void fill(double r, double g, double b) {
         fill(r, g, b, 255);
     }
 
     public void fill(double r, double g, double b, double a) {
-        r /= 255;
-        g /= 255;
-        b /= 255;
-        a /= 255;
-        fillColor = new Color((float) r, (float) g, (float) b, (float) a);
+        fillColor = new Color(round(r), round(g), round(b), round(a));
     }
 
     public void image(PImage src, double x, double y) {
@@ -206,16 +261,20 @@ public class PGraphics {
     public void smooth() {
     }
 
+    public void stroke(double grey) {
+        stroke(grey, grey, grey, 255);
+    }
+
+    public void stroke(double grey, double alpha) {
+        stroke(grey, grey, grey, alpha);
+    }
+
     public void stroke(double r, double g, double b) {
         stroke(r, g, b, 255);
     }
 
     public void stroke(double r, double g, double b, double a) {
-        r /= 255;
-        g /= 255;
-        b /= 255;
-        a /= 255;
-        strokeColor = new Color((float) r, (float) g, (float) b, (float) a);
+        strokeColor = new Color(round(r), round(g), round(b), round(a));
     }
 
     public void strokeWeight(double weight) {
@@ -238,6 +297,13 @@ public class PGraphics {
         polygon(xPoints, yPoints, 3);
     }
 
+    public void vertex(double x, double y) {
+        shape.vertex(x, y);
+    }
+
+    // END OF PUBLIC DRAWING METHODS
+
+
     private void renderShape(Shape shape) {
         if (strokeColor == null) {
             if (fillColor == null) {
@@ -252,5 +318,9 @@ public class PGraphics {
 
     private void polygon(final int[] xPoints, final int[] yPoints, final int nPoints) {
         renderShape(new Polygon(xPoints, yPoints, nPoints));
+    }
+
+    private int round(double x) {
+        return (int) (x + 0.5);
     }
 }

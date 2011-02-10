@@ -114,8 +114,38 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
     }
 
     // PGraphics impl
+
+    public void background(double grey) {
+        pg.background(grey);
+    }
+
+    public void background(double grey, double alpha) {
+        pg.background(grey, alpha);
+    }
+
+    public void background(double r, double g, double b) {
+        pg.background(r, g, b);
+    }
+
+    public void background(double r, double g, double b, double a) {
+        pg.background(r, g, b, a);
+    }
+
+    public void beginShape() {
+        pg.beginShape();
+    }
+
+    public void bezierVertex(double x1, double y1,
+            double x2, double y2, double x3, double y3) {
+        pg.bezierVertex(x1, y1, x2, y2, x3, y3);
+    }
+
     public void blendMode(Blend blend) {
         pg.blendMode(blend);
+    }
+
+    public void breakShape() {
+        pg.breakShape();
     }
 
     public void clear() {
@@ -124,6 +154,22 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
 
     public void ellipse(double x, double y, double w, double h) {
         pg.ellipse(x, y, w, h);
+    }
+
+    public void endShape() {
+        pg.endShape();
+    }
+
+    public void endShape(boolean close) {
+        pg.endShape(close);
+    }
+
+    public void fill(double grey) {
+        pg.fill(grey);
+    }
+
+    public void fill(double grey, double alpha) {
+        pg.fill(grey, alpha);
     }
 
     public void fill(double r, double g, double b) {
@@ -197,6 +243,14 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
         pg.smooth();
     }
 
+    public void stroke(double grey) {
+        pg.stroke(grey);
+    }
+
+    public void stroke(double grey, double alpha) {
+        pg.stroke(grey, alpha);
+    }
+
     public void stroke(double r, double g, double b) {
         pg.stroke(r, g, b);
     }
@@ -212,5 +266,9 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
     public void triangle(double x1, double y1, double x2, double y2,
             double x3, double y3) {
         pg.triangle(x1, y1, x2, y2, x3, y3);
+    }
+
+    public void vertex(double x, double y) {
+        pg.vertex(x, y);
     }
 }

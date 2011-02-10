@@ -42,4 +42,7 @@ public class VideoConstants {
     public final static Blend SCREEN = Blend.SCREEN;
     public final static Blend BITXOR = Blend.BITXOR;
 
+    public final static boolean OPEN = false;
+    public final static boolean CLOSE = true;
+
 }
