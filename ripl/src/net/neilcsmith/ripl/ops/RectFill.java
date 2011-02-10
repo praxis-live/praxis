@@ -22,8 +22,14 @@
 
 package net.neilcsmith.ripl.ops;
 
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.util.Arrays;
+import javax.print.attribute.standard.MediaSize.Other;
 import net.neilcsmith.ripl.PixelData;
 import net.neilcsmith.ripl.SurfaceOp;
+import net.neilcsmith.ripl.rgbmath.RGBMath;
+import net.neilcsmith.ripl.utils.SubPixels;
 
 /**
  *
@@ -31,8 +37,52 @@ import net.neilcsmith.ripl.SurfaceOp;
  */
 public class RectFill implements SurfaceOp {
 
+    private int x;
+    private int y;
+    private int width;
+    private int height;
+    private Color color;
+    private BlendFunction blend;
+
+    private RectFill(Color color, BlendFunction blend,
+            int x, int y, int width, int height) {
+        this.color = color;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.blend = blend;
+    }
+
     public void process(PixelData output, PixelData... inputs) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Rectangle in = new Rectangle(x, y, width, height);
+        Rectangle out = new Rectangle(output.getWidth(), output.getHeight());
+        Rectangle intersection = out.intersection(in);
+        if (intersection.isEmpty()) {
+            return;
+        }
+        boolean forceAlpha = false;
+        int alpha = color.getAlpha();
+        if (alpha == 0) {
+            return;
+        } else if (alpha < 255) {
+            forceAlpha = true;
+        }
+        int c = RGBMath.premultiply(color.getRGB());
+        TempData tmp = TempData.create(intersection.width, intersection.height,
+                forceAlpha || output.hasAlpha());
+        Arrays.fill(tmp.getData(), 0, intersection.width * intersection.height, c);
+        SubPixels dst = SubPixels.create(output, intersection);
+        blend.process(tmp, dst);
+        tmp.release();
+    }
+
+    public static SurfaceOp op(Color color, BlendFunction blend,
+            int x, int y, int width, int height) {
+        if (color == null || blend == null) {
+            throw new NullPointerException();
+        }
+        return new RectFill(color, blend, x, y, width, height);
     }
 
 }

@@ -25,6 +25,11 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Polygon;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Rectangle2D;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -34,7 +39,9 @@ import net.neilcsmith.ripl.ops.Blend;
 import net.neilcsmith.ripl.ops.Blit;
 import net.neilcsmith.ripl.ops.Bounds;
 import net.neilcsmith.ripl.ops.GraphicsOp;
+import net.neilcsmith.ripl.ops.RectFill;
 import net.neilcsmith.ripl.ops.ScaledBlit;
+import net.neilcsmith.ripl.ops.ShapeRender;
 
 /**
  *
@@ -83,29 +90,7 @@ public class PGraphics {
     public void ellipse(double x, double y, double w, double h) {
         x -= (w / 2);
         y -= (h / 2);
-        final int ix, iy, iw, ih;
-        ix = (int) x;
-        iy = (int) y;
-        iw = (int) w;
-        ih = (int) h;
-        if (blend.getType() != Blend.Type.Normal
-                || blend.getExtraAlpha() < alphaOpaque) {
-            warn("ellipse() doesn't support custom blend modes yet.");
-        }
-        image.process(new GraphicsOp(new GraphicsOp.Callback() {
-
-            public void draw(Graphics2D g2d, Image[] images) {
-                if (fillColor != null) {
-                    g2d.setColor(fillColor);
-                    g2d.fillOval(ix, iy, iw, ih);
-                }
-                if (strokeColor != null) {
-                    g2d.setColor(strokeColor);
-                    g2d.setStroke(stroke);
-                    g2d.drawOval(ix, iy, iw, ih);
-                }
-            }
-        }));
+        renderShape(new Ellipse2D.Double(x, y, w, h));
     }
 
     public void fill(double r, double g, double b) {
@@ -159,26 +144,7 @@ public class PGraphics {
         if (strokeColor == null) {
             return;
         }
-        if (blend.getType() != Blend.Type.Normal
-                || blend.getExtraAlpha() < alphaOpaque) {
-            warn("line() / point() doesn't support custom blend modes yet.");
-        }
-        final int ix1, iy1, ix2, iy2;
-        ix1 = (int) x1;
-        iy1 = (int) y1;
-        ix2 = (int) x2;
-        iy2 = (int) y2;
-        image.process(new GraphicsOp(new GraphicsOp.Callback() {
-
-            public void draw(Graphics2D g2d, Image[] images) {
-                if (strokeColor != null) {
-                    g2d.setColor(strokeColor);
-                    g2d.setStroke(stroke);
-                    g2d.drawLine(ix1, iy1, ix2, iy2);
-
-                }
-            }
-        }));
+        renderShape(new Line2D.Double(x1, y1, x2, y2));
     }
 
     public void noFill() {
@@ -205,7 +171,7 @@ public class PGraphics {
     }
 
     public void point(double x, double y) {
-        line(x,y,x,y);
+        line(x, y, x, y);
     }
 
     public void quad(double x1, double y1, double x2, double y2,
@@ -224,29 +190,17 @@ public class PGraphics {
     }
 
     public void rect(double x, double y, double w, double h) {
-        final int ix, iy, iw, ih;
-        ix = (int) x;
-        iy = (int) y;
-        iw = (int) w;
-        ih = (int) h;
-        if (blend.getType() != Blend.Type.Normal
-                || blend.getExtraAlpha() < alphaOpaque) {
-            warn("rect() doesn't support custom blend modes yet.");
-        }
-        image.process(new GraphicsOp(new GraphicsOp.Callback() {
-
-            public void draw(Graphics2D g2d, Image[] images) {
-                if (fillColor != null) {
-                    g2d.setColor(fillColor);
-                    g2d.fillRect(ix, iy, iw, ih);
-                }
-                if (strokeColor != null) {
-                    g2d.setColor(strokeColor);
-                    g2d.setStroke(stroke);
-                    g2d.drawRect(ix, iy, iw, ih);
-                }
+        if (strokeColor == null) {
+            if (fillColor == null) {
+                return;
             }
-        }));
+            image.process(RectFill.op(fillColor, blend, (int) x, (int) y, 
+                    (int) (w + 0.5), (int) (h + 0.5)));
+        } else {
+            renderShape(new Rectangle2D.Double(x, y, w, h));
+        }
+        
+        
     }
 
     public void smooth() {
@@ -270,7 +224,7 @@ public class PGraphics {
         }
         stroke = new BasicStroke((float) weight);
     }
-    
+
     public void triangle(double x1, double y1, double x2, double y2,
             double x3, double y3) {
         int[] xPoints = new int[3];
@@ -284,24 +238,19 @@ public class PGraphics {
         polygon(xPoints, yPoints, 3);
     }
 
-    private void polygon(final int[] xPoints, final int[] yPoints, final int nPoints) {
-        if (blend.getType() != Blend.Type.Normal
-                || blend.getExtraAlpha() < alphaOpaque) {
-            warn("triangle()/quad() doesn't support custom blend modes yet.");
-        }
-        image.process(new GraphicsOp(new GraphicsOp.Callback() {
-
-            public void draw(Graphics2D g2d, Image[] images) {
-                if (fillColor != null) {
-                    g2d.setColor(fillColor);
-                    g2d.fillPolygon(xPoints, yPoints, nPoints);
-                }
-                if (strokeColor != null) {
-                    g2d.setColor(strokeColor);
-                    g2d.setStroke(stroke);
-                    g2d.drawPolygon(xPoints, yPoints, nPoints);
-                }
+    private void renderShape(Shape shape) {
+        if (strokeColor == null) {
+            if (fillColor == null) {
+                return;
+            } else {
+                image.process(ShapeRender.op(shape, fillColor, blend));
             }
-        }));
+        } else {
+            image.process(ShapeRender.op(shape, fillColor, stroke, strokeColor, blend));
+        }
+    }
+
+    private void polygon(final int[] xPoints, final int[] yPoints, final int nPoints) {
+        renderShape(new Polygon(xPoints, yPoints, nPoints));
     }
 }
