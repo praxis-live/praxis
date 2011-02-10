@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.ripl.render.sw;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
@@ -136,6 +137,8 @@ class SWSurface extends Surface {
             SWSurface src = (SWSurface) source;
             if (src.sd != null) {
                 sd = src.sd.acquire();
+            } else {
+                sd = null;
             }
         } else {
             process(Blit.op(), source);
@@ -166,6 +169,8 @@ class SWSurface extends Surface {
 
     void draw(Graphics2D g2d, int x, int y) {
         if (sd == null) {
+            g2d.setComposite(AlphaComposite.Clear);
+            g2d.fillRect(x, y, getWidth(), getHeight());
             return;
         }
         BufferedImage im = ImageUtils.toImage(sd);
