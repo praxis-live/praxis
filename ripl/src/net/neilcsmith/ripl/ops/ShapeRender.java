@@ -28,8 +28,9 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.Path2D;
+import java.awt.geom.RectangularShape;
 import java.awt.image.BufferedImage;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.ripl.PixelData;
 import net.neilcsmith.ripl.SurfaceOp;
@@ -89,7 +90,7 @@ public class ShapeRender implements SurfaceOp {
     private void processIndirect(PixelData output) {
         Rectangle sRct = shape.getBounds();
         if (stroke != null) {
-            int growth = Math.round(stroke.getLineWidth() / 2);
+            int growth = Math.round(stroke.getLineWidth());// / 2);
             sRct.grow(growth, growth);
         }
         int tx = sRct.x > 0 ? -sRct.x : 0;
@@ -148,6 +149,15 @@ public class ShapeRender implements SurfaceOp {
             throw new NullPointerException();
         }
 
-        return new ShapeRender(shape, fillColor, stroke, strokeColor, blend);
+        return new ShapeRender(copyShape(shape), fillColor, stroke, strokeColor, blend);
+    }
+
+    private static Shape copyShape(Shape shape) {
+        if (shape instanceof RectangularShape) {
+            return (Shape) ((RectangularShape)shape).clone();
+        } else {
+            return new Path2D.Double(shape);
+        }
+
     }
 }
