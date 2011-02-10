@@ -25,7 +25,6 @@ package net.neilcsmith.ripl.ops;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.Arrays;
-import javax.print.attribute.standard.MediaSize.Other;
 import net.neilcsmith.ripl.PixelData;
 import net.neilcsmith.ripl.SurfaceOp;
 import net.neilcsmith.ripl.rgbmath.RGBMath;
