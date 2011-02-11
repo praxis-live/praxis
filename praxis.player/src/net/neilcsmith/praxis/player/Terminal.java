@@ -37,6 +37,8 @@ import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.Keymap;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -125,8 +127,10 @@ public class Terminal extends JComponent {
         evalButton = new JButton(evalAction);
         add(evalButton, "");
 
-        input.getKeymap().addActionForKeyStroke(KeyStroke.getKeyStroke("control ENTER"), evalAction);
-
+        Keymap map = JTextComponent.addKeymap("PraxisTerminal", input.getKeymap());
+        map.addActionForKeyStroke(KeyStroke.getKeyStroke("control ENTER"), evalAction);
+        input.setKeymap(map);
+        
     }
 
     private void buildStyles() {

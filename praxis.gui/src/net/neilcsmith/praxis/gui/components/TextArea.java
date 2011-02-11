@@ -36,6 +36,8 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.Keymap;
 import net.miginfocom.swing.MigLayout;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.types.PString;
@@ -90,9 +92,12 @@ public class TextArea extends SingleBindingGuiComponent {
         resetAction.setEnabled(false);
         panel.add(new JButton(resetAction), "tag cancel");
 
-        text.getKeymap().addActionForKeyStroke(KeyStroke.getKeyStroke("control ENTER"), sendAction);
-        text.getKeymap().addActionForKeyStroke(KeyStroke.getKeyStroke("ESCAPE"), resetAction);
+        Keymap map = JTextComponent.addKeymap("PraxisTextArea", text.getKeymap());
 
+        map.addActionForKeyStroke(KeyStroke.getKeyStroke("control ENTER"), sendAction);
+        map.addActionForKeyStroke(KeyStroke.getKeyStroke("ESCAPE"), resetAction);
+
+        text.setKeymap(map);
     }
 
     private void setActiveEdit(boolean active) {
