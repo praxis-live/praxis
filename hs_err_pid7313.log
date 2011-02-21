@@ -1,0 +1,603 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=0x0000000000000000, pid=7313, tid=140331278399760
+#
+# JRE version: 6.0_22-b04
+# Java VM: Java HotSpot(TM) 64-Bit Server VM (17.1-b03 mixed mode linux-amd64 )
+# Problematic frame:
+# C  0x0000000000000000
+#
+# If you would like to submit a bug report, please visit:
+#   http://java.sun.com/webapps/bugreport/crash.jsp
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread is native thread
+
+siginfo:si_signo=SIGSEGV: si_errno=0, si_code=1 (SEGV_MAPERR), si_addr=0x0000000000000000
+
+Registers:
+RAX=0x0000000000000000, RBX=0x00007fa16c02f260, RCX=0x0000000000000001, RDX=0x00007fa16bffe280
+RSP=0x00007fa16bffe228, RBP=0x0000000000000001, RSI=0x0000000000000001, RDI=0x0000000041079de0
+R8 =0x00007fa173262968, R9 =0x0000000000001ce2, R10=0x0000000000000001, R11=0x0000000000000001
+R12=0x00007fa16bffe280, R13=0x0000000041079de0, R14=0x0000000000000000, R15=0x0000000000000000
+RIP=0x0000000000000000, EFL=0x0000000000010202, CSGSFS=0x0000000000000033, ERR=0x0000000000000014
+  TRAPNO=0x000000000000000e
+
+Top of Stack: (sp=0x00007fa16bffe228)
+0x00007fa16bffe228:   00007fa17367f352 00007fa16bffe240
+0x00007fa16bffe238:   00007fa19129efe9 00007fa16bffe300
+0x00007fa16bffe248:   00007fa19108eec9 00007fa16bffe360
+0x00007fa16bffe258:   0000000000000004 00007fa16bffe368
+0x00007fa16bffe268:   00007fa16c093340 00007fa16bffe340
+0x00007fa16bffe278:   0000000041079df0 00007fa16c2d8e80
+0x00007fa16bffe288:   00007fa16bffe4d0 00007fa16c3cbf20
+0x00007fa16bffe298:   00007fa16c3cbf10 00007fa16c3cbf08
+0x00007fa16bffe2a8:   00007fa16c3cbf10 00007fa16c3cbf18
+0x00007fa16bffe2b8:   00007fa16c3cbf20 00007fa100000006
+0x00007fa16bffe2c8:   00007fa16bffe320 00007fa16b010160
+0x00007fa16bffe2d8:   00007fa1872b9620 0000000040bac000
+0x00007fa16bffe2e8:   0000000000000002 00007fa16bffe4c0
+0x00007fa16bffe2f8:   00007fa1915fd200 0000000000000000
+0x00007fa16bffe308:   0000000000000000 0000000000000000
+0x00007fa16bffe318:   0000000000000000 0000000000000000
+0x00007fa16bffe328:   0000000000000000 0000000000000000
+0x00007fa16bffe338:   0000000000000000 0000000000000000
+0x00007fa16bffe348:   0000000000000000 0000000000000000
+0x00007fa16bffe358:   00007fa190ecdbb5 0000000000000000
+0x00007fa16bffe368:   0000000000000000 0000000000000000
+0x00007fa16bffe378:   00007fa1915e3430 00007fa1915e3430
+0x00007fa16bffe388:   0000000041079de0 00007fa17250f92a
+0x00007fa16bffe398:   0000000000000002 0000000000000001
+0x00007fa16bffe3a8:   0000000000000000 0000000040d056c0
+0x00007fa16bffe3b8:   00007fa17367f4d4 0000003000000020
+0x00007fa16bffe3c8:   00007fa16bffe4b0 00007fa16bffe3e0
+0x00007fa16bffe3d8:   0000000040c51c70 00007fa191cce6b0
+0x00007fa16bffe3e8:   00007fa17367a416 0000000000000000
+0x00007fa16bffe3f8:   0000000000000000 00007fa173262908
+0x00007fa16bffe408:   0000000000001ce2 0000000040bac000
+0x00007fa16bffe418:   0000000000000001 00007fa179000080 
+
+Instructions: (pc=0x0000000000000000)
+0xfffffffffffffff0:   
+
+Stack: [0x00007fa16b7ff000,0x00007fa16c000000],  sp=0x00007fa16bffe228,  free space=1ffc0000000000000018k
+
+[error occurred during error reporting (printing target Java thread stack), id 0xb]
+
+
+---------------  P R O C E S S  ---------------
+
+VM state:not at safepoint (normal execution)
+
+VM Mutex/Monitor currently owned by a thread: None
+
+Heap
+ par new generation   total 19136K, used 4758K [0x00007fa17f470000, 0x00007fa180930000, 0x00007fa180930000)
+  eden space 17024K,  15% used [0x00007fa17f470000, 0x00007fa17f705a60, 0x00007fa180510000)
+  from space 2112K,  99% used [0x00007fa180510000, 0x00007fa18071fff8, 0x00007fa180720000)
+  to   space 2112K,   0% used [0x00007fa180720000, 0x00007fa180720000, 0x00007fa180930000)
+ concurrent mark-sweep generation total 63872K, used 12465K [0x00007fa180930000, 0x00007fa184790000, 0x00007fa187270000)
+ concurrent-mark-sweep perm gen total 46688K, used 27974K [0x00007fa187270000, 0x00007fa18a008000, 0x00007fa18c670000)
+
+Dynamic libraries:
+40000000-40009000 r-xp 00000000 08:06 1314298                            /usr/lib/jvm/java-6-sun-1.6.0.22/jre/bin/java
+40108000-4010a000 rwxp 00008000 08:06 1314298                            /usr/lib/jvm/java-6-sun-1.6.0.22/jre/bin/java
+40928000-414ed000 rwxp 00000000 00:00 0                                  [heap]
+7fa168f2b000-7fa168f2e000 ---p 00000000 00:00 0 
+7fa168f2e000-7fa16972c000 rwxp 00000000 00:00 0 
+7fa169f2d000-7fa169f30000 ---p 00000000 00:00 0 
+7fa169f30000-7fa16a72e000 rwxp 00000000 00:00 0 
+7fa16a72e000-7fa16a7a0000 r-xp 00000000 08:06 4360                       /usr/lib/liboil-0.3.so.0.3.0
+7fa16a7a0000-7fa16a9a0000 ---p 00072000 08:06 4360                       /usr/lib/liboil-0.3.so.0.3.0
+7fa16a9a0000-7fa16a9a1000 r-xp 00072000 08:06 4360                       /usr/lib/liboil-0.3.so.0.3.0
+7fa16a9a1000-7fa16a9bc000 rwxp 00073000 08:06 4360                       /usr/lib/liboil-0.3.so.0.3.0
+7fa16a9bc000-7fa16a9be000 rwxp 00000000 00:00 0 
+7fa16a9be000-7fa16a9c5000 r-xp 00000000 08:06 3097                       /usr/lib/libgstvideo-0.10.so.0.18.0
+7fa16a9c5000-7fa16abc4000 ---p 00007000 08:06 3097                       /usr/lib/libgstvideo-0.10.so.0.18.0
+7fa16abc4000-7fa16abc5000 r-xp 00006000 08:06 3097                       /usr/lib/libgstvideo-0.10.so.0.18.0
+7fa16abc5000-7fa16abc6000 rwxp 00007000 08:06 3097                       /usr/lib/libgstvideo-0.10.so.0.18.0
+7fa16abc6000-7fa16abd6000 r-xp 00000000 08:06 199555                     /usr/lib/gstreamer-0.10/libgstvideoscale.so
+7fa16abd6000-7fa16add6000 ---p 00010000 08:06 199555                     /usr/lib/gstreamer-0.10/libgstvideoscale.so
+7fa16add6000-7fa16add7000 r-xp 00010000 08:06 199555                     /usr/lib/gstreamer-0.10/libgstvideoscale.so
+7fa16add7000-7fa16add8000 rwxp 00011000 08:06 199555                     /usr/lib/gstreamer-0.10/libgstvideoscale.so
+7fa16add8000-7fa16add9000 rwxp 00000000 00:00 0 
+7fa16add9000-7fa16addc000 ---p 00000000 00:00 0 
+7fa16addc000-7fa16b5da000 rwxp 00000000 00:00 0 
+7fa16b5da000-7fa16b5fd000 r-xp 00000000 08:06 4190                       /usr/lib/libjpeg.so.62.0.0
+7fa16b5fd000-7fa16b7fd000 ---p 00023000 08:06 4190                       /usr/lib/libjpeg.so.62.0.0
+7fa16b7fd000-7fa16b7fe000 r-xp 00023000 08:06 4190                       /usr/lib/libjpeg.so.62.0.0
+7fa16b7fe000-7fa16b7ff000 rwxp 00024000 08:06 4190                       /usr/lib/libjpeg.so.62.0.0
+7fa16b7ff000-7fa16b802000 ---p 00000000 00:00 0 
+7fa16b802000-7fa16c000000 rwxp 00000000 00:00 0 
+7fa16c000000-7fa16cd03000 rwxp 00000000 00:00 0 
+7fa16cd03000-7fa170000000 ---p 00000000 00:00 0 
+7fa17006d000-7fa17007b000 r-xp 00000000 08:06 135215                     /usr/lib/gstreamer-0.10/libgstjpeg.so
+7fa17007b000-7fa17027a000 ---p 0000e000 08:06 135215                     /usr/lib/gstreamer-0.10/libgstjpeg.so
+7fa17027a000-7fa17027b000 r-xp 0000d000 08:06 135215                     /usr/lib/gstreamer-0.10/libgstjpeg.so
+7fa17027b000-7fa17027c000 rwxp 0000e000 08:06 135215                     /usr/lib/gstreamer-0.10/libgstjpeg.so
+7fa17027c000-7fa17028c000 r-xp 00000000 08:06 3096                       /usr/lib/libgsttag-0.10.so.0.18.0
+7fa17028c000-7fa17048c000 ---p 00010000 08:06 3096                       /usr/lib/libgsttag-0.10.so.0.18.0
+7fa17048c000-7fa17048d000 r-xp 00010000 08:06 3096                       /usr/lib/libgsttag-0.10.so.0.18.0
+7fa17048d000-7fa17048e000 rwxp 00011000 08:06 3096                       /usr/lib/libgsttag-0.10.so.0.18.0
+7fa17048e000-7fa1704b2000 r-xp 00000000 08:06 135261                     /usr/lib/gstreamer-0.10/libgstqtdemux.so
+7fa1704b2000-7fa1706b2000 ---p 00024000 08:06 135261                     /usr/lib/gstreamer-0.10/libgstqtdemux.so
+7fa1706b2000-7fa1706b4000 r-xp 00024000 08:06 135261                     /usr/lib/gstreamer-0.10/libgstqtdemux.so
+7fa1706b4000-7fa1706b5000 rwxp 00026000 08:06 135261                     /usr/lib/gstreamer-0.10/libgstqtdemux.so
+7fa1706b5000-7fa1706c9000 r-xp 00000000 08:06 3093                       /usr/lib/libgstrtp-0.10.so.0.18.0
+7fa1706c9000-7fa1708c8000 ---p 00014000 08:06 3093                       /usr/lib/libgstrtp-0.10.so.0.18.0
+7fa1708c8000-7fa1708ca000 r-xp 00013000 08:06 3093                       /usr/lib/libgstrtp-0.10.so.0.18.0
+7fa1708ca000-7fa1708cb000 rwxp 00015000 08:06 3093                       /usr/lib/libgstrtp-0.10.so.0.18.0
+7fa1708cb000-7fa1708ec000 r-xp 00000000 08:06 3085                       /usr/lib/libgstaudio-0.10.so.0.18.0
+7fa1708ec000-7fa170aec000 ---p 00021000 08:06 3085                       /usr/lib/libgstaudio-0.10.so.0.18.0
+7fa170aec000-7fa170aed000 r-xp 00021000 08:06 3085                       /usr/lib/libgstaudio-0.10.so.0.18.0
+7fa170aed000-7fa170aee000 rwxp 00022000 08:06 3085                       /usr/lib/libgstaudio-0.10.so.0.18.0
+7fa170aee000-7fa170b04000 r-xp 00000000 08:06 3607                       /usr/lib/libbluetooth.so.3.4.0
+7fa170b04000-7fa170d03000 ---p 00016000 08:06 3607                       /usr/lib/libbluetooth.so.3.4.0
+7fa170d03000-7fa170d04000 r-xp 00015000 08:06 3607                       /usr/lib/libbluetooth.so.3.4.0
+7fa170d04000-7fa170d06000 rwxp 00016000 08:06 3607                       /usr/lib/libbluetooth.so.3.4.0
+7fa170d06000-7fa170d25000 r-xp 00000000 08:06 135152                     /usr/lib/gstreamer-0.10/libgstbluetooth.so
+7fa170d25000-7fa170f24000 ---p 0001f000 08:06 135152                     /usr/lib/gstreamer-0.10/libgstbluetooth.so
+7fa170f24000-7fa170f25000 r-xp 0001e000 08:06 135152                     /usr/lib/gstreamer-0.10/libgstbluetooth.so
+7fa170f25000-7fa170f26000 rwxp 0001f000 08:06 135152                     /usr/lib/gstreamer-0.10/libgstbluetooth.so
+7fa170f26000-7fa170f42000 r-xp 00000000 08:06 581                        /lib/libselinux.so.1
+7fa170f42000-7fa171141000 ---p 0001c000 08:06 581                        /lib/libselinux.so.1
+7fa171141000-7fa171142000 r-xp 0001b000 08:06 581                        /lib/libselinux.so.1
+7fa171142000-7fa171143000 rwxp 0001c000 08:06 581                        /lib/libselinux.so.1
+7fa171143000-7fa171144000 rwxp 00000000 00:00 0 
+7fa171144000-7fa17115a000 r-xp 00000000 08:06 5583                       /lib/libresolv-2.10.1.so
+7fa17115a000-7fa171359000 ---p 00016000 08:06 5583                       /lib/libresolv-2.10.1.so
+7fa171359000-7fa17135a000 r-xp 00015000 08:06 5583                       /lib/libresolv-2.10.1.so
+7fa17135a000-7fa17135b000 rwxp 00016000 08:06 5583                       /lib/libresolv-2.10.1.so
+7fa17135b000-7fa17135d000 rwxp 00000000 00:00 0 
+7fa17135d000-7fa171403000 r-xp 00000000 08:06 2904                       /usr/lib/libgio-2.0.so.0.2200.3
+7fa171403000-7fa171603000 ---p 000a6000 08:06 2904                       /usr/lib/libgio-2.0.so.0.2200.3
+7fa171603000-7fa171605000 r-xp 000a6000 08:06 2904                       /usr/lib/libgio-2.0.so.0.2200.3
+7fa171605000-7fa171606000 rwxp 000a8000 08:06 2904                       /usr/lib/libgio-2.0.so.0.2200.3
+7fa171606000-7fa171607000 rwxp 00000000 00:00 0 
+7fa171607000-7fa171615000 r-xp 00000000 08:06 199552                     /usr/lib/gstreamer-0.10/libgsttypefindfunctions.so
+7fa171615000-7fa171814000 ---p 0000e000 08:06 199552                     /usr/lib/gstreamer-0.10/libgsttypefindfunctions.so
+7fa171814000-7fa171815000 r-xp 0000d000 08:06 199552                     /usr/lib/gstreamer-0.10/libgsttypefindfunctions.so
+7fa171815000-7fa171818000 rwxp 0000e000 08:06 199552                     /usr/lib/gstreamer-0.10/libgsttypefindfunctions.so
+7fa171818000-7fa171823000 r-xp 00000000 08:06 144470                     /usr/lib/gstreamer-0.10/libgstdecodebin.so
+7fa171823000-7fa171a22000 ---p 0000b000 08:06 144470                     /usr/lib/gstreamer-0.10/libgstdecodebin.so
+7fa171a22000-7fa171a23000 r-xp 0000a000 08:06 144470                     /usr/lib/gstreamer-0.10/libgstdecodebin.so
+7fa171a23000-7fa171a24000 rwxp 0000b000 08:06 144470                     /usr/lib/gstreamer-0.10/libgstdecodebin.so
+7fa171a24000-7fa171a5b000 r-xp 00000000 08:06 199542                     /usr/lib/gstreamer-0.10/libgstffmpegcolorspace.so
+7fa171a5b000-7fa171c5a000 ---p 00037000 08:06 199542                     /usr/lib/gstreamer-0.10/libgstffmpegcolorspace.so
+7fa171c5a000-7fa171c5b000 r-xp 00036000 08:06 199542                     /usr/lib/gstreamer-0.10/libgstffmpegcolorspace.so
+7fa171c5b000-7fa171c5d000 rwxp 00037000 08:06 199542                     /usr/lib/gstreamer-0.10/libgstffmpegcolorspace.so
+7fa171c5d000-7fa171c5e000 rwxp 00000000 00:00 0 
+7fa171c5e000-7fa171c97000 r-xp 00000000 08:06 4027                       /usr/lib/libgstbase-0.10.so.0.22.0
+7fa171c97000-7fa171e96000 ---p 00039000 08:06 4027                       /usr/lib/libgstbase-0.10.so.0.22.0
+7fa171e96000-7fa171e97000 r-xp 00038000 08:06 4027                       /usr/lib/libgstbase-0.10.so.0.22.0
+7fa171e97000-7fa171e98000 rwxp 00039000 08:06 4027                       /usr/lib/libgstbase-0.10.so.0.22.0
+7fa171e98000-7fa171ec3000 r-xp 00000000 08:06 135161                     /usr/lib/gstreamer-0.10/libgstcoreelements.so
+7fa171ec3000-7fa1720c3000 ---p 0002b000 08:06 135161                     /usr/lib/gstreamer-0.10/libgstcoreelements.so
+7fa1720c3000-7fa1720c4000 r-xp 0002b000 08:06 135161                     /usr/lib/gstreamer-0.10/libgstcoreelements.so
+7fa1720c4000-7fa1720c6000 rwxp 0002c000 08:06 135161                     /usr/lib/gstreamer-0.10/libgstcoreelements.so
+7fa1720c6000-7fa1720d6000 r-xp 00000000 08:06 3090                       /usr/lib/libgstinterfaces-0.10.so.0.18.0
+7fa1720d6000-7fa1722d6000 ---p 00010000 08:06 3090                       /usr/lib/libgstinterfaces-0.10.so.0.18.0
+7fa1722d6000-7fa1722d7000 r-xp 00010000 08:06 3090                       /usr/lib/libgstinterfaces-0.10.so.0.18.0
+7fa1722d7000-7fa1722d8000 rwxp 00011000 08:06 3090                       /usr/lib/libgstinterfaces-0.10.so.0.18.0
+7fa1722d8000-7fa1722e5000 r-xp 00000000 08:06 3087                       /usr/lib/libgstpbutils-0.10.so.0.18.0
+7fa1722e5000-7fa1724e4000 ---p 0000d000 08:06 3087                       /usr/lib/libgstpbutils-0.10.so.0.18.0
+7fa1724e4000-7fa1724e6000 r-xp 0000c000 08:06 3087                       /usr/lib/libgstpbutils-0.10.so.0.18.0
+7fa1724e6000-7fa1724e7000 rwxp 0000e000 08:06 3087                       /usr/lib/libgstpbutils-0.10.so.0.18.0
+7fa1724e7000-7fa172519000 r-xp 00000000 08:06 199547                     /usr/lib/gstreamer-0.10/libgstplaybin.so
+7fa172519000-7fa172718000 ---p 00032000 08:06 199547                     /usr/lib/gstreamer-0.10/libgstplaybin.so
+7fa172718000-7fa172719000 r-xp 00031000 08:06 199547                     /usr/lib/gstreamer-0.10/libgstplaybin.so
+7fa172719000-7fa17271a000 rwxp 00032000 08:06 199547                     /usr/lib/gstreamer-0.10/libgstplaybin.so
+7fa17271a000-7fa17271b000 rwxp 00000000 00:00 0 
+7fa17271b000-7fa172808000 r-xp 00000000 08:06 265641                     /usr/lib/locale/en_GB.utf8/LC_COLLATE
+7fa172808000-7fa17281e000 r-xp 00000000 08:06 613                        /lib/libz.so.1.2.3.3
+7fa17281e000-7fa172a1d000 ---p 00016000 08:06 613                        /lib/libz.so.1.2.3.3
+7fa172a1d000-7fa172a1e000 r-xp 00015000 08:06 613                        /lib/libz.so.1.2.3.3
+7fa172a1e000-7fa172a1f000 rwxp 00016000 08:06 613                        /lib/libz.so.1.2.3.3
+7fa172a1f000-7fa172a4c000 r-xp 00000000 08:06 565                        /lib/libpcre.so.3.12.1
+7fa172a4c000-7fa172c4b000 ---p 0002d000 08:06 565                        /lib/libpcre.so.3.12.1
+7fa172c4b000-7fa172c4c000 r-xp 0002c000 08:06 565                        /lib/libpcre.so.3.12.1
+7fa172c4c000-7fa172c4d000 rwxp 0002d000 08:06 565                        /lib/libpcre.so.3.12.1
+7fa172c4d000-7fa172d93000 r-xp 00000000 08:06 5257                       /usr/lib/libxml2.so.2.7.5
+7fa172d93000-7fa172f92000 ---p 00146000 08:06 5257                       /usr/lib/libxml2.so.2.7.5
+7fa172f92000-7fa172f9a000 r-xp 00145000 08:06 5257                       /usr/lib/libxml2.so.2.7.5
+7fa172f9a000-7fa172f9c000 rwxp 0014d000 08:06 5257                       /usr/lib/libxml2.so.2.7.5
+7fa172f9c000-7fa172f9d000 rwxp 00000000 00:00 0 
+7fa172f9d000-7fa173062000 r-xp 00000000 08:06 1571                       /lib/libglib-2.0.so.0.2200.3
+7fa173062000-7fa173261000 ---p 000c5000 08:06 1571                       /lib/libglib-2.0.so.0.2200.3
+7fa173261000-7fa173262000 r-xp 000c4000 08:06 1571                       /lib/libglib-2.0.so.0.2200.3
+7fa173262000-7fa173263000 rwxp 000c5000 08:06 1571                       /lib/libglib-2.0.so.0.2200.3
+7fa173263000-7fa173264000 rwxp 00000000 00:00 0 
+7fa173264000-7fa173267000 r-xp 00000000 08:06 1832                       /usr/lib/libgmodule-2.0.so.0.2200.3
+7fa173267000-7fa173466000 ---p 00003000 08:06 1832                       /usr/lib/libgmodule-2.0.so.0.2200.3
+7fa173466000-7fa173467000 r-xp 00002000 08:06 1832                       /usr/lib/libgmodule-2.0.so.0.2200.3
+7fa173467000-7fa173468000 rwxp 00003000 08:06 1832                       /usr/lib/libgmodule-2.0.so.0.2200.3
+7fa173468000-7fa17346c000 r-xp 00000000 08:06 1953                       /usr/lib/libgthread-2.0.so.0.2200.3
+7fa17346c000-7fa17366b000 ---p 00004000 08:06 1953                       /usr/lib/libgthread-2.0.so.0.2200.3
+7fa17366b000-7fa17366c000 r-xp 00003000 08:06 1953                       /usr/lib/libgthread-2.0.so.0.2200.3
+7fa17366c000-7fa17366d000 rwxp 00004000 08:06 1953                       /usr/lib/libgthread-2.0.so.0.2200.3
+7fa17366d000-7fa1736b1000 r-xp 00000000 08:06 1586                       /usr/lib/libgobject-2.0.so.0.2200.3
+7fa1736b1000-7fa1738b1000 ---p 00044000 08:06 1586                       /usr/lib/libgobject-2.0.so.0.2200.3
+7fa1738b1000-7fa1738b2000 r-xp 00044000 08:06 1586                       /usr/lib/libgobject-2.0.so.0.2200.3
+7fa1738b2000-7fa1738b3000 rwxp 00045000 08:06 1586                       /usr/lib/libgobject-2.0.so.0.2200.3
+7fa1738b3000-7fa1738b4000 rwxp 00000000 00:00 0 
+7fa1738b4000-7fa173980000 r-xp 00000000 08:06 4053                       /usr/lib/libgstreamer-0.10.so.0.22.0
+7fa173980000-7fa173b80000 ---p 000cc000 08:06 4053                       /usr/lib/libgstreamer-0.10.so.0.22.0
+7fa173b80000-7fa173b84000 r-xp 000cc000 08:06 4053                       /usr/lib/libgstreamer-0.10.so.0.22.0
+7fa173b84000-7fa173b86000 rwxp 000d0000 08:06 4053                       /usr/lib/libgstreamer-0.10.so.0.22.0
+7fa173b86000-7fa173b88000 rwxp 00000000 00:00 0 
+7fa173b88000-7fa173ba0000 r-xp 00000000 08:06 1991                       /tmp/jna6724548849572333031.tmp
+7fa173ba0000-7fa173c9f000 ---p 00018000 08:06 1991                       /tmp/jna6724548849572333031.tmp
+7fa173c9f000-7fa173ca0000 rwxp 00017000 08:06 1991                       /tmp/jna6724548849572333031.tmp
+7fa173ca0000-7fa173ca1000 rwxp 00000000 00:00 0 
+7fa173ca1000-7fa173ca4000 ---p 00000000 00:00 0 
+7fa173ca4000-7fa173da2000 rwxp 00000000 00:00 0 
+7fa173da2000-7fa173ece000 rwxs 00000000 00:09 31850520                   /SYSV00000000 (deleted)
+7fa173ece000-7fa173efa000 r-xp 00000000 08:06 1314445                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libjpeg.so
+7fa173efa000-7fa173ffa000 ---p 0002c000 08:06 1314445                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libjpeg.so
+7fa173ffa000-7fa174000000 rwxp 0002c000 08:06 1314445                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libjpeg.so
+7fa174000000-7fa175337000 rwxp 00000000 00:00 0 
+7fa175337000-7fa178000000 ---p 00000000 00:00 0 
+7fa178087000-7fa17808a000 ---p 00000000 00:00 0 
+7fa17808a000-7fa178188000 rwxp 00000000 00:00 0 
+7fa178188000-7fa178231000 r-xp 00000000 08:06 1314427                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libmlib_image.so
+7fa178231000-7fa178330000 ---p 000a9000 08:06 1314427                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libmlib_image.so
+7fa178330000-7fa178337000 rwxp 000a8000 08:06 1314427                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libmlib_image.so
+7fa178337000-7fa17834d000 r-xp 00000000 08:06 1314443                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libdcpr.so
+7fa17834d000-7fa17844f000 ---p 00016000 08:06 1314443                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libdcpr.so
+7fa17844f000-7fa178467000 rwxp 00018000 08:06 1314443                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libdcpr.so
+7fa178467000-7fa17846a000 ---p 00000000 00:00 0 
+7fa17846a000-7fa178568000 rwxp 00000000 00:00 0 
+7fa17864e000-7fa178651000 ---p 00000000 00:00 0 
+7fa178651000-7fa17874f000 rwxp 00000000 00:00 0 
+7fa17874f000-7fa178752000 ---p 00000000 00:00 0 
+7fa178752000-7fa178850000 rwxp 00000000 00:00 0 
+7fa178850000-7fa178853000 ---p 00000000 00:00 0 
+7fa178853000-7fa178951000 rwxp 00000000 00:00 0 
+7fa178951000-7fa178954000 ---p 00000000 00:00 0 
+7fa178954000-7fa178a52000 rwxp 00000000 00:00 0 
+7fa178a52000-7fa178a55000 ---p 00000000 00:00 0 
+7fa178a55000-7fa178b53000 rwxp 00000000 00:00 0 
+7fa178b56000-7fa178b59000 r-xs 00034000 08:08 1574289                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-gui.jar
+7fa178b59000-7fa178b5b000 r-xs 00010000 08:08 1574135                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-player.jar
+7fa178b5b000-7fa178b5e000 r-xs 0001f000 08:08 1574485                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-audio.jar
+7fa178b5e000-7fa178b61000 r-xs 00014000 08:08 1573717                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-components.jar
+7fa178b61000-7fa178b66000 r-xs 00061000 08:08 1573954                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-laf.jar
+7fa178b66000-7fa178b68000 r-xs 00001000 08:08 1574177                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-util.jar
+7fa178b68000-7fa178b69000 r-xs 0000e000 08:08 1573997                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-midi.jar
+7fa178b69000-7fa178b6c000 ---p 00000000 00:00 0 
+7fa178b6c000-7fa178c6a000 rwxp 00000000 00:00 0 
+7fa178c6a000-7fa178c6d000 ---p 00000000 00:00 0 
+7fa178c6d000-7fa178d6b000 rwxp 00000000 00:00 0 
+7fa178d6b000-7fa178d6e000 ---p 00000000 00:00 0 
+7fa178d6e000-7fa178e6c000 rwxp 00000000 00:00 0 
+7fa178e6c000-7fa178e6d000 r-xs 00000000 08:06 193199                     /var/cache/fontconfig/c05880de57d1f5e948fdfacc138775d9-x86-64.cache-2
+7fa178e6d000-7fa178e76000 r-xs 00000000 08:06 193133                     /var/cache/fontconfig/945677eb7aeaf62f1d50efc3fb3ec7d8-x86-64.cache-2
+7fa178e76000-7fa178e77000 r-xs 00000000 08:06 193063                     /var/cache/fontconfig/79b7902a698c37d747b157374a08587f-x86-64.cache-2
+7fa178e77000-7fa178e78000 r-xs 00000000 08:06 219280                     /var/cache/fontconfig/9365dfacd52672c8a34fb71959a05f01-x86-64.cache-2
+7fa178e78000-7fa178e79000 r-xs 00000000 08:06 200311                     /var/cache/fontconfig/acf24f57989d82ed5c91b60ef9c3a050-x86-64.cache-2
+7fa178e79000-7fa178e7d000 r-xs 00000000 08:06 192762                     /var/cache/fontconfig/6eb3985aa4124903f6ff08ba781cd364-x86-64.cache-2
+7fa178e7d000-7fa178ea5000 r-xs 00000000 08:06 200306                     /var/cache/fontconfig/4ca92cf76c0cf3dfa7f011127eff595d-x86-64.cache-2
+7fa178ea5000-7fa178ed1000 r-xs 00000000 08:06 200304                     /var/cache/fontconfig/6abf76b0b4cc7192703d8431ac929b75-x86-64.cache-2
+7fa178ed1000-7fa178ed6000 r-xs 00000000 08:06 193456                     /var/cache/fontconfig/062808c12e6e608270f93bb230aed730-x86-64.cache-2
+7fa178ed6000-7fa178ed7000 r-xs 00000000 08:06 200032                     /var/cache/fontconfig/a8d35ba226d862df35f7c320f882e11a-x86-64.cache-2
+7fa178ed7000-7fa178edc000 r-xs 00000000 08:06 200031                     /var/cache/fontconfig/515ca1ebc4b18308bea979be5704f9db-x86-64.cache-2
+7fa178edc000-7fa178ee5000 r-xs 00000000 08:06 200030                     /var/cache/fontconfig/6d41288fd70b0be22e8c3a91e032eec0-x86-64.cache-2
+7fa178ee5000-7fa178ee6000 r-xs 00000000 08:06 219304                     /var/cache/fontconfig/9451a55048e8dbe8633e64d34165fdf2-x86-64.cache-2
+7fa178ee6000-7fa178f14000 r-xs 00000000 08:06 200023                     /var/cache/fontconfig/365b55f210c0a22e9a19e35191240f32-x86-64.cache-2
+7fa178f14000-7fa178f1e000 r-xs 00000000 08:06 196738                     /var/cache/fontconfig/d52a8644073d54c13679302ca1180695-x86-64.cache-2
+7fa178f1e000-7fa178f98000 r-xs 00000000 08:06 198151                     /var/cache/fontconfig/b80ce64a4bd0ac846cde5fbdd290c01c-x86-64.cache-2
+7fa178f98000-7fa178f9b000 r-xs 00020000 08:08 1574391                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-rapl.jar
+7fa178f9b000-7fa178f9c000 r-xs 00008000 08:08 1573274                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-audioops-impl.jar
+7fa178f9c000-7fa178fa0000 r-xs 00023000 08:08 1574087                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-script.jar
+7fa178fa0000-7fa178fa1000 r-xs 0000f000 08:08 1573750                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-hub.jar
+7fa178fa1000-7fa178fa2000 r-xs 00009000 08:08 1574158                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-swing.jar
+7fa178fa2000-7fa178fa3000 r-xs 00001000 08:08 1575123                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-video-gstreamer.jar
+7fa178fa3000-7fa178fa7000 r-xs 00029000 08:08 1574777                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-video.jar
+7fa178fa7000-7fa178faa000 r-xs 00033000 08:08 1573645                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-impl.jar
+7fa178faa000-7fa178fad000 r-xs 00022000 08:08 1573532                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-core.jar
+7fa178fad000-7fa178faf000 r-xs 0000f000 08:08 1573344                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-audioservers-javasound.jar
+7fa178faf000-7fa178fb1000 r-xs 0000b000 08:08 1575104                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-ripl-gstreamer.jar
+7fa178fb1000-7fa178fb5000 r-xs 00034000 08:08 1574625                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-ripl.jar
+7fa178fb5000-7fa178fc5000 r-xs 00083000 08:08 1575072                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/ext/gstreamer-java-bin-1.1.jar
+7fa178fff000-7fa179000000 rwxs 00000000 08:06 2825                       /tmp/ffiggfwHo (deleted)
+7fa179000000-7fa179001000 r-xs 00000000 08:06 2825                       /tmp/ffiggfwHo (deleted)
+7fa179001000-7fa179022000 rwxs 00000000 00:09 31916053                   /SYSV00000000 (deleted)
+7fa179022000-7fa17902f000 rwxs 00000000 00:09 31358999                   /SYSV00000000 (deleted)
+7fa179039000-7fa17903a000 r-xp 00000000 08:06 243137                     /usr/share/locale-langpack/en_GB/LC_MESSAGES/libc.mo
+7fa17903a000-7fa17903b000 r-xp 00000000 08:06 184521                     /usr/share/locale-langpack/en_GB/LC_MESSAGES/gstreamer-0.10.mo
+7fa17903b000-7fa17903c000 r-xp 00000000 08:06 265647                     /usr/lib/locale/en_GB.utf8/LC_NUMERIC
+7fa17903c000-7fa17903d000 r-xp 00000000 08:06 265494                     /usr/lib/locale/en_GB.utf8/LC_TIME
+7fa17903d000-7fa17903e000 r-xp 00000000 08:06 264904                     /usr/lib/locale/en_GB.utf8/LC_MONETARY
+7fa17903e000-7fa17903f000 r-xp 00000000 08:06 265651                     /usr/lib/locale/en_GB.utf8/LC_MESSAGES/SYS_LC_MESSAGES
+7fa17903f000-7fa179040000 r-xp 00000000 08:06 265540                     /usr/lib/locale/en_GB.utf8/LC_PAPER
+7fa179040000-7fa179041000 r-xp 00000000 08:06 265646                     /usr/lib/locale/en_GB.utf8/LC_NAME
+7fa179041000-7fa179042000 r-xp 00000000 08:06 264905                     /usr/lib/locale/en_GB.utf8/LC_ADDRESS
+7fa179042000-7fa179043000 r-xp 00000000 08:06 264906                     /usr/lib/locale/en_GB.utf8/LC_TELEPHONE
+7fa179043000-7fa179044000 r-xp 00000000 08:06 265536                     /usr/lib/locale/en_GB.utf8/LC_MEASUREMENT
+7fa179044000-7fa179045000 r-xp 00000000 08:06 264907                     /usr/lib/locale/en_GB.utf8/LC_IDENTIFICATION
+7fa179045000-7fa17904d000 rwxs 00000000 00:09 31883286                   /SYSV00000000 (deleted)
+7fa17904d000-7fa179050000 r-xs 000cb000 08:06 1315129                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/ext/localedata.jar
+7fa179050000-7fa179057000 r-xp 00000000 08:06 1314411                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libnio.so
+7fa179057000-7fa179156000 ---p 00007000 08:06 1314411                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libnio.so
+7fa179156000-7fa179158000 rwxp 00006000 08:06 1314411                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libnio.so
+7fa179158000-7fa17915b000 ---p 00000000 00:00 0 
+7fa17915b000-7fa179259000 rwxp 00000000 00:00 0 
+7fa179259000-7fa17925e000 r-xp 00000000 08:06 3502                       /usr/lib/libXfixes.so.3.1.0
+7fa17925e000-7fa17945d000 ---p 00005000 08:06 3502                       /usr/lib/libXfixes.so.3.1.0
+7fa17945d000-7fa17945e000 r-xp 00004000 08:06 3502                       /usr/lib/libXfixes.so.3.1.0
+7fa17945e000-7fa17945f000 rwxp 00005000 08:06 3502                       /usr/lib/libXfixes.so.3.1.0
+7fa17945f000-7fa179468000 r-xp 00000000 08:06 3522                       /usr/lib/libXrender.so.1.3.0
+7fa179468000-7fa179667000 ---p 00009000 08:06 3522                       /usr/lib/libXrender.so.1.3.0
+7fa179667000-7fa179668000 r-xp 00008000 08:06 3522                       /usr/lib/libXrender.so.1.3.0
+7fa179668000-7fa179669000 rwxp 00009000 08:06 3522                       /usr/lib/libXrender.so.1.3.0
+7fa179669000-7fa179672000 r-xp 00000000 08:06 3494                       /usr/lib/libXcursor.so.1.0.2
+7fa179672000-7fa179871000 ---p 00009000 08:06 3494                       /usr/lib/libXcursor.so.1.0.2
+7fa179871000-7fa179872000 r-xp 00008000 08:06 3494                       /usr/lib/libXcursor.so.1.0.2
+7fa179872000-7fa179873000 rwxp 00009000 08:06 3494                       /usr/lib/libXcursor.so.1.0.2
+7fa179873000-7fa179874000 r-xs 0000f000 08:06 523494                     /home/nsigma/bin/netbeans-6.8/platform11/modules/org-netbeans-modules-sendopts.jar
+7fa179874000-7fa179875000 r-xs 00007000 08:08 1575017                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-praxis-video-janino.jar
+7fa179875000-7fa17987f000 r-xs 0008d000 08:08 1574790                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/ext/janino.jar
+7fa17987f000-7fa179880000 r-xs 00000000 08:08 1574788                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/org-codehaus-janino.jar
+7fa179880000-7fa179881000 r-xs 00000000 08:08 1575070                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/org-gstreamer.jar
+7fa179881000-7fa179882000 r-xs 00000000 08:08 1573288                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-audioops-impl-gpl.jar
+7fa179882000-7fa179883000 r-xs 00000000 08:08 1573196                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-audioops.jar
+7fa179883000-7fa179884000 r-xs 00003000 08:08 1573436                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-audioservers-jack.jar
+7fa179884000-7fa179886000 r-xs 00000000 08:08 1573302                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-audioservers.jar
+7fa179886000-7fa179888000 r-xs 00015000 08:08 1573418                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-neilcsmith-jnajack.jar
+7fa179888000-7fa17988b000 r-xs 000c0000 08:08 1573173                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/ext/jna-3.0.9.jar
+7fa17988b000-7fa17988c000 r-xs 00000000 08:08 1573167                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/com-sun-jna.jar
+7fa17988c000-7fa17988e000 r-xs 00011000 08:08 1573185                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/ext/miglayout-3.7.2-swing.jar
+7fa17988e000-7fa17988f000 r-xs 00000000 08:08 1573183                    /mnt/data/Code/java/praxis/praxis/build/cluster/modules/net-miginfocom.jar
+7fa17988f000-7fa179892000 ---p 00000000 00:00 0 
+7fa179892000-7fa179990000 rwxp 00000000 00:00 0 
+7fa179990000-7fa179a09000 r-xp 00000000 08:06 1314418                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libfontmanager.so
+7fa179a09000-7fa179b08000 ---p 00079000 08:06 1314418                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libfontmanager.so
+7fa179b08000-7fa179b1d000 rwxp 00078000 08:06 1314418                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libfontmanager.so
+7fa179b1d000-7fa179b2e000 rwxp 00000000 00:00 0 
+7fa179b2e000-7fa179b33000 r-xp 00000000 08:06 3498                       /usr/lib/libXdmcp.so.6.0.0
+7fa179b33000-7fa179d32000 ---p 00005000 08:06 3498                       /usr/lib/libXdmcp.so.6.0.0
+7fa179d32000-7fa179d33000 rwxp 00004000 08:06 3498                       /usr/lib/libXdmcp.so.6.0.0
+7fa179d33000-7fa179d4e000 r-xp 00000000 08:06 4660                       /usr/lib/libxcb.so.1.1.0
+7fa179d4e000-7fa179f4d000 ---p 0001b000 08:06 4660                       /usr/lib/libxcb.so.1.1.0
+7fa179f4d000-7fa179f4e000 r-xp 0001a000 08:06 4660                       /usr/lib/libxcb.so.1.1.0
+7fa179f4e000-7fa179f4f000 rwxp 0001b000 08:06 4660                       /usr/lib/libxcb.so.1.1.0
+7fa179f4f000-7fa179f51000 r-xp 00000000 08:06 3487                       /usr/lib/libXau.so.6.0.0
+7fa179f51000-7fa17a150000 ---p 00002000 08:06 3487                       /usr/lib/libXau.so.6.0.0
+7fa17a150000-7fa17a151000 r-xp 00001000 08:06 3487                       /usr/lib/libXau.so.6.0.0
+7fa17a151000-7fa17a152000 rwxp 00002000 08:06 3487                       /usr/lib/libXau.so.6.0.0
+7fa17a152000-7fa17a15b000 r-xp 00000000 08:06 3508                       /usr/lib/libXi.so.6.0.0
+7fa17a15b000-7fa17a35b000 ---p 00009000 08:06 3508                       /usr/lib/libXi.so.6.0.0
+7fa17a35b000-7fa17a35c000 r-xp 00009000 08:06 3508                       /usr/lib/libXi.so.6.0.0
+7fa17a35c000-7fa17a35d000 rwxp 0000a000 08:06 3508                       /usr/lib/libXi.so.6.0.0
+7fa17a35d000-7fa17a362000 r-xp 00000000 08:06 3528                       /usr/lib/libXtst.so.6.1.0
+7fa17a362000-7fa17a562000 ---p 00005000 08:06 3528                       /usr/lib/libXtst.so.6.1.0
+7fa17a562000-7fa17a563000 r-xp 00005000 08:06 3528                       /usr/lib/libXtst.so.6.1.0
+7fa17a563000-7fa17a564000 rwxp 00006000 08:06 3528                       /usr/lib/libXtst.so.6.1.0
+7fa17a564000-7fa17a695000 r-xp 00000000 08:06 3481                       /usr/lib/libX11.so.6.2.0
+7fa17a695000-7fa17a895000 ---p 00131000 08:06 3481                       /usr/lib/libX11.so.6.2.0
+7fa17a895000-7fa17a896000 r-xp 00131000 08:06 3481                       /usr/lib/libX11.so.6.2.0
+7fa17a896000-7fa17a89a000 rwxp 00132000 08:06 3481                       /usr/lib/libX11.so.6.2.0
+7fa17a89a000-7fa17a8ab000 r-xp 00000000 08:06 3500                       /usr/lib/libXext.so.6.4.0
+7fa17a8ab000-7fa17aaaa000 ---p 00011000 08:06 3500                       /usr/lib/libXext.so.6.4.0
+7fa17aaaa000-7fa17aaab000 r-xp 00010000 08:06 3500                       /usr/lib/libXext.so.6.4.0
+7fa17aaab000-7fa17aaac000 rwxp 00011000 08:06 3500                       /usr/lib/libXext.so.6.4.0
+7fa17aaac000-7fa17aaad000 r-xs 00000000 08:06 235070                     /var/cache/fontconfig/4794a0821666d79190d59a36cb4f44b5-x86-64.cache-2
+7fa17aaad000-7fa17aaaf000 r-xs 00000000 08:06 196737                     /var/cache/fontconfig/2c5ba8142dffc8bf0377700342b8ca1a-x86-64.cache-2
+7fa17aaaf000-7fa17aab0000 r-xs 00000000 08:06 199953                     /var/cache/fontconfig/2ce378776740ec555c7a47a38e02269a-x86-64.cache-2
+7fa17aab0000-7fa17aab6000 r-xs 00000000 08:06 198281                     /var/cache/fontconfig/105b9c7e6f0a4f82d8c9b6e39c52c6f9-x86-64.cache-2
+7fa17aab6000-7fa17aac1000 r-xs 00000000 08:06 200343                     /var/cache/fontconfig/e13b20fdb08344e0e664864cc2ede53d-x86-64.cache-2
+7fa17aac1000-7fa17aac8000 r-xs 00000000 08:06 244189                     /home/nsigma/.fontconfig/372f4cf779ea9c986c40a37c4fe5795a-x86-64.cache-2
+7fa17aac8000-7fa17ab0a000 r-xp 00000000 08:06 1314408                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/xawt/libmawt.so
+7fa17ab0a000-7fa17ac09000 ---p 00042000 08:06 1314408                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/xawt/libmawt.so
+7fa17ac09000-7fa17ac14000 rwxp 00041000 08:06 1314408                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/xawt/libmawt.so
+7fa17ac14000-7fa17ac16000 rwxp 00000000 00:00 0 
+7fa17ac16000-7fa17aca8000 r-xp 00000000 08:06 1314453                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libawt.so
+7fa17aca8000-7fa17ada7000 ---p 00092000 08:06 1314453                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libawt.so
+7fa17ada7000-7fa17adc0000 rwxp 00091000 08:06 1314453                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libawt.so
+7fa17adc0000-7fa17ade5000 rwxp 00000000 00:00 0 
+7fa17ade5000-7fa17ade8000 ---p 00000000 00:00 0 
+7fa17ade8000-7fa17aee6000 rwxp 00000000 00:00 0 
+7fa17aee6000-7fa17aee9000 ---p 00000000 00:00 0 
+7fa17aee9000-7fa17afe7000 rwxp 00000000 00:00 0 
+7fa17afe7000-7fa17afea000 ---p 00000000 00:00 0 
+7fa17afea000-7fa17b0e8000 rwxp 00000000 00:00 0 
+7fa17b0e8000-7fa17b0fb000 r-xp 00000000 08:06 1314410                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libnet.so
+7fa17b0fb000-7fa17b1fc000 ---p 00013000 08:06 1314410                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libnet.so
+7fa17b1fc000-7fa17b1ff000 rwxp 00014000 08:06 1314410                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libnet.so
+7fa17b1ff000-7fa17b25e000 r-xs 00baa000 08:06 1314259                    /usr/lib/jvm/java-6-sun-1.6.0.22/lib/tools.jar
+7fa17b25e000-7fa17b264000 r-xs 0001e000 08:06 1314254                    /usr/lib/jvm/java-6-sun-1.6.0.22/lib/dt.jar
+7fa17b264000-7fa17b265000 r-xs 00001000 08:06 526371                     /home/nsigma/bin/netbeans-6.8/platform11/lib/locale/org-openide-util_zh_CN.jar
+7fa17b265000-7fa17b267000 r-xs 00000000 08:06 526369                     /home/nsigma/bin/netbeans-6.8/platform11/lib/locale/org-openide-util_pt_BR.jar
+7fa17b267000-7fa17b268000 r-xs 00001000 08:06 526367                     /home/nsigma/bin/netbeans-6.8/platform11/lib/locale/org-openide-util_ja.jar
+7fa17b268000-7fa17b269000 r-xs 00000000 08:06 523526                     /home/nsigma/bin/netbeans-6.8/platform11/lib/locale/org-openide-modules_zh_CN.jar
+7fa17b269000-7fa17b26a000 r-xs 00000000 08:06 523525                     /home/nsigma/bin/netbeans-6.8/platform11/lib/locale/org-openide-modules_pt_BR.jar
+7fa17b26a000-7fa17b26d000 ---p 00000000 00:00 0 
+7fa17b26d000-7fa17b36b000 rwxp 00000000 00:00 0 
+7fa17b36b000-7fa17b36e000 ---p 00000000 00:00 0 
+7fa17b36e000-7fa17b46c000 rwxp 00000000 00:00 0 
+7fa17b46c000-7fa17b46d000 ---p 00000000 00:00 0 
+7fa17b46d000-7fa17b56d000 rwxp 00000000 00:00 0 
+7fa17b56d000-7fa17b570000 ---p 00000000 00:00 0 
+7fa17b570000-7fa17b66e000 rwxp 00000000 00:00 0 
+7fa17b66e000-7fa17b671000 ---p 00000000 00:00 0 
+7fa17b671000-7fa17b76f000 rwxp 00000000 00:00 0 
+7fa17b76f000-7fa17b772000 ---p 00000000 00:00 0 
+7fa17b772000-7fa17b870000 rwxp 00000000 00:00 0 
+7fa17b870000-7fa17b873000 ---p 00000000 00:00 0 
+7fa17b873000-7fa17b971000 rwxp 00000000 00:00 0 
+7fa17b971000-7fa17b974000 ---p 00000000 00:00 0 
+7fa17b974000-7fa17ba72000 rwxp 00000000 00:00 0 
+7fa17ba72000-7fa17bab1000 r-xp 00000000 08:06 265642                     /usr/lib/locale/en_GB.utf8/LC_CTYPE
+7fa17bab1000-7fa17bab4000 ---p 00000000 00:00 0 
+7fa17bab4000-7fa17bbb2000 rwxp 00000000 00:00 0 
+7fa17bbb2000-7fa17bbb5000 ---p 00000000 00:00 0 
+7fa17bbb5000-7fa17bcb3000 rwxp 00000000 00:00 0 
+7fa17bcb3000-7fa17bcb4000 ---p 00000000 00:00 0 
+7fa17bcb4000-7fa17bde7000 rwxp 00000000 00:00 0 
+7fa17bde7000-7fa17bf7f000 r-xs 03013000 08:06 1314404                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/rt.jar
+7fa17bf7f000-7fa17bfa7000 rwxp 00000000 00:00 0 
+7fa17bfa7000-7fa17bfa8000 ---p 00000000 00:00 0 
+7fa17bfa8000-7fa17efb9000 rwxp 00000000 00:00 0 
+7fa17efb9000-7fa17efcd000 rwxp 00000000 00:00 0 
+7fa17efcd000-7fa17efed000 rwxp 00000000 00:00 0 
+7fa17efed000-7fa17f002000 rwxp 00000000 00:00 0 
+7fa17f002000-7fa17f430000 rwxp 00000000 00:00 0 
+7fa17f430000-7fa17f445000 rwxp 00000000 00:00 0 
+7fa17f445000-7fa17f45c000 rwxp 00000000 00:00 0 
+7fa17f45c000-7fa17f46f000 rwxp 00000000 00:00 0 
+7fa17f46f000-7fa184790000 rwxp 00000000 00:00 0 
+7fa184790000-7fa187270000 rwxp 00000000 00:00 0 
+7fa187270000-7fa18a008000 rwxp 00000000 00:00 0 
+7fa18a008000-7fa18c670000 rwxp 00000000 00:00 0 
+7fa18c670000-7fa18c671000 r-xs 00000000 08:06 523557                     /home/nsigma/bin/netbeans-6.8/platform11/lib/locale/org-openide-modules_ja.jar
+7fa18c671000-7fa18c672000 r-xs 00000000 08:06 523650                     /home/nsigma/bin/netbeans-6.8/platform11/lib/locale/boot_zh_CN.jar
+7fa18c672000-7fa18c673000 r-xs 00000000 08:06 523651                     /home/nsigma/bin/netbeans-6.8/platform11/lib/locale/boot_pt_BR.jar
+7fa18c673000-7fa18c674000 r-xs 00000000 08:06 523658                     /home/nsigma/bin/netbeans-6.8/platform11/lib/locale/boot_ja.jar
+7fa18c674000-7fa18c675000 r-xs 00001000 08:08 1573157                    /mnt/data/Code/java/praxis/praxis/build/cluster/core/locale/core_praxis.jar
+7fa18c675000-7fa18c676000 r-xs 00001000 08:06 523435                     /home/nsigma/bin/netbeans-6.8/platform11/core/locale/org-openide-filesystems_pt_BR.jar
+7fa18c676000-7fa18c677000 r-xs 00001000 08:06 523436                     /home/nsigma/bin/netbeans-6.8/platform11/core/locale/org-openide-filesystems_zh_CN.jar
+7fa18c677000-7fa18c678000 r-xs 00001000 08:06 523653                     /home/nsigma/bin/netbeans-6.8/platform11/core/locale/core_ja.jar
+7fa18c678000-7fa18c679000 r-xs 00001000 08:06 523641                     /home/nsigma/bin/netbeans-6.8/platform11/core/locale/core_zh_CN.jar
+7fa18c679000-7fa18c67f000 r-xs 0009e000 08:06 523596                     /home/nsigma/bin/netbeans-6.8/platform11/core/org-openide-filesystems.jar
+7fa18c67f000-7fa18c680000 ---p 00000000 00:00 0 
+7fa18c680000-7fa18c780000 rwxp 00000000 00:00 0 
+7fa18c780000-7fa18c781000 ---p 00000000 00:00 0 
+7fa18c781000-7fa18c881000 rwxp 00000000 00:00 0 
+7fa18c881000-7fa18c882000 ---p 00000000 00:00 0 
+7fa18c882000-7fa18c982000 rwxp 00000000 00:00 0 
+7fa18c982000-7fa18c983000 ---p 00000000 00:00 0 
+7fa18c983000-7fa18ccf3000 rwxp 00000000 00:00 0 
+7fa18ccf3000-7fa18fa83000 rwxp 00000000 00:00 0 
+7fa18fa83000-7fa18fa91000 r-xp 00000000 08:06 1314420                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libzip.so
+7fa18fa91000-7fa18fb93000 ---p 0000e000 08:06 1314420                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libzip.so
+7fa18fb93000-7fa18fb96000 rwxp 00010000 08:06 1314420                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libzip.so
+7fa18fb96000-7fa18fb97000 rwxp 00000000 00:00 0 
+7fa18fb97000-7fa18fba3000 r-xp 00000000 08:06 1385                       /lib/libnss_files-2.10.1.so
+7fa18fba3000-7fa18fda2000 ---p 0000c000 08:06 1385                       /lib/libnss_files-2.10.1.so
+7fa18fda2000-7fa18fda3000 r-xp 0000b000 08:06 1385                       /lib/libnss_files-2.10.1.so
+7fa18fda3000-7fa18fda4000 rwxp 0000c000 08:06 1385                       /lib/libnss_files-2.10.1.so
+7fa18fda4000-7fa18fdae000 r-xp 00000000 08:06 1402                       /lib/libnss_nis-2.10.1.so
+7fa18fdae000-7fa18ffad000 ---p 0000a000 08:06 1402                       /lib/libnss_nis-2.10.1.so
+7fa18ffad000-7fa18ffae000 r-xp 00009000 08:06 1402                       /lib/libnss_nis-2.10.1.so
+7fa18ffae000-7fa18ffaf000 rwxp 0000a000 08:06 1402                       /lib/libnss_nis-2.10.1.so
+7fa18ffaf000-7fa18ffb6000 r-xp 00000000 08:06 1381                       /lib/libnss_compat-2.10.1.so
+7fa18ffb6000-7fa1901b6000 ---p 00007000 08:06 1381                       /lib/libnss_compat-2.10.1.so
+7fa1901b6000-7fa1901b7000 r-xp 00007000 08:06 1381                       /lib/libnss_compat-2.10.1.so
+7fa1901b7000-7fa1901b8000 rwxp 00008000 08:06 1381                       /lib/libnss_compat-2.10.1.so
+7fa1901b8000-7fa1901bf000 r-xp 00000000 08:06 1314422                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/native_threads/libhpi.so
+7fa1901bf000-7fa1902c0000 ---p 00007000 08:06 1314422                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/native_threads/libhpi.so
+7fa1902c0000-7fa1902c2000 rwxp 00008000 08:06 1314422                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/native_threads/libhpi.so
+7fa1902c2000-7fa1902c3000 rwxp 00000000 00:00 0 
+7fa1902c3000-7fa1902d9000 r-xp 00000000 08:06 1414                       /lib/libnsl-2.10.1.so
+7fa1902d9000-7fa1904d9000 ---p 00016000 08:06 1414                       /lib/libnsl-2.10.1.so
+7fa1904d9000-7fa1904da000 r-xp 00016000 08:06 1414                       /lib/libnsl-2.10.1.so
+7fa1904da000-7fa1904db000 rwxp 00017000 08:06 1414                       /lib/libnsl-2.10.1.so
+7fa1904db000-7fa1904dd000 rwxp 00000000 00:00 0 
+7fa1904dd000-7fa190505000 r-xp 00000000 08:06 1314433                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libjava.so
+7fa190505000-7fa190605000 ---p 00028000 08:06 1314433                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libjava.so
+7fa190605000-7fa19060c000 rwxp 00028000 08:06 1314433                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libjava.so
+7fa19060c000-7fa190619000 r-xp 00000000 08:06 1314415                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libverify.so
+7fa190619000-7fa190718000 ---p 0000d000 08:06 1314415                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libverify.so
+7fa190718000-7fa19071b000 rwxp 0000c000 08:06 1314415                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/libverify.so
+7fa19071b000-7fa190722000 r-xp 00000000 08:06 1394                       /lib/librt-2.10.1.so
+7fa190722000-7fa190921000 ---p 00007000 08:06 1394                       /lib/librt-2.10.1.so
+7fa190921000-7fa190922000 r-xp 00006000 08:06 1394                       /lib/librt-2.10.1.so
+7fa190922000-7fa190923000 rwxp 00007000 08:06 1394                       /lib/librt-2.10.1.so
+7fa190923000-7fa190926000 ---p 00000000 00:00 0 
+7fa190926000-7fa190a24000 rwxp 00000000 00:00 0 
+7fa190a24000-7fa190aa6000 r-xp 00000000 08:06 5582                       /lib/libm-2.10.1.so
+7fa190aa6000-7fa190ca6000 ---p 00082000 08:06 5582                       /lib/libm-2.10.1.so
+7fa190ca6000-7fa190ca7000 r-xp 00082000 08:06 5582                       /lib/libm-2.10.1.so
+7fa190ca7000-7fa190ca8000 rwxp 00083000 08:06 5582                       /lib/libm-2.10.1.so
+7fa190ca8000-7fa191482000 r-xp 00000000 08:06 1314440                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/server/libjvm.so
+7fa191482000-7fa191584000 ---p 007da000 08:06 1314440                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/server/libjvm.so
+7fa191584000-7fa191715000 rwxp 007dc000 08:06 1314440                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/server/libjvm.so
+7fa191715000-7fa191750000 rwxp 00000000 00:00 0 
+7fa191750000-7fa1918b6000 r-xp 00000000 08:06 1392                       /lib/libc-2.10.1.so
+7fa1918b6000-7fa191ab6000 ---p 00166000 08:06 1392                       /lib/libc-2.10.1.so
+7fa191ab6000-7fa191aba000 r-xp 00166000 08:06 1392                       /lib/libc-2.10.1.so
+7fa191aba000-7fa191abb000 rwxp 0016a000 08:06 1392                       /lib/libc-2.10.1.so
+7fa191abb000-7fa191ac0000 rwxp 00000000 00:00 0 
+7fa191ac0000-7fa191ac2000 r-xp 00000000 08:06 1383                       /lib/libdl-2.10.1.so
+7fa191ac2000-7fa191cc2000 ---p 00002000 08:06 1383                       /lib/libdl-2.10.1.so
+7fa191cc2000-7fa191cc3000 r-xp 00002000 08:06 1383                       /lib/libdl-2.10.1.so
+7fa191cc3000-7fa191cc4000 rwxp 00003000 08:06 1383                       /lib/libdl-2.10.1.so
+7fa191cc4000-7fa191cdb000 r-xp 00000000 08:06 5581                       /lib/libpthread-2.10.1.so
+7fa191cdb000-7fa191eda000 ---p 00017000 08:06 5581                       /lib/libpthread-2.10.1.so
+7fa191eda000-7fa191edb000 r-xp 00016000 08:06 5581                       /lib/libpthread-2.10.1.so
+7fa191edb000-7fa191edc000 rwxp 00017000 08:06 5581                       /lib/libpthread-2.10.1.so
+7fa191edc000-7fa191ee0000 rwxp 00000000 00:00 0 
+7fa191ee0000-7fa191eff000 r-xp 00000000 08:06 1400                       /lib/ld-2.10.1.so
+7fa191eff000-7fa191f04000 r-xs 00098000 08:06 523659                     /home/nsigma/bin/netbeans-6.8/platform11/core/core.jar
+7fa191f04000-7fa191f0b000 r-xs 000a2000 08:06 526373                     /home/nsigma/bin/netbeans-6.8/platform11/lib/org-openide-util.jar
+7fa191f0b000-7fa191f12000 r-xs 00000000 08:06 133315                     /usr/lib/gconv/gconv-modules.cache
+7fa191f12000-7fa191f1c000 rwxp 00000000 00:00 0 
+7fa191f1c000-7fa191fd2000 rwxp 00000000 00:00 0 
+7fa191fd2000-7fa191fd4000 rwxp 00000000 00:00 0 
+7fa191fd4000-7fa191fdb000 r-xp 00000000 08:06 1314406                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/jli/libjli.so
+7fa191fdb000-7fa1920dc000 ---p 00007000 08:06 1314406                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/jli/libjli.so
+7fa1920dc000-7fa1920de000 rwxp 00008000 08:06 1314406                    /usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/jli/libjli.so
+7fa1920de000-7fa1920df000 rwxp 00000000 00:00 0 
+7fa1920df000-7fa1920e0000 r-xs 00001000 08:06 523470                     /home/nsigma/bin/netbeans-6.8/platform11/core/locale/org-openide-filesystems_ja.jar
+7fa1920e0000-7fa1920e1000 r-xs 00001000 08:06 523640                     /home/nsigma/bin/netbeans-6.8/platform11/core/locale/core_pt_BR.jar
+7fa1920e1000-7fa1920e3000 r-xs 00006000 08:06 523638                     /home/nsigma/bin/netbeans-6.8/platform11/lib/org-openide-modules.jar
+7fa1920e3000-7fa1920e5000 r-xs 0003f000 08:06 523660                     /home/nsigma/bin/netbeans-6.8/platform11/lib/boot.jar
+7fa1920e5000-7fa1920f1000 rwxp 00000000 00:00 0 
+7fa1920f1000-7fa1920f9000 rwxs 00000000 08:06 1051321                    /tmp/hsperfdata_nsigma/7313
+7fa1920f9000-7fa1920fa000 rwxp 00000000 00:00 0 
+7fa1920fa000-7fa1920fb000 r-xp 00000000 00:00 0 
+7fa1920fb000-7fa1920fe000 rwxp 00000000 00:00 0 
+7fa1920fe000-7fa1920ff000 r-xp 0001e000 08:06 1400                       /lib/ld-2.10.1.so
+7fa1920ff000-7fa192100000 rwxp 0001f000 08:06 1400                       /lib/ld-2.10.1.so
+7fffc1bd8000-7fffc1bed000 rwxp 00000000 00:00 0                          [stack]
+7fffc1bff000-7fffc1c00000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+
+VM Arguments:
+jvm_args: -Djdk.home=/usr/lib/jvm/java-6-sun-1.6.0.22 -Dnetbeans.system_http_proxy=DIRECT -Dnetbeans.system_http_non_proxy_hosts= -Dnetbeans.dirs=/mnt/data/Code/java/praxis/praxis/build/cluster:/home/nsigma/bin/netbeans-6.8/platform11 -Dnetbeans.home=/home/nsigma/bin/netbeans-6.8/platform11 -Dnetbeans.logger.console=true -ea -Djava.util.logging.config.file=logging.properties -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=build/testuserdir/var/log/heapdump.hprof 
+java_command: org.netbeans.Main --userdir build/testuserdir --branding praxis --player
+Launcher Type: SUN_STANDARD
+
+Environment Variables:
+PATH=/home/nsigma/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
+USERNAME=nsigma
+LD_LIBRARY_PATH=/usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64/server:/usr/lib/jvm/java-6-sun-1.6.0.22/jre/lib/amd64:/usr/lib/jvm/java-6-sun-1.6.0.22/jre/../lib/amd64
+SHELL=/bin/bash
+DISPLAY=:0.0
+
+Signal Handlers:
+SIGSEGV: [libjvm.so+0x731250], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGBUS: [libjvm.so+0x731250], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGFPE: [libjvm.so+0x5f5e30], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGPIPE: [libjvm.so+0x5f5e30], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGXFSZ: [libjvm.so+0x5f5e30], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGILL: [libjvm.so+0x5f5e30], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGUSR1: SIG_DFL, sa_mask[0]=0x00000000, sa_flags=0x00000000
+SIGUSR2: [libjvm.so+0x5f8650], sa_mask[0]=0x00000004, sa_flags=0x10000004
+SIGHUP: [libjvm.so+0x5f83a0], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGINT: SIG_IGN, sa_mask[0]=0x00000000, sa_flags=0x00000000
+SIGTERM: [libjvm.so+0x5f83a0], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+SIGQUIT: [libjvm.so+0x5f83a0], sa_mask[0]=0x7ffbfeff, sa_flags=0x10000004
+
+
+---------------  S Y S T E M  ---------------
+
+OS:squeeze/sid
+
+uname:Linux 2.6.31-22-generic #67-Ubuntu SMP Sat Oct 16 18:51:35 UTC 2010 x86_64
+libc:glibc 2.10.1 NPTL 2.10.1 
+rlimit: STACK 8192k, CORE 0k, NPROC infinity, NOFILE 1024, AS infinity
+load average:0.10 0.06 0.03
+
+CPU:total 4 (8 cores per cpu, 2 threads per core) family 6 model 37 stepping 2, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, ht
+
+Memory: 4k page, physical 3917944k(795076k free), swap 8393920k(8303280k free)
+
+vm_info: Java HotSpot(TM) 64-Bit Server VM (17.1-b03) for linux-amd64 JRE (1.6.0_22-b04), built on Sep 15 2010 01:07:59 by "java_re" with gcc 3.2.2 (SuSE Linux)
+
+time: Mon Dec 13 11:28:40 2010
+elapsed time: 74 seconds
+
