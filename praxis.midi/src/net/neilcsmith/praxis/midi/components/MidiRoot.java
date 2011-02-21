@@ -70,12 +70,15 @@ public class MidiRoot extends AbstractRoot {
         registerControl("device", device);
     }
 
+
     @Override
-    protected void initializing() {
-        super.initializing();
+    protected void activating() {
+        super.activating();
         router = new MidiThreadRouter(getRootHub());
         receiver = new MidiContextReceiver();
     }
+
+
 
     @Override
     public Lookup getLookup() {

@@ -109,7 +109,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             this.context = new ExecutionContextImpl(System.nanoTime());
             this.router = new Router();
             this.lookup = InstanceLookup.create(hub.getLookup(), router, context);
-            initializing(); // hook for subclasses
+//            initializing(); // hook for subclasses
             if (state.compareAndSet(RootState.INITIALIZING, RootState.INITIALIZED)) {
                 controller = new Controller();
                 return controller;
@@ -138,9 +138,9 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         this.time = time;
     }
 
-    // Empty hooks for subclasses to extend setup
-    protected void initializing() {
-    }
+//    // Empty hooks for subclasses to extend setup
+//    protected void initializing() {
+//    }
 
     protected void activating() {
     }

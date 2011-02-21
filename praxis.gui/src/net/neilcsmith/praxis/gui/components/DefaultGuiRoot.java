@@ -22,10 +22,7 @@
 package net.neilcsmith.praxis.gui.components;
 
 import net.neilcsmith.praxis.core.Lookup;
-import java.awt.EventQueue;
 import java.awt.LayoutManager;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.awt.event.WindowAdapter;
@@ -44,24 +41,20 @@ import javax.swing.Timer;
 import net.miginfocom.swing.MigLayout;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
-import net.neilcsmith.praxis.core.Packet;
-import net.neilcsmith.praxis.core.Root;
-import net.neilcsmith.praxis.core.RootHub;
 import net.neilcsmith.praxis.gui.Keys;
 import net.neilcsmith.praxis.gui.ControlBinding;
 import net.neilcsmith.praxis.gui.ControlBinding.Adaptor;
 import net.neilcsmith.praxis.gui.BindingContext;
 import net.neilcsmith.praxis.gui.GuiContext;
 import net.neilcsmith.praxis.gui.impl.DefaultBindingControl;
-import net.neilcsmith.praxis.impl.AbstractRoot;
+import net.neilcsmith.praxis.impl.AbstractSwingRoot;
 import net.neilcsmith.praxis.impl.InstanceLookup;
-import net.neilcsmith.praxis.impl.RootState;
 
 /**
  *
  * @author Neil C Smith
  */
-public class DefaultGuiRoot extends AbstractRoot {
+public class DefaultGuiRoot extends AbstractSwingRoot {
 
     private final Object lock = new Object();
     private JFrame frame;
@@ -79,46 +72,7 @@ public class DefaultGuiRoot extends AbstractRoot {
     }
 
     @Override
-    public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException {
-        Root.Controller ctrl = super.initialize(ID, hub);
-        return new DelegateController(ctrl);
-    }
-
-    // @TODO should be activating?
-    @Override
-    protected void initializing() {
-        super.initializing();
-        try {
-            EventQueue.invokeAndWait(new Runnable() {
-
-                public void run() {
-                    initialize();
-                }
-            });
-        } catch (Exception ex) {
-            // @TODO what to do about exception?
-        }
-    }
-
-    @Override
-    protected final void run() {
-
-        timer = new Timer(50, new TimerProcessor());
-        timer.start();
-        RootState st;
-        while ((st = getState()) == RootState.ACTIVE_IDLE || st == RootState.ACTIVE_RUNNING) {
-//            System.out.println("Called Once");
-            synchronized (lock) {
-                try {
-                    lock.wait();
-                } catch (InterruptedException ex) {
-                    System.out.println("Shouldn't be called");
-                }
-            }
-        }
-    }
-
-    protected void initialize() {
+    protected void setup() {
         frame = new JFrame();
         frame.setTitle("PRAXIS : " + getAddress());
         frame.setSize(150, 50);
@@ -133,11 +87,8 @@ public class DefaultGuiRoot extends AbstractRoot {
                 }
             }
         });
-//        container = Box.createVerticalBox();
-//        layout = new MigLayout("fill", "[fill,grow]", "[fill,grow]");
         frame.getContentPane().setLayout(new MigLayout("fill", "[fill, grow]"));
         layout = new MigLayout("fill", "[fill]");
-//        layout = new MigLayout();
         container = new JPanel(layout);
         container.addContainerListener(new ChildrenListener());
         layoutListener = new LayoutChangeListener();
@@ -155,50 +106,6 @@ public class DefaultGuiRoot extends AbstractRoot {
         return lookup;
     }
 
-//    @Override
-//    public void addChild(String id, Component child) throws VetoException {
-//        super.addChild(id, child);
-//        if (child instanceof GuiComponent) {
-//            try {
-//                JComponent comp = ((GuiComponent) child).getSwingComponent();
-////                comp.setAlignmentX(JComponent.LEFT_ALIGNMENT);
-//                comp.setAlignmentY(JComponent.TOP_ALIGNMENT);
-//                Object constraints = comp.getClientProperty(Keys.LayoutConstraint);
-//                container.add(comp, constraints);
-//                container.revalidate();
-//                container.repaint();
-//                comp.addPropertyChangeListener(Keys.LayoutConstraint, layoutListener);
-//            } catch (Exception e) {
-//                super.removeChild(id);
-//                throw new VetoException();
-//            }
-//        }
-//    }
-//
-//    @Override
-//    public Component removeChild(String id) {
-//        Component child = super.removeChild(id);
-//        if (child instanceof GuiComponent) {
-//            JComponent comp = ((GuiComponent) child).getSwingComponent();
-//            container.remove(comp);
-//            container.revalidate();
-//            container.repaint();
-//            comp.removePropertyChangeListener(Keys.LayoutConstraint, layoutListener);
-//        }
-//        return child;
-//    }
-
-//    @Override
-//    protected void addComponent(ComponentAddress address, Component component) throws Exception {
-//        super.addComponent(address, component);
-//        frame.pack();
-//    }
-//
-//    @Override
-//    protected void removeComponent(ComponentAddress address) throws Exception {
-//        super.removeComponent(address);
-//        frame.pack();
-//    }
     @Override
     protected void starting() {
         super.starting();
@@ -213,37 +120,18 @@ public class DefaultGuiRoot extends AbstractRoot {
     }
 
     @Override
-    protected void terminating() {
-        super.terminating();
+    protected void dispose() {
+        super.dispose();
         frame.setVisible(false);
         frame.dispose();
     }
 
-    private class TimerProcessor implements ActionListener {
-
-        public void actionPerformed(ActionEvent e) {
-            nextControlFrame();
-        }
-    }
-
-    private void nextControlFrame() {
-        try {
-            nextControlFrame(System.nanoTime());
-        } catch (IllegalRootStateException ex) {
-            timer.stop();
-            synchronized (lock) {
-                lock.notifyAll();
-            }
-        }
-    }
 
     private class Bindings extends BindingContext {
 
         public void bind(ControlAddress address, Adaptor adaptor) {
-//            DefaultBinding binding = bindingCache.get(address);
             DefaultBindingControl binding = bindingCache.get(address);
             if (binding == null) {
-//                binding = new DefaultBinding(DefaultGuiRoot.this, address);
                 binding = new DefaultBindingControl(address);
                 registerControl("_binding_" + Integer.toHexString(binding.hashCode()),
                         binding);
@@ -257,7 +145,6 @@ public class DefaultGuiRoot extends AbstractRoot {
             if (cBinding == null) {
                 return;
             }
-//            DefaultBinding binding = bindingCache.get(cBinding.getAddress());
             DefaultBindingControl binding = bindingCache.get(cBinding.getAddress());
             if (binding != null) {
                 binding.unbind(adaptor);
@@ -273,25 +160,6 @@ public class DefaultGuiRoot extends AbstractRoot {
         }
     }
 
-//    private class Panel extends JPanel {
-//
-//        private MigLayout layout;
-//
-//        private Panel() {
-//            layout = new MigLayout("fill", "[fill,grow]", "[fill,grow]");
-//            setLayout(layout);
-//        }
-//
-//        @Override
-//        protected void addImpl(java.awt.Component comp, Object constraints, int index) {
-//            super.addImpl(comp, constraints, index);
-//            if (comp instanceof JComponent) {
-//                JComponent jc = (JComponent) comp;
-//                jc.addPropertyChangeListener(Keys.LayoutConstraint, layoutListener );
-//            }
-//        }
-//
-//    }
 
 
     private void setLayoutConstraint(JComponent child) {
@@ -334,37 +202,4 @@ public class DefaultGuiRoot extends AbstractRoot {
         }
     }
 
-    private class DelegateController implements Root.Controller {
-
-        private Root.Controller ctrl;
-        private Runnable runner;
-
-        private DelegateController(Root.Controller ctrl) {
-            this.ctrl = ctrl;
-            runner = new Runnable() {
-
-                public void run() {
-                    nextControlFrame();
-                }
-            };
-        }
-
-        public boolean submitPacket(Packet packet) {
-            boolean ret = ctrl.submitPacket(packet);
-            RootState state = getState();
-            if (state == RootState.ACTIVE_RUNNING ||
-                    state == RootState.ACTIVE_IDLE) {
-                EventQueue.invokeLater(runner);
-            }
-            return ret;
-        }
-
-        public void shutdown() {
-            ctrl.shutdown();
-        }
-
-        public void run() throws IllegalRootStateException {
-            ctrl.run();
-        }
-    }
 }

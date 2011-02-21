@@ -76,8 +76,8 @@ public class DefaultMidiRoot extends AbstractRoot {
     }
 
     @Override
-    protected void initializing() {
-        super.initializing();
+    protected void activating() {
+        super.activating();
         router = new MidiThreadRouter(getRootHub());
         returnAddress = ControlAddress.create(getAddress(), "_log");
     }
