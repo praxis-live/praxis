@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.apisupport.project</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
+            <code-name-base>org.lwjgl</code-name-base>
+            <suite-component/>
+            <module-dependencies/>
+            <public-packages>
+                <package>org.lwjgl</package>
+                <package>org.lwjgl.input</package>
+                <package>org.lwjgl.openal</package>
+                <package>org.lwjgl.opencl</package>
+                <package>org.lwjgl.opencl.api</package>
+                <package>org.lwjgl.opengl</package>
+            </public-packages>
+            <class-path-extension>
+                <runtime-relative-path>ext/lwjgl.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/lwjgl.jar</binary-origin>
+            </class-path-extension>
+        </data>
+    </configuration>
+</project>

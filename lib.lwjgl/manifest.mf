@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module: org.lwjgl
+OpenIDE-Module-Localizing-Bundle: org/lwjgl/Bundle.properties
+OpenIDE-Module-Specification-Version: 2.6
+
