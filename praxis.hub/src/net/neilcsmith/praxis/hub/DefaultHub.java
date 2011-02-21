@@ -33,7 +33,6 @@ import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ComponentAddress;
-import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.core.InvalidAddressException;
 import net.neilcsmith.praxis.core.Lookup;
@@ -45,8 +44,6 @@ import net.neilcsmith.praxis.core.RootHub;
 import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.interfaces.ComponentManager;
-import net.neilcsmith.praxis.core.interfaces.ConnectionManager;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.interfaces.ComponentFactoryService;
 import net.neilcsmith.praxis.core.interfaces.RootManagerService;
@@ -62,17 +59,13 @@ import net.neilcsmith.praxis.impl.SimpleControl;
  */
 public class DefaultHub extends AbstractRoot {
 
-    private static Logger logger = Logger.getLogger(DefaultHub.class.getName());
+    private static final Logger LOG = Logger.getLogger(DefaultHub.class.getName());
     private RootHubImpl hub;
     private ServiceManagerImpl serviceManager;
     private Root.Controller controller;
-//    private Set<SystemExtension> extensions;
-//    private Map<ServiceID, ControlAddress> serviceAddresses;
-//    private Map<ServiceID, ControlInfo> serviceInfo;
     private final String EXT_PREFIX = "_sys_";
     private final String HUB_ID = "praxis";
     private ConcurrentMap<String, Root.Controller> roots;
-//    private SystemExtension[] extensions;
     private Thread hubThread;
     private ComponentFactory factory;
     private Lookup lookup;
@@ -82,33 +75,18 @@ public class DefaultHub extends AbstractRoot {
     public DefaultHub(Root... exts) {
         super(EnumSet.noneOf(AbstractRoot.Caps.class));
         roots = new ConcurrentHashMap<String, Root.Controller>();
-//        serviceAddresses = new ConcurrentHashMap<ServiceID, ControlAddress>();
-//        serviceInfo = new ConcurrentHashMap<ServiceID, ControlInfo>();
-//        extensions = exts;
         hub = new RootHubImpl();
         serviceManager = new ServiceManagerImpl();
         services = new ConcurrentHashMap<InterfaceDefinition, ComponentAddress[]>();
         extensions = exts;
-        //lookup = new ServiceLoaderLookup();
-        lookup = InstanceLookup.create( new ServiceLoaderLookup(), new Object[]{serviceManager});
+        lookup = InstanceLookup.create(new ServiceLoaderLookup(), new Object[]{serviceManager});
         factory = LookupComponentFactory.getInstance(lookup);
-        
+
     }
 
-//    public DefaultHub(ComponentFactory factory, SystemExtension... exts) {
-////        super(State.ACTIVE_RUNNING);
-//        roots = new ConcurrentHashMap<String, Root.Controller>();
-//        serviceAddresses = new ConcurrentHashMap<ServiceID, ControlAddress>();
-//        serviceInfo = new ConcurrentHashMap<ServiceID, ControlInfo>();
-//        extensions = exts;
-//        this.factory = factory;
-//        hub = new RootHubImpl();
-//    }
     public void activate() throws IllegalRootStateException {
 
         controller = initialize(HUB_ID, hub);
-//        createDefaultControls();
-//        installExtensions();
         Runnable runner = new Runnable() {
 
             public void run() {
@@ -124,52 +102,37 @@ public class DefaultHub extends AbstractRoot {
 
     }
 
-    @Override
-    protected void activating() {
-//        try {
-            super.activating();
-            createDefaultControls();
-            createDefaultServices();
-            installExtensions();
-//            setRunning();
-//        } catch (IllegalRootStateException ex) {
-//            Logger.getLogger(DefaultHub.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+    public void shutdown() {
+        Root.Controller ctrl = controller;
+        if (ctrl != null) {
+            ctrl.shutdown();
+        }
+
     }
 
     @Override
-    protected void stopping() {
-        System.exit(0);
+    protected void activating() {
+        super.activating();
+        createDefaultControls();
+        createDefaultServices();
+        installExtensions();
+    }
+
+    @Override
+    protected void terminating() {
+        super.terminating();
+        String[] ids = roots.keySet().toArray(new String[roots.size()]);
+        for (String id : ids) {
+            uninstallRoot(id);
+        }
+
     }
 
 //    @Override
-//    public void setInterrupt(Runnable task) {
-//        super.setInterrupt(task);
-//    }
-//    public void eval(final String script) {
-//        if (script == null) {
-//            throw new NullPointerException();
-//        }
-//        try {
-//            ControlAddress scriptService =
-//                    getServiceManager().getServiceAddress(
-//                    ServiceID.DEFAULT_SCRIPT_INTERPRETER);
-//            ControlAddress from = ControlAddress.valueOf("/" + HUB_ID + ".log");
-//            Call call = Call.createCall(
-//                    scriptService, from, System.nanoTime(), PString.valueOf(script));
-//            hub.dispatch(call);
-//        } catch (Exception ex) {
-//            logger.log(Level.SEVERE, null, ex);
-//        }
-//
-//
+//    protected void stopping() {
+//        System.exit(0);
 //    }
     private void createDefaultControls() {
-        // TEMPORARY
-//        unregisterControl("connect");
-
-//        registerControl("create", new CreationControl(this, ControlAddress.create(getAddress(), "create"), factory));
-//        registerControl("connect", new ConnectionControl(this, ControlAddress.create(getAddress(), "connect")));
         registerControl("clear", new ClearControl());
         registerControl("log", new LogControl());
         registerControl(RootManagerService.ADD_ROOT, new AddRootControl());
@@ -179,9 +142,6 @@ public class DefaultHub extends AbstractRoot {
 
     private void createDefaultServices() {
         ComponentAddress address = ComponentAddress.create("/" + HUB_ID);
-//        installService(ComponentManager.getInstance(), address);
-        // installService(RootManager.getInstance(), address);
-//        installService(ConnectionManager.getInstance(), address);
         installService(RootManagerService.INSTANCE, address);
         installService(ComponentFactoryService.INSTANCE, address);
     }
@@ -190,21 +150,16 @@ public class DefaultHub extends AbstractRoot {
         for (Root ext : extensions) {
             // get before we activate install - thread safety
             InterfaceDefinition[] servs = ext.getInterfaces();
-//            if (ext instanceof ServiceProvider) {
-//                servs = ((ServiceProvider) ext).getInterfaces();
-//            } else {
-//                servs = new InterfaceDefinition[0];
-//            }
             String extID = EXT_PREFIX + Integer.toHexString(ext.hashCode());
             try {
                 installRoot(extID, "sysex", ext);
             } catch (InvalidAddressException ex) {
-                logger.severe("Failed to install extension\n"
-                        + ext.getClass() + " to /" + extID + "\n" + ex);
+                LOG.log(Level.SEVERE, "Failed to install extension\n{0} to /{1}\n{2}",
+                        new Object[]{ext.getClass(), extID, ex});
                 continue;
             } catch (IllegalRootStateException ex) {
-                logger.severe("Failed to install extension\n"
-                        + ext.getClass() + " to /" + extID + "\n" + ex);
+                LOG.log(Level.SEVERE, "Failed to install extension\n{0} to /{1}\n{2}",
+                        new Object[]{ext.getClass(), extID, ex});
                 continue;
             }
             // safe to install services - thread safe at this point
@@ -272,10 +227,10 @@ public class DefaultHub extends AbstractRoot {
                 try {
                     ctrl.run();
                 } catch (IllegalRootStateException ex) {
-                    logger.severe("Root " + rootID + " threw root state exception");
+                    LOG.severe("Root " + rootID + " threw root state exception");
                 } finally {
                     if (roots.remove(rootID, ctrl)) {
-                        logger.warning("Root " + rootID + " terminated unexpectedly");
+                        LOG.warning("Root " + rootID + " terminated unexpectedly");
                     }
                 }
             }
@@ -315,13 +270,6 @@ public class DefaultHub extends AbstractRoot {
             }
         }
 
-        
-
-//        // THREAD SAFE
-//        public ServiceManager getServiceManager() {
-//            return serviceManager;
-//        }
-
         // THREAD SAFE
         public Lookup getLookup() {
             return lookup;
@@ -349,7 +297,6 @@ public class DefaultHub extends AbstractRoot {
                 return provs;
             }
         }
-
     }
 
     private class ClearControl extends BasicControl {
@@ -415,7 +362,7 @@ public class DefaultHub extends AbstractRoot {
             return null;
         }
     }
-    
+
     private class NewInstanceControl extends SimpleControl {
 
         private NewInstanceControl() {
@@ -427,7 +374,6 @@ public class DefaultHub extends AbstractRoot {
             Component c = factory.createComponent(ComponentType.coerce(args.get(0)));
             return CallArguments.create(PReference.wrap(c));
         }
-
     }
 
     private class AddRootControl extends SimpleControl {
@@ -443,8 +389,6 @@ public class DefaultHub extends AbstractRoot {
             installRoot(id, args.get(1).toString(), r);
             return CallArguments.EMPTY;
         }
-
-
     }
 
     private class RemoveRootControl extends SimpleControl {
@@ -459,7 +403,5 @@ public class DefaultHub extends AbstractRoot {
             uninstallRoot(id);
             return CallArguments.EMPTY;
         }
-
     }
-
 }
