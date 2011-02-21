@@ -23,8 +23,6 @@ package net.neilcsmith.praxis.video.java;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -226,7 +224,9 @@ public class PGraphics {
     }
 
     public void point(double x, double y) {
-        line(x, y, x, y);
+//        line(x, y, x, y);
+        image.process(RectFill.op(strokeColor, blend, round(x), round(y),
+                1, 1));
     }
 
     public void quad(double x1, double y1, double x2, double y2,
