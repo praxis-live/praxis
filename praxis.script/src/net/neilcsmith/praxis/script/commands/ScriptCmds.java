@@ -21,9 +21,15 @@
  */
 package net.neilcsmith.praxis.script.commands;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Map;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.syntax.InvalidSyntaxException;
+import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.script.Command;
 import net.neilcsmith.praxis.script.CommandInstaller;
 import net.neilcsmith.praxis.script.ExecutionException;
@@ -36,25 +42,24 @@ import net.neilcsmith.praxis.script.ast.ScriptParser;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class EvalCmds implements CommandInstaller {
+public class ScriptCmds implements CommandInstaller {
 
-    private final static EvalCmds instance = new EvalCmds();
-
+    private final static ScriptCmds instance = new ScriptCmds();
     public final static Command EVAL = new Eval();
     public final static Command INLINE_EVAL = new InlineEval();
-    
+    public final static Command INCLUDE = new Include();
 
-
-    private EvalCmds() {}
+    private ScriptCmds() {
+    }
 
     public void install(Map<String, Command> commands) {
         commands.put("eval", EVAL);
-    }
-    
-    public static EvalCmds getInstance() {
-        return instance;
+        commands.put("include", INCLUDE);
     }
 
+    public static ScriptCmds getInstance() {
+        return instance;
+    }
 
     private static class Eval implements Command {
 
@@ -90,4 +95,36 @@ public class EvalCmds implements CommandInstaller {
         }
     }
 
+    private static class Include implements Command {
+
+        public StackFrame createStackFrame(Namespace namespace, CallArguments args) throws ExecutionException {
+            // @TODO - should load in background - call to
+            if (args.getSize() != 1) {
+                throw new ExecutionException();
+            }
+            try {
+                PResource res = PResource.coerce(args.get(0));
+                File file = new File(res.value());
+                String script = loadFromFile(file);
+                RootNode astRoot = ScriptParser.getInstance().parse(script);
+                return new EvalStackFrame(namespace.createChild(), astRoot);
+            } catch (Exception ex) {
+                throw new ExecutionException(ex);
+            }
+
+        }
+
+        private String loadFromFile(File file) throws FileNotFoundException, IOException {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            StringBuilder data = new StringBuilder();
+            char[] buf = new char[1024];
+            int read = 0;
+            while ((read = reader.read(buf)) != -1) {
+                data.append(buf, 0, read);
+            }
+            reader.close();
+            return data.toString();
+
+        }
+    }
 }

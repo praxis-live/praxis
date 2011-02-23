@@ -169,7 +169,7 @@ public class AtCmds implements CommandInstaller {
                 try {
                     Namespace child = namespace.createChild();
                     child.addVariable(Env.CONTEXT, new VariableImpl(ctxt));
-                    return EvalCmds.INLINE_EVAL.createStackFrame(child, CallArguments.create(script));
+                    return ScriptCmds.INLINE_EVAL.createStackFrame(child, CallArguments.create(script));
                 } catch (Exception ex) {
                     state = State.Error;
                     result = CallArguments.create(PReference.wrap(ex));

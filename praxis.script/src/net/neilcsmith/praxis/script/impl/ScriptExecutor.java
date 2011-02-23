@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.logging.Logger;
-import javax.script.ScriptContext;
-import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ComponentAddress;
@@ -40,7 +38,7 @@ import net.neilcsmith.praxis.script.Namespace;
 import net.neilcsmith.praxis.script.StackFrame;
 import net.neilcsmith.praxis.script.Variable;
 import net.neilcsmith.praxis.script.commands.CoreCommandsInstaller;
-import net.neilcsmith.praxis.script.commands.EvalCmds;
+import net.neilcsmith.praxis.script.commands.ScriptCmds;
 
 /**
  *
@@ -61,9 +59,9 @@ public class ScriptExecutor {
         stack = new LinkedList<StackFrame>();
         queue = new LinkedList<Call>();
         if (inline) {
-            evaluator = EvalCmds.INLINE_EVAL;
+            evaluator = ScriptCmds.INLINE_EVAL;
         } else {
-            evaluator = EvalCmds.EVAL;
+            evaluator = ScriptCmds.EVAL;
         }
         rootNS = new NS();
         buildCommandMap();
