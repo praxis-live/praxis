@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.player;
+package net.neilcsmith.praxis.terminal;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -47,13 +47,14 @@ import net.miginfocom.swing.MigLayout;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.types.PReference;
-import org.openide.util.Exceptions;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public class Terminal extends JComponent {
+
+    private final static Logger LOG = Logger.getLogger(Terminal.class.getName());
 
     private final static String SCRIPT = "script";
     private final static String OK = "response";
@@ -70,7 +71,7 @@ public class Terminal extends JComponent {
     private Action evalAction;
     private JButton clearButton;
     private Action clearAction;
-    
+
     public Terminal() {
         this(null);
     }
@@ -81,14 +82,14 @@ public class Terminal extends JComponent {
         buildStyles();
         setContext(context);
     }
-    
+
     public final void setContext(Context context) {
         if (context != this.context) {
             this.context = context;
             evalAction.setEnabled(true);
         }
     }
-    
+
     public Context getContext() {
         return context;
     }
@@ -130,7 +131,7 @@ public class Terminal extends JComponent {
         Keymap map = JTextComponent.addKeymap("PraxisTerminal", input.getKeymap());
         map.addActionForKeyStroke(KeyStroke.getKeyStroke("control ENTER"), evalAction);
         input.setKeymap(map);
-        
+
     }
 
     private void buildStyles() {
@@ -165,7 +166,7 @@ public class Terminal extends JComponent {
                     argsToString(args, OK_PREFIX),
                     history.getStyle(OK));
         } catch (BadLocationException ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.FINE, "Unexpected Exception in Terminal", ex);
         }
         evalAction.setEnabled(true);
     }
@@ -176,20 +177,20 @@ public class Terminal extends JComponent {
                     argsToString(args, ERROR_PREFIX),
                     history.getStyle(ERROR));
         } catch (BadLocationException ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.log(Level.FINE, "Unexpected Exception in Terminal", ex);
         }
         if (args.getSize() > 0) {
                 Argument err = args.get(0);
                 if (err instanceof PReference) {
                     Object o = ((PReference) err).getReference();
                     if (o instanceof Throwable) {
-                        Logger.getLogger(Terminal.class.getName()).log(
-                                Level.SEVERE, "ERROR: ", (Throwable) o);
+                        LOG.log(
+                                Level.WARNING, "ERROR: ", (Throwable) o);
                     } else {
-                        Logger.getLogger(Terminal.class.getName()).severe("ERROR: " + o.toString());
+                        LOG.log(Level.WARNING, "ERROR: {0}", o.toString());
                     }
                 } else {
-                    Logger.getLogger(Terminal.class.getName()).severe("ERROR: " + err.toString());
+                    LOG.log(Level.WARNING, "ERROR: {0}", err.toString());
                 }
             }
 
@@ -212,9 +213,9 @@ public class Terminal extends JComponent {
 
         private RunAction() {
             super("Run (Ctrl+ENTER)");
-
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             input.selectAll();
             input.requestFocusInWindow();
@@ -227,19 +228,19 @@ public class Terminal extends JComponent {
             try {
                 history.insertString(history.getLength(), script + "\n", history.getStyle(SCRIPT));
             } catch (BadLocationException ex) {
-                Exceptions.printStackTrace(ex);
+                LOG.log(Level.FINE, "Unexpected Exception in Terminal", ex);
             }
             try {
                 context.eval(script);
                 setEnabled(false);
             } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
+                LOG.log(Level.WARNING, "", ex);
                 try {
                     history.insertString(history.getLength(),
                             ERROR_PREFIX + "No Script Context Available\n",
                             history.getStyle(ERROR));
                 } catch (BadLocationException ex1) {
-                    Exceptions.printStackTrace(ex1);
+                    LOG.log(Level.FINE, "Unexpected Exception in Terminal", ex1);
                 }
             }
         }
@@ -255,20 +256,20 @@ public class Terminal extends JComponent {
             try {
                 history.remove(0, history.getLength());
             } catch (BadLocationException ex) {
-                Exceptions.printStackTrace(ex);
+                LOG.log(Level.FINE, "Unexpected Exception in Terminal", ex);
             }
             input.setText(null);
             input.requestFocusInWindow();
              try {
                 context.clear();
             } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
+                LOG.log(Level.WARNING, "", ex);
                 try {
                     history.insertString(history.getLength(),
                             ERROR_PREFIX + "No Script Context Available\n",
                             history.getStyle(ERROR));
                 } catch (BadLocationException ex1) {
-                    Exceptions.printStackTrace(ex1);
+                    LOG.log(Level.FINE, "Unexpected Exception in Terminal", ex1);
                 }
             }
         }

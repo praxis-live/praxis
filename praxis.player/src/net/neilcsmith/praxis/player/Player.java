@@ -72,6 +72,8 @@ import net.neilcsmith.praxis.impl.AbstractControl;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
 import net.neilcsmith.praxis.impl.RootState;
+import net.neilcsmith.praxis.terminal.Terminal;
+import net.neilcsmith.praxis.terminal.impl.DefaultTerminalContext;
 
 /**
  *
@@ -210,9 +212,11 @@ public class Player extends AbstractRoot {
     private void showTerminal() {
         if (terminalFrame == null) {
             terminalFrame = new JFrame("Praxis - Terminal");
-            TerminalContext ctxt = new TerminalContext();
+//            TerminalContext ctxt = new TerminalContext();
+            terminal = new Terminal();
+            DefaultTerminalContext ctxt = new DefaultTerminalContext(terminal);
             registerControl("_terminal", ctxt);
-            terminal = new Terminal(ctxt);
+            terminal.setContext(ctxt);
             terminalFrame.add(terminal);
             terminalFrame.pack();
 
@@ -459,51 +463,51 @@ public class Player extends AbstractRoot {
         }
     }
 
-    private class TerminalContext extends AbstractControl implements Terminal.Context {
-
-        private Call activeCall;
-
-        public void eval(String script) throws Exception {
-            ControlAddress to = ControlAddress.create(
-                    findService(ScriptService.INSTANCE),
-                    ScriptService.EVAL);
-            Call call = Call.createCall(to, getAddress(), System.nanoTime(), PString.valueOf(script));
-            getPacketRouter().route(call);
-            activeCall = call;
-        }
-
-        public void clear() throws Exception {
-            ControlAddress to = ControlAddress.create(
-                    findService(ScriptService.INSTANCE),
-                    ScriptService.CLEAR);
-            Call call = Call.createQuietCall(to, getAddress(), System.nanoTime(), CallArguments.EMPTY);
-            getPacketRouter().route(call);
-            activeCall = null;
-        }
-
-        public void call(Call call, PacketRouter router) throws Exception {
-            switch (call.getType()) {
-                case RETURN :
-                    if (call.getMatchID() == activeCall.getMatchID()) {
-                        terminal.processResponse(call.getArgs());
-                        activeCall = null;
-                    }
-                    break;
-                case ERROR :
-                    if (call.getMatchID() == activeCall.getMatchID()) {
-                        terminal.processError(call.getArgs());
-                        activeCall = null;
-                    }
-                    break;
-                default :
-
-            }
-        }
-
-        public ControlInfo getInfo() {
-            return null;
-        }
-    }
+//    private class TerminalContext extends AbstractControl implements Terminal.Context {
+//
+//        private Call activeCall;
+//
+//        public void eval(String script) throws Exception {
+//            ControlAddress to = ControlAddress.create(
+//                    findService(ScriptService.INSTANCE),
+//                    ScriptService.EVAL);
+//            Call call = Call.createCall(to, getAddress(), System.nanoTime(), PString.valueOf(script));
+//            getPacketRouter().route(call);
+//            activeCall = call;
+//        }
+//
+//        public void clear() throws Exception {
+//            ControlAddress to = ControlAddress.create(
+//                    findService(ScriptService.INSTANCE),
+//                    ScriptService.CLEAR);
+//            Call call = Call.createQuietCall(to, getAddress(), System.nanoTime(), CallArguments.EMPTY);
+//            getPacketRouter().route(call);
+//            activeCall = null;
+//        }
+//
+//        public void call(Call call, PacketRouter router) throws Exception {
+//            switch (call.getType()) {
+//                case RETURN :
+//                    if (call.getMatchID() == activeCall.getMatchID()) {
+//                        terminal.processResponse(call.getArgs());
+//                        activeCall = null;
+//                    }
+//                    break;
+//                case ERROR :
+//                    if (call.getMatchID() == activeCall.getMatchID()) {
+//                        terminal.processError(call.getArgs());
+//                        activeCall = null;
+//                    }
+//                    break;
+//                default :
+//
+//            }
+//        }
+//
+//        public ControlInfo getInfo() {
+//            return null;
+//        }
+//    }
 
     private class AboutAction extends AbstractAction {
 
