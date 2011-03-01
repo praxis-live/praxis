@@ -52,7 +52,7 @@ import net.neilcsmith.ripl.delegates.ImageDelegate;
  */
 public class Still extends AbstractComponent {
 
-    private static Logger logger = Logger.getLogger(Still.class.getName());
+    private static final Logger LOG = Logger.getLogger(Still.class.getName());
     private Delegator delegator;
     private ImageDelegate delegate;
     private ResizeMode resizeMode;
@@ -78,14 +78,11 @@ public class Still extends AbstractComponent {
         registerControl("uri", loader);
         registerPort(Port.IN, new DefaultVideoInputPort(this, delegator));
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));
-//        registerPort("uri", loader.getInputPort());
         registerPort("uri", loader.createPort());
         rdyPort = new DefaultControlOutputPort(this);
         registerPort("ready", rdyPort);
         errPort = new DefaultControlOutputPort(this);
         registerPort("error", errPort);
-//        registerPort("ready", loader.getCompletePort());
-//        registerPort("error", loader.getErrorPort());
 
     }
 
@@ -159,90 +156,7 @@ public class Still extends AbstractComponent {
         }
     }
 
-//    public void propertyChanged(Property source) {
-//        logger.info("Property change message from " + source);
-//        ResizeMode mode = null;
-//        ResizeMode oldMode = resizeMode;
-//        if (source == resizeType) {
-//            ResizeMode.Type type = ResizeMode.Type.valueOf(resizeType.getValue());
-//            mode = new ResizeMode(type, oldMode.getHorizontalAlignment(),
-//                    oldMode.getVerticalAlignment());
-//        } else if (source == alignX) {
-//            double oldX = oldMode.getHorizontalAlignment();
-//            double newX = alignX.getValue();
-//            if (newX != oldX) {
-//                mode = new ResizeMode(oldMode.getType(), newX,
-//                        oldMode.getVerticalAlignment());
-//            }
-//        } else {
-//            double oldY = oldMode.getVerticalAlignment();
-//            double newY = alignY.getValue();
-//            if (newY != oldY) {
-//                mode = new ResizeMode(oldMode.getType(),
-//                        oldMode.getHorizontalAlignment(), newY);
-//            }
-//        }
-//        if (mode != null) {
-//            resizeMode = mode;
-//            if (delegate != null) {
-//                delegate.setResizeMode(mode);
-//            }
-//        }
-//    }
-//    private class ImageBinding implements ImageLoader.Binding {
-//
-//        public void setImage(BufferedImage image) {
-//            im.setImage(image);
-//        }
-//        
-//    }
-//    private class DelegateLoader extends ResourceLoader<ImageDelegate> {
-//
-//        DelegateLoader() {
-//            super(Still.this, ImageDelegate.class);
-//        }
-////
-////        @Override
-////        protected Task getLoadTask(PResource uri) {
-////
-////        }
-//
-////        @Override
-////        protected void setResource(Argument arg) {
-////            if (arg == null) {
-////                setDelegate(null);
-////            } else {
-////                if (arg instanceof PReference) {
-////                    Object o = ((PReference) arg).getReference();
-////                    if (o instanceof ImageDelegate) {
-////                        setDelegate((ImageDelegate) o);
-////                    }
-////
-////                }
-////            }
-////        }
-//
-////        @Override
-////        protected void setResource(ImageDelegate resource) {
-////            setDelegate(resource);
-////        }
-//
-//        @Override
-//        protected Task getLoadTask(Argument identifier) {
-//            return new LoaderTask(identifier, resizeMode, delegator.getCurrentDimensions());
-//        }
-//
-//        @Override
-//        protected void resourceLoaded() {
-//            setDelegate(getResource());
-//            rdyPort.send( ((AbstractRoot) getRoot()).getTime());
-//        }
-//
-//        @Override
-//        protected void resourceError() {
-//            errPort.send( ((AbstractRoot) getRoot()).getTime());
-//        }
-//    }
+
     private class DelegateLoader extends AbstractAsyncProperty<ImageDelegate> {
 
         DelegateLoader() {
@@ -259,17 +173,16 @@ public class Still extends AbstractComponent {
         @Override
         protected void valueChanged(long time) {
             setDelegate(getValue());
+            LOG.finest("New image loaded - sending ready message from port.");
             rdyPort.send(time);
         }
 
         @Override
         protected void taskError(long time) {
+            LOG.finest("Error in image loading - sending error message from port.");
             errPort.send(time);
         }
-        
-        
-        
-        
+       
     }
 
     private class LoaderTask implements TaskService.Task {
