@@ -230,7 +230,7 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
 
     private boolean isLatest(long time) {
         if (latestSet) {
-            return (time - latest) > 0;
+            return (time - latest) >= 0;
         } else {
             return true;
         }
