@@ -167,7 +167,13 @@ public class Still extends AbstractComponent {
 
         @Override
         protected TaskService.Task createTask(CallArguments keys) throws Exception {
-            return new LoaderTask(keys.get(0), resizeMode, delegator.getCurrentDimensions());
+            Argument key = keys.get(0);
+            if (key.isEmpty()) {
+                return null;
+            } else {
+                return new LoaderTask(PResource.coerce(key),
+                        resizeMode, delegator.getCurrentDimensions());
+            }
         }
 
         @Override
@@ -187,18 +193,18 @@ public class Still extends AbstractComponent {
 
     private class LoaderTask implements TaskService.Task {
 
-        Argument uri;
+        PResource uri;
         ResizeMode mode;
         Dimension guide;
 
-        LoaderTask(Argument uri, ResizeMode mode, Dimension guide) {
+        LoaderTask(PResource uri, ResizeMode mode, Dimension guide) {
             this.uri = uri;
             this.mode = mode;
             this.guide = guide;
         }
 
         public Argument execute() throws Exception {
-            URI loc = PResource.coerce(uri).value();
+            URI loc = uri.value();
             ImageDelegate del = ImageDelegate.create(loc, mode, guide);
             return PReference.wrap(del);
         }
