@@ -105,7 +105,7 @@ public class ScriptCmds implements CommandInstaller {
             try {
                 PResource res = PResource.coerce(args.get(0));
                 File file = new File(res.value());
-                String script = loadFromFile(file);
+                String script = Utils.loadStringFromFile(file);
                 RootNode astRoot = ScriptParser.getInstance().parse(script);
                 return new EvalStackFrame(namespace.createChild(), astRoot);
             } catch (Exception ex) {
@@ -114,17 +114,5 @@ public class ScriptCmds implements CommandInstaller {
 
         }
 
-        private String loadFromFile(File file) throws FileNotFoundException, IOException {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            StringBuilder data = new StringBuilder();
-            char[] buf = new char[1024];
-            int read = 0;
-            while ((read = reader.read(buf)) != -1) {
-                data.append(buf, 0, read);
-            }
-            reader.close();
-            return data.toString();
-
-        }
     }
 }
