@@ -28,6 +28,8 @@ package net.neilcsmith.praxis.java;
  */
 public abstract class CodeContext {
 
+    public abstract long getTime();
+
     public abstract Param getParam(int index);
 
     public abstract int getParamCount();

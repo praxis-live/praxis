@@ -30,4 +30,8 @@ import net.neilcsmith.praxis.java.CodeContext;
  */
 public abstract class VideoCodeContext extends CodeContext {
 
+    public abstract PImage getImage(int index);
+
+    public abstract int getImageCount();
+
 }

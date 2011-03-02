@@ -21,8 +21,13 @@
  */
 package net.neilcsmith.praxis.video.java;
 
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.types.PNumber;
+import net.neilcsmith.praxis.java.CodeContext;
 import net.neilcsmith.praxis.java.CodeDelegate;
 import net.neilcsmith.ripl.Surface;
 import net.neilcsmith.ripl.SurfaceOp;
@@ -41,14 +46,33 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
     private PImage dst;
     private PGraphics pg;
     private boolean inited;
+    private boolean queueSends;
+    private Queue<QueueableSend> sendQueue = new LinkedList<QueueableSend>();
+    private VideoCodeContext videoContext;
     public PImage src;
     public Surface[] sources;
     public int width;
     public int height;
 
+    @Override
+    public void init(CodeContext context, long time) throws Exception {
+        super.init(context, time);
+        if (context instanceof VideoCodeContext) {
+            videoContext = (VideoCodeContext) context;
+        }
+    }
+
     public final void update(long time) {
         // ignore - tick() provides same function earlier in update cycle.
     }
+
+    @Override
+    public void tick() {
+        drainSendQueue();
+        super.tick();
+    }
+
+
 
     public final void process(Surface surface) {
         validateGraphics(surface);
@@ -62,8 +86,10 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
         height = surface.getHeight();
         if (sources.length > 0) {
             Surface s = sources[0];
-            if (src == null || src.getSurface() != s) {
+            if (src == null) {
                 src = new PImage(s);
+            } else {
+                src.setSurface(s);
             }
         }
         this.sources = sources;
@@ -90,7 +116,7 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
         if (dst == null) {
             dst = new PImage(surface);
             pg = new PGraphics(dst);
-        } else if (dst.getSurface() != surface) {
+        } else {
             dst.setSurface(surface);
         }
     }
@@ -112,6 +138,49 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
 
     public void process() {
     }
+
+    @Override
+    public void send(int idx, Argument arg) {
+        if (queueSends) {
+            sendQueue.add(new QueueableSend(idx, arg));
+        } else {
+            super.send(idx, arg);
+        }
+        
+    }
+
+    @Override
+    public void send(int idx, double value) {
+        if (queueSends) {
+            sendQueue.add(new QueueableSend(idx, PNumber.valueOf(value)));
+        } else {
+            super.send(idx, value);
+        }
+    }
+    
+    private void drainSendQueue() {
+        QueueableSend send;
+        while ((send = sendQueue.poll()) != null) {
+            super.send(send.channel, send.value);
+        }
+    }
+
+    private class QueueableSend {
+
+        private int channel;
+        private Argument value;
+
+        private QueueableSend(int channel, Argument value) {
+            this.channel = channel;
+            this.value = value;
+        }
+
+    }
+
+    public PImage im(int idx) {
+        return videoContext.getImage(idx - 1);
+    }
+
 
     // PGraphics impl
 
@@ -271,4 +340,6 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
     public void vertex(double x, double y) {
         pg.vertex(x, y);
     }
+
+    // end of PGraphics impl
 }

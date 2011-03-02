@@ -19,15 +19,17 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.java;
 
+import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.ListenerUtils;
+import net.neilcsmith.praxis.util.interpolation.Interpolator;
+import net.neilcsmith.praxis.util.interpolation.LinearInterpolator;
 
 /**
  *
@@ -35,23 +37,49 @@ import net.neilcsmith.praxis.impl.ListenerUtils;
  */
 public class Param implements ArgumentProperty.Binding {
 
-    private Argument argValue;
-    private Listener[] listeners;
+    private final static Logger LOG = Logger.getLogger(Param.class.getName());
 
-    public Param() {
+    private final static long TO_NANO = 1000000000;
+
+    private final Clock clock;
+    private ClockListener clockListener;
+    private Argument argValue;
+    private double dblValue;
+    private Listener[] listeners;
+    private boolean animating;
+    private double toValue;
+    private long duration;
+    private double fromValue;
+    private long fromTime;
+    private Interpolator interpolator;
+
+
+    public Param(Clock clock) {
+        if (clock == null) {
+            throw new NullPointerException();
+        }
+        this.clock = clock;
+        clockListener = new ClockListener() {
+
+            public void tick() {
+                Param.this.tick();
+            }
+        };
         this.argValue = PString.EMPTY;
         this.listeners = new Listener[0];
+        interpolator = LinearInterpolator.getInstance();
     }
 
     public final void setBoundValue(long time, Argument value) throws Exception {
-        argValue = value;
-        for (Listener listener : listeners) {
-            listener.valueChanged(this);
-        }
+        set(value);
     }
 
     public final Argument getBoundValue() {
-        return argValue;
+        if (argValue == null) {
+            return PNumber.valueOf(dblValue);
+        } else {
+            return argValue;
+        }
     }
 
     public void addListener(Listener listener) {
@@ -66,11 +94,15 @@ public class Param implements ArgumentProperty.Binding {
     }
 
     public Argument get() {
-        return argValue;
+        return getBoundValue();
     }
 
     public double getDouble() throws ArgumentFormatException {
-        return PNumber.coerce(argValue).value();
+        if (argValue == null) {
+            return dblValue;
+        } else {
+            return PNumber.coerce(argValue).value();
+        }
     }
 
     public double getDouble(double def) {
@@ -82,7 +114,7 @@ public class Param implements ArgumentProperty.Binding {
     }
 
     public int getInt() throws ArgumentFormatException {
-        return PNumber.coerce(argValue).toIntValue();
+        return (int) Math.round(getDouble());
     }
 
     public int getInt(int def) {
@@ -93,20 +125,104 @@ public class Param implements ArgumentProperty.Binding {
         }
     }
 
+    public Param set(Argument arg) {
+        if (arg == null) {
+            throw new NullPointerException();
+        }
+        finishAnimating();
+        argValue = arg;
+        return this;
+    }
+
+    public Param set(double value) {
+        finishAnimating();
+        argValue = null;
+        dblValue = value;
+        return this;
+    }
+
+
+    public Param to(double to) {
+        startAnimating();
+        fromValue = getDouble(0);
+        fromTime = clock.getTime();
+        argValue = null;
+        dblValue = fromValue;
+        toValue = to;
+        return this;
+    }
+
+    public Param in(double time) {
+        startAnimating();
+        duration = (long) (time * TO_NANO);
+        if (duration < 0) {
+            duration = 0;
+        }
+        return this;
+    }
+
+    public boolean isAnimating() {
+        return animating;
+    }
+
+    private void tick() {
+        if (!animating) {
+            LOG.warning("Tick called when not animating");
+            return;
+        }
+        long currentTime = clock.getTime();
+        double proportion;
+        if (duration < 1) {
+            proportion = 1;
+        } else {
+            proportion = (currentTime - fromTime) / (double) duration;
+        }
+        if (proportion >= 1) {
+            finishAnimating();
+            dblValue = toValue;
+        } else if (proportion > 0) {
+            double interpolated = interpolator.interpolate(proportion);
+            dblValue = (interpolated * (toValue - fromValue)) + fromValue;
+        } else {
+            dblValue = fromValue;
+        }
+
+
+    }
+    
+    private void startAnimating() {
+        if (!animating) {
+            animating = true;
+            clock.connect(clockListener);
+            duration = 0;
+            toValue = getDouble(0);
+        }
+    }
+
+    private void finishAnimating() {
+        if (animating) {
+            animating = false;
+            clock.disconnect(clockListener);
+        }
+
+    }
+
     public static interface Listener {
 
         public void valueChanged(Param p);
-
     }
 
-    public static interface Animator {
+    public static interface Clock {
 
         public long getTime();
 
-        public void connect(Param p);
+        public void connect(ClockListener p);
 
-        public void disconnect(Param p);
-
+        public void disconnect(ClockListener p);
     }
 
+    public static interface ClockListener {
+
+        public void tick();
+    }
 }

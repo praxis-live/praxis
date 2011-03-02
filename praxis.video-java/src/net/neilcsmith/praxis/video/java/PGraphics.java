@@ -90,7 +90,7 @@ public class PGraphics {
     }
 
     public void background(double r, double g, double b, double a) {
-        image.getSurface().clear();
+        image.clear();
         int ir = round(r);
         int ig = round(g);
         int ib = round(b);
@@ -100,7 +100,7 @@ public class PGraphics {
         int ia = round(a);
         Color bg = new Color(ir, ig, ib, ia);
         image.process(RectFill.op(bg, NORMAL, 0, 0,
-                image.getSurface().getWidth(), image.getSurface().getHeight()));
+                image.getWidth(), image.getHeight()));
     }
 
     public void beginShape() {
@@ -124,7 +124,7 @@ public class PGraphics {
     }
 
     public void clear() {
-        image.getSurface().clear();
+        image.clear();
     }
 
     public void ellipse(double x, double y, double w, double h) {
@@ -170,7 +170,9 @@ public class PGraphics {
     }
 
     public void image(PImage src, double x, double y, double w, double h) {
-        image(src, x, y, w, h, 0, 0, image.width, image.height);
+        //image(src, x, y, w, h, 0, 0, image.width, image.height);
+        // @TODO check this is correct
+        image(src, x, y, w, h, 0, 0, src.width, src.height);
     }
 
     public void image(PImage src, double x, double y, double w, double h,
@@ -216,7 +218,7 @@ public class PGraphics {
     }
 
     public void op(SurfaceOp op, Surface src) {
-        image.getSurface().process(op, src);
+        image.process(op, new PImage(src));
     }
 
     public void op(SurfaceOp op, PImage src) {

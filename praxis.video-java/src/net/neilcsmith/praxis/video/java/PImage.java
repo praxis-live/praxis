@@ -19,10 +19,10 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.video.java;
 
 import net.neilcsmith.ripl.Surface;
+import net.neilcsmith.ripl.SurfaceCapabilities;
 import net.neilcsmith.ripl.SurfaceOp;
 
 /**
@@ -44,25 +44,47 @@ public class PImage {
     }
 
     private void setSurfaceImpl(Surface surface) {
-        if (surface == null) {
-            throw new NullPointerException();
-        }
         this.surface = surface;
-        this.width = surface.getWidth();
-        this.height = surface.getHeight();
+        if (surface == null) {
+            this.width = 0;
+            this.height = 0;
+        } else {
+            this.width = surface.getWidth();
+            this.height = surface.getHeight();
+        }
     }
 
-    public Surface getSurface() {
-        return surface;
+    public int getWidth() {
+        if (surface != null) {
+            return surface.getWidth();
+        } else {
+            return 0;
+        }
+    }
+
+    public int getHeight() {
+        if (surface != null) {
+            return surface.getHeight();
+        } else {
+            return 0;
+        }
+    }
+
+    public void clear() {
+        if (surface != null) {
+            surface.clear();
+        }
     }
 
     public void process(SurfaceOp op) {
-        surface.process(op);
+        if (surface != null) {
+            surface.process(op);
+        }
     }
 
     public void process(SurfaceOp op, PImage image) {
-        surface.process(op, image.surface);
+        if (surface != null && image.surface != null) {
+            surface.process(op, image.surface);
+        }
     }
-    
-
 }

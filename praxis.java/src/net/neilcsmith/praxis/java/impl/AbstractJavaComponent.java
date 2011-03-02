@@ -24,10 +24,14 @@ package net.neilcsmith.praxis.java.impl;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractClockComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
+import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
+import net.neilcsmith.praxis.impl.ListenerUtils;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import net.neilcsmith.praxis.java.CodeContext;
 import net.neilcsmith.praxis.java.CodeDelegate;
@@ -41,6 +45,7 @@ import net.neilcsmith.praxis.java.Trigger;
  */
 public abstract class AbstractJavaComponent extends AbstractClockComponent {
 
+    private Clock clock;
     private Param[] params;
     private Trigger[] triggers;
     private Output[] outputs;
@@ -53,6 +58,7 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
         params = new Param[0];
         triggers = new Trigger[0];
         outputs = new Output[0];
+        clock = new Clock();
     }
 
     // allow subclasses to build after ins, outs, code controls, etc.
@@ -62,7 +68,7 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
         } else {
             params = new Param[count];
             for (int i=0; i < count; i++) {
-                Param param = new Param();
+                Param param = new Param(clock);
                 params[i] = param;
                 ArgumentProperty control = ArgumentProperty.create(param, PString.EMPTY);
                 registerControl(prefix + (i + 1), control);
@@ -90,6 +96,19 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
         }
     }
 
+    protected void buildOutputs(String prefix, int count) {
+        if (count < 1) {
+            outputs = new Output[0];
+        } else {
+            outputs = new Output[count];
+            for (int i=0; i < count; i++) {
+                ControlPort.Output out = new DefaultControlOutputPort(this);
+                outputs[i] = new OutputImpl(out);
+                registerPort(prefix + (i + 1), out);
+            }
+        }
+    }
+
     protected CodeContext getCodeContext() {
         if (context == null) {
             context = new DelegateContext();
@@ -97,12 +116,11 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
         return context;
     }
 
-    protected void installDelegate(CodeDelegate delegate) {
-        if (this.delegate != null) {
-            throw new IllegalStateException();
-        }
+    protected void setDelegate(CodeDelegate delegate) {
+        uninstallDelegate();
         if (delegate == null) {
-            throw new NullPointerException();
+            this.delegate = null;
+            return;
         }
         try {
             delegate.init(getCodeContext(), time);
@@ -113,10 +131,10 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
         
     }
 
-    protected void uninstallDelegate(CodeDelegate delegate) {
-        if (this.delegate == delegate && delegate != null) {
+    private void uninstallDelegate() {
+        if (delegate != null) {
             delegate.dispose();
-            this.delegate = null;
+            delegate = null;
         }
     }
 
@@ -128,8 +146,9 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
 
     public void tick(ExecutionContext source) {
         time = source.getTime();
+        clock.process();
         if (delegate != null) {
-            delegate.tick(time);
+            delegate.tick();
         }
     }
 
@@ -164,6 +183,58 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
         @Override
         public int getOutputCount() {
             return outputs.length;
+        }
+
+        @Override
+        public long getTime() {
+            return time;
+        }
+
+    }
+
+    private class OutputImpl implements Output {
+
+        private ControlPort.Output out;
+
+        private OutputImpl(ControlPort.Output out) {
+            this.out = out;
+        }
+
+        public void send(Argument arg) {
+            out.send(time, arg);
+        }
+
+        public void send(double value) {
+            out.send(time, value);
+        }
+
+    }
+
+
+    private class Clock implements Param.Clock {
+
+        private Param.ClockListener[] listeners;
+
+        private Clock() {
+            listeners = new Param.ClockListener[0];
+        }
+
+        public long getTime() {
+            return time;
+        }
+
+        private void process() {
+            for (Param.ClockListener l : listeners) {
+                l.tick();
+            }
+        }
+
+        public void connect(Param.ClockListener p) {
+            listeners = ListenerUtils.add(listeners, p);
+        }
+
+        public void disconnect(Param.ClockListener p) {
+            listeners = ListenerUtils.remove(listeners, p);
         }
 
     }

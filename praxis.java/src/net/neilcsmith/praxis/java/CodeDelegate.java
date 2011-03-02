@@ -31,7 +31,6 @@ import net.neilcsmith.praxis.core.Argument;
 public class CodeDelegate {
 
     private CodeContext context;
-    private long time;
     private boolean installable;
     private Random rnd;
 
@@ -53,8 +52,8 @@ public class CodeDelegate {
         }
     }
 
-    public void tick(long time) {
-        this.time = time;
+    public void tick() {
+        
     }
 
     public void dispose() {
@@ -85,7 +84,7 @@ public class CodeDelegate {
     }
 
     public long getTime() {
-        return time;
+        return context.getTime();
     }
 
     public final double random(double max) {
