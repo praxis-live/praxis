@@ -190,7 +190,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         }
 
         @Override
-        protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
+        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
             removeChild(args.get(0).toString());
             return CallArguments.EMPTY;
         }
@@ -203,7 +203,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         }
 
         @Override
-        protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
+        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
             if (childMap.isEmpty()) {
                 return CallArguments.create(PArray.EMPTY);
             }
@@ -226,7 +226,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         }
 
         @Override
-        protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
+        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
             if (args.getSize() < 4) {
                 throw new IllegalArgumentException();
             }
@@ -288,7 +288,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         }
 
         @Override
-        protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
+        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
             return CallArguments.create(PArray.valueOf(connections));
         }
     }

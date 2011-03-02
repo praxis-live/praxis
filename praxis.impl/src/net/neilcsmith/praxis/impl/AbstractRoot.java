@@ -446,7 +446,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         }
 
         @Override
-        protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
+        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
             if (start) {
                 setRunning();
                 return CallArguments.EMPTY;

@@ -370,7 +370,7 @@ public class DefaultHub extends AbstractRoot {
         }
 
         @Override
-        protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
+        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
             Component c = factory.createComponent(ComponentType.coerce(args.get(0)));
             return CallArguments.create(PReference.wrap(c));
         }
@@ -383,7 +383,7 @@ public class DefaultHub extends AbstractRoot {
         }
 
         @Override
-        protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
+        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
             String id = args.get(0).toString();
             Root r = factory.createRootComponent(ComponentType.coerce(args.get(1)));
             installRoot(id, args.get(1).toString(), r);
@@ -398,7 +398,7 @@ public class DefaultHub extends AbstractRoot {
         }
 
         @Override
-        protected CallArguments process(CallArguments args, boolean quiet) throws Exception {
+        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
             String id = args.get(0).toString();
             uninstallRoot(id);
             return CallArguments.EMPTY;

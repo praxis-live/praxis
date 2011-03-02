@@ -46,13 +46,13 @@ public abstract class SimpleControl implements Control {
         CallArguments out = null;
         switch (call.getType()) {
             case INVOKE:
-                out = process(call.getArgs(), false);
+                out = process(call.getTimecode(), call.getArgs(), false);
                 if (out == null) {
                     throw new Exception("No response returned from INVOKE\n" + call);
                 }
                 break;
             case INVOKE_QUIET:
-                out = process(call.getArgs(), true);
+                out = process(call.getTimecode(), call.getArgs(), true);
                 break;
             default:
                 LOG.warning("Unexpected call - \n" + call);
@@ -66,5 +66,5 @@ public abstract class SimpleControl implements Control {
         return info;
     }
 
-    protected abstract CallArguments process(CallArguments args, boolean quiet) throws Exception;
+    protected abstract CallArguments process(long time, CallArguments args, boolean quiet) throws Exception;
 }
