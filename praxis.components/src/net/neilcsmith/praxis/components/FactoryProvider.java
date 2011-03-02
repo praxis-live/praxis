@@ -31,6 +31,7 @@ import net.neilcsmith.praxis.components.math.Scale;
 import net.neilcsmith.praxis.components.math.Threshold;
 import net.neilcsmith.praxis.components.routing.Join;
 import net.neilcsmith.praxis.components.test.Log;
+import net.neilcsmith.praxis.components.timing.Animator;
 import net.neilcsmith.praxis.components.timing.SimpleDelay;
 import net.neilcsmith.praxis.components.timing.Timer;
 import net.neilcsmith.praxis.core.ComponentFactory;
@@ -83,8 +84,10 @@ public class FactoryProvider implements ComponentFactoryProvider {
             addComponent("core:test:log", Log.class);
 
             // TIMING
+            addComponent("core:timing:animator", Animator.class);
             addComponent("core:timing:delay", SimpleDelay.class);
             addComponent("core:timing:timer", Timer.class);
+
 
         }
     }
