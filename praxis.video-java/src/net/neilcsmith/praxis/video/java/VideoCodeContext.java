@@ -18,10 +18,19 @@
  *
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
+ *
+ *
+ * Parts of the API of this package, as well as some of the code, is derived from
+ * the Processing project (http://processing.org)
+ *
+ * Copyright (c) 2004-09 Ben Fry and Casey Reas
+ * Copyright (c) 2001-04 Massachusetts Institute of Technology
+ *
  */
 
 package net.neilcsmith.praxis.video.java;
 
+import net.neilcsmith.praxis.impl.ListenerUtils;
 import net.neilcsmith.praxis.java.CodeContext;
 
 /**
@@ -30,8 +39,42 @@ import net.neilcsmith.praxis.java.CodeContext;
  */
 public abstract class VideoCodeContext extends CodeContext {
 
+    private ImageListener[] listeners;
+
+    protected VideoCodeContext() {
+        listeners = new ImageListener[0];
+    }
+
     public abstract PImage getImage(int index);
 
     public abstract int getImageCount();
+
+    public void addImageListener(ImageListener listener) {
+        listeners = ListenerUtils.add(listeners, listener);
+    }
+
+    public void removeImageListener(ImageListener listener) {
+        listeners = ListenerUtils.remove(listeners, listener);
+    }
+
+    protected void fireImageChange(int index) {
+        for (ImageListener l : listeners) {
+            l.imageChanged(index);
+        }
+    }
+
+    protected void fireImageLoadError(int index) {
+        for (ImageListener l : listeners) {
+            l.imageLoadError(index);
+        }
+    }
+
+    public static interface ImageListener {
+
+        public void imageChanged(int index);
+
+        public void imageLoadError(int index);
+
+    }
 
 }

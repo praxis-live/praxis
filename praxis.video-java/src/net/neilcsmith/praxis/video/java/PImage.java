@@ -18,11 +18,18 @@
  *
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
+ *
+ *
+ * Parts of the API of this package, as well as some of the code, is derived from
+ * the Processing project (http://processing.org)
+ *
+ * Copyright (c) 2004-09 Ben Fry and Casey Reas
+ * Copyright (c) 2001-04 Massachusetts Institute of Technology
+ *
  */
 package net.neilcsmith.praxis.video.java;
 
 import net.neilcsmith.ripl.Surface;
-import net.neilcsmith.ripl.SurfaceCapabilities;
 import net.neilcsmith.ripl.SurfaceOp;
 
 /**

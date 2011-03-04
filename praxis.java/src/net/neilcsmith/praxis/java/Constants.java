@@ -18,6 +18,14 @@
  *
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
+ *
+ *
+ * Parts of the API of this package, as well as some of the code, is derived from
+ * the Processing project (http://processing.org)
+ *
+ * Copyright (c) 2004-09 Ben Fry and Casey Reas
+ * Copyright (c) 2001-04 Massachusetts Institute of Technology
+ *
  */
 
 package net.neilcsmith.praxis.java;
@@ -31,5 +39,11 @@ public class Constants {
     private Constants() {}
 
     public final static double PI = Math.PI;
+    public final static double HALF_PI = PI / 2;
+    public final static double THIRD_PI = PI / 3;
+    public final static double QUARTER_PI = PI / 4;
+    public final static double TWO_PI = PI * 2;
+    public final static double DEG_TO_RAD = PI/180;
+    public final static double RAD_TO_DEG = 180/PI;
 
 }

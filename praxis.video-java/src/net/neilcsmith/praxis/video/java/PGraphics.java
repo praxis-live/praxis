@@ -18,6 +18,14 @@
  *
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
+ *
+ *
+ * Parts of the API of this package, as well as some of the code, is derived from
+ * the Processing project (http://processing.org)
+ *
+ * Copyright (c) 2004-09 Ben Fry and Casey Reas
+ * Copyright (c) 2001-04 Massachusetts Institute of Technology
+ *
  */
 package net.neilcsmith.praxis.video.java;
 
@@ -106,6 +114,16 @@ public class PGraphics {
     public void beginShape() {
         shape = PShape.beginShape();
     }
+
+    public void bezier(double x1, double y1,
+                     double x2, double y2,
+                     double x3, double y3,
+                     double x4, double y4) {
+    beginShape();
+    vertex(x1, y1);
+    bezierVertex(x2, y2, x3, y3, x4, y4);
+    endShape();
+  }
 
     public void bezierVertex(double x1, double y1,
             double x2, double y2, double x3, double y3) {
