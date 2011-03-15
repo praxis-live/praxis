@@ -48,6 +48,7 @@ public class ArrayRandom extends AbstractComponent {
         random = new Random();
         args = ArrayProperty.create();
         registerControl("values", args);
+        registerPort("values", args.createPort());
         TriggerControl trigger = TriggerControl.create( new TriggerBinding());
         registerControl("trigger", trigger);
         registerPort("trigger", trigger.createPort());

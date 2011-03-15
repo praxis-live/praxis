@@ -60,7 +60,7 @@ public class ArrayIterator extends AbstractComponent {
 
     private void build() {
         values = PArray.EMPTY;
-        registerControl("values", ArrayProperty.create( new ArrayProperty.Binding() {
+        ArrayProperty vals =  ArrayProperty.create( new ArrayProperty.Binding() {
 
             public void setBoundValue(long time, PArray value) {
                 values = value;
@@ -71,7 +71,9 @@ public class ArrayIterator extends AbstractComponent {
             public PArray getBoundValue() {
                 return values;
             }
-        }, values));
+        }, values);
+        registerControl("values", vals);
+        registerPort("values", vals.createPort());
         minSkip = IntProperty.create( 0, 1024, 1);
         registerControl("min-skip", minSkip);
         maxSkip = IntProperty.create( 0, 1024, 1);
