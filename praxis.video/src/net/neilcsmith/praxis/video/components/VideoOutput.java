@@ -23,8 +23,12 @@ package net.neilcsmith.praxis.video.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.Port;
+import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.AbstractComponent;
+import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.video.ClientRegistrationException;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.VideoContext;
@@ -40,24 +44,20 @@ public class VideoOutput extends AbstractComponent {
     private Placeholder placeholder;
 //    private VideoContext ctxt;
     private VideoContext.OutputClient client;
+    private ArgumentProperty width;
+    private ArgumentProperty height;
+    private ArgumentProperty rotation;
 
     public VideoOutput() {
         placeholder = new Placeholder();
         registerPort(Port.IN, new DefaultVideoInputPort(this, placeholder));
-        client = new VideoContext.OutputClient() {
-
-            public int getOutputCount() {
-                return 1;
-            }
-
-            public Source getOutputSource(int index) {
-                if (index == 0) {
-                    return placeholder;
-                } else {
-                    throw new IndexOutOfBoundsException();
-                }
-            }
-        };
+        client = new OutputClientImpl();
+        width = ArgumentProperty.create();
+        height = ArgumentProperty.create();
+        rotation = ArgumentProperty.create();
+        registerControl("width", width);
+        registerControl("height", height);
+        registerControl("rotation", rotation);
     }
 
     @Override
@@ -73,4 +73,44 @@ public class VideoOutput extends AbstractComponent {
         }
     }
 
+    private class OutputClientImpl extends VideoContext.OutputClient {
+
+        public int getOutputCount() {
+            return 1;
+        }
+
+        public Source getOutputSource(int index) {
+            if (index == 0) {
+                return placeholder;
+            } else {
+                throw new IndexOutOfBoundsException();
+            }
+        }
+
+        @Override
+        public Object getClientHint(String key) {
+            if (VideoContext.CLIENT_KEY_WIDTH.equals(key)) {
+                return getInteger(width.getValue());
+            } else if (VideoContext.CLIENT_KEY_HEIGHT.equals(key)) {
+                return getInteger(height.getValue());
+            } else if (VideoContext.CLIENT_KEY_ROTATION.equals(key)) {
+                return getInteger(rotation.getValue());
+            } else {
+                return super.getClientHint(key);
+            }
+        }
+
+        private Integer getInteger(Argument val) {
+            if (val.isEmpty()) {
+                return null;
+            } else {
+                try {
+                    return PNumber.coerce(val).toIntValue();
+                } catch (ArgumentFormatException ex) {
+                    return null;
+                }
+            }
+        }
+
+    }
 }

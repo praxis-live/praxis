@@ -29,6 +29,11 @@ import net.neilcsmith.ripl.Source;
  * @author Neil C Smith
  */
 public abstract class VideoContext {
+
+    public final static String CLIENT_KEY_WIDTH = "client.width";
+    public final static String CLIENT_KEY_HEIGHT = "client.height";
+    public final static String CLIENT_KEY_ROTATION = "client.rotation";
+    public final static String CLIENT_KEY_DEVICE = "client.device";
     
     public abstract int registerVideoInputClient(InputClient client)
             throws ClientRegistrationException;
@@ -41,6 +46,10 @@ public abstract class VideoContext {
     public abstract void unregisterVideoOutputClient(OutputClient client);
 
     public static abstract class Client {
+
+        public Object getClientHint(String key) {
+            return null;
+        }
 
     }
 

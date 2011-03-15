@@ -34,10 +34,13 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagLayout;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -59,15 +62,21 @@ public class SWPlayer implements Player {
 
     private final static Logger LOG = Logger.getLogger(SWPlayer.class.getName());
 
+    private final static double DEG_90 = Math.toRadians(90);
+    private final static double DEG_180 = Math.toRadians(180);
+    private final static double DEG_270 = Math.toRadians(270);
+
     private int noSleepsPerYield = 0; // maximum number of frames without sleep before yielding
     private int maxSkip = 2; // maximum number of frames that can be skipped before rendering
-    private int width,  height; // dimensions of image
+    private int width,  height; // dimensions of surface
+    private int outputWidth, outputHeight, outputRotation;
     private double fps; // frames per second
     private long period; // period per frame in nanosecs
 //    private long frameIndex; // index of current frame
     private long time; // time of currently computing frame in relation to System.nanotime
     private volatile boolean running = false; // flag to control animation
     private SWSurface surface = null; // surface to be passed up tree
+    private SWSurface rotated = null; // rotated surface if required
     private Frame frame = null;
     private Canvas canvas = null;
     private BufferStrategy bs = null;
@@ -78,12 +87,14 @@ public class SWPlayer implements Player {
     private String title;
     private boolean fullScreen;
 
-    public SWPlayer(int width, int height, double fps) {
-        this("RIPL", width, height, fps, false);
-
-    }
-
-    public SWPlayer(String title, int width, int height, double fps, boolean fullScreen) {
+    private SWPlayer(String title,
+            int width,
+            int height,
+            double fps,
+            boolean fullScreen,
+            int outputWidth,
+            int outputHeight,
+            int outputRotation) {
         if (width <= 0 || height <= 0 || fps <= 0) {
             throw new IllegalArgumentException();
         }
@@ -96,6 +107,9 @@ public class SWPlayer implements Player {
         this.title = title;
         this.fullScreen = fullScreen;
         sink = new OutputSink();
+        this.outputWidth = outputWidth;
+        this.outputHeight = outputHeight;
+        this.outputRotation = outputRotation;
     }
 
     public void run() {
@@ -124,34 +138,60 @@ public class SWPlayer implements Player {
         time = System.nanoTime();
 
         // animation loop
-        while (running) {
-            updateAndRender();
-            afterTime = System.nanoTime();
-            sleepTime = (period - (afterTime - time)) - overSleepTime;
-            if (sleepTime > 0) {
-                try {
-                    Thread.sleep(sleepTime / 1000000L);
-                } catch (InterruptedException ex) {
-                }
-                overSleepTime = (System.nanoTime() - afterTime) - sleepTime;
-            } else {
-                excess -= sleepTime;
-                overSleepTime = 0L;
-                noSleeps++;
-                if (noSleeps > noSleepsPerYield) {
-                    Thread.yield();
-                    noSleeps = 0;
-                }
-            }
-            time += period;
+//        while (running) {
+//            updateAndRender();
+//            afterTime = System.nanoTime();
+//            sleepTime = (period - (afterTime - time)) - overSleepTime;
+//            if (sleepTime > 0) {
+//                try {
+//                    Thread.sleep(sleepTime / 1000000L);
+//                } catch (InterruptedException ex) {
+//                }
+//                overSleepTime = (System.nanoTime() - afterTime) - sleepTime;
+//            } else {
+//                excess -= sleepTime;
+//                overSleepTime = 0L;
+//                noSleeps++;
+//                if (noSleeps > noSleepsPerYield) {
+//                    Thread.yield();
+//                    noSleeps = 0;
+//                }
+//            }
+//            time += period;
+//
+//            int skips = 0;
+//            while ((excess > period) && (skips < maxSkip)) {
+//                excess -= period;
+//                updateOnly();
+//                time += period;
+//                skips++;
+//            }
+//
+//        }
 
-            int skips = 0;
-            while ((excess > period) && (skips < maxSkip)) {
-                excess -= period;
+//        long minSleepTime = 1000000L;
+        long now = 0L;
+        long difference = 0L;
+        while (running) {
+            time += period;
+            now = System.nanoTime();
+            difference = now - time;
+            if (difference > 0) {
                 updateOnly();
-                time += period;
-                skips++;
+                if (LOG.isLoggable(Level.FINEST)) {
+                    LOG.log(Level.FINEST, "Frame skipped - Difference : " + (difference));
+                }
+            } else {
+                while (difference < -1000000L) {
+                    try {
+                        Thread.sleep(1);
+                    } catch (Exception ex) {}
+                    now = System.nanoTime();
+                    difference = now - time;
+                }
+                updateAndRender();
             }
+
 
         }
 
@@ -163,7 +203,12 @@ public class SWPlayer implements Player {
         EventQueue.invokeAndWait(new Runnable() {
 
             public void run() {
-                Dimension dim = new Dimension(width, height);
+                Dimension dim;
+                if (outputRotation == 90 || outputRotation == 270) {
+                    dim = new Dimension(outputHeight, outputWidth);
+                } else {
+                    dim = new Dimension(outputWidth, outputHeight);
+                }
                 frame = new Frame(title);
 //                frame.setIgnoreRepaint(true);
                 frame.setBackground(Color.BLACK);
@@ -213,6 +258,17 @@ public class SWPlayer implements Player {
 
         surface = new SWSurface(width, height, false);
 
+        switch(outputRotation) {
+            case 90:
+            case 270:
+                rotated = new SWSurface(height, width, false);
+                break;
+            case 180:
+                rotated = new SWSurface(width, height, false);
+                break;
+
+        }
+
     }
 
     private void dispose() {
@@ -250,9 +306,36 @@ public class SWPlayer implements Player {
         Graphics2D g2d = (Graphics2D) bs.getDrawGraphics();
         try {
             sink.process(surface, time, rendering);
-            // @TODO create getImage() implementation
-            // g2d.drawImage(surface.getImage(), 0, 0, null);
-            surface.draw(g2d, 0, 0);
+//            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+//            switch(outputRotation) {
+//                case 90:
+//                    g2d.rotate(DEG_90);
+//                    g2d.translate(0,-outputHeight);
+//                    break;
+//                case 180:
+//                    g2d.rotate(DEG_180, outputWidth / 2.0, outputHeight / 2.0);
+//                    break;
+//                case 270:
+//                    g2d.rotate(DEG_270);
+//                    g2d.translate(-outputWidth, 0);
+//            }
+            switch (outputRotation) {
+                case 0:
+                    surface.draw(g2d, 0, 0, outputWidth, outputHeight);
+                    break;
+                case 90:
+                    rotated.process(SWTransform.ROTATE_90, surface);
+                    rotated.draw(g2d, 0, 0, outputHeight, outputWidth);
+                    break;
+                case 180:
+                    rotated.process(SWTransform.ROTATE_180, surface);
+                    rotated.draw(g2d, 0, 0, outputWidth, outputHeight);
+                    break;
+                case 270:
+                    rotated.process(SWTransform.ROTATE_270, surface);
+                    rotated.draw(g2d, 0, 0, outputHeight, outputWidth);
+                    break;
+            }
         } catch (Exception exception) {
             LOG.log(Level.WARNING, "Exception in render", exception);
             g2d.dispose();
@@ -264,6 +347,8 @@ public class SWPlayer implements Player {
         }
         g2d.dispose();
     }
+
+
 
     private void fireListeners() {
         int count = listeners.size();
@@ -379,6 +464,31 @@ public class SWPlayer implements Player {
             System.exit(0);
         }
         
+    }
+
+    public static SWPlayer create(
+            String title,
+            int width,
+            int height,
+            double fps,
+            boolean fullscreen) {
+        return new SWPlayer(title, width, height, fps, fullscreen, width, height, 0);
+    }
+
+    public static SWPlayer create(
+            String title,
+            int width,
+            int height,
+            double fps,
+            boolean fullscreen,
+            int outputWidth,
+            int outputHeight,
+            int rotation) {
+        if (rotation != 0 && rotation != 90 && rotation != 180 && rotation != 270) {
+            rotation = 0;
+            LOG.warning("Rotation should be 0, 90, 180 or 270. Switching to 0.");
+        }
+        return new SWPlayer(title, width, height, fps, fullscreen, outputWidth, outputHeight, rotation);
     }
 
 }

@@ -81,7 +81,6 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
         return lookup;
     }
 
-
     public void nextFrame(FrameRateSource source) {
         try {
             if (!source.isRendering()) {
@@ -98,13 +97,20 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     @Override
     protected void starting() {
         try {
-            skipcount = 0;
-            if ("SWPlayer".equals(System.getProperty("praxis.video.exp.renderer"))) {
-                player = new SWPlayer("PRAXIS : " + getAddress(), width, height, fps, fullScreen);
-            } else {
-                player = new ReferencePlayer("PRAXIS : " + getAddress(), width, height, fps, fullScreen);
-            }
-            
+
+            player = createPlayer();
+
+//            if ("SWPlayer".equals(System.getProperty("praxis.video.exp.renderer"))) {
+//                player = new SWPlayer("PRAXIS : " + getAddress(), width, height, fps, fullScreen);
+//            } else {
+//                player = new ReferencePlayer("PRAXIS : " + getAddress(), width, height, fps, fullScreen);
+//            }
+//            if ("Reference".equals(System.getProperty("praxis.video.exp.renderer"))) {
+//                player = new ReferencePlayer("PRAXIS : " + getAddress(), width, height, fps, fullScreen);
+//            } else {
+//                player = new SWPlayer("PRAXIS : " + getAddress(), width, height, fps, fullScreen);
+//            }
+
             player.addFrameRateListener(this);
 //            player.getSink(0).addSource(placeholder);
             if (outputClient != null && outputClient.getOutputCount() > 0) {
@@ -125,6 +131,37 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
         }
     }
 
+    private Player createPlayer() {
+        String title = "PRAXIS : " + getAddress();
+        int outWidth = width;
+        int outHeight = height;
+        int rotation = 0;
+        if (outputClient != null) {
+            Object w = outputClient.getClientHint(VideoContext.CLIENT_KEY_WIDTH);
+            Object h = outputClient.getClientHint(VideoContext.CLIENT_KEY_HEIGHT);
+            Object r = outputClient.getClientHint(VideoContext.CLIENT_KEY_ROTATION);
+            if (w instanceof Integer) {
+                outWidth = ((Integer) w).intValue();
+            }
+            if (h instanceof Integer) {
+                outHeight = ((Integer) h).intValue();
+            }
+            if (r instanceof Integer) {
+                rotation = ((Integer) r).intValue();
+            }
+        }
+        if ("Reference".equals(System.getProperty("praxis.video.exp.renderer"))) {
+            return new ReferencePlayer(title, width, height, fps, fullScreen);
+        } else {
+            if (outWidth == width && outHeight == height && rotation == 0) {
+                return SWPlayer.create(title, width, height, fps, fullScreen);
+            } else {
+                return SWPlayer.create(title, width, height, fps, fullScreen, outWidth, outHeight, rotation);
+            }
+        }
+
+    }
+
     @Override
     protected void stopping() {
         setInterrupt(new Runnable() {
@@ -137,7 +174,7 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
 
     }
 
-       private class Context extends VideoContext {
+    private class Context extends VideoContext {
 
         public int registerVideoInputClient(InputClient client) throws ClientRegistrationException {
             throw new UnsupportedOperationException("Not supported yet.");

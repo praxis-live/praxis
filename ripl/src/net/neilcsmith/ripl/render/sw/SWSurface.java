@@ -167,14 +167,14 @@ class SWSurface extends Surface {
     }
 
 
-    void draw(Graphics2D g2d, int x, int y) {
+    void draw(Graphics2D g2d, int x, int y, int w, int h) {
         if (sd == null) {
             g2d.setComposite(AlphaComposite.Clear);
-            g2d.fillRect(x, y, getWidth(), getHeight());
+            g2d.fillRect(x, y, w, h);
             return;
         }
         BufferedImage im = ImageUtils.toImage(sd);
-        g2d.drawImage(im, x, y, null);
+        g2d.drawImage(im, x, y, w, h, null);
     }
 
 
