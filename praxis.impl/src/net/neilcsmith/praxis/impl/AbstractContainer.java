@@ -38,6 +38,7 @@ import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.VetoException;
 import net.neilcsmith.praxis.core.Port;
+import net.neilcsmith.praxis.core.PortConnectionException;
 import net.neilcsmith.praxis.core.PortListener;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.ComponentFactoryService;
@@ -227,6 +228,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
 
         @Override
         protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
+
             if (args.getSize() < 4) {
                 throw new IllegalArgumentException();
             }
@@ -234,25 +236,29 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             PString p1id = PString.coerce(args.get(1));
             PString c2id = PString.coerce(args.get(2));
             PString p2id = PString.coerce(args.get(3));
+            try {
+                Component c1 = getChild(c1id.toString());
+                final Port p1 = c1.getPort(p1id.toString());
+                Component c2 = getChild(c2id.toString());
+                final Port p2 = c2.getPort(p2id.toString());
 
-            Component c1 = getChild(c1id.toString());
-            final Port p1 = c1.getPort(p1id.toString());
-            Component c2 = getChild(c2id.toString());
-            final Port p2 = c2.getPort(p2id.toString());
+                final PArray connection = PArray.valueOf(c1id, p1id, c2id, p2id);
 
-            final PArray connection = PArray.valueOf(c1id, p1id, c2id, p2id);
-
-            if (connect) {
-                p1.connect(p2);
-                connections.add(connection);
-                PortListener listener = new ConnectionListener(p1, p2, connection);
-                p1.addListener(listener);
-                p2.addListener(listener);
-            } else {
-                p1.disconnect(p2);
-                connections.remove(connection);
+                if (connect) {
+                    p1.connect(p2);
+                    connections.add(connection);
+                    PortListener listener = new ConnectionListener(p1, p2, connection);
+                    p1.addListener(listener);
+                    p2.addListener(listener);
+                } else {
+                    p1.disconnect(p2);
+                    connections.remove(connection);
+                }
+                return CallArguments.EMPTY;
+            } catch (Exception ex) {
+                throw new PortConnectionException("Can't connect " + c1id + "!" + p1id
+                        + " to " + c2id + "!" + p2id);
             }
-            return CallArguments.EMPTY;
         }
     }
 
