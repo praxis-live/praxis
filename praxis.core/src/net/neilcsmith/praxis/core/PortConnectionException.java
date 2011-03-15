@@ -42,4 +42,12 @@ public class PortConnectionException extends Exception {
     public PortConnectionException(String msg) {
         super(msg);
     }
+    
+    public PortConnectionException(Throwable cause) {
+        super(cause);
+    }
+
+    public PortConnectionException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 }
