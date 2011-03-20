@@ -47,17 +47,24 @@ public class Snapshot extends AbstractComponent {
         FloatProperty mix = FloatProperty.create( new MixBinding(), 0, 1, 1);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
-        TriggerControl trigger = TriggerControl.create( new TriggerBinding());
+        TriggerControl trigger = TriggerControl.create( new TriggerControl.Binding() {
+
+            public void trigger(long time) {
+                snap.trigger();
+            }
+
+        });
         registerControl("trigger", trigger);
         registerPort("trigger", trigger.createPort());
-    }
-    
-    private class TriggerBinding implements TriggerControl.Binding {
+        TriggerControl reset = TriggerControl.create(new TriggerControl.Binding() {
 
-        public void trigger(long time) {
-            snap.trigger();
-        }
-        
+            public void trigger(long time) {
+                snap.reset();
+            }
+
+        });
+        registerControl("reset", reset);
+        registerPort("reset", reset.createPort());
     }
     
     private class MixBinding implements FloatProperty.Binding {

@@ -62,6 +62,7 @@ package net.neilcsmith.ripl.ops;
 import java.util.logging.Logger;
 import net.neilcsmith.ripl.PixelData;
 import net.neilcsmith.ripl.SurfaceOp;
+import net.neilcsmith.ripl.utils.PixelArrayCache;
 
 /**
  *
@@ -102,13 +103,20 @@ public class Blur implements SurfaceOp {
 	    int sumBlue;
 
 	    int srcIndex = src.getOffset();
+            int srcSL = src.getScanline();
+            int dstSL = dst.getScanline();
 	    int dstIndex;
 	    int pixel;
 
-	    int[] sumLookupTable = new int[256 * windowSize];
-	    for (int i = 0; i < sumLookupTable.length; i++) {
-	        sumLookupTable[i] = i / windowSize;
-	    }
+//	    int[] sumLookupTable = new int[256 * windowSize];
+//	    for (int i = 0; i < sumLookupTable.length; i++) {
+//	        sumLookupTable[i] = i / windowSize;
+//	    }
+            int lookupSize = 256 * windowSize;
+            int[] sumLookupTable = PixelArrayCache.acquire(lookupSize, false);
+            for (int i=0; i < lookupSize; i++) {
+                sumLookupTable[i] = i / windowSize;
+            }
 
 	    int[] indexLookupTable = new int[radiusPlusOne];
             int width = src.getWidth();
@@ -153,7 +161,7 @@ public class Blur implements SurfaceOp {
                 					  sumLookupTable[sumRed]   << 16 |
                 					  sumLookupTable[sumGreen] <<  8 |
                 					  sumLookupTable[sumBlue];
-	            dstIndex += dst.getScanline();
+	            dstIndex += dstSL;
 
 	            int nextPixelIndex = x + radiusPlusOne;
 	            if (nextPixelIndex >= width) {
@@ -181,8 +189,10 @@ public class Blur implements SurfaceOp {
 	            sumBlue -= previousPixel & 0xFF;
 	        }
 
-	        srcIndex += src.getScanline();
+	        srcIndex += srcSL;
 	    }
+
+            PixelArrayCache.release(sumLookupTable);
 	}
 
     public static SurfaceOp op(int radius) {

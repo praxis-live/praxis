@@ -107,7 +107,13 @@ public class ImageDelegate extends AbstractDelegate {
 //            }
 //        }
         // render cache
-        surface.process(Blit.op(cache.x, cache.y), cache.surface);
+//        surface.process(Blit.op(cache.x, cache.y), cache.surface);
+        if (cache.srcBnds != null) {
+            surface.process(Blit.op(Blend.NORMAL, cache.srcBnds, cache.x, cache.y), cache.surface);
+        } else {
+            surface.process(Blit.op(cache.x, cache.y), cache.surface);
+        }
+
     }
 
     private void createCache(int outputWidth, int outputHeight) {
@@ -137,30 +143,23 @@ public class ImageDelegate extends AbstractDelegate {
 //            image.getGraphics().drawImage(source, 0, 0, null);
 //            cache = new Cache(image, width, height, 0, 0);
 //        }
-        cache = new Cache(source, source.getWidth(), source.getHeight(), 0, 0);
+        cache = new Cache(source, null, source.getWidth(), source.getHeight(), 0, 0);
     }
 
     private void createResizedCache(Dimension srcDim, Dimension dstDim) {
         Rectangle srcBnds = new Rectangle();
         Rectangle dstBnds = new Rectangle();
         ResizeUtils.calculateBounds(srcDim, dstDim, mode, srcBnds, dstBnds);
-//        BufferedImage image;
-//        if (source.getTransparency() == BufferedImage.OPAQUE) {
-//            image = new BufferedImage(dstBnds.width, dstBnds.height, BufferedImage.TYPE_INT_RGB);
-//        } else {
-//            image = new BufferedImage(dstBnds.width, dstBnds.height, BufferedImage.TYPE_INT_ARGB_PRE);
-//        }
-//        Graphics2D g2d = image.createGraphics();
-//        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-//        image.getGraphics().drawImage(source, 0, 0, dstBnds.width, dstBnds.height,
-//                srcBnds.x, srcBnds.y, srcBnds.x + srcBnds.width, srcBnds.y + srcBnds.height, null);
-//        cache = new Cache(image, dstDim.width, dstDim.height, dstBnds.x, dstBnds.y);
-//        g2d.dispose();
-        BufferedImageSurface s = new BufferedImageSurface(dstBnds.width, dstBnds.height, source.hasAlpha());
-        SurfaceOp blit = ScaledBlit.op(Blend.NORMAL, new Bounds(srcBnds),
-                new Bounds(0, 0, dstBnds.width, dstBnds.height));
-        s.process(blit, source);
-        cache = new Cache(s, dstDim.width, dstDim.height, dstBnds.x, dstBnds.y);
+        if (srcBnds.width == dstBnds.width && srcBnds.height == dstBnds.height) {
+            cache = new Cache(source, new Bounds(srcBnds), dstDim.width, dstDim.height, dstBnds.x, dstBnds.y);
+        } else {
+            BufferedImageSurface s = new BufferedImageSurface(dstBnds.width, dstBnds.height, source.hasAlpha());
+            SurfaceOp blit = ScaledBlit.op(Blend.NORMAL, new Bounds(srcBnds),
+                    new Bounds(0, 0, dstBnds.width, dstBnds.height));
+            s.process(blit, source);
+            cache = new Cache(s, null, dstDim.width, dstDim.height, dstBnds.x, dstBnds.y);
+        }
+
     }
 
     private class Cache {
@@ -170,9 +169,11 @@ public class ImageDelegate extends AbstractDelegate {
         int outputHeight;
         int x;
         int y;
+        Bounds srcBnds;
 
-        private Cache(BufferedImageSurface surface, int outputWidth, int outputHeight, int x, int y) {
+        private Cache(BufferedImageSurface surface, Bounds srcBnds, int outputWidth, int outputHeight, int x, int y) {
             this.surface = surface;
+            this.srcBnds = srcBnds;
             this.outputWidth = outputWidth;
             this.outputHeight = outputHeight;
             this.x = x;
