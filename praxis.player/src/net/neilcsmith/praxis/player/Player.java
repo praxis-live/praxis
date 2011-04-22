@@ -520,7 +520,7 @@ public class Player extends AbstractRoot {
             if (previewVersion == null) {
                 aboutText = "Praxis\n© 2011 Neil C Smith\nhttp://neilcsmith.net";
             } else {
-                aboutText = "Praxis - build:" + previewVersion + "\n© 2010 Neil C Smith\n" +
+                aboutText = "Praxis - build:" + previewVersion + "\n© 2011 Neil C Smith\n" +
                         "http://neilcsmith.net";
             }
         }
