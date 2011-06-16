@@ -21,8 +21,10 @@
  */
 package net.neilcsmith.praxis.hub;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -47,7 +49,9 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.interfaces.ComponentFactoryService;
 import net.neilcsmith.praxis.core.interfaces.RootManagerService;
+import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PReference;
+import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.BasicControl;
 import net.neilcsmith.praxis.impl.InstanceLookup;
@@ -66,6 +70,7 @@ public class DefaultHub extends AbstractRoot {
     private final String EXT_PREFIX = "_sys_";
     private final String HUB_ID = "praxis";
     private ConcurrentMap<String, Root.Controller> roots;
+    private List<PString> rootList;
     private Thread hubThread;
     private ComponentFactory factory;
     private Lookup lookup;
@@ -73,15 +78,29 @@ public class DefaultHub extends AbstractRoot {
     private Root[] extensions;
 
     public DefaultHub(Root... exts) {
-        super(EnumSet.noneOf(AbstractRoot.Caps.class));
+        this(null, null, exts);
+    }
+    
+    public DefaultHub(ComponentFactory factory, Root... exts) {
+        this(null, factory, exts);
+    }
+    
+    public DefaultHub(Lookup lookup, ComponentFactory factory, Root... exts) {
+        super(EnumSet.of(AbstractRoot.Caps.Component));
         roots = new ConcurrentHashMap<String, Root.Controller>();
+        rootList = new ArrayList<PString>();
         hub = new RootHubImpl();
         serviceManager = new ServiceManagerImpl();
         services = new ConcurrentHashMap<InterfaceDefinition, ComponentAddress[]>();
         extensions = exts;
-        lookup = InstanceLookup.create(new ServiceLoaderLookup(), new Object[]{serviceManager});
-        factory = LookupComponentFactory.getInstance(lookup);
-
+        if (lookup == null) {
+            lookup = new ServiceLoaderLookup();
+        }
+        this.lookup = InstanceLookup.create(lookup, new Object[]{serviceManager});
+        if (factory == null) {
+            factory = LookupComponentFactory.getInstance(lookup);
+        }
+        this.factory = factory;
     }
 
     public void activate() throws IllegalRootStateException {
@@ -137,6 +156,7 @@ public class DefaultHub extends AbstractRoot {
         registerControl("log", new LogControl());
         registerControl(RootManagerService.ADD_ROOT, new AddRootControl());
         registerControl(RootManagerService.REMOVE_ROOT, new RemoveRootControl());
+        registerControl(RootManagerService.ROOTS, new RootsControl());
         registerControl(ComponentFactoryService.NEW_INSTANCE, new NewInstanceControl());
     }
 
@@ -199,6 +219,8 @@ public class DefaultHub extends AbstractRoot {
         Root.Controller ctrl = root.initialize(id, hub);
         roots.put(id, ctrl);
         startRoot(id, typeID, ctrl);
+
+        rootList.add(PString.valueOf(id));
     }
 
     // NOT threadsafe - should only be called from single thread
@@ -207,6 +229,7 @@ public class DefaultHub extends AbstractRoot {
         if (ctrl != null) {
             ctrl.shutdown();
             roots.remove(id);
+            rootList.remove(PString.valueOf(id));
         }
     }
 
@@ -265,7 +288,7 @@ public class DefaultHub extends AbstractRoot {
                 // hub is not in roots!
                 controller.submitPacket(packet);
             } else {
-                logger.severe("hub throwing Invalid Address Exception");
+                logger.info("hub throwing Invalid Address Exception - no root found for id : " + packet);
                 throw new InvalidAddressException();
             }
         }
@@ -403,5 +426,20 @@ public class DefaultHub extends AbstractRoot {
             uninstallRoot(id);
             return CallArguments.EMPTY;
         }
+    }
+
+    private class RootsControl extends SimpleControl {
+
+        private RootsControl() {
+            super(RootManagerService.ROOTS_INFO);
+        }
+
+        @Override
+        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
+            return CallArguments.create(PArray.valueOf(rootList));
+        }
+
+
+
     }
 }
