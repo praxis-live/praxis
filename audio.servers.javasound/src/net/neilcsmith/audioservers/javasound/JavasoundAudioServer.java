@@ -94,6 +94,8 @@ public class JavasoundAudioServer implements AudioServer {
         New, Initialising, Active, Closing, Terminated
     };
 
+    private final static int NON_BLOCKING_MIN_BUFFER = 16384;
+
     // JS line defaults - need way to make these settable.
     private int nonBlockingOutputRatio = 16;
     private int lineBitSize = 16;
@@ -206,6 +208,7 @@ public class JavasoundAudioServer implements AudioServer {
         outputByteBuffer = new byte[byteBufferSize];
         if (mode != TimingMode.Blocking) {
             byteBufferSize *= nonBlockingOutputRatio;
+            byteBufferSize = Math.min(byteBufferSize, NON_BLOCKING_MIN_BUFFER);
         }
         outputLine.open(outputFormat, byteBufferSize);
 
