@@ -42,15 +42,15 @@ public class SimpleOverdrive extends AbstractComponent {
 
     public SimpleOverdrive() {
         overdrive = new Overdrive();
-        drive = FloatProperty.create( new DriveBinding(), 0);
-        registerControl("drive", drive);
-        registerPort("drive", drive.createPort());
-        mix = FloatProperty.create( new MixBinding(), 0);
-        registerControl("mix", mix);
-        registerPort("mix", mix.createPort());
         registerPort(Port.IN, new DefaultAudioInputPort(this, overdrive));
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, overdrive));
-
+        drive = FloatProperty.create( new DriveBinding(), 0, 1, 0);
+        registerControl("drive", drive);
+        registerPort("drive", drive.createPort());
+        mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
+        registerControl("mix", mix);
+        registerPort("mix", mix.createPort());
+        
     }
 
     private class DriveBinding implements FloatProperty.Binding {
