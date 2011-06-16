@@ -70,7 +70,7 @@ public class ComponentInfo extends Argument {
     }
 
     public String[] getPorts() {
-        return ports.keySet().toArray(new String[controls.size()]);
+        return ports.keySet().toArray(new String[ports.size()]);
     }
 
     public PortInfo getPortInfo(String port) {
