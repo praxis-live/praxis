@@ -160,9 +160,9 @@ public class Still extends AbstractComponent {
     private class DelegateLoader extends AbstractAsyncProperty<ImageDelegate> {
 
         DelegateLoader() {
-            super(new ArgumentInfo[]{ArgumentInfo.create(PResource.class, null)},
+            super(PResource.info(true),
                     ImageDelegate.class,
-                    new Argument[]{PString.EMPTY}, PMap.EMPTY);
+                    PString.EMPTY);
         }
 
         @Override
