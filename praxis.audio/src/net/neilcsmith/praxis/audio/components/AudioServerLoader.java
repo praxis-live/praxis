@@ -63,7 +63,7 @@ class AudioServerLoader {
 //        Mixer mixer = AudioSystem.getMixer(AudioSystem.getMixerInfo()[0]);
 //        return JavasoundAudioServer.create(mixer, context,
 //                JavasoundAudioServer.TimingMode.Estimated, client);
-        return JavasoundAudioServer.create(device, context, JavasoundAudioServer.TimingMode.Blocking, client);
+        return JavasoundAudioServer.create(device, context, JavasoundAudioServer.TimingMode.Estimated, client);
     }
 
     private Mixer getMixer(String device) {
