@@ -71,7 +71,7 @@ public final class ArgumentInfo extends Argument {
 
     @Override
     public String toString() {
-        return type + " {" + properties.toString() + "}";
+        return type + " " + presence + " {" + properties.toString() + "}";
     }
 
 
@@ -80,18 +80,22 @@ public final class ArgumentInfo extends Argument {
     public boolean equals(Object obj) {
         if (obj instanceof ArgumentInfo) {
             ArgumentInfo o = (ArgumentInfo) obj;
-            return type.equals(o.type) && properties.equals(o.properties);
+            return type.equals(o.type) && presence == o.presence
+                    && properties.equals(o.properties);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = 71 * hash + (this.type != null ? this.type.hashCode() : 0);
-        hash = 71 * hash + (this.properties != null ? this.properties.hashCode() : 0);
+        int hash = 5;
+        hash = 53 * hash + (this.type != null ? this.type.hashCode() : 0);
+        hash = 53 * hash + (this.presence != null ? this.presence.hashCode() : 0);
+        hash = 53 * hash + (this.properties != null ? this.properties.hashCode() : 0);
         return hash;
     }
+
+
 
 
     /**
@@ -118,7 +122,7 @@ public final class ArgumentInfo extends Argument {
      */
     public static ArgumentInfo create(Class<? extends Argument> argClass,
             Presence presence, PMap properties) {
-        if (argClass == null) {
+        if (argClass == null || presence == null) {
             throw new NullPointerException();
         }
 //        String type = argClass.getName();
