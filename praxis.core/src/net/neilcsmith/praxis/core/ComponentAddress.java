@@ -23,8 +23,6 @@ package net.neilcsmith.praxis.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
@@ -74,6 +72,15 @@ public final class ComponentAddress extends Argument {
      */
     public String getComponentID(int depth) {
         return address[depth];
+    }
+
+    /**
+     * Equivalent to getComponentID(getDepth() - 1).
+     *
+     * @return String
+     */
+    public String getID() {
+        return address[address.length - 1];
     }
     
     /**
