@@ -98,6 +98,15 @@ public class PResource extends Argument implements Comparable<PResource>{
         return ArgumentInfo.create(PResource.class, null);
     }
 
+    public static ArgumentInfo info(boolean allowEmpty) {
+        if (allowEmpty) {
+            return ArgumentInfo.create(PResource.class,
+                    PMap.valueOf(PString.valueOf(KEY_ALLOW_EMPTY), PBoolean.TRUE));
+        } else {
+            return ArgumentInfo.create(PResource.class, null);
+        }
+    }
+
     public int compareTo(PResource o) {
         return uri.compareTo(o.uri);
     }

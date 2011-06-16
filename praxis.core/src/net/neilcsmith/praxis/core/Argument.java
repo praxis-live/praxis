@@ -39,6 +39,8 @@ import java.io.Serializable;
  * @author Neil C Smith
  */
 public abstract class Argument implements Serializable {
+
+    public final static String KEY_ALLOW_EMPTY = "allow-empty";
     
     /**
      * Arguments must override the default method to return a string representation
