@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.script.impl;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -50,6 +51,7 @@ public class ScriptServiceImpl extends AbstractRoot {
     private int exID;
 
     public ScriptServiceImpl() {
+        super(EnumSet.noneOf(Caps.class));
         registerControl(ScriptService.EVAL, new EvalControl());
         registerControl(ScriptService.CLEAR, new ClearControl());
         registerInterface(ScriptService.INSTANCE);
