@@ -39,11 +39,19 @@ public abstract class ControlPort implements Port {
     public static abstract class Input extends ControlPort {
 
         public void connect(Port port) throws PortConnectionException {
-            port.connect(this);
+//            port.connect(this);
+            if (port instanceof Output) {
+                port.connect(this);
+            } else {
+                throw new PortConnectionException("Trying to connect 2 input ports together");
+            }
         }
 
         public void disconnect(Port port) {
-            port.disconnect(this);
+            if (port instanceof Output) {
+                port.disconnect(this);
+            }
+            
         }
 
         protected abstract void addControlOutputPort(Output port)
