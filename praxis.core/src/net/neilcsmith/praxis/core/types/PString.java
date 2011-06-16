@@ -23,7 +23,6 @@
 package net.neilcsmith.praxis.core.types;
 
 import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 
 /**
@@ -31,7 +30,8 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
  * @author Neil C Smith
  */
 public class PString extends Argument implements Comparable<PString> {
-    
+
+    public final static String KEY_ALLOWED_VALUES = "allowed-values";
     
     public final static PString EMPTY = PString.valueOf("");
     
@@ -101,7 +101,7 @@ public class PString extends Argument implements Comparable<PString> {
             for (int i=0; i < arr.length; i++) {
                 arr[i] = PString.valueOf(allowed[i]);
             }
-            PMap props = PMap.valueOf(PString.valueOf("allowed-values"),
+            PMap props = PMap.valueOf(PString.valueOf(KEY_ALLOWED_VALUES),
                     PArray.valueOf(arr));
             return ArgumentInfo.create(PString.class, props);
         }

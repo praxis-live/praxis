@@ -31,6 +31,9 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
  */
 public final class PNumber extends Argument implements Comparable<PNumber> {
 
+    public final static String KEY_MINIMUM = "minimum";
+    public final static String KEY_MAXIMUM = "maximum";
+
     public final static int MAX_VALUE = Integer.MAX_VALUE;
     public final static int MIN_VALUE = Integer.MIN_VALUE;
     private double value;
@@ -162,8 +165,8 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
 
     public static ArgumentInfo info(
             PNumber min, PNumber max) {
-        PMap map = PMap.valueOf(PString.valueOf("minimum"), min,
-                PString.valueOf("maximum"), max);
+        PMap map = PMap.valueOf(PString.valueOf(KEY_MINIMUM), min,
+                PString.valueOf(KEY_MAXIMUM), max);
         return ArgumentInfo.create(PNumber.class, map);
     }
 
