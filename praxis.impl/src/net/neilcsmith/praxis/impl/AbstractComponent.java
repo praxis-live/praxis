@@ -298,7 +298,6 @@ public abstract class AbstractComponent implements Component {
     protected PacketRouter getPacketRouter() {
         if (router == null) {
             router = getLookup().get(PacketRouter.class);
-            // @TODO what to do on null? Empty router?
         }
         return router;
     }

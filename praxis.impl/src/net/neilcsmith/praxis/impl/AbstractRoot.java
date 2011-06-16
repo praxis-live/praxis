@@ -70,14 +70,14 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     protected AbstractRoot(EnumSet<Caps> caps) {
         super(caps.contains(Caps.Container), caps.contains(Caps.Component));
         if (caps.contains(Caps.Startable)) {
-            createStartableControls();
+            createStartableInterface();
             defaultRunState = RootState.ACTIVE_IDLE;
         } else {
             defaultRunState = RootState.ACTIVE_RUNNING;
         }
     }
 
-    private void createStartableControls() {
+    private void createStartableInterface() {
         registerControl(StartableInterface.START, new TransportControl(true));
         registerControl(StartableInterface.STOP, new TransportControl(false));
         registerControl(StartableInterface.IS_RUNNING,
@@ -92,6 +92,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                         }
                     }
                 }));
+        registerInterface(StartableInterface.INSTANCE);
     }
 
     public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException {
@@ -118,6 +119,15 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         throw new IllegalRootStateException();
     }
 
+    void disconnect() {
+        this.router = null;
+        this.lookup = EmptyLookup.getInstance();
+        for (String id : getChildIDs()) {
+            removeChild(id);
+        }
+        hierarchyChanged();
+        hub = null;
+    }
 
     //@TODO make protected.
     @Override
@@ -141,7 +151,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 //    // Empty hooks for subclasses to extend setup
 //    protected void initializing() {
 //    }
-
     protected void activating() {
     }
 
@@ -208,7 +217,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 //    protected final void processControlFrame(long time) throws IllegalRootStateException {
 //        processControlFrame(null);
 //    }
-
 //    protected final void processControlFrame(Call call) throws IllegalRootStateException {
 //        RootState currentState = state.get();
 //        if (currentState == RootState.ACTIVE_RUNNING || currentState == RootState.ACTIVE_IDLE) {
@@ -222,7 +230,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 //            task.run();
 //        }
 //    }
-
     protected void nextControlFrame(long time) throws IllegalRootStateException {
         this.time = time;
         RootState currentState = state.get();
@@ -393,7 +400,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 //            throw new InvalidAddressException();
 //        }
 //    }
-
     public class Controller implements Root.Controller {
 
         private Controller() {
@@ -426,6 +432,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                 state.set(RootState.TERMINATING); // in case run finished before shutdown called
                 terminating();
                 context.setState(ExecutionContext.State.TERMINATED);
+                disconnect();
                 // disconnect all children?
                 state.set(RootState.TERMINATED);
             } else {
@@ -466,16 +473,15 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                 if (packet instanceof Call) {
                     Call call = (Call) packet;
                     Call.Type type = call.getType();
-                    if ( (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) &&
-                            call.getFromAddress().getComponentAddress().getRootID().equals(ID)) {
+                    if ((type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET)
+                            && call.getFromAddress().getComponentAddress().getRootID().equals(ID)) {
                         controller.submitPacket(
-                            Call.createErrorCall((Call) packet, PReference.wrap(ex)));
-                    }                 
+                                Call.createErrorCall((Call) packet, PReference.wrap(ex)));
+                    }
                 } else {
                     throw new UnsupportedOperationException();
                 }
             }
         }
     }
-
 }

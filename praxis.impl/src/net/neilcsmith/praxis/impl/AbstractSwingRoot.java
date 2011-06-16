@@ -112,6 +112,20 @@ public class AbstractSwingRoot extends AbstractRoot {
     protected void dispose() {
     }
 
+    @Override
+    final void disconnect() {
+        try {
+            EventQueue.invokeAndWait(new Runnable() {
+
+                public void run() {
+                    AbstractSwingRoot.super.disconnect();
+                }
+            });
+        } catch (Exception ex) {
+            // @TODO what to do about exception?
+        }
+    }
+
     private void nextControlFrame() {
         try {
             nextControlFrame(System.nanoTime());
