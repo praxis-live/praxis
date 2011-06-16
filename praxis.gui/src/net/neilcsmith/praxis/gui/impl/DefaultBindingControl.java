@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.gui.impl;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -77,34 +78,40 @@ public class DefaultBindingControl extends AbstractControl {
         binding.removeAdaptor(adaptor);
     }
 
+    public void unbindAll() {
+        binding.removeAll();
+    }
+
     public void call(Call call, PacketRouter router) throws Exception {
         switch (call.getType()) {
             case RETURN:
-                processReturn(call);
+//                processReturn(call);
+                binding.processResponse(call);
                 break;
             case ERROR:
-                processError(call);
+//                processError(call);
+                binding.processError(call);
                 break;
             default:
                 throw new UnsupportedOperationException();
         }
     }
 
-    private void processReturn(Call call) {
-        if (boundAddress.equals(call.getFromAddress())) {
-            binding.processResponse(call);
-        } else {
-            binding.processInfo(call);
-        }
-    }
-
-    private void processError(Call call) {
-        if (boundAddress.equals(call.getFromAddress())) {
-            binding.processError(call);
-        } else {
-            binding.processInfoError(call);
-        }
-    }
+//    private void processReturn(Call call) {
+////        if (boundAddress.equals(call.getFromAddress())) {
+////            binding.processResponse(call);
+////        } else {
+////            binding.processInfo(call);
+////        }
+//    }
+//
+//    private void processError(Call call) {
+////        if (boundAddress.equals(call.getFromAddress())) {
+////            binding.processError(call);
+////        } else {
+////            binding.processInfoError(call);
+////        }
+//    }
 
     private ControlAddress getReturnAddress() {
         return getAddress();
@@ -167,6 +174,17 @@ public class DefaultBindingControl extends AbstractControl {
             if (adaptors.remove(adaptor)) {
                 unbind(adaptor);
             }
+            updateSyncConfiguration();
+        }
+
+        private void removeAll() {
+            Iterator<Adaptor> itr = adaptors.iterator();
+            while (itr.hasNext()) {
+                Adaptor adaptor = itr.next();
+                unbind(adaptor);
+                itr.remove();
+            }
+            updateSyncConfiguration();
         }
 
         @Override
@@ -302,6 +320,8 @@ public class DefaultBindingControl extends AbstractControl {
                     }
                 }
                 activeCall = null;
+            } else if (call.getMatchID() == infoMatchID) {
+                processInfo(call);
             }
         }
 
@@ -314,6 +334,8 @@ public class DefaultBindingControl extends AbstractControl {
                     LOG.warning("Error on sync call");
                 }
                 activeCall = null;
+            } else if (call.getMatchID() == infoMatchID) {
+                processInfoError(call);
             }
         }
 
