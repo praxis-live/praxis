@@ -24,12 +24,6 @@ package net.neilcsmith.praxis.video.components;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
 import net.neilcsmith.praxis.impl.AbstractComponentFactory;
-import net.neilcsmith.praxis.video.components.Snapshot;
-import net.neilcsmith.praxis.video.components.Splitter;
-import net.neilcsmith.praxis.video.components.Still;
-import net.neilcsmith.praxis.video.components.VideoCapture;
-import net.neilcsmith.praxis.video.components.VideoOutput;
-import net.neilcsmith.praxis.video.components.VideoPlayer;
 import net.neilcsmith.praxis.video.components.filters.Blur;
 import net.neilcsmith.praxis.video.components.mix.Composite;
 import net.neilcsmith.praxis.video.components.mix.XFader;
@@ -69,12 +63,7 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
             addComponent("video:still", Still.class);
             addComponent("video:snapshot", Snapshot.class);
             addComponent("video:splitter", Splitter.class);
-            addComponent("video:test:hypnosis", Hyp.class);
-            addComponent("video:test:time", FrameTimer.class);
-            addComponent("video:test:save", ImageSave.class);
-            addComponent("video:test:difference-calc", DifferenceCalc.class);
-            addComponent("video:test:bgdiff", BackgroundDifference.class);
-            addComponent("video:test:noise", Noise.class);
+
             addComponent("video:time-fx:ripple", Ripple.class);
             addComponent("video:time-fx:difference", Difference.class);
             addComponent("video:mix:xfader", XFader.class);
@@ -83,7 +72,20 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
             addComponent("video:player", VideoPlayer.class);
             addComponent("video:capture", VideoCapture.class);
 
+            addComponent("video:filter:blur", Blur.class);
+
+            addComponent("video:source:noise", Noise.class);
+
+
+            // TEST COMPONENTS
+            addComponent("video:test:hypnosis", Hyp.class);
+            addComponent("video:test:time", FrameTimer.class);
+            addComponent("video:test:save", ImageSave.class);
+            addComponent("video:test:difference-calc", DifferenceCalc.class);
+            addComponent("video:test:bgdiff", BackgroundDifference.class);
+            addComponent("video:test:noise", Noise.class);
             addComponent("video:test:filter:blur", Blur.class);
+
         }
     }
 }
