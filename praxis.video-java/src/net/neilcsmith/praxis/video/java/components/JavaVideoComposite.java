@@ -46,10 +46,10 @@ public class JavaVideoComposite extends AbstractJavaVideoComponent {
     public JavaVideoComposite() {
         setupDelegator();
         setupCodeControl();
-        buildImageControls("im", 8, 4);
+        buildImageControls("img", 4, 0);
         buildParams("p", 16, 8);
-        buildTriggers("t", 8, 4);
-        buildOutputs("out-", 4);
+        buildTriggers("t", 4, 4);
+        buildOutputs("out-", 2);
     }
 
     private void setupDelegator() {

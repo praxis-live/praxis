@@ -185,10 +185,14 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
 
     }
 
+    @Deprecated
     public PImage im(int idx) {
         return videoContext.getImage(idx - 1);
     }
 
+    public final PImage img(int idx) {
+        return videoContext.getImage(idx - 1);
+    }
 
     // PGraphics impl
 
