@@ -21,10 +21,6 @@
  */
 package net.neilcsmith.praxis.audio.components;
 
-import net.neilcsmith.praxis.audio.components.AudioInput;
-import net.neilcsmith.praxis.audio.components.AudioOutput;
-import net.neilcsmith.praxis.audio.components.Gain;
-import net.neilcsmith.praxis.audio.components.SamplePlayer;
 import net.neilcsmith.praxis.audio.components.distortion.SimpleOverdrive;
 import net.neilcsmith.praxis.audio.components.filter.CombFilter;
 import net.neilcsmith.praxis.audio.components.filter.IIRFilter;
