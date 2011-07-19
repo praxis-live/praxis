@@ -22,7 +22,7 @@
 
 package net.neilcsmith.praxis.audio;
 
-import net.neilcsmith.audioservers.AudioServer;
+import org.jaudiolibs.audioservers.AudioServer;
 
 
 /**

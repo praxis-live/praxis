@@ -22,9 +22,8 @@
 
 package net.neilcsmith.rapl.components.time;
 
-import net.neilcsmith.audioops.impl.ContainerOp;
-import net.neilcsmith.audioops.impl.DelayOp;
-import net.neilcsmith.audioops.impl.VariableDelayOp;
+import org.jaudiolibs.audioops.impl.ContainerOp;
+import org.jaudiolibs.audioops.impl.VariableDelayOp;
 import net.neilcsmith.rapl.components.SingleInOutOpComponent;
 
 

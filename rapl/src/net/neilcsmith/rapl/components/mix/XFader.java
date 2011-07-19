@@ -22,7 +22,7 @@
  */
 package net.neilcsmith.rapl.components.mix;
 
-import net.neilcsmith.audioops.impl.GainOp;
+import org.jaudiolibs.audioops.impl.GainOp;
 import net.neilcsmith.rapl.core.Buffer;
 import net.neilcsmith.rapl.core.Source;
 import net.neilcsmith.rapl.core.impl.MultiInputInOut;

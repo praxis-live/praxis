@@ -23,8 +23,8 @@
 
 package net.neilcsmith.rapl.components.distortion;
 
-import net.neilcsmith.audioops.impl.ContainerOp;
-import net.neilcsmith.audioops.impl.gpl.OverdriveOp;
+import org.jaudiolibs.audioops.impl.ContainerOp;
+import org.jaudiolibs.audioops.impl.gpl.OverdriveOp;
 import net.neilcsmith.rapl.components.SingleInOutOpComponent;
 
 /**

@@ -22,11 +22,11 @@
 package net.neilcsmith.rapl.render;
 
 import java.nio.FloatBuffer;
-import net.neilcsmith.audioservers.AudioConfiguration;
+import org.jaudiolibs.audioservers.AudioConfiguration;
 import net.neilcsmith.rapl.core.BufferRateListener;
 import java.util.ArrayList;
 import java.util.List;
-import net.neilcsmith.audioservers.AudioClient;
+import org.jaudiolibs.audioservers.AudioClient;
 import net.neilcsmith.rapl.core.Buffer;
 import net.neilcsmith.rapl.core.Bus;
 import net.neilcsmith.rapl.core.Sink;

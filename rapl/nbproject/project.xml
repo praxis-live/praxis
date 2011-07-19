@@ -7,7 +7,7 @@
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>net.neilcsmith.audioops</code-name-base>
+                    <code-name-base>org.jaudiolibs.audioops</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -15,7 +15,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.audioops.impl</code-name-base>
+                    <code-name-base>org.jaudiolibs.audioops.impl</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -23,7 +23,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.audioops.impl.gpl</code-name-base>
+                    <code-name-base>org.jaudiolibs.audioops.impl.gpl</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -31,7 +31,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.audioservers</code-name-base>
+                    <code-name-base>org.jaudiolibs.audioservers</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>

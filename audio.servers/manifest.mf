@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 AutoUpdate-Show-In-Client: false
-OpenIDE-Module: net.neilcsmith.audioservers
-OpenIDE-Module-Localizing-Bundle: net/neilcsmith/audioservers/Bundle.properties
+OpenIDE-Module: org.jaudiolibs.audioservers
+OpenIDE-Module-Localizing-Bundle: org/jaudiolibs/audioservers/Bundle.properties
 OpenIDE-Module-Specification-Version: 1.0
 

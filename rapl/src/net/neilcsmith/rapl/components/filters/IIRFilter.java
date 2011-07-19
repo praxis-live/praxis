@@ -23,8 +23,8 @@
 
 package net.neilcsmith.rapl.components.filters;
 
-import net.neilcsmith.audioops.impl.ContainerOp;
-import net.neilcsmith.audioops.impl.IIRFilterOp;
+import org.jaudiolibs.audioops.impl.ContainerOp;
+import org.jaudiolibs.audioops.impl.IIRFilterOp;
 import net.neilcsmith.rapl.components.SingleInOutOpComponent;
 
 /**

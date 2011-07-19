@@ -22,7 +22,7 @@
  */
 package net.neilcsmith.rapl.components;
 
-import net.neilcsmith.audioops.AudioOp;
+import org.jaudiolibs.audioops.AudioOp;
 import net.neilcsmith.rapl.core.Buffer;
 import net.neilcsmith.rapl.core.impl.SingleInOut;
 

@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-OpenIDE-Module: net.neilcsmith.audioservers.jack
-OpenIDE-Module-Localizing-Bundle: net/neilcsmith/audioservers/jack/Bundle.properties
+OpenIDE-Module: org.jaudiolibs.audioservers.jack
+OpenIDE-Module-Localizing-Bundle: org/jaudiolibs/audioservers/jack/Bundle.properties
 OpenIDE-Module-Specification-Version: 1.0
 

@@ -23,11 +23,11 @@ package net.neilcsmith.praxis.audio.components;
 
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
-import net.neilcsmith.audioservers.AudioClient;
-import net.neilcsmith.audioservers.AudioConfiguration;
-import net.neilcsmith.audioservers.AudioServer;
-import net.neilcsmith.audioservers.jack.JackAudioServer;
-import net.neilcsmith.audioservers.javasound.JavasoundAudioServer;
+import org.jaudiolibs.audioservers.AudioClient;
+import org.jaudiolibs.audioservers.AudioConfiguration;
+import org.jaudiolibs.audioservers.AudioServer;
+import org.jaudiolibs.audioservers.jack.JackAudioServer;
+import org.jaudiolibs.audioservers.javasound.JavasoundAudioServer;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.types.PMap;
 

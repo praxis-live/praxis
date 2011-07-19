@@ -23,8 +23,8 @@ package net.neilcsmith.praxis.audio.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.neilcsmith.audioservers.AudioConfiguration;
-import net.neilcsmith.audioservers.AudioServer;
+import org.jaudiolibs.audioservers.AudioConfiguration;
+import org.jaudiolibs.audioservers.AudioServer;
 import net.neilcsmith.praxis.audio.AudioContext;
 import net.neilcsmith.praxis.audio.ClientRegistrationException;
 import net.neilcsmith.praxis.core.Argument;

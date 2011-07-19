@@ -3,11 +3,11 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>net.neilcsmith.audioops.impl.gpl</code-name-base>
+            <code-name-base>org.jaudiolibs.audioops.impl.gpl</code-name-base>
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>net.neilcsmith.audioops</code-name-base>
+                    <code-name-base>org.jaudiolibs.audioops</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -16,7 +16,7 @@
                 </dependency>
             </module-dependencies>
             <public-packages>
-                <package>net.neilcsmith.audioops.impl.gpl</package>
+                <package>org.jaudiolibs.audioops.impl.gpl</package>
             </public-packages>
         </data>
     </configuration>

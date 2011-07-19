@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-OpenIDE-Module: net.neilcsmith.audioops.impl
-OpenIDE-Module-Localizing-Bundle: net/neilcsmith/audioops/impl/Bundle.properties
+OpenIDE-Module: org.jaudiolibs.audioops.impl
+OpenIDE-Module-Localizing-Bundle: org/jaudiolibs/audioops/impl/Bundle.properties
 OpenIDE-Module-Specification-Version: 1.0
 

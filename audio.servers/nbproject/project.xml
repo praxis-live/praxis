@@ -3,12 +3,11 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>net.neilcsmith.audioservers</code-name-base>
+            <code-name-base>org.jaudiolibs.audioservers</code-name-base>
             <suite-component/>
             <module-dependencies/>
             <public-packages>
-                <package>net.neilcsmith.audioservers</package>
-                <package>net.neilcsmith.audioservers.impl</package>
+                <package>org.jaudiolibs.audioservers</package>
             </public-packages>
         </data>
     </configuration>
