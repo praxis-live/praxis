@@ -1,23 +1,16 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright 2010 Neil C Smith.
- * 
- * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 3 only, as
- * published by the Free Software Foundation.
- * 
- * This code is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 3 for more details.
- * 
- * You should have received a copy of the GNU General Public License version 3
- * along with this work; if not, see http://www.gnu.org/licenses/
- * 
- * 
+ *
+ * Copyright 2011 Neil C Smith.
+ *
+ * Copying and distribution of this file, with or without modification,
+ * are permitted in any medium without royalty provided the copyright
+ * notice and this notice are preserved.  This file is offered as-is,
+ * without any warranty.
+ *
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
+ *
  */
 package net.neilcsmith.ripl.rgbmath;
 
@@ -41,7 +34,7 @@ public abstract class RGBComposite {
 
     public abstract void composeRGB(int[] src, int srcPos,
             int[] dest, int destPos, int length);
-    
+
     public abstract void composeARGB(int[] src, int srcPos,
             int[] dest, int destPos, int length);
 
@@ -70,7 +63,7 @@ public abstract class RGBComposite {
                 destR = (destPx & RED_MASK) >>> 16;
                 destG = (destPx & GREEN_MASK) >>> 8;
                 destB = (destPx & BLUE_MASK);
-                
+
                 dest[destPos] = min(srcR + destR, 0xFF) << 16 |
                         min(srcG + destG, 0xFF) << 8 |
                         min(srcB + destB, 0xFF);
@@ -110,7 +103,7 @@ public abstract class RGBComposite {
                         min(srcR + destR, a) << 16 |
                         min(srcG + destG, a) << 8 |
                         min(srcB + destB, a);
-                
+
                 srcPos++;
                 destPos++;
             }
@@ -177,7 +170,7 @@ public abstract class RGBComposite {
 
         }
     }
-
+    
     public static class Sub extends RGBComposite {
 
         public Sub(double extraAlpha) {
@@ -493,7 +486,6 @@ public abstract class RGBComposite {
 
         }
     }
-
 //    public static class AddTest extends RGBComposite {
 //
 //        public AddTest(double extraAlpha) {
