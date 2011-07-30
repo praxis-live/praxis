@@ -30,6 +30,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -66,7 +67,8 @@ public class Terminal extends JComponent {
     private Context context;
 //    private JTextPane hTextPane;
     private StyledDocument history;
-    private JTextArea input;
+//    private JTextArea input;
+    private JEditorPane input;
     private JButton evalButton;
     private Action evalAction;
     private JButton clearButton;
@@ -103,17 +105,19 @@ public class Terminal extends JComponent {
         setLayout(new MigLayout("fill"));
         history = new DefaultStyledDocument();
         JTextPane hTextPane = new JTextPane(history);
-        hTextPane.setEditable(false);
-        input = new JTextArea();
+        hTextPane.setEditable(false);        
         JScrollPane hPane = new JScrollPane(hTextPane,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        hPane.setMinimumSize(new Dimension(200, 100));
+        hPane.setMinimumSize(new Dimension(300, 200));
         hPane.setPreferredSize(new Dimension(450, 250));
+        //        input = new JTextArea();
+        input = new JEditorPane();
         JScrollPane iPane = new JScrollPane(input,
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        iPane.setMinimumSize(new Dimension(200, 100));
+        iPane.setMinimumSize(new Dimension(300, 200));
+        input.setContentType("text/x-praxis-script");
         // iPane.setPreferredSize(new Dimension(450, 250));
         JSplitPane splPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 hPane, iPane);
