@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
 OpenIDE-Module: net.miginfocom
 OpenIDE-Module-Localizing-Bundle: net/miginfocom/Bundle.properties
-OpenIDE-Module-Specification-Version: 3.7.2
+OpenIDE-Module-Specification-Version: 3.7.4
 

@@ -11,8 +11,8 @@
                 <package>net.miginfocom.swing</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/miglayout-3.7.2-swing.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/miglayout-3.7.2-swing.jar</binary-origin>
+                <runtime-relative-path>ext/miglayout-3.7.4.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/miglayout-3.7.4.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>
