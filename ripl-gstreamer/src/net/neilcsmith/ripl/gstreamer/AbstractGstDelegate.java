@@ -359,7 +359,7 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
 
     private class RGBListener implements RGBDataSink.Listener {
 
-        public void rgbFrame(int width, int height, IntBuffer rgb) {
+        public void rgbFrame(boolean preroll, int width, int height, IntBuffer rgb) {
 
             if (!imageLock.tryLock()) {
                 return;

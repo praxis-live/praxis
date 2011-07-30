@@ -60,7 +60,8 @@ public class IPCamDelegate extends AbstractGstDelegate {
         Pipeline.linkMany(src, decoder);
         decoder.connect(new DecodeBin.NEW_DECODED_PAD() {
 
-            public void newDecodedPad(Element elem, Pad pad, boolean last) {
+//            public void newDecodedPad(Element elem, Pad pad, boolean last) {
+            public void newDecodedPad(DecodeBin elem, Pad pad, boolean last) {
                 /* only link once */
                 if (pad.isLinked()) {
                     return;
