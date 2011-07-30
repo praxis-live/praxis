@@ -31,7 +31,9 @@ import net.neilcsmith.praxis.video.java.PImage;
 import net.neilcsmith.praxis.video.java.VideoCodeDelegate;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.interfaces.TaskService;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.core.types.PString;
@@ -109,7 +111,9 @@ public abstract class AbstractJavaVideoComponent extends AbstractJavaComponent {
     private class CodeProperty extends AbstractAsyncProperty<VideoCodeDelegate> {
 
         private CodeProperty() {
-            super(PString.info(), VideoCodeDelegate.class, PString.EMPTY);
+            super(ArgumentInfo.create(
+                    PString.class, PMap.valueOf(PString.KEY_MIME_TYPE, "text/x-praxis-java")), 
+                    VideoCodeDelegate.class, PString.EMPTY);
         }
 
         @Override
