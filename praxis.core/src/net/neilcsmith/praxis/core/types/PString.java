@@ -32,6 +32,7 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
 public class PString extends Argument implements Comparable<PString> {
 
     public final static String KEY_ALLOWED_VALUES = "allowed-values";
+    public final static String KEY_MIME_TYPE = "mime-type";
     
     public final static PString EMPTY = PString.valueOf("");
     
