@@ -148,7 +148,6 @@ public class Jack {
      * @return String[] of full port names.
      * @throws net.neilcsmith.jnajack.JackException
      */
-    // @TODO need to free memory allocated by Jack
     public String[] getPorts(String regex, JackPortType type, EnumSet<JackPortFlags> flags)
             throws JackException {
         // don't pass regex String to native method. Invalid Strings can crash the VM

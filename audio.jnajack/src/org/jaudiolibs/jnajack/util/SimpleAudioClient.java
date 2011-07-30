@@ -147,8 +147,6 @@ public class SimpleAudioClient {
      */
     public static SimpleAudioClient create(String name, String[] inputs, String[] outputs,
             Processor processor) throws JackException {
-//        int options = JackLibrary.JackOptions.JackNoStartServer |
-//                JackLibrary.JackOptions.JackUseExactName;
         if (name == null || processor == null) {
             throw new NullPointerException();
         }
