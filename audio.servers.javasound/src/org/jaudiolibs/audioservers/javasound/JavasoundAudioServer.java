@@ -70,22 +70,20 @@ public class JavasoundAudioServer implements AudioServer {
     public static enum TimingMode {
 
         /**
-         * Block on write to output line. Javasound output buffer is same size
-         * as internal buffers.
+         * Blocking timing mode. Block on write to output line.
+         * Javasound output buffer is same size as internal buffers.
          */
         Blocking,
         /**
-         * Use large Javasound output buffer. Determine when to write to output
-         * line via getLongFramePosition().
+         * FramePosition timing mode. Use large Javasound output buffer.
+         * Determine when to write to output line via getLongFramePosition().
          */
         FramePosition,
         /**
-         * Use large Javasound output buffer.  Determine when to write to output
-         * line by estimating position using System.nanotime().
-         *
-         * @TODO Investigate whether xruns in underlying library are causing
-         * latency to increase.
+         * Estimated timing mode. Use large Javasound output buffer.
+         * Determine when to write to output line by estimating position using System.nanotime().
          */
+        // @TODO Investigate whether xruns in underlying library are causing latency to increase.
         Estimated
     };
 
@@ -111,24 +109,14 @@ public class JavasoundAudioServer implements AudioServer {
     private TimingMode mode;
     private TargetDataLine inputLine;
     private SourceDataLine outputLine;
-//    private int inputByteFrameSize;
     private byte[] inputByteBuffer;
     private float[] inputFloatBuffer;
-//    private int outputByteFrameSize;
     private byte[] outputByteBuffer;
     private float[] outputFloatBuffer;
     private List<FloatBuffer> inputBuffers;
     private List<FloatBuffer> outputBuffers;
     private AudioFloatConverter converter;
 
-//    private JavasoundAudioServer(Mixer mixer, TimingMode mode,
-//            AudioConfiguration context, AudioClient client) {
-//        this.mixer = mixer;
-//        this.context = context;
-//        this.mode = mode;
-//        this.client = client;
-//        state = new AtomicReference<State>(State.New);
-//    }
 
     private JavasoundAudioServer(Mixer inputMixer, Mixer outputMixer, TimingMode mode,
             AudioConfiguration context, AudioClient client) {
@@ -331,28 +319,22 @@ public class JavasoundAudioServer implements AudioServer {
         }
     }
 
-    @Deprecated
-    public static JavasoundAudioServer create(Mixer mixer, AudioConfiguration context,
-            TimingMode mode, AudioClient client) {
-        if (mixer == null || mode == null ||
-                context == null || client == null) {
-            throw new NullPointerException();
-        }
-        // must have real time output
-        if (context.getOutputChannelCount() == 0) {
-            throw new IllegalArgumentException();
-        }
-        // always fixed buffer size
-        if (!context.isFixedBufferSize()) {
-            context = new AudioConfiguration(context.getSampleRate(),
-                    context.getInputChannelCount(),
-                    context.getOutputChannelCount(),
-                    context.getMaxBufferSize(),
-                    true);
-        }
-        return new JavasoundAudioServer(mixer, mixer, mode, context, client);
-    }
 
+    /**
+     * Create a JavasoundAudioServer.
+     *
+     *
+     * @param inputMixer Javasound mixer to use for audio input. Can be null as long
+     * as the context passed in requests no audio input channels.
+     * @param outputMixer Javasound mixer to use for audio output.
+     * @param context Requested audio configuration. Variable buffer size property
+     * is ignored.
+     * @param mode Timing mode to use.  For lowest latency use TimingMode.Estimated 
+     * or TimingMode.FramePosition.
+     * @param client Audio client to process every callback.
+     * @return server 
+     * @throws IllegalArgumentException if requested context has no output channels.
+     */
     public static JavasoundAudioServer create(Mixer inputMixer, Mixer outputMixer,
             AudioConfiguration context, TimingMode mode, AudioClient client) {
         if (outputMixer == null || mode == null ||
@@ -377,6 +359,23 @@ public class JavasoundAudioServer implements AudioServer {
         return new JavasoundAudioServer(inputMixer, outputMixer, mode, context, client);
     }
 
+    /**
+     * Create a JavasoundAudioServer.
+     *
+     *
+     * @param device Name of the device to use for audio input and output.
+     * If null or an empty String, the first (default) device that provides the
+     * required number of lines will be chosen. Otherwise a device will be searched for
+     * that contains the provided String in its name.
+     * @param context Requested audio configuration. Variable buffer size property
+     * is ignored.
+     * @param mode Timing mode to use.  For lowest latency use TimingMode.Estimated 
+     * or TimingMode.FramePosition.
+     * @param client Audio client to process every callback.
+     * @return server 
+     * @throws Exception if requested context has no output channels, 
+     * or if suitable mixers cannot be found to satisfy the device name.
+     */
     public static JavasoundAudioServer create(String device, AudioConfiguration context,
             TimingMode mode, AudioClient client) throws Exception {
         if (mode == null || client == null) {

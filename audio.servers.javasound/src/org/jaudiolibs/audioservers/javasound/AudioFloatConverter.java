@@ -78,6 +78,8 @@ import javax.sound.sampled.AudioFormat.Encoding;
 /**
  * This class is used to convert between 8,16,24,32,32+ bit signed/unsigned
  * big/litle endian fixed/floating point byte buffers and float buffers.
+ * 
+ * This class is a modified and repackaged version of the class from Gervill / OpenJDK
  *
  * @author Karl Helgason
  */
