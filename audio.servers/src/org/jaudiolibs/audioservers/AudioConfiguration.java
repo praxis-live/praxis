@@ -44,7 +44,7 @@ public class AudioConfiguration {
     }
 
     /**
-     * Is the buffer size fixed, or may it vary. If variable, the buffer size
+     * Is the buffer size fixed. If variable, the buffer size
      * will always be between 1 and getMaxBufferSize().
      * @return true if fixed, otherwise variable.
      */
