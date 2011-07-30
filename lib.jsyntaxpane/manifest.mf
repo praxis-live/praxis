@@ -1,5 +1,6 @@
 Manifest-Version: 1.0
 OpenIDE-Module: net.neilcsmith.jsyntaxpane
+OpenIDE-Module-Install: net/neilcsmith/jsyntaxpane/Installer.class
 OpenIDE-Module-Localizing-Bundle: net/neilcsmith/jsyntaxpane/Bundle.properties
 OpenIDE-Module-Specification-Version: 1.0
 
