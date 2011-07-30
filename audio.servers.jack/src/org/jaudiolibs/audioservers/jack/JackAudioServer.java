@@ -46,9 +46,9 @@ import org.jaudiolibs.jnajack.JackShutdownCallback;
 /**
  * Implementation of AudioServer using Jack (via JNAJack)
  *
- * @TODO check thread safety of client shutdown.
  * @author Neil C Smith
  */
+// @TODO check thread safety of client shutdown.
 public class JackAudioServer implements AudioServer {
 
     private enum State {
@@ -224,14 +224,13 @@ public class JackAudioServer implements AudioServer {
     /**
      * Create a JackAudioServer.
      *
-     * The samplerate and buffer settings of the context will be ignored. These
-     * settings are taken from Jack itself.
      *
-     * @param id
-     * @param ctxt
-     * @param autoconnect
-     * @param client
-     * @return
+     * @param id Name of Jack client
+     * @param ctxt Requested audio configuration. The samplerate and buffer settings
+     * of the context will be ignored. These settings are taken from Jack itself.
+     * @param autoconnect Whether to connect inputs and outputs to first found physical ports
+     * @param client Audio client to process every Jack callback.
+     * @return server 
      */
     public static JackAudioServer create(String id, AudioConfiguration ctxt,
             boolean autoconnect, AudioClient client) {
