@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary._jack_client;
+import org.jaudiolibs.jnajack.lowlevel.JackLibraryDirect;
 
 /**
  * Main java wrapper to the Jack API. Loads the native library and provides methods
@@ -325,7 +326,8 @@ public class Jack {
         JackLibrary jackLib;
         JackLibrary._jack_client clientPtr;
         try {
-            jackLib = (JackLibrary) Native.loadLibrary("jack", JackLibrary.class);
+//            jackLib = (JackLibrary) Native.loadLibrary("jack", JackLibrary.class);
+            jackLib = new JackLibraryDirect();
             clientPtr = jackLib.jack_client_open("__jnajack__",
                     JackLibrary.JackOptions.JackUseExactName | JackLibrary.JackOptions.JackNoStartServer,
                     null);

@@ -24,6 +24,7 @@ package org.jaudiolibs.jnajack;
 
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -44,7 +45,6 @@ public class JackClient {
     private final static Logger logger = Logger.getLogger(JackClient.class.getName());
     private final static String CALL_ERROR_MSG = "Error calling native lib";
     private final static int FRAME_SIZE = 4;
-
     private JackLibrary._jack_client clientPtr;
     private ProcessCallbackWrapper processCallback; // reference kept - is in use!
     private BufferSizeCallbackWrapper buffersizeCallback;
@@ -113,7 +113,6 @@ public class JackClient {
 
     }
 
-
     /**
      * Convenience method for calling other registerPort - most port creation
      * only requires one flag so this removes the need to create an EnumSet
@@ -166,7 +165,7 @@ public class JackClient {
     }
 
     /**
-     * Set interface to be called if buffer size changes
+     * Set interface to be called if byteBuffer size changes
      * @param callback
      * @throws net.neilcsmith.jnajack.JackException
      */
@@ -251,7 +250,7 @@ public class JackClient {
             throw new JackException();
         }
     }
-    
+
     /**
      * Tell the JACK server to remove this client from the process
      * graph.  Also, disconnect all ports belonging to it, since inactive
@@ -261,7 +260,7 @@ public class JackClient {
         try {
             jackLib.jack_deactivate(clientPtr);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e );
+            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
         }
     }
 
@@ -271,16 +270,15 @@ public class JackClient {
     public void close() {
         try {
             if (clientPtr != null) {
-               jackLib.jack_client_close(clientPtr);
+                jackLib.jack_client_close(clientPtr);
             }
-            
+
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e );
+            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
         } finally {
             clientPtr = null;
         }
     }
-
 
     public String getName() {
         return name;
@@ -332,8 +330,6 @@ public class JackClient {
         close();
     }
 
-
-
     private class ProcessCallbackWrapper implements JackLibrary.JackProcessCallback {
 
         JackProcessCallback callback;
@@ -346,11 +342,20 @@ public class JackClient {
             int ret = 1;
             try {
                 JackPort[] pts = ports;
-                // fill port buffers
+
                 int nbyteframes = nframes * FRAME_SIZE;
+                
                 for (JackPort port : pts) {
-                    port.buffer = jackLib.jack_port_get_buffer(
-                            port.portPtr, nframes).getByteBuffer(0, nbyteframes);
+                    Pointer buffer = jackLib.jack_port_get_buffer(
+                            port.portPtr, nframes);
+                    if (buffer == port.buffer && port.byteBuffer.capacity() == nbyteframes) {
+                        port.byteBuffer.rewind();
+                        port.floatBuffer.rewind();
+                    } else {
+                        port.buffer = buffer;
+                        port.byteBuffer = buffer.getByteBuffer(0, nbyteframes);
+                        port.floatBuffer = port.byteBuffer.asFloatBuffer();
+                    }
                 }
                 if (callback.process(JackClient.this, nframes)) {
                     ret = 0;
@@ -361,7 +366,6 @@ public class JackClient {
             }
             return ret;
         }
-
     }
 
     private class ShutdownCallback implements JackLibrary.JackShutdownCallback {
@@ -369,7 +373,6 @@ public class JackClient {
         public void invoke(Pointer arg) {
             processShutdown();
         }
-
     }
 
     private class BufferSizeCallbackWrapper implements JackLibrary.JackBufferSizeCallback {
@@ -391,7 +394,6 @@ public class JackClient {
             }
             return ret;
         }
-
     }
 
     private class SampleRateCallbackWrapper implements JackLibrary.JackSampleRateCallback {
@@ -413,11 +415,5 @@ public class JackClient {
             }
             return ret;
         }
-
     }
-
 }
-
-
-
-

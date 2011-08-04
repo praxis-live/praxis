@@ -24,7 +24,9 @@
 
 package org.jaudiolibs.jnajack;
 
+import com.sun.jna.Pointer;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
 
 /**
@@ -34,7 +36,11 @@ import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
 public class JackPort {
 
     JackLibrary._jack_port portPtr;
-    ByteBuffer buffer;
+    
+    Pointer buffer;
+    ByteBuffer byteBuffer;
+    FloatBuffer floatBuffer;
+    
     private JackClient client;
     private JackLibrary jackLib;
     private String shortName;
@@ -47,19 +53,23 @@ public class JackPort {
     }
 
     /**
-     * Get the buffer associated with this port. Do not cache this value between
-     * process calls - this buffer reference is only valid inside the process
+     * Get the byteBuffer associated with this port. Do not cache this value between
+     * process calls - this byteBuffer reference is only valid inside the process
      * callback.
      *
-     * The buffer will be returned as a direct ByteBuffer.
+     * The byteBuffer will be returned as a direct ByteBuffer.
      *
      * For audio use <code>getBuffer().asFloatBuffer()</code>
      *
-     * @return buffer associated with this port.
+     * @return byteBuffer associated with this port.
      */
     // @TODO should we create this lazily in call to client. MIDI ports won't require this.
     public ByteBuffer getBuffer() {
-        return buffer;
+        return byteBuffer;
+    }
+    
+    public FloatBuffer getFloatBuffer() {
+        return floatBuffer;      
     }
 
     /**

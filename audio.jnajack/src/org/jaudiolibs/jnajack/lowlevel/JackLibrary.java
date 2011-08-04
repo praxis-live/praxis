@@ -1088,7 +1088,7 @@ public interface JackLibrary extends com.sun.jna.Library {
      * <i>native declaration : jack/jack.h:444</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z29jack_set_port_rename_callbackP12_jack_client22JackPortRenameCallbackPv", "?jack_set_port_rename_callback@@YAHPA12_jack_client22JackPortRenameCallbackPAX@Z"})
-    int jack_set_port_rename_callback(_jack_client jack_client_tPtr1, JackPortRenameCallback rename_callback, com.sun.jna.Pointer arg);
+//    int jack_set_port_rename_callback(_jack_client jack_client_tPtr1, JackPortRenameCallback rename_callback, com.sun.jna.Pointer arg);
 
     /**
      * Tell the JACK server to call @a graph_callback whenever the
@@ -1239,7 +1239,7 @@ public interface JackLibrary extends com.sun.jna.Library {
      * Original signature : <code>jack_port_type_id_t jack_port_type_id(const jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:589</i>
      */
-    int jack_port_type_id(_jack_port port);
+//    int jack_port_type_id(_jack_port port);
 
     /**
      * @return TRUE if the jack_port_t belongs to the jack_client_t.
@@ -1440,7 +1440,7 @@ public interface JackLibrary extends com.sun.jna.Library {
      * Original signature : <code>int jack_port_get_aliases(const jack_port_t*, char*[2])</code>
      * <i>native declaration : jack/jack.h:773</i>
      */
-    int jack_port_get_aliases(_jack_port port, java.nio.ByteBuffer aliases[]);
+//    int jack_port_get_aliases(_jack_port port, java.nio.ByteBuffer aliases[]);
 
     /**
      * If @ref JackPortCanMonitor is set for this @a port, turn input

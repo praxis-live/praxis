@@ -90,10 +90,12 @@ public class SimpleAudioClient {
 
     private void processBuffers(int nframes) {
         for (int i=0; i < inputPorts.length; i++) {
-            inputBuffers[i] = inputPorts[i].getBuffer().asFloatBuffer();
+//            inputBuffers[i] = inputPorts[i].getBuffer().asFloatBuffer();
+            inputBuffers[i] = inputPorts[i].getFloatBuffer();
         }
         for (int i=0; i < outputPorts.length; i++) {
-            outputBuffers[i] = outputPorts[i].getBuffer().asFloatBuffer();
+//            outputBuffers[i] = outputPorts[i].getBuffer().asFloatBuffer();
+            outputBuffers[i] = outputPorts[i].getFloatBuffer();
         }
         processor.process(inputBuffers, outputBuffers);
     }
