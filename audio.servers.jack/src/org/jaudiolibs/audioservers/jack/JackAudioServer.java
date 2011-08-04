@@ -163,10 +163,11 @@ public class JackAudioServer implements AudioServer {
 
     private void processBuffers(int nframes) {
         for (int i = 0; i < inputPorts.length; i++) {
-            inputBuffers.set(i, inputPorts[i].getBuffer().asFloatBuffer());
+            inputBuffers.set(i, inputPorts[i].getFloatBuffer());
         }
         for (int i = 0; i < outputPorts.length; i++) {
-            outputBuffers.set(i, outputPorts[i].getBuffer().asFloatBuffer());
+            outputBuffers.set(i, outputPorts[i].getFloatBuffer());
+            
         }
         client.process(System.nanoTime(), inputBuffers, outputBuffers, nframes);
     }
