@@ -159,6 +159,7 @@ public class JackLibraryDirect implements JackLibrary {
 
     public native NativeLong jack_get_time();
 
-    public native void free(Pointer ptr);
+//    public native void free(Pointer ptr);
+    public native void jack_free(Pointer ptr);
     
 }

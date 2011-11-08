@@ -469,7 +469,7 @@ public interface JackLibrary extends com.sun.jna.Library {
      */
     public interface JackProcessCallback extends com.sun.jna.Callback {
 
-        int invoke(int nframes, com.sun.jna.Pointer arg);
+        int invoke(int nframes);//, com.sun.jna.Pointer arg);
     }
 
     /**
@@ -1713,5 +1713,6 @@ public interface JackLibrary extends com.sun.jna.Library {
         }
     }
 
-    void free(Pointer ptr);
+//    void free(Pointer ptr);
+    void jack_free(Pointer ptr);
 }

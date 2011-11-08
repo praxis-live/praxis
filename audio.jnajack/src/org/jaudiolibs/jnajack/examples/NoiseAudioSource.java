@@ -15,7 +15,7 @@ public class NoiseAudioSource implements SimpleAudioClient.Processor {
      */
     public static void main(String[] args) throws Exception {
         SimpleAudioClient client = SimpleAudioClient.create("noise", new String[0],
-                new String[]{"output1", "output2"}, new NoiseAudioSource());
+                new String[]{"output1", "output2"}, true, true, new NoiseAudioSource());
         client.activate();
         while (true) {
             Thread.sleep(1000);

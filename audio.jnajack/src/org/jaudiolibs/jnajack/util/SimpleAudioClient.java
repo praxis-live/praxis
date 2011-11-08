@@ -49,17 +49,20 @@ public class SimpleAudioClient {
     private FloatBuffer[] outputBuffers;
     private float samplerate;
     private int buffersize;
+    private boolean autoconnect;
     private volatile boolean active;
 
-    protected SimpleAudioClient(JackClient client,
+    private SimpleAudioClient(JackClient client,
             JackPort[] inputPorts,
             JackPort[] outputPorts,
+            boolean autoconnect,
             Processor processor) throws JackException {
         this.client = client;
         this.inputPorts = inputPorts;
         this.outputPorts = outputPorts;
         this.inputBuffers = new FloatBuffer[inputPorts.length];
         this.outputBuffers = new FloatBuffer[outputPorts.length];
+        this.autoconnect = autoconnect;
         this.processor = processor;
         this.callback = new Callback();
         this.shutDownHook = new ShutDownHook();
@@ -67,19 +70,38 @@ public class SimpleAudioClient {
     }
 
     public void activate() throws JackException {
-        try { samplerate = client.getSampleRate();
-        System.out.println("Sample rate = " + samplerate);
-        buffersize = client.getBufferSize();
-        System.out.println("Buffersize = " + buffersize);
-        processor.setup(samplerate, buffersize);
-        active = true;
-        client.setProcessCallback(callback);
-        client.activate();
+        try {
+            samplerate = client.getSampleRate();
+            System.out.println("Sample rate = " + samplerate);
+            buffersize = client.getBufferSize();
+            System.out.println("Buffersize = " + buffersize);
+            processor.setup(samplerate, buffersize);
+            active = true;
+            client.setProcessCallback(callback);
+            client.activate();
+            if (autoconnect) {
+                doAutoconnect();
+            }
         } catch (Exception ex) {
             active = false;
             throw new JackException("Could not activate Jack client");
         }
-
+    }
+    
+    private void doAutoconnect() throws JackException {
+        Jack jack = Jack.getInstance();
+        String[] physical = jack.getPorts(client, null, JackPortType.AUDIO,
+                EnumSet.of(JackPortFlags.JackPortIsInput, JackPortFlags.JackPortIsPhysical));
+        int count = Math.min(outputPorts.length, physical.length);
+        for (int i=0; i<count; i++) {
+            jack.connect(client, outputPorts[i].getName(), physical[i]);
+        }
+        physical = jack.getPorts(client, null, JackPortType.AUDIO,
+                EnumSet.of(JackPortFlags.JackPortIsOutput, JackPortFlags.JackPortIsPhysical));
+        count = Math.min(inputPorts.length, physical.length);
+        for (int i=0; i<count; i++) {
+            jack.connect(client, physical[i], inputPorts[i].getName());
+        }
     }
 
     public void shutdown() {
@@ -89,19 +111,16 @@ public class SimpleAudioClient {
     }
 
     private void processBuffers(int nframes) {
-        for (int i=0; i < inputPorts.length; i++) {
-//            inputBuffers[i] = inputPorts[i].getBuffer().asFloatBuffer();
+        for (int i = 0; i < inputPorts.length; i++) {
             inputBuffers[i] = inputPorts[i].getFloatBuffer();
         }
-        for (int i=0; i < outputPorts.length; i++) {
-//            outputBuffers[i] = outputPorts[i].getBuffer().asFloatBuffer();
+        for (int i = 0; i < outputPorts.length; i++) {
             outputBuffers[i] = outputPorts[i].getFloatBuffer();
         }
         processor.process(inputBuffers, outputBuffers);
     }
 
     private class Callback implements JackProcessCallback {
-
 
         public boolean process(JackClient client, int nframes) {
             if (!active) {
@@ -127,7 +146,6 @@ public class SimpleAudioClient {
             processor.shutdown();
         }
     }
-    
 
     public static interface Processor {
 
@@ -140,6 +158,10 @@ public class SimpleAudioClient {
 
     /**
      * Create a SimpleAudioClient.
+     * 
+     * The Jack server is not started if not already running, and ports are not
+     * automatically connected.
+     * 
      * @param name
      * @param inputs array of input port names, may be null.
      * @param outputs array of output port names, may be null.
@@ -147,7 +169,33 @@ public class SimpleAudioClient {
      * @return client
      * @throws net.neilcsmith.jnajack.JackException
      */
-    public static SimpleAudioClient create(String name, String[] inputs, String[] outputs,
+    public static SimpleAudioClient create(
+            String name,
+            String[] inputs,
+            String[] outputs,
+            Processor processor) throws JackException {
+        return create(name, inputs, outputs, false, false, processor);
+    }
+
+    /**
+     * Create a SimpleAudioClient.
+     * @param name
+     * @param inputs array of input port names, may be null.
+     * @param outputs array of output port names, may be null.
+     * @param autoconnect whether to autoconnect to system input and output ports
+     * @param startServer whether to force the Jack server to start if it isn't running -
+     * see the Jack documentation for .jackdrc to find out how to set the parameters the server
+     * is started with
+     * @param processor
+     * @return client
+     * @throws net.neilcsmith.jnajack.JackException
+     */
+    public static SimpleAudioClient create(
+            String name,
+            String[] inputs,
+            String[] outputs,
+            boolean autoconnect,
+            boolean startServer,
             Processor processor) throws JackException {
         if (name == null || processor == null) {
             throw new NullPointerException();
@@ -159,8 +207,9 @@ public class SimpleAudioClient {
             outputs = new String[0];
         }
         Jack jack = Jack.getInstance();
-        EnumSet<JackOptions> options = EnumSet.of(JackOptions.JackNoStartServer,
-                JackOptions.JackUseExactName);
+        EnumSet<JackOptions> options =
+                startServer ? EnumSet.noneOf(JackOptions.class)
+                : EnumSet.of(JackOptions.JackNoStartServer);
 
         EnumSet<JackStatus> status = EnumSet.noneOf(JackStatus.class);
         JackClient client;
@@ -173,16 +222,16 @@ public class SimpleAudioClient {
 
         JackPort[] inputPorts = new JackPort[inputs.length];
         EnumSet<JackPortFlags> flags = EnumSet.of(JackPortFlags.JackPortIsInput);
-        for (int i=0; i<inputs.length; i++) {
+        for (int i = 0; i < inputs.length; i++) {
             inputPorts[i] = client.registerPort(inputs[i], JackPortType.AUDIO, flags);
         }
 
         JackPort[] outputPorts = new JackPort[outputs.length];
         flags = EnumSet.of(JackPortFlags.JackPortIsOutput);
-        for (int i=0; i<outputs.length; i++) {
+        for (int i = 0; i < outputs.length; i++) {
             outputPorts[i] = client.registerPort(outputs[i], JackPortType.AUDIO, flags);
         }
 
-        return new SimpleAudioClient(client, inputPorts, outputPorts, processor);
+        return new SimpleAudioClient(client, inputPorts, outputPorts, autoconnect, processor);
     }
 }

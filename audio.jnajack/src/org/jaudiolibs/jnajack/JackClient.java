@@ -24,7 +24,6 @@ package org.jaudiolibs.jnajack;
 
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -45,7 +44,9 @@ public class JackClient {
     private final static Logger logger = Logger.getLogger(JackClient.class.getName());
     private final static String CALL_ERROR_MSG = "Error calling native lib";
     private final static int FRAME_SIZE = 4;
-    private JackLibrary._jack_client clientPtr;
+    
+    JackLibrary._jack_client clientPtr; // package private
+    
     private ProcessCallbackWrapper processCallback; // reference kept - is in use!
     private BufferSizeCallbackWrapper buffersizeCallback;
     private SampleRateCallbackWrapper samplerateCallback;
@@ -338,7 +339,7 @@ public class JackClient {
             this.callback = callback;
         }
 
-        public int invoke(int nframes, Pointer arg) {
+        public int invoke(int nframes) { //, Pointer arg) {
             int ret = 1;
             try {
                 JackPort[] pts = ports;

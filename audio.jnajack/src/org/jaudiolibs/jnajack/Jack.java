@@ -49,15 +49,13 @@ import org.jaudiolibs.jnajack.lowlevel.JackLibraryDirect;
  */
 public class Jack {
 
-    private static Logger logger = Logger.getLogger(Jack.class.getName());
+    private static final Logger LOG = Logger.getLogger(Jack.class.getName());
     private final static String CALL_ERROR_MSG = "Error calling native lib";
     private static Jack instance;
     private JackLibrary jackLib;
-    private _jack_client clientPtr;
 
-    private Jack(JackLibrary jackLib, _jack_client clientPtr) {
+    private Jack(JackLibrary jackLib) {
         this.jackLib = jackLib;
-        this.clientPtr = clientPtr;
     }
 
     /**
@@ -85,7 +83,7 @@ public class Jack {
         try {
             cl = jackLib.jack_client_open(name, opt, statRef);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException("Could not create Jack client", e);
         }
         // get status set from int
@@ -107,7 +105,7 @@ public class Jack {
             try {
                 name = jackLib.jack_get_client_name(cl);
             } catch (Throwable e) {
-                logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+                LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
                 try {
                     jackLib.jack_client_close(cl);
                 } catch (Throwable e2) {
@@ -149,9 +147,31 @@ public class Jack {
      * @return String[] of full port names.
      * @throws net.neilcsmith.jnajack.JackException
      */
+    @Deprecated
     public String[] getPorts(String regex, JackPortType type, EnumSet<JackPortFlags> flags)
             throws JackException {
+        JackClient client = openClient("__jnajack__", EnumSet.of(JackOptions.JackNoStartServer), null);
+        String[] ret = getPorts(client, regex, type, flags);
+        client.close();
+        return ret;
+    }
+
+    /**
+     * Get an array of port names that match the requested criteria.
+     * @param client A currently open client
+     * @param regex A regular expression to match against the port names. If null or
+     * of zero length then no filtering will be done.
+     * @param type A JackPortType to filter results by. If null, the results will not
+     * be filtered by type.
+     * @param flags A set of JackPortFlags to filter results by. If the set is empty
+     * or null then the results will not be filtered.
+     * @return String[] of full port names.
+     * @throws net.neilcsmith.jnajack.JackException
+     */
+    public String[] getPorts(JackClient client, String regex, JackPortType type,
+            EnumSet<JackPortFlags> flags) throws JackException {
         // don't pass regex String to native method. Invalid Strings can crash the VM
+        
         int fl = 0;
         if (flags != null) {
             for (JackPortFlags flag : flags) {
@@ -160,26 +180,25 @@ public class Jack {
         }
         String typeString = type == null ? null : type.getTypeString();
         try {
-            Pointer ptr = jackLib.jack_get_ports(clientPtr, null,
+            Pointer ptr = jackLib.jack_get_ports(client.clientPtr, null,
                     typeString, new NativeLong(fl));
             if (ptr == null) {
                 return new String[0];
             } else {
                 String[] names = ptr.getStringArray(0);
-                jackLib.free(ptr);
+                jackLib.jack_free(ptr);
                 if (regex != null && !regex.isEmpty()) {
                     names = filterRegex(names, regex);
                 }
                 return names;
             }
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
         }
-
-
     }
-
+    
+    
     private String[] filterRegex(String[] names, String regex) {
         Pattern pattern = Pattern.compile(regex);
         ArrayList<String> list = new ArrayList<String>();
@@ -203,22 +222,43 @@ public class Jack {
      * @param source
      * @param destination
      * @throws JackException
-     * @TODO this method fails if the jack server has been restarted as the client
-     * no longer exists.
      */
+    @Deprecated
     public void connect(String source, String destination)
+            throws JackException {
+        JackClient client = openClient("__jnajack__", EnumSet.of(JackOptions.JackNoStartServer), null);
+        connect(client, source, destination);
+        client.close();
+    }
+    
+    /**
+     * Establish a connection between two ports.
+     * When a connection exists, data written to the source port will
+     * be available to be read at the destination port.
+     * The port types must be identical.
+     * The JackPortFlags of the source port must include
+     * JackPortIsOutput.
+     * The JackPortFlags of the destination port must include
+     * JackPortIsInput.
+     * @param client
+     * @param source - output port
+     * @param destination - input port
+     * @throws JackException
+     */
+    public void connect(JackClient client, String source, String destination)
             throws JackException {
         int ret = -1;
         try {
-            ret = jackLib.jack_connect(clientPtr, source, destination);
+            ret = jackLib.jack_connect(client.clientPtr, source, destination);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
         }
         if (ret != 0) {
             throw new JackException();
         }
     }
+    
 
     /**
      * Remove a connection between two ports.
@@ -226,13 +266,28 @@ public class Jack {
      * @param destination
      * @throws JackException
      */
+    @Deprecated
     public void disconnect(String source, String destination)
+            throws JackException {
+        JackClient client = openClient("__jnajack__", EnumSet.of(JackOptions.JackNoStartServer), null);
+        disconnect(client, source, destination);
+        client.close();
+    }
+    
+    /**
+     * Remove a connection between two ports.
+     * @param client 
+     * @param source - output port
+     * @param destination - input port
+     * @throws JackException
+     */
+    public void disconnect(JackClient client, String source, String destination)
             throws JackException {
         int ret = -1;
         try {
-            ret = jackLib.jack_disconnect(clientPtr, source, destination);
+            ret = jackLib.jack_disconnect(client.clientPtr, source, destination);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
         }
         if (ret != 0) {
@@ -249,7 +304,7 @@ public class Jack {
         try {
             return jackLib.jack_client_name_size() - 1;
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
         }
     }
@@ -264,7 +319,7 @@ public class Jack {
         try {
             return jackLib.jack_port_name_size() - 1;
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
         }
     }
@@ -280,20 +335,20 @@ public class Jack {
         try {
             return jackLib.jack_get_time().longValue();
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
         }
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        try {
-            jackLib.jack_client_close(clientPtr);
-        } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
-        }
-    }
+//    @Override
+//    protected void finalize() throws Throwable {
+//        super.finalize();
+//        try {
+//            jackLib.jack_client_close(clientPtr);
+//        } catch (Throwable e) {
+//            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+//        }
+//    }
 
     // @TODO this is not in Jack 1 API - implement usable workaround.
 //    public int[] getVersion() throws JackException {
@@ -319,26 +374,26 @@ public class Jack {
      * @return Jack
      * @throws net.neilcsmith.jnajack.JackException if native library cannot be loaded.
      */
-    public synchronized static Jack getInstance() throws JackException {
+    public synchronized static Jack getInstance() throws JackException {        
         if (instance != null) {
             return instance;
         }
         JackLibrary jackLib;
-        JackLibrary._jack_client clientPtr;
+//        JackLibrary._jack_client clientPtr;
         try {
 //            jackLib = (JackLibrary) Native.loadLibrary("jack", JackLibrary.class);
             jackLib = new JackLibraryDirect();
-            clientPtr = jackLib.jack_client_open("__jnajack__",
-                    JackLibrary.JackOptions.JackUseExactName | JackLibrary.JackOptions.JackNoStartServer,
-                    null);
+//            clientPtr = jackLib.jack_client_open("__jnajack__",
+//                    JackLibrary.JackOptions.JackNoStartServer,
+//                    null);
 
         } catch (Throwable e) {
             throw new JackException("Can't find native library", e);
         }
-        if (clientPtr == null) {
-            throw new JackException("Could not initialize JNAJack client");
-        }
-        instance = new Jack(jackLib, clientPtr);
+//        if (clientPtr == null) {
+//            throw new JackException("Could not initialize JNAJack client");
+//        }
+        instance = new Jack(jackLib);
         return instance;
 
 

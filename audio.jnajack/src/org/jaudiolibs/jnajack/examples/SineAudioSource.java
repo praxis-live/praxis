@@ -24,17 +24,8 @@ public class SineAudioSource implements SimpleAudioClient.Processor {
      */
     public static void main(String[] args) throws Exception {
         SimpleAudioClient client = SimpleAudioClient.create("sine", new String[0],
-                new String[]{"output-L", "output-R"}, new SineAudioSource());
+                new String[]{"output-L", "output-R"}, true, true, new SineAudioSource());
         client.activate();
-        Jack jack = Jack.getInstance();
-        String[] ports = jack.getPorts(null, JackPortType.AUDIO,
-                EnumSet.of(JackPortFlags.JackPortIsInput, JackPortFlags.JackPortIsPhysical));
-        if (ports.length > 1) {
-            jack.connect("sine:output-L", ports[0]);
-            jack.connect("sine:output-R", ports[1]);
-        } else {
-            System.out.println("Can't connect ports");
-        }
         while (true) {
             Thread.sleep(1000);
         }

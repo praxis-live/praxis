@@ -16,7 +16,7 @@ public class PassThrough implements SimpleAudioClient.Processor {
      */
     public static void main(String[] args) throws Exception {
         SimpleAudioClient client = SimpleAudioClient.create("pass-through", new String[] {"input-L", "input-R"},
-                new String[]{"output-L", "output-R"}, new PassThrough());
+                new String[]{"output-L", "output-R"}, true, true, new PassThrough());
         client.activate();
         while (true) {
             Thread.sleep(1000);
