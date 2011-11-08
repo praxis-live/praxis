@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: com.sun.jna
-OpenIDE-Module-Localizing-Bundle: com/sun/jna/Bundle.properties
-OpenIDE-Module-Specification-Version: 3.0.9
-
