@@ -145,15 +145,17 @@ public class JackAudioServer implements AudioServer {
 
     private void autoconnect() {
         try {
-            String[] ins = jack.getPorts(null, JackPortType.AUDIO, EnumSet.of(JackPortFlags.JackPortIsOutput, JackPortFlags.JackPortIsPhysical));
-            String[] outs = jack.getPorts(null, JackPortType.AUDIO, EnumSet.of(JackPortFlags.JackPortIsInput, JackPortFlags.JackPortIsPhysical));
+            String[] ins = jack.getPorts(jackclient, null, JackPortType.AUDIO,
+                    EnumSet.of(JackPortFlags.JackPortIsOutput, JackPortFlags.JackPortIsPhysical));
+            String[] outs = jack.getPorts(jackclient, null, JackPortType.AUDIO,
+                    EnumSet.of(JackPortFlags.JackPortIsInput, JackPortFlags.JackPortIsPhysical));
             int inCount = Math.min(ins.length, inputPorts.length);
             for (int i=0; i<inCount; i++) {
-                jack.connect(ins[i], inputPorts[i].getName());
+                jack.connect(jackclient, ins[i], inputPorts[i].getName());
             }
             int outCount = Math.min(outs.length, outputPorts.length);
             for (int i=0; i<outCount; i++) {
-                jack.connect(outputPorts[i].getName(), outs[i]);
+                jack.connect(jackclient, outputPorts[i].getName(), outs[i]);
             }
         } catch (JackException ex) {
             Logger.getLogger(JackAudioServer.class.getName()).log(Level.SEVERE, null, ex);
