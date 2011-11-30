@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2011 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,26 +19,26 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
+
 package net.neilcsmith.praxis.video;
 
-import java.net.URI;
-import java.util.Set;
-import net.neilcsmith.ripl.delegates.VideoDelegate;
+import net.neilcsmith.ripl.Player;
 
 /**
  *
- * @author Neil C Smith
+ * @author nsigma
  */
-public interface VideoDelegateFactory {
-
-    public VideoDelegate create(URI resource) throws InvalidVideoResourceException, InstantiationException;
-
+public interface PlayerFactory {
+    
+    public Player createPlayer(PlayerConfiguration config, ClientConfiguration[] clients)
+            throws Exception;
+    
     public static interface Provider {
-
-        public Set<String> getSupportedSchemes();
-
+        
+        public PlayerFactory getFactory();
+        
         public String getLibraryName();
-
-        public VideoDelegateFactory getFactory();
+        
     }
+    
 }

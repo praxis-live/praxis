@@ -29,6 +29,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
+import net.neilcsmith.praxis.video.ClientConfiguration;
 import net.neilcsmith.praxis.video.ClientRegistrationException;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.VideoContext;
@@ -89,11 +90,11 @@ public class VideoOutput extends AbstractComponent {
 
         @Override
         public Object getClientHint(String key) {
-            if (VideoContext.CLIENT_KEY_WIDTH.equals(key)) {
+            if (ClientConfiguration.CLIENT_KEY_WIDTH.equals(key)) {
                 return getInteger(width.getValue());
-            } else if (VideoContext.CLIENT_KEY_HEIGHT.equals(key)) {
+            } else if (ClientConfiguration.CLIENT_KEY_HEIGHT.equals(key)) {
                 return getInteger(height.getValue());
-            } else if (VideoContext.CLIENT_KEY_ROTATION.equals(key)) {
+            } else if (ClientConfiguration.CLIENT_KEY_ROTATION.equals(key)) {
                 return getInteger(rotation.getValue());
             } else {
                 return super.getClientHint(key);

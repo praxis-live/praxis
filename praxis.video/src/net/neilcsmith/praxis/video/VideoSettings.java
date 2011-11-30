@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2011 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,22 +19,28 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.video;
 
-import net.neilcsmith.praxis.video.VideoDelegateFactory;
-import java.util.Set;
+import net.neilcsmith.praxis.settings.Settings;
 
 /**
  *
- * @author Neil C Smith
+ * @author Neil C Smith <http://neilcsmith.net>
  */
-public interface VideoDelegateFactoryProvider {
+public class VideoSettings {
     
-    public Set<String> getSupportedSchemes();
+    public final static String KEY_RENDERER = "video.renderer";
     
-    public String getLibraryName();
+    private final static String DEFAULT_RENDERER = "Software";
     
-    public VideoDelegateFactory getFactory();
-
+    private VideoSettings() {}
+    
+    public static String getRenderer() {
+        return Settings.get(KEY_RENDERER, DEFAULT_RENDERER);
+    }
+    
+    public static void setRenderer(String renderer) {
+        Settings.put(KEY_RENDERER, renderer);
+    }
+    
 }

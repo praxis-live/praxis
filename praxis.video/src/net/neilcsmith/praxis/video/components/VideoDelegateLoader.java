@@ -23,7 +23,6 @@ package net.neilcsmith.praxis.video.components;
 
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.interfaces.TaskService;
-import net.neilcsmith.praxis.video.VideoDelegateFactoryProvider;
 import net.neilcsmith.praxis.video.InvalidVideoResourceException;
 import java.net.URI;
 import net.neilcsmith.praxis.core.Argument;
@@ -33,6 +32,7 @@ import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
 import net.neilcsmith.praxis.impl.AbstractComponent;
+import net.neilcsmith.praxis.video.VideoDelegateFactory;
 import net.neilcsmith.ripl.delegates.VideoDelegate;
 
 /**
@@ -97,10 +97,10 @@ public class VideoDelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
 
         public Argument execute() throws Exception {
             URI uri = PResource.coerce(id).value();
-            Lookup.Result<VideoDelegateFactoryProvider> providers =
-                    lookup.getAll(VideoDelegateFactoryProvider.class);
+            Lookup.Result<VideoDelegateFactory.Provider> providers =
+                    lookup.getAll(VideoDelegateFactory.Provider.class);
             VideoDelegate delegate = null;
-            for (VideoDelegateFactoryProvider provider : providers) {
+            for (VideoDelegateFactory.Provider provider : providers) {
                 if (provider.getSupportedSchemes().contains(uri.getScheme())) {
                     try {
                         delegate = provider.getFactory().create(uri);

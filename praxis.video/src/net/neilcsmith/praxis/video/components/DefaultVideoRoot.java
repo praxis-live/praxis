@@ -29,8 +29,13 @@ import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.InstanceLookup;
 import net.neilcsmith.praxis.impl.IntProperty;
 import net.neilcsmith.praxis.impl.RootState;
+import net.neilcsmith.praxis.settings.Settings;
+import net.neilcsmith.praxis.video.ClientConfiguration;
 import net.neilcsmith.praxis.video.ClientRegistrationException;
+import net.neilcsmith.praxis.video.PlayerConfiguration;
+import net.neilcsmith.praxis.video.PlayerFactory;
 import net.neilcsmith.praxis.video.VideoContext;
+import net.neilcsmith.praxis.video.VideoSettings;
 import net.neilcsmith.ripl.FrameRateListener;
 import net.neilcsmith.ripl.FrameRateSource;
 import net.neilcsmith.ripl.Player;
@@ -98,21 +103,8 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     protected void starting() {
         try {
 
-            player = createPlayer();
-
-//            if ("SWPlayer".equals(System.getProperty("praxis.video.exp.renderer"))) {
-//                player = new SWPlayer("PRAXIS : " + getAddress(), width, height, fps, fullScreen);
-//            } else {
-//                player = new ReferencePlayer("PRAXIS : " + getAddress(), width, height, fps, fullScreen);
-//            }
-//            if ("Reference".equals(System.getProperty("praxis.video.exp.renderer"))) {
-//                player = new ReferencePlayer("PRAXIS : " + getAddress(), width, height, fps, fullScreen);
-//            } else {
-//                player = new SWPlayer("PRAXIS : " + getAddress(), width, height, fps, fullScreen);
-//            }
-
+            player = createPlayer(VideoSettings.getRenderer());
             player.addFrameRateListener(this);
-//            player.getSink(0).addSource(placeholder);
             if (outputClient != null && outputClient.getOutputCount() > 0) {
                 player.getSink(0).addSource(outputClient.getOutputSource(0));
             }
@@ -131,15 +123,15 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
         }
     }
 
-    private Player createPlayer() {
+    private Player createPlayer(String library) {
         String title = "PRAXIS : " + getAddress();
         int outWidth = width;
         int outHeight = height;
         int rotation = 0;
         if (outputClient != null) {
-            Object w = outputClient.getClientHint(VideoContext.CLIENT_KEY_WIDTH);
-            Object h = outputClient.getClientHint(VideoContext.CLIENT_KEY_HEIGHT);
-            Object r = outputClient.getClientHint(VideoContext.CLIENT_KEY_ROTATION);
+            Object w = outputClient.getClientHint(ClientConfiguration.CLIENT_KEY_WIDTH);
+            Object h = outputClient.getClientHint(ClientConfiguration.CLIENT_KEY_HEIGHT);
+            Object r = outputClient.getClientHint(ClientConfiguration.CLIENT_KEY_ROTATION);
             if (w instanceof Integer) {
                 outWidth = ((Integer) w).intValue();
             }
@@ -149,18 +141,44 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
             if (r instanceof Integer) {
                 rotation = ((Integer) r).intValue();
             }
-        }
-        if ("Reference".equals(System.getProperty("praxis.video.exp.renderer"))) {
+        }        
+        if ("Reference".equals(library)) {
             return new ReferencePlayer(title, width, height, fps, fullScreen);
-        } else {
+        } else {           
+            PlayerFactory factory = findPlayerFactory(library);
+            if (factory != null) {
+                try {
+                    return factory.createPlayer(new PlayerConfiguration(width, height, fps),
+                            new ClientConfiguration[] {
+                                new ClientConfiguration(0, 1, null)
+                            });
+                } catch (Exception ex) {
+                    // fall through
+                }
+            }
             if (outWidth == width && outHeight == height && rotation == 0) {
                 return SWPlayer.create(title, width, height, fps, fullScreen);
             } else {
                 return SWPlayer.create(title, width, height, fps, fullScreen, outWidth, outHeight, rotation);
             }
         }
-
     }
+    
+    private PlayerFactory findPlayerFactory(String lib) {
+        if (lib == null || lib.isEmpty()) {
+            return null;
+        }
+        try {
+            for (PlayerFactory.Provider provider : getLookup().getAll(PlayerFactory.Provider.class)) {
+                if (provider.getLibraryName().equals(lib)) {
+                    return provider.getFactory();
+                }
+            }
+        } catch (Exception e) {
+        }
+        return null;
+    }
+    
 
     @Override
     protected void stopping() {
