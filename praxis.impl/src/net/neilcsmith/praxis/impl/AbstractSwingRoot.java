@@ -59,7 +59,6 @@ public class AbstractSwingRoot extends AbstractRoot {
         return new DelegateController(ctrl);
     }
 
-    // @TODO should be activating?
     @Override
     protected final void activating() {
         super.activating();

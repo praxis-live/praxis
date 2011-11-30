@@ -29,7 +29,6 @@ import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 
 /**
@@ -43,8 +42,7 @@ public class TriggerControl implements Control {
     private Binding binding;
     
     private TriggerControl(Binding binding) {
-        ArgumentInfo[] empty = new ArgumentInfo[0];
-        this.info = ControlInfo.createFunctionInfo(empty, empty, null);
+        this.info = ControlInfo.createTriggerInfo(null);
         this.binding = binding;
     }
 
