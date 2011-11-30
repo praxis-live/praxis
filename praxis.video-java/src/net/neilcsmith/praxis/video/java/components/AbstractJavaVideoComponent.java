@@ -112,7 +112,7 @@ public abstract class AbstractJavaVideoComponent extends AbstractJavaComponent {
 
         private CodeProperty() {
             super(ArgumentInfo.create(
-                    PString.class, PMap.valueOf(PString.KEY_MIME_TYPE, "text/x-praxis-java")), 
+                    PString.class, PMap.create(PString.KEY_MIME_TYPE, "text/x-praxis-java")), 
                     VideoCodeDelegate.class, PString.EMPTY);
         }
 
