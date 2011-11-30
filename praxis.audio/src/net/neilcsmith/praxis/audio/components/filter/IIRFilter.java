@@ -49,7 +49,7 @@ public class IIRFilter extends AbstractComponent {
         type = createTypeControl();
         registerControl("type", type);
         frequency =  FloatProperty.create( new FrequencyBinding(),
-                20, 20000, 20, PMap.valueOf("scale-hint", "Exponential"));
+                20, 20000, 20, PMap.create("scale-hint", "Exponential"));
         registerControl("frequency", frequency);
         registerPort("frequency", frequency.createPort());
         resonance = FloatProperty.create( new ResonanceBinding(),

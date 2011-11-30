@@ -27,6 +27,8 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
+import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.FloatProperty;
@@ -57,7 +59,8 @@ public class SamplePlayer extends AbstractComponent {
     
     private void buildControls() {
         registerControl("table", new SampleTableLoader(new LoaderListener()));
-        FloatProperty position = FloatProperty.create( new PositionBinding(), 0, 1, 0);
+        FloatProperty position = FloatProperty.create(new PositionBinding(), 0, 1, 0,
+                PMap.create(ControlInfo.KEY_TRANSIENT, true));
         registerControl("position", position);
         registerPort("position", position.createPort());
         FloatProperty in = FloatProperty.create( new InBinding(), 0, 1, 0);

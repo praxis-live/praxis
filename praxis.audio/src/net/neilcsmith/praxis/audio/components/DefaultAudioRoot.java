@@ -23,20 +23,28 @@ package net.neilcsmith.praxis.audio.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.rapl.core.SinkIsFullException;
+import net.neilcsmith.rapl.core.SourceIsFullException;
 import org.jaudiolibs.audioservers.AudioConfiguration;
 import org.jaudiolibs.audioservers.AudioServer;
 import net.neilcsmith.praxis.audio.AudioContext;
+import net.neilcsmith.praxis.audio.AudioSettings;
 import net.neilcsmith.praxis.audio.ClientRegistrationException;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.core.Lookup;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.InstanceLookup;
+import net.neilcsmith.rapl.components.Placeholder;
 import net.neilcsmith.rapl.core.BufferRateListener;
 import net.neilcsmith.rapl.core.BufferRateSource;
 import net.neilcsmith.rapl.core.Bus;
+import net.neilcsmith.rapl.core.Sink;
+import net.neilcsmith.rapl.core.Source;
 import net.neilcsmith.rapl.render.BusClient;
 
 /**
@@ -45,9 +53,9 @@ import net.neilcsmith.rapl.render.BusClient;
  */
 public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener {
 
-    private static double DEFAULT_SAMPLERATE = 48000;
-    private static int DEFAULT_BUFFERSIZE = 512;
-    private static String DEFAULT_LIBRARY = "JavaSound";
+//    private static double DEFAULT_SAMPLERATE = 44100;
+//    private static int DEFAULT_BUFFERSIZE = 512;
+//    private static String DEFAULT_LIBRARY = "JavaSound";
     private AudioContext.InputClient inputClient;
     private AudioContext.OutputClient outputClient;
     private BusClient bus;
@@ -58,16 +66,26 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
     private ArgumentProperty device;
     private AudioContext hub;
     private Lookup lookup;
+    private Placeholder[] inputs;
+    private Placeholder[] outputs;
 
     public DefaultAudioRoot() {
         buildControls();
+        inputs = new Placeholder[2];
+        inputs[0] = new Placeholder();
+        inputs[1] = new Placeholder();
+        outputs = new Placeholder[2];
+        outputs[0] = new Placeholder();
+        outputs[1] = new Placeholder();
     }
 
     private void buildControls() {
-        sampleRate = ArgumentProperty.create();
-        bufferSize = ArgumentProperty.create();
-        audioLib = ArgumentProperty.create();
-        device = ArgumentProperty.create();
+        ArgumentInfo sharedInfo = ArgumentInfo.create(
+                Argument.class, PMap.create(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
+        sampleRate = ArgumentProperty.create(sharedInfo);
+        bufferSize = ArgumentProperty.create(sharedInfo);
+        audioLib = ArgumentProperty.create(sharedInfo);
+        device = ArgumentProperty.create(sharedInfo);
         registerControl("samplerate", sampleRate);
         registerControl("buffersize", bufferSize);
         registerControl("library", audioLib);
@@ -82,8 +100,6 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
         }
         return lookup;
     }
-
-
 
     public void nextBuffer(BufferRateSource source) {
         try {
@@ -104,7 +120,8 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
             Logger.getLogger(DefaultAudioRoot.class.getName()).log(Level.SEVERE, null, ex);
             try {
                 setIdle();
-            } catch (IllegalRootStateException ex1) {}
+            } catch (IllegalRootStateException ex1) {
+            }
             return;
         }
         setInterrupt(new Runnable() {
@@ -125,67 +142,91 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
     }
 
     private AudioServer createServer(BusClient bus) throws Exception {
-        double srate = DEFAULT_SAMPLERATE;
-        Argument arg = sampleRate.getValue();
-        if (!arg.isEmpty()) {
-            try {
-                srate = PNumber.coerce(arg).value();
-            } catch (Exception ex) {
-            }
-        }
-        int bsize = DEFAULT_BUFFERSIZE;
-        arg = bufferSize.getValue();
-        if (!arg.isEmpty()) {
-            try {
-                bsize = PNumber.coerce(arg).toIntValue();
-            } catch (Exception ex) {
-            }
-        }
-        String lib = DEFAULT_LIBRARY;
-        arg = audioLib.getValue();
-        if (!arg.isEmpty()) {
-            lib = arg.toString();
-        }
+        float srate = getSamplerate();
+        int bsize = getBuffersize();
+        String lib = getLibrary();
+
         String dev = "";
-        arg = device.getValue();
+        Argument arg = device.getValue();
         if (!arg.isEmpty()) {
             dev = arg.toString();
         }
 
-        AudioConfiguration ctxt = new AudioConfiguration((float) srate, 2, 2, bsize, true);
+        AudioConfiguration ctxt = new AudioConfiguration(srate, 2, 2, bsize, true);
         return AudioServerLoader.getInstance().load(getLookup(), lib, dev,
                 getAddress().getRootID(), ctxt, bus, null);
     }
 
+    private int getSamplerate() {
+        Argument arg = sampleRate.getValue();
+        if (!arg.isEmpty()) {
+            try {
+                return PNumber.coerce(arg).toIntValue();
+            } catch (Exception ex) {
+            }
+        }
+        return AudioSettings.getSamplerate();
+    }
+
+    private int getBuffersize() {
+        Argument arg = bufferSize.getValue();
+        if (!arg.isEmpty()) {
+            try {
+                return PNumber.coerce(arg).toIntValue();
+            } catch (Exception ex) {
+            }
+        }
+        return AudioSettings.getBuffersize();
+    }
+
+    private String getLibrary() {
+        Argument arg = audioLib.getValue();
+        if (!arg.isEmpty()) {
+            return arg.toString();
+        }
+        return AudioSettings.getLibrary();
+    }
+
     // @TODO fix this!
     private void makeConnections(Bus bus) {
-        if (outputClient == null) {
-            return;
-        }
         try {
-            int outputs = outputClient.getOutputCount();
-            if (outputs == 0) {
-                return;
-            } else if (outputs == 1) {
-                bus.getSink(0).addSource(outputClient.getOutputSource(0));
-            } else {
-                bus.getSink(0).addSource(outputClient.getOutputSource(0));
-                bus.getSink(1).addSource(outputClient.getOutputSource(1));
-            }
-            if (inputClient != null) {
-                int inputs = inputClient.getInputCount();
-                if (inputs == 0) {
-                    return;
-                } else if (inputs == 1) {
-                    inputClient.getInputSink(0).addSource(bus.getSource(0));
-                } else {
-                    inputClient.getInputSink(0).addSource(bus.getSource(0));
-                    inputClient.getInputSink(1).addSource(bus.getSource(1));
-                }
-            }
-
-        } catch (Exception ex) {
+            //        if (outputClient == null) {
+            //            return;
+            //        }
+            //        try {
+            //            int outputs = outputClient.getOutputCount();
+            //            if (outputs == 0) {
+            //                return;
+            //            } else if (outputs == 1) {
+            //                bus.getSink(0).addSource(outputClient.getOutputSource(0));
+            //            } else {
+            //                bus.getSink(0).addSource(outputClient.getOutputSource(0));
+            //                bus.getSink(1).addSource(outputClient.getOutputSource(1));
+            //            }
+            //            if (inputClient != null) {
+            //                int inputs = inputClient.getInputCount();
+            //                if (inputs == 0) {
+            //                    return;
+            //                } else if (inputs == 1) {
+            //                    inputClient.getInputSink(0).addSource(bus.getSource(0));
+            //                } else {
+            //                    inputClient.getInputSink(0).addSource(bus.getSource(0));
+            //                    inputClient.getInputSink(1).addSource(bus.getSource(1));
+            //                }
+            //            }
+            //
+            //        } catch (Exception ex) {
+            //        }
+            bus.getSink(0).addSource(outputs[0]);
+            bus.getSink(1).addSource(outputs[1]);
+            inputs[0].addSource(bus.getSource(0));
+            inputs[1].addSource(bus.getSource(1));
+        } catch (SinkIsFullException ex) {
+            Logger.getLogger(DefaultAudioRoot.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SourceIsFullException ex) {
+            Logger.getLogger(DefaultAudioRoot.class.getName()).log(Level.SEVERE, null, ex);
         }
+
     }
 
     @Override
@@ -220,28 +261,70 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
 
         public int registerAudioInputClient(AudioContext.InputClient client) throws ClientRegistrationException {
             if (inputClient == null) {
-                inputClient = client;
-                return 2;
+                try {
+                    inputClient = client;
+                    int ins = client.getInputCount();
+                    if (ins == 0) {
+                        // do nothing for now
+                    } else if (ins == 1) {
+                        client.getInputSink(0).addSource(inputs[0]);
+                    } else {
+                        client.getInputSink(0).addSource(inputs[0]);
+                        client.getInputSink(1).addSource(inputs[1]);
+                    }
+                    return 2;
+                } catch (Exception ex) {
+                    inputClient = null;
+                    throw new ClientRegistrationException();
+                }
             } else {
                 throw new ClientRegistrationException();
             }
         }
 
         public void unregisterAudioInputClient(AudioContext.InputClient client) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            if (inputClient == client) {
+                inputClient = null;
+                for (Placeholder input : inputs) {
+                    for (Sink sink : input.getSinks()) {
+                        sink.removeSource(input);
+                    }
+                }
+            }
         }
 
         public int registerAudioOutputClient(AudioContext.OutputClient client) throws ClientRegistrationException {
             if (outputClient == null) {
-                outputClient = client;
-                return 2;
-            } else {
-                throw new ClientRegistrationException();
+                try {
+                    outputClient = client;
+                    int outs = client.getOutputCount();
+                    if (outs == 0) {
+                        // do nothing for now
+                    } else if (outs == 1) {
+                        outputs[0].addSource(client.getOutputSource(0));
+                    } else {
+                        outputs[0].addSource(client.getOutputSource(0));
+                        outputs[1].addSource(client.getOutputSource(1));
+                    }
+                    return 2;
+                } catch (Exception ex) {
+                    outputClient = null;
+                    throw new ClientRegistrationException(ex);
+                }
             }
+            throw new ClientRegistrationException();
+
         }
 
         public void unregisterAudioOutputClient(AudioContext.OutputClient client) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            if (outputClient == client) {
+                outputClient = null;
+                for (Placeholder output : outputs) {
+                    for (Source src : output.getSources()) {
+                        output.removeSource(src);
+                    }
+                }
+            }
         }
     }
 }

@@ -39,6 +39,7 @@ public class AudioOutput extends AbstractComponent {
 
     private Placeholder[] placeholders;
     private AudioContext.OutputClient client;
+    private AudioContext context;
 
     public AudioOutput() {
         placeholders = new Placeholder[2];
@@ -64,27 +65,21 @@ public class AudioOutput extends AbstractComponent {
     public void hierarchyChanged() {
         super.hierarchyChanged();
         AudioContext ctxt = getLookup().get(AudioContext.class);
-        if (ctxt != null) {
+        if (ctxt != context) {
+            if (context != null) {
+                context.unregisterAudioOutputClient(client);
+                context = null;
+            }
+            if (ctxt == null) {
+                return;
+            }
             try {
                 ctxt.registerAudioOutputClient(client);
+                context = ctxt;
             } catch (ClientRegistrationException ex) {
-                Logger.getLogger(AudioInput.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(AudioOutput.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
-
-
-//    @Override // @TODO implement unregister
-//    public void parentNotify(Container parent) throws VetoException {
-//        super.parentNotify(parent);
-//        if (parent instanceof AudioContext) {
-//            try {
-//                ((AudioContext) parent).registerAudioOutputClient(this);
-//            } catch (Exception ex) {
-//                Logger.getLogger(AudioOutput.class.getName()).log(Level.SEVERE, null, ex);
-//                throw new VetoException();
-//            }
-//        }
-//    }
 }

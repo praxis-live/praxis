@@ -46,7 +46,7 @@ public class CombFilter extends AbstractComponent {
         comb = new Comb();
         frequency =  FloatProperty.create( new FrequencyBinding(),
                 Comb.MIN_FREQ, Comb.MAX_FREQ, comb.getFrequency(),
-                PMap.valueOf("scale-hint", "Exponential"));
+                PMap.create("scale-hint", "Exponential"));
         registerControl("frequency", frequency);
         registerPort("frequency", frequency.createPort());
         feedback = FloatProperty.create( new FeedbackBinding(),

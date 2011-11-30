@@ -43,4 +43,14 @@ public class ClientRegistrationException extends Exception {
     public ClientRegistrationException(String msg) {
         super(msg);
     }
+    
+    
+    public ClientRegistrationException(Throwable cause) {
+        super(cause);
+    }
+    
+    public ClientRegistrationException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
+    
 }
