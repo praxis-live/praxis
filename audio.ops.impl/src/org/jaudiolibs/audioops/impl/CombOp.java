@@ -83,8 +83,8 @@ public class CombOp implements AudioOp {
     }
     
 
-    public void reset() {
-        delay.reset();
+    public void reset(int samples) {
+        delay.reset(samples);
     }
 
     public void processReplace(int buffersize, float[][] outputs, float[][] inputs) {
@@ -99,8 +99,8 @@ public class CombOp implements AudioOp {
         delay.initialize(samplerate, maxBufferSize);
     }
 
-    public boolean isInputRequired() {
-        return delay.isInputRequired();
+    public boolean isInputRequired(boolean outputRequired) {
+        return delay.isInputRequired(outputRequired);
     }
 
 }

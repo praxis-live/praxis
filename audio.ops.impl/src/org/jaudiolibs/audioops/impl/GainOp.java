@@ -62,7 +62,7 @@ public class GainOp implements AudioOp {
         return gain;
     }
 
-    public void reset() {
+    public void reset(int samples) {
         oldGain = 0;
     }
 
@@ -103,7 +103,12 @@ public class GainOp implements AudioOp {
         // no op
     }
 
-    public boolean isInputRequired() {
-        return (gain != 0 || oldGain != 0);
+    public boolean isInputRequired(boolean outputRequired) {
+        if(outputRequired) {
+            return (gain != 0 || oldGain != 0);
+        } else {
+            return false;
+        }
+        
     }
 }

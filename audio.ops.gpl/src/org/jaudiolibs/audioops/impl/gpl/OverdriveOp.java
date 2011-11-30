@@ -72,11 +72,11 @@ public class OverdriveOp implements AudioOp {
         // no op
     }
 
-    public boolean isInputRequired() {
-        return true;
+    public boolean isInputRequired(boolean outputRequired) {
+        return outputRequired;
     }
 
-    public void reset() {
+    public void reset(int skipped) {
         // no op
     }
     

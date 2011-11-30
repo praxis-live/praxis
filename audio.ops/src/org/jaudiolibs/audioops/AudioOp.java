@@ -32,7 +32,7 @@ package org.jaudiolibs.audioops;
  * @author Neil C Smith
  */
 public interface AudioOp {
-
+    
     /**
      * Process input buffers and replace data in output buffers
      *
@@ -69,8 +69,11 @@ public interface AudioOp {
 
     /**
      * Reset AudioOp in case of break in stream.
+     * 
+     * @param skipped The number of samples skipped during the break in stream,
+     * or -1 to force a full reset.
      */
-    public void reset();
+    public void reset(int skipped);
 
     /**
      * Whether this AudioOp requires input for the next buffer of audio. This
@@ -80,8 +83,14 @@ public interface AudioOp {
      *
      * If, and only if, this method returns false, then a null value may be sent
      * as the input buffer data to either of the process methods.
+     * 
+     * If outputRequired is false and inputRequired is also false, the host of the
+     * AudioOp may skip calling processing.  Before starting processing again, the
+     * host should call reset().
      *
+     * @param outputRequired whether the output of this AudioOp is required. In many
+     * cases this method will return the value of outputRequired.
      * @return true if AudioOp requires input data to work on.
      */
-    public boolean isInputRequired();
+    public boolean isInputRequired(boolean outputRequired);
 }

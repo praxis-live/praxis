@@ -122,10 +122,10 @@ public class IIRFilterOp implements AudioOp {
             throw new IllegalArgumentException();
         }
         this.samplerate = samplerate;
-        reset();
+        reset(-1);
     }
 
-    public void reset() {
+    public void reset(int samples) {
         dirty = true;
         last_set = false;
         x1 = 0;
@@ -145,8 +145,8 @@ public class IIRFilterOp implements AudioOp {
         b2 = 0;
     }
 
-    public boolean isInputRequired() {
-        return true;
+    public boolean isInputRequired(boolean outputRequired) {
+        return outputRequired;
     }
 
     /*

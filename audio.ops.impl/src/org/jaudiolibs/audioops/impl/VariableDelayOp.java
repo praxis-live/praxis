@@ -114,7 +114,7 @@ public class VariableDelayOp implements AudioOp {
         return this.gain;
     }
 
-    public void reset() {
+    public void reset(int skipped) {
         if (delaybuffer != null) {
             Arrays.fill(delaybuffer, 0);
         }
@@ -192,8 +192,8 @@ public class VariableDelayOp implements AudioOp {
         this.lastdelay = 0;
     }
 
-    public boolean isInputRequired() {
-        return true;
+    public boolean isInputRequired(boolean outputRequired) {
+        return outputRequired;
     }
 }
 

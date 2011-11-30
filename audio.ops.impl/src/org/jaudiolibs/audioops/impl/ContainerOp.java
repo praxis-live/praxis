@@ -121,7 +121,7 @@ public class ContainerOp implements AudioOp {
 
     private void processOp(int buffersize, float[][] inputs) {
         if (resetNeeded) {
-            op.reset();
+            op.reset(-1);
             resetNeeded = false;
         }
         scratchContainer[0] = scratchBuffer;
@@ -134,12 +134,12 @@ public class ContainerOp implements AudioOp {
         scratchBuffer = new float[maxBufferSize];
     }
 
-    public void reset() {
-        op.reset();
+    public void reset(int samples) {
+        op.reset(samples);
         resetNeeded = false;
     }
 
-    public boolean isInputRequired() {
-        return true;
+    public boolean isInputRequired(boolean outputRequired) {
+        return outputRequired;
     }
 }

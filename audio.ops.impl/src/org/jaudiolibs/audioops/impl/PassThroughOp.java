@@ -66,11 +66,11 @@ public class PassThroughOp implements AudioOp {
         // no op
     }
 
-    public void reset() {
+    public void reset(int skipped) {
         // no op
     }
 
-    public boolean isInputRequired() {
-        return true;
+    public boolean isInputRequired(boolean outputRequired) {
+        return outputRequired;
     }
 }
