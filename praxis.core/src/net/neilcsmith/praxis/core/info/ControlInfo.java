@@ -32,11 +32,19 @@ import net.neilcsmith.praxis.core.types.PMap;
  * @author Neil C Smith
  */
 public class ControlInfo extends Argument {
+    
+    public final static String KEY_TRANSIENT = "transient";
+    public final static String KEY_DEPRECATED = "deprecated";
+    public final static String KEY_EXPERT = "expert";
+//    public final static String KEY_DUPLICATES = "duplicates";
 
     public static enum Type {
 
-        Function, RO_Property, RW_Property
+        Function, Trigger, Property, ReadOnlyProperty
     };
+    
+    private final static ArgumentInfo[] EMPTY_INFO = new ArgumentInfo[0];
+    
     private ArgumentInfo[] inputs;
     private ArgumentInfo[] outputs;
     private Argument[] defaults;
@@ -97,7 +105,7 @@ public class ControlInfo extends Argument {
 
     @Deprecated
     public boolean isProperty() {
-        return type == Type.RO_Property || type == Type.RW_Property;
+        return type == Type.ReadOnlyProperty || type == Type.Property;
     }
 
     public Type getType() {
@@ -128,13 +136,17 @@ public class ControlInfo extends Argument {
             ArgumentInfo[] outputs, PMap properties) {
         return create(inputs, outputs, null, Type.Function, properties);
     }
+    
+    public static ControlInfo createTriggerInfo(PMap properties) {
+        return create(EMPTY_INFO, EMPTY_INFO, null, Type.Trigger, properties);
+    }
 
     public static ControlInfo createPropertyInfo(ArgumentInfo[] arguments, Argument[] defaults, PMap properties) {
-        return create(arguments, arguments, defaults, Type.RW_Property, properties);
+        return create(arguments, arguments, defaults, Type.Property, properties);
     }
 
     public static ControlInfo createReadOnlyPropertyInfo(ArgumentInfo[] arguments, PMap properties) {
-        return create(new ArgumentInfo[0], arguments, null, Type.RO_Property, properties);
+        return create(new ArgumentInfo[0], arguments, null, Type.ReadOnlyProperty, properties);
     }
 
     private static ControlInfo create(ArgumentInfo[] inputs,

@@ -102,7 +102,7 @@ public class PString extends Argument implements Comparable<PString> {
             for (int i=0; i < arr.length; i++) {
                 arr[i] = PString.valueOf(allowed[i]);
             }
-            PMap props = PMap.valueOf(PString.valueOf(KEY_ALLOWED_VALUES),
+            PMap props = PMap.create(KEY_ALLOWED_VALUES,
                     PArray.valueOf(arr));
             return ArgumentInfo.create(PString.class, props);
         }

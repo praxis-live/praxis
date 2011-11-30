@@ -26,44 +26,74 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 
 /**
  *
  * @author Neil C Smith
- * @TODO should keys be Strings - need to ensure string equal keys return same value!
  */
 public class PMap extends Argument {
 
-    public final static PMap EMPTY = new PMap(Collections.<Argument, Argument>emptyMap(), "");
-    private Map<Argument, Argument> map;
+    public final static PMap EMPTY = new PMap(Collections.<String, Argument>emptyMap(), "");
+    private Map<String, Argument> map;
     private String str;
 
-    private PMap(Map<Argument, Argument> map, String str) {
+    private PMap(Map<String, Argument> map, String str) {
         this.map = map;
         this.str = str;
     }
-
-    public Argument get(Argument key) {
+    
+    public Argument get(String key) {
         return map.get(key);
     }
     
-    public Argument get(String key) {
-        return map.get(PString.valueOf(key));
+    public boolean getBoolean(String key, boolean def) {
+        Argument val = map.get(key);
+        if (val != null) {
+            try {
+                return PBoolean.coerce(val).value();
+            } catch (Exception ex) {
+                // fall through
+            }
+        }
+        return def;
+    }
+    
+    public int getInt(String key, int def) {
+        Argument val = map.get(key);
+        if (val != null) {
+            try {
+                return PNumber.coerce(val).toIntValue();
+            } catch (Exception ex) {
+                // fall through
+            }
+        }
+        return def;
+    }
+    
+    public double getDouble(String key, int def) {
+        Argument val = map.get(key);
+        if (val != null) {
+            try {
+                return PNumber.coerce(val).value();
+            } catch (Exception ex) {
+                // fall through
+            }
+        }
+        return def;
+    }
+    
+    public String getString(String key, String def) {
+        Argument val = map.get(key);
+        if (val != null) {
+            return val.toString();
+        }
+        return def;
     }
 
     public int getSize() {
         return map.size();
-    }
-
-    public PArray getKeys() {
-        return PArray.valueOf(map.keySet());
-    }
-
-    public PArray getValues() {
-        return PArray.valueOf(map.values());
     }
 
     @Override
@@ -73,70 +103,11 @@ public class PMap extends Argument {
                 str = "";
             } else {
                 List<Argument> vals = new ArrayList<Argument>(map.size() * 2);
-                for (Map.Entry<Argument, Argument> entry : map.entrySet()) {
-                    vals.add(entry.getKey());
+                for (Map.Entry<String, Argument> entry : map.entrySet()) {
+                    vals.add(PString.valueOf(entry.getKey()));
                     vals.add(entry.getValue());
                 }
                 str = PArray.valueOf(vals).toString();
-//                List<PArray> entries = new ArrayList<PArray>(map.size());
-////                Set<Map.Entry<Argument, Argument>> entries = map.entrySet();
-//                for (Map.Entry<Argument, Argument> entry : map.entrySet()) {
-//                    entries.add(PArray.valueOf(new Argument[]{entry.getKey(), entry.getValue()}));
-//                }
-//                str = PArray.valueOf(entries).toString();
-////                StringBuilder sb = new StringBuilder();
-//                Set<Map.Entry<Argument, Argument>> entries = map.entrySet();
-//                for (Map.Entry<Argument, Argument> entry : entries) {
-//                    if (sb.length() == 0) {
-//                        sb.append("{ {");
-//                    } else {
-//                        sb.append(" { {");
-//                    }
-//                    
-//                    String s = String.valueOf(entry.getKey());
-//                    if (s.indexOf('{') > -1 || s.indexOf('}') > -1) {
-//                        s = s.replace("{", "\\{");
-//                        s = s.replace("}", "\\}");
-//                    }
-//                    sb.append(s);
-//                    sb.append("} {");
-//                    
-//                    s = String.valueOf(entry.getValue());
-//                    if (s.indexOf('{') > -1 || s.indexOf('}') > -1) {
-//                        s = s.replace("{", "\\{");
-//                        s = s.replace("}", "\\}");
-//                    }
-//                    sb.append(s);
-//                    sb.append("} }");
-//                }
-//                str = sb.toString();
-
-//                StringBuilder sb = new StringBuilder();
-//                Set<Map.Entry<Argument, Argument>> entries = map.entrySet();
-//                for (Map.Entry<Argument, Argument> entry : entries) {
-//                    if (sb.length() == 0) {
-//                        sb.append("{ \"");
-//                    } else {
-//                        sb.append(" { \"");
-//                    }
-//
-//                    String s = String.valueOf(entry.getKey());
-//                    if (s.indexOf('{') > -1 || s.indexOf('}') > -1) {
-//                        s = s.replace("{", "\\{");
-//                        s = s.replace("}", "\\}");
-//                    }
-//                    sb.append(s);
-//                    sb.append("\" \"");
-//
-//                    s = String.valueOf(entry.getValue());
-//                    if (s.indexOf('{') > -1 || s.indexOf('}') > -1) {
-//                        s = s.replace("{", "\\{");
-//                        s = s.replace("}", "\\}");
-//                    }
-//                    sb.append(s);
-//                    sb.append("\" }");
-//                }
-//                str = sb.toString();
 
             }
         }
@@ -144,13 +115,9 @@ public class PMap extends Argument {
         return str;
     }
 
-    public Map<Argument, Argument> toMap() {
-        return new LinkedHashMap<Argument, Argument>(map);
-    }
-
     @Override
     public boolean isEmpty() {
-        return map.size() == 0;
+        return map.isEmpty();
     }
     
     
@@ -170,89 +137,124 @@ public class PMap extends Argument {
         return false;
     }
 
-    public static PMap valueOf(Map<? extends Argument, ? extends Argument> map) {
+    private static Argument objToArg(Object obj) {
+        if (obj instanceof Argument) {
+            return (Argument) obj;
+        }
+        if (obj instanceof Boolean) {
+            return ((Boolean)obj).booleanValue() ? PBoolean.TRUE : PBoolean.FALSE;
+        }
+        if (obj instanceof Integer) {
+            return PNumber.valueOf(((Integer)obj).intValue());
+        }
+        if (obj instanceof Number) {
+            return PNumber.valueOf(((Number)obj).doubleValue());
+        }
+        if (obj == null) {
+            return PString.EMPTY;
+        }
+        return PString.valueOf(obj);
+    }
+    
+    public static PMap create(String key, Object value) {
+        if (key == null || value == null) {
+            throw new NullPointerException();
+        }
+        return new PMap(Collections.singletonMap(key, objToArg(value)), null);
+    }
+    
+    public static PMap create(String key1, Object value1,
+            String key2, Object value2) {
+        if (key1 == null || key2 == null) {
+            throw new NullPointerException();
+        }
+        Map<String, Argument> m = new LinkedHashMap<String, Argument>();
+        m.put(key1, objToArg(value1));
+        m.put(key2, objToArg(value2));
+        return new PMap(m, null);
+    }
+    
+    public static PMap create(String key1, Object value1,
+            String key2, Object value2,
+            String key3, Object value3) {
+        if (key1 == null || key2 == null || key3 == null) {
+            throw new NullPointerException();
+        }
+        Map<String, Argument> m = new LinkedHashMap<String, Argument>();
+        m.put(key1, objToArg(value1));
+        m.put(key2, objToArg(value2));
+        m.put(key3, objToArg(value3));
+        return new PMap(m, null);
+    }
+    
+    
+    
+    public static PMap create(Map<String, ? extends Argument> map) {
         if (map.isEmpty()) {
             return PMap.EMPTY;
         }
-        Map<Argument, Argument> m = new LinkedHashMap<Argument, Argument>(map);
+        Map<String, Argument> m = new LinkedHashMap<String, Argument>(map);
         if (m.containsKey(null) || m.containsValue(null)) {
             throw new NullPointerException(); // need to replace with something more efficient
         }
-        m = Collections.unmodifiableMap(m);
+//        m = Collections.unmodifiableMap(m);
         return new PMap(m, null);
     }
 
-    public static PMap valueOf(Argument... args) {
-        if (args.length == 0 || (args.length % 2) != 0) {
-            throw new IllegalArgumentException();
-        }
-        Map<Argument, Argument> map = new LinkedHashMap<Argument, Argument>();
-        for (int i = 0; i < args.length; i++) {
-            Argument key = args[i];
-            if (key == null) {
-                throw new NullPointerException();
-            }
-            i++;
-            Argument value = args[i];
-            if (value == null) {
-                throw new NullPointerException();
-            }
-            if (map.containsKey(key)) {
-                throw new IllegalArgumentException();
-            }
-            map.put(key, value);
-        }
-        map = Collections.unmodifiableMap(map);
-        return new PMap(map, null);
-    }
-
-    public static PMap valueOf(String ... args) {
-        if (args.length == 0 || (args.length % 2) != 0) {
-            throw new IllegalArgumentException();
-        }
-        Map<Argument, Argument> map = new LinkedHashMap<Argument, Argument>();
-        for (int i = 0; i < args.length; i++) {
-            String k = args[i];
-            if (k == null) {
-                throw new NullPointerException();
-            }
-            i++;
-            String v = args[i];
-            if (v == null) {
-                throw new NullPointerException();
-            }
-            PString key = PString.valueOf(k);
-            PString value = PString.valueOf(v);
-            if (map.containsKey(key)) {
-                throw new IllegalArgumentException();
-            }
-            map.put(key, value);
-        }
-        map = Collections.unmodifiableMap(map);
-        return new PMap(map, null);
-    }
-
-    public static PMap valueOf(String str) throws ArgumentFormatException {
-        if (str.length() == 0) {
-            return PMap.EMPTY;
-        }
-//        Map<Argument, Argument> map = new LinkedHashMap<Argument, Argument>();
-//        PArray entries = PArray.valueOf(str);
-//        for (Argument arg : entries) {
-//            PArray entry = PArray.coerce(arg);
-//            if (entry.getSize() != 2) {
-//                throw new ArgumentFormatException();
+//    public static PMap valueOf(Argument... args) {
+//        if (args.length == 0 || (args.length % 2) != 0) {
+//            throw new IllegalArgumentException();
+//        }
+//        Map<String, Argument> map = new LinkedHashMap<String, Argument>();
+//        for (int i = 0; i < args.length; i++) {
+//            String key = args[i].toString();
+//            if (key == null) {
+//                throw new NullPointerException();
 //            }
-//            Argument key = entry.get(0);
-//            Argument value = entry.get(1);
+//            i++;
+//            Argument value = args[i];
+//            if (value == null) {
+//                throw new NullPointerException();
+//            }
 //            if (map.containsKey(key)) {
-//                throw new ArgumentFormatException();
+//                throw new IllegalArgumentException();
+//            }
+//            map.put(key, value);
+//        }
+////        map = Collections.unmodifiableMap(map);
+//        return new PMap(map, null);
+//    }
+
+//    public static PMap valueOf(String ... args) {
+//        if (args.length == 0 || (args.length % 2) != 0) {
+//            throw new IllegalArgumentException();
+//        }
+//        Map<String, Argument> map = new LinkedHashMap<String, Argument>();
+//        for (int i = 0; i < args.length; i++) {
+//            String k = args[i];
+//            if (k == null) {
+//                throw new NullPointerException();
+//            }
+//            i++;
+//            String v = args[i];
+//            if (v == null) {
+//                throw new NullPointerException();
+//            }
+//            String key = k;
+//            PString value = PString.valueOf(v);
+//            if (map.containsKey(key)) {
+//                throw new IllegalArgumentException();
 //            }
 //            map.put(key, value);
 //        }
 //        map = Collections.unmodifiableMap(map);
-//        return new PMap(map, str);
-        
+//        return new PMap(map, null);
+//    }
+
+    public static PMap valueOf(String str) throws ArgumentFormatException {
+        if (str.length() == 0) {
+            return PMap.EMPTY;
+        }        
         
         PArray vals = PArray.valueOf(str);
         int size = vals.getSize();
@@ -262,16 +264,16 @@ public class PMap extends Argument {
         if ((size % 2) != 0) {
             throw new ArgumentFormatException();
         }
-        Map<Argument, Argument> map = new LinkedHashMap<Argument, Argument>();
+        Map<String, Argument> map = new LinkedHashMap<String, Argument>();
         for (int i=0; i<size;) {
-            Argument key = vals.get(i++);
+            String key = vals.get(i++).toString();
             Argument value = vals.get(i++);
-            key = map.put(key, value);
-            if (key != null) {
+            value = map.put(key, value);
+            if (value != null) {
                 throw new ArgumentFormatException();
             }
         }
-        map = Collections.unmodifiableMap(map);
+//        map = Collections.unmodifiableMap(map);
         return new PMap(map, str);
     }
 

@@ -101,7 +101,8 @@ public class PResource extends Argument implements Comparable<PResource>{
     public static ArgumentInfo info(boolean allowEmpty) {
         if (allowEmpty) {
             return ArgumentInfo.create(PResource.class,
-                    PMap.valueOf(PString.valueOf(KEY_ALLOW_EMPTY), PBoolean.TRUE));
+//                    PMap.valueOf(PString.valueOf(KEY_ALLOW_EMPTY), PBoolean.TRUE));
+                    PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true));
         } else {
             return ArgumentInfo.create(PResource.class, null);
         }

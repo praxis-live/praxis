@@ -165,8 +165,8 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
 
     public static ArgumentInfo info(
             PNumber min, PNumber max) {
-        PMap map = PMap.valueOf(PString.valueOf(KEY_MINIMUM), min,
-                PString.valueOf(KEY_MAXIMUM), max);
+        PMap map = PMap.create(KEY_MINIMUM, min,
+                KEY_MAXIMUM, max);
         return ArgumentInfo.create(PNumber.class, map);
     }
 

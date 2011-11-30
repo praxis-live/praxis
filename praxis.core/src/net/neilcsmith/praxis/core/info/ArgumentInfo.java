@@ -34,6 +34,9 @@ import net.neilcsmith.praxis.core.types.PMap;
  * @author Neil C Smith
  */
 public final class ArgumentInfo extends Argument {
+    
+    public final static String KEY_ALLOW_EMPTY = "allow-empty";
+    public final static String KEY_EMPTY_IS_DEFAULT = "empty-is-default";
 
     public static enum Presence { Always, Optional, Variable }
 

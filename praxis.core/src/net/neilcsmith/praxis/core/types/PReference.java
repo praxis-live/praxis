@@ -32,7 +32,7 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
  */
 public class PReference extends Argument {
     
-    public final static PString REFERENCE_TYPE = PString.valueOf("reference-type");
+    public final static String REFERENCE_TYPE = "reference-type";
     
     private transient Object ref;
     private Class refClass;
@@ -98,7 +98,8 @@ public class PReference extends Argument {
     }
 
     public static ArgumentInfo info(Class<?> clas) {
-        PMap properties = PMap.valueOf(REFERENCE_TYPE, PString.valueOf(clas.getName()));
+//        PMap properties = PMap.valueOf(REFERENCE_TYPE, PString.valueOf(clas.getName()));
+        PMap properties = PMap.create(REFERENCE_TYPE, clas.getName());
         return ArgumentInfo.create(PReference.class, properties);
     }
     
