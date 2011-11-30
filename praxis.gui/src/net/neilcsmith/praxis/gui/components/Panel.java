@@ -47,9 +47,9 @@ public class Panel extends AbstractGuiContainer {
 
 
     public Panel() {
-        registerControl("setup", StringProperty.create(new SetupBinding(), "fill"));
-        registerControl("rows", StringProperty.create(new AxisBinding(false), "[fill]"));
-        registerControl("columns", StringProperty.create(new AxisBinding(true), "[fill]"));
+//        registerControl("setup", StringProperty.create(new SetupBinding(), "fill"));
+//        registerControl("rows", StringProperty.create(new AxisBinding(false), "[fill]"));
+//        registerControl("columns", StringProperty.create(new AxisBinding(true), "[fill]"));
     }
 
     @Override

@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.gui.components;
 
+import java.awt.Dimension;
 import net.neilcsmith.praxis.core.Lookup;
 import java.awt.LayoutManager;
 import java.awt.event.ContainerEvent;
@@ -37,7 +38,6 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.Timer;
 import net.miginfocom.swing.MigLayout;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
@@ -54,14 +54,15 @@ import net.neilcsmith.praxis.impl.InstanceLookup;
  *
  * @author Neil C Smith
  */
+
+// IMPORTANT: Fixes and changes to behaviour of this class should be propagated
+//            to DockableGuiRoot in praxis.live.pxr.gui
 public class DefaultGuiRoot extends AbstractSwingRoot {
 
-    private final Object lock = new Object();
     private JFrame frame;
     private JPanel container;
     private MigLayout layout;
     private LayoutChangeListener layoutListener;
-    private Timer timer;
     private Map<ControlAddress, DefaultBindingControl> bindingCache;
     private Bindings bindings;
     private Context context;
@@ -75,7 +76,8 @@ public class DefaultGuiRoot extends AbstractSwingRoot {
     protected void setup() {
         frame = new JFrame();
         frame.setTitle("PRAXIS : " + getAddress());
-        frame.setSize(150, 50);
+//        frame.setSize(150, 50);
+        frame.setMinimumSize(new Dimension(150,50));
         frame.addWindowListener(new WindowAdapter() {
 
             @Override
@@ -91,11 +93,10 @@ public class DefaultGuiRoot extends AbstractSwingRoot {
         layout = new MigLayout("fill", "[fill]");
         container = new JPanel(layout);
         container.addContainerListener(new ChildrenListener());
-        layoutListener = new LayoutChangeListener();
-        
+        layoutListener = new LayoutChangeListener();        
         frame.getContentPane().add(new JScrollPane(container), "grow, push");
     }
-
+        
     @Override
     public Lookup getLookup() {
         if (lookup == null) {

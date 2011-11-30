@@ -281,8 +281,8 @@ public class DefaultBindingControl extends AbstractControl {
                         // @TODO on null?
                         bindingInfo = compInfo.getControlInfo(boundAddress.getID());
                         ControlInfo.Type type = bindingInfo.getType();
-                        isProperty = (type == ControlInfo.Type.RW_Property)
-                                || (type == ControlInfo.Type.RO_Property);
+                        isProperty = (type == ControlInfo.Type.Property)
+                                || (type == ControlInfo.Type.ReadOnlyProperty);
 
                     } catch (ArgumentFormatException ex) {
                         isProperty = false;
