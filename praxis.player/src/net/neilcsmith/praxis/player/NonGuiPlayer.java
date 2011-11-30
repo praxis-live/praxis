@@ -24,12 +24,12 @@ package net.neilcsmith.praxis.player;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
+import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.RootHub;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
@@ -37,8 +37,8 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.ScriptService;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.impl.AbstractControl;
 import net.neilcsmith.praxis.impl.AbstractRoot;
-import net.neilcsmith.praxis.impl.BasicControl;
 
 /**
  *
@@ -46,16 +46,17 @@ import net.neilcsmith.praxis.impl.BasicControl;
  */
 public class NonGuiPlayer extends AbstractRoot {
 
+    private final static Logger LOG = Logger.getLogger(NonGuiPlayer.class.getName());
     private String script;
     private ScriptControl scriptControl;
     private Root.Controller controller;
-    
+
     public NonGuiPlayer(String script) {
         if (script == null) {
             throw new NullPointerException();
         }
         this.script = script;
-        
+
     }
 
     @Override
@@ -71,33 +72,37 @@ public class NonGuiPlayer extends AbstractRoot {
         controller = super.initialize(ID, hub);
         return controller;
     }
-    
 
-
-
-
-    private class ScriptControl extends BasicControl {
+    private class ScriptControl extends AbstractControl {
 
         ControlAddress evalControl;
         ControlAddress clearControl;
         Call activeCall;
 
         ScriptControl() {
-            super(NonGuiPlayer.this);
-            try {
-                ComponentAddress ss = getServiceManager().findService(
-                        ScriptService.INSTANCE);
-                evalControl = ControlAddress.create(ss, ScriptService.EVAL);
-                clearControl = ControlAddress.valueOf("/praxis.clear");
-            } catch (ServiceUnavailableException ex) {
-                Logger.getLogger(Player.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ArgumentFormatException ex) {
-                Logger.getLogger(Player.class.getName()).log(Level.SEVERE, null, ex);
+            
+        }
+
+        public void call(Call call, PacketRouter router) throws Exception {
+            switch (call.getType()) {
+                case RETURN:
+                    processReturn(call);
+                    break;
+                case ERROR:
+                    processError(call);
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
             }
         }
 
-        @Override
-        protected void processError(Call call) throws Exception {
+        private void processReturn(Call call) throws Exception {
+            if (activeCall != null && call.getMatchID() == activeCall.getMatchID()) {
+                activeCall = null;
+            }
+        }
+
+        private void processError(Call call) throws Exception {
             if (activeCall != null && call.getMatchID() == activeCall.getMatchID()) {
                 activeCall = null;
                 CallArguments args = call.getArgs();
@@ -106,13 +111,12 @@ public class NonGuiPlayer extends AbstractRoot {
                     if (err instanceof PReference) {
                         Object o = ((PReference) err).getReference();
                         if (o instanceof Throwable) {
-                            Logger.getLogger(Player.class.getName()).log(
-                                    Level.SEVERE, "ERROR: ", (Throwable) o);
+                            LOG.log(Level.SEVERE, "ERROR: ", (Throwable) o);
                         } else {
-                            Logger.getLogger(Player.class.getName()).severe("ERROR: " + o.toString());
+                            LOG.log(Level.SEVERE, "ERROR: {0}", o.toString());
                         }
                     } else {
-                        Logger.getLogger(Player.class.getName()).severe("ERROR: " + err.toString());
+                        LOG.log(Level.SEVERE, "ERROR: {0}", err.toString());
                     }
                 }
                 System.exit(1);
@@ -120,16 +124,13 @@ public class NonGuiPlayer extends AbstractRoot {
 
         }
 
-        @Override
-        protected void processReturn(Call call) throws Exception {
-            if (activeCall != null && call.getMatchID() == activeCall.getMatchID()) {
-                activeCall = null;
-//                controller.shutdown();
-            }
-        }
-
         private void runScript(String script) {
-
+            try {
+                ComponentAddress ss = findService(ScriptService.INSTANCE);
+                evalControl = ControlAddress.create(ss, ScriptService.EVAL);
+            } catch (ServiceUnavailableException ex) {
+                LOG.log(Level.SEVERE, "", ex);
+            }
             activeCall = Call.createCall(evalControl, getAddress(), System.nanoTime(), PString.valueOf(script));
             getPacketRouter().route(activeCall);
 

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2011 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,14 +21,13 @@
  */
 package net.neilcsmith.praxis.player;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.UIManager;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
@@ -40,6 +39,8 @@ import org.netbeans.api.sendopts.CommandException;
 import org.netbeans.spi.sendopts.Env;
 import org.netbeans.spi.sendopts.Option;
 import org.netbeans.spi.sendopts.OptionProcessor;
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 import org.openide.modules.ModuleInfo;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
@@ -51,6 +52,7 @@ import org.openide.util.lookup.ServiceProvider;
 @ServiceProvider(service = OptionProcessor.class)
 public class CLIProcessor extends OptionProcessor {
 
+    private final static Logger LOG = Logger.getLogger(CLIProcessor.class.getName());
     private final static Option ALWAYS = Option.always();
     private final static Option PLAYER =
             Option.withoutArgument(Option.NO_SHORT_NAME, "player");
@@ -68,10 +70,14 @@ public class CLIProcessor extends OptionProcessor {
     @Override
     protected void process(Env env, Map<Option, String[]> optionValues) throws CommandException {
 
+        // set up UI        
         PraxisLAFManager.getInstance().installUI();
         UIManager.put("ClassLoader", Lookup.getDefault().lookup(ClassLoader.class));
 
-        env.getOutputStream().println("Current Directory : " + env.getCurrentDirectory());
+        if (LOG.isLoggable(Level.FINE)) {
+            LOG.log(Level.FINE, "Current Directory : {0}", env.getCurrentDirectory());
+            LOG.log(Level.FINE, "netbeans.user.dir : {0}", System.getProperty("netbeans.user.dir"));
+        }
 
         boolean player = optionValues.containsKey(PLAYER);
         String script = null;
@@ -82,10 +88,9 @@ public class CLIProcessor extends OptionProcessor {
                 throw new CommandException(1, "Too many script files specified on command line.");
             }
             try {
-                File f = new File(env.getCurrentDirectory(), files[0]);
-                env.getOutputStream().println("Loading script : " + f);
-                script = loadScript(f);
+                script = loadScript(env, files[0]);
             } catch (Exception ex) {
+                LOG.log(Level.SEVERE, "Error loading script file", ex);
                 throw new CommandException(1, "Error loading script file.");
             }
         }
@@ -107,6 +112,7 @@ public class CLIProcessor extends OptionProcessor {
                 startNonGuiPlayer(script);
 
             } else {
+                env.getOutputStream().println("WARNING: The Praxis GUI player is deprecated.");
                 startPlayer(script);
             }
         } catch (IllegalRootStateException ex) {
@@ -120,17 +126,53 @@ public class CLIProcessor extends OptionProcessor {
 //       
     }
 
-    private String loadScript(File script) throws IOException {
+    private String loadScript(Env env, String filename) throws IOException {
 
-        BufferedReader reader = new BufferedReader(new FileReader(script));
-        StringBuilder str = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            str.append(line);
-            str.append('\n');
+        LOG.log(Level.FINE, "File : {0}", filename);
+        File f = new File(filename);
+        if (!f.isAbsolute()) {
+            f = new File(env.getCurrentDirectory(), filename);        
         }
-        return str.toString();
-
+        LOG.log(Level.FINE, "java.io.File : {0}", f);
+//        LOG.log(Level.FINE, "java.net.URL : {0}", f.toURI().toURL());
+        FileObject target = FileUtil.toFileObject(f);
+        if (target == null) {
+            LOG.log(Level.FINE, "Can't find script file");
+            throw new IOException("Can't find script file");
+        }
+        if (target.isFolder()) {
+            target = findProjectFile(target);
+        }
+        LOG.log(Level.FINE, "Loading script : {0}", target);
+        String script = target.asText();
+        script = "set _PWD " + FileUtil.toFile(target.getParent()).toURI() + "\n" + script;
+        return script;
+    }
+    
+    
+    private FileObject findProjectFile(FileObject projectDir) throws IOException {
+        LOG.log(Level.FINE, "Searching project directory : {0}", projectDir);
+        ArrayList<FileObject> files = new ArrayList<FileObject>(1);
+        for (FileObject file : projectDir.getChildren()) {
+            LOG.log(Level.FINE, "Found Child : {0}", file);
+            if (file.hasExt("pxp")) {
+                files.add(file);
+            }
+        }
+        if (files.size() == 1) {
+            FileObject file = files.get(0);
+            LOG.log(Level.FINE, "Found project file : {0}", file);
+            return file;
+        } else {
+            for (FileObject file : files) {
+                LOG.log(Level.FINE, "Checking file : {0}", file);
+                if (file.getName().equals(projectDir.getName())) {
+                    LOG.log(Level.FINE, "Found project file : {0}", file);
+                    return file;
+                }
+            }
+        }
+        throw new IOException("No project file found");
     }
 
     private void startPlayer(String script) throws IllegalRootStateException {
