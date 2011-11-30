@@ -143,12 +143,12 @@ public class PraxisTheme extends NimRODTheme {
     public void addCustomEntriesToTable(UIDefaults table) {
         super.addCustomEntriesToTable(table);
         
-        table.put("Slider.horizontalThumbIcon", new HorizontalSliderThumbIcon());
-        table.put("Slider.verticalThumbIcon", new VerticalSliderThumbIcon());
-        table.put("Slider.horizontalSize", new DimensionUIResource(200, 36));
-        table.put("Slider.verticalSize", new DimensionUIResource(36, 200));
-        table.put("Slider.minimumHorizontalSize", new DimensionUIResource(42, 36));
-        table.put("Slider.minimumVerticalSize", new DimensionUIResource(36, 42));
+//        table.put("Slider.horizontalThumbIcon", new HorizontalSliderThumbIcon());
+//        table.put("Slider.verticalThumbIcon", new VerticalSliderThumbIcon());
+//        table.put("Slider.horizontalSize", new DimensionUIResource(200, 36));
+//        table.put("Slider.verticalSize", new DimensionUIResource(36, 200));
+//        table.put("Slider.minimumHorizontalSize", new DimensionUIResource(42, 36));
+//        table.put("Slider.minimumVerticalSize", new DimensionUIResource(36, 42));
 //          table.put("Button.select", w);
 //          table.put("ToggleButton.select", w);
     }

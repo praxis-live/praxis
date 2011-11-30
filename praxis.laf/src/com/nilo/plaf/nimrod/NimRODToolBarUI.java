@@ -44,6 +44,7 @@ public class NimRODToolBarUI extends MetalToolBarUI {
   }
   
 	protected Border createRolloverBorder() {
-	  return NimRODBorders.getGenBorder();//.getRolloverButtonBorder();
+//	  return NimRODBorders.getGenBorder();//.getRolloverButtonBorder();
+            return NimRODBorders.getRolloverButtonBorder();
   }
 }
