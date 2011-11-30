@@ -71,6 +71,19 @@ public final class Blit implements SurfaceOp {
     public BlendFunction getBlendFunction() {
         return blend;
     }
+    
+    public Bounds getSourceRegion() {
+        return srcRegion;
+    }
+    
+    public int getX() {
+        return x;
+    }
+    
+    public int getY() {
+        return y;
+    }
+    
 
     public void process(PixelData output, PixelData... inputs) {
         if (inputs.length < 1) {
