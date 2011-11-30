@@ -27,13 +27,12 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import net.neilcsmith.praxis.video.VideoDelegateFactory;
-import net.neilcsmith.praxis.video.VideoDelegateFactoryProvider;
 
 /**
  *
  * @author Neil C Smith
  */
-public class GStreamerFactoryProvider implements VideoDelegateFactoryProvider {
+public class GStreamerFactoryProvider implements VideoDelegateFactory.Provider {
     
     private static String[] schemes = { "file", "http", "v4l", "v4l2", "ipcam", "dv1394"};
 
