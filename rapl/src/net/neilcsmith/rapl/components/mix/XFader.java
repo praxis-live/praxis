@@ -81,13 +81,11 @@ public class XFader extends MultiInputInOut {
         switch (getSourceCount()) {
             case 2:
                 if (source == getSource(2)) {
-                    return g2.isInputRequired() &&
-                            super.isRenderRequired(source, time);
+                    return g2.isInputRequired(super.isRenderRequired(source, time));
                 }
             case 1:
                 if (source == getSource(1)) {
-                    return g1.isInputRequired() &&
-                            super.isRenderRequired(source, time);
+                    return g1.isInputRequired(super.isRenderRequired(source, time));
                 }
             default:
                 return false;

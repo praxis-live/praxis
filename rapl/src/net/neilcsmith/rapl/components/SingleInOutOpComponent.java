@@ -56,7 +56,7 @@ public abstract class SingleInOutOpComponent extends SingleInOut {
                 op.initialize(samplerate, buffersize);
                 resetRequired = false;
             } else if (resetRequired) {
-                op.reset();
+                op.reset(-1);
             }
             dataHolder[0] = buffer.getData();
             op.processReplace(buffer.getSize(), dataHolder, dataHolder);
