@@ -28,13 +28,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import net.miginfocom.layout.AC;
-import net.miginfocom.layout.ConstraintParser;
-import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
 import net.neilcsmith.praxis.gui.impl.AbstractGuiContainer;
 import net.neilcsmith.praxis.gui.Keys;
-import net.neilcsmith.praxis.impl.StringProperty;
 
 /**
  *
@@ -47,9 +43,7 @@ public class Panel extends AbstractGuiContainer {
 
 
     public Panel() {
-//        registerControl("setup", StringProperty.create(new SetupBinding(), "fill"));
-//        registerControl("rows", StringProperty.create(new AxisBinding(false), "[fill]"));
-//        registerControl("columns", StringProperty.create(new AxisBinding(true), "[fill]"));
+
     }
 
     @Override
@@ -57,52 +51,12 @@ public class Panel extends AbstractGuiContainer {
         if (panel != null) {
             throw new IllegalStateException();
         }
-//        layout = vertical ? new MigLayout("flowy, fill", "[fill]") //, "[grow]")
-//                : new MigLayout("fill", "[fill]");//, "[grow,fill]", "[grow]");
-        layout = new MigLayout("fill", "[fill]");
+        layout = new MigLayout("", "[fill]");
         panel = new JPanel(layout);
         panel.addContainerListener(new ChildrenListener());
-//        panel.putClientProperty(Keys.LayoutConstraint, "grow");
         return panel;
     }
 
-//    @Override
-//    protected JComponent createSwingContainer() {
-//        if (box == null) {
-//            createBox();
-//        }
-//        return box;
-//    }
-//
-//    private void createBox() {
-//        box = vertical ? Box.createVerticalBox() : Box.createHorizontalBox();
-//    }
-//    @Override
-//    protected void addToContainer(String id, JComponent component) throws Exception {
-////        if (box == null) {
-////            createBox();
-////        }
-//        if (vertical) {
-//            component.setAlignmentX(JComponent.LEFT_ALIGNMENT);
-//        } else {
-//            component.setAlignmentY(JComponent.TOP_ALIGNMENT);
-//        }
-////        box.add(component);
-//        Object constraints = component.getClientProperty(Keys.LayoutConstraint);
-//        panel.add(component, constraints);
-//        panel.revalidate();
-//        component.addPropertyChangeListener(Keys.LayoutConstraint, layoutListener);
-//    }
-//
-//    @Override
-//    protected void removeFromContainer(String id, JComponent component) {
-////        if (box != null) {
-////            box.remove(component);
-////        }
-//        panel.remove(component);
-//        panel.revalidate();
-//        component.removePropertyChangeListener(Keys.LayoutConstraint, layoutListener);
-//    }
     private void setLayoutConstraint(JComponent child) {
         layout.setComponentConstraints(child, child.getClientProperty(Keys.LayoutConstraint));
         panel.revalidate();
@@ -144,58 +98,58 @@ public class Panel extends AbstractGuiContainer {
     }
 
 
-    private class SetupBinding implements StringProperty.Binding {
-
-        private String consString = "";
-        private LC constraint = null;
-
-        public void setBoundValue(long time, String value) {
-            if (layout == null) {
-                throw new IllegalStateException("Layout not yet initialised");
-            }
-            constraint = ConstraintParser.parseLayoutConstraint(value);
-            layout.setLayoutConstraints(constraint);
-            panel.revalidate();
-            panel.repaint();
-            consString = value;
-        }
-
-        public String getBoundValue() {
-            return consString;
-        }
-
-    }
-
-    private class AxisBinding implements StringProperty.Binding {
-
-        private final boolean column;
-        private String consString = "";
-        private AC constraint = null;
-
-        private AxisBinding(boolean column) {
-            this.column = column;
-        }
-
-        public void setBoundValue(long time, String value) {
-            if (layout == null) {
-                throw new IllegalStateException("Layout not yet initialised");
-            }
-            if (column) {
-                constraint = ConstraintParser.parseColumnConstraints(value);
-                layout.setColumnConstraints(constraint);
-            } else {
-                constraint = ConstraintParser.parseRowConstraints(value);
-                layout.setRowConstraints(constraint);
-            }
-            panel.revalidate();
-            panel.repaint();
-            consString = value;
-        }
-
-        public String getBoundValue() {
-            return consString;
-        }
-
-    }
+//    private class SetupBinding implements StringProperty.Binding {
+//
+//        private String consString = "";
+//        private LC constraint = null;
+//
+//        public void setBoundValue(long time, String value) {
+//            if (layout == null) {
+//                throw new IllegalStateException("Layout not yet initialised");
+//            }
+//            constraint = ConstraintParser.parseLayoutConstraint(value);
+//            layout.setLayoutConstraints(constraint);
+//            panel.revalidate();
+//            panel.repaint();
+//            consString = value;
+//        }
+//
+//        public String getBoundValue() {
+//            return consString;
+//        }
+//
+//    }
+//
+//    private class AxisBinding implements StringProperty.Binding {
+//
+//        private final boolean column;
+//        private String consString = "";
+//        private AC constraint = null;
+//
+//        private AxisBinding(boolean column) {
+//            this.column = column;
+//        }
+//
+//        public void setBoundValue(long time, String value) {
+//            if (layout == null) {
+//                throw new IllegalStateException("Layout not yet initialised");
+//            }
+//            if (column) {
+//                constraint = ConstraintParser.parseColumnConstraints(value);
+//                layout.setColumnConstraints(constraint);
+//            } else {
+//                constraint = ConstraintParser.parseRowConstraints(value);
+//                layout.setRowConstraints(constraint);
+//            }
+//            panel.revalidate();
+//            panel.repaint();
+//            consString = value;
+//        }
+//
+//        public String getBoundValue() {
+//            return consString;
+//        }
+//
+//    }
 
 }

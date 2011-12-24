@@ -51,17 +51,15 @@ public class GuiFactoryProvider implements ComponentFactoryProvider {
             addComponent("gui:h-slider", HSlider.class);
             addComponent("gui:v-slider", VSlider.class);
             addComponent("gui:h-rangeslider", HRangeSlider.class);
-            addComponent("gui:v-rangeslider", VRangeSlider.class);
+            /* addComponent("gui:v-rangeslider", VRangeSlider.class); temp removal */
             addComponent("gui:button", Button.class);
             addComponent("gui:togglebutton", ToggleButton.class);
             addComponent("gui:xy-pad", XYController.class);
             addComponent("gui:filefield", FileField.class);
             // GUI containers
-//            addComponent("gui:h-panel", HPanel.class);
-//            addComponent("gui:v-panel", VPanel.class);
             addComponent("gui:panel", Panel.class);
             addComponent("gui:tabs", Tabs.class);
-            addComponent("gui:textarea", TextArea.class);
+            /*addComponent("gui:textarea", TextArea.class); temp removal */
 
         }
     }

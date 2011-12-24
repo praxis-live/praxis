@@ -31,6 +31,7 @@ import net.neilcsmith.praxis.gui.GuiContext;
 import net.neilcsmith.praxis.gui.Keys;
 import net.neilcsmith.praxis.impl.AbstractContainer;
 import net.neilcsmith.praxis.impl.InstanceLookup;
+import net.neilcsmith.praxis.impl.StringProperty;
 
 /**
  *
@@ -41,11 +42,14 @@ public abstract class AbstractGuiContainer extends AbstractContainer {
     private JComponent component;
     private Lookup lookup;
     private GuiContext context;
+    private LayoutBinding layout;
 
     public final JComponent getSwingContainer() {
         if (EventQueue.isDispatchThread()) {
             if (component == null) {
                 component = createSwingContainer();
+                layout = new LayoutBinding(component);
+                registerControl("layout", StringProperty.create(layout, ""));
             }
             return component;
         } else {

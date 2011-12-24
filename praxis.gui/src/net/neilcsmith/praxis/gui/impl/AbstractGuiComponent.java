@@ -24,12 +24,9 @@ package net.neilcsmith.praxis.gui.impl;
 
 import java.awt.EventQueue;
 import javax.swing.JComponent;
-import net.miginfocom.layout.CC;
-import net.miginfocom.layout.ConstraintParser;
 import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.VetoException;
 import net.neilcsmith.praxis.gui.Keys;
-import net.neilcsmith.praxis.gui.GuiComponent;
 import net.neilcsmith.praxis.gui.GuiContext;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.StringProperty;
@@ -38,7 +35,7 @@ import net.neilcsmith.praxis.impl.StringProperty;
  * Abstract superclass for default GuiComponent model.
  * @author Neil C Smith
  */
-public abstract class AbstractGuiComponent extends AbstractComponent implements GuiComponent {
+public abstract class AbstractGuiComponent extends AbstractComponent {
 
     private JComponent component;
     private LayoutBinding layout;
@@ -46,17 +43,14 @@ public abstract class AbstractGuiComponent extends AbstractComponent implements 
     private GuiContext context;
 
     protected AbstractGuiComponent() {
-        layout = new LayoutBinding();
-        registerControl("layout", StringProperty.create(layout, layout.layoutString));
     }
 
     public final JComponent getSwingComponent() {
         if (EventQueue.isDispatchThread()) {
             if (component == null) {
                 component = createSwingComponent();
-                if (layout.constraint != null) {
-                    component.putClientProperty(Keys.LayoutConstraint, layout.constraint);
-                }
+                layout = new LayoutBinding(component);
+                registerControl("layout", StringProperty.create(layout, ""));
             }
             return component;
         } else {
@@ -69,16 +63,7 @@ public abstract class AbstractGuiComponent extends AbstractComponent implements 
         if (EventQueue.isDispatchThread()) {
             super.parentNotify(parent);
             // call getSwingComponent() early to ensure JComponent creation
-//            getSwingComponent();
-//            GuiContext ctxt = findLookup().get(GuiContext.class);
-//            if (ctxt == null && container != null) {
-//                container.remove(getSwingComponent());
-//                container = null;
-//            } else {
-//                container = ctxt.getContainer();
-//                container.add(getSwingComponent());
-//            }
-
+            getSwingComponent();
         } else {
             throw new VetoException("Trying to install GUI component in GUI incompatible container.");
         }
@@ -88,7 +73,7 @@ public abstract class AbstractGuiComponent extends AbstractComponent implements 
     @Override
     public void hierarchyChanged() {
         super.hierarchyChanged();
-        getSwingComponent().putClientProperty(Keys.Address, getAddress());
+//        getSwingComponent().putClientProperty(Keys.Address, getAddress());
         GuiContext ctxt = getLookup().get(GuiContext.class);
         if (context != ctxt) {
             if (context != null) {
@@ -102,33 +87,5 @@ public abstract class AbstractGuiComponent extends AbstractComponent implements 
         getSwingComponent().putClientProperty(Keys.Address, getAddress());
     }
 
-
-
     protected abstract JComponent createSwingComponent();
-
-    private class LayoutBinding implements StringProperty.Binding {
-
-        private String layoutString = "";
-        private CC constraint = null;
-
-        public void setBoundValue(long time, String value) {
-            if (value.isEmpty()) {
-                constraint = null;
-            } else {
-                constraint = ConstraintParser.parseComponentConstraint(value);
-            }
-
-//            if (EventQueue.isDispatchThread() && component != null) {
-//                component.putClientProperty(Keys.LayoutConstraint, constraint);
-//            }
-            getSwingComponent().putClientProperty(Keys.LayoutConstraint, constraint);
-
-            layoutString = value;
-
-        }
-
-        public String getBoundValue() {
-            return layoutString;
-        }
-    }
 }
