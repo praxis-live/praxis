@@ -27,8 +27,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
-import net.neilcsmith.praxis.core.Component;
-import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.PacketRouter;
 
 /**
@@ -117,7 +115,7 @@ public abstract class AbstractAsyncControl extends AbstractControl {
                     case RETURN:
                     case ERROR:
                         if (ret.getMatchID() != call.getMatchID()) {
-                            LOG.warning("processInvoke(call) returned wrong resposne call");
+                            LOG.warning("processInvoke(call) returned wrong response call");
                             throw new IllegalStateException();
                         }
                         callQueue.poll();
