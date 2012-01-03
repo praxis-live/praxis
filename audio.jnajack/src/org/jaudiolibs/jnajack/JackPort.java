@@ -42,32 +42,39 @@ public class JackPort {
     FloatBuffer floatBuffer;
     
     private JackClient client;
-    private JackLibrary jackLib;
     private String shortName;
 
-    JackPort(String shortName, JackClient client, JackLibrary jackLib, JackLibrary._jack_port portPtr) {
+    JackPort(String shortName, JackClient client, JackLibrary._jack_port portPtr) {
         this.shortName = shortName;
         this.portPtr = portPtr;
         this.client = client;
-        this.jackLib = jackLib;
     }
 
     /**
-     * Get the byteBuffer associated with this port. Do not cache this value between
-     * process calls - this byteBuffer reference is only valid inside the process
+     * Get the ByteBuffer associated with this port. Do not cache this value between
+     * process calls - this buffer reference is only valid inside the process
      * callback.
      *
-     * The byteBuffer will be returned as a direct ByteBuffer.
+     * The returned buffer is direct.
      *
-     * For audio use <code>getBuffer().asFloatBuffer()</code>
+     * For audio use <code>getFloatBuffer()</code> as this will be more efficient.
      *
-     * @return byteBuffer associated with this port.
+     * @return buffer associated with this port.
      */
     // @TODO should we create this lazily in call to client. MIDI ports won't require this.
     public ByteBuffer getBuffer() {
         return byteBuffer;
     }
     
+    /**
+     * Get the FloatBuffer associated with this port. Do not cache this value between
+     * process calls - this buffer reference is only valid inside the process
+     * callback.
+     *
+     * The returned buffer is direct.
+     
+     * @return buffer associated with this port.
+     */
     public FloatBuffer getFloatBuffer() {
         return floatBuffer;      
     }

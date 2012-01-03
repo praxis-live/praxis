@@ -41,30 +41,30 @@ import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
  */
 public class JackClient {
 
-    private final static Logger logger = Logger.getLogger(JackClient.class.getName());
+    private final static Logger LOG = Logger.getLogger(JackClient.class.getName());
     private final static String CALL_ERROR_MSG = "Error calling native lib";
     private final static int FRAME_SIZE = 4;
-    
     JackLibrary._jack_client clientPtr; // package private
-    
     private ProcessCallbackWrapper processCallback; // reference kept - is in use!
     private BufferSizeCallbackWrapper buffersizeCallback;
     private SampleRateCallbackWrapper samplerateCallback;
     private ShutdownCallback shutdownCallback;
     private JackShutdownCallback userShutdownCallback;
     private JackPort[] ports;
+    private Jack jack;
     private JackLibrary jackLib;
     private String name;
 
-    JackClient(String name, JackLibrary jackLib, JackLibrary._jack_client client) {
+    JackClient(String name, Jack jack, JackLibrary._jack_client client) {
         this.name = name;
-        this.jackLib = jackLib;
+        this.jack = jack;
+        this.jackLib = jack.jackLib;
         this.clientPtr = client;
         shutdownCallback = new ShutdownCallback();
         try {
             jackLib.jack_on_shutdown(client, shutdownCallback, null);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
         }
         this.ports = new JackPort[0];
     }
@@ -102,13 +102,13 @@ public class JackClient {
             portPtr = jackLib.jack_port_register(
                     clientPtr, name, typeString, nativeFlags, bufferSize);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             portPtr = null;
         }
         if (portPtr == null) {
             throw new JackException("Could not register port");
         }
-        JackPort port = new JackPort(name, this, jackLib, portPtr);
+        JackPort port = new JackPort(name, this, portPtr);
         addToPortArray(port);
         return port;
 
@@ -154,7 +154,7 @@ public class JackClient {
         try {
             ret = jackLib.jack_set_process_callback(clientPtr, wrapper, null);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
         }
         if (ret == 0) {
@@ -166,7 +166,7 @@ public class JackClient {
     }
 
     /**
-     * Set interface to be called if byteBuffer size changes
+     * Set interface to be called if buffer size changes
      * @param callback
      * @throws net.neilcsmith.jnajack.JackException
      */
@@ -180,7 +180,7 @@ public class JackClient {
         try {
             ret = jackLib.jack_set_buffer_size_callback(clientPtr, wrapper, null);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
         }
         if (ret == 0) {
@@ -205,7 +205,7 @@ public class JackClient {
         try {
             ret = jackLib.jack_set_sample_rate_callback(clientPtr, wrapper, null);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
         }
         if (ret == 0) {
@@ -244,7 +244,7 @@ public class JackClient {
         try {
             ret = jackLib.jack_activate(clientPtr);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
         }
         if (ret != 0) {
@@ -261,7 +261,7 @@ public class JackClient {
         try {
             jackLib.jack_deactivate(clientPtr);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
         }
     }
 
@@ -275,7 +275,7 @@ public class JackClient {
             }
 
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
         } finally {
             clientPtr = null;
         }
@@ -295,7 +295,7 @@ public class JackClient {
         try {
             return jackLib.jack_get_sample_rate(clientPtr);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
         }
     }
@@ -313,7 +313,7 @@ public class JackClient {
         try {
             return jackLib.jack_get_buffer_size(clientPtr);
         } catch (Throwable e) {
-            logger.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
         }
     }
@@ -337,15 +337,16 @@ public class JackClient {
 
         ProcessCallbackWrapper(JackProcessCallback callback) {
             this.callback = callback;
+            jack.setupCTI(this);
         }
 
-        public int invoke(int nframes) { //, Pointer arg) {
+        public int invoke(int nframes) {
             int ret = 1;
             try {
                 JackPort[] pts = ports;
 
                 int nbyteframes = nframes * FRAME_SIZE;
-                
+
                 for (JackPort port : pts) {
                     Pointer buffer = jackLib.jack_port_get_buffer(
                             port.portPtr, nframes);
@@ -362,8 +363,11 @@ public class JackClient {
                     ret = 0;
                 }
             } catch (Throwable ex) {
-                logger.log(Level.SEVERE, "Error in process callback", ex);
+                LOG.log(Level.SEVERE, "Error in process callback", ex);
                 ret = 1;
+            }
+            if (ret != 0) {
+                jack.forceThreadDetach();
             }
             return ret;
         }
@@ -373,6 +377,7 @@ public class JackClient {
 
         public void invoke(Pointer arg) {
             processShutdown();
+            jack.forceThreadDetach();
         }
     }
 
@@ -390,7 +395,7 @@ public class JackClient {
                 callback.buffersizeChanged(JackClient.this, nframes);
                 ret = 0;
             } catch (Throwable e) {
-                logger.log(Level.SEVERE, "Error in buffersize callback", e);
+                LOG.log(Level.SEVERE, "Error in buffersize callback", e);
                 ret = -1;
             }
             return ret;
@@ -411,7 +416,7 @@ public class JackClient {
                 callback.sampleRateChanged(JackClient.this, nframes);
                 ret = 0;
             } catch (Throwable e) {
-                logger.log(Level.SEVERE, "Error in samplerate callback", e);
+                LOG.log(Level.SEVERE, "Error in samplerate callback", e);
                 ret = -1;
             }
             return ret;

@@ -23,17 +23,19 @@
  */
 package org.jaudiolibs.jnajack;
 
+import com.sun.jna.Callback;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
-import org.jaudiolibs.jnajack.lowlevel.JackLibrary._jack_client;
 import org.jaudiolibs.jnajack.lowlevel.JackLibraryDirect;
 
 /**
@@ -49,13 +51,62 @@ import org.jaudiolibs.jnajack.lowlevel.JackLibraryDirect;
  */
 public class Jack {
 
-    private static final Logger LOG = Logger.getLogger(Jack.class.getName());
+    private final static Logger LOG = Logger.getLogger(Jack.class.getName());
     private final static String CALL_ERROR_MSG = "Error calling native lib";
+    private final static String PROP_DISABLE_CTI = "jnajack.disable-cti";
+    
     private static Jack instance;
-    private JackLibrary jackLib;
-
+    
+    final JackLibrary jackLib;
+    
+    private Method setCTIMethod;
+    private Method detachMethod;
+    private Constructor<?> ctiConstructor;
+    
     private Jack(JackLibrary jackLib) {
         this.jackLib = jackLib;
+        if (!Boolean.getBoolean(PROP_DISABLE_CTI)) {
+            initCallbackMethods();
+        }
+    }
+    
+    private void initCallbackMethods() {
+        try {
+            Class<?> ctiClass = Class.forName("com.sun.jna.CallbackThreadInitializer",
+                    true, Native.class.getClassLoader());
+            setCTIMethod = Native.class.getMethod("setCallbackThreadInitializer", Callback.class, ctiClass);
+            detachMethod = Native.class.getMethod("detach", boolean.class);
+            ctiConstructor = ctiClass.getConstructor(boolean.class, boolean.class, String.class);
+                  
+        } catch (Exception ex) {
+            LOG.log(Level.WARNING, "You seem to be using a version of JNA below 3.4.0 - performance may suffer");
+            LOG.log(Level.FINE, "Exception creating CTI reflection methods", ex);
+            setCTIMethod = null;
+            detachMethod = null;
+            ctiConstructor = null;
+        }
+    }
+    
+    void setupCTI(Callback callback) {
+        if (setCTIMethod == null) {
+            return;
+        }
+        try {
+            setCTIMethod.invoke(null, callback, ctiConstructor.newInstance(false, false, "JNAJack"));
+        } catch (Exception ex) {
+            LOG.log(Level.WARNING, "Error setting up CallbackThreadInitializer", ex);
+        }
+    }
+    
+    void forceThreadDetach() {
+        if (detachMethod == null) {
+            return;
+        }
+        try {
+            detachMethod.invoke(null, true);
+        } catch (Exception ex) {
+            LOG.log(Level.WARNING, "Error invoking Native.detach(true)", ex);
+        }
     }
 
     /**
@@ -114,7 +165,7 @@ public class Jack {
             }
         }
 
-        return new JackClient(name, jackLib, cl);
+        return new JackClient(name, this, cl);
 
 
     }
@@ -340,15 +391,6 @@ public class Jack {
         }
     }
 
-//    @Override
-//    protected void finalize() throws Throwable {
-//        super.finalize();
-//        try {
-//            jackLib.jack_client_close(clientPtr);
-//        } catch (Throwable e) {
-//            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
-//        }
-//    }
 
     // @TODO this is not in Jack 1 API - implement usable workaround.
 //    public int[] getVersion() throws JackException {
@@ -379,23 +421,13 @@ public class Jack {
             return instance;
         }
         JackLibrary jackLib;
-//        JackLibrary._jack_client clientPtr;
         try {
-//            jackLib = (JackLibrary) Native.loadLibrary("jack", JackLibrary.class);
             jackLib = new JackLibraryDirect();
-//            clientPtr = jackLib.jack_client_open("__jnajack__",
-//                    JackLibrary.JackOptions.JackNoStartServer,
-//                    null);
 
         } catch (Throwable e) {
             throw new JackException("Can't find native library", e);
         }
-//        if (clientPtr == null) {
-//            throw new JackException("Could not initialize JNAJack client");
-//        }
         instance = new Jack(jackLib);
         return instance;
-
-
     }
 }
