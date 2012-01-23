@@ -128,7 +128,13 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
     }
 
     public ComponentAddress getAddress(Component child) {
-        return ComponentAddress.create(getAddress(), getChildID(child));
+        ComponentAddress containerAddress = getAddress();
+        String childID = getChildID(child);
+        if (containerAddress == null || childID == null) {
+            return null;
+        } else {
+            return ComponentAddress.create(containerAddress, childID);
+        }   
     }
 
     public String[] getChildIDs() {
