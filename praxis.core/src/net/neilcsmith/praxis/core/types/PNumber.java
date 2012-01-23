@@ -33,6 +33,7 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
 
     public final static String KEY_MINIMUM = "minimum";
     public final static String KEY_MAXIMUM = "maximum";
+    public final static String KEY_IS_INTEGER = "is-integer";
 
     public final static int MAX_VALUE = Integer.MAX_VALUE;
     public final static int MIN_VALUE = Integer.MIN_VALUE;
@@ -155,19 +156,22 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
 
     public static ArgumentInfo info(
             double min, double max) {
-        return info(valueOf(min), valueOf(max));
-    }
-
-    public static ArgumentInfo info(
-            int min, int max) {
-        return info(valueOf(min), valueOf(max));
-    }
-
-    public static ArgumentInfo info(
-            PNumber min, PNumber max) {
         PMap map = PMap.create(KEY_MINIMUM, min,
                 KEY_MAXIMUM, max);
         return ArgumentInfo.create(PNumber.class, map);
     }
+
+    public static ArgumentInfo integerInfo() {
+        return ArgumentInfo.create(PNumber.class, PMap.create(KEY_IS_INTEGER, true));
+    }
+    
+    public static ArgumentInfo integerInfo(
+            int min, int max) {
+        PMap map = PMap.create(KEY_MINIMUM, min,
+                KEY_MAXIMUM, max, KEY_IS_INTEGER, true);
+        return ArgumentInfo.create(PNumber.class, map);
+    }
+
+    
 
 }

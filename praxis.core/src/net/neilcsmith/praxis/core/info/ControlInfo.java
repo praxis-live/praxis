@@ -40,7 +40,7 @@ public class ControlInfo extends Argument {
 
     public static enum Type {
 
-        Function, Trigger, Property, ReadOnlyProperty
+        Function, Action, Property, ReadOnlyProperty
     };
     
     private final static ArgumentInfo[] EMPTY_INFO = new ArgumentInfo[0];
@@ -138,7 +138,7 @@ public class ControlInfo extends Argument {
     }
     
     public static ControlInfo createTriggerInfo(PMap properties) {
-        return create(EMPTY_INFO, EMPTY_INFO, null, Type.Trigger, properties);
+        return create(EMPTY_INFO, EMPTY_INFO, null, Type.Action, properties);
     }
 
     public static ControlInfo createPropertyInfo(ArgumentInfo[] arguments, Argument[] defaults, PMap properties) {
