@@ -25,6 +25,7 @@ import net.neilcsmith.praxis.audio.components.distortion.SimpleOverdrive;
 import net.neilcsmith.praxis.audio.components.filter.CombFilter;
 import net.neilcsmith.praxis.audio.components.filter.IIRFilter;
 import net.neilcsmith.praxis.audio.components.mix.XFader;
+import net.neilcsmith.praxis.audio.components.sampling.Looper;
 import net.neilcsmith.praxis.audio.components.test.Sine;
 import net.neilcsmith.praxis.audio.components.time.MonoDelay2s;
 import net.neilcsmith.praxis.core.ComponentFactory;
@@ -62,8 +63,9 @@ public class AudioFactoryProvider implements ComponentFactoryProvider {
             addComponent("audio:filter:comb", CombFilter.class);
             addComponent("audio:filter:iir", IIRFilter.class);
             addComponent("audio:delay:mono-delay", MonoDelay2s.class);
-            addComponent("audio:distortion:simple-overdrive", SimpleOverdrive.class);
+            addComponent("audio:distortion:overdrive", SimpleOverdrive.class);
             addComponent("audio:mix:xfader", XFader.class);
+            addComponent("audio:sampling:looper", Looper.class);
 
         }
     }

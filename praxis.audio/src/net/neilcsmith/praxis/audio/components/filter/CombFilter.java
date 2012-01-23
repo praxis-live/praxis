@@ -44,6 +44,8 @@ public class CombFilter extends AbstractComponent {
 
     public CombFilter() {
         comb = new Comb();
+        registerPort(Port.IN, new DefaultAudioInputPort(this, comb));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, comb));
         frequency =  FloatProperty.create( new FrequencyBinding(),
                 Comb.MIN_FREQ, Comb.MAX_FREQ, comb.getFrequency(),
                 PMap.create("scale-hint", "Exponential"));
@@ -56,8 +58,7 @@ public class CombFilter extends AbstractComponent {
         mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
-        registerPort(Port.IN, new DefaultAudioInputPort(this, comb));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(this, comb));
+        
     }
 
     private class MixBinding implements FloatProperty.Binding {

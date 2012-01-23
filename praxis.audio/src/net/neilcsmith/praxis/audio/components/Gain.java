@@ -40,10 +40,10 @@ public class Gain extends AbstractComponent {
     public Gain() {
         gain = new net.neilcsmith.rapl.components.Gain();
         FloatProperty level =  FloatProperty.create( new GainBinding(), 0, 2, gain.getGain(), PMap.create("scale-hint", "Exponential"));
-        registerControl("level", level);
-        registerPort("level", level.createPort());
         registerPort(Port.IN, new DefaultAudioInputPort(this, gain));
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, gain));
+        registerControl("level", level);
+        registerPort("level", level.createPort());   
     }
     
     private class GainBinding implements FloatProperty.Binding {

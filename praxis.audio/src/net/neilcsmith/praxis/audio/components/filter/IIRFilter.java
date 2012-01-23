@@ -46,6 +46,8 @@ public class IIRFilter extends AbstractComponent {
 
     public IIRFilter() {
         filter = new net.neilcsmith.rapl.components.filters.IIRFilter();
+        registerPort(Port.IN, new DefaultAudioInputPort(this, filter));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, filter));
         type = createTypeControl();
         registerControl("type", type);
         frequency =  FloatProperty.create( new FrequencyBinding(),
@@ -59,8 +61,7 @@ public class IIRFilter extends AbstractComponent {
         mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
-        registerPort(Port.IN, new DefaultAudioInputPort(this, filter));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(this, filter));
+        
     }
 
     private StringProperty createTypeControl() {

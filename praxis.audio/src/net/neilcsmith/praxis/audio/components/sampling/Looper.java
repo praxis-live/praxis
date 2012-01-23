@@ -20,8 +20,9 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.audio.components;
+package net.neilcsmith.praxis.audio.components.sampling;
 
+import net.neilcsmith.praxis.audio.components.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
@@ -40,25 +41,23 @@ import net.neilcsmith.rapl.util.SampleTable;
  *
  * @author Neil C Smith
  */
-public class SamplePlayer extends AbstractComponent {
+public class Looper extends AbstractComponent {
 
-    private static Logger logger = Logger.getLogger(SamplePlayer.class.getName());
+    private static Logger logger = Logger.getLogger(Looper.class.getName());
 
-    private net.neilcsmith.rapl.components.SamplePlayer player;
-//    private BooleanProperty playing;
-    private int tablesize;
+    private net.neilcsmith.rapl.components.sampling.Looper looper;    
     
-    
-    public SamplePlayer() {
-        player = new net.neilcsmith.rapl.components.SamplePlayer();
-             
-        registerPort(Port.IN, new DefaultAudioInputPort(this, player));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(this, player));
+    public Looper() {
+        looper = new net.neilcsmith.rapl.components.sampling.Looper();
+        looper.setLoopSize(1);    
+        registerPort(Port.IN, new DefaultAudioInputPort(this, looper));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, looper));
         buildControls();
     }
     
     private void buildControls() {
-        registerControl("sample", new SampleTableLoader(new LoaderListener()));
+        FloatProperty loopSize = FloatProperty.create(new LoopSizeBinding(), 0, 60, 1);
+        registerControl("loop-size", loopSize);
         FloatProperty position = FloatProperty.create(new PositionBinding(), 0, 1, 0,
                 PMap.create(ControlInfo.KEY_TRANSIENT, true));
         registerControl("position", position);
@@ -72,37 +71,46 @@ public class SamplePlayer extends AbstractComponent {
         FloatRangeProperty range = FloatRangeProperty.create( new RangeBinding(),
                 0, 1, 0, 1);
         registerControl("range", range);
-        FloatProperty speed = FloatProperty.create( new SpeedBinding(), -2048, 2048, 1);
+        FloatProperty speed = FloatProperty.create( new SpeedBinding(), -4, 4, 1);
         registerControl("speed", speed);
         registerPort("speed", speed.createPort());
-        registerControl("loop", BooleanProperty.create(this, new LoopingBinding(), false));
+//        registerControl("loop", BooleanProperty.create(this, new LoopingBinding(), false));
         TriggerControl play = TriggerControl.create( new PlayBinding());
         registerControl("play", play);
         registerPort("play", play.createPort());
         TriggerControl stop = TriggerControl.create( new StopBinding());
         registerControl("stop", stop);
         registerPort("stop", stop.createPort());
+        TriggerControl record = TriggerControl.create( new RecordBinding());
+        registerControl("record", record);
+        registerPort("record", record.createPort());
         BooleanProperty playing = BooleanProperty.create(this, new PlayingBinding(), false,
                 PMap.create(ControlInfo.KEY_TRANSIENT, true));
         registerControl("playing", playing);
+        BooleanProperty recording = BooleanProperty.create(this, new RecordingBinding(), false,
+                PMap.create(ControlInfo.KEY_TRANSIENT, true));
+        registerControl("recording", recording);
     }
 
     private class PlayingBinding implements BooleanProperty.Binding {
 
         public void setBoundValue(long time, boolean value) {
-            player.setPlaying(value);
+            looper.setPlaying(value);
         }
 
         public boolean getBoundValue() {
-            return player.getPlaying();
+            return looper.getPlaying();
         }
         
     }
+
+    
     
     private class PlayBinding implements TriggerControl.Binding {
 
         public void trigger(long time) {
-            player.setPlaying(true);
+            looper.setPlaying(true);
+            looper.setRecording(false);
         }
         
     }
@@ -110,19 +118,40 @@ public class SamplePlayer extends AbstractComponent {
     private class StopBinding implements TriggerControl.Binding {
 
         public void trigger(long time) {
-            player.setPlaying(false);
+            looper.setPlaying(false);
+            looper.setRecording(false);
         }
         
+    }
+    
+    private class RecordBinding implements TriggerControl.Binding {
+
+        public void trigger(long time) {
+            looper.setRecording(true);
+        }
+        
+    }
+    
+    private class RecordingBinding implements BooleanProperty.Binding {
+
+        public void setBoundValue(long time, boolean value) {
+            looper.setRecording(value);
+        }
+
+        public boolean getBoundValue() {
+            return looper.getRecording();
+        }
+
     }
     
     private class SpeedBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            player.setSpeed((float) value);
+            looper.setSpeed((float) value);
         }
 
         public double getBoundValue() {
-            return player.getSpeed();
+            return looper.getSpeed();
         }
         
     }
@@ -130,11 +159,11 @@ public class SamplePlayer extends AbstractComponent {
     private class PositionBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            player.setPosition((float) (value * tablesize));
+            looper.setPosition((float) (value * looper.getTableSize()));
         }
 
         public double getBoundValue() {
-            return player.getPosition() / tablesize;
+            return looper.getPosition() / looper.getTableSize();
         }
         
     }
@@ -142,16 +171,16 @@ public class SamplePlayer extends AbstractComponent {
     private class InBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            int pos = (int) Math.round(value * tablesize);
-            player.setIn(pos);
+            int pos = (int) Math.round(value * looper.getTableSize());
+            looper.setIn(pos);
             if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("Input : " + value + " Player Input = " + player.getIn()
-                        + " Player Output = " + player.getOut());
+                logger.finest("Input : " + value + " Player Input = " + looper.getIn()
+                        + " Player Output = " + looper.getOut());
             }
         }
 
         public double getBoundValue() {
-            return (double) player.getIn() / tablesize;
+            return (double) looper.getIn() / looper.getTableSize();
         }
         
     }
@@ -159,12 +188,12 @@ public class SamplePlayer extends AbstractComponent {
     private class OutBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            int pos = (int) Math.round(value * tablesize);
-            player.setOut(pos);
+            int pos = (int) Math.round(value * looper.getTableSize());
+            looper.setOut(pos);
         }
 
         public double getBoundValue() {
-            return (double) player.getOut() / tablesize;
+            return (double) looper.getOut() / looper.getTableSize();
         }
         
     }
@@ -172,17 +201,17 @@ public class SamplePlayer extends AbstractComponent {
     private class RangeBinding implements FloatRangeProperty.Binding {
 
         public void setBoundLowValue(long time, double low) {
-            int pos = (int) Math.round(low * tablesize);
-            player.setIn(pos);
+            int pos = (int) Math.round(low * looper.getTableSize());
+            looper.setIn(pos);
         }
 
         public void setBoundHighValue(long time, double high) {
-            int pos = (int) Math.round(high * tablesize);
-            player.setOut(pos);
+            int pos = (int) Math.round(high * looper.getTableSize());
+            looper.setOut(pos);
         }
 
         public double getBoundLowValue() {
-            double ret =  (double) player.getIn() / tablesize;
+            double ret =  (double) looper.getIn() / looper.getTableSize();
             if (logger.isLoggable(Level.FINEST)) {
                 logger.finest("Returning Low = " + ret);
             }
@@ -190,7 +219,7 @@ public class SamplePlayer extends AbstractComponent {
         }
 
         public double getBoundHighValue() {
-            double ret = (double) player.getOut() / tablesize;
+            double ret = (double) looper.getOut() / looper.getTableSize();
             if (logger.isLoggable(Level.FINEST)) {
                 logger.finest("Returning High = " + ret);
             }
@@ -199,33 +228,28 @@ public class SamplePlayer extends AbstractComponent {
 
     }
     
-    private class LoopingBinding implements BooleanProperty.Binding {
+//    private class LoopingBinding implements BooleanProperty.Binding {
+//
+//        public void setBoundValue(long time, boolean value) {
+//            looper.setLooping(value);
+//        }
+//
+//        public boolean getBoundValue() {
+//            return looper.getLooping();
+//        }
+//        
+//    }
+    
+    private class LoopSizeBinding implements FloatProperty.Binding {
 
-        public void setBoundValue(long time, boolean value) {
-            player.setLooping(value);
+        public void setBoundValue(long time, double value) {
+            looper.setLoopSize((float) value);
         }
 
-        public boolean getBoundValue() {
-            return player.getLooping();
+        public double getBoundValue() {
+            return looper.getLoopSize();
         }
         
     }
     
-    private class LoaderListener implements SampleTableLoader.Listener {
-
-        public void tableLoaded(SampleTableLoader loader, long time) {
-            SampleTable table = loader.getTable();
-            if (table == null) {
-                tablesize = 1;
-            } else {
-                tablesize = table.getSize();
-            }
-            player.setSampleTable(table);
-        }
-
-        public void tableError(SampleTableLoader loader, long time) {
-            
-        }
-        
-    }
 }

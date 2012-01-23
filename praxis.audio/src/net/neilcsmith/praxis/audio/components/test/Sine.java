@@ -37,11 +37,12 @@ public class Sine extends AbstractComponent {
     
     public Sine() {
         sine = new net.neilcsmith.rapl.components.test.Sine(440);
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, sine));
         FloatProperty freq = FloatProperty.create( new FrequencyBinding(),
                 110, 4 * 440, 440);
         registerControl("frequency", freq );
         registerPort("frequency", freq.createPort());
-        registerPort(Port.OUT, new DefaultAudioOutputPort(this, sine));
+        
     }
     
     private class FrequencyBinding implements FloatProperty.Binding {
