@@ -45,12 +45,13 @@ public class SimpleDelay extends AbstractClockComponent {
     private boolean active;
 
     public SimpleDelay() {
-        FloatProperty delay = createDelayControl();
-        registerControl("time", delay);
-        registerPort("time", delay.createPort());
+        
         registerPort(Port.IN, createInputPort());
         output = new DefaultControlOutputPort(this);
         registerPort(Port.OUT, output);
+        FloatProperty delay = createDelayControl();
+        registerControl("time", delay);
+        registerPort("time", delay.createPort());
     }
 
     private FloatProperty createDelayControl() {

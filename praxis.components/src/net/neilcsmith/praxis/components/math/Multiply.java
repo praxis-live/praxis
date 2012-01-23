@@ -40,12 +40,12 @@ public class Multiply extends AbstractComponent {
     private ControlPort.Output output;
     
     public Multiply() {
-        value = FloatProperty.create( 0);
-        registerControl("value", value);
-        registerPort("value", value.createPort());
         registerPort(Port.IN, FloatInputPort.create( new InputBinding()));
         output = new DefaultControlOutputPort(this);
         registerPort(Port.OUT, output);
+        value = FloatProperty.create( 0);
+        registerControl("value", value);
+        registerPort("value", value.createPort());     
     }
     
     private class InputBinding implements FloatInputPort.Binding {

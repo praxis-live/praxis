@@ -72,14 +72,6 @@ public class ArrayIterator extends AbstractComponent {
                 return values;
             }
         }, values);
-        registerControl("values", vals);
-        registerPort("values", vals.createPort());
-        minSkip = IntProperty.create( 0, 1024, 1);
-        registerControl("min-skip", minSkip);
-        maxSkip = IntProperty.create( 0, 1024, 1);
-        registerControl("max-skip", maxSkip);
-        pingPong = BooleanProperty.create(this, false);
-        registerControl("ping-pong", pingPong);
         TriggerControl trigger = TriggerControl.create( new TriggerControl.Binding() {
 
             public void trigger(long time) {
@@ -90,6 +82,15 @@ public class ArrayIterator extends AbstractComponent {
         registerPort("trigger", trigger.createPort());
         output = new DefaultControlOutputPort(this);
         registerPort(Port.OUT, output);
+        registerControl("values", vals);
+        registerPort("values", vals.createPort());
+        minSkip = IntProperty.create( 0, 1024, 1);
+        registerControl("min-skip", minSkip);
+        maxSkip = IntProperty.create( 0, 1024, 1);
+        registerControl("max-skip", maxSkip);
+        pingPong = BooleanProperty.create(this, false);
+        registerControl("ping-pong", pingPong);
+        
     }
 
     private void send(long time) {

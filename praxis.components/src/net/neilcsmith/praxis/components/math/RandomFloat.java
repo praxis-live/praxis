@@ -49,13 +49,13 @@ public class RandomFloat extends AbstractComponent {
         range = FloatProperty.create( 0, PNumber.MAX_VALUE, 1);
         output = new DefaultControlOutputPort(this);
         trigger = TriggerControl.create( new TriggerBinding());
-        registerControl("minimum", minimum);
-        registerPort("minimum", minimum.createPort());
-        registerControl("range", range);
-        registerPort("range", range.createPort());
         registerControl("trigger", trigger);
         registerPort("trigger", trigger.createPort());
         registerPort(Port.OUT, output);
+        registerControl("minimum", minimum);
+        registerPort("minimum", minimum.createPort());
+        registerControl("range", range);
+        registerPort("range", range.createPort());     
     }
     
     

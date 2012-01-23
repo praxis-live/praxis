@@ -53,12 +53,13 @@ public class Resolver extends AbstractComponent {
                 resolve(time, arg);
             }
         }));
-        base = UriProperty.create( PResource.valueOf(new File("").toURI()));
-        registerControl("base", base);
         out = new DefaultControlOutputPort(this);
         error = new DefaultControlOutputPort(this);
         registerPort("out", out);
         registerPort("error", error);
+        base = UriProperty.create( PResource.valueOf(new File("").toURI()));
+        registerControl("base", base);
+        
     }
     
     private void resolve(long time, Argument arg) {

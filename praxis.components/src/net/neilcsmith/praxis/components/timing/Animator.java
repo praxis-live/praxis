@@ -65,11 +65,12 @@ public class Animator extends AbstractClockComponent {
         output = new DefaultControlOutputPort(this);
         registerControl(TO, to);
         registerPort(TO, FloatInputPort.create(to));
+        registerPort(Port.OUT, output);    
         registerControl(VALUE, value);
         registerPort(VALUE, value.createPort());
         registerControl(TIME, duration);
         registerPort(TIME, duration.createPort());
-        registerPort(Port.OUT, output);
+        
     }
 
     public void tick(ExecutionContext source) {

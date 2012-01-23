@@ -71,6 +71,8 @@ public class Join extends AbstractExecutionContextComponent {
                 }
             }
         }));
+        out = new DefaultControlOutputPort(this);
+        registerPort("out", out);
         TriggerControl reset = TriggerControl.create( new TriggerControl.Binding() {
 
             public void trigger(long time) {
@@ -79,8 +81,7 @@ public class Join extends AbstractExecutionContextComponent {
         });
         registerControl("reset", reset);
         registerPort("reset", reset.createPort());
-        out = new DefaultControlOutputPort(this);
-        registerPort("out", out);
+        
     }
 
     private void reset() {

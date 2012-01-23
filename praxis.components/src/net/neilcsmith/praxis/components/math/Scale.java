@@ -47,6 +47,8 @@ public class Scale extends AbstractComponent {
         y2 = FloatProperty.create( 1);
         FloatInputPort input = FloatInputPort.create( new InputBinding());
         output = new DefaultControlOutputPort(this);
+        registerPort(Port.IN, input);
+        registerPort(Port.OUT, output);
         registerControl("x1", x1);
         registerPort("x1", x1.createPort());
         registerControl("x2", x2);
@@ -54,9 +56,7 @@ public class Scale extends AbstractComponent {
         registerControl("y1", y1);
         registerPort("y1", y1.createPort());
         registerControl("y2", y2);
-        registerPort("y2", y2.createPort());
-        registerPort(Port.IN, input);
-        registerPort(Port.OUT, output);
+        registerPort("y2", y2.createPort());   
     }
 
     private class InputBinding implements FloatInputPort.Binding {

@@ -42,14 +42,14 @@ public class Variable extends AbstractComponent {
 
     public Variable() {
         value = PString.EMPTY;
-        ArgumentProperty p = ArgumentProperty.create( new ValueBinding(), value);
-        registerControl("value", p);
-        registerPort("value", p.createPort());
+        ArgumentProperty p = ArgumentProperty.create( new ValueBinding(), value);      
         TriggerControl t = TriggerControl.create( new TriggerBinding());
         registerControl("trigger", t);
         registerPort("trigger", t.createPort());
         output = new DefaultControlOutputPort(this);
         registerPort(Port.OUT, output);
+        registerControl("value", p);
+        registerPort("value", p.createPort());
     }
     
     private class ValueBinding implements ArgumentProperty.Binding {
