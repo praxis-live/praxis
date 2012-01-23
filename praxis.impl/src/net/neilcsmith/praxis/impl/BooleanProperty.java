@@ -27,6 +27,7 @@ import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PBoolean;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
 
 /**
@@ -92,12 +93,17 @@ public class BooleanProperty extends AbstractSingleArgProperty {
 
     public static BooleanProperty create(Component component, Binding binding,
             boolean def) {
+        return create(component, binding, def, null);
+    }
+    
+    public static BooleanProperty create(Component component, Binding binding,
+            boolean def, PMap properties) {
         if (binding == null) {
             binding = new DefaultBinding(def);
         }
         ArgumentInfo[] arguments = new ArgumentInfo[]{PBoolean.info()};
         Argument[] defaults = new Argument[]{PBoolean.valueOf(def)};
-        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
+        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new BooleanProperty(component, binding, info);
     }
 

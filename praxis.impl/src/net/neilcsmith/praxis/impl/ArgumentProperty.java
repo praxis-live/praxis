@@ -73,19 +73,19 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
     
     
     public static ArgumentProperty create() {
-        return create(Argument.info(), PString.EMPTY, null);
+        return create(Argument.info(), null, PString.EMPTY);
     }
     
     public static ArgumentProperty create(ArgumentInfo info) {
-        return create(info, PString.EMPTY, null);
+        return create(info, null, PString.EMPTY);
     }
 
     public static ArgumentProperty create( Binding binding, Argument def) {
-        return create(Argument.info(), def, binding);
+        return create(Argument.info(), binding, def);
         
     }
     
-    public static ArgumentProperty create(ArgumentInfo typeInfo, Argument def, Binding binding) {
+    public static ArgumentProperty create(ArgumentInfo typeInfo, Binding binding, Argument def) {
         if (binding == null) {
             binding = new DefaultBinding(def);
         }
