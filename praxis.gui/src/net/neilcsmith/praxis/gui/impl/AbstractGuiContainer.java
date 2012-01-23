@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,6 +23,8 @@
 package net.neilcsmith.praxis.gui.impl;
 
 import java.awt.EventQueue;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.Lookup;
@@ -41,6 +43,7 @@ public abstract class AbstractGuiContainer extends AbstractContainer {
 
     private JComponent component;
     private Lookup lookup;
+    private LabelBinding label;
     private GuiContext context;
     private LayoutBinding layout;
 
@@ -48,19 +51,29 @@ public abstract class AbstractGuiContainer extends AbstractContainer {
         if (EventQueue.isDispatchThread()) {
             if (component == null) {
                 component = createSwingContainer();
+                label = new LabelBinding(component);
+                label.addPropertyChangeListener(new LabelListener());
+                registerControl("label", StringProperty.create(label, ""));
+                initControls();
                 layout = new LayoutBinding(component);
                 registerControl("layout", StringProperty.create(layout, ""));
+                updateLabel();
             }
             return component;
         } else {
             return null;
         }
     }
+    
+    protected void initControls() {
+        // no op hook
+    }
 
     @Override
     public void parentNotify(Container parent) throws VetoException {
         if (EventQueue.isDispatchThread()) {
             super.parentNotify(parent);
+            getSwingContainer();
         } else {
             throw new VetoException("Trying to install GUI component in GUI incompatible container.");
         }
@@ -98,5 +111,25 @@ public abstract class AbstractGuiContainer extends AbstractContainer {
     }
 
     protected abstract JComponent createSwingContainer();
+    
+    protected void updateLabel() {
+        // no op hook
+    }
+    
+    protected String getLabel() {
+        return label.getBoundValue();
+    }
+    
+    protected boolean isLabelOnParent() {
+        return label.isLabelOnParent();
+    }
+    
+    private class LabelListener implements PropertyChangeListener {
+
+        public void propertyChange(PropertyChangeEvent pce) {
+            updateLabel();
+        }
+        
+    }
 
 }

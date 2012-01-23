@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -60,7 +60,6 @@ public class FileField extends SingleBindingGuiComponent {
 
     public FileField() {
         labelText = "";
-        registerControl("label", StringProperty.create( new LabelBinding(), labelText));
     }
 
     @Override
@@ -77,6 +76,17 @@ public class FileField extends SingleBindingGuiComponent {
             createComponentAndAdaptor();
         }
         return box;
+    }
+
+    @Override
+    protected void updateLabel() {
+        super.updateLabel();
+        if (isLabelOnParent()) {
+            labelText = "";
+        } else {
+            labelText = getLabel();
+        }
+        updateBorders();
     }
 
     private void createComponentAndAdaptor() {
@@ -113,10 +123,10 @@ public class FileField extends SingleBindingGuiComponent {
     private void updateBorders() {
         if (box != null) {
             if (labelText.isEmpty()) {
-                box.setBorder(BorderFactory.createEtchedBorder());
+                box.setBorder(Utils.getBorder());
             } else {
                 box.setBorder(BorderFactory.createTitledBorder(
-                        BorderFactory.createEtchedBorder(), labelText));
+                        Utils.getBorder(), labelText));
             }
             box.revalidate();
         }
@@ -213,16 +223,15 @@ public class FileField extends SingleBindingGuiComponent {
             // no op
         }
     }
-
-    private class LabelBinding implements StringProperty.Binding {
-
-        public void setBoundValue(long time, String value) {
-            labelText = value;
-            updateBorders();
-        }
-
-        public String getBoundValue() {
-            return labelText;
-        }
-    }
+//    private class LabelBinding implements StringProperty.Binding {
+//
+//        public void setBoundValue(long time, String value) {
+//            labelText = value;
+//            updateBorders();
+//        }
+//
+//        public String getBoundValue() {
+//            return labelText;
+//        }
+//    }
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,6 +23,8 @@
 package net.neilcsmith.praxis.gui.impl;
 
 import java.awt.EventQueue;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.VetoException;
@@ -38,8 +40,8 @@ import net.neilcsmith.praxis.impl.StringProperty;
 public abstract class AbstractGuiComponent extends AbstractComponent {
 
     private JComponent component;
+    private LabelBinding label;
     private LayoutBinding layout;
-//    private JComponent container;
     private GuiContext context;
 
     protected AbstractGuiComponent() {
@@ -49,13 +51,22 @@ public abstract class AbstractGuiComponent extends AbstractComponent {
         if (EventQueue.isDispatchThread()) {
             if (component == null) {
                 component = createSwingComponent();
+                label = new LabelBinding(component);
+                label.addPropertyChangeListener(new LabelListener());
+                registerControl("label", StringProperty.create(label, ""));
+                initControls();
                 layout = new LayoutBinding(component);
                 registerControl("layout", StringProperty.create(layout, ""));
+                updateLabel();
             }
             return component;
         } else {
             return null;
         }
+    }
+    
+    protected void initControls() {
+        // no op hook
     }
 
     @Override
@@ -88,4 +99,24 @@ public abstract class AbstractGuiComponent extends AbstractComponent {
     }
 
     protected abstract JComponent createSwingComponent();
+    
+    protected void updateLabel() {
+        // no op hook
+    }
+    
+    protected String getLabel() {
+        return label.getBoundValue();
+    }
+    
+    protected boolean isLabelOnParent() {
+        return label.isLabelOnParent();
+    }
+    
+    private class LabelListener implements PropertyChangeListener {
+
+        public void propertyChange(PropertyChangeEvent pce) {
+            updateLabel();
+        }
+        
+    }
 }

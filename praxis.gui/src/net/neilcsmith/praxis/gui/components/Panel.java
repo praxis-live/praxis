@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,10 +22,12 @@
  */
 package net.neilcsmith.praxis.gui.components;
 
+import java.awt.Dimension;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import net.miginfocom.swing.MigLayout;
@@ -40,11 +42,7 @@ public class Panel extends AbstractGuiContainer {
 
     private JPanel panel;
     private MigLayout layout;
-
-
-    public Panel() {
-
-    }
+//    private String labelText;
 
     @Override
     protected JComponent createSwingContainer() {
@@ -54,8 +52,29 @@ public class Panel extends AbstractGuiContainer {
         layout = new MigLayout("", "[fill]");
         panel = new JPanel(layout);
         panel.addContainerListener(new ChildrenListener());
+        panel.setMinimumSize(new Dimension(50,20));
         return panel;
     }
+
+    @Override
+    protected void updateLabel() {
+        super.updateLabel();
+        updateBorder();
+    }
+    
+    private void updateBorder() {
+        if (isLabelOnParent()) {
+            panel.setBorder(null);
+        } else {
+            String labelText = getLabel();
+            if (labelText.isEmpty()) {
+                panel.setBorder(Utils.getBorder());
+            } else {
+                panel.setBorder(BorderFactory.createTitledBorder(Utils.getBorder(), labelText));
+            }
+        }
+    }
+
 
     private void setLayoutConstraint(JComponent child) {
         layout.setComponentConstraints(child, child.getClientProperty(Keys.LayoutConstraint));
@@ -98,58 +117,5 @@ public class Panel extends AbstractGuiContainer {
     }
 
 
-//    private class SetupBinding implements StringProperty.Binding {
-//
-//        private String consString = "";
-//        private LC constraint = null;
-//
-//        public void setBoundValue(long time, String value) {
-//            if (layout == null) {
-//                throw new IllegalStateException("Layout not yet initialised");
-//            }
-//            constraint = ConstraintParser.parseLayoutConstraint(value);
-//            layout.setLayoutConstraints(constraint);
-//            panel.revalidate();
-//            panel.repaint();
-//            consString = value;
-//        }
-//
-//        public String getBoundValue() {
-//            return consString;
-//        }
-//
-//    }
-//
-//    private class AxisBinding implements StringProperty.Binding {
-//
-//        private final boolean column;
-//        private String consString = "";
-//        private AC constraint = null;
-//
-//        private AxisBinding(boolean column) {
-//            this.column = column;
-//        }
-//
-//        public void setBoundValue(long time, String value) {
-//            if (layout == null) {
-//                throw new IllegalStateException("Layout not yet initialised");
-//            }
-//            if (column) {
-//                constraint = ConstraintParser.parseColumnConstraints(value);
-//                layout.setColumnConstraints(constraint);
-//            } else {
-//                constraint = ConstraintParser.parseRowConstraints(value);
-//                layout.setRowConstraints(constraint);
-//            }
-//            panel.revalidate();
-//            panel.repaint();
-//            consString = value;
-//        }
-//
-//        public String getBoundValue() {
-//            return consString;
-//        }
-//
-//    }
 
 }

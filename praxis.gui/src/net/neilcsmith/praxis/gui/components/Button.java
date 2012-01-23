@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -35,13 +35,16 @@ import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.PacketRouter;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.ScriptService;
 import net.neilcsmith.praxis.core.types.PArray;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.gui.ControlBinding.Adaptor;
 import net.neilcsmith.praxis.gui.impl.ActionAdaptor;
 import net.neilcsmith.praxis.gui.impl.SingleBindingGuiComponent;
+import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.ArrayProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
 
@@ -57,22 +60,39 @@ public class Button extends SingleBindingGuiComponent {
     private ActionAdaptor adaptor;
     private String label;
     private CallArguments values;
-    private StringProperty onClick;
+    private ArgumentProperty onClick;
 
     public Button() {
         label = "";
         values = CallArguments.EMPTY;
-        registerControl("values", ArrayProperty.create(new ValuesBinding(), PArray.EMPTY));
-        registerControl("label", StringProperty.create(new LabelBinding(), label));
-        onClick = StringProperty.create("");
-        registerControl("on-click", onClick);
-        registerControl("_on-click-log", new OnClickLog());
+//        registerControl("values", ArrayProperty.create(new ValuesBinding(), PArray.EMPTY));
+//        registerControl("label", StringProperty.create(new LabelBinding(), label));
+//        onClick = StringProperty.create("");
+//        registerControl("on-click", onClick);
+//        registerControl("_on-click-log", new OnClickLog());
         // @TODO Fix ControlInfo here.
 //        onClickInfo = ControlInfo.createPropertyInfo(new ArgumentInfo[] {ControlAddress.info(), Argument.info()},
 //                new Argument[] {PString.EMPTY}, null);
 //        registerControl("on-click", new OnClickProperty(this, onClickInfo));
     }
 
+    @Override
+    protected void initControls() {
+        super.initControls();
+        registerControl("values", ArrayProperty.create(new ValuesBinding(), PArray.EMPTY));
+        onClick = ArgumentProperty.create(ArgumentInfo.create(PString.class,
+                PMap.create(PString.KEY_MIME_TYPE, "text/x-praxis-script")));
+        registerControl("on-click", onClick);
+        registerControl("_on-click-log", new OnClickLog());
+    }
+
+    @Override
+    protected void updateLabel() {
+        super.updateLabel();
+        button.setText(getLabel());
+    }
+    
+    
     @Override
     protected JComponent createSwingComponent() {
         if (button == null) {
@@ -118,7 +138,7 @@ public class Button extends SingleBindingGuiComponent {
 
     private void processOnClick() {
         try {
-            String script = onClick.getValue().trim();
+            String script = onClick.getValue().toString().trim();
             if (script.isEmpty()) {
                 return;
             }
@@ -135,20 +155,20 @@ public class Button extends SingleBindingGuiComponent {
         }
     }
 
-    private class LabelBinding implements StringProperty.Binding {
-
-        public void setBoundValue(long time, String value) {
-            label = value;
-            if (button != null) {
-                button.setText(value);
-                button.revalidate();
-            }
-        }
-
-        public String getBoundValue() {
-            return label;
-        }
-    }
+//    private class LabelBinding implements StringProperty.Binding {
+//
+//        public void setBoundValue(long time, String value) {
+//            label = value;
+//            if (button != null) {
+//                button.setText(value);
+//                button.revalidate();
+//            }
+//        }
+//
+//        public String getBoundValue() {
+//            return label;
+//        }
+//    }
 
     private class ValuesBinding implements ArrayProperty.Binding {
 

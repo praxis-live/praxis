@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -33,6 +33,9 @@ import javax.swing.JToggleButton;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.types.PBoolean;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.gui.impl.SingleBindingGuiComponent;
 import net.neilcsmith.praxis.gui.ControlBinding.Adaptor;
@@ -54,14 +57,27 @@ public class ToggleButton extends SingleBindingGuiComponent {
 
     public ToggleButton() {
         label = "";
-        onArg = PString.EMPTY;
-        offArg = PString.EMPTY;
-        registerControl("on-value", ArgumentProperty.create( new OnBinding(), onArg));
-        registerControl("off-value", ArgumentProperty.create( new OffBinding(), offArg));
-        registerControl("label", StringProperty.create( new LabelBinding(), label));
-
+        onArg = PBoolean.TRUE;
+        offArg = PBoolean.FALSE;
+//        registerControl("on-value", ArgumentProperty.create( new OnBinding(), onArg));
+//        registerControl("off-value", ArgumentProperty.create( new OffBinding(), offArg));
+//        registerControl("label", StringProperty.create( new LabelBinding(), label));
     }
 
+    @Override
+    protected void initControls() {
+        super.initControls();
+        registerControl("on-value", ArgumentProperty.create( new OnBinding(), onArg));
+        registerControl("off-value", ArgumentProperty.create( new OffBinding(), offArg));
+    }
+    
+    @Override
+    protected void updateLabel() {
+        super.updateLabel();
+        button.setText(getLabel());
+    }
+    
+    
     @Override
     protected Adaptor getBindingAdaptor() {
         if (adaptor == null) {
@@ -96,8 +112,8 @@ public class ToggleButton extends SingleBindingGuiComponent {
                 // no op
             }
         });
-        button.setIcon(new LEDIcon(new Color(20,0,0)));
-        button.setSelectedIcon(new LEDIcon(new Color(200,0,0)));
+//        button.setIcon(new LEDIcon(new Color(20,0,0)));
+//        button.setSelectedIcon(new LEDIcon(new Color(200,0,0)));
     }
 
     private void setAdaptorArguments() {
@@ -107,19 +123,19 @@ public class ToggleButton extends SingleBindingGuiComponent {
         }
     }
 
-    private class LabelBinding implements StringProperty.Binding {
-
-        public void setBoundValue(long time, String value) {
-            label = value;
-            if (button != null) {
-                button.setText(value);
-            }
-        }
-
-        public String getBoundValue() {
-            return label;
-        }
-    }
+//    private class LabelBinding implements StringProperty.Binding {
+//
+//        public void setBoundValue(long time, String value) {
+//            label = value;
+//            if (button != null) {
+//                button.setText(value);
+//            }
+//        }
+//
+//        public String getBoundValue() {
+//            return label;
+//        }
+//    }
 
     private class OnBinding implements ArgumentProperty.Binding {
 

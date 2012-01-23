@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -31,8 +31,12 @@ import javax.swing.BoundedRangeModel;
 import javax.swing.Box;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JComponent;
+import javax.swing.border.Border;
+import javax.swing.border.EtchedBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.gui.ControlBinding.Adaptor;
@@ -58,9 +62,18 @@ class RangeSlider extends SingleBindingGuiComponent {
     public RangeSlider(boolean vertical) {
         labelText = "";
         this.vertical = vertical;
-        registerControl("label", StringProperty.create( new LabelBinding(), labelText));
-        registerControl("minimum", ArgumentProperty.create( new MinBinding(), PString.EMPTY));
-        registerControl("maximum", ArgumentProperty.create( new MaxBinding(), PString.EMPTY));
+//        registerControl("label", StringProperty.create( new LabelBinding(), labelText));
+//        registerControl("minimum", ArgumentProperty.create( new MinBinding(), PString.EMPTY));
+//        registerControl("maximum", ArgumentProperty.create( new MaxBinding(), PString.EMPTY));
+    }
+
+    @Override
+    protected void initControls() {
+        super.initControls();
+        ArgumentInfo info = ArgumentInfo.create(Argument.class,
+                PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true, ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
+        registerControl("minimum", ArgumentProperty.create(info, new MinBinding(), PString.EMPTY));
+        registerControl("maximum", ArgumentProperty.create(info, new MaxBinding(), PString.EMPTY));
     }
 
     @Override
@@ -69,6 +82,17 @@ class RangeSlider extends SingleBindingGuiComponent {
             createComponentAndAdaptor();
         }
         return box;
+    }
+
+    @Override
+    protected void updateLabel() {
+        super.updateLabel();
+        if (isLabelOnParent()) {
+            labelText = "";
+        } else {
+            labelText = getLabel();
+        }
+        updateBorders();
     }
 
     @Override
@@ -90,7 +114,7 @@ class RangeSlider extends SingleBindingGuiComponent {
         if (prefMax != null) {
             adaptor.setPreferredMaximum(prefMax);
         }
-        
+
         slider.addAncestorListener(new AncestorListener() {
 
             public void ancestorAdded(AncestorEvent event) {
@@ -107,34 +131,48 @@ class RangeSlider extends SingleBindingGuiComponent {
         });
         box = vertical ? Box.createVerticalBox() : Box.createHorizontalBox();
         box.add(slider);
-        setBorders();
+//        setBorders();
+        updateBorders();
 
     }
 
-    private void setBorders() {
-//        if (labelText.length() > 0) {
-            box.setBorder(BorderFactory.createTitledBorder(
-                    BorderFactory.createEtchedBorder(), labelText));
-//        } else {
-//            box.setBorder(BorderFactory.createEtchedBorder());
-//        }
-    }
-
-    private class LabelBinding implements StringProperty.Binding {
-
-        public void setBoundValue(long time, String value) {
-            labelText = value;
-            if (box != null) {
-                setBorders();
-                box.revalidate();
+//    private void setBorders() {
+////        if (labelText.length() > 0) {
+//            box.setBorder(BorderFactory.createTitledBorder(
+//                    BorderFactory.createEtchedBorder(), labelText));
+////        } else {
+////            box.setBorder(BorderFactory.createEtchedBorder());
+////        }
+//    }
+    private void updateBorders() {
+        if (box != null) {
+            Border etched = Utils.getBorder();
+            if (labelText.isEmpty()) {
+                box.setBorder(etched);
+            } else {
+                box.setBorder(BorderFactory.createTitledBorder(
+                        etched, labelText));
             }
+            box.revalidate();
         }
 
-        public String getBoundValue() {
-            return labelText;
-        }
+
     }
 
+//    private class LabelBinding implements StringProperty.Binding {
+//
+//        public void setBoundValue(long time, String value) {
+//            labelText = value;
+//            if (box != null) {
+//                setBorders();
+//                box.revalidate();
+//            }
+//        }
+//
+//        public String getBoundValue() {
+//            return labelText;
+//        }
+//    }
     private class MinBinding implements ArgumentProperty.Binding {
 
         public void setBoundValue(long time, Argument value) {
@@ -159,7 +197,6 @@ class RangeSlider extends SingleBindingGuiComponent {
                 return prefMin;
             }
         }
-
     }
 
     private class MaxBinding implements ArgumentProperty.Binding {
@@ -186,8 +223,5 @@ class RangeSlider extends SingleBindingGuiComponent {
                 return prefMax;
             }
         }
-
     }
-
-
 }

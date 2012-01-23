@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,6 +23,7 @@
 package net.neilcsmith.praxis.gui.components;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.beans.PropertyChangeEvent;
@@ -40,27 +41,45 @@ import net.neilcsmith.praxis.gui.impl.AbstractGuiContainer;
 public class Tabs extends AbstractGuiContainer {
 
     private JTabbedPane tabs;
-    private AddressListener addressListener;
+    private LabelListener addressListener;
 
     @Override
     protected JComponent createSwingContainer() {
         if (tabs == null) {
             tabs = new JTabbedPane();
-            tabs.putClientProperty(Keys.LayoutConstraint, "grow, push");
+//            tabs.putClientProperty(Keys.LayoutConstraint, "grow, push");
             tabs.addContainerListener(new ChildrenListener());
-
+            tabs.setMinimumSize(new Dimension(50,20));
         }
         return tabs;
     }
 
     private void setTabName(JComponent cmp) {
-        Object val = cmp.getClientProperty(Keys.Address);
+        Object val = cmp.getClientProperty(Keys.Label);
+        if (val instanceof String) {
+            String label = (String) val;
+            if (!label.isEmpty()) {
+                setTabName(cmp, label);
+                cmp.putClientProperty(Keys.LabelOnParent, true);
+                return;
+            }
+        }
+        // not found label
+        cmp.putClientProperty(Keys.LabelOnParent, false);
+        val = cmp.getClientProperty(Keys.Address);
         if (val instanceof ComponentAddress) {
             ComponentAddress ad = (ComponentAddress) val;
-            int index = tabs.indexOfComponent(cmp);
-            if (index > -1) {
-                tabs.setTitleAt(index, ad.getComponentID(ad.getDepth() - 1));
-            }
+            setTabName(cmp, ad.getID());
+            return;
+        }
+        // no address???
+        setTabName(cmp, cmp.getName());
+    }
+
+    private void setTabName(JComponent cmp, String name) {
+        int index = tabs.indexOfComponent(cmp);
+        if (index > -1) {
+            tabs.setTitleAt(index, name);
         }
     }
 
@@ -68,10 +87,10 @@ public class Tabs extends AbstractGuiContainer {
 
         public void componentAdded(ContainerEvent e) {
             if (addressListener == null) {
-                addressListener = new AddressListener();
+                addressListener = new LabelListener();
             }
             Component child = e.getChild();
-            child.addPropertyChangeListener(Keys.Address,
+            child.addPropertyChangeListener(Keys.Label,
                     addressListener);
             if (child instanceof JComponent) {
                 setTabName((JComponent) child);
@@ -79,12 +98,12 @@ public class Tabs extends AbstractGuiContainer {
         }
 
         public void componentRemoved(ContainerEvent e) {
-            e.getChild().removePropertyChangeListener(Keys.Address,
+            e.getChild().removePropertyChangeListener(Keys.Label,
                     addressListener);
         }
     }
 
-    private class AddressListener implements PropertyChangeListener {
+    private class LabelListener implements PropertyChangeListener {
 
         public void propertyChange(PropertyChangeEvent evt) {
             if (evt.getSource() instanceof JComponent) {

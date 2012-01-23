@@ -217,6 +217,7 @@ public class DefaultBindingControl extends AbstractControl {
 
         private void updateSyncConfiguration() {
             if (isProperty) {
+                LOG.log(Level.FINE, "Updating sync configuration on {0}", boundAddress);
                 boolean active = false;
                 SyncRate highRate = SyncRate.None;
                 for (Adaptor a : adaptors) {
@@ -230,11 +231,13 @@ public class DefaultBindingControl extends AbstractControl {
                 }
                 if (!active || highRate == SyncRate.None) {
                     if (syncTimer.isRunning()) {
+                        LOG.log(Level.FINE, "Stopping sync timer on {0}", boundAddress);
                         syncTimer.stop();
                     }
                 } else {
                     syncTimer.setDelay(delayForRate(highRate));
                     if (!syncTimer.isRunning()) {
+                        LOG.log(Level.FINE, "Starting sync timer on {0}", boundAddress);
                         syncTimer.start();
                     }
                     processSync();
@@ -331,7 +334,8 @@ public class DefaultBindingControl extends AbstractControl {
                     activeAdaptor.onError(call.getArgs());
                     activeAdaptor = null;
                 } else {
-                    LOG.warning("Error on sync call");
+                    LOG.log(Level.WARNING, "Error on sync call - {0} - DEACTIVATING", call.getFromAddress());
+                    syncTimer.stop();
                 }
                 activeCall = null;
             } else if (call.getMatchID() == infoMatchID) {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -25,6 +25,8 @@ package net.neilcsmith.praxis.gui.impl;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.gui.ControlBinding;
 import net.neilcsmith.praxis.gui.BindingContext;
@@ -35,17 +37,26 @@ import net.neilcsmith.praxis.impl.ArgumentProperty;
  * @author Neil C Smith
  */
 public abstract class SingleBindingGuiComponent extends AbstractGuiComponent {
-
+    
     private ControlAddress binding;
     private ControlBinding.Adaptor adaptor;
     private BindingContext bindingContext;
-
+    
     protected SingleBindingGuiComponent() {
-        registerControl("binding", ArgumentProperty.create( new AddressBinding(), PString.EMPTY));
     }
-
+    
+    @Override
+    protected void initControls() {
+        super.initControls();
+        registerControl("binding", ArgumentProperty.create(
+                ArgumentInfo.create(ControlAddress.class,
+                    PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true)),
+                new AddressBinding(),
+                PString.EMPTY));
+    }
+    
     private class AddressBinding implements ArgumentProperty.Binding {
-
+        
         public void setBoundValue(long time, Argument value) {
             if (adaptor == null) {
                 adaptor = getBindingAdaptor();
@@ -63,40 +74,16 @@ public abstract class SingleBindingGuiComponent extends AbstractGuiComponent {
                     }
                 }
             }
-//            if (value.isEmpty() && adaptor.getBinding() != null) {
-//                root.unbind(adaptor);
-//                binding = null;
-//            } else if (root != null) {
-//                if (binding != null) {
-//                    root.unbind(binding, adaptor);
-//                }
-//                try {
-//                    binding = ControlAddress.coerce(value);
-//                    root.bind(binding, adaptor);
-//                } catch (ArgumentFormatException ex) {
-//                    binding = null;
-//                }
-//            }
         }
-
+        
         public Argument getBoundValue() {
             return binding == null ? PString.EMPTY : binding;
         }
     }
-
+    
     @Override
     public void hierarchyChanged() {
         super.hierarchyChanged();
-//        Root r = getRoot();
-//        if (r instanceof BindingContext) {
-//            bindingContext = (BindingContext) r;
-//        } else {
-//            if (binding != null) {
-//                bindingContext.unbind(adaptor);
-//                binding = null;
-//                bindingContext = null;
-//            }
-//        }
         BindingContext ctxt = getLookup().get(BindingContext.class);
         if (bindingContext != ctxt) {
             if (bindingContext != null && binding != null) {
@@ -108,6 +95,6 @@ public abstract class SingleBindingGuiComponent extends AbstractGuiComponent {
             bindingContext = ctxt;
         }
     }
-
+    
     protected abstract ControlBinding.Adaptor getBindingAdaptor();
 }

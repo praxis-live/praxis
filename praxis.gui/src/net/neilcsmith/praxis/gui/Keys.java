@@ -32,6 +32,10 @@ public class Keys {
 
     private Keys() {}
 
+    public final static String Label = "Praxis.Label";
+    
+    public final static String LabelOnParent = "Praxis.LabelOnParent";
+    
     public final static String LayoutConstraint = "Praxis.LayoutConstraint";
 
     public final static String Address = "Praxis.Address";

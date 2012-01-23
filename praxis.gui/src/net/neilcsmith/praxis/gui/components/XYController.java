@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -33,6 +33,8 @@ import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.Root;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.gui.impl.AbstractGuiComponent;
@@ -64,16 +66,37 @@ public class XYController extends AbstractGuiComponent {
         xPrefs = new Preferences();
         yPrefs = new Preferences();
         labelText = "";
-        registerControl("label", StringProperty.create( new LabelBinding(), labelText));
-        registerControl("binding-x", ArgumentProperty.create( new XAddressBinding(), PString.EMPTY));
-        registerControl("binding-y", ArgumentProperty.create( new YAddressBinding(), PString.EMPTY));
-        registerControl("minimum-x", ArgumentProperty.create( new MinBinding(xPrefs), PString.EMPTY));
-        registerControl("minimum-y", ArgumentProperty.create( new MinBinding(yPrefs), PString.EMPTY));
-        registerControl("maximum-x", ArgumentProperty.create( new MaxBinding(xPrefs), PString.EMPTY));
-        registerControl("maximum-y", ArgumentProperty.create( new MaxBinding(yPrefs), PString.EMPTY));
-        registerControl("scale-x", ArgumentProperty.create( new ScaleBinding(xPrefs), PString.EMPTY));
-        registerControl("scale-y", ArgumentProperty.create( new ScaleBinding(yPrefs), PString.EMPTY));
+//        registerControl("label", StringProperty.create(new LabelBinding(), labelText));
+//        registerControl("binding-x", ArgumentProperty.create(new XAddressBinding(), PString.EMPTY));
+//        registerControl("binding-y", ArgumentProperty.create(new YAddressBinding(), PString.EMPTY));
+//        registerControl("minimum-x", ArgumentProperty.create(new MinBinding(xPrefs), PString.EMPTY));
+//        registerControl("minimum-y", ArgumentProperty.create(new MinBinding(yPrefs), PString.EMPTY));
+//        registerControl("maximum-x", ArgumentProperty.create(new MaxBinding(xPrefs), PString.EMPTY));
+//        registerControl("maximum-y", ArgumentProperty.create(new MaxBinding(yPrefs), PString.EMPTY));
+//        registerControl("scale-x", ArgumentProperty.create(new ScaleBinding(xPrefs), PString.EMPTY));
+//        registerControl("scale-y", ArgumentProperty.create(new ScaleBinding(yPrefs), PString.EMPTY));
     }
+
+    @Override
+    protected void initControls() {
+        super.initControls();
+        ArgumentInfo bindingInfo = ArgumentInfo.create(ControlAddress.class, PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true));
+        registerControl("binding-x", ArgumentProperty.create(bindingInfo, new XAddressBinding(), PString.EMPTY));
+        registerControl("binding-y", ArgumentProperty.create(bindingInfo, new YAddressBinding(), PString.EMPTY));
+        
+        ArgumentInfo info = ArgumentInfo.create(Argument.class,
+                PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true, ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
+        registerControl("minimum-x", ArgumentProperty.create(info, new MinBinding(xPrefs), PString.EMPTY));
+        registerControl("minimum-y", ArgumentProperty.create(info, new MinBinding(yPrefs), PString.EMPTY));
+        registerControl("maximum-x", ArgumentProperty.create(info, new MaxBinding(xPrefs), PString.EMPTY));
+        registerControl("maximum-y", ArgumentProperty.create(info, new MaxBinding(yPrefs), PString.EMPTY));
+        
+        info = ArgumentInfo.create(PString.class, PMap.create(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
+        registerControl("scale-x", ArgumentProperty.create(info, new ScaleBinding(xPrefs), PString.EMPTY));
+        registerControl("scale-y", ArgumentProperty.create(info, new ScaleBinding(yPrefs), PString.EMPTY));
+    }
+    
+    
 
     @Override
     protected JComponent createSwingComponent() {
@@ -81,6 +104,17 @@ public class XYController extends AbstractGuiComponent {
             createComponentAndAdaptors();
         }
         return container;
+    }
+
+    @Override
+    protected void updateLabel() {
+        super.updateLabel();
+        if (isLabelOnParent()) {
+            labelText = "";
+        } else {
+            labelText = getLabel();
+        }
+        updateBorders();
     }
 
     private void createComponentAndAdaptors() {
@@ -110,10 +144,10 @@ public class XYController extends AbstractGuiComponent {
     private void updateBorders() {
         if (container != null) {
             if (labelText.isEmpty()) {
-                container.setBorder(BorderFactory.createEtchedBorder());
+                container.setBorder(Utils.getBorder());
             } else {
                 container.setBorder(BorderFactory.createTitledBorder(
-                        BorderFactory.createEtchedBorder(), labelText));
+                        Utils.getBorder(), labelText));
             }
             container.revalidate();
         }

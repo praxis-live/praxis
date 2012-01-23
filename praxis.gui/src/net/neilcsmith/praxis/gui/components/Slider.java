@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -25,7 +25,6 @@ import net.neilcsmith.praxis.gui.impl.SingleBindingGuiComponent;
 import net.neilcsmith.praxis.gui.impl.BoundedValueAdaptor;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.gui.*;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JComponent;
@@ -33,11 +32,12 @@ import javax.swing.JSlider;
 import javax.swing.border.Border;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.gui.ControlBinding.Adaptor;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
-import net.neilcsmith.praxis.impl.StringProperty;
 
 /**
  *
@@ -58,11 +58,24 @@ class Slider extends SingleBindingGuiComponent {
     public Slider(boolean vertical) {
         labelText = "";
         this.vertical = vertical;
-        registerControl("label", StringProperty.create( new LabelBinding(), labelText));
-        registerControl("minimum", ArgumentProperty.create( new MinBinding(), PString.EMPTY));
-        registerControl("maximum", ArgumentProperty.create( new MaxBinding(), PString.EMPTY));
-        registerControl("scale", ArgumentProperty.create( new ScaleBinding(), PString.EMPTY));
+//        registerControl("label", StringProperty.create( new LabelBinding(), labelText));
+//        registerControl("minimum", ArgumentProperty.create( new MinBinding(), PString.EMPTY));
+//        registerControl("maximum", ArgumentProperty.create( new MaxBinding(), PString.EMPTY));
+//        registerControl("scale", ArgumentProperty.create( new ScaleBinding(), PString.EMPTY));
     }
+
+    @Override
+    protected void initControls() {
+        super.initControls();
+        ArgumentInfo info = ArgumentInfo.create(Argument.class,
+                PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true, ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
+        registerControl("minimum", ArgumentProperty.create(info, new MinBinding(), PString.EMPTY));
+        registerControl("maximum", ArgumentProperty.create(info, new MaxBinding(), PString.EMPTY));
+        info = ArgumentInfo.create(PString.class, PMap.create(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
+        registerControl("scale", ArgumentProperty.create(info, new ScaleBinding(), PString.EMPTY));
+    }
+    
+    
 
     @Override
     protected JComponent createSwingComponent() {
@@ -115,14 +128,12 @@ class Slider extends SingleBindingGuiComponent {
 
     private void updateBorders() {
         if (box != null) {
-            Border etched = BorderFactory.createEtchedBorder(slider.getBackground().brighter().brighter(),
-                    slider.getBackground().brighter());
+            Border etched = Utils.getBorder();
+//                    BorderFactory.createEtchedBorder(slider.getBackground().brighter().brighter(),
+//                    slider.getBackground().brighter());
             if (labelText.isEmpty()) {
-//                box.setBorder(BorderFactory.createEtchedBorder());
                 box.setBorder(etched);
             } else {
-//                box.setBorder(BorderFactory.createTitledBorder(
-//                    BorderFactory.createEtchedBorder(), labelText));
                 box.setBorder(BorderFactory.createTitledBorder(
                     etched, labelText));
             }
@@ -132,21 +143,34 @@ class Slider extends SingleBindingGuiComponent {
 
     }
 
-
-
-    private class LabelBinding implements StringProperty.Binding {
-
-        public void setBoundValue(long time, String value) {
-            labelText = value;
-            if (box != null) {
-                updateBorders();
-            }
+    @Override
+    protected void updateLabel() {
+        super.updateLabel();
+        if (isLabelOnParent()) {
+            labelText = "";
+        } else {
+            labelText = getLabel();
         }
-
-        public String getBoundValue() {
-            return labelText;
-        }
+        updateBorders();
     }
+    
+    
+
+
+
+//    private class LabelBinding implements StringProperty.Binding {
+//
+//        public void setBoundValue(long time, String value) {
+//            labelText = value;
+//            if (box != null) {
+//                updateBorders();
+//            }
+//        }
+//
+//        public String getBoundValue() {
+//            return labelText;
+//        }
+//    }
 
     private class MinBinding implements ArgumentProperty.Binding {
 
