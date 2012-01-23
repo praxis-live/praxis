@@ -60,8 +60,8 @@ public class JavaVideoComposite extends AbstractJavaVideoComponent {
             delegator.addSource(dst);
             delegator.addSource(src);
             registerPort(Port.IN, new DefaultVideoInputPort(this, dst));
-            registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));
             registerPort("src", new DefaultVideoInputPort(this, src));
+            registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));          
         } catch (SinkIsFullException ex) {
             Logger.getLogger(JavaVideoComposite.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SourceIsFullException ex) {
