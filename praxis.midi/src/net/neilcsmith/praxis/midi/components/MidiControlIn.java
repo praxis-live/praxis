@@ -31,7 +31,9 @@ import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.PacketRouter;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
@@ -103,7 +105,11 @@ public class MidiControlIn extends AbstractMidiInComponent {
                 return maximum;
             }
         }, maximum);
-        ArgumentProperty bd = ArgumentProperty.create(new AddressBinding(), PString.EMPTY);
+        ArgumentProperty bd = ArgumentProperty.create(
+                ArgumentInfo.create(ControlAddress.class,
+                    PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true)), 
+                new AddressBinding(),
+                PString.EMPTY);
         registerControl("channel", ch);
         registerControl("controller", ctl);
         registerControl("minimum", min);

@@ -33,13 +33,17 @@ import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.Transmitter;
+import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.core.InvalidAddressException;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.Packet;
 import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.RootHub;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractRoot;
+import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.InstanceLookup;
 import net.neilcsmith.praxis.impl.RootState;
 import net.neilcsmith.praxis.impl.StringProperty;
@@ -51,8 +55,8 @@ import net.neilcsmith.praxis.midi.MidiInputContext;
  */
 public class MidiRoot extends AbstractRoot {
 
-    private static Logger logger = Logger.getLogger(MidiRoot.class.getName());
-    private StringProperty device;
+    private final static Logger LOG = Logger.getLogger(MidiRoot.class.getName());
+    private ArgumentProperty device;
     private MidiThreadRouter router;
     private MidiDevice midiDevice;
     private Transmitter transmitter;
@@ -66,7 +70,9 @@ public class MidiRoot extends AbstractRoot {
     }
 
     private void buildControls() {
-        device = StringProperty.create("");
+        ArgumentInfo info = ArgumentInfo.create(
+                Argument.class, PMap.create(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
+        device = ArgumentProperty.create(info);
         registerControl("device", device);
     }
 
@@ -105,7 +111,7 @@ public class MidiRoot extends AbstractRoot {
     protected void starting() {
         super.starting();
         try {
-            midiDevice = getDevice(device.getValue());
+            midiDevice = getDevice(device.getValue().toString());
             transmitter = midiDevice.getTransmitter();
             transmitter.setReceiver(receiver);
             midiDevice.open();
@@ -210,12 +216,12 @@ public class MidiRoot extends AbstractRoot {
 
         public void route(Packet packet) {
             try {
-                if (logger.isLoggable(Level.FINEST)) {
-                    logger.log(Level.FINEST, "Sending call\n" + packet);
+                if (LOG.isLoggable(Level.FINEST)) {
+                    LOG.log(Level.FINEST, "Sending call\n" + packet);
                 }
                 hub.dispatch(packet);
             } catch (InvalidAddressException ex) {
-                logger.log(Level.WARNING, "Invalid Root Address - " + packet.getRootID());
+                LOG.log(Level.WARNING, "Invalid Root Address - " + packet.getRootID());
             }
         }
     }

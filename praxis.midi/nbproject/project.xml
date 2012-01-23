@@ -23,7 +23,10 @@
                     </run-dependency>
                 </dependency>
             </module-dependencies>
-            <public-packages/>
+            <public-packages>
+                <package>net.neilcsmith.praxis.midi</package>
+                <package>net.neilcsmith.praxis.midi.impl</package>
+            </public-packages>
         </data>
     </configuration>
 </project>

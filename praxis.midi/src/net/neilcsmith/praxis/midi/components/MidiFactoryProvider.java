@@ -32,8 +32,6 @@ import net.neilcsmith.praxis.impl.AbstractComponentFactory;
  */
 public class MidiFactoryProvider implements ComponentFactoryProvider {
 
-    private final static String OLD_API = "praxis.midi.adv.oldapi";
-
     private final static ComponentFactory factory = new Factory();
 
     public ComponentFactory getFactory() {
@@ -47,15 +45,9 @@ public class MidiFactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-            if (Boolean.getBoolean(OLD_API)) {
-                addRoot("root:midi", DefaultMidiRoot.class);
-            } else {
                 addRoot("root:midi", MidiRoot.class);
-                addComponent("midi:control-in", MidiControlIn.class);
-            }
-            
+                addComponent("midi:control-in", MidiControlIn.class);         
         }
-
+        
     }
-
 }
