@@ -40,10 +40,11 @@ public class Blur extends AbstractComponent {
     public Blur() {
         filter = new BlurFilter();
         IntProperty radius = IntProperty.create( new RadiusBinding(), 0, 256, 0);
-        registerControl("radius", radius);
-        registerPort("radius", radius.createPort());
         registerPort(Port.IN, new DefaultVideoInputPort(this, filter));
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, filter));
+        registerControl("radius", radius);
+        registerPort("radius", radius.createPort());
+        
     }
 
     private class RadiusBinding implements IntProperty.Binding {

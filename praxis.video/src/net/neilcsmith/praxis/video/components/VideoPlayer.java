@@ -25,6 +25,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.Port;
+import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
@@ -39,25 +41,34 @@ import net.neilcsmith.ripl.delegates.VideoDelegate.StateException;
  */
 public class VideoPlayer extends AbstractExecutionContextComponent {
 
-    VideoDelegate video;
-    Delegator delegator;
-    VideoDelegateLoader loader;
+    private enum TriggerState {
+
+        Play, Pause, Stop
+    }
+    private VideoDelegate video;
+    private Delegator delegator;
+    private VideoDelegateLoader loader;
 
     public VideoPlayer() {
         delegator = new Delegator();
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));
         loader = new VideoDelegateLoader(this, new VideoBinding());
-        registerControl("uri", loader);
-        TriggerControl play = TriggerControl.create( new PlayTrigger());
-        registerControl("play", play);
-        TriggerControl pause = TriggerControl.create( new PauseTrigger());
-        registerControl("pause", pause);
-        FloatProperty position = FloatProperty.create( new PositionBinding(), 0, 1, 0);
+        registerControl("video", loader);
+        FloatProperty position = FloatProperty.create(new PositionBinding(), 0, 1, 0,
+                PMap.create(ControlInfo.KEY_TRANSIENT, true));
         registerControl("position", position);
-
+        registerPort("position", position.createPort());
+        TriggerControl play = TriggerControl.create(new TriggerBinding(TriggerState.Play));        
+        registerControl("play", play);
+        registerPort("play", play.createPort());
+        TriggerControl pause = TriggerControl.create(new TriggerBinding(TriggerState.Pause));
+        registerControl("pause", pause);
+        registerPort("pause", pause.createPort());
+        TriggerControl stop = TriggerControl.create(new TriggerBinding(TriggerState.Stop));
+        registerControl("stop", stop);
+        registerPort("stop", stop.createPort());
 
     }
-
 
     private class PositionBinding implements FloatProperty.Binding {
 
@@ -87,25 +98,28 @@ public class VideoPlayer extends AbstractExecutionContextComponent {
         }
     }
 
-    private class PlayTrigger implements TriggerControl.Binding {
+    private class TriggerBinding implements TriggerControl.Binding {
 
-        public void trigger(long time) {
-            if (video != null) {
-                try {
-                    video.play();
-                } catch (StateException ex) {
-                    Logger.getLogger(VideoPlayer.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
+        private TriggerState state;
+        
+        private TriggerBinding(TriggerState state) {
+            this.state = state;
         }
-    }
-
-    private class PauseTrigger implements TriggerControl.Binding {
-
+        
         public void trigger(long time) {
             if (video != null) {
                 try {
-                    video.pause();
+                    switch (state) {
+                        case Play:
+                            video.play();
+                            break;
+                        case Pause:
+                            video.pause();
+                            break;
+                        case Stop:
+                            video.stop();
+                            break;
+                    }
                 } catch (StateException ex) {
                     Logger.getLogger(VideoPlayer.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -121,7 +135,6 @@ public class VideoPlayer extends AbstractExecutionContextComponent {
             }
             video = delegate;
             delegator.setDelegate(delegate);
-            
         }
 
         public void delegateLoaded(VideoDelegateLoader source, long time) {
@@ -129,65 +142,9 @@ public class VideoPlayer extends AbstractExecutionContextComponent {
         }
 
         public void delegateError(VideoDelegateLoader source, long time) {
-            
         }
-        
     }
-    
-//    private class VideoLoader extends ResourceLoader<VideoDelegate> {
-//
-//        VideoLoader() {
-//            super(VideoPlayer.this, VideoDelegate.class);
-//        }
-//
-//        @Override
-//        protected Task getLoadTask(PUri uri) {
-//            return getDelegateLoaderTask(uri);
-//        }
-//
-//        @Override
-//        protected void setResource(VideoDelegate resource) {
-//            if (video != null) {
-//                video.dispose();
-//                video = null;
-//            }
-//            if (resource == null) {
-//                delegator.setDelegate(null);
-//
-//            } else {
-//                delegator.setDelegate(resource);
-//                video = resource;
-//            }
-//        }
 
-//        @Override
-//        protected void setResource(Argument arg) {
-//            if (arg == null) {
-//                delegator.setDelegate(null);
-//                if (video != null) {
-//                    video.dispose();
-//                    video = null;
-//                }
-//            } else {
-//                try {
-//                    PReference ref = PReference.coerce(arg);
-//                    VideoDelegate del = (VideoDelegate) ref.getReference();
-//                    video = del;
-//                    delegator.setDelegate(del);
-//                } catch (Exception ex) {
-//                    Logger.getLogger(VideoPlayer.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            }
-//
-//
-//        }
-//    }
-//
-//    protected abstract Task getDelegateLoaderTask(PUri uri);
-//
-
-    
-    
     public void stateChanged(ExecutionContext source) {
         if (source.getState() == ExecutionContext.State.IDLE) {
             if (video != null) {
@@ -206,5 +163,4 @@ public class VideoPlayer extends AbstractExecutionContextComponent {
             }
         }
     }
-    
 }

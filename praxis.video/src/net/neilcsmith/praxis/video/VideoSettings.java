@@ -30,8 +30,17 @@ import net.neilcsmith.praxis.settings.Settings;
 public class VideoSettings {
     
     public final static String KEY_RENDERER = "video.renderer";
+//    public final static String KEY_CAPTURE_DEVICE = "video.capture.device";
     
     private final static String DEFAULT_RENDERER = "Software";
+    
+//    private static String DEFAULT_CAPTURE_DEVICE = "";
+//    static {
+//        String os = System.getProperty("os.name");
+//        if (os != null && os.contains("Linux")) {
+//            DEFAULT_CAPTURE_DEVICE = "v4l2://0";
+//        }
+//    }
     
     private VideoSettings() {}
     
@@ -42,5 +51,13 @@ public class VideoSettings {
     public static void setRenderer(String renderer) {
         Settings.put(KEY_RENDERER, renderer);
     }
+    
+//    public static String getCaptureDevice() {
+//        return Settings.get(KEY_CAPTURE_DEVICE, DEFAULT_CAPTURE_DEVICE);
+//    }
+//    
+//    public static void setCaptureDevice(String device) {
+//        Settings.put(KEY_CAPTURE_DEVICE, device);
+//    }
     
 }

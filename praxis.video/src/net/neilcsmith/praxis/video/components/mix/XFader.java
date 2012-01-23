@@ -53,17 +53,15 @@ public class XFader extends AbstractComponent {
             pl2 = new Placeholder();
             mixer.addSource(pl1);
             mixer.addSource(pl2);
-            registerPort(Port.OUT, new DefaultVideoOutputPort(this, mixer));
             registerPort(Port.IN + "-1", new DefaultVideoInputPort(this, pl1));
             registerPort(Port.IN + "-2", new DefaultVideoInputPort(this, pl2));
-
-//            registerControl("mix", new MixControl());
-            FloatProperty mix = createMixControl();
-            registerControl("mix", mix);
-            registerPort("mix", mix.createPort());
+            registerPort(Port.OUT, new DefaultVideoOutputPort(this, mixer));
             StringProperty mode = createModeControl();
             registerControl("mode", mode);
             registerPort("mode", mode.createPort());
+            FloatProperty mix = createMixControl();
+            registerControl("mix", mix);
+            registerPort("mix", mix.createPort());         
         } catch (SinkIsFullException ex) {
             Logger.getLogger(XFader.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SourceIsFullException ex) {

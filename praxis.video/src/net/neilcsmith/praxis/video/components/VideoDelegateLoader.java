@@ -45,7 +45,7 @@ public class VideoDelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
     private Listener listener;
 
     public VideoDelegateLoader(AbstractComponent component, Listener listener) {
-        super(PResource.info(), VideoDelegate.class, PString.EMPTY);
+        super(PResource.info(true), VideoDelegate.class, PString.EMPTY);
         if (listener == null) {
             throw new NullPointerException();
         }

@@ -43,20 +43,21 @@ public class VideoCapture extends AbstractExecutionContextComponent {
     private VideoDelegate video;
     private Delegator container;
     private VideoDelegateLoader loader;
-    private ArgumentProperty device;
 
     public VideoCapture() {
+        
+        container = new Delegator();
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, container));
         
         loader = new VideoDelegateLoader(this, new VideoBinding());
         registerControl("device", loader);
         TriggerControl start = TriggerControl.create( new StartBinding());
-        registerControl("start", start);
-        registerPort("start", start.createPort());
+        registerControl("play", start);
+        registerPort("play", start.createPort());
         TriggerControl stop = TriggerControl.create( new StopBinding());
         registerControl("stop", stop);
         registerPort("stop", stop.createPort());
-        container = new Delegator();
-        registerPort(Port.OUT, new DefaultVideoOutputPort(this, container));
+               
     }
 
     public void stateChanged(ExecutionContext source) {

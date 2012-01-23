@@ -52,12 +52,11 @@ public class Composite extends AbstractComponent {
             src = new Placeholder();
             comp.addSource(dst);
             comp.addSource(src);
-            registerPort(Port.OUT, new DefaultVideoOutputPort(this, comp));
+            
             registerPort(Port.IN, new DefaultVideoInputPort(this, dst));
             registerPort("src", new DefaultVideoInputPort(this, src));
-            
-            registerControl("force-alpha", createAlphaControl());
-            
+            registerPort(Port.OUT, new DefaultVideoOutputPort(this, comp));
+                 
             StringProperty mode = createModeControl();
             registerControl("mode", mode);
             registerPort("mode", mode.createPort());
@@ -65,6 +64,8 @@ public class Composite extends AbstractComponent {
             FloatProperty mix = createMixControl();
             registerControl("mix", mix);
             registerPort("mix", mix.createPort());
+            
+            registerControl("force-alpha", createAlphaControl());
 
 
         } catch (SinkIsFullException ex) {
