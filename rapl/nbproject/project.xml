@@ -44,6 +44,7 @@
                 <package>net.neilcsmith.rapl.components.distortion</package>
                 <package>net.neilcsmith.rapl.components.filters</package>
                 <package>net.neilcsmith.rapl.components.mix</package>
+                <package>net.neilcsmith.rapl.components.sampling</package>
                 <package>net.neilcsmith.rapl.components.test</package>
                 <package>net.neilcsmith.rapl.components.time</package>
                 <package>net.neilcsmith.rapl.core</package>
