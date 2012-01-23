@@ -58,7 +58,7 @@ public class NimRODButtonUI extends MetalButtonUI {
         super.installDefaults(button);
 
 //    button.setBorder( NimRODBorders.getButtonBorder());
-        setBorderSafe(button, NimRODBorders.getButtonBorder());
+        NimRODUtils.setBorderSafe(button, NimRODBorders.getButtonBorder());
 
         selectColor = NimRODLookAndFeel.getFocusColor();
     }
@@ -141,11 +141,13 @@ public class NimRODButtonUI extends MetalButtonUI {
             if (c.getParent() instanceof JToolBar) {
                 if (mod.isRollover() || mod.isPressed() || mod.isSelected()) {
 //          c.setBorder( NimRODBorders.getGenBorder());
-                    setBorderSafe(c, NimRODBorders.getGenBorder());
+//                    setBorderSafe(c, NimRODBorders.getGenBorder());
                 } else {
 //          c.setBorder( NimRODBorders.getEmptyGenBorder());
-                    setBorderSafe(c, NimRODBorders.getEmptyGenBorder());
+//                    setBorderSafe(c, NimRODBorders.getEmptyGenBorder());
                 }
+                
+                NimRODUtils.setBorderSafe(c, NimRODBorders.getRolloverButtonBorder());
 
                 if (mod.isPressed() || mod.isSelected()) {
                     g2D.setColor(NimRODLookAndFeel.getFocusColor());
@@ -195,12 +197,7 @@ public class NimRODButtonUI extends MetalButtonUI {
         return boton;
     }
 
-    private void setBorderSafe(JComponent c, Border b) {
-        Border existing = c.getBorder();
-        if (existing == null || existing instanceof UIResource) {
-            c.setBorder(b);
-        }
-    }
+    
 
     /////////////////////////////////////
     public class MiListener extends MouseInputAdapter implements PropertyChangeListener, FocusListener {

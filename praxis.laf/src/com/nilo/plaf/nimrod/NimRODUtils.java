@@ -30,7 +30,9 @@ import java.io.*;
 import java.util.Properties;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.plaf.ColorUIResource;
+import javax.swing.plaf.UIResource;
 
 class NimRODUtils {
   
@@ -397,5 +399,12 @@ class NimRODUtils {
   static float getFrameOpacityFloat() {
     return getFrameOpacity() / 255f;
   }
+  
+  static void setBorderSafe(JComponent c, Border b) {
+        Border existing = c.getBorder();
+        if (existing == null || existing instanceof UIResource) {
+            c.setBorder(b);
+        }
+    }
 
 }

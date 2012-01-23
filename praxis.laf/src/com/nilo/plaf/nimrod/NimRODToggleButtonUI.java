@@ -140,10 +140,12 @@ public class NimRODToggleButtonUI extends MetalToggleButtonUI {
 
             if (c.getParent() instanceof JToolBar) {
                 if (mod.isRollover() || mod.isPressed() || mod.isSelected()) {
-                    c.setBorder(NimRODBorders.getGenBorder());
+//                    c.setBorder(NimRODBorders.getGenBorder());
                 } else {
-                    c.setBorder(NimRODBorders.getEmptyGenBorder());
+//                    c.setBorder(NimRODBorders.getEmptyGenBorder());
                 }
+                
+                NimRODUtils.setBorderSafe(c, NimRODBorders.getRolloverButtonBorder());
 
                 if (mod.isPressed() || mod.isSelected()) {
                     g2D.setColor(NimRODLookAndFeel.getFocusColor());

@@ -397,21 +397,21 @@ public class NimRODLookAndFeel extends MetalLookAndFeel {
     // Para el JTree
     table.put( "Tree.collapsedIcon", NimRODIconFactory.getTreeCollapsedIcon());
     table.put( "Tree.expandedIcon", NimRODIconFactory.getTreeExpandedIcon());
-    table.put( "Tree.closedIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/TreeDirCerrado.png"));
-    table.put( "Tree.openIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/TreeDirAbierto.png"));
+    table.put( "Tree.closedIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/TreeClosed.png"));
+    table.put( "Tree.openIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/TreeOpen.png"));
     table.put( "Tree.leafIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/TreeFicheroIcon.png"));
     table.put( "Tree.PelotillaIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/TreePelotilla.png"));
     
     // Los dialogos de ficheros
-    table.put( "FileView.directoryIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/DialogDirCerrado.png"));
+    table.put( "FileView.directoryIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/DialogDirClosed.png"));
     table.put( "FileView.fileIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/DialogFicheroIcon.png"));
     table.put( "FileView.floppyDriveIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/DialogFloppyIcon.png"));
     table.put( "FileView.hardDriveIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/DialogHDIcon.png"));
-    table.put( "FileChooser.newFolderIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/DialogNewDir.png"));
-    table.put( "FileChooser.homeFolderIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/DialogHome.png"));
-    table.put( "FileChooser.upFolderIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/DialogDirParriba.png"));
-    table.put( "FileChooser.detailsViewIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/DialogDetails.png"));
-    table.put( "FileChooser.listViewIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/DialogList.png"));
+    table.put( "FileChooser.newFolderIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/folder-new.png"));
+    table.put( "FileChooser.homeFolderIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/go-home.png"));
+    table.put( "FileChooser.upFolderIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/go-up.png"));
+    table.put( "FileChooser.detailsViewIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/view-list-compact.png"));
+    table.put( "FileChooser.listViewIcon", NimRODUtils.loadRes( "/com/nilo/plaf/nimrod/icons/view-list-icons.png"));
     
     // Para los muchos CheckBox y RadioButtons
     table.put( "CheckBoxMenuItem.checkIcon", NimRODIconFactory.getCheckBoxMenuItemIcon());
