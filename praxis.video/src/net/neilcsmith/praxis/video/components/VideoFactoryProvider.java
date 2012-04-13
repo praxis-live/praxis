@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -24,11 +24,13 @@ package net.neilcsmith.praxis.video.components;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
 import net.neilcsmith.praxis.impl.AbstractComponentFactory;
+import net.neilcsmith.praxis.video.components.analysis.blobs.BlobTracker;
+import net.neilcsmith.praxis.video.components.analysis.FrameDelay;
+import net.neilcsmith.praxis.video.components.analysis.Difference;
 import net.neilcsmith.praxis.video.components.filters.Blur;
 import net.neilcsmith.praxis.video.components.mix.Composite;
 import net.neilcsmith.praxis.video.components.mix.XFader;
 import net.neilcsmith.praxis.video.components.test.BackgroundDifference;
-import net.neilcsmith.praxis.video.components.test.Difference;
 import net.neilcsmith.praxis.video.components.test.DifferenceCalc;
 import net.neilcsmith.praxis.video.components.test.FrameTimer;
 import net.neilcsmith.praxis.video.components.test.Hyp;
@@ -83,8 +85,11 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
             addComponent("video:test:save", ImageSave.class);
             addComponent("video:test:difference-calc", DifferenceCalc.class);
             addComponent("video:test:bgdiff", BackgroundDifference.class);
-            addComponent("video:test:noise", Noise.class);
-            addComponent("video:test:filter:blur", Blur.class);
+//            addComponent("video:test:noise", Noise.class);
+//            addComponent("video:test:filter:blur", Blur.class);
+            addComponent("video:test:analysis:frame-delay", FrameDelay.class);
+            addComponent("video:test:analysis:difference", net.neilcsmith.praxis.video.components.analysis.Difference.class);
+            addComponent("video:test:analysis:blob-tracker", BlobTracker.class);
 
         }
     }
