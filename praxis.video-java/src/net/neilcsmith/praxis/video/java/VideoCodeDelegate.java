@@ -71,13 +71,13 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
     }
 
     public final void update(long time) {
-        // ignore - tick() provides same function earlier in update cycle.
+        // ignore - update() provides same function earlier in update cycle.
     }
 
     @Override
-    public void tick() {
+    public final void update() {
         drainSendQueue();
-        super.tick();
+        super.update();
     }
 
 
