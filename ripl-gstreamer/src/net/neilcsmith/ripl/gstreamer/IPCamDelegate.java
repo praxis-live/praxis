@@ -51,7 +51,7 @@ public class IPCamDelegate extends AbstractGstDelegate {
     @Override
     protected Pipeline buildPipeline(Listener listener) {
         Pipeline pipe = new Pipeline();
-        Element src = ElementFactory.make("neonhttpsrc", "source");
+        Element src = ElementFactory.make("souphttpsrc", "source");
         src.set("location", address.toString());
         DecodeBin decoder = new DecodeBin("decoder");
         final RGBDataSink sink = new RGBDataSink("sink", listener);
