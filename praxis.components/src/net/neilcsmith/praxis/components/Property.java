@@ -24,9 +24,11 @@ package net.neilcsmith.praxis.components;
 
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractComponent;
+import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 
@@ -34,7 +36,7 @@ import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
  *
  * @author Neil C Smith
  */
-public class Property extends AbstractComponent {
+public class Property extends AbstractExecutionContextComponent {
     
     private ControlPort.Output output;
     private Argument arg;
@@ -45,6 +47,12 @@ public class Property extends AbstractComponent {
         ArgumentProperty value = ArgumentProperty.create( new Binding(), arg);
         registerControl("value", value);
         registerPort(Port.OUT, output);
+    }
+
+    public void stateChanged(ExecutionContext source) {
+        if (source.getState() == ExecutionContext.State.ACTIVE) {
+            output.send(source.getTime(), arg);
+        }
     }
     
     private class Binding implements ArgumentProperty.Binding {
