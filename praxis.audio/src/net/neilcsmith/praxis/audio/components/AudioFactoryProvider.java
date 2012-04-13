@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.audio.components;
 
+import net.neilcsmith.praxis.audio.components.analysis.Level;
 import net.neilcsmith.praxis.audio.components.distortion.SimpleOverdrive;
 import net.neilcsmith.praxis.audio.components.filter.CombFilter;
 import net.neilcsmith.praxis.audio.components.filter.IIRFilter;
@@ -66,6 +67,9 @@ public class AudioFactoryProvider implements ComponentFactoryProvider {
             addComponent("audio:distortion:overdrive", SimpleOverdrive.class);
             addComponent("audio:mix:xfader", XFader.class);
             addComponent("audio:sampling:looper", Looper.class);
+            
+            // test
+            addComponent("audio:test:analysis:level", Level.class);
 
         }
     }
