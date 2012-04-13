@@ -36,7 +36,7 @@ public abstract class VideoDelegate extends AbstractDelegate {
     private ResizeMode resizeMode;
     
     protected VideoDelegate() {
-        resizeMode = new ResizeMode(ResizeMode.Type.Scale, 0.5, 0.5);
+        resizeMode = new ResizeMode(ResizeMode.Type.Stretch, 0.5, 0.5);
     }
     
     public void setResizeMode(ResizeMode mode) {
