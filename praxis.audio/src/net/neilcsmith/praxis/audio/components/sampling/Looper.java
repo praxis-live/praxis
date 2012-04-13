@@ -159,11 +159,11 @@ public class Looper extends AbstractComponent {
     private class PositionBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            looper.setPosition((float) (value * looper.getTableSize()));
+            looper.setPosition((float) value);
         }
 
         public double getBoundValue() {
-            return looper.getPosition() / looper.getTableSize();
+            return looper.getPosition();
         }
         
     }
@@ -171,16 +171,11 @@ public class Looper extends AbstractComponent {
     private class InBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            int pos = (int) Math.round(value * looper.getTableSize());
-            looper.setIn(pos);
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("Input : " + value + " Player Input = " + looper.getIn()
-                        + " Player Output = " + looper.getOut());
-            }
+            looper.setLoopStart((float) value);
         }
 
         public double getBoundValue() {
-            return (double) looper.getIn() / looper.getTableSize();
+            return (double) looper.getLoopStart();
         }
         
     }
@@ -188,12 +183,11 @@ public class Looper extends AbstractComponent {
     private class OutBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            int pos = (int) Math.round(value * looper.getTableSize());
-            looper.setOut(pos);
+            looper.setLoopEnd((float) value);
         }
 
         public double getBoundValue() {
-            return (double) looper.getOut() / looper.getTableSize();
+            return looper.getLoopEnd();
         }
         
     }
@@ -201,29 +195,19 @@ public class Looper extends AbstractComponent {
     private class RangeBinding implements FloatRangeProperty.Binding {
 
         public void setBoundLowValue(long time, double low) {
-            int pos = (int) Math.round(low * looper.getTableSize());
-            looper.setIn(pos);
+            looper.setLoopStart((float)low);
         }
 
         public void setBoundHighValue(long time, double high) {
-            int pos = (int) Math.round(high * looper.getTableSize());
-            looper.setOut(pos);
+            looper.setLoopEnd((float)high);
         }
 
         public double getBoundLowValue() {
-            double ret =  (double) looper.getIn() / looper.getTableSize();
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("Returning Low = " + ret);
-            }
-            return ret;
+            return looper.getLoopStart();
         }
 
         public double getBoundHighValue() {
-            double ret = (double) looper.getOut() / looper.getTableSize();
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("Returning High = " + ret);
-            }
-            return ret;
+            return looper.getLoopEnd();
         }
 
     }

@@ -33,15 +33,16 @@ import net.neilcsmith.rapl.util.SampleTable;
 public class Looper extends SingleInOut {
 
     private SampleTable table;
+    private float start = 0;
+    private float end = 1;
     private int tableSize;
     private int in;
     private int out;
     private boolean playing;
     private boolean looping = true;
-//    private boolean wasPlaying;
     private boolean recording;
     private boolean wasRecording;
-    private float position;
+    private float ptr;
     private float speed = 1;
     private float loopSize;
 
@@ -81,17 +82,41 @@ public class Looper extends SingleInOut {
         }
     }
 
+    public void setLoopStart(float start) {
+        if (start < 0) {
+            start = 0;
+        } else if (start > end) {
+            start = end;
+        }
+        this.start = start;
+        if (table != null) {
+            in = (int) (start * table.getSize());
+        }
+    }
+
+    public float getLoopStart() {
+        return start;
+    }
+
+    public void setLoopEnd(float end) {
+        if (end < start) {
+            end = start;
+        } else if (end > 1) {
+            end = 1;
+        }
+        this.end = end;
+        if (table != null) {
+            out = (int) (end * table.getSize());
+        }
+    }
+
+    public float getLoopEnd() {
+        return end;
+    }
+
     public boolean getPlaying() {
         return playing;
     }
-
-//    public void setLooping(boolean looping) {
-//        this.looping = looping;
-//    }
-//
-//    public boolean getLooping() {
-//        return looping;
-//    }
 
     public void setIn(int value) {
         if (value < 0) {
@@ -122,19 +147,26 @@ public class Looper extends SingleInOut {
     }
 
     public void setPosition(float value) {
-        if (value < in || value >= out) {
-            position = in;
-        } else {
-            position = value;
+        if (table == null) {
+            return;
         }
-//        smoothIndex = 0;
+        value = value * table.getSize();
+        if (value < in || value >= out) {
+            ptr = in;
+        } else {
+            ptr = value;
+        }
         if (playing) {
             smoothIndex = 0;
         }
     }
 
     public float getPosition() {
-        return position;
+        if (table != null) {
+            return ptr / table.getSize();
+        } else {
+            return 0;
+        }
     }
 
     public void setSpeed(float value) {
@@ -144,7 +176,7 @@ public class Looper extends SingleInOut {
     public float getSpeed() {
         return speed;
     }
-    
+
     public int getTableSize() {
         return tableSize;
     }
@@ -172,8 +204,9 @@ public class Looper extends SingleInOut {
             tableSize = 1;
         }
         table = SampleTable.wrap(srate, new float[tableSize]);
-        in = 0;
-        out = tableSize;
+        in = (int) (start * tableSize);
+        out = (int) (end * tableSize);
+        ptr = 0;
         wasRecording = false;
 
     }
@@ -185,14 +218,19 @@ public class Looper extends SingleInOut {
         if (!wasRecording) {
             smoothIndex = 0;
         }
-        int idx = (int) position;
+        int idx = (int) ptr;
         int looplength = out - in;
-        while (idx >= out) {
-            idx -= looplength;
+        if (looplength > 0) {
+            while (idx >= out) {
+                idx -= looplength;
+            }
+            while (idx < in) {
+                idx += looplength;
+            }
+        } else {
+            idx = in;
         }
-        while (idx < in) {
-            idx += looplength;
-        }
+
 //        boolean smoothEnds = false;
 //        boolean smoothIdx = false;
         if (idx != recordIdx) {
@@ -260,7 +298,7 @@ public class Looper extends SingleInOut {
 //            recordIdx = idx;
 //        }
         wasRecording = true;
-        position = idx;
+        ptr = idx;
         recordIdx = idx;
         recordIn = in;
         recordOut = out;
@@ -388,32 +426,32 @@ public class Looper extends SingleInOut {
         if (loopLength > 0 && table != null) {
             if (rendering) {
                 for (int i = 0; i < bSize; i++) {
-                    if (position >= out) {
+                    if (ptr >= out) {
                         smoothIndex = 0;
                         if (looping) {
-                            while (position >= out) {
-                                position -= loopLength;
+                            while (ptr >= out) {
+                                ptr -= loopLength;
                             }
                         } else {
                             processStopped(data, i, rendering);
-                            position = in;
+                            ptr = in;
                             playing = false;
                             return;
                         }
-                    } else if (position < in) {
+                    } else if (ptr < in) {
                         smoothIndex = 0;
                         if (looping) {
-                            while (position < in) {
-                                position += loopLength;
+                            while (ptr < in) {
+                                ptr += loopLength;
                             }
                         } else {
                             processStopped(data, i, rendering);
-                            position = out - 1;
+                            ptr = out - 1;
                             playing = false;
                             return;
                         }
                     }
-                    float sample = getSample(position);
+                    float sample = getSample(ptr);
                     if (smoothIndex >= 0) {
                         sample = smooth(sample);
                         smoothIndex++;
@@ -424,27 +462,27 @@ public class Looper extends SingleInOut {
                     data[i] = sample;
 
                     previousSample = sample;
-                    position += speed;
+                    ptr += speed;
 
                 }
             } else {
-                position += (speed * bSize);
-                if (position > out) {
+                ptr += (speed * bSize);
+                if (ptr > out) {
                     if (looping) {
-                        while (position > out) {
-                            position -= loopLength;
+                        while (ptr > out) {
+                            ptr -= loopLength;
                         }
                     } else {
-                        position = in;
+                        ptr = in;
                         playing = false;
                     }
-                } else if (position < in) {
+                } else if (ptr < in) {
                     if (looping) {
-                        while (position < in) {
-                            position += loopLength;
+                        while (ptr < in) {
+                            ptr += loopLength;
                         }
                     } else {
-                        position = out - 1;
+                        ptr = out - 1;
                         playing = false;
                     }
                 }
