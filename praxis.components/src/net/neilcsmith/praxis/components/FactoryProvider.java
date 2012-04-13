@@ -26,10 +26,13 @@ import net.neilcsmith.praxis.components.array.ArrayRandom;
 import net.neilcsmith.praxis.components.file.Resolver;
 import net.neilcsmith.praxis.components.math.Add;
 import net.neilcsmith.praxis.components.math.Multiply;
+import net.neilcsmith.praxis.components.math.Normalize;
 import net.neilcsmith.praxis.components.math.RandomFloat;
 import net.neilcsmith.praxis.components.math.Scale;
 import net.neilcsmith.praxis.components.math.Threshold;
+import net.neilcsmith.praxis.components.routing.Inhibitor;
 import net.neilcsmith.praxis.components.routing.Join;
+import net.neilcsmith.praxis.components.routing.Send;
 import net.neilcsmith.praxis.components.test.Log;
 import net.neilcsmith.praxis.components.timing.Animator;
 import net.neilcsmith.praxis.components.timing.SimpleDelay;
@@ -76,9 +79,12 @@ public class FactoryProvider implements ComponentFactoryProvider {
             addComponent("core:math:multiply", Multiply.class);
             addComponent("core:math:add", Add.class);
             addComponent("core:math:scale", Scale.class);
+            addComponent("core:test:math:normalize", Normalize.class);
 
             //ROUTING
             addComponent("core:routing:join", Join.class);
+            addComponent("core:test:routing:inhibitor", Inhibitor.class);
+            addComponent("core:test:routing:send", Send.class);
 
             // TEST
             addComponent("core:test:log", Log.class);
