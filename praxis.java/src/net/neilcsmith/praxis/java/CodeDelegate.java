@@ -60,7 +60,7 @@ public class CodeDelegate {
         }
     }
 
-    public void tick() {
+    public void update() {
     }
 
     public void dispose() {
