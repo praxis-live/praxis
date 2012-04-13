@@ -148,7 +148,7 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
         time = source.getTime();
         clock.process();
         if (delegate != null) {
-            delegate.tick();
+            delegate.update();
         }
     }
 
