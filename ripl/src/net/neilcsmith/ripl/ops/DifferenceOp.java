@@ -120,7 +120,7 @@ public class DifferenceOp implements SurfaceOp {
                         fgData[fgIdx] = fg & ALPHA_MASK |
                                 (fgR << 16) | (fgG << 8) | fgB;
                     }
-                    bgData[bgIdx] = fg;
+//                    bgData[bgIdx] = fg;
 
                     bgIdx++;
                     fgIdx++;
@@ -168,7 +168,7 @@ public class DifferenceOp implements SurfaceOp {
                         fgData[fgIdx] = fg & ALPHA_MASK |
                                 (maxDelta << 16) | (maxDelta << 8) | maxDelta;
                     }
-                    bgData[bgIdx] = fg;
+//                    bgData[bgIdx] = fg;
 
                     bgIdx++;
                     fgIdx++;
@@ -217,7 +217,7 @@ public class DifferenceOp implements SurfaceOp {
                     } else {
                         fgData[fgIdx] = alpha ? 0xFFFFFFFF : 0xFFFFFF;
                     }
-                    bgData[bgIdx] = fg;
+//                    bgData[bgIdx] = fg;
 
                     bgIdx++;
                     fgIdx++;
