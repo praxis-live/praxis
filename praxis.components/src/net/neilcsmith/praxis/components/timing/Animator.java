@@ -49,6 +49,7 @@ public class Animator extends AbstractClockComponent {
     private double fromValue;
     private long fromTime;
     private double toValue;
+    private double pendingToValue;
     private long toTime;
     private FloatProperty duration;
     private boolean animating;
@@ -78,10 +79,14 @@ public class Animator extends AbstractClockComponent {
             return;
         }
         long time = source.getTime();
+//        if (needsConfiguring) {
+//            configure(time);
+//        } else {
+//            processAnimation(time);
+//        }
+        processAnimation(time);
         if (needsConfiguring) {
             configure(time);
-        } else {
-            processAnimation(time);
         }
         output.send(time, currentValue);
     }
@@ -90,6 +95,7 @@ public class Animator extends AbstractClockComponent {
         animating = true;
         needsConfiguring = false;
         fromValue = currentValue;
+        toValue = pendingToValue;
         fromTime = time;
         toTime = fromTime + ((long) (duration.getValue() * TO_NANO));
         if (toTime == fromTime) {
@@ -115,7 +121,7 @@ public class Animator extends AbstractClockComponent {
     private class ValueBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            currentValue = value;
+            currentValue = toValue = fromValue = value;
             animating = false;
             needsConfiguring = false;
             output.send(time, value);
@@ -144,7 +150,7 @@ public class Animator extends AbstractClockComponent {
         }
 
         public void receive(long time, double value) {
-            toValue = value;
+            pendingToValue = value;
             needsConfiguring = true;
             animating = true;
         }
