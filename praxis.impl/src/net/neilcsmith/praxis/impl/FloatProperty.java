@@ -22,7 +22,6 @@
 package net.neilcsmith.praxis.impl;
 
 import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PMap;
