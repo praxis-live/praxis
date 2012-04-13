@@ -32,7 +32,7 @@ import net.neilcsmith.ripl.rgbmath.RGBMath;
  */
 public class Blend implements BlendFunction {
 
-    public static enum Type {Normal, Add, Sub, Difference, Multiply, Screen, BitXor};
+    public static enum Type {Normal, Add, Sub, Difference, Multiply, Screen, BitXor, Mask};
 
     public final static Blend NORMAL = new Blend(Type.Normal, 1);
     public final static Blend ADD = new Blend(Type.Add, 1);
@@ -41,7 +41,7 @@ public class Blend implements BlendFunction {
     public final static Blend MULTIPLY = new Blend(Type.Multiply, 1);
     public final static Blend SCREEN = new Blend(Type.Screen, 1);
     public final static Blend BITXOR = new Blend(Type.BitXor, 1);
-
+    public final static Blend MASK = new Blend(Type.Mask, 1);
 
     public static Blend ofType(Type type) {
         switch (type) {
@@ -59,6 +59,8 @@ public class Blend implements BlendFunction {
                 return SCREEN;
             case BitXor :
                 return BITXOR;
+            case Mask :
+                return MASK;
             default :
                 throw new IllegalArgumentException();
         }
@@ -91,6 +93,9 @@ public class Blend implements BlendFunction {
                 break;
             case BitXor :
                 cmp = new RGBComposite.BitXor(extraAlpha);
+                break;
+            case Mask :
+                cmp = new RGBComposite.Mask(extraAlpha);
                 break;
             default :
                 throw new IllegalArgumentException();

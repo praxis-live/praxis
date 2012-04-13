@@ -44,7 +44,8 @@ public class Composite extends AbstractInOut {
         Difference,
         Multiply,
         Screen,
-        BitXor
+        BitXor,
+        Mask
     }
     private Mode mode = Mode.Normal;
     private double mix = 1.0;
@@ -176,7 +177,8 @@ public class Composite extends AbstractInOut {
                 return Blit.op(Blend.SCREEN.opacity(mix));
             case BitXor:
                 return Blit.op(Blend.BITXOR.opacity(mix));
-            
+            case Mask:
+                return Blit.op(Blend.MASK.opacity(mix));
             default:
                 throw new IllegalArgumentException();
         }

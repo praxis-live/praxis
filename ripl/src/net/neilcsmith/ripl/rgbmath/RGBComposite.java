@@ -486,77 +486,78 @@ public abstract class RGBComposite {
 
         }
     }
-//    public static class AddTest extends RGBComposite {
-//
-//        public AddTest(double extraAlpha) {
-//            super(extraAlpha);
-//        }
-//
-//        public void composeRGB(int[] src, int srcPos, int[] destIn, int destInPos, int[] destOut, int destOutPos, int length) {
-//            int a, b;
-//            int af = extraAlpha;
-//            for (int i = 0; i < length; i++) {
-////                a = af == 256 ? src[srcPos] : multRGB(src[srcPos], af);
-//                a = src[srcPos];
-//                b = destIn[destInPos];
-//                destOut[destOutPos] = min((((a & RED_MASK) >>> 8) * af) + (b & RED_MASK), RED_MASK) & RED_MASK |
-//                        min((((a & GREEN_MASK) >>> 8) * af) + (b & GREEN_MASK), GREEN_MASK) & GREEN_MASK |
-//                        min((((a & BLUE_MASK) * af) >>> 8) + (b & BLUE_MASK), BLUE_MASK);
-////                destOut[destOutPos] = min((a & RED_MASK) + (b & RED_MASK), RED_MASK) & RED_MASK |
-////                        min((a & GREEN_MASK) + (b & GREEN_MASK), GREEN_MASK) & GREEN_MASK |
-////                        min((a & BLUE_MASK) + (b & BLUE_MASK), BLUE_MASK);
-////                a = src[srcPos];
-////                b = destIn[destInPos];
-////                int srcA = (af == 256) ? (a & ALPHA_MASK) >>> 24
-////                        : (((a & ALPHA_MASK >>> 24) * af) >> 8);
-////                int srcR = (af == 256) ? (a & RED_MASK) >>> 16
-////                        : (((a & RED_MASK) * af) >>> 24);
-////                int srcG = (af == 256) ? (a & GREEN_MASK) >>> 8
-////                        : (((a & GREEN_MASK) * af) >>> 16);
-////                int srcB = (af == 256) ? (a & BLUE_MASK)
-////                        : (((a & BLUE_MASK) * af) >>> 8);
-////                int destA = (b & ALPHA_MASK) >>> 24;
-////                int destR = (b & RED_MASK) >>> 16;
-////                int destG = (b & GREEN_MASK) >>> 8;
-////                int destB = (b & BLUE_MASK);
-////
-////                destOut[destOutPos] = min(srcA + destA, 0xFF) << 24 |
-////                        min(srcR + destR, 0xFF) << 16 |
-////                        min(srcG + destG, 0xFF) << 8 |
-////                        min(srcB + destB, 0xFF);
-//
-//                srcPos++;
-//                destInPos++;
-//                destOutPos++;
-//
-//            }
-//        }
-//
-//        public void composeARGB(int[] src, int srcPos, int[] destIn, int destInPos, int[] destOut, int destOutPos, int length) {
-////            int a, b;
-//            int alpha = extraAlpha;
-//            for (int i = 0; i < length; i++) {
-//                int srcPx = alpha == 255 ? src[srcPos] : multARGB(src[srcPos], alpha);
-//                int destPx = destIn[destInPos];
-//                int srcA = (srcPx & ALPHA_MASK) >>> 24;
-//                int srcR = (srcPx & RED_MASK) >>> 16;
-//                int srcG = (srcPx & GREEN_MASK) >>> 8;
-//                int srcB = (srcPx & BLUE_MASK);
-//                int destA = (destPx & ALPHA_MASK) >>> 24;
-//                int destR = (destPx & RED_MASK) >>> 16;
-//                int destG = (destPx & GREEN_MASK) >>> 8;
-//                int destB = (destPx & BLUE_MASK);
-//
-//                destOut[destOutPos] = min(srcA + destA, 0xFF) << 24 |
-//                        min(srcR + destR, 0xFF) << 16 |
-//                        min(srcG + destG, 0xFF) << 8 |
-//                        min(srcB + destB, 0xFF);
-//
-//                srcPos++;
-//                destInPos++;
-//                destOutPos++;
-//            }
-//
-//        }
-//    }
+    
+    public static class Mask extends RGBComposite {
+
+        public Mask(double extraAlpha) {
+            super(extraAlpha);
+        }
+
+        public void composeRGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
+            int alpha = extraAlpha;
+            for (int i = 0; i < length; i++) {
+                int srcPx = src[srcPos];
+                int destPx = dest[destPos];
+                int srcR = (alpha == 255) ? (srcPx & RED_MASK) >>> 16
+                        : mult((srcPx & RED_MASK) >>> 16, alpha);
+                int srcG = (alpha == 255) ? (srcPx & GREEN_MASK) >>> 8
+                        : mult((srcPx & GREEN_MASK) >>> 8, alpha);
+                int srcB = (alpha == 255) ? (srcPx & BLUE_MASK)
+                        : mult(srcPx & BLUE_MASK, alpha);
+                int destR = (destPx & RED_MASK) >>> 16;
+                int destG = (destPx & GREEN_MASK) >>> 8;
+                int destB = (destPx & BLUE_MASK);
+
+                dest[destPos] = (alpha == 255) ? mult(srcR, destR) << 16 |
+                        mult(srcG, destG) << 8 |
+                        mult(srcB, destB)
+                        : (mult(srcR, destR) + mult(destR, 255 - alpha)) << 16 |
+                        (mult(srcG, destG) + mult(destG, 255 - alpha)) << 8 |
+                        mult(srcB, destB) + mult(destB, 255 - alpha);
+
+                srcPos++;
+                destPos++;
+
+            }
+        }
+
+        public void composeARGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
+            int alpha = extraAlpha;
+            for (int i = 0; i < length; i++) {
+                int srcPx = src[srcPos];
+                int destPx = dest[destPos];
+                int srcA = (alpha == 255) ? (srcPx & ALPHA_MASK) >>> 24
+                        : mult((srcPx & ALPHA_MASK) >>> 24, alpha);
+                int srcR = (alpha == 255) ? (srcPx & RED_MASK) >>> 16
+                        : mult((srcPx & RED_MASK) >>> 16, alpha);
+                int srcG = (alpha == 255) ? (srcPx & GREEN_MASK) >>> 8
+                        : mult((srcPx & GREEN_MASK) >>> 8, alpha);
+                int srcB = (alpha == 255) ? (srcPx & BLUE_MASK)
+                        : mult(srcPx & BLUE_MASK, alpha);
+                int destA = (destPx & ALPHA_MASK) >>> 24;
+                int destR = (destPx & RED_MASK) >>> 16;
+                int destG = (destPx & GREEN_MASK) >>> 8;
+                int destB = (destPx & BLUE_MASK);
+
+//                dest[destPos] = blend(srcA, destA, srcA) << 24 |
+//                        (mult(srcR, destR) + mult(destR, 255 - srcA) + mult(srcR, 255 - destA)) << 16 |
+//                        (mult(srcG, destG) + mult(destG, 255 - srcA) + mult(srcG, 255 - destA)) << 8 |
+//                        mult(srcB, destB) + mult(destB, 255 - srcA) + mult(srcB, 255 - destA);
+                
+                dest[destPos] = (alpha == 255) ? mult(srcA, destA) << 24 |
+                        mult(srcR, destR) << 16 |
+                        mult(srcG, destG) << 8 |
+                        mult(srcB, destB)
+                        : (mult(srcA, destA) + mult(destA, 255 - alpha)) << 24 |
+                        (mult(srcR, destR) + mult(destR, 255 - alpha)) << 16 |
+                        (mult(srcG, destG) + mult(destG, 255 - alpha)) << 8 |
+                        mult(srcB, destB) + mult(destB, 255 - alpha);
+
+                srcPos++;
+                destPos++;
+            }
+
+        }
+    }
+
 }
