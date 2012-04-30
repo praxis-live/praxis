@@ -39,7 +39,8 @@
                     </run-dependency>
                 </dependency>
             </module-dependencies>
-            <public-packages>
+            <friend-packages>
+                <friend>net.neilcsmith.praxis.audio</friend>
                 <package>net.neilcsmith.rapl.components</package>
                 <package>net.neilcsmith.rapl.components.distortion</package>
                 <package>net.neilcsmith.rapl.components.filters</package>
@@ -51,7 +52,7 @@
                 <package>net.neilcsmith.rapl.core.impl</package>
                 <package>net.neilcsmith.rapl.render</package>
                 <package>net.neilcsmith.rapl.util</package>
-            </public-packages>
+            </friend-packages>
         </data>
     </configuration>
 </project>
