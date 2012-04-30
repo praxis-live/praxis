@@ -35,6 +35,10 @@ public class GLContext {
         return height;
     } 
     
+    public GLSurface createSurface(int width, int height, boolean alpha) {
+        return new GLSurface(width, height, alpha);
+    }
+    
     public void dispose() {
         try {
             Display.setParent(null);

@@ -23,7 +23,6 @@ package net.neilcsmith.ripl.render.opengl.ops;
 
 import net.neilcsmith.ripl.Surface;
 import net.neilcsmith.ripl.SurfaceOp;
-import net.neilcsmith.ripl.render.opengl.GLException;
 import net.neilcsmith.ripl.render.opengl.internal.GLSurface;
 
 /**
@@ -44,12 +43,14 @@ public abstract class GLOp {
     public final Class<? extends SurfaceOp> getOpClass() {
         return opClass;
     }
-        
-    public boolean canProcess(SurfaceOp op) {
-        return opClass.isInstance(op);
-    }
     
-    public abstract void process(SurfaceOp op, GLSurface output, GLSurface ... inputs);
+    public abstract void process(SurfaceOp op, GLSurface output, Bypass bypass, Surface ... inputs);
+   
+    public interface Bypass {
+        
+        public void process(SurfaceOp op, Surface ... inputs);
+        
+    }
    
     
 }

@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.neilcsmith.ripl.SurfaceOp;
 import net.neilcsmith.ripl.ops.Blit;
+import net.neilcsmith.ripl.ops.ScaledBlit;
 
 /**
  *
@@ -42,20 +43,16 @@ public class GLOpCache {
     
     private void init() {
         cache = new HashMap<Class<? extends SurfaceOp>, GLOp>();
-        cache.put(Blit.class, new GLBlit());
+        cache.put(Blit.class, new GLBlitOp());
+        cache.put(ScaledBlit.class, new GLScaledBlitOp());
     }
     
-//    public GLOp find(Class<? extends SurfaceOp> op) {
-//        return cache.get(op);
+//    public <T extends SurfaceOp> GLOp<T> find(Class<T> op) {
+//        return (GLOp<T>) cache.get(op);
 //    }
     
     public GLOp find(SurfaceOp op) {
-        GLOp glop = cache.get(op.getClass());
-        if (glop != null && glop.canProcess(op)) {
-            return glop;
-        } else {
-            return null;
-        }
+        return cache.get(op.getClass());
     }
     
     public static GLOpCache getInstance() {

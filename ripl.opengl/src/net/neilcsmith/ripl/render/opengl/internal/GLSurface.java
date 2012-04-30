@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -43,87 +43,44 @@ public class GLSurface extends Surface {
     private final static PixelData[] EMPTY_DATA = new PixelData[0];
     private GLSurfaceData sd;
     private boolean clear = true;
+    private GLContext context;
     private GLSurface parent;
     private boolean accelerated;
+    private FallbackProcessor fallback;
 
-    public GLSurface(int width, int height, boolean alpha) {
-        super(width, height, alpha);
+    GLSurface(int width, int height, boolean alpha) {
+        this(null, width, height, alpha);
     }
 
     private GLSurface(GLSurface parent, int width, int height, boolean alpha) {
-        this(width, height, alpha);
+        super(width, height, alpha);
         this.parent = parent;
+        fallback = new FallbackProcessor();
     }
 
     @Override
     public void process(SurfaceOp op, Surface... inputs) {
-        GLOp glop = null;
-        if (parent == null || parent.accelerated) {
-            // @TODO - need better mechanism for checking parent state - parent may change!
-            // fix snapshot mix to not check compatible on non-parent???
-//            System.out.println("Looking for GLOp");
-            glop = GLOpCache.getInstance().find(op);
-        }
+        GLOp glop = GLOpCache.getInstance().find(op);
         if (glop != null) {
             try {
-                switch (inputs.length) {
-                    case 0:
-                        processHW(glop, op);
-                        break;
-                    case 1:
-                        processHW(glop, op, inputs[0]);
-                        break;
-                    default:
-                        processHW(glop, op, inputs);
-                }
-                accelerated = true;
-                clear = false;
-                return;
+                glop.process(op, this, fallback, inputs);
             } catch (Exception ex) {
                 LOGGER.log(Level.SEVERE, null, ex);
             }
+        } else {
+            fallback.process(op, inputs);
         }
-        switch (inputs.length) {
-            case 0:
-                processSW(op);
-                break;
-            case 1:
-                processSW(op, inputs[0]);
-                break;
-            default:
-                processSW(op, inputs);
-        }
-        clear = false;
-        accelerated = false;
+
+
     }
 
-    private void processHW(GLOp glop, SurfaceOp op) {
-        glop.process(op, this);
-    }
-    
-    private void processHW(GLOp glop, SurfaceOp op, Surface input) {
-        GLSurface in;
-        if (input instanceof GLSurface) {
-            in = (GLSurface) input;
-            glop.process(op, this, in);
-        } else {
-            SurfaceOp rev = Reverse.op(op, getWritableData());
-            input.process(rev);
-        }
-    }
-    
-    
-    private void processHW(GLOp glop, SurfaceOp op, Surface[] inputs) {
-        throw new UnsupportedOperationException();
-    }
-    
     GLSurfaceData getReadableData() {
         if (sd == null) {
             sd = GLSurfaceData.createSurfaceData(getWidth(), getHeight(), hasAlpha(), true);
         }
         return sd;
     }
-    
+
     GLSurfaceData getWritableData() {
         if (sd == null) {
             sd = GLSurfaceData.createSurfaceData(getWidth(), getHeight(), hasAlpha(), true);
@@ -132,31 +89,53 @@ public class GLSurface extends Surface {
         }
         return sd;
     }
-
-    private void processSW(SurfaceOp op) {
-        op.process(getWritableData(), EMPTY_DATA);
+    
+    GLContext getContext() {
+        return context;
     }
 
-    private void processSW(SurfaceOp op, Surface input) {
-        if (input instanceof GLSurface) {
-            GLSurface in = (GLSurface) input;
-            op.process(getWritableData(), in.getReadableData());
-        } else {
-            SurfaceOp rev = Reverse.op(op, getWritableData());
-            input.process(rev);
-        }
-    }
+    private class FallbackProcessor implements GLOp.Bypass {
 
-    private void processSW(SurfaceOp op, Surface[] inputs) {
-        PixelData[] pixelInputs = new PixelData[inputs.length];
-        for (int i = 0; i < inputs.length; i++) {
-            if (inputs[i] instanceof GLSurface) {
-                pixelInputs[i] = ((GLSurface) inputs[i]).getReadableData();
-            } else {
-                throw new UnsupportedOperationException("not yet implemented");
+        @Override
+        public void process(SurfaceOp op, Surface... inputs) {
+            switch (inputs.length) {
+                case 0:
+                    processSW(op);
+                    break;
+                case 1:
+                    processSW(op, inputs[0]);
+                    break;
+                default:
+                    processSW(op, inputs);
+                    break;
             }
         }
-        op.process(getWritableData(), pixelInputs);
+
+        private void processSW(SurfaceOp op) {
+            op.process(getWritableData(), EMPTY_DATA);
+        }
+
+        private void processSW(SurfaceOp op, Surface input) {
+            if (input instanceof GLSurface) {
+                GLSurface in = (GLSurface) input;
+                op.process(getWritableData(), in.getReadableData());
+            } else {
+                SurfaceOp rev = Reverse.op(op, getWritableData());
+                input.process(rev);
+            }
+        }
+
+        private void processSW(SurfaceOp op, Surface[] inputs) {
+            PixelData[] pixelInputs = new PixelData[inputs.length];
+            for (int i = 0; i < inputs.length; i++) {
+                if (inputs[i] instanceof GLSurface) {
+                    pixelInputs[i] = ((GLSurface) inputs[i]).getReadableData();
+                } else {
+                    throw new UnsupportedOperationException("not yet implemented");
+                }
+            }
+            op.process(getWritableData(), pixelInputs);
+        }
     }
 
     @Override
@@ -202,6 +181,9 @@ public class GLSurface extends Surface {
         if (!(surface instanceof GLSurface)) {
             return false;
         }
+//        if (((GLSurface) surface).context != context) {
+//            return false;
+//        }
         if (checkDimensions && (surface.getWidth() != getWidth()
                 || surface.getHeight() != getHeight())) {
             return false;
@@ -217,6 +199,4 @@ public class GLSurface extends Surface {
     public Surface createSurface(int width, int height, boolean alpha, SurfaceCapabilities caps) {
         return new GLSurface(this, width, height, alpha);
     }
-    
-    
 }

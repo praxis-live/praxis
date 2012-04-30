@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -240,28 +240,20 @@ public class GLPlayer implements Player {
             }
         });
 
-        initGL();
-
-        surface = new GLSurface(width, height, false);
-
-        switch (outputRotation) {
-            case 90:
-            case 270:
-                rotated = new GLSurface(height, width, false);
-                break;
-            case 180:
-                rotated = new GLSurface(width, height, false);
-                break;
-
-        }
-
-    }
-
-    private void initGL() throws Exception {
         context = GLContext.createContext(canvas);
-//        renderer = new TextureRenderer(1);
-//        renderer.disableBlending();
-//        image = new Texture(width, height);
+        surface = context.createSurface(width, height, false);
+
+//        switch (outputRotation) {
+//            case 90:
+//            case 270:
+//                rotated = new GLSurface(height, width, false);
+//                break;
+//            case 180:
+//                rotated = new GLSurface(width, height, false);
+//                break;
+//
+//        }
+
     }
 
     private void dispose() {

@@ -108,7 +108,7 @@ public class GLRenderer implements Disposable {
         }
         mesh = this.buffers[0];
 
-        createShader(); // make static?
+        createShader(); // one default shader per GLContext
 
     }
 
@@ -141,6 +141,8 @@ public class GLRenderer implements Disposable {
         if (shader.isCompiled() == false) {
             throw new IllegalArgumentException("couldn't compile shader: " + shader.getLog());
         }
+
+
     }
 
     public void clear() {
@@ -272,6 +274,7 @@ public class GLRenderer implements Disposable {
     }
 
     public void draw(GLSurface src, float x, float y, float width, float height) {
+        draw(src, 0, 0, src.getWidth(), src.getHeight(), x, y, width, height);
     }
 
     public void draw(GLSurface src, float srcX, float srcY, float srcWidth, float srcHeight, float x, float y) {
@@ -284,6 +287,11 @@ public class GLRenderer implements Disposable {
 
     public void draw(GLSurface src, float srcX, float srcY, float srcWidth, float srcHeight,
             float x, float y, float width, float height) {
+        Texture tex = src.getReadableData().getTexture();
+        activate();
+        region.setTexture(tex);
+        region.setRegion((int) srcX, (int) srcY, (int) srcWidth, (int) srcHeight);
+        draw(region, x, y, width, height);
     }
 
     /** Draws a rectangle with the bottom left corner at x,y having the width and height of the region. */
@@ -499,10 +507,13 @@ public class GLRenderer implements Disposable {
     }
 
     public static void safe() {
-        GLRenderer r = get(null);
-        r.activate();
-        r.flush();
-        active = null;
+//        GLRenderer r = get(null);
+//        r.activate();
+//        r.flush();
+//        active = null;
+        flushActive();
+        FrameBuffer.unbind();
+        GL11.glViewport(0, 0, GLContext.getCurrent().getWidth(), GLContext.getCurrent().getWidth());
     }
 
     public static void flushActive() {
