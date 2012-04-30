@@ -15,7 +15,13 @@
                     </test-dependency>
                 </test-type>
             </test-dependencies>
-            <public-packages>
+            <friend-packages>
+                <friend>net.neilcsmith.praxis.video</friend>
+                <friend>net.neilcsmith.praxis.video.gstreamer</friend>
+                <friend>net.neilcsmith.praxis.video.java</friend>
+                <friend>net.neilcsmith.praxis.video.opengl</friend>
+                <friend>net.neilcsmith.ripl.gstreamer</friend>
+                <friend>net.neilcsmith.ripl.render.opengl</friend>
                 <package>net.neilcsmith.ripl</package>
                 <package>net.neilcsmith.ripl.components</package>
                 <package>net.neilcsmith.ripl.components.filters</package>
@@ -29,7 +35,7 @@
                 <package>net.neilcsmith.ripl.render.sw</package>
                 <package>net.neilcsmith.ripl.rgbmath</package>
                 <package>net.neilcsmith.ripl.utils</package>
-            </public-packages>
+            </friend-packages>
         </data>
     </configuration>
 </project>
