@@ -28,11 +28,11 @@ public class JavaVideoFactoryProvider implements ComponentFactoryProvider {
             build();
         }
 
-        private void build() {
-            addComponent("video:test:java:processor", JavaVideoProcessor.class);
-            addComponent("video:test:java:composite", JavaVideoComposite.class);
+        private void build() {      
 
             addComponent("video:code:composite", JavaVideoComposite.class);
+            
+            addComponent("video:test:java:processor", JavaVideoProcessor.class);
         }
 
     }
