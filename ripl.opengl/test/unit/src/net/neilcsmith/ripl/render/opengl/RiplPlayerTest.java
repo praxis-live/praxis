@@ -17,14 +17,9 @@ import net.neilcsmith.ripl.components.Delegator;
 import net.neilcsmith.ripl.components.Placeholder;
 import net.neilcsmith.ripl.components.Snapshot;
 import net.neilcsmith.ripl.components.mix.Composite;
-import net.neilcsmith.ripl.components.mix.XFader;
-import net.neilcsmith.ripl.components.test.Noise;
 import net.neilcsmith.ripl.delegates.Delegate;
 import net.neilcsmith.ripl.delegates.ImageDelegate;
-import net.neilcsmith.ripl.delegates.VideoDelegate;
-import net.neilcsmith.ripl.gstreamer.V4LDelegate;
 import net.neilcsmith.ripl.ops.GraphicsOp;
-import net.neilcsmith.ripl.render.sw.SWPlayer;
 import net.neilcsmith.ripl.utils.ResizeMode;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -66,14 +61,10 @@ public class RiplPlayerTest {
         System.setProperty("org.lwjgl.librarypath", "/home/nsigma");
         final Player player = GLPlayer.create("Test", 640, 480, 1, false);
         Delegator img = new Delegator(ImageDelegate.create(new URI("file:///home/nsigma/Pictures/P4060324.JPG"), new ResizeMode(ResizeMode.Type.Stretch, 0, 0), null));
-        VideoDelegate cam = V4LDelegate.create(new URI("v4l2://0"));
-        cam.initialize();
-        cam.play();
-        Delegator d = new Delegator(cam);
 
         snap = new Snapshot();
         snap.setFadeTime(0.5);
-        snap.addSource(d);
+        snap.addSource(img);
         snap.setMix(1);
         snap.trigger();
         
