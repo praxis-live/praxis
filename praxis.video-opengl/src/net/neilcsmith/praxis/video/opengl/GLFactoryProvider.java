@@ -54,8 +54,12 @@ public class GLFactoryProvider implements PlayerFactory.Provider {
             if (clients.length != 1 || clients[0].getSourceCount() != 0 || clients[0].getSinkCount() != 1) {
                 throw new IllegalArgumentException("Invalid client configuration");
             }
-            
-            return GLPlayer.create("OPENGL TEST", config.getWidth(), config.getHeight(), config.getFPS(), false);
+            Object fs = clients[0].getHint(ClientConfiguration.CLIENT_KEY_FULLSCREEN);
+            boolean fullscreen = false;
+            if (fs instanceof Boolean) {
+                fullscreen = ((Boolean)fs).booleanValue();
+            }
+            return GLPlayer.create("OPENGL TEST", config.getWidth(), config.getHeight(), config.getFPS(), fullscreen);
             
         }
         
