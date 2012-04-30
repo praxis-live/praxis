@@ -46,6 +46,18 @@ public class ScaledBlit implements SurfaceOp {
         this.dstBnds = dstBnds;
     }
 
+    public BlendFunction getBlendFunction() {
+        return blend;
+    }
+    
+    public Bounds getSourceRegion() {
+        return srcBnds;
+    }
+    
+    public Bounds getDestinationRegion() {
+        return dstBnds;
+    }
+    
     public void process(PixelData output, PixelData... inputs) {
         if (inputs.length < 1) {
             return;
