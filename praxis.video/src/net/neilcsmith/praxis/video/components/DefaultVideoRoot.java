@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.video.components;
 
+import java.util.Collections;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.impl.AbstractRoot;
@@ -150,7 +151,10 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
                 try {
                     return factory.createPlayer(new PlayerConfiguration(width, height, fps),
                             new ClientConfiguration[] {
-                                new ClientConfiguration(0, 1, null)
+                                new ClientConfiguration(0, 1, 
+                                        fullScreen ? Collections.<String, Object>singletonMap(
+                            ClientConfiguration.CLIENT_KEY_FULLSCREEN, Boolean.TRUE)
+                                    : null)
                             });
                 } catch (Exception ex) {
                     // fall through
