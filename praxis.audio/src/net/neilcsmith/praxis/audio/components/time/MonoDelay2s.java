@@ -28,7 +28,9 @@ import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
-import net.neilcsmith.rapl.components.time.MonoDelay;
+import org.jaudiolibs.audioops.impl.ContainerOp;
+import org.jaudiolibs.audioops.impl.VariableDelayOp;
+import org.jaudiolibs.pipes.impl.OpHolder;
 
 /**
  *
@@ -36,15 +38,18 @@ import net.neilcsmith.rapl.components.time.MonoDelay;
  */
 public class MonoDelay2s extends AbstractComponent {
 
-    private MonoDelay delay;
+    private VariableDelayOp delay;
+    private ContainerOp container;
     private FloatProperty time;
     private FloatProperty feedback;
     private FloatProperty mix;
 
     public MonoDelay2s() {
-        delay = new MonoDelay(2);
-        registerPort(Port.IN, new DefaultAudioInputPort(this, delay));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(this, delay));
+        delay = new VariableDelayOp(2);
+        container = new ContainerOp(delay);
+        OpHolder holder = new OpHolder(container);
+        registerPort(Port.IN, new DefaultAudioInputPort(this, holder));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, holder));
         time =  FloatProperty.create( new TimeBinding(),
                 0, 2, 0);
         registerControl("time", time);
@@ -62,11 +67,11 @@ public class MonoDelay2s extends AbstractComponent {
     private class MixBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            delay.setMix((float) value);
+            container.setMix((float) value);
         }
 
         public double getBoundValue() {
-            return delay.getMix();
+            return container.getMix();
         }
 
     }

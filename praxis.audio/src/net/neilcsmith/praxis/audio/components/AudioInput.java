@@ -29,8 +29,8 @@ import net.neilcsmith.praxis.audio.ClientRegistrationException;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.rapl.components.Placeholder;
-import net.neilcsmith.rapl.core.Sink;
+import org.jaudiolibs.pipes.impl.Placeholder;
+import org.jaudiolibs.pipes.Sink;
 
 /**
  *

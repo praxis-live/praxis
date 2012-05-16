@@ -30,7 +30,10 @@ import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
-import net.neilcsmith.rapl.components.filters.IIRFilter.Type;
+import org.jaudiolibs.audioops.impl.ContainerOp;
+import org.jaudiolibs.audioops.impl.IIRFilterOp;
+import org.jaudiolibs.audioops.impl.IIRFilterOp.Type;
+import org.jaudiolibs.pipes.impl.OpHolder;
 
 /**
  *
@@ -38,16 +41,19 @@ import net.neilcsmith.rapl.components.filters.IIRFilter.Type;
  */
 public class IIRFilter extends AbstractComponent {
 
-    private net.neilcsmith.rapl.components.filters.IIRFilter filter;
+    private IIRFilterOp filter;
+    private ContainerOp container;
     private FloatProperty frequency;
     private FloatProperty resonance;
     private FloatProperty mix;
     private StringProperty type;
 
     public IIRFilter() {
-        filter = new net.neilcsmith.rapl.components.filters.IIRFilter();
-        registerPort(Port.IN, new DefaultAudioInputPort(this, filter));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(this, filter));
+        filter = new IIRFilterOp();
+        container = new ContainerOp(filter);
+        OpHolder holder = new OpHolder(container);
+        registerPort(Port.IN, new DefaultAudioInputPort(this, holder));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, holder));
         type = createTypeControl();
         registerControl("type", type);
         frequency =  FloatProperty.create( new FrequencyBinding(),
@@ -88,11 +94,11 @@ public class IIRFilter extends AbstractComponent {
     private class MixBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            filter.setMix((float) value);
+            container.setMix((float) value);
         }
 
         public double getBoundValue() {
-            return filter.getMix();
+            return container.getMix();
         }
 
     }

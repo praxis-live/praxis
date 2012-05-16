@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -59,36 +59,8 @@ class AudioServerLoader {
 
     private AudioServer createJavaSoundServer(String device, AudioConfiguration context,
             AudioClient client) throws Exception {
-//        Mixer mixer = getMixer(device);
-//        Mixer mixer = AudioSystem.getMixer(AudioSystem.getMixerInfo()[0]);
-//        return JavasoundAudioServer.create(mixer, context,
-//                JavasoundAudioServer.TimingMode.Estimated, client);
         return JavasoundAudioServer.create(device, context, JavasoundAudioServer.TimingMode.Estimated, client);
     }
-
-    private Mixer getMixer(String device) {
-        Mixer.Info[] infos = AudioSystem.getMixerInfo();
-        Mixer mixer = null;
-        for (Mixer.Info info : infos) {
-            if (info.getName().equals(device)) {
-                mixer = AudioSystem.getMixer(info);
-                break;
-            }
-        }
-        if (mixer == null) {
-            for (Mixer.Info info : infos) {
-                if (info.getName().contains(device)) {
-                    mixer = AudioSystem.getMixer(info);
-                    break;
-                }
-            }
-        }
-        if (mixer == null) {
-            mixer = AudioSystem.getMixer(infos[0]);
-        }
-        return mixer;
-    }
-
 
     public static AudioServerLoader getInstance() {
         return instance;

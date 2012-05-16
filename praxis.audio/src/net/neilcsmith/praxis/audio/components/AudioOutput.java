@@ -28,8 +28,8 @@ import net.neilcsmith.praxis.audio.ClientRegistrationException;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.rapl.components.Placeholder;
-import net.neilcsmith.rapl.core.Source;
+import org.jaudiolibs.pipes.impl.Placeholder;
+import org.jaudiolibs.pipes.Source;
 
 /**
  *

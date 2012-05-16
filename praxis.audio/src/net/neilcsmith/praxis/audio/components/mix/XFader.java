@@ -28,8 +28,9 @@ import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
-import net.neilcsmith.rapl.components.Gain;
-import net.neilcsmith.rapl.components.Mixer;
+import org.jaudiolibs.audioops.impl.GainOp;
+import org.jaudiolibs.pipes.impl.Mixer;
+import org.jaudiolibs.pipes.impl.OpHolder;
 
 /**
  *
@@ -37,24 +38,26 @@ import net.neilcsmith.rapl.components.Mixer;
  */
 public class XFader extends AbstractComponent {
 
-    Gain g1;
-    Gain g2;
+    GainOp g1;
+    GainOp g2;
     Mixer mixer;
 
     public XFader() {
-        g1 = new Gain();
+        g1 = new GainOp();
         g1.setGain(1);
-        g2 = new Gain();
+        g2 = new GainOp();
         g2.setGain(0);
+        OpHolder g1h = new OpHolder(g1);
+        OpHolder g2h = new OpHolder(g2);
         mixer = new Mixer(2);
         try {
-            mixer.addSource(g1);
-            mixer.addSource(g2);
+            mixer.addSource(g1h);
+            mixer.addSource(g2h);
         } catch (Exception ex) {
             throw new Error();
         }
-        registerPort(Port.IN + "-1", new DefaultAudioInputPort(this, g1));
-        registerPort(Port.IN + "-2", new DefaultAudioInputPort(this, g2));
+        registerPort(Port.IN + "-1", new DefaultAudioInputPort(this, g1h));
+        registerPort(Port.IN + "-2", new DefaultAudioInputPort(this, g2h));
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, mixer));
         FloatProperty mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);

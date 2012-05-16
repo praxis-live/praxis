@@ -21,8 +21,8 @@
  */
 package net.neilcsmith.praxis.audio;
 
-import net.neilcsmith.rapl.core.Sink;
-import net.neilcsmith.rapl.core.Source;
+import org.jaudiolibs.pipes.Sink;
+import org.jaudiolibs.pipes.Source;
 
 /**
  *
@@ -42,6 +42,8 @@ public abstract class AudioContext {
     public abstract void unregisterAudioOutputClient(OutputClient client);
 
     public static abstract class Client {
+        
+        //@TODO add change listeners to client for changes to counts
     }
 
     public static abstract class InputClient extends Client {

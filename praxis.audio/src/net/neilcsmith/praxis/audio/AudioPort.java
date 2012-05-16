@@ -25,7 +25,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.PortConnectionException;
 import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.core.types.PMap;
-import net.neilcsmith.rapl.core.Source;
+import org.jaudiolibs.pipes.Source;
 
 /**
  *

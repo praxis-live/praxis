@@ -28,7 +28,9 @@ import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
-import net.neilcsmith.rapl.components.distortion.Overdrive;
+import org.jaudiolibs.audioops.impl.ContainerOp;
+import org.jaudiolibs.audioops.impl.gpl.OverdriveOp;
+import org.jaudiolibs.pipes.impl.OpHolder;
 
 /**
  *
@@ -36,14 +38,17 @@ import net.neilcsmith.rapl.components.distortion.Overdrive;
  */
 public class SimpleOverdrive extends AbstractComponent {
 
-    private Overdrive overdrive;
+    private ContainerOp container;
+    private OverdriveOp overdrive;
     private FloatProperty drive;
     private FloatProperty mix;
 
     public SimpleOverdrive() {
-        overdrive = new Overdrive();
-        registerPort(Port.IN, new DefaultAudioInputPort(this, overdrive));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(this, overdrive));
+        overdrive = new OverdriveOp();
+        container = new ContainerOp(overdrive);
+        OpHolder cmp = new OpHolder(container);
+        registerPort(Port.IN, new DefaultAudioInputPort(this, cmp));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, cmp));
         drive = FloatProperty.create( new DriveBinding(), 0, 1, 0);
         registerControl("drive", drive);
         registerPort("drive", drive.createPort());
@@ -68,11 +73,11 @@ public class SimpleOverdrive extends AbstractComponent {
     private class MixBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            overdrive.setMix((float) value);
+            container.setMix((float) value);
         }
 
         public double getBoundValue() {
-            return overdrive.getMix();
+            return container.getMix();
         }
 
     }

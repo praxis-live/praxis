@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,8 +23,6 @@ package net.neilcsmith.praxis.audio.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.neilcsmith.rapl.core.SinkIsFullException;
-import net.neilcsmith.rapl.core.SourceIsFullException;
 import org.jaudiolibs.audioservers.AudioConfiguration;
 import org.jaudiolibs.audioservers.AudioServer;
 import net.neilcsmith.praxis.audio.AudioContext;
@@ -39,13 +37,15 @@ import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.InstanceLookup;
-import net.neilcsmith.rapl.components.Placeholder;
-import net.neilcsmith.rapl.core.BufferRateListener;
-import net.neilcsmith.rapl.core.BufferRateSource;
-import net.neilcsmith.rapl.core.Bus;
-import net.neilcsmith.rapl.core.Sink;
-import net.neilcsmith.rapl.core.Source;
-import net.neilcsmith.rapl.render.BusClient;
+import org.jaudiolibs.pipes.impl.Placeholder;
+import org.jaudiolibs.pipes.BufferRateListener;
+import org.jaudiolibs.pipes.BufferRateSource;
+import org.jaudiolibs.pipes.Bus;
+import org.jaudiolibs.pipes.Sink;
+import org.jaudiolibs.pipes.Source;
+import org.jaudiolibs.pipes.SinkIsFullException;
+import org.jaudiolibs.pipes.SourceIsFullException;
+import org.jaudiolibs.pipes.impl.BusClient;
 
 /**
  *
@@ -53,9 +53,6 @@ import net.neilcsmith.rapl.render.BusClient;
  */
 public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener {
 
-//    private static double DEFAULT_SAMPLERATE = 44100;
-//    private static int DEFAULT_BUFFERSIZE = 512;
-//    private static String DEFAULT_LIBRARY = "JavaSound";
     private AudioContext.InputClient inputClient;
     private AudioContext.OutputClient outputClient;
     private BusClient bus;
@@ -190,33 +187,6 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
     // @TODO fix this!
     private void makeConnections(Bus bus) {
         try {
-            //        if (outputClient == null) {
-            //            return;
-            //        }
-            //        try {
-            //            int outputs = outputClient.getOutputCount();
-            //            if (outputs == 0) {
-            //                return;
-            //            } else if (outputs == 1) {
-            //                bus.getSink(0).addSource(outputClient.getOutputSource(0));
-            //            } else {
-            //                bus.getSink(0).addSource(outputClient.getOutputSource(0));
-            //                bus.getSink(1).addSource(outputClient.getOutputSource(1));
-            //            }
-            //            if (inputClient != null) {
-            //                int inputs = inputClient.getInputCount();
-            //                if (inputs == 0) {
-            //                    return;
-            //                } else if (inputs == 1) {
-            //                    inputClient.getInputSink(0).addSource(bus.getSource(0));
-            //                } else {
-            //                    inputClient.getInputSink(0).addSource(bus.getSource(0));
-            //                    inputClient.getInputSink(1).addSource(bus.getSource(1));
-            //                }
-            //            }
-            //
-            //        } catch (Exception ex) {
-            //        }
             bus.getSink(0).addSource(outputs[0]);
             bus.getSink(1).addSource(outputs[1]);
             inputs[0].addSource(bus.getSource(0));

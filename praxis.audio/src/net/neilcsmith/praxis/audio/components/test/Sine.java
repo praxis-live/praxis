@@ -19,32 +19,33 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.audio.components.test;
 
 import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
+import org.jaudiolibs.pipes.Buffer;
+import org.jaudiolibs.pipes.impl.SingleOut;
 
 /**
  *
  * @author Neil C Smith
  */
 public class Sine extends AbstractComponent {
-    
-    private net.neilcsmith.rapl.components.test.Sine sine;
-    
+
+    private SineUG sine;
+
     public Sine() {
-        sine = new net.neilcsmith.rapl.components.test.Sine(440);
+        sine = new SineUG(440);
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, sine));
-        FloatProperty freq = FloatProperty.create( new FrequencyBinding(),
+        FloatProperty freq = FloatProperty.create(new FrequencyBinding(),
                 110, 4 * 440, 440);
-        registerControl("frequency", freq );
+        registerControl("frequency", freq);
         registerPort("frequency", freq.createPort());
-        
+
     }
-    
+
     private class FrequencyBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
@@ -54,7 +55,48 @@ public class Sine extends AbstractComponent {
         public double getBoundValue() {
             return sine.getFrequency();
         }
-        
     }
 
+    private class SineUG extends SingleOut {
+
+        private final static float TWOPI = (float) (2 * Math.PI);
+        private float phase = 0;
+        private float volume = 0.6f;
+        private float freq = 440;
+        private float srate = 0;
+
+        public SineUG() {
+            this(440);
+        }
+
+        public SineUG(float freq) {
+            this.freq = freq;
+        }
+
+        public void setFrequency(float frequency) {
+            this.freq = frequency;
+        }
+
+        public float getFrequency() {
+            return this.freq;
+        }
+
+        @Override
+        protected void process(Buffer buffer, boolean rendering) {
+            if (srate != buffer.getSampleRate()) {
+                srate = buffer.getSampleRate();
+                phase = 0;
+            }
+            float[] out = buffer.getData();
+            int bufsz = buffer.getSize();
+            for (int i = 0; i < bufsz; i++) {
+                phase += TWOPI * freq / srate;
+//           buffer.set(i, (float) (volume * Math.sin(phase)));
+                out[i] = volume * (float) Math.sin(phase);
+            }
+            while (phase > TWOPI) {
+                phase -= TWOPI;
+            }
+        }
+    }
 }

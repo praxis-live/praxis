@@ -29,7 +29,9 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
-import net.neilcsmith.rapl.components.filters.Comb;
+import org.jaudiolibs.audioops.impl.CombOp;
+import org.jaudiolibs.audioops.impl.ContainerOp;
+import org.jaudiolibs.pipes.impl.OpHolder;
 
 /**
  *
@@ -37,17 +39,20 @@ import net.neilcsmith.rapl.components.filters.Comb;
  */
 public class CombFilter extends AbstractComponent {
 
-    private Comb comb;
+    private ContainerOp container;
+    private CombOp comb;
     private FloatProperty frequency;
     private FloatProperty feedback;
     private FloatProperty mix;
 
     public CombFilter() {
-        comb = new Comb();
-        registerPort(Port.IN, new DefaultAudioInputPort(this, comb));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(this, comb));
+        comb = new CombOp();
+        container = new ContainerOp(comb);
+        OpHolder holder = new OpHolder(container);
+        registerPort(Port.IN, new DefaultAudioInputPort(this, holder));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, holder));
         frequency =  FloatProperty.create( new FrequencyBinding(),
-                Comb.MIN_FREQ, Comb.MAX_FREQ, comb.getFrequency(),
+                CombOp.MIN_FREQ, CombOp.MAX_FREQ, comb.getFrequency(),
                 PMap.create("scale-hint", "Exponential"));
         registerControl("frequency", frequency);
         registerPort("frequency", frequency.createPort());
@@ -64,11 +69,11 @@ public class CombFilter extends AbstractComponent {
     private class MixBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            comb.setMix((float) value);
+            container.setMix((float) value);
         }
 
         public double getBoundValue() {
-            return comb.getMix();
+            return container.getMix();
         }
 
     }

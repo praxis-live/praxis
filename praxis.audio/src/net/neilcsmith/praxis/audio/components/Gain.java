@@ -28,6 +28,8 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
+import org.jaudiolibs.audioops.impl.GainOp;
+import org.jaudiolibs.pipes.impl.OpHolder;
 
 /**
  *
@@ -35,13 +37,15 @@ import net.neilcsmith.praxis.impl.FloatProperty;
  */
 public class Gain extends AbstractComponent {
 
-    private net.neilcsmith.rapl.components.Gain gain;
+    private OpHolder ug;
+    private GainOp op;
     
     public Gain() {
-        gain = new net.neilcsmith.rapl.components.Gain();
-        FloatProperty level =  FloatProperty.create( new GainBinding(), 0, 2, gain.getGain(), PMap.create("scale-hint", "Exponential"));
-        registerPort(Port.IN, new DefaultAudioInputPort(this, gain));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(this, gain));
+        op = new GainOp();
+        ug = new OpHolder(op);
+        FloatProperty level =  FloatProperty.create( new GainBinding(), 0, 2, op.getGain(), PMap.create("scale-hint", "Exponential"));
+        registerPort(Port.IN, new DefaultAudioInputPort(this, ug));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(this, ug));
         registerControl("level", level);
         registerPort("level", level.createPort());   
     }
@@ -49,11 +53,11 @@ public class Gain extends AbstractComponent {
     private class GainBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            gain.setGain((float) value);
+            op.setGain((float) value);
         }
 
         public double getBoundValue() {
-            return gain.getGain();
+            return op.getGain();
         }
         
     }

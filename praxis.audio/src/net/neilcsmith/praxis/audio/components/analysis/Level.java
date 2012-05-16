@@ -28,8 +28,9 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.TriggerControl;
-import net.neilcsmith.rapl.core.Buffer;
-import net.neilcsmith.rapl.core.impl.SingleInOut;
+import org.jaudiolibs.pipes.Buffer;
+import org.jaudiolibs.pipes.impl.SingleInOut;
+
 
 /**
  *

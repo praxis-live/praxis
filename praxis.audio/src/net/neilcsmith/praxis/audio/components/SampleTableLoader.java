@@ -33,7 +33,7 @@ import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
-import net.neilcsmith.rapl.util.SampleTable;
+import net.neilcsmith.praxis.audio.io.SampleTable;
 
 /**
  *
