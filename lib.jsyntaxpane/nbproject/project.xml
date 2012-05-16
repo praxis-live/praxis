@@ -24,10 +24,6 @@
                 </dependency>
             </module-dependencies>
             <public-packages/>
-            <class-path-extension>
-                <runtime-relative-path>ext/jsyntaxpane-0.9.6.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jsyntaxpane-0.9.6.jar</binary-origin>
-            </class-path-extension>
         </data>
     </configuration>
 </project>
