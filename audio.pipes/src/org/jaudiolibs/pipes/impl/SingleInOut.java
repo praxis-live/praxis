@@ -33,36 +33,75 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package org.jaudiolibs.pipes.impl;
 
-import org.jaudiolibs.pipes.Buffer;
+import org.jaudiolibs.pipes.*;
 
 /**
  *
  * @author Neil C Smith
  */
-public abstract class SingleInOut extends AbstractInOut {
-    
-    boolean ensureClear = true;
+public abstract class SingleInOut extends SingleOut implements Sink {
 
-    
-    public SingleInOut() {
-        this(true);
-    }
-    
-    public SingleInOut(boolean ensureClear) {
-        super(1,1);
-        this.ensureClear = ensureClear;
-    }
-    
-    
+    private Source source;
+    private long renderReqTime;
+    private boolean renderReqCache;
+
     @Override
-    protected void callSources(Buffer buffer, long time, boolean rendering) {
-        if (sources.size() == 1) {
-            sources.get(0).process(buffer, this, time);
-        } else if (ensureClear && rendering) {
-            buffer.clear();
+    public final void addSource(Source source) throws SinkIsFullException, SourceIsFullException {
+        if (source == null) {
+            throw new NullPointerException();
+        }
+        if (this.source != null) {
+            throw new SinkIsFullException();
+        }
+        source.registerSink(this);
+        this.source = source;
+    }
+
+    @Override
+    public final void removeSource(Source source) {
+        if (this.source == source) {
+            source.unregisterSink(this);
+            this.source = null;
+        }
+    }
+
+    @Override
+    public Source[] getSources() {
+        if (source == null) {
+            return new Source[0];
+        } else {
+            return new Source[]{source};
+        }
+    }
+
+    @Override
+    public boolean isRenderRequired(Source source, long time) {
+        return isRendering(time);
+    }
+
+    boolean isRendering(long time) {
+        if (time != renderReqTime) {
+            if (sink == null) {
+                renderReqCache = false;
+            } else {
+                renderReqCache = sink.isRenderRequired(this, time);
+            }
+            renderReqTime = time;
+        }
+        return renderReqCache;
+    }
+
+    @Override
+    void processImpl(Buffer buffer, Sink sink, long time) {
+        if (this.sink == sink) {
+            if (source == null) {
+                buffer.clear();
+            } else {
+                source.process(buffer, this, time);
+            }
+            process(buffer, isRendering(time));
         }
     }
 }

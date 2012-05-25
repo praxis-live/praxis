@@ -28,26 +28,15 @@ import org.jaudiolibs.pipes.Buffer;
  *
  * @author Neil C Smith
  */
-public class Splitter extends MultiOutputInOut {
+public class Splitter extends MultiInOut {
     
     public Splitter(int maxOutputs) {
-        super(maxOutputs);
+        super(1, maxOutputs);
     }
 
     @Override
-    protected void process(Buffer buffer, boolean rendering) {
-        if (rendering) {
-            if (getSourceCount() == 0) {
-                buffer.clear();
-            } else {
-                Buffer src = getInputBuffer(0);
-                float[] srcData = src.getData();
-                float[] destData = buffer.getData();
-                for (int i=0, k=src.getSize(); i<k; i++) {
-                    destData[i] = srcData[i];
-                }
-            }
-        }
+    protected void writeOutput(Buffer[] inputs, Buffer output, int index) {
+        super.writeOutput(inputs, output, 0);
     }
-
+    
 }

@@ -27,37 +27,32 @@ import org.jaudiolibs.pipes.Buffer;
  *
  * @author Neil C Smith
  */
-public class Mixer extends MultiInputInOut {
+public class Mixer extends MultiInOut {
 
     public Mixer(int maxInputs) {
-        super(maxInputs);
+        super(maxInputs, 1);
     }
 
     @Override
-    protected void process(Buffer buffer, boolean rendering) {
-        int inputs = getSourceCount();
-        if (inputs == 0) {
-            buffer.clear();
+    protected void writeOutput(Buffer[] inputs, Buffer output, int index) {
+        if (inputs.length == 0) {
+            output.clear();
             return;
         }
-
-        float[] out = buffer.getData();
-        for (int i = 0; i < inputs; i++) {
-            float[] in = getInputBuffer(i).getData();
+        float[] out = output.getData();
+        for (int i = 0; i < inputs.length; i++) {
+            float[] in = inputs[i].getData();
             if (i == 0) {
-                for (int k = 0,  z = out.length; k < z; k++) {
+                for (int k = 0,  z = output.getSize(); k < z; k++) {
                     out[k] = in[k];
                 }
             } else {
-                for (int k = 0,  z = out.length; k < z; k++) {
+                for (int k = 0,  z = output.getSize(); k < z; k++) {
                     out[k] += in[k];
                 }
             }
 
         }
-
-
-
-
     }
+
 }

@@ -280,16 +280,6 @@ public class BusClient implements Bus, AudioClient {
             }
         }
 
-//        @Override
-//        public long getTime() {
-//            return time;
-//        }
-//
-//        @Override
-//        public void setTime(long time, boolean recurse) {
-//            // ignore ??
-//        }
-
         @Override
         public void registerSink(Sink sink) throws SourceIsFullException {
             if (sink == null) {

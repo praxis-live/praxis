@@ -37,61 +37,115 @@ package org.jaudiolibs.pipes.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jaudiolibs.pipes.Sink;
-import org.jaudiolibs.pipes.SinkIsFullException;
-import org.jaudiolibs.pipes.Source;
-import org.jaudiolibs.pipes.SourceIsFullException;
-import org.jaudiolibs.pipes.Buffer;
+import org.jaudiolibs.pipes.*;
 
 /**
  *
- * @author Neil C Smith
+ * @author Neil C Smith (http://neilcsmith.net)
  */
-abstract class AbstractInOut extends AbstractSource implements Sink {
+public abstract class MultiInOut implements Source, Sink {
 
-    int maxSources;
-    List<Source> sources;
-    long time = 0;
+    private int maxSources;
+    private List<Source> sources;
+    private int maxSinks;
+    private List<Sink> sinks;
+    private Buffer[] buffers;
+    private long time;
     private long renderReqTime;
     private boolean renderReqCache;
+    private int renderIdx = 0;
 
-    public AbstractInOut(int maxSources, int maxSinks) {
-        super(maxSinks);
-        if (maxSources < 1) {
+    protected MultiInOut(int maxSources, int maxSinks) {
+        if (maxSources < 0 || maxSinks < 1) {
             throw new IllegalArgumentException();
         }
         this.maxSources = maxSources;
-        this.sources = new ArrayList<Source>(maxSources);
+        this.sources = new ArrayList<Source>();
+        this.maxSinks = maxSinks;
+        this.sinks = new ArrayList<Sink>();
+        buffers = new Buffer[0];
     }
 
     @Override
     public void process(Buffer buffer, Sink sink, long time) {
-        if (!validateSink(sink)) {
+        int sinkIndex = sinks.indexOf(sink);
+        if (sinkIndex < 0) {
             return;
         }
-        boolean rendering = isRendering(time);
+
         if (this.time != time) {
+            boolean rendering = isRendering(time);
             this.time = time;
-            callSources(buffer, time, rendering);
+            checkBuffers(buffer);
+            callSources(time);
+            process(buffers, rendering);
         }
-        process(buffer, rendering);
+        if (sink.isRenderRequired(this, time)) {
+            writeOutput(buffers, buffer, sinkIndex);
+        }
     }
 
-//    @Override
-//    public long getTime() {
-//        return time;
-//    }
-//
-//    @Override
-//    public void setTime(long time, boolean recurse) {
-//        this.time = time;
-//        if (recurse) {
-//            for (Source source : sources) {
-//                source.setTime(time, true);
-//            }
-//        }
-//    }
+    private void checkBuffers(Buffer out) {
+        // check size
+        if (buffers.length != sources.size()) {
+            Buffer[] newBufs = new Buffer[sources.size()];
+            System.arraycopy(buffers, 0, newBufs, 0,
+                    buffers.length < newBufs.length ? buffers.length : newBufs.length);
+            buffers = newBufs;
+        }
+        // validate 
+        for (int i = 0; i < buffers.length; i++) {
+            Buffer in = buffers[i];
+            if (in == null || !out.isCompatible(in)) {
+                buffers[i] = out.createBuffer();
+            }
+        }
+    }
 
+    private void callSources(long time) {
+        for (int i = 0; i < sources.size(); i++) {
+            sources.get(i).process(buffers[i], this, time);
+        }
+    }
+    
+    protected void process(Buffer[] buffers, boolean rendering){
+        // no op
+    }
+
+    protected void writeOutput(Buffer[] inputs, Buffer output, int index) {
+        if (index < inputs.length) {
+            Buffer in = inputs[index];
+            float[] inData = in.getData();
+            float[] outData = output.getData();
+            System.arraycopy(inData, 0, outData, 0, in.getSize());
+        } else {
+            output.clear();
+        }
+    }
+
+    @Override
+    public void registerSink(Sink sink) throws SourceIsFullException {
+        if (sink == null) {
+            throw new NullPointerException();
+        }
+        if (sinks.contains(sink)) {
+            return;
+        }
+        if (sinks.size() == maxSinks) {
+            throw new SourceIsFullException();
+        }
+        sinks.add(sink);
+    }
+
+    @Override
+    public void unregisterSink(Sink sink) {
+        sinks.remove(sink);
+    }
+
+    @Override
+    public Sink[] getSinks() {
+        return sinks.toArray(new Sink[sinks.size()]);
+    }
 
     @Override
     public void addSource(Source source) throws SinkIsFullException, SourceIsFullException {
@@ -117,16 +171,16 @@ abstract class AbstractInOut extends AbstractSource implements Sink {
     }
 
     @Override
-    public boolean isRenderRequired(Source source, long time) {
-        return isRendering(time);
-    }
-
-    @Override
     public Source[] getSources() {
         return sources.toArray(new Source[sources.size()]);
     }
 
-    protected boolean isRendering(long time) {
+    @Override
+    public boolean isRenderRequired(Source source, long time) {
+        return isRendering(time);
+    }
+
+    private boolean isRendering(long time) {
         if (sinks.size() == 1) {
             return simpleRenderingCheck(time);
         } else {
@@ -141,7 +195,6 @@ abstract class AbstractInOut extends AbstractSource implements Sink {
         }
         return renderReqCache;
     }
-    private int renderIdx = 0;
 
     private boolean protectedRenderingCheck(long time) {
         if (renderIdx > 0) {
@@ -167,20 +220,4 @@ abstract class AbstractInOut extends AbstractSource implements Sink {
             return renderReqCache;
         }
     }
-
-    protected int getSourceCount() {
-        return sources.size();
-    }
-
-    protected Source getSource(int index) {
-        return sources.get(index);
-    }
-
-    protected int getIndexOf(Source source) {
-        return sources.indexOf(source);
-    }
-
-    protected abstract void callSources(Buffer buffer, long time, boolean rendering);
-
-    protected abstract void process(Buffer buffer, boolean rendering);
 }

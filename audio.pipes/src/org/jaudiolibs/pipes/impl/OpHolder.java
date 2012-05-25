@@ -37,6 +37,7 @@ package org.jaudiolibs.pipes.impl;
 
 import org.jaudiolibs.audioops.AudioOp;
 import org.jaudiolibs.pipes.Buffer;
+import org.jaudiolibs.pipes.Source;
 
 /**
  *
@@ -47,7 +48,7 @@ public class OpHolder extends SingleInOut {
     private AudioOp op;
     private float samplerate;
     private int buffersize;
-    private boolean resetRequired;
+    private int skipped;
     private float[][] dataHolder;
 
     public OpHolder(AudioOp op) {
@@ -66,17 +67,23 @@ public class OpHolder extends SingleInOut {
                 samplerate = buffer.getSampleRate();
                 buffersize = buffer.getSize();
                 op.initialize(samplerate, buffersize);
-                resetRequired = false;
-            } else if (resetRequired) {
-                op.reset(-1);
+                skipped = 0;
+            } else if (skipped != 0) {
+                op.reset(skipped);
+                skipped = 0;
             }
             dataHolder[0] = buffer.getData();
             op.processReplace(buffer.getSize(), dataHolder, dataHolder);
-            resetRequired = false;
         } else {
-            resetRequired = true;
+            skipped += buffer.getSize();
         }
-
     }
+
+    @Override
+    public boolean isRenderRequired(Source source, long time) {
+        return op.isInputRequired(super.isRenderRequired(source, time));
+    }
+    
+    
 
 }

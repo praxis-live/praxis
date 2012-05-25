@@ -33,17 +33,58 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package org.jaudiolibs.pipes.impl;
+
+import org.jaudiolibs.pipes.Buffer;
+import org.jaudiolibs.pipes.Sink;
+import org.jaudiolibs.pipes.Source;
+import org.jaudiolibs.pipes.SourceIsFullException;
 
 /**
  *
  * @author Neil C Smith
  */
-public abstract class SingleOut extends AbstractOut {
-    
-    public SingleOut() {
-        super(1);
+public abstract class SingleOut implements Source {
+
+    Sink sink;
+
+    @Override
+    public final void process(Buffer buffer, Sink sink, long time) {
+        processImpl(buffer, sink, time);
     }
-    
+
+    void processImpl(Buffer buffer, Sink sink, long time) {
+        if (this.sink == sink) {
+            process(buffer, sink.isRenderRequired(this, time));
+        }
+    }
+
+    @Override
+    public final void registerSink(Sink sink) throws SourceIsFullException {
+        if (sink == null) {
+            throw new NullPointerException();
+        }
+        if (this.sink != null) {
+            throw new SourceIsFullException();
+        }
+        this.sink = sink;
+    }
+
+    @Override
+    public final void unregisterSink(Sink sink) {
+        if (this.sink == sink) {
+            this.sink = null;
+        }
+    }
+
+    @Override
+    public final Sink[] getSinks() {
+        if (sink == null) {
+            return new Sink[0];
+        } else {
+            return new Sink[]{sink};
+        }
+    }
+
+    protected abstract void process(Buffer buffer, boolean rendering);
 }

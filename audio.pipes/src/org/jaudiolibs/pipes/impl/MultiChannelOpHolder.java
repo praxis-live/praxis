@@ -33,70 +33,67 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package org.jaudiolibs.pipes.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.jaudiolibs.pipes.SinkIsFullException;
-import org.jaudiolibs.pipes.Source;
-import org.jaudiolibs.pipes.SourceIsFullException;
+import org.jaudiolibs.audioops.AudioOp;
 import org.jaudiolibs.pipes.Buffer;
+import org.jaudiolibs.pipes.Source;
 
 /**
  *
  * @author Neil C Smith
  */
-abstract class CachedInOut extends AbstractInOut {
-    
-    List<Buffer> inputBuffers;
-    boolean ensureClear;
+public class MultiChannelOpHolder extends MultiInOut {
 
-    
-    public CachedInOut(int maxSources, int maxSinks) {
-        super(maxSources, maxSinks);
-        inputBuffers = new ArrayList<Buffer>(maxSources);
-    }
-   
+    private AudioOp op;
+    private float samplerate;
+    private int buffersize;
+    private int skipped;
+    private float[][] dataHolder;
 
-    @Override
-    public void addSource(Source source) throws SinkIsFullException, SourceIsFullException {
-        super.addSource(source);
-        inputBuffers.add(null);
-    }
-
-    @Override
-    public void removeSource(Source source) {
-        int idx = getIndexOf(source);
-        super.removeSource(source);
-        if (idx > -1) {
-            inputBuffers.remove(idx);
+    public MultiChannelOpHolder(AudioOp op, int channels) {
+        super(channels, channels);
+        if (op == null) {
+            throw new NullPointerException();
         }
+        this.op = op;
     }
-    
-    protected Buffer getInputBuffer(int index) {
-        return inputBuffers.get(index);
-    }
-    
+
     @Override
-    protected void callSources(Buffer buffer, long time, boolean rendering) {
-        for (int i=0; i < sources.size(); i++) {
-            Buffer oldInput = inputBuffers.get(i);
-            Buffer input = validateInputBuffer(oldInput, buffer, i);
-            if (input != oldInput) {
-                inputBuffers.set(i, input);
+    protected void process(Buffer[] buffers, boolean rendering) {
+        int bCount = buffers.length;
+        if (bCount == 0) {
+            skipped = -1;
+            return;
+        }
+        if (rendering) {
+            Buffer buffer = buffers[0];
+            if (samplerate != buffer.getSampleRate()
+                    || buffersize < buffer.getSize()) {
+                samplerate = buffer.getSampleRate();
+                buffersize = buffer.getSize();
+                op.initialize(samplerate, buffersize);
+                skipped = 0;
+            } else if (skipped != 0) {
+                op.reset(skipped);
+                skipped = 0;
             }
-            sources.get(i).process(input, this, time);
+            if (dataHolder == null || dataHolder.length != bCount) {
+                dataHolder = new float[bCount][];
+            }
+            for (int i=0; i < bCount; i++) {
+                dataHolder[i] = buffers[i].getData();
+            }
+            op.processReplace(buffer.getSize(), dataHolder, dataHolder);
+        } else {
+            if (skipped != -1) {
+                skipped += buffers[0].getSize();
+            }
         }
     }
 
-    protected Buffer validateInputBuffer(Buffer input, Buffer output, int index) {
-        if (input == null ||
-                !output.isCompatible(input)) {
-            return output.createBuffer();
-        }
-        return input;
+    @Override
+    public boolean isRenderRequired(Source source, long time) {
+        return op.isInputRequired(super.isRenderRequired(source, time));
     }
-    
-
 }
