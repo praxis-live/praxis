@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -43,6 +43,11 @@ public class DefaultControlOutputPort extends ControlPort.Output {
     private boolean sending;
     private final PortInfo info;
 
+    public DefaultControlOutputPort() {
+        this(null);
+    }
+       
+    @Deprecated
     public DefaultControlOutputPort(Component component) {
         connections = new ControlPort.Input[0];
         pls = new PortListenerSupport(this);
@@ -125,16 +130,6 @@ public class DefaultControlOutputPort extends ControlPort.Output {
         sending = false;
     }
 
-//    public void send(int value) {
-//        if (sending) {
-//            return;
-//        }
-//        sending = true;
-//        for (ControlPort.Input port : connections) {
-//            port.receive(value);
-//        }
-//        sending = false;
-//    }
     public void send(long time, Argument value) {
         if (sending) {
             return;

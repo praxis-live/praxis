@@ -24,50 +24,54 @@
 package net.neilcsmith.praxis.impl;
 
 import java.lang.reflect.Array;
+import net.neilcsmith.praxis.util.ArrayUtils;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
+@Deprecated
 public class ListenerUtils {
 
     private ListenerUtils() {}
 
     public static <T> T[] add(T[] listeners, T listener) {
-        if (listener == null) {
-            throw new NullPointerException();
-        }
-        for (int i=0; i < listeners.length; i++) {
-            if (listeners[i] == listener) {
-                return listeners;
-            }
-        }
-        int length = listeners.length + 1;
-        T[] ret = (T[]) Array.newInstance(listeners.getClass().getComponentType(), length);
-        System.arraycopy(listeners, 0, ret, 0, length - 1);
-        ret[length - 1] = listener;
-        return ret;
+        return ArrayUtils.add(listeners, listener);
+//        if (listener == null) {
+//            throw new NullPointerException();
+//        }
+//        for (int i=0; i < listeners.length; i++) {
+//            if (listeners[i] == listener) {
+//                return listeners;
+//            }
+//        }
+//        int length = listeners.length + 1;
+//        T[] ret = (T[]) Array.newInstance(listeners.getClass().getComponentType(), length);
+//        System.arraycopy(listeners, 0, ret, 0, length - 1);
+//        ret[length - 1] = listener;
+//        return ret;
     }
 
     public static <T> T[] remove(T[] listeners, T listener) {
-        if (listener == null) {
-            throw new NullPointerException();
-        }
-        int idx = -1;
-        for (int i=0; i < listeners.length; i++) {
-            if (listeners[i] == listener) {
-                idx = i;
-                break;
-            }
-        }
-        if (idx == -1) {
-            return listeners;
-        }
-        int length = listeners.length - 1;
-        T[] ret = (T[]) Array.newInstance(listeners.getClass().getComponentType(), length);
-        System.arraycopy(listeners, 0, ret, 0, idx);
-        System.arraycopy(listeners, idx + 1, ret, idx, length - idx);
-        return ret;
+        return ArrayUtils.remove(listeners, listener);
+//        if (listener == null) {
+//            throw new NullPointerException();
+//        }
+//        int idx = -1;
+//        for (int i=0; i < listeners.length; i++) {
+//            if (listeners[i] == listener) {
+//                idx = i;
+//                break;
+//            }
+//        }
+//        if (idx == -1) {
+//            return listeners;
+//        }
+//        int length = listeners.length - 1;
+//        T[] ret = (T[]) Array.newInstance(listeners.getClass().getComponentType(), length);
+//        System.arraycopy(listeners, 0, ret, 0, idx);
+//        System.arraycopy(listeners, idx + 1, ret, idx, length - idx);
+//        return ret;
     }
 
 }

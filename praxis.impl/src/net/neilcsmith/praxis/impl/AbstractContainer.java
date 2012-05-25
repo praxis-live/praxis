@@ -28,6 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
@@ -262,6 +263,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
                 }
                 return CallArguments.EMPTY;
             } catch (Exception ex) {
+                LOG.log(Level.FINE, "Can't connect ports.", ex);
                 throw new PortConnectionException("Can't connect " + c1id + "!" + p1id
                         + " to " + c2id + "!" + p2id);
             }
