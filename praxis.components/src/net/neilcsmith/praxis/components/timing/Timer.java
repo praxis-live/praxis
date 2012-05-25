@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -42,7 +42,7 @@ public class Timer extends AbstractClockComponent {
     
     public Timer() {
         FloatProperty period = FloatProperty.create( new PeriodBinding(), 0, 60 * 60, 1);
-        output = new DefaultControlOutputPort(this);
+        output = new DefaultControlOutputPort();
         registerPort(Port.OUT, output);
         registerControl("period", period);
         registerPort("period", period.createPort());
