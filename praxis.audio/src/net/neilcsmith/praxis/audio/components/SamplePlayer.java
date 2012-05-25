@@ -78,7 +78,7 @@ public class SamplePlayer extends AbstractComponent {
         FloatRangeProperty range = FloatRangeProperty.create(new RangeBinding(),
                 0, 1, 0, 1);
         registerControl("range", range);
-        FloatProperty speed = FloatProperty.create(new SpeedBinding(), -2048, 2048, 1);
+        FloatProperty speed = FloatProperty.create(new SpeedBinding(), -4, 4, 1);
         registerControl("speed", speed);
         registerPort("speed", speed.createPort());
         registerControl("loop", BooleanProperty.create(this, new LoopingBinding(), false));
