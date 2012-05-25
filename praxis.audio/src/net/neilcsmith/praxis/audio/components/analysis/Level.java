@@ -24,8 +24,9 @@ package net.neilcsmith.praxis.audio.components.analysis;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.impl.AbstractComponent;
+import net.neilcsmith.praxis.impl.AbstractClockComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import org.jaudiolibs.pipes.Buffer;
@@ -36,19 +37,17 @@ import org.jaudiolibs.pipes.impl.SingleInOut;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class Level extends AbstractComponent {
+public class Level extends AbstractClockComponent {
     
     private AudioMeasure cmp;
     private ControlPort.Output out;
+    private float[] cache;
     
     public Level() {
         cmp = new AudioMeasure();
-        out = new DefaultControlOutputPort(this);
+        out = new DefaultControlOutputPort();
         registerPort(Port.IN, new DefaultAudioInputPort(this, cmp));
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, cmp));
-        TriggerControl trigger = TriggerControl.create(new Binding());
-        registerControl("trigger", trigger);
-        registerPort("trigger", trigger.createPort());
         registerPort("level", out);
     }
     
@@ -60,24 +59,23 @@ public class Level extends AbstractComponent {
         ret /= buffer.length;
         return Math.sqrt(ret);
     }
-    
-    private class Binding implements TriggerControl.Binding {
 
-        public void trigger(long time) {
-            float[] buffer = cmp.cache;
-            if (buffer != null) {
-                out.send(time, calculateRMS(buffer));
-            } else {
-                out.send(time, 0);
-            }
+    public void tick(ExecutionContext source) {
+        if (cache == null) {
+            out.send(source.getTime(), 0);
+        } else {
+            out.send(source.getTime(), calculateRMS(cache));
         }
-        
     }
-    
-    
+
+    @Override
+    public void stateChanged(ExecutionContext source) {
+        cache = null;
+    }
+        
     private class AudioMeasure extends SingleInOut {
         
-        private float[] cache;
+        
 
         @Override
         protected void process(Buffer buffer, boolean rendering) {
