@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -28,7 +28,10 @@ import net.neilcsmith.praxis.audio.components.filter.IIRFilter;
 import net.neilcsmith.praxis.audio.components.mix.XFader;
 import net.neilcsmith.praxis.audio.components.sampling.Looper;
 import net.neilcsmith.praxis.audio.components.test.Sine;
-import net.neilcsmith.praxis.audio.components.time.MonoDelay2s;
+import net.neilcsmith.praxis.audio.components.delay.MonoDelay2s;
+import net.neilcsmith.praxis.audio.components.modulation.LFODelay;
+import net.neilcsmith.praxis.audio.components.modulation.MonoChorus;
+import net.neilcsmith.praxis.audio.components.reverb.Freeverb;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
 import net.neilcsmith.praxis.impl.AbstractComponentFactory;
@@ -61,11 +64,15 @@ public class AudioFactoryProvider implements ComponentFactoryProvider {
             addComponent("audio:sine", Sine.class);
             addComponent("audio:gain", Gain.class);
             addComponent("audio:sampleplayer", SamplePlayer.class);
+            addComponent("audio:analysis:level", Level.class);
             addComponent("audio:filter:comb", CombFilter.class);
             addComponent("audio:filter:iir", IIRFilter.class);
             addComponent("audio:delay:mono-delay", MonoDelay2s.class);
             addComponent("audio:distortion:overdrive", SimpleOverdrive.class);
             addComponent("audio:mix:xfader", XFader.class);
+            addComponent("audio:modulation:chorus", MonoChorus.class);
+            addComponent("audio:modulation:lfo-delay", LFODelay.class);
+            addComponent("audio:reverb:freeverb", Freeverb.class);
             addComponent("audio:sampling:looper", Looper.class);
             
             // test

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -20,8 +20,7 @@
  * have any questions.
  *
  */
-
-package net.neilcsmith.praxis.audio.components.time;
+package net.neilcsmith.praxis.audio.components.modulation;
 
 import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
@@ -29,39 +28,49 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import org.jaudiolibs.audioops.impl.ContainerOp;
-import org.jaudiolibs.audioops.impl.VariableDelayOp;
+import org.jaudiolibs.audioops.impl.LFODelayOp;
 import org.jaudiolibs.pipes.impl.OpHolder;
 
 /**
  *
  * @author Neil C Smith
  */
-public class MonoDelay2s extends AbstractComponent {
+public class LFODelay extends AbstractComponent {
 
-    private VariableDelayOp delay;
+    private LFODelayOp op;
     private ContainerOp container;
-    private FloatProperty time;
+    private FloatProperty delay;
+    private FloatProperty range;
+    private FloatProperty rate;
+//    private FloatProperty phase;
     private FloatProperty feedback;
     private FloatProperty mix;
 
-    public MonoDelay2s() {
-        delay = new VariableDelayOp(2);
-        container = new ContainerOp(delay);
+    public LFODelay() {
+        op = new LFODelayOp();
+        container = new ContainerOp(op);
         OpHolder holder = new OpHolder(container);
         registerPort(Port.IN, new DefaultAudioInputPort(this, holder));
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, holder));
-        time =  FloatProperty.create( new TimeBinding(),
-                0, 2, 0);
-        registerControl("time", time);
-        registerPort("time", time.createPort());
-        feedback = FloatProperty.create( new FeedbackBinding(),
+        delay = FloatProperty.create(new DelayBinding(), 0, 1, 0);
+        registerControl("delay", delay);
+        registerPort("delay", delay.createPort());
+        range = FloatProperty.create(new RangeBinding(), 0, 1, 0);
+        registerControl("range", range);
+        registerPort("range", range.createPort());
+        rate = FloatProperty.create(new RateBinding(), 0, 40, 0);
+        registerControl("rate", rate);
+        registerPort("rate", rate.createPort());
+        feedback = FloatProperty.create(new FeedbackBinding(),
                 0, 1, 0);
         registerControl("feedback", feedback);
         registerPort("feedback", feedback.createPort());
-        mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
+//        phase = FloatProperty.create(new PhaseBinding(), 0, 1, 0);
+//        registerControl("phase", phase);
+        mix = FloatProperty.create(new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
-        
+
     }
 
     private class MixBinding implements FloatProperty.Binding {
@@ -73,31 +82,60 @@ public class MonoDelay2s extends AbstractComponent {
         public double getBoundValue() {
             return container.getMix();
         }
-
     }
 
-    private class TimeBinding implements FloatProperty.Binding {
+    private class DelayBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            delay.setDelay((float) value);
+            op.setDelay((float) value);
         }
 
         public double getBoundValue() {
-            return delay.getDelay();
+            return op.getDelay();
         }
-
     }
 
+    private class RangeBinding implements FloatProperty.Binding {
+
+        public void setBoundValue(long time, double value) {
+            op.setRange((float) value);
+        }
+
+        public double getBoundValue() {
+            return op.getRange();
+        }
+    }
+
+    private class RateBinding implements FloatProperty.Binding {
+
+        public void setBoundValue(long time, double value) {
+            op.setRate((float) value);
+        }
+
+        public double getBoundValue() {
+            return op.getRate();
+        }
+    }
+
+//    private class PhaseBinding implements FloatProperty.Binding {
+//
+//        public void setBoundValue(long time, double value) {
+//            op.setPhase((float)value);
+//        }
+//
+//        public double getBoundValue() {
+//            return op.getPhase();
+//        }
+//        
+//    }
     private class FeedbackBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            delay.setFeedback((float) value);
+            op.setFeedback((float) value);
         }
 
         public double getBoundValue() {
-            return delay.getFeedback();
+            return op.getFeedback();
         }
-
     }
-
 }
