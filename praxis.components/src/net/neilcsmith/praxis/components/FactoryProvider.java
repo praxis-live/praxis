@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -83,18 +83,22 @@ public class FactoryProvider implements ComponentFactoryProvider {
 
             //ROUTING
             addComponent("core:routing:join", Join.class);
-            addComponent("core:test:routing:inhibitor", Inhibitor.class);
-            addComponent("core:test:routing:send", Send.class);
+            addComponent("core:routing:inhibitor", Inhibitor.class);
+            addComponent("core:routing:send", Send.class);
 
-            // TEST
-            addComponent("core:test:log", Log.class);
-
+            
             // TIMING
             addComponent("core:timing:animator", Animator.class);
             addComponent("core:timing:delay", SimpleDelay.class);
             addComponent("core:timing:timer", Timer.class);
 
 
+            
+            // IN TESTING
+            addComponent("core:test:log", Log.class);
+            addComponent("core:test:routing:inhibitor", Inhibitor.class);
+            addComponent("core:test:routing:send", Send.class);
+            
         }
     }
 }
