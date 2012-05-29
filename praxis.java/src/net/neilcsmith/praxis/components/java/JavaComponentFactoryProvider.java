@@ -46,7 +46,7 @@ public class JavaComponentFactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-            addComponent("core:test:code:custom", JavaComponent.class);
+            addComponent("core:code:custom", JavaComponent.class);
         }
 
     }
