@@ -1,1 +1,1 @@
-net.neilcsmith.praxis.video.gstreamer.GStreamerFactoryProvider
+net.neilcsmith.praxis.video.gstreamer.factory.GStreamerFactoryProvider

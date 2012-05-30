@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -20,32 +20,52 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.video.gstreamer;
+package net.neilcsmith.praxis.video.gstreamer.factory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.video.InvalidVideoResourceException;
 import net.neilcsmith.praxis.video.VideoDelegateFactory;
+import net.neilcsmith.praxis.video.gstreamer.GStreamerLibraryLoader;
 import net.neilcsmith.ripl.delegates.VideoDelegate;
 import net.neilcsmith.ripl.gstreamer.DV1394Delegate;
 import net.neilcsmith.ripl.gstreamer.IPCamDelegate;
 import net.neilcsmith.ripl.gstreamer.PlaybinDelegate;
 import net.neilcsmith.ripl.gstreamer.V4LDelegate;
+import org.openide.util.Lookup;
 
 /**
  *
  * @author Neil C Smith
  */
 public class GStreamerFactory implements VideoDelegateFactory {
+    
+    private final static Logger LOG = Logger.getLogger(GStreamerFactory.class.getName());
 
     private static GStreamerFactory instance = new GStreamerFactory();
 
     private GStreamerFactory() {
-    // singleton
+        preloadLibs();
     }
 
+    private void preloadLibs() {
+        try {
+            for (GStreamerLibraryLoader loader : Lookup.getDefault().lookupAll(GStreamerLibraryLoader.class)) {
+                
+                try {
+                    loader.load();
+                } catch (Exception ex) {
+                    LOG.log(Level.WARNING, "Exception thrown while trying to load GStreamer libraries with loader " + loader, ex);
+                }
+            }
+        } catch (Exception ex) {
+            LOG.log(Level.WARNING, "Exception thrown while trying to load GStreamer library loaders", ex);
+        }
+    }
+    
     public static GStreamerFactory getInstance() {
         return instance;
     }

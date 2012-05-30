@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -20,32 +20,14 @@
  * have any questions.
  *
  */
-
 package net.neilcsmith.praxis.video.gstreamer;
-
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import net.neilcsmith.praxis.video.VideoDelegateFactory;
 
 /**
  *
- * @author Neil C Smith
+ * @author Neil C Smith (http://neilcsmith.net)
  */
-public class GStreamerFactoryProvider implements VideoDelegateFactory.Provider {
+public interface GStreamerLibraryLoader {
     
-    private static String[] schemes = { "file", "http", "v4l", "v4l2", "ipcam", "dv1394"};
-
-    public Set<String> getSupportedSchemes() {
-        return new LinkedHashSet<String>(Arrays.asList(schemes)); 
-    }
-
-    public String getLibraryName() {
-        return "gstreamer";
-    }
-
-    public VideoDelegateFactory getFactory() {
-        return GStreamerFactory.getInstance();
-    }
-
+    public void load() throws Exception;
+    
 }
