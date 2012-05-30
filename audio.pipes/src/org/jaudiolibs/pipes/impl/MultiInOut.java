@@ -37,18 +37,20 @@ package org.jaudiolibs.pipes.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jaudiolibs.pipes.*;
+import org.jaudiolibs.pipes.Buffer;
+import org.jaudiolibs.pipes.Pipe;
+import org.jaudiolibs.pipes.SourceIsFullException;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public abstract class MultiInOut implements Source, Sink {
+public abstract class MultiInOut extends Pipe {
 
     private int maxSources;
-    private List<Source> sources;
+    private List<Pipe> sources;
     private int maxSinks;
-    private List<Sink> sinks;
+    private List<Pipe> sinks;
     private Buffer[] buffers;
     private long time;
     private long renderReqTime;
@@ -60,14 +62,14 @@ public abstract class MultiInOut implements Source, Sink {
             throw new IllegalArgumentException();
         }
         this.maxSources = maxSources;
-        this.sources = new ArrayList<Source>();
+        this.sources = new ArrayList<Pipe>();
         this.maxSinks = maxSinks;
-        this.sinks = new ArrayList<Sink>();
+        this.sinks = new ArrayList<Pipe>();
         buffers = new Buffer[0];
     }
 
     @Override
-    public void process(Buffer buffer, Sink sink, long time) {
+    protected void process(Pipe sink, Buffer buffer, long time) {
         int sinkIndex = sinks.indexOf(sink);
         if (sinkIndex < 0) {
             return;
@@ -80,7 +82,7 @@ public abstract class MultiInOut implements Source, Sink {
             callSources(time);
             process(buffers, rendering);
         }
-        if (sink.isRenderRequired(this, time)) {
+        if (sinkRequiresRender(sink, time)) {
             writeOutput(buffers, buffer, sinkIndex);
         }
     }
@@ -104,11 +106,12 @@ public abstract class MultiInOut implements Source, Sink {
 
     private void callSources(long time) {
         for (int i = 0; i < sources.size(); i++) {
-            sources.get(i).process(buffers[i], this, time);
+//            sources.get(i).process(buffers[i], this, time);
+            callSource(sources.get(i), buffers[i], time);
         }
     }
-    
-    protected void process(Buffer[] buffers, boolean rendering){
+
+    protected void process(Buffer[] buffers, boolean rendering) {
         // no op
     }
 
@@ -124,12 +127,12 @@ public abstract class MultiInOut implements Source, Sink {
     }
 
     @Override
-    public void registerSink(Sink sink) throws SourceIsFullException {
+    protected void registerSink(Pipe sink) throws SourceIsFullException {
         if (sink == null) {
             throw new NullPointerException();
         }
         if (sinks.contains(sink)) {
-            return;
+            throw new IllegalArgumentException();
         }
         if (sinks.size() == maxSinks) {
             throw new SourceIsFullException();
@@ -138,45 +141,31 @@ public abstract class MultiInOut implements Source, Sink {
     }
 
     @Override
-    public void unregisterSink(Sink sink) {
+    protected void unregisterSink(Pipe sink) {
         sinks.remove(sink);
     }
 
     @Override
-    public Sink[] getSinks() {
-        return sinks.toArray(new Sink[sinks.size()]);
-    }
-
-    @Override
-    public void addSource(Source source) throws SinkIsFullException, SourceIsFullException {
+    protected void registerSource(Pipe source) {
         if (source == null) {
             throw new NullPointerException();
         }
         if (sources.contains(source)) {
-            return;
+            throw new IllegalArgumentException();
         }
         if (sources.size() == maxSources) {
             throw new SourceIsFullException();
         }
-        source.registerSink(this);
         sources.add(source);
     }
 
     @Override
-    public void removeSource(Source source) {
-        if (sources.contains(source)) {
-            source.unregisterSink(this);
-            sources.remove(source);
-        }
+    public void unregisterSource(Pipe source) {
+        sources.remove(source);
     }
 
     @Override
-    public Source[] getSources() {
-        return sources.toArray(new Source[sources.size()]);
-    }
-
-    @Override
-    public boolean isRenderRequired(Source source, long time) {
+    protected boolean isRenderRequired(Pipe source, long time) {
         return isRendering(time);
     }
 
@@ -191,15 +180,20 @@ public abstract class MultiInOut implements Source, Sink {
     private boolean simpleRenderingCheck(long time) {
         if (time != renderReqTime) {
             renderReqTime = time;
-            renderReqCache = sinks.get(0).isRenderRequired(this, time);
+//            renderReqCache = sinks.get(0).isRenderRequired(this, time);
+            renderReqCache = sinkRequiresRender(sinks.get(0), time);
         }
         return renderReqCache;
     }
 
     private boolean protectedRenderingCheck(long time) {
+        Pipe sink;
         if (renderIdx > 0) {
             while (renderIdx < sinks.size()) {
-                if (sinks.get(renderIdx++).isRenderRequired(this, time)) {
+//                if (sinks.get(renderIdx++).isRenderRequired(this, time)) {
+                sink = sinks.get(renderIdx);
+                renderIdx++;
+                if (sinkRequiresRender(sink, time)) {
                     renderIdx = 0;
                     return true;
                 }
@@ -210,7 +204,10 @@ public abstract class MultiInOut implements Source, Sink {
                 renderReqTime = time;
                 renderReqCache = false;
                 while (renderIdx < sinks.size()) {
-                    if (sinks.get(renderIdx++).isRenderRequired(this, time)) {
+//                    if (sinks.get(renderIdx++).isRenderRequired(this, time)) {
+                    sink = sinks.get(renderIdx);
+                    renderIdx++;
+                    if (sinkRequiresRender(sink, time)) {
                         renderReqCache = true;
                         break;
                     }
@@ -219,5 +216,35 @@ public abstract class MultiInOut implements Source, Sink {
             }
             return renderReqCache;
         }
+    }
+
+    @Override
+    public int getSourceCount() {
+        return sources.size();
+    }
+
+    @Override
+    public int getSourceCapacity() {
+        return maxSources;
+    }
+
+    @Override
+    public Pipe getSource(int idx) {
+        return sources.get(idx);
+    }
+
+    @Override
+    public int getSinkCount() {
+        return sinks.size();
+    }
+
+    @Override
+    public int getSinkCapacity() {
+        return maxSinks;
+    }
+
+    @Override
+    public Pipe getSink(int idx) {
+        return sinks.get(idx);
     }
 }

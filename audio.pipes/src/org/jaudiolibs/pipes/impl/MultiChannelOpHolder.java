@@ -37,7 +37,7 @@ package org.jaudiolibs.pipes.impl;
 
 import org.jaudiolibs.audioops.AudioOp;
 import org.jaudiolibs.pipes.Buffer;
-import org.jaudiolibs.pipes.Source;
+import org.jaudiolibs.pipes.Pipe;
 
 /**
  *
@@ -93,7 +93,7 @@ public class MultiChannelOpHolder extends MultiInOut {
     }
 
     @Override
-    public boolean isRenderRequired(Source source, long time) {
+    public boolean isRenderRequired(Pipe source, long time) {
         return op.isInputRequired(super.isRenderRequired(source, time));
     }
 }

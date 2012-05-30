@@ -21,8 +21,7 @@
  */
 package net.neilcsmith.praxis.audio;
 
-import org.jaudiolibs.pipes.Sink;
-import org.jaudiolibs.pipes.Source;
+import org.jaudiolibs.pipes.Pipe;
 
 /**
  *
@@ -50,13 +49,13 @@ public abstract class AudioContext {
 
         public abstract int getInputCount();
 
-        public abstract Sink getInputSink(int index);
+        public abstract Pipe getInputSink(int index);
     }
 
     public static abstract class OutputClient extends Client {
 
         public abstract int getOutputCount();
 
-        public abstract Source getOutputSource(int index);
+        public abstract Pipe getOutputSource(int index);
     }
 }

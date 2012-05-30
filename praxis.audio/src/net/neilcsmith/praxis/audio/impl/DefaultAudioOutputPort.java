@@ -28,10 +28,8 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.audio.AudioPort;
 import net.neilcsmith.praxis.core.*;
 import net.neilcsmith.praxis.impl.PortListenerSupport;
-import org.jaudiolibs.pipes.Sink;
-import org.jaudiolibs.pipes.Source;
+import org.jaudiolibs.pipes.Pipe;
 import org.jaudiolibs.pipes.impl.Splitter;
-
 
 /**
  *
@@ -40,18 +38,18 @@ import org.jaudiolibs.pipes.impl.Splitter;
 public class DefaultAudioOutputPort extends AudioPort.Output {
 
     private final static Logger logger = Logger.getLogger(DefaultAudioOutputPort.class.getName());
-    private Source source;
-    private Source portSource;
+    private Pipe source;
+    private Pipe portSource;
     private Splitter splitter;
     private List<AudioPort.Input> connections;
     private boolean multiChannelCapable;
     private PortListenerSupport pls;
 
-    public DefaultAudioOutputPort(Component host, Source source) {
+    public DefaultAudioOutputPort(Component host, Pipe source) {
         this(host, source, false);
     }
 
-    public DefaultAudioOutputPort(Component host, Source source,
+    public DefaultAudioOutputPort(Component host, Pipe source,
             boolean multiChannelCapable) {
         if (source == null) {
             throw new NullPointerException();
@@ -124,13 +122,13 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
         if (multiChannelCapable || portSource == splitter) {
             return;
         }
-        Sink[] sinks = removeSinks(source);
+        Pipe[] sinks = removeSinks(source);
         try {
             if (splitter == null) {
                 splitter = new Splitter(16); // @TODO make channels configurable
             }
             splitter.addSource(source);
-            for (Sink sink : sinks) {
+            for (Pipe sink : sinks) {
                 sink.addSource(splitter);
             }
             portSource = splitter;
@@ -147,10 +145,10 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
         if (portSource == source) {
             return;
         }
-        Sink[] sinks = removeSinks(splitter);
+        Pipe[] sinks = removeSinks(splitter);
         try {
             splitter.removeSource(source);
-            for (Sink sink : sinks) {
+            for (Pipe sink : sinks) {
                 sink.addSource(source);
             }
             portSource = source;
@@ -164,9 +162,17 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
 
     }
 
-    private Sink[] removeSinks(Source source) {
-        Sink[] sinks = source.getSinks();
-        for (Sink sink : sinks) {
+    private Pipe[] removeSinks(Pipe source) {
+//        Sink[] sinks = source.getSinks();
+//        for (Sink sink : sinks) {
+//            sink.removeSource(source);
+//        }
+//        return sinks;
+        Pipe[] sinks = new Pipe[source.getSinkCount()];
+        for (int i = 0; i < sinks.length; i++) {
+            sinks[i] = source.getSink(i);
+        }
+        for (Pipe sink : sinks) {
             sink.removeSource(source);
         }
         return sinks;

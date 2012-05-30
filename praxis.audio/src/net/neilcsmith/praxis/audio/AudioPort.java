@@ -25,7 +25,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.PortConnectionException;
 import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.core.types.PMap;
-import org.jaudiolibs.pipes.Source;
+import org.jaudiolibs.pipes.Pipe;
 
 /**
  *
@@ -63,9 +63,9 @@ public abstract class AudioPort implements Port {
             return info;
         }
 
-        protected abstract void addAudioOutputPort(Output port, Source source) throws PortConnectionException;
+        protected abstract void addAudioOutputPort(Output port, Pipe source) throws PortConnectionException;
 
-        protected abstract void removeAudioOutputPort(Output port, Source source);
+        protected abstract void removeAudioOutputPort(Output port, Pipe source);
     }
 
     public static abstract class Output extends AudioPort {
@@ -84,11 +84,11 @@ public abstract class AudioPort implements Port {
             return info;
         }
 
-        protected final void makeConnection(Input port, Source source) throws PortConnectionException {
+        protected final void makeConnection(Input port, Pipe source) throws PortConnectionException {
             port.addAudioOutputPort(this, source);
         }
 
-        protected final void breakConnection(Input port, Source source) {
+        protected final void breakConnection(Input port, Pipe source) {
             port.removeAudioOutputPort(this, source);
         }
     }

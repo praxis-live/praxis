@@ -34,7 +34,7 @@ import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.FloatRangeProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import org.jaudiolibs.pipes.Buffer;
-import org.jaudiolibs.pipes.Source;
+import org.jaudiolibs.pipes.Pipe;
 import org.jaudiolibs.pipes.impl.SingleInOut;
 
 /**
@@ -760,7 +760,7 @@ public class Looper extends AbstractComponent {
         }
 
         @Override
-        public boolean isRenderRequired(Source source, long time) {
+        public boolean isRenderRequired(Pipe source, long time) {
             return recording;
         }
     }

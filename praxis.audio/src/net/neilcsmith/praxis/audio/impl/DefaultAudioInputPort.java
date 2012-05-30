@@ -29,8 +29,7 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.audio.AudioPort;
 import net.neilcsmith.praxis.core.*;
 import net.neilcsmith.praxis.impl.PortListenerSupport;
-import org.jaudiolibs.pipes.Sink;
-import org.jaudiolibs.pipes.Source;
+import org.jaudiolibs.pipes.Pipe;
 import org.jaudiolibs.pipes.impl.Mixer;
 
 /**
@@ -40,18 +39,18 @@ import org.jaudiolibs.pipes.impl.Mixer;
 public class DefaultAudioInputPort extends AudioPort.Input {
 
     private final static Logger logger = Logger.getLogger(DefaultAudioInputPort.class.getName());
-    private Sink sink;
-    private Sink portSink;
+    private Pipe sink;
+    private Pipe portSink;
     private Mixer mixer;
     private List<AudioPort.Output> connections;
     private boolean multiChannelCapable;
     private PortListenerSupport pls;
 
-    public DefaultAudioInputPort(Component host, Sink sink) {
+    public DefaultAudioInputPort(Component host, Pipe sink) {
         this(host, sink, false);
     }
 
-    public DefaultAudioInputPort(Component host, Sink sink,
+    public DefaultAudioInputPort(Component host, Pipe sink,
             boolean multiChannelCapable) {
         if (sink == null) {
             throw new NullPointerException();
@@ -82,7 +81,7 @@ public class DefaultAudioInputPort extends AudioPort.Input {
     }
 
     @Override
-    protected void addAudioOutputPort(Output port, Source source) throws PortConnectionException {
+    protected void addAudioOutputPort(Output port, Pipe source) throws PortConnectionException {
         if (connections.contains(port)) {
             throw new PortConnectionException();
         }
@@ -102,7 +101,7 @@ public class DefaultAudioInputPort extends AudioPort.Input {
     }
 
     @Override
-    protected void removeAudioOutputPort(Output port, Source source) {
+    protected void removeAudioOutputPort(Output port, Pipe source) {
         if (connections.remove(port)) {
             portSink.removeSource(source);
             if (connections.size() == 1) {
@@ -116,13 +115,13 @@ public class DefaultAudioInputPort extends AudioPort.Input {
         if (multiChannelCapable || portSink == mixer) {
             return;
         }
-        Source[] sources = removeSources(sink);
+        Pipe[] sources = removeSources(sink);
         try {
             if (mixer == null) {
                 mixer = new Mixer(16); // @TODO make channels configurable
             }
             sink.addSource(mixer);
-            for (Source source : sources) {
+            for (Pipe source : sources) {
                 mixer.addSource(source);
             }
             portSink = mixer;
@@ -131,6 +130,7 @@ public class DefaultAudioInputPort extends AudioPort.Input {
             removeSources(mixer);
             removeSources(sink);
             connections.clear();
+            pls.fireListeners();
         }
     }
 
@@ -138,10 +138,10 @@ public class DefaultAudioInputPort extends AudioPort.Input {
         if (portSink == sink) {
             return;
         }
-        Source[] sources = removeSources(mixer);
+        Pipe[] sources = removeSources(mixer);
         try {
             sink.removeSource(mixer);
-            for (Source source : sources) {
+            for (Pipe source : sources) {
                 sink.addSource(source);
             }
             portSink = sink;
@@ -150,13 +150,22 @@ public class DefaultAudioInputPort extends AudioPort.Input {
             removeSources(sink);
             removeSources(mixer);
             connections.clear();
+            pls.fireListeners();
         }
 
     }
 
-    private Source[] removeSources(Sink sink) {
-        Source[] sources = sink.getSources();
-        for (Source source : sources) {
+    private Pipe[] removeSources(Pipe sink) {
+//        Pipe[] sources = sink.getSources();
+//        for (Source source : sources) {
+//            sink.removeSource(source);
+//        }
+//        return sources;
+        Pipe[] sources = new Pipe[sink.getSourceCount()];
+        for (int i=0; i<sources.length; i++) {
+            sources[i] = sink.getSource(i);
+        }
+        for (Pipe source : sources) {
             sink.removeSource(source);
         }
         return sources;

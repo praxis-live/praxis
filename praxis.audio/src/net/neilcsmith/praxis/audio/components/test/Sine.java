@@ -26,6 +26,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import org.jaudiolibs.pipes.Buffer;
+import org.jaudiolibs.pipes.impl.SingleInOut;
 import org.jaudiolibs.pipes.impl.SingleOut;
 
 /**
@@ -57,7 +58,7 @@ public class Sine extends AbstractComponent {
         }
     }
 
-    private class SineUG extends SingleOut {
+    private class SineUG extends SingleInOut {
 
         private final static float TWOPI = (float) (2 * Math.PI);
         private float phase = 0;

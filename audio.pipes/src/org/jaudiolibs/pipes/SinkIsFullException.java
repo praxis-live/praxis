@@ -40,7 +40,7 @@ package org.jaudiolibs.pipes;
  *
  * @author Neil C Smith
  */
-public class SinkIsFullException extends Exception {
+public class SinkIsFullException extends RuntimeException {
 
     /**
      * Creates a new instance of <code>SinkIsFullException</code> without detail message.

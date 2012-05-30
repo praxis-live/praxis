@@ -28,8 +28,8 @@ import net.neilcsmith.praxis.audio.ClientRegistrationException;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
+import org.jaudiolibs.pipes.Pipe;
 import org.jaudiolibs.pipes.impl.Placeholder;
-import org.jaudiolibs.pipes.Source;
 
 /**
  *
@@ -55,7 +55,7 @@ public class AudioOutput extends AbstractComponent {
             }
 
             @Override
-            public Source getOutputSource(int index) {
+            public Pipe getOutputSource(int index) {
                 return placeholders[index];
             }
         };

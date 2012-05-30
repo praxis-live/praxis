@@ -35,49 +35,58 @@
  */
 package org.jaudiolibs.pipes.impl;
 
-import org.jaudiolibs.pipes.*;
+import org.jaudiolibs.pipes.Buffer;
+import org.jaudiolibs.pipes.Pipe;
+import org.jaudiolibs.pipes.SinkIsFullException;
 
 /**
  *
  * @author Neil C Smith
  */
-public abstract class SingleInOut extends SingleOut implements Sink {
+public abstract class SingleInOut extends SingleOut {
 
-    private Source source;
+    private Pipe source;
     private long renderReqTime;
     private boolean renderReqCache;
 
     @Override
-    public final void addSource(Source source) throws SinkIsFullException, SourceIsFullException {
+    public final void registerSource(Pipe source) {
         if (source == null) {
             throw new NullPointerException();
         }
         if (this.source != null) {
             throw new SinkIsFullException();
         }
-        source.registerSink(this);
         this.source = source;
     }
 
     @Override
-    public final void removeSource(Source source) {
+    public final void unregisterSource(Pipe source) {
         if (this.source == source) {
-            source.unregisterSink(this);
             this.source = null;
         }
     }
 
     @Override
-    public Source[] getSources() {
-        if (source == null) {
-            return new Source[0];
-        } else {
-            return new Source[]{source};
+    public final Pipe getSource(int idx) {
+        if (idx == 0 && source != null) {
+            return source;
         }
+        throw new IndexOutOfBoundsException();
     }
 
     @Override
-    public boolean isRenderRequired(Source source, long time) {
+    public final int getSourceCount() {
+        return source == null ? 0 : 1;
+    }
+
+    @Override
+    public final int getSourceCapacity() {
+        return 1;
+    }
+    
+    @Override
+    protected boolean isRenderRequired(Pipe source, long time) {
         return isRendering(time);
     }
 
@@ -86,7 +95,8 @@ public abstract class SingleInOut extends SingleOut implements Sink {
             if (sink == null) {
                 renderReqCache = false;
             } else {
-                renderReqCache = sink.isRenderRequired(this, time);
+//                renderReqCache = sink.isRenderRequired(this, time);
+                renderReqCache = sinkRequiresRender(sink, time);
             }
             renderReqTime = time;
         }
@@ -94,14 +104,16 @@ public abstract class SingleInOut extends SingleOut implements Sink {
     }
 
     @Override
-    void processImpl(Buffer buffer, Sink sink, long time) {
+    void processImpl(Pipe sink, Buffer buffer, long time) {
         if (this.sink == sink) {
             if (source == null) {
                 buffer.clear();
             } else {
-                source.process(buffer, this, time);
+//                source.process(buffer, this, time);
+                callSource(source, buffer, time);
             }
             process(buffer, isRendering(time));
         }
     }
+
 }

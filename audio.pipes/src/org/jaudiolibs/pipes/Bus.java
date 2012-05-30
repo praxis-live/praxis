@@ -43,11 +43,11 @@ package org.jaudiolibs.pipes;
 public interface Bus extends BufferRateSource {
 
 
-    public Sink getSink(int index);
+    public Pipe getSink(int index);
 
     public int getSinkCount();
 
-    public Source getSource(int index);
+    public Pipe getSource(int index);
 
     public int getSourceCount();
     

@@ -40,7 +40,7 @@ package org.jaudiolibs.pipes;
  *
  * @author Neil C Smith
  */
-public class SourceIsFullException extends Exception {
+public class SourceIsFullException extends RuntimeException {
 
     /**
      * Creates a new instance of <code>SourceIsFullException</code> without detail message.

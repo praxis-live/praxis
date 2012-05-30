@@ -33,21 +33,64 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package org.jaudiolibs.pipes;
+
+import java.util.logging.Logger;
 
 /**
  *
- * @author Neil C Smith
+ * @author Neil C Smith (http://neilcsmith.net)
  */
-public interface Sink {
+public abstract class Pipe {
     
-    public void addSource(Source source) throws SinkIsFullException, SourceIsFullException;
+    public final void addSource(Pipe source) {
+        source.registerSink(this);
+        try {
+            registerSource(source);
+        } catch (RuntimeException ex) {
+            source.unregisterSink(this);
+            throw ex;
+        }   
+    }
     
-    public void removeSource(Source source);
+    public final void removeSource(Pipe source) {
+        source.unregisterSink(this);
+        unregisterSource(source);
+    }
     
-    public boolean isRenderRequired(Source source, long time);
+    public abstract int getSourceCount();
     
-    public Source[] getSources();
-
+    public abstract int getSourceCapacity();
+    
+    public abstract Pipe getSource(int idx);
+    
+    public abstract int getSinkCount();
+    
+    public abstract int getSinkCapacity();
+    
+    public abstract Pipe getSink(int idx);
+    
+    protected final void callSource(Pipe source, Buffer buffer, long time) {
+        source.process(this, buffer, time);
+    }
+    
+    protected final boolean sinkRequiresRender(Pipe sink, long time) {
+        return sink.isRenderRequired(this, time);
+    }
+    
+    protected abstract void process(Pipe sink, Buffer buffer, long time);
+    
+    protected abstract boolean isRenderRequired(Pipe source, long time);
+    
+    protected abstract void registerSource(Pipe source);
+    
+    protected abstract void unregisterSource(Pipe source);
+    
+    protected abstract void registerSink(Pipe sink);
+    
+    protected abstract void unregisterSink(Pipe sink);
+    
+    
+    
+    
 }

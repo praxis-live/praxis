@@ -36,31 +36,39 @@
 package org.jaudiolibs.pipes.impl;
 
 import org.jaudiolibs.pipes.Buffer;
-import org.jaudiolibs.pipes.Sink;
-import org.jaudiolibs.pipes.Source;
+import org.jaudiolibs.pipes.Pipe;
 import org.jaudiolibs.pipes.SourceIsFullException;
 
 /**
  *
  * @author Neil C Smith
  */
-public abstract class SingleOut implements Source {
+public abstract class SingleOut extends Pipe {
 
-    Sink sink;
+    Pipe sink;
 
     @Override
-    public final void process(Buffer buffer, Sink sink, long time) {
-        processImpl(buffer, sink, time);
+    public final void process(Pipe sink, Buffer buffer, long time) {
+        processImpl(sink, buffer, time);
     }
 
-    void processImpl(Buffer buffer, Sink sink, long time) {
+    void processImpl(Pipe sink, Buffer buffer, long time) {
         if (this.sink == sink) {
-            process(buffer, sink.isRenderRequired(this, time));
+            process(buffer, sinkRequiresRender(sink, time));
         }
     }
 
     @Override
-    public final void registerSink(Sink sink) throws SourceIsFullException {
+    protected void registerSource(Pipe source) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    protected void unregisterSource(Pipe source) {
+    }
+
+    @Override
+    public final void registerSink(Pipe sink) throws SourceIsFullException {
         if (sink == null) {
             throw new NullPointerException();
         }
@@ -71,20 +79,49 @@ public abstract class SingleOut implements Source {
     }
 
     @Override
-    public final void unregisterSink(Sink sink) {
+    public final void unregisterSink(Pipe sink) {
         if (this.sink == sink) {
             this.sink = null;
         }
     }
 
+    protected abstract void process(Buffer buffer, boolean rendering);
+
     @Override
-    public final Sink[] getSinks() {
-        if (sink == null) {
-            return new Sink[0];
-        } else {
-            return new Sink[]{sink};
-        }
+    public int getSourceCount() {
+        return 0;
     }
 
-    protected abstract void process(Buffer buffer, boolean rendering);
+    @Override
+    public int getSourceCapacity() {
+        return 0;
+    }
+
+    @Override
+    public Pipe getSource(int idx) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    @Override
+    public final int getSinkCount() {
+        return sink == null ? 0 : 1;
+    }
+
+    @Override
+    public final int getSinkCapacity() {
+        return 1;
+    }
+
+    @Override
+    public Pipe getSink(int idx) {
+        if (idx == 0 && sink != null) {
+            return sink;
+        }
+        throw new IndexOutOfBoundsException();
+    }
+
+    @Override
+    protected boolean isRenderRequired(Pipe source, long time) {
+        return false;
+    }
 }

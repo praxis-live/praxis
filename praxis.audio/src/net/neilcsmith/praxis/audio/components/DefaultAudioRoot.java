@@ -41,8 +41,6 @@ import org.jaudiolibs.pipes.impl.Placeholder;
 import org.jaudiolibs.pipes.BufferRateListener;
 import org.jaudiolibs.pipes.BufferRateSource;
 import org.jaudiolibs.pipes.Bus;
-import org.jaudiolibs.pipes.Sink;
-import org.jaudiolibs.pipes.Source;
 import org.jaudiolibs.pipes.SinkIsFullException;
 import org.jaudiolibs.pipes.SourceIsFullException;
 import org.jaudiolibs.pipes.impl.BusClient;
@@ -256,8 +254,11 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
             if (inputClient == client) {
                 inputClient = null;
                 for (Placeholder input : inputs) {
-                    for (Sink sink : input.getSinks()) {
-                        sink.removeSource(input);
+//                    for (Sink sink : input.getSinks()) {
+//                        sink.removeSource(input);
+//                    }
+                    if (input.getSinkCount() == 1) {
+                        input.getSink(0).removeSource(input);
                     }
                 }
             }
@@ -290,8 +291,11 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
             if (outputClient == client) {
                 outputClient = null;
                 for (Placeholder output : outputs) {
-                    for (Source src : output.getSources()) {
-                        output.removeSource(src);
+//                    for (Source src : output.getSources()) {
+//                        output.removeSource(src);
+//                    }
+                    if (output.getSourceCount() == 1) {
+                        output.removeSource(output.getSource(0));
                     }
                 }
             }

@@ -49,10 +49,10 @@ public abstract class Buffer {
     public abstract float[] getData();
 
     public abstract void clear();
-    
-    public boolean isSilent() {
-        return false;
-    }
+//    
+//    public boolean isSilent() {
+//        return false;
+//    }
     
     public abstract boolean isCompatible(Buffer buffer);
     
