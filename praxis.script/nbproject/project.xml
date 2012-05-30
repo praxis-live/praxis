@@ -34,7 +34,6 @@
             </test-dependencies>
             <public-packages>
                 <package>net.neilcsmith.praxis.script</package>
-                <package>net.neilcsmith.praxis.script.ast</package>
                 <package>net.neilcsmith.praxis.script.impl</package>
             </public-packages>
         </data>
