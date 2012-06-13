@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -25,40 +25,50 @@ import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.interfaces.TaskService;
 import net.neilcsmith.praxis.video.InvalidVideoResourceException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Lookup;
-import net.neilcsmith.praxis.core.types.PReference;
-import net.neilcsmith.praxis.core.types.PString;
-import net.neilcsmith.praxis.core.types.PResource;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.types.*;
 import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.video.VideoDelegateFactory;
+import net.neilcsmith.praxis.video.VideoSettings;
 import net.neilcsmith.ripl.delegates.VideoDelegate;
 
 /**
  *
  * @author Neil C Smith
- * @TODO add library name mechanism
  */
 public class VideoDelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
+    
+    private final static List<Argument> suggestedValues;
+    static {
+        List<Argument> list = new ArrayList<Argument>(4);
+        list.add(PString.valueOf("capture://0"));
+        list.add(PString.valueOf("capture://1"));
+        list.add(PString.valueOf("capture://2"));
+        list.add(PString.valueOf("capture://3"));
+        suggestedValues = Collections.unmodifiableList(list);
+    }
+    
 
     private Listener listener;
 
     public VideoDelegateLoader(AbstractComponent component, Listener listener) {
-        super(PResource.info(true), VideoDelegate.class, PString.EMPTY);
+        super(ArgumentInfo.create(PResource.class, PMap.create(
+                ArgumentInfo.KEY_ALLOW_EMPTY, true,
+                ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.valueOf(suggestedValues))),
+                VideoDelegate.class, PString.EMPTY);
         if (listener == null) {
             throw new NullPointerException();
         }
         this.listener = listener;
     }
 
-//    @Override
-//    protected Task getLoadTask(Argument id) {
-////        Lookup getAll = getComponent().getRoot().getLookup();
-//        Lookup lookup = getComponent().getParent().getLookup();
-//        // @TODO - can we be called if parent is null?
-//        return new LoadTask(lookup, id);
-//    }
 
     public VideoDelegate getDelegate() {
         return getValue();
@@ -74,10 +84,6 @@ public class VideoDelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
         }
     }
 
-//    @Override
-//    protected void setResource(VideoDelegate resource) {
-//        binding.setDelegate(resource);
-//    }
     public static interface Listener {
 
         public void delegateLoaded(VideoDelegateLoader source, long time);
@@ -97,6 +103,9 @@ public class VideoDelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
 
         public Argument execute() throws Exception {
             URI uri = PResource.coerce(id).value();
+            if ("capture".equals(uri.getScheme())) {
+                uri = translateCapture(uri);
+            }
             Lookup.Result<VideoDelegateFactory.Provider> providers =
                     lookup.getAll(VideoDelegateFactory.Provider.class);
             VideoDelegate delegate = null;
@@ -124,6 +133,29 @@ public class VideoDelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
             } catch (Exception ex) {
                 delegate.dispose();
                 throw new InvalidVideoResourceException();
+            }
+        }
+        
+        private URI translateCapture(URI uri) {
+            int idx = 0;
+            try {
+                String auth = uri.getAuthority();
+                if (auth != null) {
+                    idx = Integer.parseInt(uri.getAuthority());
+                }          
+            } catch (Exception ex) {}
+            String dev = VideoSettings.getCaptureDevice(idx);
+            try {
+                URI out = new URI(dev);
+                if (out.getQuery() == null) {
+                    String query = uri.getQuery();
+                    if (query != null) {
+                        out = new URI(out.getScheme(), out.getAuthority(), null, query, null);
+                    }
+                }
+                return out;
+            } catch (URISyntaxException ex) {
+                return uri;
             }
         }
     }

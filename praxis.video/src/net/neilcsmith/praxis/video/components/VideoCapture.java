@@ -38,8 +38,7 @@ import net.neilcsmith.ripl.delegates.VideoDelegate.StateException;
  * @author Neil C Smith
  */
 public class VideoCapture extends AbstractExecutionContextComponent {
-
-//    private final static String DEFAULT_DEVICE = "v4l2://0?width=640&height=480";
+    
     private VideoDelegate video;
     private Delegator container;
     private VideoDelegateLoader loader;

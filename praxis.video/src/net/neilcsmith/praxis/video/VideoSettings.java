@@ -28,36 +28,45 @@ import net.neilcsmith.praxis.settings.Settings;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public class VideoSettings {
-    
+
     public final static String KEY_RENDERER = "video.renderer";
-//    public final static String KEY_CAPTURE_DEVICE = "video.capture.device";
-    
+    private final static String KEY_CAPTURE_PREFIX = "video.capture";
     private final static String DEFAULT_RENDERER = "Software";
-    
-//    private static String DEFAULT_CAPTURE_DEVICE = "";
-//    static {
-//        String os = System.getProperty("os.name");
-//        if (os != null && os.contains("Linux")) {
-//            DEFAULT_CAPTURE_DEVICE = "v4l2://0";
-//        }
-//    }
-    
-    private VideoSettings() {}
-    
+    private static String DEFAULT_CAPTURE_SCHEME = "v4l2";
+
+    static {
+        String os = System.getProperty("os.name");
+        if (os != null) {
+            if (os.contains("Windows")) {
+                DEFAULT_CAPTURE_SCHEME = "ks";
+            } else if (os.contains("Mac") || os.contains("Darwin")) {
+                DEFAULT_CAPTURE_SCHEME = "qtkit";
+            }
+        }
+    }
+
+    private VideoSettings() {
+    }
+
     public static String getRenderer() {
         return Settings.get(KEY_RENDERER, DEFAULT_RENDERER);
     }
-    
+
     public static void setRenderer(String renderer) {
         Settings.put(KEY_RENDERER, renderer);
     }
-    
-//    public static String getCaptureDevice() {
-//        return Settings.get(KEY_CAPTURE_DEVICE, DEFAULT_CAPTURE_DEVICE);
-//    }
-//    
-//    public static void setCaptureDevice(String device) {
-//        Settings.put(KEY_CAPTURE_DEVICE, device);
-//    }
-    
+
+    public static String getCaptureDevice(int idx) {
+        if (idx < 0) {
+            throw new IllegalArgumentException();
+        }
+        return Settings.get(KEY_CAPTURE_PREFIX + idx, DEFAULT_CAPTURE_SCHEME + "://" + idx);
+    }
+
+    public static void setCaptureDevice(int idx, String device) {
+        if (idx < 0) {
+            throw new IllegalArgumentException();
+        }
+        Settings.put(KEY_CAPTURE_PREFIX + idx, device);
+    }
 }
