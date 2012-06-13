@@ -43,8 +43,7 @@ public class BooleanProperty extends AbstractSingleArgProperty {
 //    public FloatProperty(AbstractComponent component, float min, float max, float def) {
 //        this(component, null, min, max, def);
 //    }
-    private BooleanProperty(Component component, Binding binding,
-            ControlInfo info) {
+    private BooleanProperty(Binding binding, ControlInfo info) {
         super(info);
         this.binding = binding;
 
@@ -86,16 +85,18 @@ public class BooleanProperty extends AbstractSingleArgProperty {
         return binding.getBoundValue();
     }
 
-
+    @Deprecated
     public static BooleanProperty create(Component component, boolean def) {
         return create(component, null, def);
     }
 
+    @Deprecated
     public static BooleanProperty create(Component component, Binding binding,
             boolean def) {
         return create(component, binding, def, null);
     }
     
+    @Deprecated
     public static BooleanProperty create(Component component, Binding binding,
             boolean def, PMap properties) {
         if (binding == null) {
@@ -104,7 +105,25 @@ public class BooleanProperty extends AbstractSingleArgProperty {
         ArgumentInfo[] arguments = new ArgumentInfo[]{PBoolean.info()};
         Argument[] defaults = new Argument[]{PBoolean.valueOf(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
-        return new BooleanProperty(component, binding, info);
+        return new BooleanProperty(binding, info);
+    }
+    
+    public static BooleanProperty create(boolean def) {
+        return create(null, def, null);
+    }
+
+    public static BooleanProperty create(Binding binding, boolean def) {
+        return create(binding, def, null);
+    }
+    
+    public static BooleanProperty create(Binding binding, boolean def, PMap properties) {
+        if (binding == null) {
+            binding = new DefaultBinding(def);
+        }
+        ArgumentInfo[] arguments = new ArgumentInfo[]{PBoolean.info()};
+        Argument[] defaults = new Argument[]{PBoolean.valueOf(def)};
+        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
+        return new BooleanProperty(binding, info);
     }
 
 
