@@ -29,6 +29,7 @@ import net.neilcsmith.praxis.audio.AudioContext;
 import net.neilcsmith.praxis.audio.AudioSettings;
 import net.neilcsmith.praxis.audio.ClientRegistrationException;
 import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
@@ -49,11 +50,16 @@ import org.jaudiolibs.pipes.impl.BusClient;
  *
  * @author Neil C Smith
  */
-public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener {
+public class DefaultAudioRoot extends AbstractRoot {
 
+    private final static Logger LOG = Logger.getLogger(DefaultAudioRoot.class.getName());
+    
+    private final static int DEFAULT_INTERNAL_BUFFERSIZE = 64;
+    
     private AudioContext.InputClient inputClient;
     private AudioContext.OutputClient outputClient;
     private BusClient bus;
+    private BusListener busListener;
     private AudioServer server;
     private ArgumentProperty sampleRate;
     private ArgumentProperty bufferSize;
@@ -63,6 +69,7 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
     private Lookup lookup;
     private Placeholder[] inputs;
     private Placeholder[] outputs;
+    private long period = -1;
 
     public DefaultAudioRoot() {
         buildControls();
@@ -91,23 +98,35 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
     @Override
     public Lookup getLookup() {
         if (lookup == null) {
-            lookup = InstanceLookup.create(super.getLookup(), hub);
+            initLookup();
         }
         return lookup;
     }
 
-    public void nextBuffer(BufferRateSource source) {
-        try {
-            nextControlFrame(source.getTime());
-        } catch (IllegalRootStateException ex) {
-            server.shutdown();
+    private void initLookup() {
+        ExecutionContext exctxt = super.getLookup().get(ExecutionContext.class);
+        if (exctxt == null) {
+            LOG.warning("No ExecutionContext found for DefaultAudioRoot");
+            lookup = InstanceLookup.create(super.getLookup(), hub);
+        } else {
+            lookup = InstanceLookup.create(super.getLookup(), hub, new AudioExecutionContext(exctxt));
         }
     }
 
     @Override
     protected void starting() {
-        bus = new BusClient(2, 2);
-        bus.addBufferRateListener(this);
+        int bsize = DEFAULT_INTERNAL_BUFFERSIZE;
+        if (!bufferSize.getValue().isEmpty()) {
+            try {
+                bsize = PNumber.coerce(bufferSize.getValue()).toIntValue();
+            } catch (Exception ex) {
+                //fall through
+            }
+        }
+        bus = new BusClient(bsize, 2, 2);
+        busListener = new BusListener();
+        bus.addBufferRateListener(busListener);
+        bus.addConfigurationListener(busListener);
         makeConnections(bus);
         try {
             server = createServer(bus);
@@ -149,7 +168,7 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
 
         AudioConfiguration ctxt = new AudioConfiguration(srate, 2, 2, bsize, true);
         return AudioServerLoader.getInstance().load(getLookup(), lib, dev,
-                getAddress().getRootID(), ctxt, bus, null);
+                "praxis-" + getAddress().getRootID(), ctxt, bus, null);
     }
 
     private int getSamplerate() {
@@ -206,6 +225,7 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
                 bus.disconnectAll();
                 server = null;
                 bus = null;
+                busListener = null;
             }
         });
     }
@@ -222,6 +242,26 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
         bus = null;
         if (b != null) {
             b.disconnectAll();
+        }
+    }
+
+    private class BusListener implements BufferRateListener, BusClient.ConfigurationListener {
+
+        public void nextBuffer(BufferRateSource source) {
+            try {
+                nextControlFrame(source.getTime());
+            } catch (IllegalRootStateException ex) {
+                server.shutdown();
+            }
+        }
+
+        public void configure(AudioConfiguration context) throws Exception {
+            period = (long) ((context.getMaxBufferSize()
+                / context.getSampleRate()) * 1000000000);
+        }
+
+        public void shutdown() {
+            period = -1;
         }
     }
 
@@ -299,6 +339,44 @@ public class DefaultAudioRoot extends AbstractRoot implements BufferRateListener
                     }
                 }
             }
+        }
+    }
+
+    private class AudioExecutionContext extends ExecutionContext {
+
+        private ExecutionContext delegate;
+
+        private AudioExecutionContext(ExecutionContext delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public long getPeriod() {
+            return period;
+        }
+
+        public void removeStateListener(StateListener listener) {
+            delegate.removeStateListener(listener);
+        }
+
+        public void removeClockListener(ClockListener listener) {
+            delegate.removeClockListener(listener);
+        }
+
+        public long getTime() {
+            return delegate.getTime();
+        }
+
+        public State getState() {
+            return delegate.getState();
+        }
+
+        public void addStateListener(StateListener listener) {
+            delegate.addStateListener(listener);
+        }
+
+        public void addClockListener(ClockListener listener) {
+            delegate.addClockListener(listener);
         }
     }
 }
