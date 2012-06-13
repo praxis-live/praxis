@@ -24,17 +24,13 @@ package net.neilcsmith.praxis.video.gstreamer.factory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.video.InvalidVideoResourceException;
 import net.neilcsmith.praxis.video.VideoDelegateFactory;
 import net.neilcsmith.praxis.video.gstreamer.GStreamerLibraryLoader;
 import net.neilcsmith.ripl.delegates.VideoDelegate;
-import net.neilcsmith.ripl.gstreamer.DV1394Delegate;
-import net.neilcsmith.ripl.gstreamer.IPCamDelegate;
-import net.neilcsmith.ripl.gstreamer.PlaybinDelegate;
-import net.neilcsmith.ripl.gstreamer.V4LDelegate;
+import net.neilcsmith.ripl.gstreamer.*;
 import org.openide.util.Lookup;
 
 /**
@@ -72,10 +68,17 @@ public class GStreamerFactory implements VideoDelegateFactory {
 
     public VideoDelegate create(URI resource) throws InvalidVideoResourceException, InstantiationException {
         String scheme = resource.getScheme();
+        if (scheme == null) {
+            throw new InvalidVideoResourceException();
+        }
         if (scheme.equals("file") || scheme.equals("http")) {
             return createPlaybinDelegate(resource);
         } else if (scheme.equals("v4l") || scheme.equals("v4l2")) {
             return createV4LDelegate(resource);
+        } else if (scheme.equals("ks")) {
+            return createKSDelegate(resource);
+        } else if (scheme.equals("qtkit")) {
+            return createQTKitDelegate(resource);        
         } else if (scheme.equals("ipcam")) {
             return createIPCamDelegate(resource);
         } else if (scheme.equals("dv1394")) {
@@ -106,4 +109,14 @@ public class GStreamerFactory implements VideoDelegateFactory {
     private VideoDelegate createV4LDelegate(URI resource) {
         return V4LDelegate.create(resource);
     }
+    
+    
+    private VideoDelegate createKSDelegate(URI resource) {
+        return KSDelegate.create(resource);
+    }
+    
+    private VideoDelegate createQTKitDelegate(URI resource) {
+        return QTKitDelegate.create(resource);
+    }
+    
 }

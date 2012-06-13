@@ -34,7 +34,7 @@ import net.neilcsmith.praxis.video.VideoDelegateFactory;
  */
 public class GStreamerFactoryProvider implements VideoDelegateFactory.Provider {
     
-    private static String[] schemes = { "file", "http", "v4l", "v4l2", "ipcam", "dv1394"};
+    private static String[] schemes = { "file", "http", "v4l", "v4l2", "ks", "qtkit", "ipcam", "dv1394"};
 
     public Set<String> getSupportedSchemes() {
         return new LinkedHashSet<String>(Arrays.asList(schemes)); 
