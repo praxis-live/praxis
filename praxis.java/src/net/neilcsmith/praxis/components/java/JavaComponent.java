@@ -39,12 +39,13 @@ import org.codehaus.janino.ClassBodyEvaluator;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public class JavaComponent extends AbstractJavaComponent {
-    
-    private static final String[] IMPORTS = {
+
+    private final static String[] IMPORTS = {
         "java.util.*",
         "net.neilcsmith.praxis.java.*",
         "static net.neilcsmith.praxis.java.Constants.*"
     };
+    private final static String TEMPLATE = "\npublic void setup() {\n  \n}\n\npublic void update() {\n  \n}";
 
     public JavaComponent() {
         setupCodeControl();
@@ -56,12 +57,14 @@ public class JavaComponent extends AbstractJavaComponent {
     private void setupCodeControl() {
         registerControl("code", new CodeProperty());
     }
-    
+
     private class CodeProperty extends AbstractAsyncProperty<CodeDelegate> {
 
         private CodeProperty() {
             super(ArgumentInfo.create(
-                    PString.class, PMap.create(PString.KEY_MIME_TYPE, "text/x-praxis-java")), 
+                    PString.class, PMap.create(
+                    PString.KEY_MIME_TYPE, "text/x-praxis-java",
+                    ArgumentInfo.KEY_TEMPLATE, TEMPLATE)),
                     CodeDelegate.class, PString.EMPTY);
         }
 
@@ -104,5 +107,4 @@ public class JavaComponent extends AbstractJavaComponent {
             return PReference.wrap(delegate);
         }
     }
-    
 }
