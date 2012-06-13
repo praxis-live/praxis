@@ -1,18 +1,20 @@
-/*******************************************************************************
+/**
+ * *****************************************************************************
  * Copyright 2011 See AUTHORS file.
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ * ****************************************************************************
+ */
 package net.neilcsmith.ripl.render.opengl.internal;
 
 import java.util.HashMap;
@@ -23,9 +25,11 @@ import net.neilcsmith.ripl.render.opengl.internal.VertexAttributes.Usage;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL14;
 
-/** <p>
- * 
- * @author mzechner */
+/**
+ * <p>
+ *
+ * @author mzechner
+ */
 // derived from SpriteBatch in libgdx
 public class GLRenderer implements Disposable {
 
@@ -55,9 +59,13 @@ public class GLRenderer implements Disposable {
     private ShaderProgram shader;
     private float color = Color.WHITE.toFloatBits();
     private Color tempColor = new Color(1, 1, 1, 1);
-    /** number of render calls **/
+    /**
+     * number of render calls *
+     */
     public int renderCalls = 0;
-    /** the maximum number of sprites rendered in one batch so far **/
+    /**
+     * the maximum number of sprites rendered in one batch so far *
+     */
     public int maxSpritesInBatch = 0;
     private ShaderProgram customShader = null;
     private GLSurface surface;
@@ -66,18 +74,20 @@ public class GLRenderer implements Disposable {
         this(surface, 1000, 1);
     }
 
-    /** <p>
-     * Constructs a new TextureRenderer. Sets the projection matrix to an orthographic projection with y-axis point upwards, x-axis
-     * point to the right and the origin being in the bottom left corner of the screen. The projection will be pixel perfect with
-     * respect to the screen resolution.
+    /**
+     * <p> Constructs a new TextureRenderer. Sets the projection matrix to an
+     * orthographic projection with y-axis point upwards, x-axis point to the
+     * right and the origin being in the bottom left corner of the screen. The
+     * projection will be pixel perfect with respect to the screen resolution.
      * </p>
-     * 
-     * <p>
-     * The size parameter specifies the maximum size of a single batch in number of sprites
-     * </p>
-     * 
+     *
+     * <p> The size parameter specifies the maximum size of a single batch in
+     * number of sprites </p>
+     *
      * @param size the batch size in number of sprites
-     * @param buffers the number of buffers to use. only makes sense with VBOs. This is an expert function. */
+     * @param buffers the number of buffers to use. only makes sense with VBOs.
+     * This is an expert function.
+     */
     private GLRenderer(GLSurface surface, int size, int buffers) {
 
         this.surface = surface;
@@ -108,7 +118,7 @@ public class GLRenderer implements Disposable {
         }
         mesh = this.buffers[0];
 
-        createShader(); // one default shader per GLContext
+        createShader();
 
     }
 
@@ -210,8 +220,11 @@ public class GLRenderer implements Disposable {
 
     }
 
-    /** Finishes off rendering. Enables depth writes, disables blending and texturing. Must always be called after a call to
-     * {@link #beginDrawing()} */
+    /**
+     * Finishes off rendering. Enables depth writes, disables blending and
+     * texturing. Must always be called after a call to
+     * {@link #beginDrawing()}
+     */
     private void flush() {
 
         if (active != this) {
@@ -232,6 +245,7 @@ public class GLRenderer implements Disposable {
 
         if (customShader != null) {
             customShader.end();
+//            customShader = null;
         } else {
             shader.end();
         }
@@ -240,24 +254,34 @@ public class GLRenderer implements Disposable {
 
     }
 
-    /** Sets the color used to tint images when they are added to the TextureRenderer. Default is {@link Color#WHITE}. */
+    /**
+     * Sets the color used to tint images when they are added to the
+     * TextureRenderer. Default is {@link Color#WHITE}.
+     */
     public void setColor(Color tint) {
         color = tint.toFloatBits();
     }
 
-    /** @see #setColor(Color) */
+    /**
+     * @see #setColor(Color)
+     */
     public void setColor(float r, float g, float b, float a) {
         int intBits = (int) (255 * a) << 24 | (int) (255 * b) << 16 | (int) (255 * g) << 8 | (int) (255 * r);
         color = Float.intBitsToFloat(intBits & 0xfeffffff);
     }
 
-    /** @see #setColor(Color)
-     * @see Color#toFloatBits() */
+    /**
+     * @see #setColor(Color)
+     * @see Color#toFloatBits()
+     */
     public void setColor(float color) {
         this.color = color;
     }
 
-    /** @return the rendering color of this TextureRenderer. Manipulating the returned instance has no effect. */
+    /**
+     * @return the rendering color of this TextureRenderer. Manipulating the
+     * returned instance has no effect.
+     */
     public Color getColor() {
         int intBits = Float.floatToRawIntBits(color);
         Color color = this.tempColor;
@@ -294,12 +318,18 @@ public class GLRenderer implements Disposable {
         draw(region, x, y, width, height);
     }
 
-    /** Draws a rectangle with the bottom left corner at x,y having the width and height of the region. */
+    /**
+     * Draws a rectangle with the bottom left corner at x,y having the width and
+     * height of the region.
+     */
     private void draw(TextureRegion region, float x, float y) {
         draw(region, x, y, Math.abs(region.getRegionWidth()), Math.abs(region.getRegionHeight()));
     }
 
-    /** Draws a rectangle with the bottom left corner at x,y and stretching the region to cover the given width and height. */
+    /**
+     * Draws a rectangle with the bottom left corner at x,y and stretching the
+     * region to cover the given width and height.
+     */
     private void draw(TextureRegion region, float x, float y, float width, float height) {
 //        if (!drawing) {
 //            throw new IllegalStateException("SpriteBatch.begin must be called before draw.");
@@ -380,8 +410,10 @@ public class GLRenderer implements Disposable {
         }
 
         if (customShader != null) {
+            LOGGER.finest("Rendering with custom shader");
             mesh.render(customShader, GL11.GL_TRIANGLES, 0, spritesInBatch * 6);
         } else {
+            LOGGER.finest("Rendering with default shader");
             mesh.render(shader, GL11.GL_TRIANGLES, 0, spritesInBatch * 6);
         }
 
@@ -394,7 +426,10 @@ public class GLRenderer implements Disposable {
         mesh = buffers[currBufferIdx];
     }
 
-    /** Disables blending for drawing sprites. Does not disable blending for text rendering */
+    /**
+     * Disables blending for drawing sprites. Does not disable blending for text
+     * rendering
+     */
     public void disableBlending() {
         if (blendingDisabled) {
             return;
@@ -403,7 +438,9 @@ public class GLRenderer implements Disposable {
         blendingDisabled = true;
     }
 
-    /** Enables blending for sprites */
+    /**
+     * Enables blending for sprites
+     */
     public void enableBlending() {
         if (!blendingDisabled) {
             return;
@@ -412,10 +449,12 @@ public class GLRenderer implements Disposable {
         blendingDisabled = false;
     }
 
-    /** Sets the blending function to be used when rendering sprites.
-     * 
+    /**
+     * Sets the blending function to be used when rendering sprites.
+     *
      * @param srcFunc the source function, e.g. GL11.GL_SRC_ALPHA
-     * @param dstFunc the destination function, e.g. GL11.GL_ONE_MINUS_SRC_ALPHA */
+     * @param dstFunc the destination function, e.g. GL11.GL_ONE_MINUS_SRC_ALPHA
+     */
     public void setBlendFunction(int srcFunc, int dstFunc) {
         setBlendFunction(srcFunc, dstFunc, srcFunc, dstFunc);
     }
@@ -432,7 +471,9 @@ public class GLRenderer implements Disposable {
 
     }
 
-    /** Disposes all resources associated with this TextureRenderer */
+    /**
+     * Disposes all resources associated with this TextureRenderer
+     */
     public void dispose() {
         for (int i = 0; i < buffers.length; i++) {
             buffers[i].dispose();
@@ -444,34 +485,79 @@ public class GLRenderer implements Disposable {
 
     private void setupMatrices() {
         combinedMatrix.set(projectionMatrix).mul(transformMatrix);
+//        if (customShader != null) {
+//            customShader.setUniformMatrix("u_proj", projectionMatrix);
+//            customShader.setUniformMatrix("u_trans", transformMatrix);
+//            customShader.setUniformMatrix("u_projTrans", combinedMatrix);
+//            customShader.setUniformi("u_texture", 0);
+//        } else {
+        ShaderProgram prog = customShader == null ? shader : customShader; 
+        if (prog.hasUniform("u_projectionViewMatrix")) {
+            prog.setUniformMatrix("u_projectionViewMatrix", combinedMatrix);
+        }
+        if (prog.hasUniform("u_texture")) {
+            prog.setUniformi("u_texture", 0);
+        }
+        
+
+    }
+
+    /**
+     * Sets the shader to be used in a GLES 2.0 environment. Vertex position
+     * attribute is called "a_position", the texture coordinates attribute is
+     * called called "a_texCoords0", the color attribute is called "a_color".
+     * See
+     * {@link ShaderProgram#POSITION_ATTRIBUTE}, {@link ShaderProgram#COLOR_ATTRIBUTE}
+     * and {@link ShaderProgram#TEXCOORD_ATTRIBUTE} which gets "0" appened to
+     * indicate the use of the first texture unit. The projection matrix is
+     * uploaded via a mat4 uniform called "u_proj", the transform matrix is
+     * uploaded via a uniform called "u_trans", the combined transform and
+     * projection matrx is is uploaded via a mat4 uniform called "u_projTrans".
+     * The texture sampler is passed via a uniform called "u_texture".
+     *
+     * Call this method with a null argument to use the default shader.
+     *
+     * @param shader the {@link ShaderProgram} or null to use the default
+     * shader.
+     */
+    private void setShader(ShaderProgram shader) {
+        activate();
+        renderMesh();
         if (customShader != null) {
-            customShader.setUniformMatrix("u_proj", projectionMatrix);
-            customShader.setUniformMatrix("u_trans", transformMatrix);
-            customShader.setUniformMatrix("u_projTrans", combinedMatrix);
-            customShader.setUniformi("u_texture", 0);
+            LOGGER.log(Level.FINE,"Unbinding custom shader");
+            customShader.end();
         } else {
-            shader.setUniformMatrix("u_projectionViewMatrix", combinedMatrix);
-            shader.setUniformi("u_texture", 0);
+            LOGGER.log(Level.FINE,"Unbinding default shader");
+            this.shader.end();
         }
 
-    }
-
-    /** Sets the shader to be used in a GLES 2.0 environment. Vertex position attribute is called "a_position", the texture
-     * coordinates attribute is called called "a_texCoords0", the color attribute is called "a_color". See
-     * {@link ShaderProgram#POSITION_ATTRIBUTE}, {@link ShaderProgram#COLOR_ATTRIBUTE} and {@link ShaderProgram#TEXCOORD_ATTRIBUTE}
-     * which gets "0" appened to indicate the use of the first texture unit. The projection matrix is uploaded via a mat4 uniform
-     * called "u_proj", the transform matrix is uploaded via a uniform called "u_trans", the combined transform and projection
-     * matrx is is uploaded via a mat4 uniform called "u_projTrans". The texture sampler is passed via a uniform called
-     * "u_texture".
-     * 
-     * Call this method with a null argument to use the default shader.
-     * 
-     * @param shader the {@link ShaderProgram} or null to use the default shader. */
-    public void setShader(ShaderProgram shader) {
         customShader = shader;
+
+        if (customShader != null) {
+            customShader.begin();
+            LOGGER.log(Level.FINE,"Binding custom shader");
+        } else {
+            this.shader.begin();
+            LOGGER.log(Level.FINE,"Binding default shader");
+        }
+        setupMatrices();
+
+
     }
 
-    /** @return whether blending for sprites is enabled */
+    public void bind(ShaderProgram shader) {
+        setShader(shader);
+    }
+
+    public void unbind(ShaderProgram shader) {
+        if (customShader == shader) {
+            setShader(null);
+        }
+    }
+
+    /**
+     * @return whether blending for sprites is enabled
+     */
     public boolean isBlendingEnabled() {
         return !blendingDisabled;
     }

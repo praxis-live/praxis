@@ -29,6 +29,7 @@ import java.util.Map;
 import net.neilcsmith.ripl.render.opengl.internal.GLContext;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL21;
 
 //import com.badlogic.gdx.Application;
 //import com.badlogic.gdx.Gdx;
@@ -117,7 +118,7 @@ public class ShaderProgram implements Disposable {
 	private String[] attributeNames;
 
 	/** program handle **/
-	private int program;
+	public int program;
 
 	/** vertex shader handle **/
 	private int vertexShaderHandle;
@@ -207,31 +208,31 @@ public class ShaderProgram implements Disposable {
 
 		int compiled = intbuf.get(0);
 		if (compiled == 0) {
-//			GL20.glGetShader(shader, GL20.GL_INFO_LOG_LENGTH, intbuf);
-//			int infoLogLength = intbuf.get(0);
-//			if (infoLogLength > 1) {
-//				String infoLog = getShaderInfoLog(shader);
-//				log += infoLog;
-//			}
+			GL20.glGetShader(shader, GL20.GL_INFO_LOG_LENGTH, intbuf);
+			int infoLogLength = intbuf.get(0);
+			if (infoLogLength > 1) {
+				String infoLog = getShaderInfoLog(shader);
+				log += infoLog;
+			}
 			return -1;
 		}
 
 		return shader;
 	}
         
-//        private String getShaderInfoLog (int shader) {
-//		ByteBuffer buffer = ByteBuffer.allocateDirect(1024 * 10);
-//		buffer.order(ByteOrder.nativeOrder());
-//		ByteBuffer tmp = ByteBuffer.allocateDirect(4);
-//		tmp.order(ByteOrder.nativeOrder());
-//		IntBuffer intBuffer = tmp.asIntBuffer();
-//
-//		GL20.glGetShaderInfoLog(shader, intBuffer, buffer);
-//		int numBytes = intBuffer.get(0);
-//		byte[] bytes = new byte[numBytes];
-//		buffer.get(bytes);
-//		return new String(bytes);
-//	}
+        private String getShaderInfoLog (int shader) {
+		ByteBuffer buffer = ByteBuffer.allocateDirect(1024 * 10);
+		buffer.order(ByteOrder.nativeOrder());
+		ByteBuffer tmp = ByteBuffer.allocateDirect(4);
+		tmp.order(ByteOrder.nativeOrder());
+		IntBuffer intBuffer = tmp.asIntBuffer();
+
+		GL20.glGetShaderInfoLog(shader, intBuffer, buffer);
+		int numBytes = intBuffer.get(0);
+		byte[] bytes = new byte[numBytes];
+		buffer.get(bytes);
+		return new String(bytes);
+	}
 
 	private int linkProgram () {
 		int program = GL20.glCreateProgram();
@@ -259,14 +260,14 @@ public class ShaderProgram implements Disposable {
 	/** @return the log info for the shader compilation and program linking stage. The shader needs to be bound for this method to
 	 *         have an effect. */
 	public String getLog () {
-//		if (isCompiled) {
-//			Gdx.gl20.glGetProgramiv(program, GL20.GL_INFO_LOG_LENGTH, intbuf);
-//			int infoLogLength = intbuf.get(0);
-//			if (infoLogLength > 1) log = Gdx.gl20.glGetProgramInfoLog(program);
-//			return log;
-//		} else {
+		if (isCompiled) {
+			GL20.glGetProgram(program, GL20.GL_INFO_LOG_LENGTH, intbuf);
+			int infoLogLength = intbuf.get(0);
+			if (infoLogLength > 1) log = GL20.glGetProgramInfoLog(program, infoLogLength);
 			return log;
-//		}
+		} else {
+			return log;
+		}
 	}
 
 	/** @return whether this ShaderProgram compiled successfully. */
@@ -726,7 +727,7 @@ public class ShaderProgram implements Disposable {
 	/** @param name the name of the uniform
 	 * @return the type of the uniform, one of {@link GL20#GL_FLOAT}, {@link GL20#GL_FLOAT_VEC2} etc. */
 	public int getUniformType (String name) {
-		Integer type = attributes.get(name);
+		Integer type = uniformTypes.get(name);
 		if (type == null)
 			return 0;
 		else

@@ -196,7 +196,7 @@ public class GLSurface extends Surface {
     }
 
     @Override
-    public Surface createSurface(int width, int height, boolean alpha, SurfaceCapabilities caps) {
+    public GLSurface createSurface(int width, int height, boolean alpha, SurfaceCapabilities caps) {
         return new GLSurface(this, width, height, alpha);
     }
 }
