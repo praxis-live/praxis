@@ -139,7 +139,7 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
             throw new ArgumentFormatException(ex);
         }
     }
-
+        
     public static PNumber coerce(
             Argument arg) throws ArgumentFormatException {
         if (arg instanceof PNumber) {
