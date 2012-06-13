@@ -29,6 +29,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.LinkPort;
 import org.jaudiolibs.audioops.impl.CombOp;
 import org.jaudiolibs.audioops.impl.ContainerOp;
 import org.jaudiolibs.pipes.impl.OpHolder;
@@ -44,6 +45,7 @@ public class CombFilter extends AbstractComponent {
     private FloatProperty frequency;
     private FloatProperty feedback;
     private FloatProperty mix;
+    private LinkPort<CombFilter> link;
 
     public CombFilter() {
         comb = new CombOp();
@@ -63,13 +65,15 @@ public class CombFilter extends AbstractComponent {
         mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
-        
+        link = new LinkPort<CombFilter>(CombFilter.class, new LinkHandler(), this);
+        registerPort(LinkPort.ID, link);
     }
 
     private class MixBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             container.setMix((float) value);
+            link.fireUpdate();
         }
 
         public double getBoundValue() {
@@ -82,6 +86,7 @@ public class CombFilter extends AbstractComponent {
 
         public void setBoundValue(long time, double value) {
             comb.setFrequency((float) value);
+            link.fireUpdate();
         }
 
         public double getBoundValue() {
@@ -94,12 +99,23 @@ public class CombFilter extends AbstractComponent {
 
         public void setBoundValue(long time, double value) {
             comb.setFeedback((float) value);
+            link.fireUpdate();
         }
 
         public double getBoundValue() {
             return comb.getFeedback();
         }
 
+    }
+    
+    private class LinkHandler implements LinkPort.Handler<CombFilter> {
+
+        public void update(CombFilter source) {
+            comb.setFrequency(source.comb.getFrequency());
+            comb.setFeedback(source.comb.getFeedback());
+            container.setMix(source.container.getMix());
+        }
+        
     }
 
 }

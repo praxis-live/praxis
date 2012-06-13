@@ -52,7 +52,7 @@ public class Gain extends AbstractComponent {
         registerControl("level", level);
         registerPort("level", level.createPort()); 
         link = new LinkPort<GainOp>(GainOp.class, new LinkHandler(), op);
-        registerPort("link", link);
+        registerPort(LinkPort.ID, link);
     }
     
     private class GainBinding implements FloatProperty.Binding {

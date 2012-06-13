@@ -28,6 +28,7 @@ import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.LinkPort;
 import org.jaudiolibs.audioops.impl.ContainerOp;
 import org.jaudiolibs.audioops.impl.VariableDelayOp;
 import org.jaudiolibs.pipes.impl.OpHolder;
@@ -43,6 +44,7 @@ public class MonoDelay2s extends AbstractComponent {
     private FloatProperty time;
     private FloatProperty feedback;
     private FloatProperty mix;
+    private LinkPort<MonoDelay2s> link;
 
     public MonoDelay2s() {
         delay = new VariableDelayOp(2);
@@ -61,13 +63,15 @@ public class MonoDelay2s extends AbstractComponent {
         mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
-        
+        link = new LinkPort<MonoDelay2s>(MonoDelay2s.class, new LinkHandler(), this);
+        registerPort(LinkPort.ID, link);
     }
 
     private class MixBinding implements FloatProperty.Binding {
-
+        
         public void setBoundValue(long time, double value) {
             container.setMix((float) value);
+            link.fireUpdate();
         }
 
         public double getBoundValue() {
@@ -80,6 +84,7 @@ public class MonoDelay2s extends AbstractComponent {
 
         public void setBoundValue(long time, double value) {
             delay.setDelay((float) value);
+            link.fireUpdate();
         }
 
         public double getBoundValue() {
@@ -92,6 +97,7 @@ public class MonoDelay2s extends AbstractComponent {
 
         public void setBoundValue(long time, double value) {
             delay.setFeedback((float) value);
+            link.fireUpdate();
         }
 
         public double getBoundValue() {
@@ -100,4 +106,16 @@ public class MonoDelay2s extends AbstractComponent {
 
     }
 
+    
+    private class LinkHandler implements LinkPort.Handler<MonoDelay2s> {
+
+        public void update(MonoDelay2s source) {
+            delay.setDelay(source.delay.getDelay());
+            delay.setFeedback(source.delay.getFeedback());
+            container.setMix(source.container.getMix());
+        }
+        
+    }
+    
+    
 }

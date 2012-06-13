@@ -29,6 +29,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.LinkPort;
 import net.neilcsmith.praxis.impl.StringProperty;
 import org.jaudiolibs.audioops.impl.ContainerOp;
 import org.jaudiolibs.audioops.impl.IIRFilterOp;
@@ -47,6 +48,7 @@ public class IIRFilter extends AbstractComponent {
     private FloatProperty resonance;
     private FloatProperty mix;
     private StringProperty type;
+    private LinkPort<IIRFilter> link;
 
     public IIRFilter() {
         filter = new IIRFilterOp();
@@ -67,7 +69,8 @@ public class IIRFilter extends AbstractComponent {
         mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
-        
+        link = new LinkPort<IIRFilter>(IIRFilter.class, new LinkHandler(), this);
+        registerPort(LinkPort.ID, link);
     }
 
     private StringProperty createTypeControl() {
@@ -81,6 +84,7 @@ public class IIRFilter extends AbstractComponent {
             @Override
             public void setBoundValue(long time, String value) {
                 filter.setFilterType(Type.valueOf(value));
+                link.fireUpdate();
             }
 
             @Override
@@ -95,6 +99,7 @@ public class IIRFilter extends AbstractComponent {
 
         public void setBoundValue(long time, double value) {
             container.setMix((float) value);
+            link.fireUpdate();
         }
 
         public double getBoundValue() {
@@ -107,6 +112,7 @@ public class IIRFilter extends AbstractComponent {
 
         public void setBoundValue(long time, double value) {
             filter.setFrequency((float) value);
+            link.fireUpdate();
         }
 
         public double getBoundValue() {
@@ -119,11 +125,23 @@ public class IIRFilter extends AbstractComponent {
 
         public void setBoundValue(long time, double value) {
             filter.setResonance((float) value);
+            link.fireUpdate();
         }
 
         public double getBoundValue() {
             return filter.getResonance();
         }
 
+    }
+    
+    private class LinkHandler implements LinkPort.Handler<IIRFilter> {
+
+        public void update(IIRFilter source) {
+            filter.setFilterType(source.filter.getFilterType());
+            filter.setFrequency(source.filter.getFrequency());
+            filter.setResonance(source.filter.getResonance());
+            container.setMix(source.container.getMix());
+        }
+        
     }
 }
