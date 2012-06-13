@@ -31,6 +31,7 @@ import org.gstreamer.Pipeline;
 import org.gstreamer.SeekFlags;
 import org.gstreamer.SeekType;
 import org.gstreamer.elements.PlayBin;
+import org.gstreamer.elements.PlayBin2;
 import org.gstreamer.elements.RGBDataSink;
 import org.gstreamer.elements.RGBDataSink.Listener;
 
@@ -41,7 +42,8 @@ import org.gstreamer.elements.RGBDataSink.Listener;
 public class PlaybinDelegate extends AbstractGstDelegate {
 
     private URI loc;
-    private PlayBin pipe;
+//    private PlayBin pipe;
+    private PlayBin2 pipe;
 
     protected PlaybinDelegate(URI loc) {
         this.loc = loc;
@@ -49,7 +51,8 @@ public class PlaybinDelegate extends AbstractGstDelegate {
 
     @Override
     protected Pipeline buildPipeline(Listener listener) throws Exception {
-        pipe = new PlayBin("PlayBin", loc);
+//        pipe = new PlayBin("PlayBin", loc);
+        pipe = new PlayBin2("PlayBin2", loc);
         pipe.setAudioSink(null);
         RGBDataSink sink = new RGBDataSink(("sink"), listener);
         sink.setPassDirectBuffer(true);
