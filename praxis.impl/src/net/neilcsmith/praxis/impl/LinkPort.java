@@ -34,6 +34,8 @@ import net.neilcsmith.praxis.core.types.PMap;
  * @author nsigma
  */
 public final class LinkPort<T> implements Port {
+    
+    public final static String ID = "link";
 
     private final static Logger LOG = Logger.getLogger(LinkPort.class.getName());
     private final Class<T> type;
