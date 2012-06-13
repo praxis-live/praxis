@@ -66,18 +66,27 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
             addComponent("video:still", Still.class);
             addComponent("video:snapshot", Snapshot.class);
             addComponent("video:splitter", Splitter.class);
-
-            addComponent("video:time-fx:ripple", Ripple.class);
-            addComponent("video:time-fx:difference", Difference.class);
-            addComponent("video:mix:xfader", XFader.class);
-            addComponent("video:mix:composite", Composite.class);
-
             addComponent("video:player", VideoPlayer.class);
             addComponent("video:capture", VideoCapture.class);
 
-            addComponent("video:filter:blur", Blur.class);
+            // ANALYSIS
+            addComponent("video:analysis:frame-delay", FrameDelay.class);
+            addComponent("video:analysis:difference", net.neilcsmith.praxis.video.components.analysis.Difference.class);
+            addComponent("video:analysis:simple-tracker", BlobTracker.class);
 
+            // FILTER
+            addComponent("video:filter:blur", Blur.class);
+            
+            // MIX
+            addComponent("video:mix:xfader", XFader.class);
+            addComponent("video:mix:composite", Composite.class);
+
+            // SOURCE
             addComponent("video:source:noise", Noise.class);
+            
+            // TIME-FX
+            addComponent("video:time-fx:ripple", Ripple.class);
+            addComponent("video:time-fx:difference", Difference.class);
 
 
             // TEST COMPONENTS
