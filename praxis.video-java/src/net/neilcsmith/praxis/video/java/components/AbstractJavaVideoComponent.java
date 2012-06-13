@@ -64,6 +64,8 @@ public abstract class AbstractJavaVideoComponent extends AbstractJavaComponent {
         "static net.neilcsmith.praxis.video.java.VideoConstants.*"
     };
     
+    private final static String TEMPLATE = "\npublic void setup() {\n  \n}\n\npublic void draw() {\n  \n}";
+    
     private PImage[] images;
 
     protected AbstractJavaVideoComponent() {
@@ -112,7 +114,9 @@ public abstract class AbstractJavaVideoComponent extends AbstractJavaComponent {
 
         private CodeProperty() {
             super(ArgumentInfo.create(
-                    PString.class, PMap.create(PString.KEY_MIME_TYPE, "text/x-praxis-java")), 
+                    PString.class, PMap.create(
+                    PString.KEY_MIME_TYPE, "text/x-praxis-java",
+                    ArgumentInfo.KEY_TEMPLATE, TEMPLATE)), 
                     VideoCodeDelegate.class, PString.EMPTY);
         }
 
