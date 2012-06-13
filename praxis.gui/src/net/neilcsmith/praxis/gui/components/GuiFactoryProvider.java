@@ -48,6 +48,7 @@ public class GuiFactoryProvider implements ComponentFactoryProvider {
             addRoot("root:gui", DefaultGuiRoot.class);
 
             // COMPONENTS
+            
             addComponent("gui:h-slider", HSlider.class);
             addComponent("gui:v-slider", VSlider.class);
             addComponent("gui:h-rangeslider", HRangeSlider.class);
@@ -56,6 +57,8 @@ public class GuiFactoryProvider implements ComponentFactoryProvider {
             addComponent("gui:togglebutton", ToggleButton.class);
             addComponent("gui:xy-pad", XYController.class);
             addComponent("gui:filefield", FileField.class);
+            addComponent("gui:combobox", ComboBox.class);
+            addComponent("gui:textfield", TextField.class);
             // GUI containers
             addComponent("gui:panel", Panel.class);
             addComponent("gui:tabs", Tabs.class);
