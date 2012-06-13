@@ -129,7 +129,7 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
             if (info != null) {
                 intHint = info.getProperties().get("scale-hint");
             }
-            
+
         }
         if (intHint == null) {
             interpolator = LinearInterpolator.getInstance();
@@ -186,14 +186,12 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
     public void updateBindingConfiguration() {
         ControlBinding binding = getBinding();
         if (binding == null) {
-            return;
+            info = null;
+        } else {
+            info = binding.getBindingInfo();
         }
-        info = binding.getBindingInfo();
-        if (info != null) {
-            updateAllowedRange();
-            updateScale();
-        }
-
+        updateAllowedRange();
+        updateScale();
     }
 
     private class ChangeHandler implements ChangeListener {
@@ -210,8 +208,6 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
     public boolean getValueIsAdjusting() {
         return model.getValueIsAdjusting();
     }
-
-
 
     private double convertToDouble(int value) {
         int mMin = model.getMinimum();
