@@ -30,6 +30,7 @@ import net.neilcsmith.praxis.components.math.Normalize;
 import net.neilcsmith.praxis.components.math.RandomFloat;
 import net.neilcsmith.praxis.components.math.Scale;
 import net.neilcsmith.praxis.components.math.Threshold;
+import net.neilcsmith.praxis.components.routing.Gate;
 import net.neilcsmith.praxis.components.routing.Inhibitor;
 import net.neilcsmith.praxis.components.routing.Join;
 import net.neilcsmith.praxis.components.routing.Send;
@@ -82,6 +83,7 @@ public class FactoryProvider implements ComponentFactoryProvider {
             addComponent("core:test:math:normalize", Normalize.class);
 
             //ROUTING
+            addComponent("core:routing:gate", Gate.class);
             addComponent("core:routing:join", Join.class);
             addComponent("core:routing:inhibitor", Inhibitor.class);
             addComponent("core:routing:send", Send.class);
