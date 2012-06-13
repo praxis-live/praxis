@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -56,6 +56,7 @@ import org.jaudiolibs.audioservers.AudioServer;
 
 /**
  * Implementation of an AudioServer using Javasound.
+ *
  * @author Neil C Smith
  */
 public class JavasoundAudioServer implements AudioServer {
@@ -70,8 +71,8 @@ public class JavasoundAudioServer implements AudioServer {
     public static enum TimingMode {
 
         /**
-         * Blocking timing mode. Block on write to output line.
-         * Javasound output buffer is same size as internal buffers.
+         * Blocking timing mode. Block on write to output line. Javasound output
+         * buffer is same size as internal buffers.
          */
         Blocking,
         /**
@@ -80,8 +81,9 @@ public class JavasoundAudioServer implements AudioServer {
          */
         FramePosition,
         /**
-         * Estimated timing mode. Use large Javasound output buffer.
-         * Determine when to write to output line by estimating position using System.nanotime().
+         * Estimated timing mode. Use large Javasound output buffer. Determine
+         * when to write to output line by estimating position using
+         * System.nanotime().
          */
         // @TODO Investigate whether xruns in underlying library are causing latency to increase.
         Estimated
@@ -91,9 +93,7 @@ public class JavasoundAudioServer implements AudioServer {
 
         New, Initialising, Active, Closing, Terminated
     };
-
     private final static int NON_BLOCKING_MIN_BUFFER = 16384;
-
     // JS line defaults - need way to make these settable.
     private int nonBlockingOutputRatio = 16;
     private int lineBitSize = 16;
@@ -116,7 +116,6 @@ public class JavasoundAudioServer implements AudioServer {
     private List<FloatBuffer> inputBuffers;
     private List<FloatBuffer> outputBuffers;
     private AudioFloatConverter converter;
-
 
     private JavasoundAudioServer(Mixer inputMixer, Mixer outputMixer, TimingMode mode,
             AudioConfiguration context, AudioClient client) {
@@ -223,20 +222,29 @@ public class JavasoundAudioServer implements AudioServer {
         outputLine.start();
 
         long startTime = System.nanoTime();
-        double bufferTime = ((double) context.getMaxBufferSize() /
-                context.getSampleRate()) * 1000000000;
+        long now = startTime;
+        double bufferTime = ((double) context.getMaxBufferSize()
+                / context.getSampleRate());
+        TimeFilter dll = new TimeFilter(bufferTime, 0.5);
+        bufferTime *= 1e9;
         long bufferCount = 0;
         int bufferSize = context.getMaxBufferSize();
+        final boolean debug = LOG.isLoggable(Level.FINEST);
+
         try {
             while (state.get() == State.Active) {
+                bufferCount++;
+                now = System.nanoTime();
                 readInput();
-                if (client.process(System.nanoTime(), inputBuffers, outputBuffers, bufferSize)) {
+                if (client.process((long) (dll.update(now / 1e9) * 1e9), inputBuffers, outputBuffers, bufferSize)) {
                     writeOutput();
                     switch (mode) {
                         case Estimated:
+//                            while (((now - startTime) / bufferTime) < bufferCount) {
                             while (((System.nanoTime() - startTime) / bufferTime) < bufferCount) {
                                 try {
                                     Thread.sleep(1);
+//                                    now = System.nanoTime();
                                 } catch (Exception ex) {
                                 }
                             }
@@ -248,18 +256,41 @@ public class JavasoundAudioServer implements AudioServer {
                                 } catch (Exception ex) {
                                 }
                             }
+//                            now = System.nanoTime();
                             break;
+                        default:
+//                            now = System.nanoTime();
                     }
-                    bufferCount++;
                 } else {
                     shutdown();
+                }
+                if (debug) {
+                    processDebug(dll);
                 }
             }
         } catch (Exception ex) {
             Logger.getLogger(JavasoundAudioServer.class.getName()).log(Level.SEVERE, "", ex);
         }
+    }
 
+    private void processDebug(TimeFilter dll) {
+        long x = dll.ncycles - 1;
+        if (x == 0) {
+            LOG.finest("| audiotime drift | filter drift  | systime jitter | filter jitter  |");
+        }
+        if (x % 1000 == 0) {
+            double device_drift = (dll.device_time - dll.system_time) * 1000.0;
+            double filter_drift = (dll.filter_time - dll.system_time) * 1000.0;
+            double device_rate_error = device_drift / dll.ncycles;
+            double filter_jitter = dll.filter_period_error - device_rate_error;
+            double system_jitter = dll.system_period_error - device_rate_error;
 
+            LOG.finest(String.format("| %15.6f | %13.6f | %14.6f | %14.6f |",
+                    device_drift,
+                    filter_drift,
+                    system_jitter,
+                    filter_jitter));
+        }
     }
 
     private void readInput() {
@@ -319,26 +350,26 @@ public class JavasoundAudioServer implements AudioServer {
         }
     }
 
-
     /**
      * Create a JavasoundAudioServer.
      *
      *
-     * @param inputMixer Javasound mixer to use for audio input. Can be null as long
-     * as the context passed in requests no audio input channels.
+     * @param inputMixer Javasound mixer to use for audio input. Can be null as
+     * long as the context passed in requests no audio input channels.
      * @param outputMixer Javasound mixer to use for audio output.
-     * @param context Requested audio configuration. Variable buffer size property
-     * is ignored.
-     * @param mode Timing mode to use.  For lowest latency use TimingMode.Estimated 
-     * or TimingMode.FramePosition.
+     * @param context Requested audio configuration. Variable buffer size
+     * property is ignored.
+     * @param mode Timing mode to use. For lowest latency use
+     * TimingMode.Estimated or TimingMode.FramePosition.
      * @param client Audio client to process every callback.
-     * @return server 
-     * @throws IllegalArgumentException if requested context has no output channels.
+     * @return server
+     * @throws IllegalArgumentException if requested context has no output
+     * channels.
      */
     public static JavasoundAudioServer create(Mixer inputMixer, Mixer outputMixer,
             AudioConfiguration context, TimingMode mode, AudioClient client) {
-        if (outputMixer == null || mode == null ||
-                context == null || client == null) {
+        if (outputMixer == null || mode == null
+                || context == null || client == null) {
             throw new NullPointerException();
         }
         if (inputMixer == null && context.getInputChannelCount() > 0) {
@@ -363,18 +394,18 @@ public class JavasoundAudioServer implements AudioServer {
      * Create a JavasoundAudioServer.
      *
      *
-     * @param device Name of the device to use for audio input and output.
-     * If null or an empty String, the first (default) device that provides the
-     * required number of lines will be chosen. Otherwise a device will be searched for
-     * that contains the provided String in its name.
-     * @param context Requested audio configuration. Variable buffer size property
-     * is ignored.
-     * @param mode Timing mode to use.  For lowest latency use TimingMode.Estimated 
-     * or TimingMode.FramePosition.
+     * @param device Name of the device to use for audio input and output. If
+     * null or an empty String, the first (default) device that provides the
+     * required number of lines will be chosen. Otherwise a device will be
+     * searched for that contains the provided String in its name.
+     * @param context Requested audio configuration. Variable buffer size
+     * property is ignored.
+     * @param mode Timing mode to use. For lowest latency use
+     * TimingMode.Estimated or TimingMode.FramePosition.
      * @param client Audio client to process every callback.
-     * @return server 
-     * @throws Exception if requested context has no output channels, 
-     * or if suitable mixers cannot be found to satisfy the device name.
+     * @return server
+     * @throws Exception if requested context has no output channels, or if
+     * suitable mixers cannot be found to satisfy the device name.
      */
     public static JavasoundAudioServer create(String device, AudioConfiguration context,
             TimingMode mode, AudioClient client) throws Exception {
@@ -411,10 +442,10 @@ public class JavasoundAudioServer implements AudioServer {
         for (int i = 0; i < infos.length; i++) {
             mixer = AudioSystem.getMixer(infos[i]);
             lines = mixer.getTargetLineInfo();
-            if ( lines.length > 0 ) {
-                if ( infos[i].getName().indexOf(device) >= 0 ) {
+            if (lines.length > 0) {
+                if (infos[i].getName().indexOf(device) >= 0) {
                     LOG.finest("Found input mixer :\n" + infos[i]);
-                        return mixer;
+                    return mixer;
                 }
             }
         }
@@ -428,15 +459,13 @@ public class JavasoundAudioServer implements AudioServer {
         for (int i = 0; i < infos.length; i++) {
             mixer = AudioSystem.getMixer(infos[i]);
             lines = mixer.getSourceLineInfo();
-            if ( lines.length > 0 ) {
-                if ( infos[i].getName().indexOf(device) >= 0 ) {
+            if (lines.length > 0) {
+                if (infos[i].getName().indexOf(device) >= 0) {
                     LOG.finest("Found output mixer :\n" + infos[i]);
-                        return mixer;
+                    return mixer;
                 }
             }
         }
         throw new LineUnavailableException();
     }
-
-
 }
