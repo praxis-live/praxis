@@ -33,62 +33,54 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.jaudiolibs.pipes;
+
+package org.jaudiolibs.pipes.impl;
+
+import java.lang.reflect.Array;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public abstract class Pipe {
-    
-    public final void addSource(Pipe source) {
-        source.registerSink(this);
-        try {
-            registerSource(source);
-        } catch (RuntimeException ex) {
-            source.unregisterSink(this);
-            throw ex;
-        }   
+class Utils {
+
+    private Utils() {}
+
+    static <T> T[] arrayAdd(T[] array, T obj) {
+        if (obj == null) {
+            throw new NullPointerException();
+        }
+        for (int i=0; i < array.length; i++) {
+            if (array[i] == obj) {
+                return array;
+            }
+        }
+        int length = array.length + 1;
+        T[] ret = (T[]) Array.newInstance(array.getClass().getComponentType(), length);
+        System.arraycopy(array, 0, ret, 0, length - 1);
+        ret[length - 1] = obj;
+        return ret;
     }
-    
-    public final void removeSource(Pipe source) {
-        source.unregisterSink(this);
-        unregisterSource(source);
+
+    static <T> T[] arrayRemove(T[] array, T obj) {
+        if (obj == null) {
+            throw new NullPointerException();
+        }
+        int idx = -1;
+        for (int i=0; i < array.length; i++) {
+            if (array[i] == obj) {
+                idx = i;
+                break;
+            }
+        }
+        if (idx == -1) {
+            return array;
+        }
+        int length = array.length - 1;
+        T[] ret = (T[]) Array.newInstance(array.getClass().getComponentType(), length);
+        System.arraycopy(array, 0, ret, 0, idx);
+        System.arraycopy(array, idx + 1, ret, idx, length - idx);
+        return ret;
     }
-    
-    public abstract int getSourceCount();
-    
-    public abstract int getSourceCapacity();
-    
-    public abstract Pipe getSource(int idx);
-    
-    public abstract int getSinkCount();
-    
-    public abstract int getSinkCapacity();
-    
-    public abstract Pipe getSink(int idx);
-    
-    protected final void callSource(Pipe source, Buffer buffer, long time) {
-        source.process(this, buffer, time);
-    }
-    
-    protected final boolean sinkRequiresRender(Pipe sink, long time) {
-        return sink.isRenderRequired(this, time);
-    }
-    
-    protected abstract void process(Pipe sink, Buffer buffer, long time);
-    
-    protected abstract boolean isRenderRequired(Pipe source, long time);
-    
-    protected abstract void registerSource(Pipe source);
-    
-    protected abstract void unregisterSource(Pipe source);
-    
-    protected abstract void registerSink(Pipe sink);
-    
-    protected abstract void unregisterSink(Pipe sink);
-    
-    
-    
-    
+
 }

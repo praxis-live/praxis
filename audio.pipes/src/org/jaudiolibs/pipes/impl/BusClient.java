@@ -40,6 +40,7 @@ import org.jaudiolibs.audioservers.AudioConfiguration;
 import org.jaudiolibs.pipes.BufferRateListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import org.jaudiolibs.audioservers.AudioClient;
 import org.jaudiolibs.pipes.*;
 
@@ -47,15 +48,23 @@ import org.jaudiolibs.pipes.*;
  *
  * @author Neil C Smith
  */
-//@TODO Optimise reading and writing from buffers now we've moved to float[]
 public class BusClient implements Bus, AudioClient {
+    
+    private final static Logger LOG = Logger.getLogger(BusClient.class.getName());
 
     private float sampleRate;
     private int bufferSize;
+    private int intBufferSize;
     private long time;
+    private long bufferTime;
+    private long avgBufferTime;
+    private long startTime;
+    private long bufferCount;
     private InputSource[] sources;
     private OutputSink[] sinks;
-    private List<BufferRateListener> listeners = new ArrayList<BufferRateListener>();
+//    private List<BufferRateListener> listeners = new ArrayList<BufferRateListener>();
+    private BufferRateListener[] listeners;
+    private ConfigurationListener[] confListeners;
 
     /**
      *
@@ -63,9 +72,14 @@ public class BusClient implements Bus, AudioClient {
      * @param outputs
      */
     public BusClient(int inputs, int outputs) {
-        if (inputs < 0 || outputs < 1) {
+        this(0, inputs, outputs);
+    }
+    
+    public BusClient(int intBufferSize, int inputs, int outputs) {
+        if (intBufferSize < 0 || inputs < 0 || outputs < 1) {
             throw new IllegalArgumentException();
         }
+        this.intBufferSize = intBufferSize;
         sinks = new OutputSink[outputs];
         for (int i = 0; i < outputs; i++) {
             sinks[i] = new OutputSink();
@@ -74,8 +88,8 @@ public class BusClient implements Bus, AudioClient {
         for (int i = 0; i < inputs; i++) {
             sources[i] = new InputSource();
         }
-
-
+        listeners = new BufferRateListener[0];
+        confListeners = new ConfigurationListener[0];
     }
 
     @Override
@@ -83,15 +97,28 @@ public class BusClient implements Bus, AudioClient {
         if (listener == null) {
             throw new NullPointerException();
         }
-        if (listeners.contains(listener)) {
-            return;
-        }
-        listeners.add(listener);
+//        if (listeners.contains(listener)) {
+//            return;
+//        }
+//        listeners.add(listener);
+        listeners = Utils.arrayAdd(listeners, listener);
     }
 
     @Override
     public void removeBufferRateListener(BufferRateListener listener) {
-        listeners.remove(listener);
+//        listeners.remove(listener);
+        listeners = Utils.arrayRemove(listeners, listener);
+    }
+    
+    public void addConfigurationListener(ConfigurationListener listener) {
+        if (listener == null) {
+            throw new NullPointerException();
+        }
+        confListeners = Utils.arrayAdd(confListeners, listener);
+    }
+    
+    public void removeConfigurationListener(ConfigurationListener listener) {
+        confListeners = Utils.arrayRemove(confListeners, listener);
     }
 
     @Override
@@ -134,10 +161,34 @@ public class BusClient implements Bus, AudioClient {
 
     @Override
     public void configure(AudioConfiguration context) throws Exception {
+        if (!context.isFixedBufferSize()) {
+            throw new IllegalArgumentException("BusClient can currently only work with fixed buffer sizes.");
+        }
         this.sampleRate = context.getSampleRate();
         this.bufferSize = context.getMaxBufferSize();
+
+        // check internal buffer size
+        if (intBufferSize != 0) {
+            if (bufferSize % intBufferSize != 0) {
+                throw new IllegalArgumentException("External buffersize is not a multiple of internal buffersize.");
+            }
+        } else {
+            intBufferSize = bufferSize;
+        }
+        bufferTime = (long) ((intBufferSize / context.getSampleRate()) * 1000000000);
+        avgBufferTime = bufferTime;
+        bufferCount = 0;
+        LOG.fine("Buffer time is " + bufferTime);
+        // call conf listeners here - after our validation
+        for (ConfigurationListener listener : confListeners) {
+            listener.configure(context);
+        }
+        
+        for (InputSource source : sources) {
+            source.data = new float[intBufferSize];
+        }
         for (OutputSink sink : sinks) {
-            sink.buffer = new DefaultBuffer(sampleRate, bufferSize);
+            sink.buffer = new DefaultBuffer(sampleRate, intBufferSize);
         }
         int activeCount = Math.min(context.getOutputChannelCount(), sinks.length);
         for (int i = 0; i < activeCount; i++) {
@@ -151,11 +202,28 @@ public class BusClient implements Bus, AudioClient {
             // @TODO allow variable buffer sizes
             return false;
         }
-        setTime(time);
-        setInputData(inputs);
-        fireListeners();
-        processSinks();
-        writeOutput(outputs, nframes);
+        if ((time - this.time) < 0) {
+            LOG.warning("Passed in time less than last time\nPassed in : " + time + "\nLast time : " + this.time);
+        }
+            
+        int count = nframes / intBufferSize;
+//        if (bufferCount <= 0) {
+//            startTime = time;    
+//            bufferCount = 0;
+//        } else {
+//            avgBufferTime = (time - startTime) / bufferCount;
+//        }     
+//        bufferCount += count;
+        
+        time -= (count - 1) * avgBufferTime;
+        for (int i = 0; i < count; i++) {
+            setTime(time);
+            readInput(inputs);
+            fireListeners();
+            processSinks();
+            writeOutput(outputs);
+            time += avgBufferTime;
+        }
         return true;
     }
 
@@ -163,17 +231,21 @@ public class BusClient implements Bus, AudioClient {
         this.time = time;
     }
 
-    private void setInputData(List<FloatBuffer> inputs) {
+    private void readInput(List<FloatBuffer> inputs) {
         int count = Math.min(inputs.size(), sources.length);
         for (int i = 0; i < count; i++) {
-            sources[i].data = inputs.get(i);
+            FloatBuffer data = inputs.get(i);
+            data.get(sources[i].data);
         }
     }
 
     private void fireListeners() {
-        int count = listeners.size();
-        for (int i = 0; i < count; i++) {
-            listeners.get(i).nextBuffer(this);
+//        int count = listeners.size();
+//        for (int i = 0; i < count; i++) {
+//            listeners.get(i).nextBuffer(this);
+//        }
+        for (BufferRateListener listener : listeners) {
+            listener.nextBuffer(this);
         }
     }
 
@@ -183,12 +255,12 @@ public class BusClient implements Bus, AudioClient {
         }
     }
 
-    private void writeOutput(List<FloatBuffer> outputs, int nframes) {
+    private void writeOutput(List<FloatBuffer> outputs) {
         int count = Math.min(sinks.length, outputs.size());
         for (int i = 0; i < count; i++) {
             float[] data = sinks[i].buffer.getData();
             FloatBuffer out = outputs.get(i);
-            out.put(data, 0, nframes);
+            out.put(data, 0, intBufferSize);
         }
     }
 
@@ -197,6 +269,17 @@ public class BusClient implements Bus, AudioClient {
         for (OutputSink sink : sinks) {
             sink.active = false;
         }
+        for (ConfigurationListener listener : confListeners) {
+            listener.shutdown();
+        }
+    }
+    
+    public static interface ConfigurationListener {
+        
+        public void configure(AudioConfiguration context) throws Exception;
+        
+        public void shutdown();
+        
     }
 
     private class OutputSink extends Pipe {
@@ -284,13 +367,12 @@ public class BusClient implements Bus, AudioClient {
         protected void unregisterSink(Pipe sink) {
             throw new UnsupportedOperationException();
         }
-        
     }
 
     private class InputSource extends Pipe {
 
         private Pipe sink;
-        private FloatBuffer data;
+        private float[] data;
 
         private InputSource() {
             data = null;
@@ -299,13 +381,20 @@ public class BusClient implements Bus, AudioClient {
         @Override
         public void process(Pipe sink, Buffer buffer, long time) {
             if (sink == this.sink && sinkRequiresRender(sink, time)) {
-                FloatBuffer in = data;
-                if (in == null) {
+//                FloatBuffer in = data;
+//                if (in == null) {
+//                    buffer.clear();
+//                } else {
+//                    int len = Math.min(in.capacity(), buffer.getSize());
+//                    float[] out = buffer.getData();
+//                    in.get(out, 0, len);
+//                }
+                if (data == null) {
                     buffer.clear();
                 } else {
-                    int len = Math.min(in.capacity(), buffer.getSize());
                     float[] out = buffer.getData();
-                    in.get(out, 0, len);
+                    int len = buffer.getSize();
+                    System.arraycopy(data, 0, out, 0, len);
                 }
             }
         }
@@ -375,8 +464,5 @@ public class BusClient implements Bus, AudioClient {
         protected void unregisterSource(Pipe source) {
             throw new UnsupportedOperationException();
         }
-        
-
-
     }
 }
