@@ -41,7 +41,7 @@ public class Timer extends AbstractClockComponent {
     private boolean first;
     
     public Timer() {
-        FloatProperty period = FloatProperty.create( new PeriodBinding(), 0, 60 * 60, 1);
+        FloatProperty period = FloatProperty.create( new PeriodBinding(), 0, 60, 1);
         output = new DefaultControlOutputPort();
         registerPort(Port.OUT, output);
         registerControl("period", period);

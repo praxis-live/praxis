@@ -46,7 +46,7 @@ public class Inhibitor extends AbstractExecutionContextComponent {
         registerPort(Port.IN, new InputPort());
         out = new DefaultControlOutputPort();
         registerPort(Port.OUT, out);
-        FloatProperty time = FloatProperty.create(new TimeBinding(), 0, 60 * 60, 1);
+        FloatProperty time = FloatProperty.create(new TimeBinding(), 0, 60, 1);
         registerControl("time", time);
         registerPort("time", time.createPort());
     }
