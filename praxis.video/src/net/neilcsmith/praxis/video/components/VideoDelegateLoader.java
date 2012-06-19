@@ -43,7 +43,7 @@ import net.neilcsmith.ripl.delegates.VideoDelegate;
  *
  * @author Neil C Smith
  */
-public class VideoDelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
+class VideoDelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
     
     private final static List<Argument> suggestedValues;
     static {
@@ -58,10 +58,12 @@ public class VideoDelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
 
     private Listener listener;
 
-    public VideoDelegateLoader(AbstractComponent component, Listener listener) {
-        super(ArgumentInfo.create(PResource.class, PMap.create(
+    VideoDelegateLoader(AbstractComponent component, Listener listener, boolean capture) {
+        super(ArgumentInfo.create(PResource.class, capture ? PMap.create(
                 ArgumentInfo.KEY_ALLOW_EMPTY, true,
-                ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.valueOf(suggestedValues))),
+                ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.valueOf(suggestedValues)) :
+                PMap.create(
+                ArgumentInfo.KEY_ALLOW_EMPTY, true)),
                 VideoDelegate.class, PString.EMPTY);
         if (listener == null) {
             throw new NullPointerException();

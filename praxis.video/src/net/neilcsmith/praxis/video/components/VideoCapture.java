@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -48,7 +48,7 @@ public class VideoCapture extends AbstractExecutionContextComponent {
         container = new Delegator();
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, container));
         
-        loader = new VideoDelegateLoader(this, new VideoBinding());
+        loader = new VideoDelegateLoader(this, new VideoBinding(), true);
         registerControl("device", loader);
         TriggerControl start = TriggerControl.create( new StartBinding());
         registerControl("play", start);

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -52,7 +52,7 @@ public class VideoPlayer extends AbstractExecutionContextComponent {
     public VideoPlayer() {
         delegator = new Delegator();
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));
-        loader = new VideoDelegateLoader(this, new VideoBinding());
+        loader = new VideoDelegateLoader(this, new VideoBinding(), false);
         registerControl("video", loader);
         FloatProperty position = FloatProperty.create(new PositionBinding(), 0, 1, 0,
                 PMap.create(ControlInfo.KEY_TRANSIENT, true));
