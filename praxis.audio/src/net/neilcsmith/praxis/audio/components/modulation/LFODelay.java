@@ -53,8 +53,8 @@ public class LFODelay extends AbstractComponent {
         registerPort(Port.IN, new DefaultAudioInputPort(this, holder));
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, holder));
         delay = FloatProperty.create(new DelayBinding(), 0, 1, 0);
-        registerControl("delay", delay);
-        registerPort("delay", delay.createPort());
+        registerControl("time", delay);
+        registerPort("time", delay.createPort());
         range = FloatProperty.create(new RangeBinding(), 0, 1, 0);
         registerControl("range", range);
         registerPort("range", range.createPort());
