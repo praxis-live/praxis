@@ -56,7 +56,7 @@ public class SamplePlayer extends AbstractComponent {
     public SamplePlayer() {
         player = new SamplePlayerUG();
 
-        registerPort(Port.IN, new DefaultAudioInputPort(this, player));
+//        registerPort(Port.IN, new DefaultAudioInputPort(this, player));
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, player));
         buildControls();
     }
