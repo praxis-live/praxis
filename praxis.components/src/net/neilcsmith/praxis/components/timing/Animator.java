@@ -21,10 +21,14 @@
  */
 package net.neilcsmith.praxis.components.timing;
 
+import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.Port;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.AbstractClockComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
@@ -60,12 +64,13 @@ public class Animator extends AbstractClockComponent {
 
     public Animator() {
         interpolator = LinearInterpolator.getInstance();
-        ToControl to = new ToControl();
+//        ToControl to = new ToControl();
         FloatProperty value = FloatProperty.create(new ValueBinding(), currentValue);
-        duration = FloatProperty.create(0, 60 * 5, 0);
-        output = new DefaultControlOutputPort(this);
+        duration = FloatProperty.create(0, 60, 0);
+        output = new DefaultControlOutputPort();
+        FloatProperty to = FloatProperty.create(new ToBinding(), 0, PMap.create(ControlInfo.KEY_TRANSIENT, true));
         registerControl(TO, to);
-        registerPort(TO, FloatInputPort.create(to));
+        registerPort(TO, to.createPort());
         registerPort(Port.OUT, output);    
         registerControl(VALUE, value);
         registerPort(VALUE, value.createPort());
@@ -132,27 +137,51 @@ public class Animator extends AbstractClockComponent {
         }
     }
 
-    private class ToControl extends SimpleControl implements FloatInputPort.Binding {
+    private class ToBinding implements FloatProperty.Binding {
+        
+        private double value = 0;
 
-        private ToControl() {
-            super(null);
-        }
-
-        @Override
-        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
-            double value = PNumber.coerce(args.get(0)).value();
-            receive(time, value);
-            if (quiet) {
-                return null;
-            } else {
-                return CallArguments.EMPTY;
-            }
-        }
-
-        public void receive(long time, double value) {
+        public void setBoundValue(long time, double value) {
             pendingToValue = value;
             needsConfiguring = true;
             animating = true;
+            this.value = value;
         }
+
+        public double getBoundValue() {
+            if (animating) {
+                return value;
+            } else {
+                return currentValue;
+            }
+        }
+        
     }
+    
+//    private class ToControl extends SimpleControl implements FloatInputPort.Binding {
+//
+//        private ToControl() {
+//            super(ControlInfo.createPropertyInfo(
+//                    new ArgumentInfo[]{PNumber.info()}, 
+//                    new Argument[]{PNumber.valueOf(0)}, 
+//                    PMap.create(ControlInfo.KEY_TRANSIENT, true)));
+//        }
+//
+//        @Override
+//        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
+//            double value = PNumber.coerce(args.get(0)).value();
+//            receive(time, value);
+//            if (quiet) {
+//                return null;
+//            } else {
+//                return CallArguments.EMPTY;
+//            }
+//        }
+//
+//        public void receive(long time, double value) {
+//            pendingToValue = value;
+//            needsConfiguring = true;
+//            animating = true;
+//        }
+//    }
 }
