@@ -44,7 +44,8 @@ public class SineAudioSourceTest {
     public void testMain() throws Exception {
         System.out.println("main");
         String[] args = null;
-        SineAudioSource.main(args);
+        System.setProperty("jna.nosys", "true");
+        TestPortConnectionTracking.main(args);
 //        PassThrough.main(args);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");

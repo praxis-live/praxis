@@ -1,43 +1,50 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith
+ * Some methods copyright 2012 Chuck Ritola
  *
  * This code is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License version 3 only, as
- * published by the Free Software Foundation.
- * 
+ * under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation; either version 2.1 of the License,
+ * or (at your option) any later version.
+ *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- * version 3 for more details.
- * 
- * You should have received a copy of the GNU General Public License version 3
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this work; if not, see http://www.gnu.org/licenses/
  * 
- * 
+ *
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  *
  */
 package org.jaudiolibs.jnajack;
 
-import com.sun.jna.NativeLong;
-import com.sun.jna.Pointer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
+import org.jaudiolibs.jnajack.lowlevel.JackLibrary._jack_port;
+
+import com.sun.jna.NativeLong;
+import com.sun.jna.Pointer;
+import com.sun.jna.ptr.ByteByReference;
 
 /**
- * Wraps a native Jack client.
+ *   Wraps a native Jack client.
  *
- * There is no public constructor - use <code>Jack.getInstance().openClient(...)</code>
+ *   There is no public constructor - use
+ *  <code>Jack.getInstance().openClient(...)</code>
  *
- * @author Neil C Smith
+ *   @author Neil C Smith
  */
 public class JackClient {
 
@@ -48,6 +55,10 @@ public class JackClient {
     private ProcessCallbackWrapper processCallback; // reference kept - is in use!
     private BufferSizeCallbackWrapper buffersizeCallback;
     private SampleRateCallbackWrapper samplerateCallback;
+    private ClientRegistrationCallbackWrapper clientRegistrationCallback;
+    private GraphOrderCallbackWrapper graphOrderChangeCallback;
+    private PortRegistrationCallbackWrapper portRegistrationCallback;
+    private PortConnectCallbackWrapper portConnectCallback;
     private ShutdownCallback shutdownCallback;
     private JackShutdownCallback userShutdownCallback;
     private JackPort[] ports;
@@ -70,22 +81,20 @@ public class JackClient {
     }
 
     /**
-     * Create a new port for the client. This is an object used for moving
-     * data of any type in or out of the client.  Ports may be connected
-     * in various ways.
-     *  Each port has a short name.  The port's full name contains the name
-     * of the client concatenated with a colon (:) followed by its short
-     * name.
+     *   Create a new port for the client. This is an object used for moving data
+     * of any type in or out of the client. Ports may be connected in various
+     * ways. Each port has a short name. The port's full name contains the name
+     * of the client concatenated with a colon (:) followed by its short name.
      *
-     * The jack_port_name_size() is the maximum length of this full
-     * name.  Exceeding that will cause the port registration to fail and
-     * return NULL. <em>Checking name size is not currently done in JNAJack</em>
+     *   The jack_port_name_size() is the maximum length of this full name.
+     * Exceeding that will cause the port registration to fail and return NULL.
+     * <em>Checking name size is not currently done in JNAJack</em>
      *
-     * @param name
-     * @param type
-     * @param flags
-     * @return JackPort
-     * @throws JackException 
+     *   @param name
+     *   @param type
+     *   @param flags
+     *   @return JackPort
+     *   @throws JackException
      */
     public JackPort registerPort(String name, JackPortType type, EnumSet<JackPortFlags> flags)
             throws JackException {
@@ -115,13 +124,14 @@ public class JackClient {
     }
 
     /**
-     * Convenience method for calling other registerPort - most port creation
+     *   Convenience method for calling other registerPort - most port creation
      * only requires one flag so this removes the need to create an EnumSet
-     * @param name
-     * @param type
-     * @param flag
-     * @return JackPort
-     * @throws JackException
+     *
+     *   @param name
+     *   @param type
+     *   @param flag
+     *   @return JackPort
+     *   @throws JackException
      */
     public JackPort registerPort(String name, JackPortType type, JackPortFlags flag)
             throws JackException {
@@ -137,13 +147,13 @@ public class JackClient {
     }
 
     /**
-     * Tell the Jack server to call the JackProcessCallback whenever there is
-     * work be done.
-     * The code in the supplied function must be suitable for real-time
-     * execution.  That means that it cannot call functions that might
+     *   Tell the Jack server to call the JackProcessCallback whenever there is
+     * work be done. The code in the supplied function must be suitable for
+     * real-time execution. That means that it cannot call functions that might
      * block for a long time.
-     * @param callback
-     * @throws net.neilcsmith.jnajack.JackException
+     *
+     *   @param callback
+     *   @throws net.neilcsmith.jnajack.JackException
      */
     public void setProcessCallback(JackProcessCallback callback) throws JackException {
         if (callback == null) {
@@ -166,9 +176,125 @@ public class JackClient {
     }
 
     /**
-     * Set interface to be called if buffer size changes
-     * @param callback
-     * @throws net.neilcsmith.jnajack.JackException
+     * Tell the JACK server to call the supplied JackGraphOrderCallback whenever the
+     * processing graph is reordered.
+     * * All "notification events" are received in a separated non RT thread,
+     * the code in the supplied function does not need to be
+     * suitable for real-time execution.
+     * This method cannot be called while the client is activated
+     * (after activate() has been called.)
+     *
+     *   @param callback
+     *   @throws JackException
+     *   @since Jul 23, 2012
+     */
+    //cjritola 2012
+    public void setGraphOrderCallback(JackGraphOrderCallback callback)
+            throws JackException {
+        if (callback == null) {
+            throw new NullPointerException("Passed callback is null.");
+        }
+
+        try {
+            jackLib.jack_set_graph_order_callback(
+                    clientPtr, graphOrderChangeCallback = new GraphOrderCallbackWrapper(callback), null);
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+        }
+    }
+
+    /**
+     *  Tell the JACK server to call the supplied JackClientRegistrationCallback 
+     * whenever a client is registered or unregistered.
+     * 
+     * All "notification events" are received in a separated non RT thread,
+     * the code in the supplied function does not need to be
+     * suitable for real-time execution.
+     * 
+     * NOTE: this method cannot be called while the client is activated
+     * (after activate() has been called.)
+     *
+     *   @param callback
+     *   @throws JackException
+     *   @since Jul 23, 2012
+     */
+    //cjritola 2012
+    public void setClientRegistrationCallback(JackClientRegistrationCallback callback)
+            throws JackException {
+        if (callback == null) {
+            throw new NullPointerException("Passed callback is null.");
+        }
+        try {
+            jackLib.jack_set_client_registration_callback(
+                    clientPtr, clientRegistrationCallback = new ClientRegistrationCallbackWrapper(callback), null);
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+        }
+    }
+
+    /**
+     *  Tell the JACK server to call the supplied JackPortConnectCallback 
+     * whenever a port is connected or disconnected.
+     * 
+     * All "notification events" are received in a separated non RT thread,
+     * the code in the supplied function does not need to be
+     * suitable for real-time execution.
+     * 
+     * NOTE: this method cannot be called while the client is activated
+     * (after activate() has been called.)
+     *
+     *   @param callback
+     *   @throws JackException
+     *   @since Jul 23, 2012
+     */
+    //cjritola 2012
+    public void setPortConnectCallback(JackPortConnectCallback callback)
+            throws JackException {
+        if (callback == null) {
+            throw new NullPointerException("Passed callback is null.");
+        }
+        try {
+            jackLib.jack_set_port_connect_callback(
+                    clientPtr, portConnectCallback = new PortConnectCallbackWrapper(callback), null);
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+        }
+    }
+
+    /**
+     *  Tell the JACK server to call the supplied JackPortRegistrationCallback 
+     * whenever a port is registered or unregistered.
+     * 
+     * All "notification events" are received in a separated non RT thread,
+     * the code in the supplied function does not need to be
+     * suitable for real-time execution.
+     * 
+     * NOTE: this method cannot be called while the client is activated
+     * (after activate() has been called.)
+     *
+     *   @param callback
+     *   @throws JackException
+     *   @since Jul 23, 2012
+     */
+    //cjritola 2012
+    public void setPortRegistrationCallback(JackPortRegistrationCallback callback)
+            throws JackException {
+        if (callback == null) {
+            throw new NullPointerException("Passed callback is null.");
+        }
+        try {
+            jackLib.jack_set_port_registration_callback(
+                    clientPtr, portRegistrationCallback = new PortRegistrationCallbackWrapper(callback), null);
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+        }
+    }
+
+    /**
+     *   Set interface to be called if buffer size changes
+     *
+     *   @param callback
+     *   @throws net.neilcsmith.jnajack.JackException
      */
     public void setBuffersizeCallback(JackBufferSizeCallback callback)
             throws JackException {
@@ -191,9 +317,10 @@ public class JackClient {
     }
 
     /**
-     * Set interface to be called if sample rate changes.
-     * @param callback
-     * @throws net.neilcsmith.jnajack.JackException
+     *   Set interface to be called if sample rate changes.
+     *
+     *   @param callback
+     *   @throws net.neilcsmith.jnajack.JackException
      */
     public void setSampleRateCallback(JackSampleRateCallback callback)
             throws JackException {
@@ -216,28 +343,26 @@ public class JackClient {
     }
 
     /**
-     * Register a function (and argument) to be called if and when the
-     * JACK server shuts down the client thread.  The function is not
-     * called on the process thread --- use only async-safe functions,
-     * and remember that it is executed from another thread.  A typical function
-     * might set a flag or write to a pipe so that the rest of the
-     * application knows that the JACK client thread has shut
-     * down.
-     * NOTE: clients do not need to call this.  It exists only
-     * to help more complex clients understand what is going
-     * on.  It should be called before activate().
-     * @param callback
-     * @throws net.neilcsmith.jnajack.JackException
+     *   Register a function (and argument) to be called if and when the JACK
+     * server shuts down the client thread. The function is not called on the
+     * process thread --- use only async-safe functions, and remember that it is
+     * executed from another thread. A typical function might set a flag or
+     * write to a pipe so that the rest of the application knows that the JACK
+     * client thread has shut down. NOTE: clients do not need to call this. It
+     * exists only to help more complex clients understand what is going on. It
+     * should be called before activate().
+     *
+     *   @param callback
+     *   @throws net.neilcsmith.jnajack.JackException
      */
     public void onShutdown(JackShutdownCallback callback) throws JackException {
         userShutdownCallback = callback;
     }
 
     /**
-     * Tell the Jack server that the program is ready to start processing
-     * audio.
+     *   Tell the Jack server that the program is ready to start processing audio.
      *
-     * @throws JackException if client could not be activated.
+     *   @throws JackException if client could not be activated.
      */
     public void activate() throws JackException {
         int ret = -1;
@@ -253,9 +378,9 @@ public class JackClient {
     }
 
     /**
-     * Tell the JACK server to remove this client from the process
-     * graph.  Also, disconnect all ports belonging to it, since inactive
-     * clients have no port connections.
+     *   Tell the JACK server to remove this client from the process graph. Also,
+     * disconnect all ports belonging to it, since inactive clients have no port
+     * connections.
      */
     public void deactivate() {
         try {
@@ -266,7 +391,7 @@ public class JackClient {
     }
 
     /**
-     * Disconnects this client from the JACK server.
+     *   Disconnects this client from the JACK server.
      */
     public void close() {
         try {
@@ -286,10 +411,11 @@ public class JackClient {
     }
 
     /**
-     * Get the sample rate of the jack system, as set by the user when
-     * jackd was started.
-     * @return sample rate
-     * @throws net.neilcsmith.jnajack.JackException
+     *   Get the sample rate of the jack system, as set by the user when jackd was
+     * started.
+     *
+     *   @return sample rate
+     *   @throws net.neilcsmith.jnajack.JackException
      */
     public int getSampleRate() throws JackException {
         try {
@@ -301,13 +427,13 @@ public class JackClient {
     }
 
     /**
-     * The current maximum size that will ever be passed to the JackProcessCallback.
-     * It should only be used *before* the client has been activated.
-     * This size may change, clients that depend on it
-     * must register a JackBuffersizeCallback so they will be notified if it
-     * does.
-     * @return int maximum buffersize.
-     * @throws net.neilcsmith.jnajack.JackException
+     *   The current maximum size that will ever be passed to the
+     * JackProcessCallback. It should only be used *before* the client has been
+     * activated. This size may change, clients that depend on it must register
+     * a JackBuffersizeCallback so they will be notified if it does.
+     *
+     *   @return int maximum buffersize.
+     *   @throws net.neilcsmith.jnajack.JackException
      */
     public int getBufferSize() throws JackException {
         try {
@@ -399,6 +525,101 @@ public class JackClient {
                 ret = -1;
             }
             return ret;
+        }
+    }
+
+    //cjritola 2012
+    private class PortConnectCallbackWrapper implements JackLibrary.JackPortConnectCallback {
+
+        JackPortConnectCallback callback;
+
+        PortConnectCallbackWrapper(JackPortConnectCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void invoke(int a, int b, int connect, Pointer arg) {
+            try {
+                _jack_port pA = jackLib.jack_port_by_id(clientPtr, a);
+                _jack_port pB = jackLib.jack_port_by_id(clientPtr, b);
+
+                String portNameA = jackLib.jack_port_name(pA);
+                String portNameB = jackLib.jack_port_name(pB);
+
+                if (connect != 0) {
+                    callback.portsConnected(JackClient.this, portNameA, portNameB);
+                } else {
+                    callback.portsDisconnected(JackClient.this, portNameA, portNameB);
+                }
+            } catch (Throwable e) {
+                LOG.log(Level.SEVERE, "Error in port connection callback", e);
+            }
+        }
+    }
+
+    //cjritola 2012
+    private class ClientRegistrationCallbackWrapper implements JackLibrary.JackClientRegistrationCallback {
+
+        JackClientRegistrationCallback callback;
+
+        ClientRegistrationCallbackWrapper(JackClientRegistrationCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void invoke(ByteByReference name, int register, Pointer arg) {
+            try {
+                String nameString = name.getPointer().getString(0);
+                if (register != 0) {
+                    callback.clientRegistered(JackClient.this, nameString);
+                } else {
+                    callback.clientUnregistered(JackClient.this, nameString);
+                }
+            } catch (Throwable e) {
+                LOG.log(Level.SEVERE, "Error in client registration callback", e);
+            }
+        }
+    }
+
+    //cjritola 2012
+    private class PortRegistrationCallbackWrapper implements JackLibrary.JackPortRegistrationCallback {
+
+        JackPortRegistrationCallback callback;
+
+        PortRegistrationCallbackWrapper(JackPortRegistrationCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void invoke(int port, int int1, Pointer arg) {
+            try {
+
+                _jack_port p = jackLib.jack_port_by_id(clientPtr, port);
+                String portName = jackLib.jack_port_name(p);
+                if (int1 != 0) {
+                    callback.portRegistered(JackClient.this, portName);
+                } else {
+                    callback.portUnregistered(JackClient.this, portName);
+                }
+            } catch (Throwable e) {
+                LOG.log(Level.SEVERE, "Error in port registration callback", e);
+            }
+        }
+    }
+
+    //cjritola 2012
+    private class GraphOrderCallbackWrapper implements JackLibrary.JackGraphOrderCallback {
+
+        JackGraphOrderCallback callback;
+
+        GraphOrderCallbackWrapper(JackGraphOrderCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public int invoke(Pointer arg) {
+            callback.graphOrderChanged(JackClient.this);
+            return 0;
         }
     }
 

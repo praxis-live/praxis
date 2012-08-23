@@ -89,9 +89,9 @@ public class JackLibraryDirect implements JackLibrary {
 
     public native int jack_port_connected_to(_jack_port port, String port_name);
 
-    public native PointerByReference jack_port_get_connections(_jack_port port);
+    public native Pointer jack_port_get_connections(_jack_port port);
 
-    public native PointerByReference jack_port_get_all_connections(_jack_client client, _jack_port port);
+    public native Pointer jack_port_get_all_connections(_jack_client client, _jack_port port);
 
     public native int jack_port_tie(_jack_port src, _jack_port dst);
 

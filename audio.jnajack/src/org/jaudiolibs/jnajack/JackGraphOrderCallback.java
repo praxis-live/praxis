@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2012 Neil C Smith / Chuck Ritola
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -21,27 +21,21 @@
  * have any questions.
  *
  */
-
 package org.jaudiolibs.jnajack;
 
 /**
- * Implement this interface and set on client to be informed if the buffersize
- * changes.
+ *  Called when the JACK graph order is changed.
  *
- * @author Neil C Smith
+ *  @author Chuck Ritola
+ *
  */
-public interface JackBufferSizeCallback {
+public interface JackGraphOrderCallback {
 
     /**
-     * Method invoked whenever the JACK engine buffer size changes.  Although
-     * this function is called in the JACK process thread, the normal process
-     * cycle is suspended during its operation, causing a gap in the audio flow.
-     * So, it is OK to perform operations in this method that are not realtime
-     * 'safe'.
-     * 
-     * @param client
-     * @param buffersize
+     *  Invoked when the JACK graph order is changed.
+     *
+     *  @param	invokingClient	The JACK client which is invoking this callback.
+     *  @since Jul 23, 2012
      */
-    public void buffersizeChanged(JackClient client, int buffersize);
-
+    public void graphOrderChanged(JackClient invokingClient);
 }

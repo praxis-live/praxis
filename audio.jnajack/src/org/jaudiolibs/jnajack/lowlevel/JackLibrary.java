@@ -1277,7 +1277,8 @@ public interface JackLibrary extends com.sun.jna.Library {
      * <i>native declaration : jack/jack.h:623</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z25jack_port_get_connectionsPK10_jack_port", "?jack_port_get_connections@@YAPAPADPA10_jack_port@Z"})
-    com.sun.jna.ptr.PointerByReference jack_port_get_connections(_jack_port port);
+//    com.sun.jna.ptr.PointerByReference jack_port_get_connections(_jack_port port);
+    Pointer jack_port_get_connections(_jack_port port);
 
     /**
      * @return a null-terminated array of full port names to which the @a
@@ -1296,7 +1297,8 @@ public interface JackLibrary extends com.sun.jna.Library {
      * <i>native declaration : jack/jack.h:644</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z29jack_port_get_all_connectionsPK12_jack_clientPK10_jack_port", "?jack_port_get_all_connections@@YAPAPADPA12_jack_clientPA10_jack_port@Z"})
-    com.sun.jna.ptr.PointerByReference jack_port_get_all_connections(_jack_client client, _jack_port port);
+//    com.sun.jna.ptr.PointerByReference jack_port_get_all_connections(_jack_client client, _jack_port port);
+    Pointer jack_port_get_all_connections(_jack_client client, _jack_port port);
 
     /**
      * A client may call this on a pair of its own ports to

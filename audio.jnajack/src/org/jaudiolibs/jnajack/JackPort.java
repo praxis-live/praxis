@@ -1,7 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith
+ * 
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -21,28 +22,33 @@
  * have any questions.
  *
  */
-
 package org.jaudiolibs.jnajack;
 
 import com.sun.jna.Pointer;
+import com.sun.jna.ptr.PointerByReference;
+
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
 
 /**
  * Wraps a native Jack port.
+ *
  * @author Neil C Smith
  */
 public class JackPort {
 
     JackLibrary._jack_port portPtr;
-    
     Pointer buffer;
     ByteBuffer byteBuffer;
     FloatBuffer floatBuffer;
-    
     private JackClient client;
     private String shortName;
+    private final static Logger LOG = Logger.getLogger(JackPort.class.getName());
+    private final static String CALL_ERROR_MSG = "Error calling native lib";
 
     JackPort(String shortName, JackClient client, JackLibrary._jack_port portPtr) {
         this.shortName = shortName;
@@ -51,13 +57,14 @@ public class JackPort {
     }
 
     /**
-     * Get the ByteBuffer associated with this port. Do not cache this value between
-     * process calls - this buffer reference is only valid inside the process
-     * callback.
+     * Get the ByteBuffer associated with this port. Do not cache this value
+     * between process calls - this buffer reference is only valid inside the
+     * process callback.
      *
      * The returned buffer is direct.
      *
-     * For audio use <code>getFloatBuffer()</code> as this will be more efficient.
+     * For audio use
+     * <code>getFloatBuffer()</code> as this will be more efficient.
      *
      * @return buffer associated with this port.
      */
@@ -65,22 +72,23 @@ public class JackPort {
     public ByteBuffer getBuffer() {
         return byteBuffer;
     }
-    
+
     /**
-     * Get the FloatBuffer associated with this port. Do not cache this value between
-     * process calls - this buffer reference is only valid inside the process
-     * callback.
+     * Get the FloatBuffer associated with this port. Do not cache this value
+     * between process calls - this buffer reference is only valid inside the
+     * process callback.
      *
      * The returned buffer is direct.
-     
+     *
      * @return buffer associated with this port.
      */
     public FloatBuffer getFloatBuffer() {
-        return floatBuffer;      
+        return floatBuffer;
     }
 
     /**
      * Get the full name for this port including the "client_name:" prefix.
+     *
      * @return full name
      */
     public String getName() {
@@ -89,10 +97,35 @@ public class JackPort {
 
     /**
      * Get the short name for this port (without client name prefix).
+     *
      * @return short name
      */
     public String getShortName() {
         return shortName;
     }
 
+    /**
+     * Returns the full names of the ports which are connected to this port. If
+     * none, returns an empty array.
+     *
+     * @return Array of port names
+     * @throws JackException
+     * @since Jul 22, 2012
+     */
+    public String[] getConnections() throws JackException {
+        try {
+            JackLibrary jackLib = Jack.getInstance().jackLib;
+            Pointer ptr = jackLib.jack_port_get_connections(portPtr);
+            if (ptr == null) {
+                return new String[0];
+            } else {
+                String[] res = ptr.getStringArray(0);
+                jackLib.jack_free(ptr);
+                return res;
+            }
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
+    }
 }
