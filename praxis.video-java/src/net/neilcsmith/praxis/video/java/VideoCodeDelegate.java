@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -47,13 +47,13 @@ import net.neilcsmith.ripl.ops.Blend;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class VideoCodeDelegate extends CodeDelegate implements Delegate, CompositeDelegate {
+public class VideoCodeDelegate extends CodeDelegate {
 
     private final static Logger LOG = Logger.getLogger(VideoCodeDelegate.class.getName());
-    private final static Surface[] EMPTY_SOURCES = new Surface[0];
+//    private final static Surface[] EMPTY_SOURCES = new Surface[0];
     private PImage dst;
     private PGraphics pg;
-    private boolean inited;
+    private boolean setupRequired;
     private boolean queueSends;
     private Queue<QueueableSend> sendQueue = new LinkedList<QueueableSend>();
     private VideoCodeContext videoContext;
@@ -62,33 +62,15 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
     public int width;
     public int height;
 
-    @Override
-    public void init(CodeContext context, long time) throws Exception {
-        super.init(context, time);
-        if (context instanceof VideoCodeContext) {
-            videoContext = (VideoCodeContext) context;
-        }
-    }
 
-    public final void update(long time) {
-        // ignore - update() provides same function earlier in update cycle.
-    }
-
-    @Override
-    public final void update() {
-        drainSendQueue();
-        super.update();
+    private void setVideoContext(VideoCodeContext videoContext) {
+        this.videoContext = videoContext;
+        setupRequired = true;
     }
 
 
 
-    public final void process(Surface surface) {
-        validateGraphics(surface);
-        sources = EMPTY_SOURCES;
-        processImpl();
-    }
-
-    public final void process(Surface surface, Surface... sources) {
+    private void process(Surface surface, boolean setup, Surface... sources) {
         validateGraphics(surface);
         width = surface.getWidth();
         height = surface.getHeight();
@@ -101,17 +83,13 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
             }
         }
         this.sources = sources;
-        processImpl();
-    }
-
-    private void processImpl() {
-        if (!inited) {
+        if (setup) {
             try {
                 setup();
             } catch (Exception ex) {
                 LOG.log(Level.WARNING, "", ex);
             }
-            inited = true;
+
         }
         try {
             draw();
@@ -129,23 +107,10 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
         }
     }
 
-    public boolean forceRender() {
-        return false;
-    }
-
-    public boolean usesInput() {
-        return true;
-    }
-
-    public void setup() {
-    }
 
     public void draw() {
-        process();
-    } //old API used process()
-
-    public void process() {
     }
+
 
     @Override
     public void send(int idx, Argument arg) {
@@ -361,4 +326,57 @@ public class VideoCodeDelegate extends CodeDelegate implements Delegate, Composi
     }
 
     // end of PGraphics impl
+    
+    
+    public static class Controller extends CodeDelegate.Controller {
+        
+        private CodeContext context;
+        private VideoCodeDelegate delegate;
+        private boolean setupRequired;
+        
+        public Controller(VideoCodeDelegate delegate) {
+            super(delegate);
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void init(CodeContext context) throws Exception {
+            super.init(context);
+            this.context = context;
+            if (context instanceof VideoCodeContext) {
+                delegate.setVideoContext((VideoCodeContext) context);
+            } else {
+                delegate.setVideoContext(null);
+            }
+            setupRequired = true;
+        }
+
+        @Override
+        public void update() throws Exception {
+            if (context == null) {
+                throw new IllegalStateException("Calling update() on an uninited code delegate");
+            }
+            delegate.drainSendQueue();
+        }
+        
+        public void process(Surface surface, Surface[] sources) {
+            if (setupRequired) {
+                delegate.process(surface, true, sources);
+                setupRequired = false;
+            } else {
+                delegate.process(surface, false, sources);
+            }
+        }
+
+        @Override
+        public void dispose() {
+            super.dispose();
+            context = null;
+            setupRequired = false;
+        }
+        
+        
+        
+    }
+    
 }

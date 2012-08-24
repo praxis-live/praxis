@@ -30,8 +30,8 @@
 
 package net.neilcsmith.praxis.video.java;
 
-import net.neilcsmith.praxis.impl.ListenerUtils;
 import net.neilcsmith.praxis.java.CodeContext;
+import net.neilcsmith.praxis.util.ArrayUtils;
 
 /**
  *
@@ -50,11 +50,11 @@ public abstract class VideoCodeContext extends CodeContext {
     public abstract int getImageCount();
 
     public void addImageListener(ImageListener listener) {
-        listeners = ListenerUtils.add(listeners, listener);
+        listeners = ArrayUtils.add(listeners, listener);
     }
 
     public void removeImageListener(ImageListener listener) {
-        listeners = ListenerUtils.remove(listeners, listener);
+        listeners = ArrayUtils.remove(listeners, listener);
     }
 
     protected void fireImageChange(int index) {

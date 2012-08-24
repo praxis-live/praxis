@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,7 +19,6 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.java.impl;
 
 import java.util.logging.Level;
@@ -31,13 +30,13 @@ import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractClockComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
-import net.neilcsmith.praxis.impl.ListenerUtils;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import net.neilcsmith.praxis.java.CodeContext;
 import net.neilcsmith.praxis.java.CodeDelegate;
 import net.neilcsmith.praxis.java.Output;
 import net.neilcsmith.praxis.java.Param;
 import net.neilcsmith.praxis.java.Trigger;
+import net.neilcsmith.praxis.util.ArrayUtils;
 
 /**
  *
@@ -49,9 +48,11 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
     private Param[] params;
     private Trigger[] triggers;
     private Output[] outputs;
-    private CodeDelegate delegate;
+//    private CodeDelegate delegate;
+    private CodeDelegate.Controller controller;
     private DelegateContext context;
     private long time;
+    private boolean active;
 
     protected AbstractJavaComponent() {
         // in case subclasses don't build
@@ -67,7 +68,7 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
             params = new Param[0];
         } else {
             params = new Param[count];
-            for (int i=0; i < count; i++) {
+            for (int i = 0; i < count; i++) {
                 Param param = new Param(clock);
                 params[i] = param;
                 ArgumentProperty control = ArgumentProperty.create(param, PString.EMPTY);
@@ -84,7 +85,7 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
             triggers = new Trigger[0];
         } else {
             triggers = new Trigger[count];
-            for (int i=0; i < count; i++) {
+            for (int i = 0; i < count; i++) {
                 Trigger trigger = new Trigger();
                 triggers[i] = trigger;
                 TriggerControl control = TriggerControl.create(trigger);
@@ -101,8 +102,8 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
             outputs = new Output[0];
         } else {
             outputs = new Output[count];
-            for (int i=0; i < count; i++) {
-                ControlPort.Output out = new DefaultControlOutputPort(this);
+            for (int i = 0; i < count; i++) {
+                ControlPort.Output out = new DefaultControlOutputPort();
                 outputs[i] = new OutputImpl(out);
                 registerPort(prefix + (i + 1), out);
             }
@@ -116,42 +117,63 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
         return context;
     }
 
-    protected void setDelegate(CodeDelegate delegate) {
-        uninstallDelegate();
-        if (delegate == null) {
-            this.delegate = null;
+    protected void installController(CodeDelegate.Controller controller) {
+        uninstallController();
+        if (controller == null) {
+            this.controller = null;
             return;
         }
         try {
-            delegate.init(getCodeContext(), time);
-            this.delegate = delegate;
+
+            this.controller = controller;
+            if (active) {
+                controller.init(getCodeContext());
+            }
+
         } catch (Exception ex) {
             Logger.getLogger(AbstractJavaComponent.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
     }
 
-    private void uninstallDelegate() {
-        if (delegate != null) {
-            delegate.dispose();
-            delegate = null;
+    protected void uninstallController() {
+        if (controller != null) {
+            controller.dispose();
+            controller = null;
         }
     }
 
     @Override
     public void stateChanged(ExecutionContext source) {
-        super.stateChanged(source);
         time = source.getTime();
+        if (source.getState() == ExecutionContext.State.ACTIVE) {
+            active = true;
+            if (controller != null) {
+                try {
+                    controller.init(getCodeContext());
+                } catch (Exception ex) {
+                    Logger.getLogger(AbstractJavaComponent.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+        } else {
+            active = false;
+            if (controller != null) {
+                controller.dispose();
+            }
+        }
     }
 
     public void tick(ExecutionContext source) {
         time = source.getTime();
         clock.process();
-        if (delegate != null) {
-            delegate.update();
+        if (controller != null) {
+            try {
+                controller.update();
+            } catch (Exception ex) {
+                // what to do on exception? uninstall?
+            }
         }
     }
-
 
     private class DelegateContext extends CodeContext {
 
@@ -189,7 +211,6 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
         public long getTime() {
             return time;
         }
-
     }
 
     private class OutputImpl implements Output {
@@ -207,9 +228,7 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
         public void send(double value) {
             out.send(time, value);
         }
-
     }
-
 
     private class Clock implements Param.Clock {
 
@@ -230,13 +249,11 @@ public abstract class AbstractJavaComponent extends AbstractClockComponent {
         }
 
         public void connect(Param.ClockListener p) {
-            listeners = ListenerUtils.add(listeners, p);
+            listeners = ArrayUtils.add(listeners, p);
         }
 
         public void disconnect(Param.ClockListener p) {
-            listeners = ListenerUtils.remove(listeners, p);
+            listeners = ArrayUtils.remove(listeners, p);
         }
-
     }
-
 }

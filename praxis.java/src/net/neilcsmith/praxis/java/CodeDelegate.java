@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -50,21 +50,25 @@ public class CodeDelegate {
         rnd = new Random();
     }
 
-    public void init(CodeContext context, long time) throws Exception {
-        if (context == null) {
-            throw new NullPointerException();
-        }
+    private void setCodeContext(CodeContext context) {
         this.context = context;
         if (installable) {
             // add param listeners
         }
     }
+    
+    private void dispose() {
+        context = null;
+    }
 
+    public void setup() {
+    }
+    
     public void update() {
     }
 
-    public void dispose() {
-    }
+//    public void dispose() {
+//    }
 
     public Param p(int idx) {
         return context.getParam(idx - 1);
@@ -332,4 +336,49 @@ public class CodeDelegate {
         perlin = null;
     }
     // end of Perlin noise functions
+    
+    
+    
+    public static class Controller {
+        
+        private CodeContext context;
+        private CodeDelegate delegate;
+        private boolean setupRequired;
+        
+        public Controller(CodeDelegate delegate) {
+            if (delegate == null) {
+                throw new NullPointerException();
+            }
+            this.delegate = delegate;
+        }
+        
+        public void init(CodeContext context) throws Exception {
+            if (context == null) {
+                throw new NullPointerException();
+            }
+            delegate.setCodeContext(context);
+            setupRequired = true;
+            this.context = context;
+        }
+        
+        public void update() throws Exception {
+            if (context == null) {
+                throw new IllegalStateException("Calling update() on an uninited CodeDelegate");
+            }
+            if (setupRequired) {
+                delegate.setup();
+                setupRequired = false;
+            }
+            delegate.update();
+        }
+        
+        public void dispose() {
+            delegate.setCodeContext(null);
+            setupRequired = false;
+            context = null;
+        }
+        
+    }
+    
+    
 }

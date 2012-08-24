@@ -43,6 +43,8 @@ import net.neilcsmith.praxis.java.CodeDelegate;
 import net.neilcsmith.praxis.java.impl.AbstractJavaComponent;
 import net.neilcsmith.praxis.video.java.VideoCodeContext;
 import net.neilcsmith.ripl.Surface;
+import net.neilcsmith.ripl.delegates.CompositeDelegate;
+import net.neilcsmith.ripl.delegates.Delegate;
 import net.neilcsmith.ripl.impl.BufferedImageSurface;
 import org.codehaus.janino.ClassBodyEvaluator;
 
@@ -93,10 +95,10 @@ public abstract class AbstractJavaVideoComponent extends AbstractJavaComponent {
     }
 
     @Override
-    protected void setDelegate(CodeDelegate delegate) {
-        super.setDelegate(delegate);
-        if (delegate instanceof VideoCodeDelegate) {
-            installToDelegator((VideoCodeDelegate) delegate);
+    protected void installController(CodeDelegate.Controller controller) {
+        super.installController(controller);
+        if (controller instanceof VideoCodeDelegate.Controller) {
+            installToDelegator(new ControllerDelegate((VideoCodeDelegate.Controller) controller));
         } else {
             installToDelegator(null);
         }
@@ -108,7 +110,39 @@ public abstract class AbstractJavaVideoComponent extends AbstractJavaComponent {
     }
 
     
-    protected abstract void installToDelegator(VideoCodeDelegate delegate);
+    protected abstract void installToDelegator(ControllerDelegate delegate);
+    
+    protected static class ControllerDelegate implements Delegate, CompositeDelegate {
+        
+        private final static Surface[] EMPTY_SOURCES = new Surface[0];
+        
+        private VideoCodeDelegate.Controller controller;
+        
+        private ControllerDelegate(VideoCodeDelegate.Controller controller) {
+            this.controller = controller;
+        }
+
+        public void process(Surface surface) {
+            controller.process(surface, EMPTY_SOURCES);
+        }
+
+        public void update(long time) {
+            // no op
+        }
+
+        public boolean forceRender() {
+            return false;
+        }
+
+        public boolean usesInput() {
+            return true;
+        }
+
+        public void process(Surface surface, Surface... sources) {
+            controller.process(surface, sources == null ? EMPTY_SOURCES : sources);
+        }
+        
+    }
 
     private class CodeProperty extends AbstractAsyncProperty<VideoCodeDelegate> {
 
@@ -133,7 +167,13 @@ public abstract class AbstractJavaVideoComponent extends AbstractJavaComponent {
 
         @Override
         protected void valueChanged(long time) {
-            setDelegate(getValue());
+//            setDelegate(getValue());
+            VideoCodeDelegate delegate = getValue();
+            if (delegate != null) {
+                installController(new VideoCodeDelegate.Controller(delegate));
+            } else {
+                installController(null);
+            }
         }
 
         @Override
@@ -262,6 +302,7 @@ public abstract class AbstractJavaVideoComponent extends AbstractJavaComponent {
         }
 
     }
+    
 
 
 }

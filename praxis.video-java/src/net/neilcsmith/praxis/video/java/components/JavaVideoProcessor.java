@@ -22,7 +22,6 @@
 
 package net.neilcsmith.praxis.video.java.components;
 
-import net.neilcsmith.praxis.video.java.VideoCodeDelegate;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
@@ -51,7 +50,7 @@ public class JavaVideoProcessor extends AbstractJavaVideoComponent {
     }
 
     @Override
-    protected void installToDelegator(VideoCodeDelegate delegate) {
+    protected void installToDelegator(ControllerDelegate delegate) {
         delegator.setDelegate(delegate);
     }
 

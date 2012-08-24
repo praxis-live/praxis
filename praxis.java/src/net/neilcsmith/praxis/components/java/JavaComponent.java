@@ -81,7 +81,12 @@ public class JavaComponent extends AbstractJavaComponent {
 
         @Override
         protected void valueChanged(long time) {
-            setDelegate(getValue());
+            CodeDelegate delegate = getValue();
+            if (delegate != null) {
+                installController(new CodeDelegate.Controller(delegate));
+            } else {
+                installController(null);
+            }
         }
 
         @Override
