@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -35,16 +35,19 @@ import net.neilcsmith.praxis.core.RootHub;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.ScriptService;
+import net.neilcsmith.praxis.core.interfaces.SystemManagerService;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractControl;
 import net.neilcsmith.praxis.impl.AbstractRoot;
+import net.neilcsmith.praxis.impl.SimpleControl;
+import org.openide.LifecycleManager;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class NonGuiPlayer extends AbstractRoot {
+class NonGuiPlayer extends AbstractRoot {
 
     private final static Logger LOG = Logger.getLogger(NonGuiPlayer.class.getName());
     private String script;
@@ -56,13 +59,16 @@ public class NonGuiPlayer extends AbstractRoot {
             throw new NullPointerException();
         }
         this.script = script;
+        scriptControl = new ScriptControl();
+        registerControl("_script-control", scriptControl);
+        registerInterface(SystemManagerService.INSTANCE);
+        registerControl(SystemManagerService.SYSTEM_EXIT, new ExitControl());
 
     }
 
     @Override
     protected void run() {
-        scriptControl = new ScriptControl();
-        registerControl("_script-control", scriptControl);
+        
         scriptControl.runScript(script);
         super.run();
     }
@@ -139,5 +145,19 @@ public class NonGuiPlayer extends AbstractRoot {
         public ControlInfo getInfo() {
             return null;
         }
+    }
+    
+    private class ExitControl extends SimpleControl {
+        
+        private ExitControl() {
+            super(SystemManagerService.SYSTEM_EXIT_INFO);
+        }
+
+        @Override
+        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
+            LifecycleManager.getDefault().exit();
+            return CallArguments.EMPTY;
+        }
+        
     }
 }

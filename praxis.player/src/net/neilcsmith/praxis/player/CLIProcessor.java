@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -54,16 +54,13 @@ public class CLIProcessor extends OptionProcessor {
 
     private final static Logger LOG = Logger.getLogger(CLIProcessor.class.getName());
     private final static Option ALWAYS = Option.always();
-    private final static Option PLAYER =
-            Option.withoutArgument(Option.NO_SHORT_NAME, "player");
     private final static Option FILE = Option.defaultArguments();
 
     @Override
     protected Set<Option> getOptions() {
         Set<Option> opts = new HashSet<Option>(3);
         opts.add(ALWAYS);
-        opts.add(PLAYER);
-        opts.add(FILE);
+        opts.add(FILE);        
         return opts;
     }
 
@@ -79,7 +76,6 @@ public class CLIProcessor extends OptionProcessor {
             LOG.log(Level.FINE, "netbeans.user.dir : {0}", System.getProperty("netbeans.user.dir"));
         }
 
-        boolean player = optionValues.containsKey(PLAYER);
         String script = null;
 
         if (optionValues.containsKey(FILE)) {
@@ -104,17 +100,14 @@ public class CLIProcessor extends OptionProcessor {
         }
 
         try {
-            if (!player) {
-                if (script == null) {
-                    throw new CommandException(1,
-                            "When not using the --player option you must pass in a valid script.");
-                }
-                startNonGuiPlayer(script);
 
-            } else {
-                env.getOutputStream().println("WARNING: The Praxis GUI player is deprecated.");
-                startPlayer(script);
+            if (script == null) {
+                throw new CommandException(1,
+                        "You must pass in a valid script or project.");
             }
+            startNonGuiPlayer(script);
+
+
         } catch (IllegalRootStateException ex) {
             throw new CommandException(1, "Error starting hub.");
         }
@@ -131,7 +124,7 @@ public class CLIProcessor extends OptionProcessor {
         LOG.log(Level.FINE, "File : {0}", filename);
         File f = new File(filename);
         if (!f.isAbsolute()) {
-            f = new File(env.getCurrentDirectory(), filename);        
+            f = new File(env.getCurrentDirectory(), filename);
         }
         LOG.log(Level.FINE, "java.io.File : {0}", f);
 //        LOG.log(Level.FINE, "java.net.URL : {0}", f.toURI().toURL());
@@ -148,8 +141,7 @@ public class CLIProcessor extends OptionProcessor {
         script = "set _PWD " + FileUtil.toFile(target.getParent()).toURI() + "\n" + script;
         return script;
     }
-    
-    
+
     private FileObject findProjectFile(FileObject projectDir) throws IOException {
         LOG.log(Level.FINE, "Searching project directory : {0}", projectDir);
         ArrayList<FileObject> files = new ArrayList<FileObject>(1);
@@ -173,18 +165,6 @@ public class CLIProcessor extends OptionProcessor {
             }
         }
         throw new IOException("No project file found");
-    }
-
-    private void startPlayer(String script) throws IllegalRootStateException {
-        Player player;
-        if (script != null) {
-            player = new Player(script);
-        } else {
-            player = new Player();
-        }
-        DefaultHub hub = new DefaultHub(new ScriptServiceImpl(),
-                new TaskServiceImpl(), player);
-        hub.activate();
     }
 
     private void startNonGuiPlayer(String script) throws IllegalRootStateException {
