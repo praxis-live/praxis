@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -31,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.*;
 import net.neilcsmith.praxis.core.interfaces.StartableInterface;
+import net.neilcsmith.praxis.core.interfaces.SystemManagerService;
 import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
@@ -44,12 +45,12 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 
     public static enum Caps {
 
-        Component, Container, Startable
+        Component, Container, Startable, ExitableOnStop
     };
     private static final Logger LOG = Logger.getLogger(AbstractRoot.class.getName());
     public static final int DEFAULT_FRAME_TIME = 100; // set in constructor?
     private AtomicReference<RootState> state = new AtomicReference<RootState>(RootState.NEW);
-    private RootState cachedState = RootState.NEW; // cache to pass to listeners because for thread safety
+    private RootState cachedState = RootState.NEW; // cache to pass to listeners for thread safety
     private RootState defaultRunState;
     private RootHub hub;
     private String ID;
@@ -62,6 +63,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     private Lookup lookup;
     private ExecutionContextImpl context;
     private Router router;
+    private ExitOnStopControl exitOnStop;
 
     protected AbstractRoot() {
         this(EnumSet.allOf(Caps.class));
@@ -74,6 +76,9 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             defaultRunState = RootState.ACTIVE_IDLE;
         } else {
             defaultRunState = RootState.ACTIVE_RUNNING;
+        }
+        if (caps.contains(Caps.ExitableOnStop)) {
+            createExitOnStopControl();
         }
     }
 
@@ -93,6 +98,12 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                     }
                 }));
         registerInterface(StartableInterface.INSTANCE);
+    }
+    
+    private void createExitOnStopControl() {
+        exitOnStop = new ExitOnStopControl();
+        registerControl("exit-on-stop", BooleanProperty.create(exitOnStop, false));
+        registerControl("_exit-log", exitOnStop);
     }
 
     public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException {
@@ -181,6 +192,9 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     protected final void setIdle() throws IllegalRootStateException {
         if (state.compareAndSet(RootState.ACTIVE_RUNNING, RootState.ACTIVE_IDLE)) {
             stopping();
+            if (exitOnStop != null) {
+                exitOnStop.idling();
+            }
             return;
         }
         throw new IllegalRootStateException();
@@ -304,7 +318,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             }
         } catch (Exception ex) {
             Call.Type type = call.getType();
-            LOG.log(Level.WARNING, "Exception thrown from call\n" + call, ex);
+            LOG.log(Level.FINE, "Exception thrown from call\n" + call, ex);
             if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
                 router.route(Call.createErrorCall(call, PReference.wrap(ex)));
             }
@@ -462,6 +476,47 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                 return CallArguments.EMPTY;
             }
         }
+    }
+    
+    private class ExitOnStopControl extends SimpleControl implements BooleanProperty.Binding {
+        
+        private boolean exit;
+
+        private ExitOnStopControl() {
+            super(null);
+        }
+        
+        @Override
+        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
+            throw new UnsupportedOperationException("Not supported.");
+        }
+
+        public void setBoundValue(long time, boolean value) {
+            exit = value;
+        }
+
+        public boolean getBoundValue() {
+            return exit;
+        }
+        
+        private void idling() {
+            if (exit) {
+                try {
+                    ControlAddress to = ControlAddress.create(findService(SystemManagerService.INSTANCE),
+                            SystemManagerService.SYSTEM_EXIT);
+                    getPacketRouter().route(Call.createCall(
+                            to, 
+                            ControlAddress.create(getAddress(), "_exit-log"),
+                            getTime(),
+                            CallArguments.EMPTY));
+                } catch (Exception ex) {
+                    LOG.log(Level.WARNING, "Can't access SystemManagerService - exiting manually", ex);
+                    System.exit(0);
+                }
+                
+            }
+        }
+        
     }
 
     private class Router implements PacketRouter {
