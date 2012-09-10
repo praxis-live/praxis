@@ -421,9 +421,9 @@ public class JavasoundAudioServer implements AudioServer {
         }
         Mixer in = null;
         if (context.getInputChannelCount() > 0) {
-            in = findInputMixer(device);
+            in = findInputMixer(device, context);
         }
-        Mixer out = findOutputMixer(device);
+        Mixer out = findOutputMixer(device, context);
         // always fixed buffer size
         if (!context.isFixedBufferSize()) {
             context = new AudioConfiguration(context.getSampleRate(),
@@ -435,14 +435,13 @@ public class JavasoundAudioServer implements AudioServer {
         return new JavasoundAudioServer(in, out, mode, context, client);
     }
 
-    private static Mixer findInputMixer(String device) throws Exception {
+    private static Mixer findInputMixer(String device, AudioConfiguration conf) throws Exception {
         Mixer.Info[] infos = AudioSystem.getMixerInfo();
         Mixer mixer;
-        Line.Info[] lines;
+        DataLine.Info lineInfo = new DataLine.Info(TargetDataLine.class, getInputFormat(conf));
         for (int i = 0; i < infos.length; i++) {
             mixer = AudioSystem.getMixer(infos[i]);
-            lines = mixer.getTargetLineInfo();
-            if (lines.length > 0) {
+            if (mixer.isLineSupported(lineInfo)) {
                 if (infos[i].getName().indexOf(device) >= 0) {
                     LOG.finest("Found input mixer :\n" + infos[i]);
                     return mixer;
@@ -452,14 +451,13 @@ public class JavasoundAudioServer implements AudioServer {
         throw new Exception();
     }
 
-    private static Mixer findOutputMixer(String device) throws LineUnavailableException {
+    private static Mixer findOutputMixer(String device, AudioConfiguration conf) throws LineUnavailableException {
         Mixer.Info[] infos = AudioSystem.getMixerInfo();
         Mixer mixer;
-        Line.Info[] lines;
+        DataLine.Info lineInfo = new DataLine.Info(SourceDataLine.class, getOutputFormat(conf));
         for (int i = 0; i < infos.length; i++) {
             mixer = AudioSystem.getMixer(infos[i]);
-            lines = mixer.getSourceLineInfo();
-            if (lines.length > 0) {
+            if (mixer.isLineSupported(lineInfo)) {
                 if (infos[i].getName().indexOf(device) >= 0) {
                     LOG.finest("Found output mixer :\n" + infos[i]);
                     return mixer;
@@ -468,4 +466,21 @@ public class JavasoundAudioServer implements AudioServer {
         }
         throw new LineUnavailableException();
     }
+    
+    private static AudioFormat getInputFormat(AudioConfiguration conf) {
+        return new AudioFormat(conf.getSampleRate(),
+                16,
+                conf.getInputChannelCount(),
+                true,
+                false);
+    }
+    
+    private static AudioFormat getOutputFormat(AudioConfiguration conf) {
+        return new AudioFormat(conf.getSampleRate(),
+                16,
+                conf.getOutputChannelCount(),
+                true,
+                false);
+    }
+    
 }
