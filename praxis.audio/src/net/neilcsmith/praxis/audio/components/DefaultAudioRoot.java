@@ -166,7 +166,10 @@ public class DefaultAudioRoot extends AbstractRoot {
             dev = arg.toString();
         }
 
-        AudioConfiguration ctxt = new AudioConfiguration(srate, 2, 2, bsize, true);
+//        AudioConfiguration ctxt = new AudioConfiguration(srate, 2, 2, bsize, true);
+        AudioConfiguration ctxt = new AudioConfiguration(srate, 
+                inputClient == null ? 0 : 2, 
+                2, bsize, true);
         return AudioServerLoader.getInstance().load(getLookup(), lib, dev,
                 "praxis-" + getAddress().getRootID(), ctxt, bus, null);
     }
