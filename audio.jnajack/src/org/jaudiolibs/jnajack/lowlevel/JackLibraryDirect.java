@@ -1,22 +1,28 @@
-
 package org.jaudiolibs.jnajack.lowlevel;
 
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
+import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.ByteByReference;
 import com.sun.jna.ptr.IntByReference;
-import com.sun.jna.ptr.PointerByReference;
-import java.nio.ByteBuffer;
 
 /**
  *
  * @author nsigma
  */
 public class JackLibraryDirect implements JackLibrary {
-    
+
     static {
-        Native.register("jack");     
+        if (Platform.is64Bit()) {
+            try {
+                Native.register("jack64");
+            } catch (UnsatisfiedLinkError e) {
+                Native.register("jack");
+            }
+        } else {
+            Native.register("jack");
+        }
     }
 
     public native _jack_client jack_client_open(String client_name, int options, IntByReference status);
@@ -58,7 +64,6 @@ public class JackLibraryDirect implements JackLibrary {
     public native int jack_set_port_connect_callback(_jack_client jack_client_tPtr1, JackPortConnectCallback connect_callback, Pointer arg);
 
 //    public native int jack_set_port_rename_callback(_jack_client jack_client_tPtr1, JackPortRenameCallback rename_callback, Pointer arg);
-
     public native int jack_set_graph_order_callback(_jack_client jack_client_tPtr1, JackGraphOrderCallback graph_callback, Pointer voidPtr1);
 
     public native int jack_set_xrun_callback(_jack_client jack_client_tPtr1, JackXRunCallback xrun_callback, Pointer arg);
@@ -82,7 +87,6 @@ public class JackLibraryDirect implements JackLibrary {
     public native ByteByReference jack_port_type(_jack_port port);
 
 //    public native int jack_port_type_id(_jack_port port);
-
     public native int jack_port_is_mine(_jack_client jack_client_tPtr1, _jack_port port);
 
     public native int jack_port_connected(_jack_port port);
@@ -114,7 +118,6 @@ public class JackLibraryDirect implements JackLibrary {
     public native int jack_port_unset_alias(_jack_port port, String alias);
 
 //    public native int jack_port_get_aliases(_jack_port port, ByteBuffer[] aliases);
-
     public native int jack_port_request_monitor(_jack_port port, int onoff);
 
     public native int jack_port_request_monitor_by_name(_jack_client client, String port_name, int onoff);
@@ -161,5 +164,4 @@ public class JackLibraryDirect implements JackLibrary {
 
 //    public native void free(Pointer ptr);
     public native void jack_free(Pointer ptr);
-    
 }
