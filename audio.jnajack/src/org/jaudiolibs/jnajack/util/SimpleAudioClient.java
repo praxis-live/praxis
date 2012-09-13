@@ -37,6 +37,7 @@ import java.util.EnumSet;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public class SimpleAudioClient {
 
     private JackClient client;
