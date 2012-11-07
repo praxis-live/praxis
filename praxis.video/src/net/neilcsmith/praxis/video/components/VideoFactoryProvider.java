@@ -24,20 +24,18 @@ package net.neilcsmith.praxis.video.components;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
 import net.neilcsmith.praxis.impl.AbstractComponentFactory;
-import net.neilcsmith.praxis.video.components.analysis.blobs.BlobTracker;
+import net.neilcsmith.praxis.video.components.analysis.Difference;
 import net.neilcsmith.praxis.video.components.analysis.FrameDelay;
-
+import net.neilcsmith.praxis.video.components.analysis.blobs.BlobTracker;
 import net.neilcsmith.praxis.video.components.filters.Blur;
 import net.neilcsmith.praxis.video.components.mix.Composite;
 import net.neilcsmith.praxis.video.components.mix.XFader;
-import net.neilcsmith.praxis.video.components.test.BackgroundDifference;
-import net.neilcsmith.praxis.video.components.test.Difference;
 import net.neilcsmith.praxis.video.components.test.DifferenceCalc;
-import net.neilcsmith.praxis.video.components.test.FrameTimer;
-import net.neilcsmith.praxis.video.components.test.Hyp;
 import net.neilcsmith.praxis.video.components.test.ImageSave;
-import net.neilcsmith.praxis.video.components.test.Noise;
-import net.neilcsmith.praxis.video.components.test.Ripple;
+import net.neilcsmith.praxis.video.components.source.Noise;
+import net.neilcsmith.praxis.video.components.timefx.FrameDifference;
+import net.neilcsmith.praxis.video.components.timefx.Ripple;
+
 
 /**
  *
@@ -66,12 +64,12 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
             addComponent("video:still", Still.class);
             addComponent("video:snapshot", Snapshot.class);
             addComponent("video:splitter", Splitter.class);
-            addComponent("video:player", VideoPlayer.class);
-            addComponent("video:capture", VideoCapture.class);
+//            addComponent("video:player", VideoPlayer.class);
+//            addComponent("video:capture", VideoCapture.class);
 
             // ANALYSIS
             addComponent("video:analysis:frame-delay", FrameDelay.class);
-            addComponent("video:analysis:difference", net.neilcsmith.praxis.video.components.analysis.Difference.class);
+            addComponent("video:analysis:difference", Difference.class);
             addComponent("video:analysis:simple-tracker", BlobTracker.class);
 
             // FILTER
@@ -86,17 +84,13 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
             
             // TIME-FX
             addComponent("video:time-fx:ripple", Ripple.class);
-            addComponent("video:time-fx:difference", Difference.class);
+            addComponent("video:time-fx:difference", FrameDifference.class);
 
 
             // TEST COMPONENTS
-//            addComponent("video:test:hypnosis", Hyp.class);
-//            addComponent("video:test:time", FrameTimer.class);
             addComponent("video:test:save", ImageSave.class);
             addComponent("video:test:difference-calc", DifferenceCalc.class);
-//            addComponent("video:test:bgdiff", BackgroundDifference.class);
             addComponent("video:test:noise", Noise.class);
-//            addComponent("video:test:filter:blur", Blur.class);
             addComponent("video:test:analysis:frame-delay", FrameDelay.class);
             addComponent("video:test:analysis:difference", net.neilcsmith.praxis.video.components.analysis.Difference.class);
             addComponent("video:test:analysis:blob-tracker", BlobTracker.class);

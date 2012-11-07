@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -31,10 +31,11 @@ import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.video.ClientConfiguration;
 import net.neilcsmith.praxis.video.ClientRegistrationException;
-import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.VideoContext;
-import net.neilcsmith.ripl.components.Placeholder;
-import net.neilcsmith.ripl.Source;
+import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
+import net.neilcsmith.praxis.video.pipes.VideoPipe;
+import net.neilcsmith.praxis.video.pipes.impl.Placeholder;
+
 
 /**
  *
@@ -43,7 +44,7 @@ import net.neilcsmith.ripl.Source;
 public class VideoOutput extends AbstractComponent {
 
     private Placeholder placeholder;
-//    private VideoContext ctxt;
+    private VideoContext context;
     private VideoContext.OutputClient client;
     private ArgumentProperty width;
     private ArgumentProperty height;
@@ -64,14 +65,23 @@ public class VideoOutput extends AbstractComponent {
     @Override
     public void hierarchyChanged() {
         super.hierarchyChanged();
-        VideoContext ctxt = getLookup().get(VideoContext.class);
-        if (ctxt != null) {
+        VideoContext ctxt = getLookup().get(VideoContext.class);       
+        if (ctxt != context) {
+            if (context != null) {
+                context.unregisterVideoOutputClient(client);
+                context = null;
+            }
+            if (ctxt == null) {
+                return;
+            }
             try {
                 ctxt.registerVideoOutputClient(client);
+                context = ctxt;
             } catch (ClientRegistrationException ex) {
                 Logger.getLogger(VideoOutput.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        
     }
 
     private class OutputClientImpl extends VideoContext.OutputClient {
@@ -80,7 +90,7 @@ public class VideoOutput extends AbstractComponent {
             return 1;
         }
 
-        public Source getOutputSource(int index) {
+        public VideoPipe getOutputSource(int index) {
             if (index == 0) {
                 return placeholder;
             } else {

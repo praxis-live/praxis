@@ -22,11 +22,9 @@
 package net.neilcsmith.praxis.video.impl;
 
 import net.neilcsmith.praxis.core.*;
-import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.impl.PortListenerSupport;
 import net.neilcsmith.praxis.video.VideoPort;
-import net.neilcsmith.ripl.Sink;
-import net.neilcsmith.ripl.Source;
+import net.neilcsmith.praxis.video.pipes.VideoPipe;
 
 /**
  *
@@ -34,11 +32,11 @@ import net.neilcsmith.ripl.Source;
  */
 public class DefaultVideoInputPort extends VideoPort.Input {
 
-    private Sink sink;
+    private VideoPipe sink;
     private VideoPort.Output connection;
     private PortListenerSupport pls;
 
-    public DefaultVideoInputPort(Component host, Sink sink) {
+    public DefaultVideoInputPort(Component host, VideoPipe sink) {
         if (sink == null) {
             throw new NullPointerException();
         }
@@ -59,7 +57,7 @@ public class DefaultVideoInputPort extends VideoPort.Input {
 
 
     @Override
-    protected void addImageOutputPort(VideoPort.Output port, Source source) throws PortConnectionException {
+    protected void addVideoOutputPort(VideoPort.Output port, VideoPipe source) throws PortConnectionException {
         if (connection != null) {
             throw new PortConnectionException();
         }
@@ -74,7 +72,7 @@ public class DefaultVideoInputPort extends VideoPort.Input {
     }
 
     @Override
-    protected void removeImageOutputPort(VideoPort.Output port, Source source) {
+    protected void removeVideoOutputPort(VideoPort.Output port, VideoPipe source) {
         if (connection == port) {
             connection = null;
             sink.removeSource(source);

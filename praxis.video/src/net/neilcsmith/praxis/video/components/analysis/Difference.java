@@ -21,20 +21,16 @@
  */
 package net.neilcsmith.praxis.video.components.analysis;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
-import net.neilcsmith.ripl.components.Placeholder;
-import net.neilcsmith.ripl.SinkIsFullException;
-import net.neilcsmith.ripl.SourceIsFullException;
-import net.neilcsmith.ripl.Surface;
-import net.neilcsmith.ripl.impl.MultiInputInOut;
-import net.neilcsmith.ripl.ops.DifferenceOp;
+import net.neilcsmith.praxis.video.pipes.impl.MultiInOut;
+import net.neilcsmith.praxis.video.pipes.impl.Placeholder;
+import net.neilcsmith.praxis.video.render.Surface;
+import net.neilcsmith.praxis.video.render.ops.DifferenceOp;
 
 /**
  *
@@ -49,25 +45,25 @@ public class Difference extends AbstractComponent {
     private BackgroundDifference diff;
 
     public Difference() {
-        try {
-            diff = new BackgroundDifference();
-            Placeholder pl1 = new Placeholder();
-            Placeholder pl2 = new Placeholder();
-            diff.addSource(pl1);
-            diff.addSource(pl2);
-            registerPort(Port.IN + "-1", new DefaultVideoInputPort(this, pl1));
-            registerPort(Port.IN + "-2", new DefaultVideoInputPort(this, pl2));
-            registerPort(Port.OUT, new DefaultVideoOutputPort(this, diff));
-            StringProperty mode = StringProperty.create(new ModeBinding(), getModeStrings(), diff.getMode().name());
-            registerControl("mode", mode);
-            FloatProperty threshold = FloatProperty.create(new ThresholdBinding(), 0, 1, 0);
-            registerControl("threshold", threshold);
-            registerPort("threshold", threshold.createPort());
-        } catch (SinkIsFullException ex) {
-            Logger.getLogger(Difference.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SourceIsFullException ex) {
-            Logger.getLogger(Difference.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//        try {
+        diff = new BackgroundDifference();
+        Placeholder pl1 = new Placeholder();
+        Placeholder pl2 = new Placeholder();
+        diff.addSource(pl1);
+        diff.addSource(pl2);
+        registerPort(Port.IN + "-1", new DefaultVideoInputPort(this, pl1));
+        registerPort(Port.IN + "-2", new DefaultVideoInputPort(this, pl2));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, diff));
+        StringProperty mode = StringProperty.create(new ModeBinding(), getModeStrings(), diff.getMode().name());
+        registerControl("mode", mode);
+        FloatProperty threshold = FloatProperty.create(new ThresholdBinding(), 0, 1, 0);
+        registerControl("threshold", threshold);
+        registerPort("threshold", threshold.createPort());
+//        } catch (SinkIsFullException ex) {
+//            Logger.getLogger(Difference.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (SourceIsFullException ex) {
+//            Logger.getLogger(Difference.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
 
     private String[] getModeStrings() {
@@ -101,12 +97,12 @@ public class Difference extends AbstractComponent {
         }
     }
 
-    private class BackgroundDifference extends MultiInputInOut {
+    private class BackgroundDifference extends MultiInOut {
 
         private DifferenceOp op;
 
         public BackgroundDifference() {
-            super(2, false);
+            super(2, 1);
             op = new DifferenceOp();
         }
 
@@ -147,23 +143,23 @@ public class Difference extends AbstractComponent {
         }
 
         @Override
-        protected void process(Surface surface, boolean rendering) {
-            if (rendering) {
-                surface.clear();
-                Surface input;
-                int count = getSourceCount();
-                if (count > 0) {
-                    input = getInputSurface(0);
-                    surface.copy(input);
-                    input.release();
-                }
-                if (count > 1) {
-                    input = getInputSurface(1);
-                    surface.process(op, input);
-                    input.release();
-                }
+        protected void process(Surface[] inputs, Surface output, int outputIndex, boolean rendering) {
+            if (!rendering) {
+                return;
+            }
+            output.clear();
+            Surface input;
+            int count = inputs.length;
+            if (count > 0) {
+                input = inputs[0];
+                output.copy(input);
+                input.release();
+            }
+            if (count > 1) {
+                input = inputs[1];
+                output.process(op, input);
+                input.release();
             }
         }
-
     }
 }

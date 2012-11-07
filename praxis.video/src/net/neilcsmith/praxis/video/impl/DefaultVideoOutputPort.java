@@ -22,10 +22,9 @@
 package net.neilcsmith.praxis.video.impl;
 
 import net.neilcsmith.praxis.core.*;
-import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.impl.PortListenerSupport;
 import net.neilcsmith.praxis.video.VideoPort;
-import net.neilcsmith.ripl.Source;
+import net.neilcsmith.praxis.video.pipes.VideoPipe;
 
 /**
  *
@@ -33,11 +32,11 @@ import net.neilcsmith.ripl.Source;
  */
 public class DefaultVideoOutputPort extends VideoPort.Output {
 
-    private Source source;
+    private VideoPipe source;
     private VideoPort.Input connection;
     private PortListenerSupport pls;
 
-    public DefaultVideoOutputPort(Component host, Source source) {
+    public DefaultVideoOutputPort(Component host, VideoPipe source) {
         if (source == null) {
             throw new NullPointerException();
         }

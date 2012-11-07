@@ -22,15 +22,11 @@
 
 package net.neilcsmith.praxis.video.components;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
-import net.neilcsmith.ripl.components.Placeholder;
-import net.neilcsmith.ripl.SinkIsFullException;
-import net.neilcsmith.ripl.SourceIsFullException;
+import net.neilcsmith.praxis.video.pipes.impl.Placeholder;
 
 /**
  *
@@ -38,13 +34,13 @@ import net.neilcsmith.ripl.SourceIsFullException;
  */
 public class Splitter extends AbstractComponent {
     
-    private net.neilcsmith.ripl.components.Splitter spl;
+    private net.neilcsmith.praxis.video.pipes.impl.Splitter spl;
     private Placeholder out1;
     private Placeholder out2;
     
     public Splitter() {
-        try {
-            spl = new net.neilcsmith.ripl.components.Splitter();
+//        try {
+            spl = new net.neilcsmith.praxis.video.pipes.impl.Splitter(2);
             out1 = new Placeholder();
             out2 = new Placeholder();
             out1.addSource(spl);
@@ -52,12 +48,12 @@ public class Splitter extends AbstractComponent {
             registerPort(Port.IN, new DefaultVideoInputPort(this, spl));
             registerPort(Port.OUT + "-1", new DefaultVideoOutputPort(this, out1));
             registerPort(Port.OUT + "-2", new DefaultVideoOutputPort(this, out2));
-            
-        } catch (SinkIsFullException ex) {
-            Logger.getLogger(Splitter.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SourceIsFullException ex) {
-            Logger.getLogger(Splitter.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//            
+//        } catch (SinkIsFullException ex) {
+//            Logger.getLogger(Splitter.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (SourceIsFullException ex) {
+//            Logger.getLogger(Splitter.class.getName()).log(Level.SEVERE, null, ex);
+//        }
         
     }
 

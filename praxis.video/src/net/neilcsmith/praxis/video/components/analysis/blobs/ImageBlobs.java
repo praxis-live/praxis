@@ -2,7 +2,7 @@ package net.neilcsmith.praxis.video.components.analysis.blobs;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import net.neilcsmith.ripl.PixelData;
+import net.neilcsmith.praxis.video.render.PixelData;
 
 /**
  * 

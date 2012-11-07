@@ -41,10 +41,11 @@ import net.neilcsmith.praxis.impl.TriggerControl;
 import net.neilcsmith.praxis.impl.UriProperty;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
-import net.neilcsmith.ripl.components.Delegator;
-import net.neilcsmith.ripl.Surface;
-import net.neilcsmith.ripl.delegates.AbstractDelegate;
-import net.neilcsmith.ripl.impl.BufferedImageSurface;
+import net.neilcsmith.praxis.video.pipes.VideoPipe;
+import net.neilcsmith.praxis.video.pipes.impl.SingleInOut;
+import net.neilcsmith.praxis.video.render.Surface;
+import net.neilcsmith.praxis.video.render.utils.BufferedImageSurface;
+
 
 /**
  *
@@ -65,9 +66,9 @@ public class ImageSave extends AbstractComponent {
         pool = new ArrayList<SoftReference<BufferedImageSurface>>();
         callback = new SaveCallback();
         uri = UriProperty.create(PResource.valueOf(new File("image").toURI()));
-        Delegator d = new Delegator(new SaveDelegate());
-        registerPort(Port.IN, new DefaultVideoInputPort(this, d));
-        registerPort(Port.OUT, new DefaultVideoOutputPort(this, d));
+        SavePipe savePipe = new SavePipe();
+        registerPort(Port.IN, new DefaultVideoInputPort(this, savePipe));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, savePipe));
         registerControl("file", uri);
         TriggerControl trigger = TriggerControl.create(new TriggerBinding());
         registerControl("trigger", trigger);
@@ -112,9 +113,9 @@ public class ImageSave extends AbstractComponent {
         pool.add(new SoftReference<BufferedImageSurface>(surface));
     }
 
-    private class SaveDelegate extends AbstractDelegate {
+    private class SavePipe extends SingleInOut {
 
-        public void process(Surface surface) {
+        public void process(Surface surface, boolean rendering) {
             if (triggered) {
                 int width = surface.getWidth();
                 int height = surface.getHeight();
@@ -129,13 +130,17 @@ public class ImageSave extends AbstractComponent {
                 }
                 triggered = false;
             }
-
         }
 
         @Override
-        public boolean forceRender() {
-            return triggered;
+        protected boolean isRenderRequired(VideoPipe source, long time) {
+            if (triggered) {
+                return true;
+            } else {
+                return super.isRenderRequired(source, time);
+            }
         }
+        
     }
 
     private class ImageSaver implements TaskService.Task {

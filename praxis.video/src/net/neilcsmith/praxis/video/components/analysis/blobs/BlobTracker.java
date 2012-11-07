@@ -32,14 +32,13 @@ import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
-import net.neilcsmith.ripl.PixelData;
-import net.neilcsmith.ripl.Surface;
-import net.neilcsmith.ripl.SurfaceOp;
-import net.neilcsmith.ripl.components.Delegator;
-import net.neilcsmith.ripl.delegates.AbstractDelegate;
-import net.neilcsmith.ripl.ops.Blend;
-import net.neilcsmith.ripl.ops.GraphicsOp;
-import net.neilcsmith.ripl.ops.RectFill;
+import net.neilcsmith.praxis.video.pipes.impl.SingleInOut;
+import net.neilcsmith.praxis.video.render.PixelData;
+import net.neilcsmith.praxis.video.render.Surface;
+import net.neilcsmith.praxis.video.render.SurfaceOp;
+import net.neilcsmith.praxis.video.render.ops.Blend;
+import net.neilcsmith.praxis.video.render.ops.GraphicsOp;
+import net.neilcsmith.praxis.video.render.ops.RectFill;
 
 /**
  *
@@ -48,7 +47,7 @@ import net.neilcsmith.ripl.ops.RectFill;
 public class BlobTracker extends AbstractClockComponent {
 
     private ImageBlobs imageBlobs;
-    private BlobDelegate blobDelegate;
+    private BlobPipe blobPipe;
     private BooleanProperty debug;
     private ControlPort.Output x;
     private ControlPort.Output y;
@@ -60,20 +59,19 @@ public class BlobTracker extends AbstractClockComponent {
     private double heightd;
 
     public BlobTracker() {
-        blobDelegate = new BlobDelegate();
+        blobPipe = new BlobPipe();
         imageBlobs = new ImageBlobs();
-        Delegator del = new Delegator(blobDelegate);
-        debug = BooleanProperty.create(this, false);
+        debug = BooleanProperty.create(false);
         registerControl("debug", debug);
-        registerPort(Port.IN, new DefaultVideoInputPort(this, del));
-        registerPort(Port.OUT, new DefaultVideoOutputPort(this, del));
-        x = new DefaultControlOutputPort(this);
+        registerPort(Port.IN, new DefaultVideoInputPort(this, blobPipe));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, blobPipe));
+        x = new DefaultControlOutputPort();
         registerPort("x", x);
-        y = new DefaultControlOutputPort(this);
+        y = new DefaultControlOutputPort();
         registerPort("y", y);
-        width = new DefaultControlOutputPort(this);
+        width = new DefaultControlOutputPort();
         registerPort("width", width);
-        height = new DefaultControlOutputPort(this);
+        height = new DefaultControlOutputPort();
         registerPort("height", height);
     }
 
@@ -85,9 +83,13 @@ public class BlobTracker extends AbstractClockComponent {
         height.send(time, heightd);
     }
 
-    private class BlobDelegate extends AbstractDelegate implements SurfaceOp {
+    private class BlobPipe extends SingleInOut implements SurfaceOp {
 
-        public void process(Surface surface) {
+        public void process(Surface surface, boolean rendering) {
+
+            if (!rendering) {
+                return;
+            }
             surface.process(this);
             imageBlobs.dotracking();
             if (imageBlobs.trackedblobs.isEmpty()) {
@@ -126,5 +128,7 @@ public class BlobTracker extends AbstractClockComponent {
         public void process(PixelData output, PixelData... inputs) {
             imageBlobs.calc(output);
         }
+
+
     }
 }

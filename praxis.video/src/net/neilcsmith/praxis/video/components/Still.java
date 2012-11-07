@@ -28,12 +28,10 @@ import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.interfaces.TaskService;
-import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PReference;
-import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.core.types.PResource;
+import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
@@ -41,10 +39,9 @@ import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
-//import net.neilcsmith.ripl.components.Still;
-import net.neilcsmith.ripl.components.Delegator;
-import net.neilcsmith.ripl.utils.ResizeMode;
-import net.neilcsmith.ripl.delegates.ImageDelegate;
+import net.neilcsmith.praxis.video.pipes.impl.SingleInOut;
+import net.neilcsmith.praxis.video.render.Surface;
+import net.neilcsmith.praxis.video.utils.ResizeMode;
 
 /**
  *
@@ -71,17 +68,17 @@ public class Still extends AbstractComponent {
         DelegateLoader loader = new DelegateLoader();
         registerPort(Port.IN, new DefaultVideoInputPort(this, delegator));
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));
-        registerControl("image", loader);  
+        registerControl("image", loader);
         registerPort("image", loader.createPort());
         registerControl("resize-mode", resizeType);
         registerPort("resize-mode", resizeType.createPort());
         registerControl("align-x", alignX);
         registerPort("align-x", alignX.createPort());
         registerControl("align-y", alignY);
-        registerPort("align-y", alignY.createPort());       
-        rdyPort = new DefaultControlOutputPort(this);
+        registerPort("align-y", alignY.createPort());
+        rdyPort = new DefaultControlOutputPort();
         registerPort("ready", rdyPort);
-        errPort = new DefaultControlOutputPort(this);
+        errPort = new DefaultControlOutputPort();
         registerPort("error", errPort);
 
     }
@@ -156,7 +153,6 @@ public class Still extends AbstractComponent {
         }
     }
 
-
     private class DelegateLoader extends AbstractAsyncProperty<ImageDelegate> {
 
         DelegateLoader() {
@@ -172,7 +168,7 @@ public class Still extends AbstractComponent {
                 return null;
             } else {
                 return new LoaderTask(PResource.coerce(key),
-                        resizeMode, delegator.getCurrentDimensions());
+                        resizeMode, null);//delegator.getCurrentDimensions());
             }
         }
 
@@ -188,7 +184,6 @@ public class Still extends AbstractComponent {
             LOG.finest("Error in image loading - sending error message from port.");
             errPort.send(time);
         }
-       
     }
 
     private class LoaderTask implements TaskService.Task {
@@ -208,5 +203,22 @@ public class Still extends AbstractComponent {
             ImageDelegate del = ImageDelegate.create(loc, mode, guide);
             return PReference.wrap(del);
         }
+    }
+
+    private class Delegator extends SingleInOut {
+
+        private ImageDelegate delegate;
+
+        @Override
+        protected void process(Surface surface, boolean rendering) {
+            if (rendering && delegate != null) {
+                delegate.process(surface);
+            }
+        }
+
+        private void setDelegate(ImageDelegate delegate) {
+            this.delegate = delegate;
+        }
+
     }
 }

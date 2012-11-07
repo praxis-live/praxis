@@ -25,7 +25,8 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.PortConnectionException;
 import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.core.types.PMap;
-import net.neilcsmith.ripl.Source;
+import net.neilcsmith.praxis.video.pipes.VideoPipe;
+
 
 /**
  *
@@ -65,9 +66,9 @@ public abstract class VideoPort implements Port {
             return info;
         }
 
-        protected abstract void addImageOutputPort(Output port, Source source) throws PortConnectionException;
+        protected abstract void addVideoOutputPort(Output port, VideoPipe source) throws PortConnectionException;
 
-        protected abstract void removeImageOutputPort(Output port, Source source);
+        protected abstract void removeVideoOutputPort(Output port, VideoPipe source);
     }
 
     public static abstract class Output extends VideoPort {
@@ -86,12 +87,12 @@ public abstract class VideoPort implements Port {
             return info;
         }
 
-        protected final void makeConnection(Input port, Source source) throws PortConnectionException {
-            port.addImageOutputPort(this, source);
+        protected final void makeConnection(Input port, VideoPipe source) throws PortConnectionException {
+            port.addVideoOutputPort(this, source);
         }
 
-        protected final void breakConnection(Input port, Source source) {
-            port.removeImageOutputPort(this, source);
+        protected final void breakConnection(Input port, VideoPipe source) {
+            port.removeVideoOutputPort(this, source);
         }
     }
 }

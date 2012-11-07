@@ -26,9 +26,9 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
-import net.neilcsmith.ripl.Surface;
-import net.neilcsmith.ripl.components.Delegator;
-import net.neilcsmith.ripl.delegates.AbstractDelegate;
+import net.neilcsmith.praxis.video.pipes.impl.SingleInOut;
+import net.neilcsmith.praxis.video.render.Surface;
+
 
 /**
  *
@@ -36,31 +36,29 @@ import net.neilcsmith.ripl.delegates.AbstractDelegate;
  */
 public class FrameDelay extends AbstractExecutionContextComponent {
     
-    private Delegator delegator;
-    private DelegateImpl delegate;
+    private DelayPipe delayPipe;
     
     public FrameDelay() {
-        delegate = new DelegateImpl();
-        delegator = new Delegator(delegate);
-        registerPort(Port.IN, new DefaultVideoInputPort(this, delegator));
-        registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));
+        delayPipe = new DelayPipe();
+        registerPort(Port.IN, new DefaultVideoInputPort(this, delayPipe));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(this, delayPipe));
     }
 
     public void stateChanged(ExecutionContext source) {
-       delegate.reset();
+       delayPipe.reset();
     }
 
     
-    private class DelegateImpl extends AbstractDelegate {
+    private class DelayPipe extends SingleInOut {
         
         private Surface previous;
         private Surface tmp;
 
-        public void process(Surface surface) {
+        public void process(Surface surface, boolean rendering) {
             if (previous == null || !surface.checkCompatible(surface, true, true)) {
                 reset();
-                previous = surface.createSurface(null);
-                tmp = surface.createSurface(null);
+                previous = surface.createSurface();
+                tmp = surface.createSurface();
                 previous.copy(surface);
                 surface.clear();
             } else {

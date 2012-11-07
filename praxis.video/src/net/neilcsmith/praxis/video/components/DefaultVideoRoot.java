@@ -33,15 +33,13 @@ import net.neilcsmith.praxis.impl.RootState;
 import net.neilcsmith.praxis.settings.Settings;
 import net.neilcsmith.praxis.video.ClientConfiguration;
 import net.neilcsmith.praxis.video.ClientRegistrationException;
+import net.neilcsmith.praxis.video.Player;
 import net.neilcsmith.praxis.video.PlayerConfiguration;
 import net.neilcsmith.praxis.video.PlayerFactory;
 import net.neilcsmith.praxis.video.VideoContext;
 import net.neilcsmith.praxis.video.VideoSettings;
-import net.neilcsmith.ripl.FrameRateListener;
-import net.neilcsmith.ripl.FrameRateSource;
-import net.neilcsmith.ripl.Player;
-import net.neilcsmith.ripl.render.reference.ReferencePlayer;
-import net.neilcsmith.ripl.render.sw.SWPlayer;
+import net.neilcsmith.praxis.video.pipes.FrameRateListener;
+import net.neilcsmith.praxis.video.pipes.FrameRateSource;
 
 /**
  *
@@ -143,9 +141,9 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
                 rotation = ((Integer) r).intValue();
             }
         }        
-        if ("Reference".equals(library)) {
-            return new ReferencePlayer(title, width, height, fps, fullScreen);
-        } else {           
+//        if ("Reference".equals(library)) {
+//            return new ReferencePlayer(title, width, height, fps, fullScreen);
+//        } else {           
             PlayerFactory factory = findPlayerFactory(library);
             if (factory != null) {
                 try {
@@ -165,7 +163,7 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
             } else {
                 return SWPlayer.create(title, width, height, fps, fullScreen, outWidth, outHeight, rotation);
             }
-        }
+//        }
     }
     
     private PlayerFactory findPlayerFactory(String lib) {

@@ -21,8 +21,7 @@
  */
 package net.neilcsmith.praxis.video;
 
-import net.neilcsmith.ripl.Sink;
-import net.neilcsmith.ripl.Source;
+import net.neilcsmith.praxis.video.pipes.VideoPipe;
 
 /**
  *
@@ -57,7 +56,7 @@ public abstract class VideoContext {
 
         public abstract int getInputCount();
 
-        public abstract Sink getInputSink(int index);
+        public abstract VideoPipe getInputSink(int index);
 
     }
 
@@ -65,7 +64,7 @@ public abstract class VideoContext {
 
         public abstract int getOutputCount();
 
-        public abstract Source getOutputSource(int index);
+        public abstract VideoPipe getOutputSource(int index);
 
     }
 }

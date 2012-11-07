@@ -22,8 +22,6 @@
 
 package net.neilcsmith.praxis.video;
 
-import net.neilcsmith.ripl.Player;
-
 /**
  *
  * @author nsigma

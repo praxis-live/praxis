@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.apisupport.project</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
+            <code-name-base>net.neilcsmith.praxis.video.pipes</code-name-base>
+            <suite-component/>
+            <module-dependencies>
+                <dependency>
+                    <code-name-base>net.neilcsmith.praxis.video.render</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>1.0</specification-version>
+                    </run-dependency>
+                </dependency>
+            </module-dependencies>
+            <friend-packages>
+                <friend>net.neilcsmith.praxis.video</friend>
+                <friend>net.neilcsmith.praxis.video.gstreamer</friend>
+                <friend>net.neilcsmith.praxis.video.java</friend>
+                <friend>net.neilcsmith.praxis.video.opengl</friend>
+                <package>net.neilcsmith.praxis.video.pipes</package>
+                <package>net.neilcsmith.praxis.video.pipes.impl</package>
+            </friend-packages>
+        </data>
+    </configuration>
+</project>

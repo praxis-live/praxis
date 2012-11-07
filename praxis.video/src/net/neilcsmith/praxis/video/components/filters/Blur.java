@@ -19,7 +19,6 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.video.components.filters;
 
 import net.neilcsmith.praxis.core.Port;
@@ -27,24 +26,26 @@ import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.IntProperty;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
-import net.neilcsmith.ripl.components.filters.BlurFilter;
+import net.neilcsmith.praxis.video.pipes.impl.SingleInOut;
+import net.neilcsmith.praxis.video.render.Surface;
+import net.neilcsmith.praxis.video.render.SurfaceOp;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public class Blur extends AbstractComponent {
-    
-    private BlurFilter filter;
+
+    private BlurPipe filter;
 
     public Blur() {
-        filter = new BlurFilter();
-        IntProperty radius = IntProperty.create( new RadiusBinding(), 0, 256, 0);
+        filter = new BlurPipe();
+        IntProperty radius = IntProperty.create(new RadiusBinding(), 0, 256, 0);
         registerPort(Port.IN, new DefaultVideoInputPort(this, filter));
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, filter));
         registerControl("radius", radius);
         registerPort("radius", radius.createPort());
-        
+
     }
 
     private class RadiusBinding implements IntProperty.Binding {
@@ -56,8 +57,34 @@ public class Blur extends AbstractComponent {
         public int getBoundValue() {
             return filter.getRadius();
         }
-
     }
 
+    private class BlurPipe extends SingleInOut {
 
+        private SurfaceOp op;
+        private int radius;
+
+        public int getRadius() {
+            return radius;
+        }
+
+        public void setRadius(int radius) {
+            if (radius < 0) {
+                throw new IllegalArgumentException();
+            }
+            this.op = null;
+            this.radius = radius;
+        }
+
+        @Override
+        protected void process(Surface surface, boolean rendering) {
+            if (!rendering) {
+                return;
+            }
+            if (op == null) {
+                op = net.neilcsmith.praxis.video.render.ops.Blur.op(radius);
+            }
+            surface.process(op);
+        }
+    }
 }
