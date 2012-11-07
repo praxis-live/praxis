@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -53,10 +53,13 @@ public class FloatRangeProperty extends AbstractProperty {
         if (args.getSize() != 2) {
             throw new IllegalArgumentException();
         }
-        PNumber low = PNumber.coerce(args.get(0));
-        PNumber high = PNumber.coerce(args.get(1));
-        binding.setBoundLowValue(time, low.value());
-        binding.setBoundHighValue(time, high.value());
+        double low = PNumber.coerce(args.get(0)).value();
+        double high = PNumber.coerce(args.get(1)).value();
+        if (low < min || low > max || high < min || high > max) {
+            throw new IllegalArgumentException();
+        }
+        binding.setBoundLowValue(time, low);
+        binding.setBoundHighValue(time, high);
     }
 
 
