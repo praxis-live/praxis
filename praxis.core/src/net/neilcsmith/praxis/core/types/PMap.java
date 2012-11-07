@@ -201,55 +201,7 @@ public class PMap extends Argument {
         return new PMap(m, null);
     }
 
-//    public static PMap valueOf(Argument... args) {
-//        if (args.length == 0 || (args.length % 2) != 0) {
-//            throw new IllegalArgumentException();
-//        }
-//        Map<String, Argument> map = new LinkedHashMap<String, Argument>();
-//        for (int i = 0; i < args.length; i++) {
-//            String key = args[i].toString();
-//            if (key == null) {
-//                throw new NullPointerException();
-//            }
-//            i++;
-//            Argument value = args[i];
-//            if (value == null) {
-//                throw new NullPointerException();
-//            }
-//            if (map.containsKey(key)) {
-//                throw new IllegalArgumentException();
-//            }
-//            map.put(key, value);
-//        }
-////        map = Collections.unmodifiableMap(map);
-//        return new PMap(map, null);
-//    }
 
-//    public static PMap valueOf(String ... args) {
-//        if (args.length == 0 || (args.length % 2) != 0) {
-//            throw new IllegalArgumentException();
-//        }
-//        Map<String, Argument> map = new LinkedHashMap<String, Argument>();
-//        for (int i = 0; i < args.length; i++) {
-//            String k = args[i];
-//            if (k == null) {
-//                throw new NullPointerException();
-//            }
-//            i++;
-//            String v = args[i];
-//            if (v == null) {
-//                throw new NullPointerException();
-//            }
-//            String key = k;
-//            PString value = PString.valueOf(v);
-//            if (map.containsKey(key)) {
-//                throw new IllegalArgumentException();
-//            }
-//            map.put(key, value);
-//        }
-//        map = Collections.unmodifiableMap(map);
-//        return new PMap(map, null);
-//    }
 
     public static PMap valueOf(String str) throws ArgumentFormatException {
         if (str.length() == 0) {
