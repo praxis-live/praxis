@@ -93,7 +93,4 @@ public class DefaultBuffer extends Buffer {
         }
     }
 
-    public void release() {
-        // no op
-    }
 }
