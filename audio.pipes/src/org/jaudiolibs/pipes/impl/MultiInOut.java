@@ -125,6 +125,10 @@ public abstract class MultiInOut extends Pipe {
             output.clear();
         }
     }
+    
+    protected long getTime() {
+        return time;
+    }
 
     @Override
     protected void registerSink(Pipe sink) throws SourceIsFullException {

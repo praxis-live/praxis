@@ -46,6 +46,7 @@ import org.jaudiolibs.pipes.SourceIsFullException;
 public abstract class SingleOut extends Pipe {
 
     Pipe sink;
+    private long time;
 
     @Override
     public final void process(Pipe sink, Buffer buffer, long time) {
@@ -54,6 +55,7 @@ public abstract class SingleOut extends Pipe {
 
     void processImpl(Pipe sink, Buffer buffer, long time) {
         if (this.sink == sink) {
+            this.time = time;
             process(buffer, sinkRequiresRender(sink, time));
         }
     }
@@ -86,6 +88,10 @@ public abstract class SingleOut extends Pipe {
     }
 
     protected abstract void process(Buffer buffer, boolean rendering);
+    
+    protected long getTime() {
+        return time;
+    }
 
     @Override
     public int getSourceCount() {
