@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.PortListener;
+import net.neilcsmith.praxis.util.ArrayUtils;
 
 /**
  *
@@ -47,26 +48,14 @@ public class PortListenerSupport {
         if (listener == null) {
             throw new NullPointerException();
         }
-        List<PortListener> list = Arrays.asList(listeners);
-        if (list.contains(listener)) {
-            return;
-        }
-        list = new ArrayList<PortListener>(list);
-        list.add(listener);
-        listeners = list.toArray(new PortListener[list.size()]);
+        listeners = ArrayUtils.add(listeners, listener);
     }
 
     public void removeListener(PortListener listener) {
         if (listener == null) {
             return;
         }
-        List<PortListener> list = Arrays.asList(listeners);
-        if (!list.contains(listener)) {
-            return;
-        }
-        list = new ArrayList<PortListener>(list);
-        list.remove(listener);
-        listeners = list.toArray(new PortListener[list.size()]);
+        listeners = ArrayUtils.remove(listeners, listener);
     }
 
     public void fireListeners() {
