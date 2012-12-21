@@ -23,8 +23,6 @@ package net.neilcsmith.praxis.audio.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jaudiolibs.audioservers.AudioConfiguration;
-import org.jaudiolibs.audioservers.AudioServer;
 import net.neilcsmith.praxis.audio.AudioContext;
 import net.neilcsmith.praxis.audio.AudioSettings;
 import net.neilcsmith.praxis.audio.ClientRegistrationException;
@@ -38,12 +36,10 @@ import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.InstanceLookup;
-import org.jaudiolibs.pipes.impl.Placeholder;
+import org.jaudiolibs.audioservers.AudioConfiguration;
+import org.jaudiolibs.audioservers.AudioServer;
 import org.jaudiolibs.pipes.BufferRateListener;
 import org.jaudiolibs.pipes.BufferRateSource;
-import org.jaudiolibs.pipes.Bus;
-import org.jaudiolibs.pipes.SinkIsFullException;
-import org.jaudiolibs.pipes.SourceIsFullException;
 import org.jaudiolibs.pipes.impl.BusClient;
 
 /**
@@ -51,11 +47,10 @@ import org.jaudiolibs.pipes.impl.BusClient;
  * @author Neil C Smith
  */
 public class DefaultAudioRoot extends AbstractRoot {
-
+    
     private final static Logger LOG = Logger.getLogger(DefaultAudioRoot.class.getName());
-    
+    private final static int MAX_CHANNELS = 16;
     private final static int DEFAULT_INTERNAL_BUFFERSIZE = 64;
-    
     private AudioContext.InputClient inputClient;
     private AudioContext.OutputClient outputClient;
     private BusClient bus;
@@ -67,18 +62,18 @@ public class DefaultAudioRoot extends AbstractRoot {
     private ArgumentProperty device;
     private AudioContext hub;
     private Lookup lookup;
-    private Placeholder[] inputs;
-    private Placeholder[] outputs;
+//    private Placeholder[] inputs;
+//    private Placeholder[] outputs;
     private long period = -1;
 
     public DefaultAudioRoot() {
         buildControls();
-        inputs = new Placeholder[2];
-        inputs[0] = new Placeholder();
-        inputs[1] = new Placeholder();
-        outputs = new Placeholder[2];
-        outputs[0] = new Placeholder();
-        outputs[1] = new Placeholder();
+//        inputs = new Placeholder[2];
+//        inputs[0] = new Placeholder();
+//        inputs[1] = new Placeholder();
+//        outputs = new Placeholder[2];
+//        outputs[0] = new Placeholder();
+//        outputs[1] = new Placeholder();
     }
 
     private void buildControls() {
@@ -115,6 +110,13 @@ public class DefaultAudioRoot extends AbstractRoot {
 
     @Override
     protected void starting() {
+        if (outputClient == null) {
+            try {
+                setIdle();
+            } catch (IllegalRootStateException ex) {
+            }
+            return;
+        }
         int bsize = DEFAULT_INTERNAL_BUFFERSIZE;
         if (!bufferSize.getValue().isEmpty()) {
             try {
@@ -123,11 +125,16 @@ public class DefaultAudioRoot extends AbstractRoot {
                 //fall through
             }
         }
-        bus = new BusClient(bsize, 2, 2);
+        bus = new BusClient(bsize,
+                inputClient == null ? 0 : inputClient.getInputCount(),
+                outputClient.getOutputCount());
         busListener = new BusListener();
         bus.addBufferRateListener(busListener);
         bus.addConfigurationListener(busListener);
-        makeConnections(bus);
+        if (inputClient != null) {
+            makeInputConnections();
+        }
+        makeOutputConnections();
         try {
             server = createServer(bus);
         } catch (Exception ex) {
@@ -139,7 +146,6 @@ public class DefaultAudioRoot extends AbstractRoot {
             return;
         }
         setInterrupt(new Runnable() {
-
             public void run() {
                 try {
                     server.run();
@@ -166,10 +172,10 @@ public class DefaultAudioRoot extends AbstractRoot {
             dev = arg.toString();
         }
 
-//        AudioConfiguration ctxt = new AudioConfiguration(srate, 2, 2, bsize, true);
-        AudioConfiguration ctxt = new AudioConfiguration(srate, 
-                inputClient == null ? 0 : 2, 
-                2, bsize, true);
+        AudioConfiguration ctxt = new AudioConfiguration(srate,
+                bus.getSourceCount(),
+                bus.getSinkCount(), 
+                bsize, true);
         return AudioServerLoader.getInstance().load(getLookup(), lib, dev,
                 "praxis-" + getAddress().getRootID(), ctxt, bus, null);
     }
@@ -205,24 +211,33 @@ public class DefaultAudioRoot extends AbstractRoot {
     }
 
     // @TODO fix this!
-    private void makeConnections(Bus bus) {
-        try {
-            bus.getSink(0).addSource(outputs[0]);
-            bus.getSink(1).addSource(outputs[1]);
-            inputs[0].addSource(bus.getSource(0));
-            inputs[1].addSource(bus.getSource(1));
-        } catch (SinkIsFullException ex) {
-            Logger.getLogger(DefaultAudioRoot.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SourceIsFullException ex) {
-            Logger.getLogger(DefaultAudioRoot.class.getName()).log(Level.SEVERE, null, ex);
+//    private void makeConnections(Bus bus) {
+//        bus.getSink(0).addSource(outputs[0]);
+//        bus.getSink(1).addSource(outputs[1]);
+//        inputs[0].addSource(bus.getSource(0));
+//        inputs[1].addSource(bus.getSource(1));
+//    }
+    
+    private void makeInputConnections() {
+        int count = Math.min(inputClient.getInputCount(), bus.getSourceCount());
+        for (int i=0; i<count; i++) {
+            inputClient.getInputSink(i).addSource(bus.getSource(i));
         }
-
+    }
+    
+    private void makeOutputConnections() {
+        int count = Math.min(outputClient.getOutputCount(), bus.getSinkCount());
+        for (int i=0; i<count; i++) {
+            bus.getSink(i).addSource(outputClient.getOutputSource(i));
+        }
     }
 
     @Override
     protected void stopping() {
+        if (bus == null) {
+            return;
+        }
         setInterrupt(new Runnable() {
-
             public void run() {
                 server.shutdown();
                 bus.disconnectAll();
@@ -260,7 +275,7 @@ public class DefaultAudioRoot extends AbstractRoot {
 
         public void configure(AudioConfiguration context) throws Exception {
             period = (long) ((context.getMaxBufferSize()
-                / context.getSampleRate()) * 1000000000);
+                    / context.getSampleRate()) * 1000000000);
         }
 
         public void shutdown() {
@@ -272,73 +287,41 @@ public class DefaultAudioRoot extends AbstractRoot {
 
         public int registerAudioInputClient(AudioContext.InputClient client) throws ClientRegistrationException {
             if (inputClient == null) {
-                try {
-                    inputClient = client;
-                    int ins = client.getInputCount();
-                    if (ins == 0) {
-                        // do nothing for now
-                    } else if (ins == 1) {
-                        client.getInputSink(0).addSource(inputs[0]);
-                    } else {
-                        client.getInputSink(0).addSource(inputs[0]);
-                        client.getInputSink(1).addSource(inputs[1]);
-                    }
-                    return 2;
-                } catch (Exception ex) {
-                    inputClient = null;
-                    throw new ClientRegistrationException();
-                }
+                inputClient = client;
             } else {
                 throw new ClientRegistrationException();
             }
+            return MAX_CHANNELS;
         }
 
         public void unregisterAudioInputClient(AudioContext.InputClient client) {
             if (inputClient == client) {
                 inputClient = null;
-                for (Placeholder input : inputs) {
-//                    for (Sink sink : input.getSinks()) {
-//                        sink.removeSource(input);
-//                    }
-                    if (input.getSinkCount() == 1) {
-                        input.getSink(0).removeSource(input);
-                    }
+                if (bus != null) {
+                    bus.disconnectAll();
+                    makeOutputConnections();
                 }
             }
         }
 
         public int registerAudioOutputClient(AudioContext.OutputClient client) throws ClientRegistrationException {
             if (outputClient == null) {
-                try {
-                    outputClient = client;
-                    int outs = client.getOutputCount();
-                    if (outs == 0) {
-                        // do nothing for now
-                    } else if (outs == 1) {
-                        outputs[0].addSource(client.getOutputSource(0));
-                    } else {
-                        outputs[0].addSource(client.getOutputSource(0));
-                        outputs[1].addSource(client.getOutputSource(1));
-                    }
-                    return 2;
-                } catch (Exception ex) {
-                    outputClient = null;
-                    throw new ClientRegistrationException(ex);
-                }
+                    outputClient = client;                 
+            } else {
+                throw new ClientRegistrationException();
             }
-            throw new ClientRegistrationException();
-
+            return MAX_CHANNELS;
         }
 
         public void unregisterAudioOutputClient(AudioContext.OutputClient client) {
             if (outputClient == client) {
                 outputClient = null;
-                for (Placeholder output : outputs) {
-//                    for (Source src : output.getSources()) {
-//                        output.removeSource(src);
-//                    }
-                    if (output.getSourceCount() == 1) {
-                        output.removeSource(output.getSource(0));
+                if (bus != null) {
+                    bus.disconnectAll();
+                    try {
+                        setIdle();
+                    } catch (IllegalRootStateException ex) {
+                        // ignore, already stopping?
                     }
                 }
             }

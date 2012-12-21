@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -25,10 +25,13 @@ package net.neilcsmith.praxis.audio.components;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.audio.AudioContext;
+import net.neilcsmith.praxis.audio.AudioPort;
 import net.neilcsmith.praxis.audio.ClientRegistrationException;
+import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
+import net.neilcsmith.praxis.impl.IntProperty;
 import org.jaudiolibs.pipes.Pipe;
 import org.jaudiolibs.pipes.impl.Placeholder;
 
@@ -38,30 +41,33 @@ import org.jaudiolibs.pipes.impl.Placeholder;
  */
 public class AudioInput extends AbstractComponent {
     
-    private Placeholder[] placeholders;
+    private final static int MAX_CHANNELS = 16;
+    
+    private final Placeholder[] placeholders;
+    private final AudioPort.Output[] ports;
     private AudioContext.InputClient client;
+    
+    private int channelCount;
     private AudioContext context;
     
     public AudioInput() {
-        placeholders = new Placeholder[2];
-        placeholders[0] = new Placeholder();
-        placeholders[1] = new Placeholder();
-        registerPort(Port.OUT + "-1", new DefaultAudioOutputPort(this, placeholders[0]));
-        registerPort(Port.OUT + "-2", new DefaultAudioOutputPort(this, placeholders[1]));
-        client = new AudioContext.InputClient() {
-
-            @Override
-            public int getInputCount() {
-                return 2;
-            }
-
-            @Override
-            public Pipe getInputSink(int index) {
-                return placeholders[index];
-            }
-        };
+        placeholders = new Placeholder[MAX_CHANNELS];
+        for (int i=0; i<MAX_CHANNELS; i++) {
+            placeholders[i] = new Placeholder();
+        }
+        ports = new AudioPort.Output[MAX_CHANNELS];
+        
+        client = new Client();
+        
+        channelCount = 2;
+        
+        registerControl("channels",
+                IntProperty.create(new CountBinding(), 1, MAX_CHANNELS, channelCount));
+        
+        syncPorts();
+        markDynamic();
     }
-
+    
 
     @Override
     public void hierarchyChanged() {
@@ -82,7 +88,51 @@ public class AudioInput extends AbstractComponent {
                 Logger.getLogger(AudioInput.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+    
+    private void syncPorts() {
+        for (int i=0; i<MAX_CHANNELS; i++) {
+            if (i < channelCount) {
+                if (ports[i] == null) {
+                    AudioPort.Output port = new DefaultAudioOutputPort(this, placeholders[i]);
+                    registerPort(Port.OUT + "-" + (i+1), port);
+                    ports[i] = port;
+                }
+            } else {
+                if (ports[i] != null) {
+                    // unregister will disconnect all
+                    unregisterPort(Port.OUT + "-" + (i+1));
+                    ports[i] = null;
+                }
+            }
+        }
+    }
+    
+    
+    private class Client extends AudioContext.InputClient {
+
+        @Override
+        public int getInputCount() {
+            return channelCount;
+        }
+
+        @Override
+        public Pipe getInputSink(int index) {
+            return placeholders[index];
+        }
         
+    }
+    
+    private class CountBinding implements IntProperty.Binding {
+
+        public void setBoundValue(long time, int value) {
+            channelCount = value;
+            syncPorts();
+        }
+
+        public int getBoundValue() {
+            return channelCount;
+        }
         
     }
 
