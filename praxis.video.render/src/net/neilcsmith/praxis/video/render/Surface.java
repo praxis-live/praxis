@@ -29,9 +29,9 @@ public abstract class Surface {
 
     private final static Surface[] EMPTY = new Surface[0];
 
-    private final int width;
-    private final int height;
-    private final boolean alpha;
+    protected final int width;
+    protected final int height;
+    protected final boolean alpha;
 
     public Surface(int width, int height, boolean alpha) {
         if (width < 1 || height < 1) {
