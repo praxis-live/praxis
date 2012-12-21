@@ -24,19 +24,21 @@ package net.neilcsmith.praxis.core.info;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import net.neilcsmith.praxis.core.types.PMap;
 import java.util.Map;
 import java.util.Set;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
+import net.neilcsmith.praxis.core.types.PMap;
 
 /**
  *
  * @author Neil C Smith
  */
 public class ComponentInfo extends Argument {
+    
+    public final static String KEY_DYNAMIC = "dynamic";
 
     private Class<? extends Component> type;
     private InterfaceDefinition[] interfaces;
@@ -87,6 +89,11 @@ public class ComponentInfo extends Argument {
         return "ComponentInfo toString() not implemented yet";
     }
 
+    @Override
+    public boolean isEquivalent(Argument arg) {
+        return equals(arg);
+    }
+    
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

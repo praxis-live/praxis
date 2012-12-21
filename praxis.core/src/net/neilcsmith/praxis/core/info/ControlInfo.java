@@ -68,6 +68,12 @@ public class ControlInfo extends Argument {
     }
 
     @Override
+    public boolean isEquivalent(Argument arg) {
+        return equals(arg);
+    }
+    
+
+    @Override
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;

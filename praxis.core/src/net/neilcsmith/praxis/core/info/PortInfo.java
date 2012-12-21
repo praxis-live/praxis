@@ -69,6 +69,11 @@ public final class PortInfo extends Argument {
     }
 
     @Override
+    public boolean isEquivalent(Argument arg) {
+        return equals(arg);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof PortInfo) {
             PortInfo o = (PortInfo) obj;

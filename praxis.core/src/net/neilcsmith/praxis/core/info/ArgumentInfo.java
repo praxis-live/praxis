@@ -80,7 +80,12 @@ public final class ArgumentInfo extends Argument {
         return type + " " + presence + " {" + properties.toString() + "}";
     }
 
+    @Override
+    public boolean isEquivalent(Argument arg) {
+        return equals(arg);
+    }
 
+    
 
     @Override
     public boolean equals(Object obj) {
