@@ -5,6 +5,7 @@
 package net.neilcsmith.praxis.video.opengl.internal;
 
 import java.awt.Canvas;
+import java.util.WeakHashMap;
 import net.neilcsmith.praxis.video.opengl.GLException;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
@@ -19,12 +20,18 @@ public class GLContext {
     private final static PixelFormat DEFAULT_PIXEL_FORMAT = new PixelFormat(24, 8, 16, 0, 0);
     private static GLContext current;
     
-    
-    
-    private int width;
-    private int height;
+    final GLRenderer renderer;
+    final int width;
+    final int height;
 
-    private GLContext() {
+    
+    private WeakHashMap<GLSurface, Boolean> surfaces;
+
+    private GLContext(int width, int height) {
+        this.width = width;
+        this.height = height;
+        this.renderer = new GLRenderer(this);
+        surfaces = new WeakHashMap<GLSurface, Boolean>();    
     }
     
     public int getWidth() {
@@ -35,11 +42,21 @@ public class GLContext {
         return height;
     } 
     
+    public GLRenderer getRenderer() {
+        return renderer;
+    }
+    
     public GLSurface createSurface(int width, int height, boolean alpha) {
-        return new GLSurface(width, height, alpha);
+        GLSurface s =  new GLSurface(this, width, height, alpha);
+        surfaces.put(s, Boolean.TRUE);
+        return s;
     }
     
     public void dispose() {
+        for (GLSurface s : surfaces.keySet()) {
+            s.clear();
+        }
+        TextureCache.clear();
         try {
             Display.setParent(null);
         } catch (LWJGLException ex) {
@@ -48,17 +65,15 @@ public class GLContext {
         current = null;
     }
 
-    public static GLContext createContext(Canvas canvas) throws GLException {
+    public synchronized static GLContext createContext(Canvas canvas) throws GLException {
         if (current != null) {
-            throw new GLException(); //@ TODO - make thread safe!
+            throw new GLException();
         }
         try {
             Display.setParent(canvas);
             createDisplayPixelFormat();
             Display.setVSyncEnabled(true);
-            GLContext ctxt = new GLContext();
-            ctxt.width = canvas.getWidth();
-            ctxt.height = canvas.getHeight();
+            GLContext ctxt = new GLContext(canvas.getWidth(), canvas.getHeight());
             current = ctxt;
             return ctxt;
         } catch (Exception ex) {

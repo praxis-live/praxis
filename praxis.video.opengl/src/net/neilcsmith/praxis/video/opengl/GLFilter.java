@@ -34,6 +34,7 @@ import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
+import net.neilcsmith.praxis.video.opengl.internal.Color;
 import net.neilcsmith.praxis.video.opengl.internal.GLRenderer;
 import net.neilcsmith.praxis.video.opengl.internal.GLSurface;
 import net.neilcsmith.praxis.video.opengl.internal.ShaderProgram;
@@ -174,8 +175,10 @@ public class GLFilter extends AbstractExecutionContextComponent {
                 }
                 GLSurface src = (GLSurface) inputs[0];
                 GLSurface dst = (GLSurface) output;
-                GLRenderer r = GLRenderer.get((GLSurface) dst);
+                GLRenderer r = dst.getGLContext().getRenderer();
+                r.target(dst);
                 r.setBlendFunction(GL11.GL_ONE, GL11.GL_ZERO);
+                r.setColor(Color.WHITE);
                 r.bind(shader);
                 for (int i=0; i < uniformIDs.length; i++) {
                     String id = uniformIDs[i];
@@ -196,7 +199,6 @@ public class GLFilter extends AbstractExecutionContextComponent {
         }
 
         private void initShader() {
-            GLRenderer.safe();
             if (shader != null) {
                 shader.dispose();
             }

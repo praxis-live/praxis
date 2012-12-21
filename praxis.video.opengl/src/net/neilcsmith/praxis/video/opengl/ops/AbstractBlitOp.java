@@ -49,7 +49,7 @@ abstract class AbstractBlitOp extends GLOp {
 
     void setupBlending(GLRenderer renderer, Blend blend, boolean srcAlpha, boolean dstAlpha) {
 
-        renderer.enableBlending();
+//        renderer.enableBlending();
 
         switch (blend.getType()) {
             case Normal:

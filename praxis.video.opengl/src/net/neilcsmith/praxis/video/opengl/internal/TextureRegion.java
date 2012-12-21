@@ -20,7 +20,7 @@ package net.neilcsmith.praxis.video.opengl.internal;
  * pointing to the right and the y axis pointing downwards.
  * @author mzechner
  * @author Nathan Sweet */
-public class TextureRegion {
+class TextureRegion {
 	Texture texture;
 	float u, v;
 	float u2, v2;

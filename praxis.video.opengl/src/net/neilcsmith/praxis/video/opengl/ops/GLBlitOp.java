@@ -53,7 +53,8 @@ public class GLBlitOp extends AbstractBlitOp {
         try {
             Blend blend = (Blend) blit.getBlendFunction();
             if (canProcess(blend)) {
-                GLRenderer renderer = GLRenderer.get(dst);
+                GLRenderer renderer = dst.getGLContext().getRenderer();
+                renderer.target(dst);
                 setupBlending(renderer, blend, src.hasAlpha(), dst.hasAlpha());
                 Bounds bounds = blit.getSourceRegion();
 

@@ -17,12 +17,15 @@
  */
 package net.neilcsmith.praxis.video.opengl.internal;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.IntBuffer;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.video.opengl.internal.VertexAttributes.Usage;
+import net.neilcsmith.praxis.video.render.utils.PixelArrayCache;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL14;
 
 /**
@@ -34,23 +37,21 @@ import org.lwjgl.opengl.GL14;
 public class GLRenderer implements Disposable {
 
     private final static Logger LOGGER = Logger.getLogger(GLRenderer.class.getName());
-    private final static Map<GLSurface, GLRenderer> renderers =
-            new HashMap<GLSurface, GLRenderer>();
-    private static GLRenderer active;
+//    private final static Map<GLSurface, GLRenderer> renderers =
+//            new HashMap<GLSurface, GLRenderer>();
+//    private static GLRenderer active;
+    private GLContext context;
     static final int VERTEX_SIZE = 2 + 1 + 2;
     static final int SPRITE_SIZE = 4 * VERTEX_SIZE;
     private Mesh mesh;
     private Mesh[] buffers;
-    private Texture lastTexture = null;
-    private float invTexWidth = 0;
-    private float invTexHeight = 0;
+    private Texture tex0 = null;
     private int idx = 0;
     private int currBufferIdx = 0;
     private final float[] vertices;
     private final Matrix4 transformMatrix = new Matrix4();
     private final Matrix4 projectionMatrix = new Matrix4();
     private final Matrix4 combinedMatrix = new Matrix4();
-//    private boolean drawing = false;
     private boolean blendingDisabled = false;
     private int blendSrcFunc = GL11.GL_ONE;
     private int blendDstFunc = GL11.GL_ZERO;
@@ -58,20 +59,15 @@ public class GLRenderer implements Disposable {
     private int blendDstAlphaFunc = GL11.GL_ZERO;
     private ShaderProgram shader;
     private float color = Color.WHITE.toFloatBits();
-    private Color tempColor = new Color(1, 1, 1, 1);
-    /**
-     * number of render calls *
-     */
-    public int renderCalls = 0;
-    /**
-     * the maximum number of sprites rendered in one batch so far *
-     */
-    public int maxSpritesInBatch = 0;
     private ShaderProgram customShader = null;
     private GLSurface surface;
+    private Texture target;
+    private boolean active;
+    private IntBuffer scratchBuffer;
+    private Texture emptyTexture;
 
-    private GLRenderer(GLSurface surface) {
-        this(surface, 1000, 1);
+    GLRenderer(GLContext context) {
+        this(context, 1000, 1);
     }
 
     /**
@@ -88,9 +84,9 @@ public class GLRenderer implements Disposable {
      * @param buffers the number of buffers to use. only makes sense with VBOs.
      * This is an expert function.
      */
-    private GLRenderer(GLSurface surface, int size, int buffers) {
+    private GLRenderer(GLContext context, int size, int buffers) {
 
-        this.surface = surface;
+        this.context = context;
 
         this.buffers = new Mesh[buffers];
 
@@ -119,6 +115,8 @@ public class GLRenderer implements Disposable {
         mesh = this.buffers[0];
 
         createShader();
+
+        createEmptyTexture();
 
     }
 
@@ -151,20 +149,29 @@ public class GLRenderer implements Disposable {
         if (shader.isCompiled() == false) {
             throw new IllegalArgumentException("couldn't compile shader: " + shader.getLog());
         }
+    }
 
-
+    private void createEmptyTexture() {
+        GLSurfaceData sd = new GLSurfaceData(32, 32, true);
+        sd.pixels = PixelArrayCache.acquire(32 * 32, false);
+        sd.texture = new Texture(32, 32);
+        int white = 0xFFFFFFFF;
+        Arrays.fill(sd.pixels, white);
+        syncPixelsToTexture(sd);
+        PixelArrayCache.release(sd.pixels);
+        emptyTexture = sd.texture;
     }
 
     public void clear() {
-//        checkActive();
-//        beginDrawing();
         activate();
-        lastTexture = null;
+        tex0 = null;
         idx = 0;
         if (surface == null) {
+            LOGGER.finest("Clearing screen");
             GL11.glClearColor(0, 0, 0, 1);
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
         } else {
+            LOGGER.finest("Clearing surface");
             if (surface.hasAlpha()) {
                 GL11.glClearColor(0, 0, 0, 0);
             } else {
@@ -174,23 +181,64 @@ public class GLRenderer implements Disposable {
         }
     }
 
-    private void activate() {
-        if (active == this) {
+    public void target(GLSurface surface) {
+        if (surface == this.surface) {
             return;
         }
+        flush();
+        this.surface = surface;
+    }
 
-        FrameBuffer fbo = null;
-        if (surface != null) {
-            // this might switch to a different renderer - wait to flush until afterwards.
-            fbo = surface.getWritableData().getTexture().getFrameBuffer();
+    void invalidate(GLSurface surface) {
+        if (this.surface == surface) {
+            target(null);
         }
+    }
 
-        if (active != null) {
-            active.flush();
+    private void activate() {
+        if (active) {
+            return;
         }
 
         GL11.glDepthMask(false);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
+
+        FrameBuffer fbo = null;
+        boolean clear = false;
+        target = null;
+
+        if (surface != null) {
+            GLSurfaceData data = surface.data;
+            if (data == null) {
+                LOGGER.finest("Setting up render to empty surface");
+                data = new GLSurfaceData(surface.getWidth(), surface.getHeight(), surface.hasAlpha());
+                data.texture = TextureCache.acquire(data.width, data.height);
+                surface.data = data;
+                clear = true;
+            } else if (data.usage > 1) {
+                LOGGER.finest("Setting up render to shared surface");
+                data.usage--;
+                if (data.texture == null) {
+                    data.texture = TextureCache.acquire(data.width, data.height);
+                    syncPixelsToTexture(data);
+                }
+                data.texture.getFrameBuffer().bind();
+                data = new GLSurfaceData(surface.getWidth(), surface.getHeight(), surface.hasAlpha());
+                data.texture = TextureCache.acquire(data.width, data.height);
+                data.texture.bind();
+                GL11.glCopyTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 0, 0, data.width, data.height);
+                surface.data = data;
+            } else if (data.texture == null) {
+                LOGGER.finest("Setting up render to pixel backed surface");
+                data.texture = TextureCache.acquire(data.width, data.height);
+                syncPixelsToTexture(data);
+            }
+            data.pixels = null;
+            target = data.texture;
+            fbo = data.texture.getFrameBuffer();
+        }
+
+
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 
         if (fbo == null) {
@@ -216,41 +264,27 @@ public class GLRenderer implements Disposable {
         }
         setupMatrices();
 
-        active = this;
+        active = true;
+
+        if (clear) {
+            clear();
+        }
 
     }
 
-    /**
-     * Finishes off rendering. Enables depth writes, disables blending and
-     * texturing. Must always be called after a call to
-     * {@link #beginDrawing()}
-     */
-    private void flush() {
-
-        if (active != this) {
-            LOGGER.fine("flush() called but we're not the active renderer");
-        }
+    public void flush() {
 
         renderMesh();
 
-        lastTexture = null;
-        idx = 0;
-//        drawing = false;
-
-        GL11.glDepthMask(true);
-        if (isBlendingEnabled()) {
-            GL11.glDisable(GL11.GL_BLEND);
-        }
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        tex0 = null;
 
         if (customShader != null) {
             customShader.end();
-//            customShader = null;
         } else {
             shader.end();
         }
 
-        active = null;
+        active = false;
 
     }
 
@@ -277,20 +311,19 @@ public class GLRenderer implements Disposable {
     public void setColor(float color) {
         this.color = color;
     }
-
-    /**
-     * @return the rendering color of this TextureRenderer. Manipulating the
-     * returned instance has no effect.
-     */
-    public Color getColor() {
-        int intBits = Float.floatToRawIntBits(color);
-        Color color = this.tempColor;
-        color.r = (intBits & 0xff) / 255f;
-        color.g = ((intBits >>> 8) & 0xff) / 255f;
-        color.b = ((intBits >>> 16) & 0xff) / 255f;
-        color.a = ((intBits >>> 24) & 0xff) / 255f;
-        return color;
-    }
+//    /**
+//     * @return the rendering color of this TextureRenderer. Manipulating the
+//     * returned instance has no effect.
+//     */
+//    public Color getColor() {
+//        int intBits = Float.floatToRawIntBits(color);
+//        Color color = this.tempColor;
+//        color.r = (intBits & 0xff) / 255f;
+//        color.g = ((intBits >>> 8) & 0xff) / 255f;
+//        color.b = ((intBits >>> 16) & 0xff) / 255f;
+//        color.a = ((intBits >>> 24) & 0xff) / 255f;
+//        return color;
+//    }
     private TextureRegion region = new TextureRegion();
 
     public void draw(GLSurface src, float x, float y) {
@@ -302,20 +335,36 @@ public class GLRenderer implements Disposable {
     }
 
     public void draw(GLSurface src, float srcX, float srcY, float srcWidth, float srcHeight, float x, float y) {
-        Texture tex = src.getReadableData().getTexture();
-        activate();
-        region.setTexture(tex);
-        region.setRegion((int) srcX, (int) srcY, (int) srcWidth, (int) srcHeight);
-        draw(region, x, y);
+        draw(src, srcX, srcY, srcWidth, srcHeight, x, y, srcWidth, srcHeight);
     }
 
     public void draw(GLSurface src, float srcX, float srcY, float srcWidth, float srcHeight,
             float x, float y, float width, float height) {
-        Texture tex = src.getReadableData().getTexture();
         activate();
-        region.setTexture(tex);
-        region.setRegion((int) srcX, (int) srcY, (int) srcWidth, (int) srcHeight);
-        draw(region, x, y, width, height);
+        GLSurfaceData data = src.data;
+        if (data == null) {
+            LOGGER.finest("Drawing empty Surface - using empty texture");
+            float col = color;
+            if (src.hasAlpha()) {
+                setColor(0, 0, 0, 0);
+            } else {
+                float a = ((Float.floatToRawIntBits(col) >>> 24) & 0xff) / 255f;
+                setColor(0, 0, 0, a);
+            }
+            region.setRegion(emptyTexture);
+            draw(region, x, y, width, height);
+            color = col;
+        } else {
+            if (data.texture == null) {
+                LOGGER.finest("Surface texture is null - uploading pixels");
+                data.texture = TextureCache.acquire(data.width, data.height);
+                syncPixelsToTexture(data);
+            }
+            region.setTexture(data.texture);
+            region.setRegion((int) srcX, (int) srcY, (int) srcWidth, (int) srcHeight);
+            draw(region, x, y, width, height);
+        }
+
     }
 
     /**
@@ -336,11 +385,11 @@ public class GLRenderer implements Disposable {
 //        }
         Texture texture = region.texture;
 
-        if (texture != lastTexture) {
+        if (texture != tex0) {
             renderMesh();
-            lastTexture = texture;
-            invTexWidth = 1f / texture.getWidth();
-            invTexHeight = 1f / texture.getHeight();
+            tex0 = texture;
+//            invTexWidth = 1f / texture.getWidth();
+//            invTexHeight = 1f / texture.getHeight();
         } else if (idx == vertices.length) {
 //            System.out.println("idx == vertices.length");
             renderMesh();
@@ -384,16 +433,14 @@ public class GLRenderer implements Disposable {
             return;
         }
 
-        renderCalls++;
-
         int spritesInBatch = idx / 20;
 
-        if (lastTexture == null) {
+        if (tex0 == null) {
             LOGGER.log(Level.WARNING, "Texture is null - returning : idx = {0}", idx);
             return;
         }
 
-        lastTexture.bind();
+        tex0.bind();
         mesh.setVertices(vertices, 0, idx);
 
         if (blendingDisabled) {
@@ -424,29 +471,6 @@ public class GLRenderer implements Disposable {
             currBufferIdx = 0;
         }
         mesh = buffers[currBufferIdx];
-    }
-
-    /**
-     * Disables blending for drawing sprites. Does not disable blending for text
-     * rendering
-     */
-    public void disableBlending() {
-        if (blendingDisabled) {
-            return;
-        }
-        renderMesh();
-        blendingDisabled = true;
-    }
-
-    /**
-     * Enables blending for sprites
-     */
-    public void enableBlending() {
-        if (!blendingDisabled) {
-            return;
-        }
-        renderMesh();
-        blendingDisabled = false;
     }
 
     /**
@@ -481,53 +505,32 @@ public class GLRenderer implements Disposable {
         if (shader != null) {
             shader.dispose();
         }
+        if (emptyTexture != null) {
+            emptyTexture.dispose();
+        }
     }
 
     private void setupMatrices() {
         combinedMatrix.set(projectionMatrix).mul(transformMatrix);
-//        if (customShader != null) {
-//            customShader.setUniformMatrix("u_proj", projectionMatrix);
-//            customShader.setUniformMatrix("u_trans", transformMatrix);
-//            customShader.setUniformMatrix("u_projTrans", combinedMatrix);
-//            customShader.setUniformi("u_texture", 0);
-//        } else {
-        ShaderProgram prog = customShader == null ? shader : customShader; 
+        ShaderProgram prog = customShader == null ? shader : customShader;
         if (prog.hasUniform("u_projectionViewMatrix")) {
             prog.setUniformMatrix("u_projectionViewMatrix", combinedMatrix);
         }
         if (prog.hasUniform("u_texture")) {
             prog.setUniformi("u_texture", 0);
         }
-        
+
 
     }
 
-    /**
-     * Sets the shader to be used in a GLES 2.0 environment. Vertex position
-     * attribute is called "a_position", the texture coordinates attribute is
-     * called called "a_texCoords0", the color attribute is called "a_color".
-     * See
-     * {@link ShaderProgram#POSITION_ATTRIBUTE}, {@link ShaderProgram#COLOR_ATTRIBUTE}
-     * and {@link ShaderProgram#TEXCOORD_ATTRIBUTE} which gets "0" appened to
-     * indicate the use of the first texture unit. The projection matrix is
-     * uploaded via a mat4 uniform called "u_proj", the transform matrix is
-     * uploaded via a uniform called "u_trans", the combined transform and
-     * projection matrx is is uploaded via a mat4 uniform called "u_projTrans".
-     * The texture sampler is passed via a uniform called "u_texture".
-     *
-     * Call this method with a null argument to use the default shader.
-     *
-     * @param shader the {@link ShaderProgram} or null to use the default
-     * shader.
-     */
     private void setShader(ShaderProgram shader) {
         activate();
         renderMesh();
         if (customShader != null) {
-            LOGGER.log(Level.FINE,"Unbinding custom shader");
+            LOGGER.log(Level.FINE, "Unbinding custom shader");
             customShader.end();
         } else {
-            LOGGER.log(Level.FINE,"Unbinding default shader");
+            LOGGER.log(Level.FINE, "Unbinding default shader");
             this.shader.end();
         }
 
@@ -535,10 +538,10 @@ public class GLRenderer implements Disposable {
 
         if (customShader != null) {
             customShader.begin();
-            LOGGER.log(Level.FINE,"Binding custom shader");
+            LOGGER.log(Level.FINE, "Binding custom shader");
         } else {
             this.shader.begin();
-            LOGGER.log(Level.FINE,"Binding default shader");
+            LOGGER.log(Level.FINE, "Binding default shader");
         }
         setupMatrices();
 
@@ -555,64 +558,62 @@ public class GLRenderer implements Disposable {
         }
     }
 
-    /**
-     * @return whether blending for sprites is enabled
-     */
-    public boolean isBlendingEnabled() {
-        return !blendingDisabled;
-    }
-//    static public final int X1 = 0;
-//    static public final int Y1 = 1;
-//    static public final int C1 = 2;
-//    static public final int U1 = 3;
-//    static public final int V1 = 4;
-//    static public final int X2 = 5;
-//    static public final int Y2 = 6;
-//    static public final int C2 = 7;
-//    static public final int U2 = 8;
-//    static public final int V2 = 9;
-//    static public final int X3 = 10;
-//    static public final int Y3 = 11;
-//    static public final int C3 = 12;
-//    static public final int U3 = 13;
-//    static public final int V3 = 14;
-//    static public final int X4 = 15;
-//    static public final int Y4 = 16;
-//    static public final int C4 = 17;
-//    static public final int U4 = 18;
-//    static public final int V4 = 19;
-
-    public static GLRenderer get(GLSurface surface) {
-        GLRenderer renderer = renderers.get(surface);
-        if (renderer == null) {
-            LOGGER.log(Level.FINE, "Creating renderer for {0}", surface);
-            renderer = new GLRenderer(surface);
-            renderers.put(surface, renderer);
+    void syncTextureToPixels(GLSurfaceData data) {
+        LOGGER.fine("Copying texture to pixels");
+        if (data.texture == target) {
+            LOGGER.fine("Texture is current render target");
+            flush();
         }
-        return renderer;
-    }
-
-    public static void safe() {
-//        GLRenderer r = get(null);
-//        r.activate();
-//        r.flush();
-//        active = null;
-        flushActive();
-        FrameBuffer.unbind();
-        GL11.glViewport(0, 0, GLContext.getCurrent().getWidth(), GLContext.getCurrent().getWidth());
-    }
-
-    public static void flushActive() {
-        if (active != null) {
-            active.flush();
+        int tWidth = data.texture.getWidth();
+        int size = tWidth * data.texture.getHeight();
+        if (scratchBuffer == null || scratchBuffer.capacity() < size) {
+            scratchBuffer = BufferUtils.createIntBuffer(size);
+        }
+        scratchBuffer.rewind();
+        data.texture.bind();
+        GL11.glGetTexImage(GL11.GL_TEXTURE_2D,
+                0,
+                GL12.GL_BGRA,
+                GL12.GL_UNSIGNED_INT_8_8_8_8_REV,
+                scratchBuffer);
+        scratchBuffer.rewind();
+        int offset = 0;
+        for (int y = 0; y < data.height; y++) {
+            scratchBuffer.position(offset);
+            scratchBuffer.get(data.pixels, y * data.width, data.width);
+            offset += tWidth;
         }
     }
 
-    public static void clearAll() {
-        safe();
-        for (GLRenderer r : renderers.values()) {
-            r.dispose();
+    void syncPixelsToTexture(GLSurfaceData data) {
+        LOGGER.fine("Copying pixels to texture");
+        if (data.texture == target) {
+            LOGGER.log(Level.FINE, "Texture is current render target");
+            flush();
         }
-        renderers.clear();
+        int size = data.width * data.height;
+        if (scratchBuffer == null || scratchBuffer.capacity() < size) {
+            scratchBuffer = BufferUtils.createIntBuffer(size);
+        }
+        data.texture.bind();
+        scratchBuffer.rewind();
+        scratchBuffer.put(data.pixels, 0, size);
+        scratchBuffer.rewind();
+        if (!data.alpha) {
+            GL11.glPixelTransferf(GL11.GL_ALPHA_BIAS, 1);
+        }
+        GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D,
+                0,
+                0,
+                0,
+                data.width,
+                data.height,
+                GL12.GL_BGRA,
+                GL12.GL_UNSIGNED_INT_8_8_8_8_REV,
+                scratchBuffer);
+        if (!data.alpha) {
+            GL11.glPixelTransferf(GL11.GL_ALPHA_BIAS, 0);
+        }
+
     }
 }

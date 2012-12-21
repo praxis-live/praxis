@@ -162,11 +162,11 @@ public class ShaderProgram implements Disposable {
 //		this.matrix = BufferUtils.newFloatBuffer(16);
                 this.matrix = BufferUtils.createFloatBuffer(16);
                 
-                context = GLContext.getCurrent();
+//                context = GLContext.getCurrent();
                 
-                if (context != null) {
+//                if (context != null) {
                     compileShaders(vertexShader, fragmentShader);
-                }
+//                }
 	}
 
 	/** Loads and compiles the shaders, creates a new program and links the shaders.

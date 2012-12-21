@@ -99,7 +99,7 @@ public class Texture implements Disposable {
     public Texture(int width, int height) {
         this.width = width;
         this.height = height;
-//        init();
+        init();
     }
 
     private void init() {
@@ -124,11 +124,6 @@ public class Texture implements Disposable {
     /** Binds this texture. The texture will be bound to the currently active texture unit specified via
      * {@link GLCommon#glActiveTexture(int)}. */
     public void bind() {
-        GLContext cur = GLContext.getCurrent();
-        if (context != cur) {
-            context = cur;
-            init();   
-        }
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, glHandle);
     }
 
@@ -200,13 +195,6 @@ public class Texture implements Disposable {
 
     /** Disposes all resources associated with the texture */
     public void dispose() {
-        // this is a hack. reason: we have to set the glHandle to 0 for textures that are
-        // reloaded through the asset manager as we first remove (and thus dispose) the texture
-        // and then reload it. the glHandle is set to 0 in invalidateAllTextures prior to
-        // removal from the asset manager.
-        if (glHandle == 0) {
-            return;
-        }
         if (frameBuffer != null) {
             frameBuffer.dispose();
         }

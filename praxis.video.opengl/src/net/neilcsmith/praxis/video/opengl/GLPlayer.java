@@ -50,6 +50,7 @@ import net.neilcsmith.praxis.video.pipes.SinkIsFullException;
 import net.neilcsmith.praxis.video.pipes.VideoPipe;
 import net.neilcsmith.praxis.video.render.Surface;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
 
 /**
  *
@@ -119,6 +120,7 @@ public class GLPlayer implements Player {
         try {
             init();
         } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "Unable to start OpenGL player", ex);
             running = false;
             dispose();
             return;
@@ -249,10 +251,7 @@ public class GLPlayer implements Player {
     }
 
     private void disposeGL() {
-        GLRenderer.clearAll();
         if (context != null) {
-//            renderer.dispose();
-//            image.dispose();
             context.dispose();
             context = null;
         }
@@ -321,11 +320,13 @@ public class GLPlayer implements Player {
 
     private void renderToScreen(GLSurface surface) throws Exception {
         try {
-            GLRenderer renderer = GLRenderer.get(null);
+            GLRenderer renderer = context.getRenderer();
+            renderer.target(null);
             renderer.clear(); // snapshot seems to have a bug where the background is released?!
-            renderer.disableBlending();
+            renderer.setBlendFunction(GL11.GL_ONE, GL11.GL_ZERO);
+            renderer.setColor(1,1,1,1);
             renderer.draw(surface, 0, 0);
-            GLRenderer.flushActive();
+            renderer.flush();
 //            GLRenderer.safe();
         } catch (Exception exception) {
             LOGGER.log(Level.SEVERE, "Error in rendering surface", exception);

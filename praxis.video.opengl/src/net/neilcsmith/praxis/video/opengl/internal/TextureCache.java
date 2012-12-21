@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class TextureCache {
+class TextureCache {
     
     private final static Logger LOGGER = Logger.getLogger(TextureCache.class.getName());
     
@@ -36,6 +36,9 @@ public class TextureCache {
         cache.get().release(texture);
     }
     
+    public static void clear() {
+        cache.get().clear();
+    }
     
     private static class CacheImpl {
         
@@ -77,6 +80,16 @@ public class TextureCache {
                 }
             }
             texture.dispose();
+        }
+        
+        private void clear() {
+            for (int i=0; i < textures.length; i++) {
+                Texture t = textures[i];
+                if (t != null) {
+                    t.dispose();
+                    textures[i] = null;
+                }
+            }
         }
         
     }
