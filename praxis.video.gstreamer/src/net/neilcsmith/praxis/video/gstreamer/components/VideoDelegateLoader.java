@@ -56,7 +56,7 @@ class VideoDelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
     private Listener listener;
 
     VideoDelegateLoader(AbstractComponent component, Listener listener, boolean capture) {
-        super(ArgumentInfo.create(PResource.class, capture ? PMap.create(
+        super(ArgumentInfo.create(capture ? PString.class : PResource.class, capture ? PMap.create(
                 ArgumentInfo.KEY_ALLOW_EMPTY, true,
                 ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.valueOf(suggestedValues)) :
                 PMap.create(
