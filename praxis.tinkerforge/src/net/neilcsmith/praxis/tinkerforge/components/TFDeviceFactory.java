@@ -21,6 +21,8 @@
  */
 package net.neilcsmith.praxis.tinkerforge.components;
 
+import com.tinkerforge.BrickletAmbientLight;
+import com.tinkerforge.BrickletDistanceIR;
 import com.tinkerforge.BrickletLCD20x4;
 import com.tinkerforge.BrickletRotaryPoti;
 import com.tinkerforge.Device;
@@ -45,6 +47,8 @@ class TFDeviceFactory {
         map = new HashMap<String, Class<? extends Device>>();
         map.put("LCD 20x4 Bricklet", BrickletLCD20x4.class);
         map.put("Rotary Poti Bricklet", BrickletRotaryPoti.class);
+        map.put("Distance IR Bricklet", BrickletDistanceIR.class);
+        map.put("Ambient Light Bricklet", BrickletAmbientLight.class);
         
     }
 

@@ -46,8 +46,10 @@ public class TFComponentFactoryProvider implements ComponentFactoryProvider {
 
         private void build() {
                 addRoot("root:tinkerforge", TFRoot.class);
-                addComponent("tinkerforge:rotary-poti", RotaryPoti.class);
+                addComponent("tinkerforge:ambient-light", AmbientLight.class);
+                addComponent("tinkerforge:distance-ir", DistanceIR.class);
                 addComponent("tinkerforge:lcd20x4", LCD20x4.class);
+                addComponent("tinkerforge:rotary-poti", RotaryPoti.class);
         }
         
     }
