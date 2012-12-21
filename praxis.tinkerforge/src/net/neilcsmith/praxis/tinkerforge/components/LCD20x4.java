@@ -61,6 +61,8 @@ public class LCD20x4 extends AbstractTFComponent<BrickletLCD20x4> {
 
     @Override
     protected void disposeDevice(BrickletLCD20x4 device) {
+        device.backlightOff();
+        device.clearDisplay();
         this.device = null;
     }
 
