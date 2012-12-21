@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -43,6 +43,7 @@ import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.core.interfaces.ComponentInterface;
 import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
+import net.neilcsmith.praxis.core.types.PMap;
 
 /**
  *
@@ -57,6 +58,7 @@ public abstract class AbstractComponent implements Component {
     private ComponentAddress address;
     private ComponentInfo info;
     private PacketRouter router;
+    private boolean dynamic;
 
     /**
      *
@@ -72,6 +74,10 @@ public abstract class AbstractComponent implements Component {
         if (componentInterface) {
             buildComponentInterface();
         }
+    }
+    
+    protected void markDynamic() {
+        dynamic = true;
     }
 
     private void buildComponentInterface() {
@@ -258,7 +264,12 @@ public abstract class AbstractComponent implements Component {
         if (info == null) {
             Map<String, ControlInfo> controls = buildControlInfoMap();
             Map<String, PortInfo> ports = buildPortInfoMap();
-            info = ComponentInfo.create(getClass(), interfaceSet, controls, ports, null);
+            info = ComponentInfo.create(
+                    getClass(),
+                    interfaceSet,
+                    controls,
+                    ports,
+                    dynamic ? PMap.create(ComponentInfo.KEY_DYNAMIC, true) : PMap.EMPTY);
         }
         return info;
     }
