@@ -63,7 +63,10 @@
                     </run-dependency>
                 </dependency>
             </module-dependencies>
-            <public-packages/>
+            <friend-packages>
+                <friend>net.neilcsmith.praxis.video.gstreamer.windows</friend>
+                <package>net.neilcsmith.praxis.video.gstreamer</package>
+            </friend-packages>
         </data>
     </configuration>
 </project>
