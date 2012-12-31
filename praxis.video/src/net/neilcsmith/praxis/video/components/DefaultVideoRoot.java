@@ -22,6 +22,8 @@
 package net.neilcsmith.praxis.video.components;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.impl.AbstractRoot;
@@ -147,12 +149,12 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
             PlayerFactory factory = findPlayerFactory(library);
             if (factory != null) {
                 try {
+                    Map<String, Object> clientMap = new HashMap<String, Object>(2);
+                    clientMap.put(ClientConfiguration.CLIENT_KEY_TITLE, title);
+                    clientMap.put(ClientConfiguration.CLIENT_KEY_FULLSCREEN, fullScreen);
                     return factory.createPlayer(new PlayerConfiguration(width, height, fps),
                             new ClientConfiguration[] {
-                                new ClientConfiguration(0, 1, 
-                                        fullScreen ? Collections.<String, Object>singletonMap(
-                            ClientConfiguration.CLIENT_KEY_FULLSCREEN, Boolean.TRUE)
-                                    : null)
+                                new ClientConfiguration(0, 1, clientMap)
                             });
                 } catch (Exception ex) {
                     // fall through
