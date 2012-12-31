@@ -36,6 +36,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.JTextComponent;
@@ -48,6 +49,7 @@ import net.miginfocom.swing.MigLayout;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.types.PReference;
+import net.neilcsmith.praxis.texteditor.TextEditor;
 
 /**
  *
@@ -65,10 +67,8 @@ public class Terminal extends JComponent {
 
 
     private Context context;
-//    private JTextPane hTextPane;
     private StyledDocument history;
-//    private JTextArea input;
-    private JEditorPane input;
+    private TextEditor input;
     private JButton evalButton;
     private Action evalAction;
     private JButton clearButton;
@@ -111,14 +111,9 @@ public class Terminal extends JComponent {
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         hPane.setMinimumSize(new Dimension(300, 200));
         hPane.setPreferredSize(new Dimension(450, 250));
-        //        input = new JTextArea();
-        input = new JEditorPane();
-        JScrollPane iPane = new JScrollPane(input,
-                JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        input = TextEditor.create("text/x-praxis-script", "");
+        JComponent iPane = input.getEditorComponent();
         iPane.setMinimumSize(new Dimension(300, 200));
-        input.setContentType("text/x-praxis-script");
-        // iPane.setPreferredSize(new Dimension(450, 250));
         JSplitPane splPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 hPane, iPane);
         splPane.setContinuousLayout(true);
@@ -132,9 +127,9 @@ public class Terminal extends JComponent {
         evalButton = new JButton(evalAction);
         add(evalButton, "");
 
-        Keymap map = JTextComponent.addKeymap("PraxisTerminal", input.getKeymap());
+        Keymap map = JTextComponent.addKeymap("PraxisTerminal", input.getTextComponent().getKeymap());
         map.addActionForKeyStroke(KeyStroke.getKeyStroke("control ENTER"), evalAction);
-        input.setKeymap(map);
+        input.getTextComponent().setKeymap(map);
 
     }
 
@@ -156,12 +151,12 @@ public class Terminal extends JComponent {
 
     @Override
     public void requestFocus() {
-        input.requestFocus();
+        input.getTextComponent().requestFocus();
     }
 
     @Override
     public boolean requestFocusInWindow() {
-        return input.requestFocusInWindow();
+        return input.getTextComponent().requestFocusInWindow();
     }
 
     public void processResponse(CallArguments args) {
@@ -221,12 +216,13 @@ public class Terminal extends JComponent {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            input.selectAll();
-            input.requestFocusInWindow();
-            String script = input.getText();
+            JTextComponent text = input.getTextComponent();
+            text.selectAll();
+            text.requestFocusInWindow();
+            String script = text.getText();
             script = script.trim();
             if (script.isEmpty()) {
-                input.setText(null);
+                text.setText(null);
                 return;
             }
             try {
@@ -262,8 +258,8 @@ public class Terminal extends JComponent {
             } catch (BadLocationException ex) {
                 LOG.log(Level.FINE, "Unexpected Exception in Terminal", ex);
             }
-            input.setText(null);
-            input.requestFocusInWindow();
+            input.getTextComponent().setText("");
+            requestFocusInWindow();
              try {
                 context.clear();
             } catch (Exception ex) {
