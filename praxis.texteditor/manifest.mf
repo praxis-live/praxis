@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+OpenIDE-Module: net.neilcsmith.praxis.texteditor
+OpenIDE-Module-Localizing-Bundle: net/neilcsmith/praxis/texteditor/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+AutoUpdate-Essential-Module: true
+AutoUpdate-Show-In-Client: false
+
