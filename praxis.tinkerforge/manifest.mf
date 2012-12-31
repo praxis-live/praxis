@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+AutoUpdate-Show-In-Client: false
 OpenIDE-Module: net.neilcsmith.praxis.tinkerforge
 OpenIDE-Module-Localizing-Bundle: net/neilcsmith/praxis/tinkerforge/Bundle.properties
 OpenIDE-Module-Specification-Version: 1.0
