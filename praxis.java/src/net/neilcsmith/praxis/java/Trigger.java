@@ -31,8 +31,8 @@
 
 package net.neilcsmith.praxis.java;
 
-import net.neilcsmith.praxis.impl.ListenerUtils;
 import net.neilcsmith.praxis.impl.TriggerControl;
+import net.neilcsmith.praxis.util.ArrayUtils;
 
 /**
  *
@@ -69,11 +69,11 @@ public class Trigger implements TriggerControl.Binding {
         if (listener == null) {
             throw new NullPointerException();
         }
-        listeners = ListenerUtils.add(listeners, listener);
+        listeners = ArrayUtils.add(listeners, listener);
     }
     
     public void removeListener(Listener listener) {
-        listeners = ListenerUtils.remove(listeners, listener);
+        listeners = ArrayUtils.remove(listeners, listener);
     }
     
     public static interface Listener {
