@@ -35,25 +35,35 @@ import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.FloatRangeProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
+import org.jaudiolibs.pipes.impl.MultiInOut;
+import org.jaudiolibs.pipes.impl.Placeholder;
 
 /**
  *
  * @author Neil C Smith
  */
-public class SamplePlayer extends AbstractComponent {
+public class StereoPlayer extends AbstractComponent {
 
-    private static Logger logger = Logger.getLogger(SamplePlayer.class.getName());
-    private SamplePlayerUG player;
-//    private BooleanProperty playing;
+    private static final Logger logger = Logger.getLogger(StereoPlayer.class.getName());
+    private SamplePlayerUG[] players;
     private int tablesize;
     private ControlPort.Output readyPort;
     private ControlPort.Output errorPort;
 
-    public SamplePlayer() {
-        player = new SamplePlayerUG();
-
-//        registerPort(Port.IN, new DefaultAudioInputPort(this, player));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(this, player));
+    public StereoPlayer() {
+        players = new SamplePlayerUG[2];
+        players[0] = new SamplePlayerUG();
+        players[1] = new SamplePlayerUG();    
+        JointRenderUG join = new JointRenderUG(2,2);       
+        join.addSource(players[0]);
+        join.addSource(players[1]);     
+        Placeholder outL = new Placeholder();
+        Placeholder outR = new Placeholder();
+        outL.addSource(join);
+        outR.addSource(join);
+        
+        registerPort(Port.OUT + "-1", new DefaultAudioOutputPort(outL));
+        registerPort(Port.OUT + "-2", new DefaultAudioOutputPort(outR));
         buildControls();
     }
 
@@ -77,66 +87,76 @@ public class SamplePlayer extends AbstractComponent {
         FloatProperty speed = FloatProperty.create(new SpeedBinding(), -4, 4, 1);
         registerControl("speed", speed);
         registerPort("speed", speed.createPort());
-        registerControl("loop", BooleanProperty.create(this, new LoopingBinding(), false));
+        registerControl("loop", BooleanProperty.create(new LoopingBinding(), false));
         TriggerControl play = TriggerControl.create(new PlayBinding());
         registerControl("play", play);
         registerPort("play", play.createPort());
         TriggerControl stop = TriggerControl.create(new StopBinding());
         registerControl("stop", stop);
         registerPort("stop", stop.createPort());
-        BooleanProperty playing = BooleanProperty.create(this, new PlayingBinding(), false,
+        BooleanProperty playing = BooleanProperty.create(new PlayingBinding(), false,
                 PMap.create(ControlInfo.KEY_TRANSIENT, true));
         registerControl("playing", playing);
-        readyPort = new DefaultControlOutputPort(this);
+        readyPort = new DefaultControlOutputPort();
         registerPort("ready", readyPort);
-        errorPort = new DefaultControlOutputPort(this);
+        errorPort = new DefaultControlOutputPort();
         registerPort("error", errorPort);
     }
 
     private class PlayingBinding implements BooleanProperty.Binding {
 
         public void setBoundValue(long time, boolean value) {
-            player.setPlaying(value);
+            for (SamplePlayerUG player : players) {
+                player.setPlaying(value);
+            }       
         }
 
         public boolean getBoundValue() {
-            return player.getPlaying();
+            return players[0].getPlaying();
         }
     }
 
     private class PlayBinding implements TriggerControl.Binding {
 
         public void trigger(long time) {
-            player.setPlaying(true);
+            for (SamplePlayerUG player : players) {
+                player.setPlaying(true);
+            } 
         }
     }
 
     private class StopBinding implements TriggerControl.Binding {
 
         public void trigger(long time) {
-            player.setPlaying(false);
+            for (SamplePlayerUG player : players) {
+                player.setPlaying(false);
+            } 
         }
     }
 
     private class SpeedBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            player.setSpeed((float) value);
+            for (SamplePlayerUG player : players) {
+                player.setSpeed((float) value);
+            }      
         }
 
         public double getBoundValue() {
-            return player.getSpeed();
+            return players[0].getSpeed();
         }
     }
 
     private class PositionBinding implements FloatProperty.Binding {
 
         public void setBoundValue(long time, double value) {
-            player.setPosition((float) (value * tablesize));
+            for (SamplePlayerUG player : players) {
+                player.setPosition((float) (value * tablesize));
+            }         
         }
 
         public double getBoundValue() {
-            return player.getPosition() / tablesize;
+            return players[0].getPosition() / tablesize;
         }
     }
 
@@ -144,15 +164,13 @@ public class SamplePlayer extends AbstractComponent {
 
         public void setBoundValue(long time, double value) {
             int pos = (int) Math.round(value * tablesize);
-            player.setIn(pos);
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("Input : " + value + " Player Input = " + player.getIn()
-                        + " Player Output = " + player.getOut());
-            }
+            for (SamplePlayerUG player : players) {
+                player.setIn(pos);
+            }          
         }
 
         public double getBoundValue() {
-            return (double) player.getIn() / tablesize;
+            return (double) players[0].getIn() / tablesize;
         }
     }
 
@@ -160,11 +178,13 @@ public class SamplePlayer extends AbstractComponent {
 
         public void setBoundValue(long time, double value) {
             int pos = (int) Math.round(value * tablesize);
-            player.setOut(pos);
+            for (SamplePlayerUG player : players) {
+                player.setOut(pos);
+            }            
         }
 
         public double getBoundValue() {
-            return (double) player.getOut() / tablesize;
+            return (double) players[0].getOut() / tablesize;
         }
     }
 
@@ -172,16 +192,20 @@ public class SamplePlayer extends AbstractComponent {
 
         public void setBoundLowValue(long time, double low) {
             int pos = (int) Math.round(low * tablesize);
-            player.setIn(pos);
+            for (SamplePlayerUG player : players) {
+                player.setIn(pos);
+            }    
         }
 
         public void setBoundHighValue(long time, double high) {
             int pos = (int) Math.round(high * tablesize);
-            player.setOut(pos);
+            for (SamplePlayerUG player : players) {
+                player.setOut(pos);
+            }     
         }
 
         public double getBoundLowValue() {
-            double ret = (double) player.getIn() / tablesize;
+            double ret = (double) players[0].getIn() / tablesize;
             if (logger.isLoggable(Level.FINEST)) {
                 logger.finest("Returning Low = " + ret);
             }
@@ -189,7 +213,7 @@ public class SamplePlayer extends AbstractComponent {
         }
 
         public double getBoundHighValue() {
-            double ret = (double) player.getOut() / tablesize;
+            double ret = (double) players[0].getOut() / tablesize;
             if (logger.isLoggable(Level.FINEST)) {
                 logger.finest("Returning High = " + ret);
             }
@@ -200,11 +224,13 @@ public class SamplePlayer extends AbstractComponent {
     private class LoopingBinding implements BooleanProperty.Binding {
 
         public void setBoundValue(long time, boolean value) {
-            player.setLooping(value);
+            for (SamplePlayerUG player : players) {
+                player.setLooping(value);
+            }     
         }
 
         public boolean getBoundValue() {
-            return player.getLooping();
+            return players[0].getLooping();
         }
     }
 
@@ -217,12 +243,27 @@ public class SamplePlayer extends AbstractComponent {
             } else {
                 tablesize = table.getSize();
             }
-            player.setSampleTable(table);
+            for (int i=0; i<players.length; i++) {
+                players[i].setSampleTable(table);
+                if (i >= table.getChannelCount()) {
+                    players[i].setChannel(0);
+                } else {
+                    players[i].setChannel(i);
+                }
+            }
             readyPort.send(time);
         }
 
         public void tableError(SampleTableLoader loader, long time) {
             errorPort.send(time);
         }
+    }
+    
+    private class JointRenderUG extends MultiInOut {
+        
+        private JointRenderUG(int in, int out) {
+            super(in, out);
+        }
+        
     }
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,16 +22,18 @@
 package net.neilcsmith.praxis.audio.components;
 
 import net.neilcsmith.praxis.audio.components.analysis.Level;
+import net.neilcsmith.praxis.audio.components.container.AudioContainerInput;
+import net.neilcsmith.praxis.audio.components.container.AudioContainerOutput;
+import net.neilcsmith.praxis.audio.components.delay.MonoDelay2s;
 import net.neilcsmith.praxis.audio.components.distortion.SimpleOverdrive;
 import net.neilcsmith.praxis.audio.components.filter.CombFilter;
 import net.neilcsmith.praxis.audio.components.filter.IIRFilter;
 import net.neilcsmith.praxis.audio.components.mix.XFader;
-import net.neilcsmith.praxis.audio.components.sampling.Looper;
-import net.neilcsmith.praxis.audio.components.test.Sine;
-import net.neilcsmith.praxis.audio.components.delay.MonoDelay2s;
 import net.neilcsmith.praxis.audio.components.modulation.LFODelay;
 import net.neilcsmith.praxis.audio.components.modulation.MonoChorus;
 import net.neilcsmith.praxis.audio.components.reverb.Freeverb;
+import net.neilcsmith.praxis.audio.components.sampling.Looper;
+import net.neilcsmith.praxis.audio.components.test.Sine;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
 import net.neilcsmith.praxis.impl.AbstractComponentFactory;
@@ -76,8 +78,13 @@ public class AudioFactoryProvider implements ComponentFactoryProvider {
             addComponent("audio:sampling:looper", Looper.class);
             
             // test
-            addComponent("audio:test:analysis:level", Level.class);
+            //addTestComponent("audio:test:analysis:level", Level.class, "audio:analysis:level");
+            addComponent("audio:test:analysis:level", data(Level.class).test().replacement("audio:analysis:level"));
+            addComponent("audio:sampling:player", data(StereoPlayer.class).test());
 
+            addComponent("audio:container:input", data(AudioContainerInput.class).test());
+            addComponent("audio:container:output", data(AudioContainerOutput.class).test());
+            
         }
     }
 }
