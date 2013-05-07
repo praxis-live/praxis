@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -29,11 +29,7 @@ import net.neilcsmith.praxis.video.pipes.VideoPipe;
  */
 public abstract class VideoContext {
 
-//    public final static String CLIENT_KEY_WIDTH = "client.width";
-//    public final static String CLIENT_KEY_HEIGHT = "client.height";
-//    public final static String CLIENT_KEY_ROTATION = "client.rotation";
-//    public final static String CLIENT_KEY_DEVICE = "client.device";
-    
+   
     public abstract int registerVideoInputClient(InputClient client)
             throws ClientRegistrationException;
     
@@ -45,6 +41,8 @@ public abstract class VideoContext {
     public abstract void unregisterVideoOutputClient(OutputClient client);
 
     public static abstract class Client {
+        
+        // @TODO add client listeners to allow some changes at runtime?
 
         public Object getClientHint(String key) {
             return null;
