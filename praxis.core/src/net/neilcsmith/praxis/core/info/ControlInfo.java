@@ -143,7 +143,12 @@ public class ControlInfo extends Argument {
         return create(inputs, outputs, null, Type.Function, properties);
     }
     
+    @Deprecated
     public static ControlInfo createTriggerInfo(PMap properties) {
+        return create(EMPTY_INFO, EMPTY_INFO, null, Type.Action, properties);
+    }
+    
+    public static ControlInfo createActionInfo(PMap properties) {
         return create(EMPTY_INFO, EMPTY_INFO, null, Type.Action, properties);
     }
 
