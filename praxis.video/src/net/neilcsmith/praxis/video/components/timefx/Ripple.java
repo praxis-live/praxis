@@ -30,7 +30,7 @@ import net.neilcsmith.praxis.video.pipes.impl.Placeholder;
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
-import net.neilcsmith.praxis.video.render.rgbmath.RGBMath;
+import net.neilcsmith.praxis.video.render.utils.RGBMath;
 
 /**
  *

@@ -39,7 +39,7 @@ import net.neilcsmith.praxis.video.pipes.impl.SingleInOut;
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
-import static net.neilcsmith.praxis.video.render.rgbmath.RGBMath.*;
+import static net.neilcsmith.praxis.video.render.utils.RGBMath.*;
 
 /**
  *
