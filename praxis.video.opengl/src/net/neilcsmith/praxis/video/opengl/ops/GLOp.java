@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.video.opengl.ops;
 
+import java.util.logging.Logger;
 import net.neilcsmith.praxis.video.opengl.internal.GLSurface;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
@@ -30,6 +31,8 @@ import net.neilcsmith.praxis.video.render.SurfaceOp;
  * @author Neil C Smith
  */
 public abstract class GLOp {
+    
+    final static Logger LOG = Logger.getLogger(GLOp.class.getName());
     
     private final Class<? extends SurfaceOp> opClass;
     

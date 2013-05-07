@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.video.opengl.internal.VertexAttributes.Usage;
+import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.utils.PixelArrayCache;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -208,29 +209,29 @@ public class GLRenderer implements Disposable {
         target = null;
 
         if (surface != null) {
-            GLSurfaceData data = surface.data;
+            GLSurfaceData data = surface.getData();
             if (data == null) {
                 LOGGER.finest("Setting up render to empty surface");
                 data = new GLSurfaceData(surface.getWidth(), surface.getHeight(), surface.hasAlpha());
-                data.texture = TextureCache.acquire(data.width, data.height);
-                surface.data = data;
+                data.texture = context.getTextureManager().acquire(data.width, data.height);
+                surface.setData(data);
                 clear = true;
             } else if (data.usage > 1) {
                 LOGGER.finest("Setting up render to shared surface");
                 data.usage--;
                 if (data.texture == null) {
-                    data.texture = TextureCache.acquire(data.width, data.height);
+                    data.texture = context.getTextureManager().acquire(data.width, data.height);
                     syncPixelsToTexture(data);
                 }
                 data.texture.getFrameBuffer().bind();
                 data = new GLSurfaceData(surface.getWidth(), surface.getHeight(), surface.hasAlpha());
-                data.texture = TextureCache.acquire(data.width, data.height);
+                data.texture = context.getTextureManager().acquire(data.width, data.height);
                 data.texture.bind();
                 GL11.glCopyTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 0, 0, data.width, data.height);
-                surface.data = data;
+                surface.setData(data);
             } else if (data.texture == null) {
                 LOGGER.finest("Setting up render to pixel backed surface");
-                data.texture = TextureCache.acquire(data.width, data.height);
+                data.texture = context.getTextureManager().acquire(data.width, data.height);
                 syncPixelsToTexture(data);
             }
             data.pixels = null;
@@ -326,23 +327,24 @@ public class GLRenderer implements Disposable {
 //    }
     private TextureRegion region = new TextureRegion();
 
-    public void draw(GLSurface src, float x, float y) {
+    public void draw(Surface src, float x, float y) {
         draw(src, 0, 0, src.getWidth(), src.getHeight(), x, y);
     }
 
-    public void draw(GLSurface src, float x, float y, float width, float height) {
+    public void draw(Surface src, float x, float y, float width, float height) {
         draw(src, 0, 0, src.getWidth(), src.getHeight(), x, y, width, height);
     }
 
-    public void draw(GLSurface src, float srcX, float srcY, float srcWidth, float srcHeight, float x, float y) {
+    public void draw(Surface src, float srcX, float srcY, float srcWidth, float srcHeight, float x, float y) {
         draw(src, srcX, srcY, srcWidth, srcHeight, x, y, srcWidth, srcHeight);
     }
 
-    public void draw(GLSurface src, float srcX, float srcY, float srcWidth, float srcHeight,
+    public void draw(Surface src, float srcX, float srcY, float srcWidth, float srcHeight,
             float x, float y, float width, float height) {
         activate();
-        GLSurfaceData data = src.data;
-        if (data == null) {
+        TextureRegion tr = initRegion(region, src, (int) srcX, (int) srcY, (int) (srcWidth + 0.5f), (int) (srcHeight + 0.5f));
+//        GLSurfaceData data = src.data;
+        if (tr == null) {
             LOGGER.finest("Drawing empty Surface - using empty texture");
             float col = color;
             if (src.hasAlpha()) {
@@ -355,24 +357,37 @@ public class GLRenderer implements Disposable {
             draw(region, x, y, width, height);
             color = col;
         } else {
-            if (data.texture == null) {
-                LOGGER.finest("Surface texture is null - uploading pixels");
-                data.texture = TextureCache.acquire(data.width, data.height);
-                syncPixelsToTexture(data);
-            }
-            region.setTexture(data.texture);
-            region.setRegion((int) srcX, (int) srcY, (int) srcWidth, (int) srcHeight);
+//            if (data.texture == null) {
+//                LOGGER.finest("Surface texture is null - uploading pixels");
+//                data.texture = context.getTextureManager().acquire(data.width, data.height);
+//                syncPixelsToTexture(data);
+//            }
+//            region.setTexture(data.texture);
+//            region.setRegion((int) srcX, (int) srcY, (int) srcWidth, (int) srcHeight);
             draw(region, x, y, width, height);
         }
-
     }
 
-    /**
-     * Draws a rectangle with the bottom left corner at x,y having the width and
-     * height of the region.
-     */
-    private void draw(TextureRegion region, float x, float y) {
-        draw(region, x, y, Math.abs(region.getRegionWidth()), Math.abs(region.getRegionHeight()));
+    public void draw(Surface src, float srcX, float srcY, float srcWidth, float srcHeight,
+            float[] vts) {
+        activate();
+        TextureRegion tr = initRegion(region, src, (int) srcX, (int) srcY, (int) (srcWidth + 0.5f), (int) (srcHeight + 0.5f));
+        if (tr == null) {
+            LOGGER.finest("Drawing empty Surface - using empty texture");
+            float col = color;
+            if (src.hasAlpha()) {
+                setColor(0, 0, 0, 0);
+            } else {
+                float a = ((Float.floatToRawIntBits(col) >>> 24) & 0xff) / 255f;
+                setColor(0, 0, 0, a);
+            }
+            region.setRegion(emptyTexture);
+            draw(region, vts);
+            color = col;
+        } else {
+            draw(region, vts);
+        }
+
     }
 
     /**
@@ -425,6 +440,68 @@ public class GLRenderer implements Disposable {
         vertices[idx++] = color;
         vertices[idx++] = u2;
         vertices[idx++] = v;
+    }
+
+    private void draw(TextureRegion region, float[] vts) {
+        Texture texture = region.texture;
+
+        if (texture != tex0) {
+            renderMesh();
+            tex0 = texture;
+        } else if (idx == vertices.length) {
+            renderMesh();
+        }
+
+//        final float fx2 = x + width;
+//        final float fy2 = y + height;
+        final float u = region.u;
+        final float v = region.v2;
+        final float u2 = region.u2;
+        final float v2 = region.v;
+
+        vertices[idx++] = vts[0];
+        vertices[idx++] = vts[1];
+        vertices[idx++] = color;
+        vertices[idx++] = u;
+        vertices[idx++] = v;
+
+        vertices[idx++] = vts[2];
+        vertices[idx++] = vts[3];
+        vertices[idx++] = color;
+        vertices[idx++] = u;
+        vertices[idx++] = v2;
+
+        vertices[idx++] = vts[4];
+        vertices[idx++] = vts[5];
+        vertices[idx++] = color;
+        vertices[idx++] = u2;
+        vertices[idx++] = v2;
+
+        vertices[idx++] = vts[6];
+        vertices[idx++] = vts[7];
+        vertices[idx++] = color;
+        vertices[idx++] = u2;
+        vertices[idx++] = v;
+    }
+
+    private TextureRegion initRegion(TextureRegion region, Surface src, int x, int y, int width, int height) {
+        if (src instanceof GLSurface) {
+            GLSurfaceData data = ((GLSurface) src).getData();
+            if (data == null) {
+                return null;
+            }
+            if (data.texture == null) {
+                LOGGER.finest("Surface texture is null - uploading pixels");
+                data.texture = context.getTextureManager().acquire(data.width, data.height);
+                syncPixelsToTexture(data);
+            }
+            region.setTexture(data.texture);
+            region.setRegion(x, y, width, height);
+            return region;
+        } else {
+            context.getTextureManager().initTextureRegion(region, src, x, y, width, height);
+            return region;
+        }
     }
 
     private void renderMesh() {
@@ -595,25 +672,34 @@ public class GLRenderer implements Disposable {
         if (scratchBuffer == null || scratchBuffer.capacity() < size) {
             scratchBuffer = BufferUtils.createIntBuffer(size);
         }
-        data.texture.bind();
         scratchBuffer.rewind();
         scratchBuffer.put(data.pixels, 0, size);
         scratchBuffer.rewind();
-        if (!data.alpha) {
+        syncPixelBufferToTexture(scratchBuffer, data.texture, data.alpha, 0, 0, data.width, data.height);
+
+    }
+    
+    void syncPixelBufferToTexture(IntBuffer buffer, 
+            Texture texture, 
+            boolean alpha, 
+            int x, int y, int width, int height ) {
+        texture.bind();
+        if (!alpha) {
             GL11.glPixelTransferf(GL11.GL_ALPHA_BIAS, 1);
         }
         GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D,
                 0,
-                0,
-                0,
-                data.width,
-                data.height,
+                x,
+                y,
+                width,
+                height,
                 GL12.GL_BGRA,
                 GL12.GL_UNSIGNED_INT_8_8_8_8_REV,
-                scratchBuffer);
-        if (!data.alpha) {
+                buffer);
+        if (!alpha) {
             GL11.glPixelTransferf(GL11.GL_ALPHA_BIAS, 0);
         }
-
     }
+
+
 }

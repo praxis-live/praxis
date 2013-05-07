@@ -40,11 +40,11 @@ public class GLSurface extends Surface {
 
     private final static Logger LOGGER = Logger.getLogger(GLSurface.class.getName());
     private final static PixelData[] EMPTY_DATA = new PixelData[0];
-    GLSurfaceData data;
+    private GLSurfaceData data;
     private boolean clear = true;
     private GLContext context;
-//    private GLSurface parent;
     private FallbackProcessor fallback;
+    private int modCount;
 
     GLSurface(GLContext context, int width, int height, boolean alpha) {
         super(width, height, alpha);
@@ -54,6 +54,7 @@ public class GLSurface extends Surface {
 
     @Override
     public void process(SurfaceOp op, Surface... inputs) {
+        modCount++;
         GLOp glop = GLOpCache.getInstance().find(op);
         if (glop != null) {
             try {
@@ -69,6 +70,14 @@ public class GLSurface extends Surface {
     public GLContext getGLContext() {
         return context;
     }
+    
+    void setData(GLSurfaceData data) {
+        this.data = data;
+    }
+    
+    GLSurfaceData getData() {
+        return data;
+    }
 
     private void makeSWReadable() {
         if (data == null) {
@@ -76,12 +85,12 @@ public class GLSurface extends Surface {
             data.pixels = PixelArrayCache.acquire(width * height, true);
         } else if (data.pixels == null) {
             data.pixels = PixelArrayCache.acquire(width * height, false);
-            context.renderer.syncTextureToPixels(data);
+            context.getRenderer().syncTextureToPixels(data);
         }
     }
 
     private void makeSWWritable() {
-        context.renderer.invalidate(this);
+        context.getRenderer().invalidate(this);
         makeSWReadable();
         if (data.usage > 1) {
             GLSurfaceData tmp = new GLSurfaceData(width, height, alpha);
@@ -92,7 +101,7 @@ public class GLSurface extends Surface {
         }
         // invalidate texture
         if (data.texture != null) {
-            TextureCache.release(data.texture);
+            context.getTextureManager().release(data.texture);
             data.texture = null;
         }
         
@@ -161,7 +170,8 @@ public class GLSurface extends Surface {
 
     @Override
     public void release() {
-        context.renderer.invalidate(this);
+        modCount++;
+        context.getRenderer().invalidate(this);
         if (data != null) {
             data.usage--;
             if (data.usage <= 0) {
@@ -174,7 +184,7 @@ public class GLSurface extends Surface {
                 }
                 if (data.texture != null) {
                     LOGGER.log(Level.FINEST, "Releasing Texture");
-                    TextureCache.release(data.texture);
+                    context.getTextureManager().release(data.texture);
                     data.texture = null;
                 }
             }
@@ -185,7 +195,7 @@ public class GLSurface extends Surface {
     @Override
     public void copy(Surface source) {
         assert source != this;
-        
+        modCount++;
         if (checkCompatible(source, true, true)) {
             release();
             GLSurface src = (GLSurface) source;
@@ -202,6 +212,12 @@ public class GLSurface extends Surface {
             process(Blit.op(), source);
         }
     }
+
+    @Override
+    public int getModCount() {
+        return modCount;
+    }
+    
 
     @Override
     public boolean checkCompatible(Surface surface, boolean checkDimensions, boolean checkAlpha) {

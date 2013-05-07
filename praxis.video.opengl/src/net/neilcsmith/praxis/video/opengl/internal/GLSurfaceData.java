@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -72,131 +72,6 @@ public class GLSurfaceData implements PixelData {
     public boolean hasAlpha() {
         return alpha;
     }
-//
-//    GLSurfaceData acquire() {
-//        usage++;
-//        return this;
-//    }
-//
-//    void release() {
-//        usage--;
-//        if (usage <= 0) {
-//            if (pixels != null) {
-//                PixelArrayCache.release(pixels);
-//                pixels = null;
-//            }
-//            if (texture != null) {
-//                TextureCache.release(texture);
-//                texture = null;
-//            }
-//        }
-//    }
 
-//    GLSurfaceData getUnshared() {
-//        if (usage > 1) {
-//            GLSurfaceData copy = new GLSurfaceData(width, height, alpha, false);
-//            if (pixels != null) {
-//                System.arraycopy(pixels, 0, copy.getData(), 0, width * height);
-//            } else if (texture != null) {
-//                GLRenderer.safe();
-//                texture.getFrameBuffer().bind();
-//                GL11.glEnable(GL11.GL_TEXTURE_2D);
-//                copy.getTexture().bind();        
-//                GL11.glCopyTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height);
-//                FrameBuffer.unbind();
-//            }
-//            release();
-//            return copy;
-//
-//        } else if (usage == 1) {
-//            return this;
-//        } else {
-//            throw new IllegalStateException();
-//        }
-//    }
-//
-//    Texture getTexture() {
-//        if (texture == null) {
-//            texture = TextureCache.acquire(width, height);
-//            if (pixels != null) {
-//                copy(pixels, texture);
-//                PixelArrayCache.release(pixels);
-//                pixels = null;
-//            } else if (clearPending) {
-//                GLRenderer.safe();
-//                texture.getFrameBuffer().bind();
-//                if (alpha) {
-//                    GL11.glClearColor(0, 0, 0, 0);
-//                } else {
-//                    GL11.glClearColor(0, 0, 0, 1);
-//                }
-//                GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-//                clearPending = false;
-//                FrameBuffer.unbind();
-//            }
-//        }
-//        return texture;
-//    }
-//
-//    private void copy(Texture texture, int[] pixels) {
-////        System.out.println("Copying texture to pixels");
-//        LOGGER.fine("Copying texture to pixels");
-//        GLRenderer.safe();
-//        int tWidth = texture.getWidth();
-//        int size = tWidth * texture.getHeight();
-//        if (buffer == null || buffer.capacity() < size) {
-//            buffer = BufferUtils.createIntBuffer(size);
-//        }
-//        buffer.rewind();
-//        texture.bind();
-//        GL11.glGetTexImage(GL11.GL_TEXTURE_2D,
-//                0,
-//                GL12.GL_BGRA,
-//                GL12.GL_UNSIGNED_INT_8_8_8_8_REV,
-//                buffer);
-//        buffer.rewind();
-////        if (tWidth == width) {
-////            buffer.get(pixels, 0, size);
-////        } else {
-//            int offset = 0;
-//            for (int y = 0; y < height; y++) {
-//                buffer.position(offset);
-//                buffer.get(pixels, y * width, width);
-//                offset += tWidth;
-//            }
-////        }
-//
-//    }
-//
-//    private void copy(int[] pixels, Texture texture) {
-//        
-////        System.out.println("Copying pixels to texture");
-//        LOGGER.fine("Copying pixels to texture");
-//
-//        GLRenderer.safe();
-//        int size = width * height;
-//        if (buffer == null || buffer.capacity() < size) {
-//            buffer = BufferUtils.createIntBuffer(size);
-//        }
-//        texture.bind();
-//        buffer.rewind();
-//        buffer.put(pixels, 0, size);
-//        buffer.rewind();
-//        if (!alpha) {
-//            GL11.glPixelTransferf(GL11.GL_ALPHA_BIAS, 1);
-//        }
-//        GL11.glTexSubImage2D(GL11.GL_TEXTURE_2D,
-//                0,
-//                0,
-//                0,
-//                width,
-//                height,
-//                GL12.GL_BGRA,
-//                GL12.GL_UNSIGNED_INT_8_8_8_8_REV,
-//                buffer);
-//        if (!alpha) {
-//            GL11.glPixelTransferf(GL11.GL_ALPHA_BIAS, 0);
-//        }
-//
 
 }

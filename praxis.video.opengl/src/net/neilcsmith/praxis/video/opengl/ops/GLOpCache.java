@@ -26,6 +26,7 @@ import java.util.Map;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
 import net.neilcsmith.praxis.video.render.ops.Blit;
 import net.neilcsmith.praxis.video.render.ops.ScaledBlit;
+import net.neilcsmith.praxis.video.render.ops.TransformBlit;
 
 /**
  *
@@ -45,11 +46,9 @@ public class GLOpCache {
         cache = new HashMap<Class<? extends SurfaceOp>, GLOp>();
         cache.put(Blit.class, new GLBlitOp());
         cache.put(ScaledBlit.class, new GLScaledBlitOp());
+        cache.put(TransformBlit.class, new GLTransformBlitOp());
     }
     
-//    public <T extends SurfaceOp> GLOp<T> find(Class<T> op) {
-//        return (GLOp<T>) cache.get(op);
-//    }
     
     public GLOp find(SurfaceOp op) {
         return cache.get(op.getClass());

@@ -15,11 +15,6 @@
  ******************************************************************************/
 package net.neilcsmith.praxis.video.opengl.internal;
 
-import net.neilcsmith.praxis.video.opengl.internal.VertexAttributes;
-import net.neilcsmith.praxis.video.opengl.internal.VertexBufferObject;
-import net.neilcsmith.praxis.video.opengl.internal.VertexAttribute;
-import net.neilcsmith.praxis.video.opengl.internal.Disposable;
-import net.neilcsmith.praxis.video.opengl.internal.IndexBufferObject;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import org.lwjgl.opengl.GL11;

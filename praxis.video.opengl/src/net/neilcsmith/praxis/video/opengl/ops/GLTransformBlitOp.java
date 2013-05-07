@@ -22,37 +22,45 @@
 package net.neilcsmith.praxis.video.opengl.ops;
 
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
 import java.util.logging.Level;
 import net.neilcsmith.praxis.video.opengl.internal.GLRenderer;
 import net.neilcsmith.praxis.video.opengl.internal.GLSurface;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
 import net.neilcsmith.praxis.video.render.ops.BlendMode;
-import net.neilcsmith.praxis.video.render.ops.ScaledBlit;
+import net.neilcsmith.praxis.video.render.ops.TransformBlit;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class GLScaledBlitOp extends AbstractBlitOp {
+public class GLTransformBlitOp extends AbstractBlitOp {
     
-    private Rectangle rect;
+    private final Rectangle rect;
+    private final AffineTransform transform;
+    private final float[] vertices;
 
-    GLScaledBlitOp() {
-        super(ScaledBlit.class);
+    GLTransformBlitOp() {
+        super(TransformBlit.class);
+        rect = new Rectangle();
+        transform = new AffineTransform();
+        vertices = new float[8];
     }
 
     @Override
     public void process(SurfaceOp op, GLSurface output, Bypass bypass, Surface... inputs) {
         if (inputs.length > 0) {
-            if (process((ScaledBlit) op, output, inputs[0])) {
+            LOG.fine("Processing OpenGL transformed blit");
+            if (process((TransformBlit) op, output, inputs[0])) {
+                LOG.fine("Success!?");
                 return;
             }
         }
         bypass.process(op, inputs);
     }
 
-    private boolean process(ScaledBlit blit, GLSurface dst, Surface src) {
+    private boolean process(TransformBlit blit, GLSurface dst, Surface src) {
         try {
             BlendMode mode = blit.getBlendMode();
             if (canProcess(mode)) {
@@ -70,14 +78,31 @@ public class GLScaledBlitOp extends AbstractBlitOp {
                 int dstW = bnds == null ? dst.getWidth() : bnds.width;
                 int dstX = bnds == null ? 0 : bnds.x;
                 int dstH = bnds == null ? dst.getHeight() : bnds.height;
-                int dstY = bnds == null ? 0 : dst.getHeight() - (bnds.y + dstH);
+                int dstY = bnds == null ? 0 : bnds.y;
+//                int dstY = bnds == null ? 0 : dst.getHeight() - (bnds.y + dstH);
                 
-                renderer.draw(src, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH);
+                AffineTransform tr = blit.getTransform(transform);
+                vertices[0] = dstX;
+                vertices[1] = dstY + dstH;
+                vertices[2] = dstX;
+                vertices[3] = dstY;
+                vertices[4] = dstX + dstW;
+                vertices[5] = dstY;
+                vertices[6] = dstX + dstW;
+                vertices[7] = dstY + dstH;
+                
+                tr.transform(vertices, 0, vertices, 0, 4);
+                vertices[1] = dst.getHeight() - vertices[1];
+                vertices[3] = dst.getHeight() - vertices[3];
+                vertices[5] = dst.getHeight() - vertices[5];
+                vertices[7] = dst.getHeight() - vertices[7];
+                
+                renderer.draw(src, srcX, srcY, srcW, srcH, vertices);
                 return true;
             }
         } catch (Exception ex) {
             // fall through
-            LOG.log(Level.FINE, "Scaled blit threw exception", ex);
+            LOG.log(Level.FINE, "Transform blit threw exception", ex);
         }
         return false;
     }

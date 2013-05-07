@@ -1,6 +1,23 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright 2013 Neil C Smith.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 3 only, as
+ * published by the Free Software Foundation.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 3 for more details.
+ *
+ * You should have received a copy of the GNU General Public License version 3
+ * along with this work; if not, see http://www.gnu.org/licenses/
+ *
+ *
+ * Please visit http://neilcsmith.net if you need additional information or
+ * have any questions.
  */
 package net.neilcsmith.praxis.video.opengl.internal;
 
@@ -20,9 +37,10 @@ public class GLContext {
     private final static PixelFormat DEFAULT_PIXEL_FORMAT = new PixelFormat(24, 8, 16, 0, 0);
     private static GLContext current;
     
-    final GLRenderer renderer;
-    final int width;
-    final int height;
+    private final GLRenderer renderer;
+    private final TextureManager textureManager;
+    private final int width;
+    private final int height;
 
     
     private WeakHashMap<GLSurface, Boolean> surfaces;
@@ -31,6 +49,7 @@ public class GLContext {
         this.width = width;
         this.height = height;
         this.renderer = new GLRenderer(this);
+        this.textureManager = new TextureManager(this);
         surfaces = new WeakHashMap<GLSurface, Boolean>();    
     }
     
@@ -46,6 +65,10 @@ public class GLContext {
         return renderer;
     }
     
+    TextureManager getTextureManager() {
+        return textureManager;
+    }
+    
     public GLSurface createSurface(int width, int height, boolean alpha) {
         GLSurface s =  new GLSurface(this, width, height, alpha);
         surfaces.put(s, Boolean.TRUE);
@@ -56,7 +79,7 @@ public class GLContext {
         for (GLSurface s : surfaces.keySet()) {
             s.clear();
         }
-        TextureCache.clear();
+        textureManager.clear();
         try {
             Display.setParent(null);
         } catch (LWJGLException ex) {

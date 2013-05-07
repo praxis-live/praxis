@@ -26,8 +26,8 @@ import net.neilcsmith.praxis.video.opengl.internal.Color;
 import net.neilcsmith.praxis.video.opengl.internal.GLRenderer;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
 import net.neilcsmith.praxis.video.render.ops.Blend;
-import net.neilcsmith.praxis.video.render.ops.Blend.Type;
-import static net.neilcsmith.praxis.video.render.ops.Blend.Type.*;
+import net.neilcsmith.praxis.video.render.ops.BlendMode;
+import static net.neilcsmith.praxis.video.render.ops.BlendMode.*;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -36,22 +36,22 @@ import org.lwjgl.opengl.GL11;
  */
 abstract class AbstractBlitOp extends GLOp {
     
-    private final static EnumSet<Type> supportedBlends = 
+    private final static EnumSet<BlendMode> supportedBlends = 
             EnumSet.of(Normal, Add, Multiply, Mask);
 
     protected AbstractBlitOp(Class<? extends SurfaceOp> opClass) {
         super(opClass);
     }
 
-    boolean canProcess(Blend blend) {
-        return supportedBlends.contains(blend.getType());
+    boolean canProcess(BlendMode mode) {
+        return supportedBlends.contains(mode);
     }
 
-    void setupBlending(GLRenderer renderer, Blend blend, boolean srcAlpha, boolean dstAlpha) {
+    void setupBlending(GLRenderer renderer, BlendMode mode, float opacity) {// boolean srcAlpha, boolean dstAlpha) {
 
 //        renderer.enableBlending();
 
-        switch (blend.getType()) {
+        switch (mode) {
             case Normal:
                 renderer.setBlendFunction(GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
                 break;
@@ -68,7 +68,6 @@ abstract class AbstractBlitOp extends GLOp {
                 throw new IllegalArgumentException();
         }
 
-        float extraAlpha = (float) blend.getExtraAlpha();
-        renderer.setColor(new Color(extraAlpha, extraAlpha, extraAlpha, extraAlpha));
+        renderer.setColor(new Color(opacity, opacity, opacity, opacity));
     }
 }

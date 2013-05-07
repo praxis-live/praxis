@@ -21,52 +21,54 @@
  */
 package net.neilcsmith.praxis.video.opengl.ops;
 
+import java.awt.Rectangle;
 import net.neilcsmith.praxis.video.opengl.internal.GLRenderer;
 import net.neilcsmith.praxis.video.opengl.internal.GLSurface;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
-import net.neilcsmith.praxis.video.render.ops.Blend;
+import net.neilcsmith.praxis.video.render.ops.BlendMode;
 import net.neilcsmith.praxis.video.render.ops.Blit;
-import net.neilcsmith.praxis.video.render.ops.Bounds;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public class GLBlitOp extends AbstractBlitOp {
+    
+    private Rectangle rect;
 
     GLBlitOp() {
         super(Blit.class);
+        rect = new Rectangle();
     }
 
     @Override
     public void process(SurfaceOp op, GLSurface output, Bypass bypass, Surface... inputs) {
-        if (inputs.length > 0 && inputs[0] instanceof GLSurface) {
-            if (process((Blit) op, output, (GLSurface) inputs[0])) {
+        if (inputs.length > 0) {
+            if (process((Blit) op, output, inputs[0])) {
                 return;
             }
         }
         bypass.process(op, inputs);
     }
 
-    private boolean process(Blit blit, GLSurface dst, GLSurface src) {
+    private boolean process(Blit blit, GLSurface dst, Surface src) {
         try {
-            Blend blend = (Blend) blit.getBlendFunction();
-            if (canProcess(blend)) {
+            BlendMode mode = blit.getBlendMode();
+            if (canProcess(mode)) {
                 GLRenderer renderer = dst.getGLContext().getRenderer();
                 renderer.target(dst);
-                setupBlending(renderer, blend, src.hasAlpha(), dst.hasAlpha());
-                Bounds bounds = blit.getSourceRegion();
-
+                setupBlending(renderer, mode, (float) blit.getOpacity());
+                Rectangle bounds = blit.getSourceRegion(rect);
                 if (bounds == null) {
                     int x = blit.getX();
                     int y = dst.getHeight() - (blit.getY() + src.getHeight());
                     renderer.draw(src, x, y);
                 } else {
                     int x = blit.getX();
-                    int sh = bounds.getHeight();
+                    int sh = bounds.height;
                     int y = dst.getHeight() - (blit.getY() + sh);
-                    renderer.draw(src, bounds.getX(), bounds.getY(), bounds.getWidth(), sh, x, y);
+                    renderer.draw(src, bounds.x, bounds.y, bounds.width, sh, x, y);
                 }
                 return true;
             }
