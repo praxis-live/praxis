@@ -19,7 +19,6 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.core;
 
 /**
@@ -29,17 +28,27 @@ package net.neilcsmith.praxis.core;
 public class RegistrationException extends Exception {
 
     /**
-     * Creates a new instance of <code>PortRegistrationException</code> without detail message.
+     * Creates a new instance of
+     * <code>PortRegistrationException</code> without detail message.
      */
     public RegistrationException() {
     }
 
-
     /**
-     * Constructs an instance of <code>PortRegistrationException</code> with the specified detail message.
+     * Constructs an instance of
+     * <code>PortRegistrationException</code> with the specified detail message.
+     *
      * @param msg the detail message.
      */
     public RegistrationException(String msg) {
         super(msg);
+    }
+
+    public RegistrationException(Throwable cause) {
+        super(cause);
+    }
+
+    public RegistrationException(String msg, Throwable cause) {
+        super(msg, cause);
     }
 }

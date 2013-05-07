@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -27,7 +27,7 @@ package net.neilcsmith.praxis.core;
  *
  * @author Neil C Smith
  */
-public interface ContainerContext {
+public abstract class ContainerContext {
 
       /**
      * Allows children to register a control on this container.
@@ -36,7 +36,7 @@ public interface ContainerContext {
      * @param control
      * @throws RegistrationException
      */
-    public void registerControl(String id, Control control) throws RegistrationException;
+    public abstract void registerControl(String id, Control control) throws RegistrationException;
 
     /**
      * Unregister child control.
@@ -44,7 +44,7 @@ public interface ContainerContext {
      * @param child
      * @param control
      */
-    public void unregisterControl(String id, Control control);
+    public abstract void unregisterControl(String id, Control control);
 
      /**
      * Allows children to register a port on this container.
@@ -53,7 +53,7 @@ public interface ContainerContext {
      * @param port
      * @throws net.neilcsmith.praxis.core.PortRegistrationException
      */
-    public void registerPort(String id, Port port) throws RegistrationException;
+    public abstract void registerPort(String id, Port port) throws RegistrationException;
 
 
     /**
@@ -62,6 +62,6 @@ public interface ContainerContext {
      * @param child
      * @param port
      */
-    public void unregisterPort(String id, Port port);
+    public abstract void unregisterPort(String id, Port port);
 
 }
