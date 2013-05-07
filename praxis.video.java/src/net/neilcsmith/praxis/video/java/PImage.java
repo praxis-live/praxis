@@ -37,7 +37,7 @@ import net.neilcsmith.praxis.video.render.SurfaceOp;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class PImage {
+public final class PImage {
 
     private Surface surface;
     public int width;

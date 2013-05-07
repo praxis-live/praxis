@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -39,7 +39,6 @@ import net.neilcsmith.praxis.java.CodeContext;
 import net.neilcsmith.praxis.java.CodeDelegate;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
-import net.neilcsmith.praxis.video.render.ops.Blend;
 
 /**
  *
@@ -90,6 +89,7 @@ public class VideoCodeDelegate extends CodeDelegate {
 
         }
         try {
+            pg.resetMatrix();
             draw();
         } catch (Exception ex) {
             LOG.log(Level.WARNING, "", ex);
@@ -147,11 +147,11 @@ public class VideoCodeDelegate extends CodeDelegate {
         }
 
     }
-
-    @Deprecated
-    public PImage im(int idx) {
-        return videoContext.getImage(idx - 1);
-    }
+//
+//    @Deprecated
+//    public PImage im(int idx) {
+//        return videoContext.getImage(idx - 1);
+//    }
 
     public final PImage img(int idx) {
         return videoContext.getImage(idx - 1);
@@ -191,8 +191,13 @@ public class VideoCodeDelegate extends CodeDelegate {
         pg.bezierVertex(x1, y1, x2, y2, x3, y3);
     }
 
-    public void blendMode(Blend blend) {
+    @Deprecated
+    public void blendMode(VideoConstants.Blend blend) {
         pg.blendMode(blend);
+    }
+    
+    public void blendMode(VideoConstants.Blend blend, double opacity) {
+        pg.blendMode(blend, opacity);
     }
 
     public void breakShape() {
@@ -289,6 +294,22 @@ public class VideoCodeDelegate extends CodeDelegate {
     public void rect(double x, double y, double w, double h) {
         pg.rect(x, y, w, h);
     }
+    
+    public void resetMatrix() {
+        pg.resetMatrix();
+    }
+    
+    public void rotate(double angle) {
+        pg.rotate(angle);
+    }
+    
+    public void scale(double scale) {
+        pg.scale(scale);
+    }
+
+    public void scale(double x, double y) {
+        pg.scale(x, y);
+    }
 
     public void smooth() {
         pg.smooth();
@@ -313,6 +334,14 @@ public class VideoCodeDelegate extends CodeDelegate {
     public void strokeWeight(double weight) {
         pg.strokeWeight(weight);
     }
+    
+    public void translate(double x, double y) {
+        pg.translate(x, y);
+    }
+
+    
+
+    
 
     public void triangle(double x1, double y1, double x2, double y2,
             double x3, double y3) {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -30,7 +30,7 @@
 
 package net.neilcsmith.praxis.video.java;
 
-import net.neilcsmith.praxis.video.render.ops.Blend;
+import net.neilcsmith.praxis.video.render.ops.BlendMode;
 
 
 
@@ -42,17 +42,54 @@ public class VideoConstants {
 
     private VideoConstants() {}
 
-    public final static Blend NORMAL = Blend.NORMAL;
+    public final static Blend NORMAL = new Blend(BlendMode.Normal);
     public final static Blend BLEND = NORMAL;
-    public final static Blend ADD = Blend.ADD;
-    public final static Blend SUB = Blend.SUB;
+    public final static Blend ADD = new Blend(BlendMode.Add);
+    public final static Blend SUB = new Blend(BlendMode.Sub);
     public final static Blend SUBTRACT = SUB;
-    public final static Blend DIFFERENCE = Blend.DIFFERENCE;
-    public final static Blend MULTIPLY = Blend.MULTIPLY;
-    public final static Blend SCREEN = Blend.SCREEN;
-    public final static Blend BITXOR = Blend.BITXOR;
+    public final static Blend DIFFERENCE = new Blend(BlendMode.Difference);
+    public final static Blend MULTIPLY = new Blend(BlendMode.Multiply);
+    public final static Blend SCREEN = new Blend(BlendMode.Screen);
+    public final static Blend BITXOR = new Blend(BlendMode.BitXor);
+    public final static Blend MASK = new Blend(BlendMode.Mask);
 
     public final static boolean OPEN = false;
     public final static boolean CLOSE = true;
+    
+    
+    public static class Blend {
+        
+        private final BlendMode mode;
+        private final double opacity;
+        
+        private Blend(BlendMode mode) {
+            this(mode, 1);
+        }
+        
+        private Blend(BlendMode mode, double opacity) {
+            this.mode = mode;
+            this.opacity = opacity;
+        }
+        
+        BlendMode getMode() {
+            return mode;
+        }
+        
+        double getOpacity() {
+            return opacity;
+        }
+        
+        @Deprecated
+        public Blend opacity(double opacity) {
+            if (opacity < 0) {
+                opacity = 0;
+            } else if (opacity > 1) {
+                opacity = 1;
+            }
+            return new Blend(mode, opacity);
+        }
+        
+    }
+    
 
 }
