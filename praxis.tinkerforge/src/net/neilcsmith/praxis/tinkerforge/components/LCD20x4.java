@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,6 +22,8 @@
 package net.neilcsmith.praxis.tinkerforge.components;
 
 import com.tinkerforge.BrickletLCD20x4;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
@@ -31,19 +33,19 @@ import net.neilcsmith.praxis.impl.StringProperty;
  * @author Neil C Smith
  */
 public class LCD20x4 extends AbstractTFComponent<BrickletLCD20x4> {
-    
+
     private BrickletLCD20x4 device;
     private String[] lines;
     private boolean backlight;
-    
+
     public LCD20x4() {
         super(BrickletLCD20x4.class);
         int len = 4;
         lines = new String[len];
-        for (int i=0; i<len; i++) {
+        for (int i = 0; i < len; i++) {
             lines[i] = "";
             StringProperty p = StringProperty.create(new LineBinding(i), "");
-            String id = "line" + (i+1);
+            String id = "line" + (i + 1);
             registerControl(id, p);
             registerPort(id, p.createPort());
         }
@@ -61,41 +63,53 @@ public class LCD20x4 extends AbstractTFComponent<BrickletLCD20x4> {
 
     @Override
     protected void disposeDevice(BrickletLCD20x4 device) {
-        device.backlightOff();
-        device.clearDisplay();
+        try {
+            device.backlightOff();
+            device.clearDisplay();       
+        } catch (Exception ex) {
+            Logger.getLogger(LCD20x4.class.getName()).log(Level.FINE, null, ex);
+        }
         this.device = null;
     }
 
     @Override
     public void tick(ExecutionContext source) {
-        
     }
-    
+
     private void refreshDisplay() {
+
         if (device == null) {
             return;
         }
-        device.clearDisplay();
-        for (int i=0; i<lines.length; i++) {
-            device.writeLine((short)i, (short)0, lines[i]);
+        try {
+            device.clearDisplay();
+            for (int i = 0; i < lines.length; i++) {
+                device.writeLine((short) i, (short) 0, lines[i]);
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(LCD20x4.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private void refreshBacklight() {
         if (device == null) {
             return;
         }
-        if (backlight) {
-            device.backlightOn();
-        } else {
-            device.backlightOff();
+        try {
+            if (backlight) {
+                device.backlightOn();
+            } else {
+                device.backlightOff();
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(LCD20x4.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private class LineBinding implements StringProperty.Binding {
-        
+
         private int idx;
-        
+
         private LineBinding(int idx) {
             this.idx = idx;
         }
@@ -110,9 +124,8 @@ public class LCD20x4 extends AbstractTFComponent<BrickletLCD20x4> {
         public String getBoundValue() {
             return lines[idx];
         }
-        
     }
-    
+
     private class BacklightBinding implements BooleanProperty.Binding {
 
         @Override
@@ -127,10 +140,5 @@ public class LCD20x4 extends AbstractTFComponent<BrickletLCD20x4> {
         public boolean getBoundValue() {
             return backlight;
         }
-        
     }
-    
-    
-    
-    
 }

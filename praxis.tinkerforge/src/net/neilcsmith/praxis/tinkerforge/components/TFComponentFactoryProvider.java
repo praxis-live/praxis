@@ -45,11 +45,16 @@ public class TFComponentFactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-                addRoot("root:tinkerforge", TFRoot.class);
-                addComponent("tinkerforge:ambient-light", AmbientLight.class);
-                addComponent("tinkerforge:distance-ir", DistanceIR.class);
-                addComponent("tinkerforge:lcd20x4", LCD20x4.class);
-                addComponent("tinkerforge:rotary-poti", RotaryPoti.class);
+//                addRoot("root:tinkerforge", TFRoot.class);
+                addRoot("root:tinkerforge", data(TFRoot.class).test());
+//                addComponent("tinkerforge:ambient-light", AmbientLight.class);
+//                addComponent("tinkerforge:distance-ir", DistanceIR.class);
+//                addComponent("tinkerforge:lcd20x4", LCD20x4.class);
+//                addComponent("tinkerforge:rotary-poti", RotaryPoti.class);
+                addComponent("tinkerforge:ambient-light", data(AmbientLight.class).test());
+                addComponent("tinkerforge:distance-ir", data(DistanceIR.class).test());
+                addComponent("tinkerforge:lcd20x4", data(LCD20x4.class).test());
+                addComponent("tinkerforge:rotary-poti", data(RotaryPoti.class).test());
         }
         
     }

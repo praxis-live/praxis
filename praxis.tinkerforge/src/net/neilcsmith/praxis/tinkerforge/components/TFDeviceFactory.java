@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -26,6 +26,7 @@ import com.tinkerforge.BrickletDistanceIR;
 import com.tinkerforge.BrickletLCD20x4;
 import com.tinkerforge.BrickletRotaryPoti;
 import com.tinkerforge.Device;
+import com.tinkerforge.IPConnection;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,48 +38,36 @@ import java.util.Map;
 class TFDeviceFactory {
 
     private final static TFDeviceFactory INSTANCE = new TFDeviceFactory();
-    private Map<String, Class<? extends Device>> map;
 
-    private TFDeviceFactory() {
-        initMap();
-    }
-
-    private void initMap() {
-        map = new HashMap<String, Class<? extends Device>>();
-        map.put("LCD 20x4 Bricklet", BrickletLCD20x4.class);
-        map.put("Rotary Poti Bricklet", BrickletRotaryPoti.class);
-        map.put("Distance IR Bricklet", BrickletDistanceIR.class);
-        map.put("Ambient Light Bricklet", BrickletAmbientLight.class);
-        
-    }
-
-    Device createDevice(String name, String uid) throws Exception {
-        
-        Class<? extends Device> cls = findDeviceClass(name);
-        return constructDevice(cls, uid);
-
-    }
-
-    private Class<? extends Device> findDeviceClass(String name) {
-        int i = name.lastIndexOf(' ');
-        if (i < 0) {
-            throw new IllegalArgumentException("Illegal device name - no space found");
+    Device createDevice(int deviceID, String uid, IPConnection ipcon) {
+        switch (deviceID) {
+            case BrickletAmbientLight.DEVICE_IDENTIFIER:
+                return new BrickletAmbientLight(uid, ipcon);
+            case BrickletDistanceIR.DEVICE_IDENTIFIER:
+                return new BrickletDistanceIR(uid, ipcon);
+            case BrickletLCD20x4.DEVICE_IDENTIFIER:
+                return new BrickletLCD20x4(uid, ipcon);
+            case BrickletRotaryPoti.DEVICE_IDENTIFIER:
+                return new BrickletRotaryPoti(uid, ipcon);
         }
-        name = name.substring(0, i).replace('-', ' ');
-        Class<? extends Device> cls = map.get(name);
-        if (cls == null) {
-            throw new IllegalArgumentException("Unregistered device name : " + name);
+        throw new IllegalArgumentException("Unknown device");
+
+    }
+
+    String getDeviceName(int deviceID) {
+        switch (deviceID) {
+            case BrickletAmbientLight.DEVICE_IDENTIFIER:
+                return "Ambient Light Bricklet";
+            case BrickletDistanceIR.DEVICE_IDENTIFIER:
+                return "Distance IR Bricklet";
+            case BrickletLCD20x4.DEVICE_IDENTIFIER:
+                return "LCD 20x4 Bricklet";
+            case BrickletRotaryPoti.DEVICE_IDENTIFIER:
+                return "Rotary Poti Bricklet";
         }
-        return cls;
+        return "Unknown Device";
     }
-    
-    private Device constructDevice(Class<? extends Device> cls, String uid) throws Exception {
-        Constructor<? extends Device> con = cls.getConstructor(String.class);
-        return con.newInstance(uid);
-    }
-    
-    
-    
+
     static TFDeviceFactory getDefault() {
         return INSTANCE;
     }

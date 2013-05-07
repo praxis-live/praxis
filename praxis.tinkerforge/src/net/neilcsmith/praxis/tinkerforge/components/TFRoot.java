@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,8 +23,9 @@ package net.neilcsmith.praxis.tinkerforge.components;
 
 import com.tinkerforge.Device;
 import com.tinkerforge.IPConnection;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import com.tinkerforge.NotConnectedException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -82,8 +83,10 @@ public class TFRoot extends AbstractRoot {
     @Override
     protected void starting() {
         try {
-            ipcon = new IPConnection(host, port);
-            ipcon.enumerate(enumerator);
+            ipcon = new IPConnection();
+            ipcon.connect(host, port);
+            ipcon.addEnumerateListener(enumerator);
+            ipcon.enumerate();
         } catch (Exception ex) {
             LOG.log(Level.WARNING, "Can't start connection.", ex);
         }
@@ -94,9 +97,13 @@ public class TFRoot extends AbstractRoot {
         status.clear();
         context.removeAll();
         if (ipcon != null) {
-            ipcon.destroy();
+            try {
+                ipcon.disconnect();
+            } catch (NotConnectedException ex) {
+                Logger.getLogger(TFRoot.class.getName()).log(Level.SEVERE, null, ex);
+            }
             ipcon = null;
-        }    
+        }
     }
 
     @Override
@@ -107,8 +114,6 @@ public class TFRoot extends AbstractRoot {
             task = queue.poll();
         }
     }
-    
-    
 
     private class HostBinding implements StringProperty.Binding {
 
@@ -141,17 +146,18 @@ public class TFRoot extends AbstractRoot {
             return port;
         }
     }
-    
+
     private class Status implements ArgumentProperty.ReadBinding {
-        
-        private Set<String> statusSet = new LinkedHashSet<String>();
+
+//        private Set<String> statusSet = new LinkedHashSet<String>();
+        private final Map<String, String> infoMap = new LinkedHashMap<String, String>();
         private PString cache;
 
         @Override
         public Argument getBoundValue() {
             if (cache == null) {
                 StringBuilder builder = new StringBuilder();
-                for (String line : statusSet) {
+                for (String line : infoMap.values()) {
                     builder.append(line);
                     builder.append("\n");
                 }
@@ -159,69 +165,68 @@ public class TFRoot extends AbstractRoot {
             }
             return cache;
         }
-        
-        private void add(String info) {
-            boolean changed = statusSet.add(info);
-            if (changed) {
-                cache = null;
-            }
+
+        private void add(String uid, String info) {
+            infoMap.put(uid, info);
+            cache = null;
         }
-        
-        private void remove(String info) {
-            boolean changed = statusSet.remove(info);
-            if (changed) {
-                cache = null;
-            }
+
+        private void remove(String uid) {
+            infoMap.remove(uid);
+            cache = null;
         }
-        
+
         private void clear() {
-            statusSet.clear();
+            infoMap.clear();
+            cache = null;
         }
-        
     }
-    
+
     private class ComponentEnumerator implements IPConnection.EnumerateListener {
 
         @Override
-        public void enumerate(final String uid, final String name, short stackID, boolean isNew) {
+        public void enumerate(final String uid,
+                String connectedUid,
+                char position,
+                short[] hardwareVersion,
+                short[] firmwareVersion,
+                int deviceID,
+                short enumerationType) {
             IPConnection ip = ipcon;
             if (ip == null) {
                 LOG.fine("enumerate() called but IPConnection is null - ignoring!");
                 return; // removed from under us?
             }
-            if (isNew) {
-                LOG.log(Level.FINE, "Component connected - UID:{0} Name:{1}", new Object[]{uid, name});
+            if (enumerationType != IPConnection.ENUMERATION_TYPE_DISCONNECTED) {
+                LOG.log(Level.FINE, "Component connected - UID:{0} Name:{1}", new Object[]{uid, deviceID});
                 try {
-                    final Device device = TFDeviceFactory.getDefault().createDevice(name, uid);
-                    ipcon.addDevice(device);
+                    final Device device = TFDeviceFactory.getDefault().createDevice(deviceID ,uid, ipcon);
+                    final String name = TFDeviceFactory.getDefault().getDeviceName(deviceID);
                     queue.add(new Runnable() {
-
                         @Override
                         public void run() {
                             if (getState() == RootState.ACTIVE_RUNNING) {
                                 context.addDevice(uid, device);
-                                status.add(name + " UID:" + uid);
+                                status.add(uid, name + " UID:" + uid);
                             }
                         }
                     });
                 } catch (Exception ex) {
-                    LOG.log(Level.FINE, "Unable to create device for UID: {0} Name: {1}", new Object[]{uid, name});
+                    LOG.log(Level.FINE, "Unable to create device for UID: {0} Name: {1}", new Object[]{uid, deviceID});
                     LOG.log(Level.FINE, "", ex);
                 }
             } else {
-                LOG.log(Level.FINE, "Component disconnected - UID:{0} Name:{1}", new Object[]{uid, name});
+                LOG.log(Level.FINE, "Component disconnected - UID:{0} Name:{1}", new Object[]{uid, deviceID});
                 queue.add(new Runnable() {
-
                     @Override
                     public void run() {
                         if (getState() == RootState.ACTIVE_RUNNING) {
                             context.removeDevice(uid);
-                            status.remove(name + " UID:" + uid);
+                            status.remove(uid);
                         }
                     }
                 });
             }
         }
-        
     }
 }

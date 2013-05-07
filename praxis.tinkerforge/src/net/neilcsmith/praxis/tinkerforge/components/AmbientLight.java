@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,6 +22,8 @@
 package net.neilcsmith.praxis.tinkerforge.components;
 
 import com.tinkerforge.BrickletAmbientLight;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.ExecutionContext;
@@ -53,14 +55,22 @@ public class AmbientLight extends AbstractTFComponent<BrickletAmbientLight> {
         this.device = device;
         Listener l = new Listener();
         active = l;
-        device.addListener(l);
-        device.setIlluminanceCallbackPeriod(50);
+        device.addIlluminanceListener(l);
+        try {
+            device.setIlluminanceCallbackPeriod(50);
+        } catch (Exception ex) {
+            Logger.getLogger(AmbientLight.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
     protected void disposeDevice(BrickletAmbientLight device) {
         active = null;
-        device.setIlluminanceCallbackPeriod(0);
+        try {
+            device.setIlluminanceCallbackPeriod(0);
+        } catch (Exception ex) {
+            Logger.getLogger(AmbientLight.class.getName()).log(Level.FINE, null, ex);
+        }
         this.device = null;
     }
 

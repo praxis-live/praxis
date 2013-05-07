@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,6 +22,8 @@
 package net.neilcsmith.praxis.tinkerforge.components;
 
 import com.tinkerforge.BrickletRotaryPoti;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.ExecutionContext;
@@ -60,14 +62,22 @@ public class RotaryPoti extends AbstractTFComponent<BrickletRotaryPoti> {
         this.device = device;
         Listener l = new Listener();
         active = l;
-        device.addListener(l);
-        device.setPositionCallbackPeriod(50);
+        device.addPositionListener(l);
+        try {
+            device.setPositionCallbackPeriod(50);
+        } catch (Exception ex) {
+            Logger.getLogger(RotaryPoti.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     @Override
     protected void disposeDevice(BrickletRotaryPoti device) {
         active = null;
-        device.setPositionCallbackPeriod(0);
+        try {
+            device.setPositionCallbackPeriod(0);
+        } catch (Exception ex) {
+            Logger.getLogger(RotaryPoti.class.getName()).log(Level.FINE, null, ex);
+        }
         this.device = null;
     }
 
