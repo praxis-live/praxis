@@ -19,7 +19,6 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.core;
 
 /**
@@ -27,13 +26,15 @@ package net.neilcsmith.praxis.core;
  * @author Neil C Smith
  */
 public interface Lookup {
+    
+    public final static Lookup EMPTY = new EmptyLookup();
+    public final static Lookup SYSTEM = new SystemLookup();
 
     public <T> T get(Class<T> type);
-    
-    public <T> Result<T> getAll(Class<T> type);
-    
-    public interface Result<T> extends Iterable<T> {
-        
-    }
 
+    public <T> Result<T> getAll(Class<T> type);
+
+    public interface Result<T> extends Iterable<T> {
+    }
+    
 }
