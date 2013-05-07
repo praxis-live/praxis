@@ -43,7 +43,7 @@ public class DV1394DelegateTrial extends AbstractGstDelegate {
     }
 
     @Override
-    protected Pipeline buildPipeline(Listener listener) {
+    protected Pipeline buildPipeline(Element sink) {
         Pipeline pipe = new Pipeline();
         Element src = ElementFactory.make("dv1394src", "source0");
         Element demux = ElementFactory.make("dvdemux", "dvdemux0");
@@ -51,9 +51,9 @@ public class DV1394DelegateTrial extends AbstractGstDelegate {
         Element color0 = ElementFactory.make("ffmpegcolorspace", "color0");
         Element deint = ElementFactory.make("deinterlace", "deint0");
         Element color1 = ElementFactory.make("ffmpegcolorspace", "color1");
-        RGBDataSink sink = new RGBDataSink("sink", listener);
-        sink.getSinkElement().set("sync", "false");
-        sink.setPassDirectBuffer(true);
+//        RGBDataSink sink = new RGBDataSink("sink", listener);
+//        sink.getSinkElement().set("sync", "false");
+//        sink.setPassDirectBuffer(true);
         pipe.addMany(src, demux, dvdec, color0, sink);
         Pipeline.linkMany(src, demux, dvdec, color0, sink);
         return pipe;

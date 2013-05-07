@@ -43,15 +43,15 @@ public class DV1394Delegate extends AbstractGstDelegate {
     }
 
     @Override
-    protected Pipeline buildPipeline(Listener listener) {
+    protected Pipeline buildPipeline(Element sink) {
         Pipeline pipe = new Pipeline();
         Element src = ElementFactory.make("dv1394src", "source");
         DecodeBin decoder = new DecodeBin("decoder");
         final Element color = ElementFactory.make("ffmpegcolorspace", "color");
         final Element deint = ElementFactory.make("deinterlace", "deint");
-        final RGBDataSink sink = new RGBDataSink("sink", listener);
-        sink.getSinkElement().set("sync", "false");
-        sink.setPassDirectBuffer(true);
+//        final RGBDataSink sink = new RGBDataSink("sink", listener);
+//        sink.getSinkElement().set("sync", "false");
+//        sink.setPassDirectBuffer(true);
         pipe.addMany(src, decoder, color, deint, sink);
 //        pipe.addMany(src, decoder, color, sink);
         Pipeline.linkMany(src, decoder);

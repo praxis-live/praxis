@@ -22,11 +22,8 @@
 package net.neilcsmith.praxis.video.gstreamer.delegates;
 
 import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -35,15 +32,21 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.video.gstreamer.components.VideoDelegate;
+import net.neilcsmith.praxis.video.render.NativePixelData;
+import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.Surface;
-import net.neilcsmith.praxis.video.render.ops.GraphicsOp;
+import net.neilcsmith.praxis.video.render.SurfaceOp;
+import net.neilcsmith.praxis.video.render.ops.ScaledBlit;
+import net.neilcsmith.praxis.video.render.utils.BufferedImageSurface;
 import net.neilcsmith.praxis.video.utils.ResizeMode;
 import net.neilcsmith.praxis.video.utils.ResizeUtils;
+import org.gstreamer.Buffer;
 import org.gstreamer.Bus;
+import org.gstreamer.Element;
 import org.gstreamer.Gst;
 import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
-import org.gstreamer.elements.RGBDataSink;
+import org.gstreamer.elements.BufferDataAppSink;
 
 /**
  *
@@ -53,8 +56,8 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
 
     private static Logger logger = Logger.getLogger(AbstractGstDelegate.class.getName());
     private final AtomicReference<State> state;
-    private BufferedImage image;
-    private final Lock imageLock;
+    private GStreamerSurface surface;
+    private final Lock surfaceLock;
     private Pipeline pipe;
     private Rectangle srcRegion;
     private int srcWidth;
@@ -69,7 +72,7 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
     protected AbstractGstDelegate() {
         Gst.init();
         state = new AtomicReference<VideoDelegate.State>(State.New);
-        imageLock = new ReentrantLock();
+        surfaceLock = new ReentrantLock();
     }
 
     @Override
@@ -77,7 +80,9 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
         // this is where we call down to build pipeline
         if (state.compareAndSet(State.New, State.Ready)) {
             try {
-                pipe = buildPipeline(new RGBListener());
+                BufferDataAppSink sink = new BufferDataAppSink("sink", new BufferListener());
+                sink.setAutoDisposeBuffer(false);
+                pipe = buildPipeline(sink);
                 makeBusConnections(pipe.getBus());
                 pipe.setState(org.gstreamer.State.READY); // in gst thread?
                 return State.Ready;
@@ -269,40 +274,42 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
             }
         }
 
-        imageLock.lock();
+        surfaceLock.lock();
 
         try {
-            if (image != null) {
+            if (surface != null && surface.buffer != null) {
                 checkRegions(output);
-                output.process(new GraphicsOp(new GraphicsOp.Callback() {
-                    public void draw(Graphics2D g2d, Image[] images) {
-                        
-                        int dx1 = destRegion.x;
-                        int dy1 = destRegion.y;
-                        int dx2 = dx1 + destRegion.width;
-                        int dy2 = dy1 + destRegion.height;
-                        int sx1 = srcRegion.x;
-                        int sy1 = srcRegion.y;
-                        int sx2 = sx1 + srcRegion.width;
-                        int sy2 = sy1 + srcRegion.height;
-                        g2d.drawImage(image, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
-                    }
-                }));
+//                output.process(new GraphicsOp(new GraphicsOp.Callback() {
+//                    public void draw(Graphics2D g2d, Image[] images) {
+//                        
+//                        int dx1 = destRegion.x;
+//                        int dy1 = destRegion.y;
+//                        int dx2 = dx1 + destRegion.width;
+//                        int dy2 = dy1 + destRegion.height;
+//                        int sx1 = srcRegion.x;
+//                        int sy1 = srcRegion.y;
+//                        int sx2 = sx1 + srcRegion.width;
+//                        int sy2 = sy1 + srcRegion.height;
+//                        g2d.drawImage(image, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
+//                    }
+//                }));
+                output.process(new ScaledBlit().setSourceRegion(srcRegion).setDestinationRegion(destRegion),
+                        surface);
                 newFrameAvailable = false;
             }
 
         } finally {
-            imageLock.unlock();
+            surfaceLock.unlock();
         }
     }
 
     private void checkRegions(Surface output) {
         if (srcRegion == null || destRegion == null
-                || srcWidth != image.getWidth() || srcHeight != image.getHeight()
+                || srcWidth != surface.getWidth() || srcHeight != surface.getHeight()
                 || destWidth != output.getWidth() || destHeight != output.getHeight()) {
             Rectangle src = new Rectangle();
             Rectangle dest = new Rectangle();
-            Dimension srcDim = new Dimension(image.getWidth(), image.getHeight());
+            Dimension srcDim = new Dimension(surface.getWidth(), surface.getHeight());
             Dimension destDim = new Dimension(output.getWidth(), output.getHeight());
             ResizeUtils.calculateBounds(srcDim, destDim, getResizeMode(), src, dest);
             srcRegion = src;
@@ -318,17 +325,15 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
         destRegion = null;
     }
 
-    private BufferedImage getImage(int width, int height) {
-        if (image != null && image.getWidth() == width && image.getHeight() == height) {
-            return image;
-        }
-        if (image != null) {
-            image.flush();
-        }
-        image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-//        image.setAccelerationPriority(0.0f);
-        return image;
-    }
+//    private BufferedImageSurface getImage(int width, int height) {
+//        if (image != null && image.getWidth() == width && image.getHeight() == height) {
+//            return image;
+//        }
+//
+//        image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+////        image.setAccelerationPriority(0.0f);
+//        return image;
+//    }
 
     private void makeBusConnections(Bus bus) {
         bus.connect(new Bus.ERROR() {
@@ -352,33 +357,146 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
             }
         });
     }
-
-    private class RGBListener implements RGBDataSink.Listener {
-
-        public void rgbFrame(boolean preroll, int width, int height, IntBuffer rgb) {
-
-            if (!imageLock.tryLock()) {
-                return;
-            }
-
-            try {
-                image = getImage(width, height);
-                int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-                rgb.get(pixels, 0, width * height);
-                newFrameAvailable = true;
-            } finally {
-                imageLock.unlock();
-            }
-
-
-        }
-    }
-
-    protected abstract Pipeline buildPipeline(RGBDataSink.Listener listener) throws Exception;
+    
+    protected abstract Pipeline buildPipeline(Element sink) throws Exception;
 
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
         dispose();
     }
+//
+//    private class RGBListener implements RGBDataSink.Listener {
+//
+//        public void rgbFrame(boolean preroll, int width, int height, IntBuffer rgb) {
+//
+//            if (!surfaceLock.tryLock()) {
+//                return;
+//            }
+//
+//            try {
+//                image = getImage(width, height);
+//                int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+//                rgb.get(pixels, 0, width * height);
+//                newFrameAvailable = true;
+//            } finally {
+//                surfaceLock.unlock();
+//            }
+//
+//
+//        }
+//    }
+    
+    private class BufferListener implements BufferDataAppSink.Listener {
+
+        public void bufferFrame(int width, int height, Buffer buffer) {
+            surfaceLock.lock();
+            try {
+                if (surface == null || surface.getWidth() != width || surface.getHeight() != height) {
+                    if (surface != null && surface.buffer != null) {
+                        surface.buffer.dispose();
+                    }
+                    surface = new GStreamerSurface(width, height);
+                } else {
+                    if (surface.buffer != null) {
+                        surface.buffer.dispose();
+                    }
+                }
+                surface.buffer = buffer;
+                surface.modCount++;
+            } finally {
+                surfaceLock.unlock();
+            }
+        }
+        
+    }
+    
+    private static class GStreamerSurface extends Surface implements NativePixelData {
+        
+        private static PixelData[] EMPTY = new PixelData[0];
+        
+        private Buffer buffer;
+        private int[] data;
+        private int modCount;
+        
+        private GStreamerSurface(int width, int height) {
+            super(width, height, false);
+        }
+
+        @Override
+        public int getModCount() {
+            return modCount;
+        }
+
+        @Override
+        public void process(SurfaceOp op, Surface... inputs) {
+            if (inputs.length > 0) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+            modCount++;
+            op.process(this, EMPTY);
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public boolean isClear() {
+            return false;
+        }
+
+        @Override
+        public void release() {
+            // no op
+        }
+
+        @Override
+        public void copy(Surface source) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public boolean checkCompatible(Surface surface, boolean checkDimensions, boolean checkAlpha) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Surface createSurface(int width, int height, boolean alpha) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public int[] getData() {
+            if (data == null) {
+                data = new int[width * height];
+            }
+            IntBuffer ib = buffer.getByteBuffer().asIntBuffer();
+            ib.rewind();
+            ib.get(data);
+            ib.rewind();
+            return data;
+        }
+
+        public int getOffset() {
+            return 0;
+        }
+
+        public int getScanline() {
+            return width;
+        }
+
+        public ByteBuffer getNativeData() {
+            ByteBuffer bb = buffer.getByteBuffer();
+            bb.rewind();
+            return bb;
+        }
+
+        public Format getFormat() {
+            return Format.INT_RGB;
+        }
+        
+    }
+
+    
 }

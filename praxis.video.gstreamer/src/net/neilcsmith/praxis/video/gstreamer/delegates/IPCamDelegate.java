@@ -49,13 +49,13 @@ public class IPCamDelegate extends AbstractGstDelegate {
     }
 
     @Override
-    protected Pipeline buildPipeline(Listener listener) {
+    protected Pipeline buildPipeline(Element sink) {
         Pipeline pipe = new Pipeline();
         Element src = ElementFactory.make("souphttpsrc", "source");
         src.set("location", address.toString());
         DecodeBin decoder = new DecodeBin("decoder");
-        final RGBDataSink sink = new RGBDataSink("sink", listener);
-        sink.setPassDirectBuffer(true);
+//        final RGBDataSink sink = new RGBDataSink("sink", listener);
+//        sink.setPassDirectBuffer(true);
         pipe.addMany(src, decoder, sink);
         Pipeline.linkMany(src, decoder);
         decoder.connect(new DecodeBin.NEW_DECODED_PAD() {
@@ -70,7 +70,7 @@ public class IPCamDelegate extends AbstractGstDelegate {
                 Caps caps = pad.getCaps();
                 Structure struct = caps.getStructure(0);
                 if (struct.getName().startsWith("video/")) {
-                    pad.link(sink.getStaticPad("sink"));
+//                    pad.link(sink.getStaticPad("sink"));
                 } //else {
                   //  System.out.println("Unknown pad [" + struct.getName() + "]");
                 //}

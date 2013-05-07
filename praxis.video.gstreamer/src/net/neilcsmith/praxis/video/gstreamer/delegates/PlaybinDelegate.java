@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.video.gstreamer.delegates;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import org.gstreamer.Bus;
+import org.gstreamer.Element;
 import org.gstreamer.Format;
 import org.gstreamer.Gst;
 import org.gstreamer.GstObject;
@@ -50,12 +51,12 @@ public class PlaybinDelegate extends AbstractGstDelegate {
     }
 
     @Override
-    protected Pipeline buildPipeline(Listener listener) throws Exception {
+    protected Pipeline buildPipeline(Element sink) throws Exception {
 //        pipe = new PlayBin("PlayBin", loc);
         pipe = new PlayBin2("PlayBin2", loc);
         pipe.setAudioSink(null);
-        RGBDataSink sink = new RGBDataSink(("sink"), listener);
-        sink.setPassDirectBuffer(true);
+//        RGBDataSink sink = new RGBDataSink(("sink"), listener);
+//        sink.setPassDirectBuffer(true);
         pipe.setVideoSink(sink);
         pipe.getBus().connect(new Bus.SEGMENT_DONE() {
 

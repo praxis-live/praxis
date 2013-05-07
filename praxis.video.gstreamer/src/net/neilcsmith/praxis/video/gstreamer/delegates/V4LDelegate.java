@@ -60,15 +60,15 @@ public class V4LDelegate extends AbstractGstDelegate {
 //        this.capsString = caps;
 //    }
     @Override
-    protected Pipeline buildPipeline(Listener listener) {
+    protected Pipeline buildPipeline(Element sink) {
         Pipeline pipe = new Pipeline();
         Element src = ElementFactory.make(sourceType, "source");
         src.set("device", srcDevice);
         Element caps = ElementFactory.make("capsfilter", "caps");
         Element fcs = ElementFactory.make("ffmpegcolorspace", "fcs");
         caps.setCaps(Caps.fromString(capsString));
-        RGBDataSink sink = new RGBDataSink("sink", listener);
-        sink.setPassDirectBuffer(true);
+//        RGBDataSink sink = new RGBDataSink("sink", listener);
+//        sink.setPassDirectBuffer(true);
         pipe.addMany(src, fcs, caps, sink);
         Pipeline.linkMany(src, fcs, caps, sink);
         return pipe;

@@ -48,15 +48,15 @@ public class KSDelegate extends AbstractGstDelegate {
     
 
     @Override
-    protected Pipeline buildPipeline(Listener listener) {
+    protected Pipeline buildPipeline(Element sink) {
         Pipeline pipe = new Pipeline();
         Element src = ElementFactory.make(SRC_TYPE, "source");
         src.set("device-index", deviceIdx);
         Element caps = ElementFactory.make("capsfilter", "caps");
         Element fcs = ElementFactory.make("ffmpegcolorspace", "fcs");
         caps.setCaps(Caps.fromString(capsString));
-        RGBDataSink sink = new RGBDataSink("sink", listener);
-        sink.setPassDirectBuffer(true);
+//        RGBDataSink sink = new RGBDataSink("sink", listener);
+//        sink.setPassDirectBuffer(true);
         pipe.addMany(src, fcs, caps, sink);
         Pipeline.linkMany(src, fcs, caps, sink);
         return pipe;
