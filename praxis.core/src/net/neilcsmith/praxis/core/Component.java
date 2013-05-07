@@ -26,8 +26,7 @@ import net.neilcsmith.praxis.core.info.ComponentInfo;
 /**
  * Components are the main building blocks within Praxis. They may provide Controls
  * and Ports. Components expect to be used within a hierarchy, inside a Root
- * component, and potentially inside other Container components. Root and Container
- * are subinterfaces of this interface.
+ * component, and potentially inside other Container components.
  *
  * @author Neil C Smith
  */
