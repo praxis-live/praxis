@@ -27,6 +27,10 @@
                 <package>org.jaudiolibs.pipes</package>
                 <package>org.jaudiolibs.pipes.impl</package>
             </public-packages>
+            <class-path-extension>
+                <runtime-relative-path>ext/pipes-1.0-130327.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/pipes-1.0-130327.jar</binary-origin>
+            </class-path-extension>
         </data>
     </configuration>
 </project>

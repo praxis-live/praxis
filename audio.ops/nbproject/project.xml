@@ -9,6 +9,10 @@
             <public-packages>
                 <package>org.jaudiolibs.audioops</package>
             </public-packages>
+            <class-path-extension>
+                <runtime-relative-path>ext/audioops-api-1.0-130327.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/audioops-api-1.0-130327.jar</binary-origin>
+            </class-path-extension>
         </data>
     </configuration>
 </project>
