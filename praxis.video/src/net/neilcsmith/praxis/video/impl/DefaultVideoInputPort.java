@@ -36,7 +36,12 @@ public class DefaultVideoInputPort extends VideoPort.Input {
     private VideoPort.Output connection;
     private PortListenerSupport pls;
 
+    @Deprecated
     public DefaultVideoInputPort(Component host, VideoPipe sink) {
+        this(sink);
+    }
+    
+    public DefaultVideoInputPort(VideoPipe sink) {
         if (sink == null) {
             throw new NullPointerException();
         }
