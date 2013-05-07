@@ -14,7 +14,6 @@
                 <friend>net.neilcsmith.praxis.video.pipes</friend>
                 <package>net.neilcsmith.praxis.video.render</package>
                 <package>net.neilcsmith.praxis.video.render.ops</package>
-                <package>net.neilcsmith.praxis.video.render.rgbmath</package>
                 <package>net.neilcsmith.praxis.video.render.utils</package>
             </friend-packages>
         </data>

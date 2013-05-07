@@ -27,7 +27,7 @@ import java.awt.Rectangle;
 import java.util.Arrays;
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
-import net.neilcsmith.praxis.video.render.rgbmath.RGBMath;
+import net.neilcsmith.praxis.video.render.utils.RGBMath;
 
 /**
  *
@@ -35,27 +35,79 @@ import net.neilcsmith.praxis.video.render.rgbmath.RGBMath;
  */
 public class RectFill implements SurfaceOp {
 
-    private int x;
-    private int y;
-    private int width;
-    private int height;
+    private final Rectangle bounds;
     private Color color;
-    private BlendFunction blend;
+    private BlendMode blendMode;
+    private double opacity;
 
-    private RectFill(Color color, BlendFunction blend,
-            int x, int y, int width, int height) {
+    public RectFill() {
+        bounds = new Rectangle();
+        color = new Color(0, 0, 0, 0);
+        blendMode = BlendMode.Normal;
+        opacity = 1;
+    }
+    
+    public RectFill setBounds(int x, int y, int width, int height) {
+        bounds.setBounds(x, y, width, height);
+        return this;
+    }
+    
+    public RectFill setBounds(Rectangle rect) {
+        bounds.setBounds(rect);
+        return this;
+    }
+    
+    public Rectangle getBounds(Rectangle rect) {
+        if (rect == null) {
+            return new Rectangle(bounds);
+        } else {
+            rect.setBounds(rect);
+            return rect;
+        }
+    }
+    
+    public RectFill setColor(Color color) {
+        if (color == null) {
+            throw new NullPointerException();
+        }
         this.color = color;
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.blend = blend;
+        return this;
+    }
+    
+    public Color getColor() {
+        return color;
+    }
+    
+    public RectFill setBlendMode(BlendMode blendMode) {
+        if (blendMode == null) {
+            throw new NullPointerException();
+        }
+        this.blendMode = blendMode;
+        return this;
+    }
+    
+    public BlendMode getBlendMode() {
+        return blendMode;
+    }
+    
+    public RectFill setOpacity(double opacity) {
+        if (opacity < 0) {
+            opacity = 0;
+        } else if (opacity > 1) {
+            opacity = 1;
+        }
+        this.opacity = opacity;
+        return this;
+    }
+    
+    public double getOpacity() {
+        return opacity;
     }
 
+    @Override
     public void process(PixelData output, PixelData... inputs) {
-        Rectangle in = new Rectangle(x, y, width, height);
         Rectangle out = new Rectangle(output.getWidth(), output.getHeight());
-        Rectangle intersection = out.intersection(in);
+        Rectangle intersection = out.intersection(bounds);
         if (intersection.isEmpty()) {
             return;
         }
@@ -71,16 +123,20 @@ public class RectFill implements SurfaceOp {
                 forceAlpha || output.hasAlpha());
         Arrays.fill(tmp.getData(), 0, intersection.width * intersection.height, c);
         SubPixels dst = SubPixels.create(output, intersection);
-        blend.process(tmp, dst);
+//        blend.process(tmp, dst);
+        BlendUtil.process(tmp, dst, blendMode, opacity);
         tmp.release();
     }
 
+    @Deprecated
     public static SurfaceOp op(Color color, BlendFunction blend,
             int x, int y, int width, int height) {
-        if (color == null || blend == null) {
-            throw new NullPointerException();
-        }
-        return new RectFill(color, blend, x, y, width, height);
+        RectFill op = new RectFill();
+        op.setBlendMode(Blit.extractBlendMode(blend));
+        op.setOpacity(((Blend)blend).getExtraAlpha());
+        op.setColor(color);
+        op.setBounds(x, y, width, height);
+        return op;
     }
 
 }

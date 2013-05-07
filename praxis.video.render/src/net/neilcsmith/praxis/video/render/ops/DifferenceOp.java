@@ -24,7 +24,7 @@ package net.neilcsmith.praxis.video.render.ops;
 
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
-import static net.neilcsmith.praxis.video.render.rgbmath.RGBMath.*;
+import static net.neilcsmith.praxis.video.render.utils.RGBMath.*;
 
 /**
  *

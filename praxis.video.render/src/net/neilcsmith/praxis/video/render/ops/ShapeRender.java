@@ -28,8 +28,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.geom.Path2D;
-import java.awt.geom.RectangularShape;
 import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.video.render.PixelData;
@@ -48,29 +46,86 @@ public class ShapeRender implements SurfaceOp {
 
     private Shape shape;
     private BasicStroke stroke;
-    private BlendFunction blend;
+    private BlendMode blendMode;
+    private double opacity;
     private Color fillColor;
     private Color strokeColor;
-    private boolean direct;
 
-    private ShapeRender(Shape shape, Color fillColor, BasicStroke stroke,
-            Color strokeColor, BlendFunction blend) {
+    public ShapeRender() {
+        this.blendMode = BlendMode.Normal;
+        this.opacity = 1;
+    }
+    
+    public ShapeRender setShape(Shape shape) {
         this.shape = shape;
-        this.fillColor = fillColor;
+        return this;
+    }
+    
+    public Shape getShape() {
+        return shape;
+    }
+    
+    public ShapeRender setStroke(BasicStroke stroke) {
         this.stroke = stroke;
-        this.strokeColor = strokeColor;
-        this.blend = blend;
-        if (blend instanceof Blend) {
-            Blend b = (Blend) blend;
-            if (b.getType() == Blend.Type.Normal && 
-                    (stroke == null || b.getExtraAlpha() > EPSILON) ) {
-                direct = true;
-            }
-        }
+        return this;
+    }
+    
+    public BasicStroke getStroke() {
+        return stroke;
     }
 
+    public BlendMode getBlendMode() {
+        return blendMode;
+    }
+
+    public ShapeRender setBlendMode(BlendMode blendMode) {
+        if (blendMode == null) {
+            throw new NullPointerException();
+        }
+        this.blendMode = blendMode;
+        return this;
+    }
+
+    public double getOpacity() {
+        return opacity;
+    }
+
+    public ShapeRender setOpacity(double opacity) {
+        if (opacity < 0) {
+            opacity = 0;
+        } else if (opacity > 1) {
+            opacity = 1;
+        }
+        this.opacity = opacity;
+        return this;
+    }
+
+    public Color getFillColor() {
+        return fillColor;
+    }
+
+    public ShapeRender setFillColor(Color fillColor) {
+        this.fillColor = fillColor;
+        return this;
+    }
+
+    public Color getStrokeColor() {
+        return strokeColor;
+    }
+
+    public ShapeRender setStrokeColor(Color strokeColor) {
+        this.strokeColor = strokeColor;
+        return this;
+    }
+    
+    
+
+    @Override
     public void process(PixelData output, PixelData... inputs) {
-        if (direct) {
+        if (shape == null) {
+            return;
+        }
+        if (blendMode == BlendMode.Normal) {
             processDirect(output);
         } else {
             processIndirect(output);
@@ -80,7 +135,7 @@ public class ShapeRender implements SurfaceOp {
     private void processDirect(PixelData output) {
         BufferedImage im = ImageUtils.toImage(output);
         Graphics2D g2d = im.createGraphics();
-        double opacity = ((Blend) blend).getExtraAlpha();
+//        double opacity = ((Blend) blend).getExtraAlpha();
         if (opacity < EPSILON) {
             g2d.setComposite(AlphaComposite.SrcOver.derive((float) opacity));
         }
@@ -106,7 +161,8 @@ public class ShapeRender implements SurfaceOp {
         g2d.translate(tx, ty);
         drawShape(g2d);
         SubPixels dst = SubPixels.create(output, intersection);
-        blend.process(tmp, dst);
+//        blend.process(tmp, dst);
+        BlendUtil.process(tmp, dst, blendMode, opacity);
         tmp.release();
     }
 
@@ -115,49 +171,48 @@ public class ShapeRender implements SurfaceOp {
             g2d.setColor(fillColor);
             g2d.fill(shape);
         }
-        if (stroke != null) {
+        if (stroke != null && strokeColor != null) {
             g2d.setStroke(stroke);
             g2d.setColor(strokeColor);
             g2d.draw(shape);
         }
     }
 
-
+    @Deprecated
     public static SurfaceOp op(Shape shape, Color fillColor) {
         return op(shape, fillColor, Blend.NORMAL);
     }
 
+    @Deprecated
     public static SurfaceOp op(Shape shape, Color fillColor, BlendFunction blend) {
         return op(shape, fillColor, null, null, blend);
     }
 
+    @Deprecated
     public static SurfaceOp op(Shape shape, Color fillColor, BasicStroke stroke,
             Color strokeColor) {
         return op(shape, fillColor, stroke, strokeColor, Blend.NORMAL);
     }
 
+    @Deprecated
     public static SurfaceOp op(Shape shape, Color fillColor, BasicStroke stroke,
             Color strokeColor, BlendFunction blend) {
-        if (shape == null || blend == null) {
-            throw new NullPointerException();
-        }
-        if (stroke == null) {
-            if (fillColor == null) {
-                throw new NullPointerException();
-            }
-        } else if (strokeColor == null) {
-            throw new NullPointerException();
-        }
-
-        return new ShapeRender(copyShape(shape), fillColor, stroke, strokeColor, blend);
+        ShapeRender op = new ShapeRender();
+        op.setBlendMode(Blit.extractBlendMode(blend));
+        op.setOpacity(((Blend)blend).getExtraAlpha());
+        op.setShape(shape);
+        op.setStroke(stroke);
+        op.setFillColor(fillColor);
+        op.setStrokeColor(strokeColor);
+        return op;
     }
 
-    private static Shape copyShape(Shape shape) {
-        if (shape instanceof RectangularShape) {
-            return (Shape) ((RectangularShape)shape).clone();
-        } else {
-            return new Path2D.Double(shape);
-        }
-
-    }
+//    private static Shape copyShape(Shape shape) {
+//        if (shape instanceof RectangularShape) {
+//            return (Shape) ((RectangularShape)shape).clone();
+//        } else {
+//            return new Path2D.Double(shape);
+//        }
+//
+//    }
 }

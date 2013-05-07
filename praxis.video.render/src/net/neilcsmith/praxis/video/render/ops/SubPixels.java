@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -45,28 +45,32 @@ class SubPixels implements PixelData {
         this.height = height;
     }
 
-
-
+    @Override
     public int[] getData() {
         return pd.getData();
     }
 
+    @Override
     public int getOffset() {
         return pd.getOffset() + (y * pd.getScanline()) + x;
     }
 
+    @Override
     public int getScanline() {
         return pd.getScanline();
     }
 
+    @Override
     public int getWidth() {
         return width;
     }
 
+    @Override
     public int getHeight() {
         return height;
     }
 
+    @Override
     public boolean hasAlpha() {
         return pd.hasAlpha();
     }

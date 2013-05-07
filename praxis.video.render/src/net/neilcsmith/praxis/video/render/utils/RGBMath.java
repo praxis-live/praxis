@@ -12,7 +12,7 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.video.render.rgbmath;
+package net.neilcsmith.praxis.video.render.utils;
 
 /**
  *

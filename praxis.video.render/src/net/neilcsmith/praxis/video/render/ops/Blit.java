@@ -19,90 +19,122 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.video.render.ops;
 
 import java.awt.Rectangle;
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
 
-
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public final class Blit implements SurfaceOp {
+    
+    private final Rectangle srcRegion = new Rectangle();
 
-    private static Blit defaultBlit = new Blit(Blend.NORMAL);
+    private BlendMode blendMode = BlendMode.Normal;
+    private double opacity = 1;
+    private int x = 0;
+    private int y = 0;
+    private boolean hasRegion = false;
 
-    private boolean identity;
-    private BlendFunction blend;
-    private int x;
-    private int y;
-    private Bounds srcRegion;
 
-    private Blit() {
-        this(Blend.NORMAL);
-    }
-
-    private Blit(BlendFunction blend) {
-        if (blend == null) {
-            throw new NullPointerException();
-        }
-        this.blend = blend;
-        identity = true;
-    }
-
-    private Blit(BlendFunction blend, int x, int y) {
-        this(blend, null, x, y);
-    }
-
-    private Blit(BlendFunction blend, Bounds srcRegion, int x, int y) {
-        if (blend == null) {
-            throw new NullPointerException();
-        }
-        this.blend = blend;
-        this.srcRegion = srcRegion;
+    public Blit setX(int x) {
         this.x = x;
-        this.y = y;
-        identity = false;
+        return this;
     }
 
-    public BlendFunction getBlendFunction() {
-        return blend;
-    }
-    
-    public Bounds getSourceRegion() {
-        return srcRegion;
-    }
-    
     public int getX() {
         return x;
     }
-    
+
+    public Blit setY(int y) {
+        this.y = y;
+        return this;
+    }
+
     public int getY() {
         return y;
     }
-    
 
+    public Blit setSourceRegion(Rectangle rect) {
+        if (rect == null) {
+            hasRegion = false;
+        } else {
+            hasRegion = true;
+            srcRegion.setBounds(rect);
+        }
+        return this;
+    }
+
+    public Blit setSourceRegion(int x, int y, int width, int height) {
+        hasRegion = true;
+        srcRegion.setBounds(x, y, width, height);
+        return this;
+    }
+    
+    public Rectangle getSourceRegion(Rectangle rect) {
+        if (hasRegion) {
+            if (rect == null) {
+                rect = new Rectangle(srcRegion);
+            } else {
+                rect.setBounds(srcRegion);
+            }
+            return rect;
+        } else {
+            return null;
+        }
+    }
+    
+    public boolean hasSourceRegion() {
+        return hasRegion;
+    }
+
+    public Blit setBlendMode(BlendMode blendMode) {
+        if (blendMode == null) {
+            throw new NullPointerException();
+        }
+        this.blendMode = blendMode;
+        return this;
+    }
+
+    public BlendMode getBlendMode() {
+        return blendMode;
+    }
+
+    public Blit setOpacity(double opacity) {
+        if (opacity < 0 || opacity > 1) {
+            throw new IllegalArgumentException();
+        }
+        this.opacity = opacity;
+        return this;
+    }
+
+    public double getOpacity() {
+        return opacity;
+    }
+
+    @Override
     public void process(PixelData output, PixelData... inputs) {
         if (inputs.length < 1) {
             return;
         }
-        if (identity) {
-            blend.process(inputs[0], output);
+        if (!hasRegion && x == 0 && y == 0) {
+//            blend.process(inputs[0], output);
+            BlendUtil.process(inputs[0], output, blendMode, opacity);
         } else {
 //            PixelData dst = SubPixels.create(output, x, y, output.getWidth() - x, output.getHeight() - y);
 //            blend.process(inputs[0], dst);
             processComplex(inputs[0], output);
-        }       
+        }
     }
 
     private void processComplex(PixelData src, PixelData dst) {
         Rectangle sRct = new Rectangle(0, 0, src.getWidth(), src.getHeight());
         int srcX = 0, srcY = 0;
-        if (srcRegion != null) {
-            sRct = sRct.intersection(srcRegion.asRectangle());
+        if (hasRegion) {
+            sRct = sRct.intersection(srcRegion);
             if (sRct.isEmpty()) {
                 return;
             }
@@ -110,7 +142,7 @@ public final class Blit implements SurfaceOp {
             srcY = sRct.y;
         }
         Rectangle dRct = new Rectangle(0, 0, dst.getWidth(), dst.getHeight());
-        sRct.translate(x-srcX, y-srcY);
+        sRct.translate(x - srcX, y - srcY);
         Rectangle intersection = dRct.intersection(sRct);
         if (intersection.isEmpty()) {
             return;
@@ -120,27 +152,64 @@ public final class Blit implements SurfaceOp {
         sRct.translate(srcX - x, srcY - y);
         SubPixels srcPD = SubPixels.create(src, sRct.x, sRct.y, sRct.width, sRct.height);
         SubPixels dstPD = SubPixels.create(dst, dRct.x, dRct.y, dRct.width, dRct.height);
-        blend.process(srcPD, dstPD);
+//        blend.process(srcPD, dstPD);
+        BlendUtil.process(srcPD, dstPD, blendMode, opacity);
     }
-
+    
+    @Deprecated
     public static SurfaceOp op() {
-        return defaultBlit;
+        return new Blit();
     }
 
+    @Deprecated
     public static SurfaceOp op(BlendFunction blend) {
-        return new Blit(blend);
+        Blit blit = new Blit();
+        blit.setBlendMode(extractBlendMode(blend));
+        blit.setOpacity(((Blend) blend).getExtraAlpha());
+        return blit;
     }
-    
+
+    @Deprecated
     public static SurfaceOp op(int x, int y) {
-        return new Blit(Blend.NORMAL,x,y);
+        return new Blit().setX(x).setY(y);
     }
 
+    @Deprecated
     public static SurfaceOp op(BlendFunction blend, int x, int y) {
-        return new Blit(blend, x, y);
-    }
-    
-    public static SurfaceOp op(BlendFunction blend, Bounds srcRegion, int x, int y) {
-        return new Blit(blend, srcRegion, x, y);
+        Blit blit = new Blit().setX(x).setY(y);
+        blit.setBlendMode(extractBlendMode(blend));
+        blit.setOpacity(((Blend) blend).getExtraAlpha());
+        return blit;
     }
 
+    @Deprecated
+    public static SurfaceOp op(BlendFunction blend, Bounds srcRegion, int x, int y) {
+        return new Blit().setX(x).setY(y)
+                .setBlendMode(extractBlendMode(blend))
+                .setOpacity(((Blend)blend).getExtraAlpha())
+                .setSourceRegion(srcRegion.asRectangle());
+    }
+
+    static BlendMode extractBlendMode(BlendFunction blend) {
+        Blend.Type type = ((Blend) blend).getType();
+        switch (type) {
+            case Add:
+                return BlendMode.Add;
+            case BitXor:
+                return BlendMode.BitXor;
+            case Difference:
+                return BlendMode.Difference;
+            case Mask:
+                return BlendMode.Mask;
+            case Multiply:
+                return BlendMode.Multiply;
+            case Normal:
+                return BlendMode.Normal;
+            case Screen:
+                return BlendMode.Screen;
+            case Sub:
+                return BlendMode.Sub;
+        }
+        throw new UnsupportedOperationException("Can't convert blend function");
+    }
 }

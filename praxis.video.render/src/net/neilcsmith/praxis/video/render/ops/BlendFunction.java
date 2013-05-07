@@ -29,6 +29,7 @@ import net.neilcsmith.praxis.video.render.PixelData;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
+@Deprecated
 public interface BlendFunction {
 
     public abstract void process(PixelData src, PixelData dst);

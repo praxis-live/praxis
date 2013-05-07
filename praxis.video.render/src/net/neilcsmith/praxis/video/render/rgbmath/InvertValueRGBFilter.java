@@ -21,7 +21,7 @@
  */
 package net.neilcsmith.praxis.video.render.rgbmath;
 
-import static net.neilcsmith.praxis.video.render.rgbmath.RGBMath.*;
+import static net.neilcsmith.praxis.video.render.utils.RGBMath.*;
 
 /**
  *

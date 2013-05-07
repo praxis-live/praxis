@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * Copying and distribution of this file, with or without modification,
  * are permitted in any medium without royalty provided the copyright
@@ -12,42 +12,41 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.video.render.rgbmath;
+package net.neilcsmith.praxis.video.render.ops;
 
 import static net.neilcsmith.praxis.video.render.utils.RGBMath.*;
 
 /**
  *
  * @author Neil C Smith
- * @TODO Further optimisations - remove alpha check out of inner loop where possible
  */
-@Deprecated
-public abstract class RGBComposite {
+abstract class RGBComposite {
 
-    protected int extraAlpha;
+    final static RGBComposite ADD = new RGBComposite.Add();
+    final static RGBComposite BITXOR = new RGBComposite.BitXor();
+    final static RGBComposite DIFFERENCE = new RGBComposite.Difference();
+    final static RGBComposite MASK = new RGBComposite.Mask();
+    final static RGBComposite MULTIPLY = new RGBComposite.Multiply();
+    final static RGBComposite NORMAL = new RGBComposite.Normal();
+    final static RGBComposite SCREEN = new RGBComposite.Screen();
+    final static RGBComposite SUB = new RGBComposite.Sub();
+    
+    
 
-    protected RGBComposite(double extraAlpha) {
-        if (extraAlpha < 0.0 || extraAlpha > 1.0) {
-            throw new IllegalArgumentException("Extra alpha multiplier must be between 0 and 1");
-        }
-        this.extraAlpha = (int) (extraAlpha * 255);
+    private RGBComposite() {
     }
 
-    public abstract void composeRGB(int[] src, int srcPos,
-            int[] dest, int destPos, int length);
+    abstract void rgb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha);
 
-    public abstract void composeARGB(int[] src, int srcPos,
-            int[] dest, int destPos, int length);
+    abstract void argb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha);
 
-    public static class Add extends RGBComposite {
+    static class Add extends RGBComposite {
 
-        public Add(double extraAlpha) {
-            super(extraAlpha);
+        private Add() {
         }
 
-        public void composeRGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-//            int srcPx, b;
-            int alpha = extraAlpha;
+        @Override
+        void rgb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             int srcPx, destPx, srcR, srcG, srcB, destR, destG, destB;
             for (int i = 0; i < length; i++) {
                 srcPx = src[srcPos];
@@ -65,9 +64,9 @@ public abstract class RGBComposite {
                 destG = (destPx & GREEN_MASK) >>> 8;
                 destB = (destPx & BLUE_MASK);
 
-                dest[destPos] = min(srcR + destR, 0xFF) << 16 |
-                        min(srcG + destG, 0xFF) << 8 |
-                        min(srcB + destB, 0xFF);
+                dest[destPos] = min(srcR + destR, 0xFF) << 16
+                        | min(srcG + destG, 0xFF) << 8
+                        | min(srcB + destB, 0xFF);
 
                 srcPos++;
                 destPos++;
@@ -75,9 +74,8 @@ public abstract class RGBComposite {
             }
         }
 
-        public void composeARGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-//            int a, b;
-            int alpha = extraAlpha;
+        @Override
+        void argb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -100,10 +98,10 @@ public abstract class RGBComposite {
 //                        min(srcB + destB, 0xFF);
 
                 int a = min(srcA + destA, 0xFF);
-                dest[destPos] = a << 24 |
-                        min(srcR + destR, a) << 16 |
-                        min(srcG + destG, a) << 8 |
-                        min(srcB + destB, a);
+                dest[destPos] = a << 24
+                        | min(srcR + destR, a) << 16
+                        | min(srcG + destG, a) << 8
+                        | min(srcB + destB, a);
 
                 srcPos++;
                 destPos++;
@@ -111,14 +109,13 @@ public abstract class RGBComposite {
         }
     }
 
-    public static class Normal extends RGBComposite {
+    static class Normal extends RGBComposite {
 
-        public Normal(double extraAlpha) {
-            super(extraAlpha);
+        private Normal() {
         }
 
-        public void composeRGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-            int alpha = extraAlpha;
+        @Override
+        void rgb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -132,9 +129,9 @@ public abstract class RGBComposite {
                 int destG = (destPx & GREEN_MASK) >>> 8;
                 int destB = (destPx & BLUE_MASK);
 
-                dest[destPos] = blend(srcR, destR, alpha) << 16 |
-                        blend(srcG, destG, alpha) << 8 |
-                        blend(srcB, destB, alpha);
+                dest[destPos] = blend(srcR, destR, alpha) << 16
+                        | blend(srcG, destG, alpha) << 8
+                        | blend(srcB, destB, alpha);
 
                 srcPos++;
                 destPos++;
@@ -142,8 +139,8 @@ public abstract class RGBComposite {
             }
         }
 
-        public void composeARGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-            int alpha = extraAlpha;
+        @Override
+        void argb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -160,10 +157,10 @@ public abstract class RGBComposite {
                 int destG = (destPx & GREEN_MASK) >>> 8;
                 int destB = (destPx & BLUE_MASK);
 
-                dest[destPos] = blend(srcA, destA, srcA) << 24 |
-                        blend(srcR, destR, srcA) << 16 |
-                        blend(srcG, destG, srcA) << 8 |
-                        blend(srcB, destB, srcA);
+                dest[destPos] = blend(srcA, destA, srcA) << 24
+                        | blend(srcR, destR, srcA) << 16
+                        | blend(srcG, destG, srcA) << 8
+                        | blend(srcB, destB, srcA);
 
                 srcPos++;
                 destPos++;
@@ -171,15 +168,14 @@ public abstract class RGBComposite {
 
         }
     }
-    
-    public static class Sub extends RGBComposite {
 
-        public Sub(double extraAlpha) {
-            super(extraAlpha);
+    static class Sub extends RGBComposite {
+
+        private Sub() {
         }
 
-        public void composeRGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-            int alpha = extraAlpha;
+        @Override
+        void rgb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -193,9 +189,9 @@ public abstract class RGBComposite {
                 int destG = (destPx & GREEN_MASK) >>> 8;
                 int destB = (destPx & BLUE_MASK);
 
-                dest[destPos] = max(destR - srcR, 0) << 16 |
-                        max(destG - srcG, 0) << 8 |
-                        max(destB - srcB, 0);
+                dest[destPos] = max(destR - srcR, 0) << 16
+                        | max(destG - srcG, 0) << 8
+                        | max(destB - srcB, 0);
 
                 srcPos++;
                 destPos++;
@@ -203,8 +199,8 @@ public abstract class RGBComposite {
             }
         }
 
-        public void composeARGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-            int alpha = extraAlpha;
+        @Override
+        void argb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -221,10 +217,10 @@ public abstract class RGBComposite {
                 int destG = (destPx & GREEN_MASK) >>> 8;
                 int destB = (destPx & BLUE_MASK);
 
-                dest[destPos] = blend(srcA, destA, srcA) << 24 |
-                        max(destR - srcR, 0) << 16 |
-                        max(destG - srcG, 0) << 8 |
-                        max(destB - srcB, 0);
+                dest[destPos] = blend(srcA, destA, srcA) << 24
+                        | max(destR - srcR, 0) << 16
+                        | max(destG - srcG, 0) << 8
+                        | max(destB - srcB, 0);
 
                 srcPos++;
                 destPos++;
@@ -233,14 +229,13 @@ public abstract class RGBComposite {
         }
     }
 
-    public static class Difference extends RGBComposite {
+    static class Difference extends RGBComposite {
 
-        public Difference(double extraAlpha) {
-            super(extraAlpha);
+        private Difference() {
         }
 
-        public void composeRGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-            int alpha = extraAlpha;
+        @Override
+        void rgb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -254,11 +249,11 @@ public abstract class RGBComposite {
                 int destG = (destPx & GREEN_MASK) >>> 8;
                 int destB = (destPx & BLUE_MASK);
 
-                dest[destPos] = alpha == 255 ? diff(srcR, destR) << 16 |
-                        diff(srcG, destG) << 8 |
-                        diff(srcB, destB) : (srcR + destR - (2 * min(srcR, mult(destR, alpha)))) << 16 |
-                        (srcG + destG - (2 * min(srcG, mult(destG, alpha)))) << 8 |
-                        (srcB + destB - (2 * min(srcB, mult(destB, alpha))));
+                dest[destPos] = alpha == 255 ? diff(srcR, destR) << 16
+                        | diff(srcG, destG) << 8
+                        | diff(srcB, destB) : (srcR + destR - (2 * min(srcR, mult(destR, alpha)))) << 16
+                        | (srcG + destG - (2 * min(srcG, mult(destG, alpha)))) << 8
+                        | (srcB + destB - (2 * min(srcB, mult(destB, alpha))));
 
                 srcPos++;
                 destPos++;
@@ -266,8 +261,8 @@ public abstract class RGBComposite {
             }
         }
 
-        public void composeARGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-            int alpha = extraAlpha;
+        @Override
+        void argb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -289,10 +284,10 @@ public abstract class RGBComposite {
 //                        diff(srcG, destG) << 8 |
 //                        diff(srcB, destB);
 
-                dest[destPos] = blend(srcA, destA, srcA) << 24 |
-                        (srcR + destR - (2 * min(mult(srcR, destA), mult(destR, srcA)))) << 16 |
-                        (srcG + destG - (2 * min(mult(srcG, destA), mult(destG, srcA)))) << 8 |
-                        (srcB + destB - (2 * min(mult(srcB, destA), mult(destB, srcA))));
+                dest[destPos] = blend(srcA, destA, srcA) << 24
+                        | (srcR + destR - (2 * min(mult(srcR, destA), mult(destR, srcA)))) << 16
+                        | (srcG + destG - (2 * min(mult(srcG, destA), mult(destG, srcA)))) << 8
+                        | (srcB + destB - (2 * min(mult(srcB, destA), mult(destB, srcA))));
 
                 srcPos++;
                 destPos++;
@@ -301,14 +296,13 @@ public abstract class RGBComposite {
         }
     }
 
-    public static class BitXor extends RGBComposite {
+    static class BitXor extends RGBComposite {
 
-        public BitXor(double extraAlpha) {
-            super(extraAlpha);
+        private BitXor() {
         }
 
-        public void composeRGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-            int alpha = extraAlpha;
+        @Override
+        void rgb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -322,9 +316,9 @@ public abstract class RGBComposite {
                 int destG = (destPx & GREEN_MASK) >>> 8;
                 int destB = (destPx & BLUE_MASK);
 
-                dest[destPos] = (srcR ^ destR) << 16 |
-                        (srcG ^ destG) << 8 |
-                        (srcB ^ destB);
+                dest[destPos] = (srcR ^ destR) << 16
+                        | (srcG ^ destG) << 8
+                        | (srcB ^ destB);
 
                 srcPos++;
                 destPos++;
@@ -332,8 +326,8 @@ public abstract class RGBComposite {
             }
         }
 
-        public void composeARGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-            int alpha = extraAlpha;
+        @Override
+        void argb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -350,10 +344,10 @@ public abstract class RGBComposite {
                 int destG = (destPx & GREEN_MASK) >>> 8;
                 int destB = (destPx & BLUE_MASK);
 
-                dest[destPos] = blend(srcA, destA, srcA) << 24 |
-                        (srcR ^ destR) << 16 |
-                        (srcG ^ destG) << 8 |
-                        (srcB ^ destB);
+                dest[destPos] = blend(srcA, destA, srcA) << 24
+                        | (srcR ^ destR) << 16
+                        | (srcG ^ destG) << 8
+                        | (srcB ^ destB);
 
                 srcPos++;
                 destPos++;
@@ -362,14 +356,13 @@ public abstract class RGBComposite {
         }
     }
 
-    public static class Screen extends RGBComposite {
+    static class Screen extends RGBComposite {
 
-        public Screen(double extraAlpha) {
-            super(extraAlpha);
+        private Screen() {
         }
 
-        public void composeRGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-            int alpha = extraAlpha;
+        @Override
+        void rgb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -383,9 +376,9 @@ public abstract class RGBComposite {
                 int destG = (destPx & GREEN_MASK) >>> 8;
                 int destB = (destPx & BLUE_MASK);
 
-                dest[destPos] = (255 - mult(255 - srcR, 255 - destR)) << 16 |
-                        (255 - mult(255 - srcG, 255 - destG)) << 8 |
-                        (255 - mult(255 - srcB, 255 - destB));
+                dest[destPos] = (255 - mult(255 - srcR, 255 - destR)) << 16
+                        | (255 - mult(255 - srcG, 255 - destG)) << 8
+                        | (255 - mult(255 - srcB, 255 - destB));
 
                 srcPos++;
                 destPos++;
@@ -393,8 +386,8 @@ public abstract class RGBComposite {
             }
         }
 
-        public void composeARGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-            int alpha = extraAlpha;
+        @Override
+        void argb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -411,10 +404,10 @@ public abstract class RGBComposite {
                 int destG = (destPx & GREEN_MASK) >>> 8;
                 int destB = (destPx & BLUE_MASK);
 
-                dest[destPos] = blend(srcA, destA, srcA) << 24 |
-                        (255 - mult(255 - srcR, 255 - destR)) << 16 |
-                        (255 - mult(255 - srcG, 255 - destG)) << 8 |
-                        (255 - mult(255 - srcB, 255 - destB));
+                dest[destPos] = blend(srcA, destA, srcA) << 24
+                        | (255 - mult(255 - srcR, 255 - destR)) << 16
+                        | (255 - mult(255 - srcG, 255 - destG)) << 8
+                        | (255 - mult(255 - srcB, 255 - destB));
 
                 srcPos++;
                 destPos++;
@@ -424,14 +417,13 @@ public abstract class RGBComposite {
         }
     }
 
-    public static class Multiply extends RGBComposite {
+    static class Multiply extends RGBComposite {
 
-        public Multiply(double extraAlpha) {
-            super(extraAlpha);
+        private Multiply() {
         }
 
-        public void composeRGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-            int alpha = extraAlpha;
+        @Override
+        void rgb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -445,12 +437,12 @@ public abstract class RGBComposite {
                 int destG = (destPx & GREEN_MASK) >>> 8;
                 int destB = (destPx & BLUE_MASK);
 
-                dest[destPos] = (alpha == 255) ? mult(srcR, destR) << 16 |
-                        mult(srcG, destG) << 8 |
-                        mult(srcB, destB)
-                        : (mult(srcR, destR) + mult(destR, 255 - alpha)) << 16 |
-                        (mult(srcG, destG) + mult(destG, 255 - alpha)) << 8 |
-                        mult(srcB, destB) + mult(destB, 255 - alpha);
+                dest[destPos] = (alpha == 255) ? mult(srcR, destR) << 16
+                        | mult(srcG, destG) << 8
+                        | mult(srcB, destB)
+                        : (mult(srcR, destR) + mult(destR, 255 - alpha)) << 16
+                        | (mult(srcG, destG) + mult(destG, 255 - alpha)) << 8
+                        | mult(srcB, destB) + mult(destB, 255 - alpha);
 
                 srcPos++;
                 destPos++;
@@ -458,8 +450,8 @@ public abstract class RGBComposite {
             }
         }
 
-        public void composeARGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-            int alpha = extraAlpha;
+        @Override
+        public void argb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -476,10 +468,10 @@ public abstract class RGBComposite {
                 int destG = (destPx & GREEN_MASK) >>> 8;
                 int destB = (destPx & BLUE_MASK);
 
-                dest[destPos] = blend(srcA, destA, srcA) << 24 |
-                        (mult(srcR, destR) + mult(destR, 255 - srcA) + mult(srcR, 255 - destA)) << 16 |
-                        (mult(srcG, destG) + mult(destG, 255 - srcA) + mult(srcG, 255 - destA)) << 8 |
-                        mult(srcB, destB) + mult(destB, 255 - srcA) + mult(srcB, 255 - destA);
+                dest[destPos] = blend(srcA, destA, srcA) << 24
+                        | (mult(srcR, destR) + mult(destR, 255 - srcA) + mult(srcR, 255 - destA)) << 16
+                        | (mult(srcG, destG) + mult(destG, 255 - srcA) + mult(srcG, 255 - destA)) << 8
+                        | mult(srcB, destB) + mult(destB, 255 - srcA) + mult(srcB, 255 - destA);
 
                 srcPos++;
                 destPos++;
@@ -487,15 +479,14 @@ public abstract class RGBComposite {
 
         }
     }
-    
-    public static class Mask extends RGBComposite {
 
-        public Mask(double extraAlpha) {
-            super(extraAlpha);
+    static class Mask extends RGBComposite {
+
+        private Mask() {
         }
 
-        public void composeRGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-            int alpha = extraAlpha;
+        @Override
+        void rgb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -509,12 +500,12 @@ public abstract class RGBComposite {
                 int destG = (destPx & GREEN_MASK) >>> 8;
                 int destB = (destPx & BLUE_MASK);
 
-                dest[destPos] = (alpha == 255) ? mult(srcR, destR) << 16 |
-                        mult(srcG, destG) << 8 |
-                        mult(srcB, destB)
-                        : (mult(srcR, destR) + mult(destR, 255 - alpha)) << 16 |
-                        (mult(srcG, destG) + mult(destG, 255 - alpha)) << 8 |
-                        mult(srcB, destB) + mult(destB, 255 - alpha);
+                dest[destPos] = (alpha == 255) ? mult(srcR, destR) << 16
+                        | mult(srcG, destG) << 8
+                        | mult(srcB, destB)
+                        : (mult(srcR, destR) + mult(destR, 255 - alpha)) << 16
+                        | (mult(srcG, destG) + mult(destG, 255 - alpha)) << 8
+                        | mult(srcB, destB) + mult(destB, 255 - alpha);
 
                 srcPos++;
                 destPos++;
@@ -522,8 +513,8 @@ public abstract class RGBComposite {
             }
         }
 
-        public void composeARGB(int[] src, int srcPos, int[] dest, int destPos, int length) {
-            int alpha = extraAlpha;
+        @Override
+        void argb(int[] src, int srcPos, int[] dest, int destPos, int length, int alpha) {
             for (int i = 0; i < length; i++) {
                 int srcPx = src[srcPos];
                 int destPx = dest[destPos];
@@ -544,15 +535,15 @@ public abstract class RGBComposite {
 //                        (mult(srcR, destR) + mult(destR, 255 - srcA) + mult(srcR, 255 - destA)) << 16 |
 //                        (mult(srcG, destG) + mult(destG, 255 - srcA) + mult(srcG, 255 - destA)) << 8 |
 //                        mult(srcB, destB) + mult(destB, 255 - srcA) + mult(srcB, 255 - destA);
-                
-                dest[destPos] = (alpha == 255) ? mult(srcA, destA) << 24 |
-                        mult(srcR, destR) << 16 |
-                        mult(srcG, destG) << 8 |
-                        mult(srcB, destB)
-                        : (mult(srcA, destA) + mult(destA, 255 - alpha)) << 24 |
-                        (mult(srcR, destR) + mult(destR, 255 - alpha)) << 16 |
-                        (mult(srcG, destG) + mult(destG, 255 - alpha)) << 8 |
-                        mult(srcB, destB) + mult(destB, 255 - alpha);
+
+                dest[destPos] = (alpha == 255) ? mult(srcA, destA) << 24
+                        | mult(srcR, destR) << 16
+                        | mult(srcG, destG) << 8
+                        | mult(srcB, destB)
+                        : (mult(srcA, destA) + mult(destA, 255 - alpha)) << 24
+                        | (mult(srcR, destR) + mult(destR, 255 - alpha)) << 16
+                        | (mult(srcG, destG) + mult(destG, 255 - alpha)) << 8
+                        | mult(srcB, destB) + mult(destB, 255 - alpha);
 
                 srcPos++;
                 destPos++;
@@ -560,5 +551,4 @@ public abstract class RGBComposite {
 
         }
     }
-
 }

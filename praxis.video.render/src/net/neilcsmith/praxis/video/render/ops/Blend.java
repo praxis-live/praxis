@@ -24,12 +24,13 @@ package net.neilcsmith.praxis.video.render.ops;
 
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.rgbmath.RGBComposite;
-import net.neilcsmith.praxis.video.render.rgbmath.RGBMath;
+import net.neilcsmith.praxis.video.render.utils.RGBMath;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
+@Deprecated
 public class Blend implements BlendFunction {
 
     public static enum Type {Normal, Add, Sub, Difference, Multiply, Screen, BitXor, Mask};

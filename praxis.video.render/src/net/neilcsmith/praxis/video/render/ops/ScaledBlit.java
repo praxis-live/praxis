@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,16 +19,15 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.video.render.ops;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
 import net.neilcsmith.praxis.video.render.utils.ImageUtils;
-
 
 /**
  *
@@ -36,88 +35,168 @@ import net.neilcsmith.praxis.video.render.utils.ImageUtils;
  */
 public class ScaledBlit implements SurfaceOp {
 
-    private BlendFunction blend;
-    private Bounds srcBnds;
-    private Bounds dstBnds;
-    private TempData tmp;
+    private final Rectangle srcRegion = new Rectangle();
+    private final Rectangle dstRegion = new Rectangle();
+    private boolean hasSrcRegion;
+    private boolean hasDstRegion;
+    private BlendMode blendMode = BlendMode.Normal;
+    private double opacity = 1;
 
-    private ScaledBlit(BlendFunction blend, Bounds srcBnds, Bounds dstBnds) {
-        this.blend = blend;
-        this.srcBnds = srcBnds;
-        this.dstBnds = dstBnds;
+//    public BlendFunction getBlendFunction() {
+//        return null;
+//    }
+//
+//    public Bounds getSourceRegion() {
+//        return null;
+//    }
+//
+//    public Bounds getDestinationRegion() {
+//        return null;
+//    }
+
+    public ScaledBlit setSourceRegion(Rectangle rect) {
+        if (rect == null) {
+            hasSrcRegion = false;
+        } else {
+            hasSrcRegion = true;
+            srcRegion.setBounds(rect);
+        }
+        return this;
     }
 
-    public BlendFunction getBlendFunction() {
-        return blend;
+    public ScaledBlit setSourceRegion(int x, int y, int width, int height) {
+        hasSrcRegion = true;
+        srcRegion.setBounds(x, y, width, height);
+        return this;
     }
-    
-    public Bounds getSourceRegion() {
-        return srcBnds;
+
+    public Rectangle getSourceRegion(Rectangle rect) {
+        if (hasSrcRegion) {
+            if (rect == null) {
+                rect = new Rectangle(srcRegion);
+            } else {
+                rect.setBounds(srcRegion);
+            }
+            return rect;
+        } else {
+            return null;
+        }
     }
-    
-    public Bounds getDestinationRegion() {
-        return dstBnds;
+
+    public boolean hasSourceRegion() {
+        return hasSrcRegion;
     }
-    
+
+    public ScaledBlit setDestinationRegion(Rectangle rect) {
+        if (rect == null) {
+            hasDstRegion = false;
+        } else {
+            hasDstRegion = true;
+            dstRegion.setBounds(rect);
+        }
+        return this;
+    }
+
+    public ScaledBlit setDestinationRegion(int x, int y, int width, int height) {
+        hasDstRegion = true;
+        dstRegion.setBounds(x, y, width, height);
+        return this;
+    }
+
+    public Rectangle getDestinationRegion(Rectangle rect) {
+        if (hasDstRegion) {
+            if (rect == null) {
+                rect = new Rectangle(dstRegion);
+            } else {
+                rect.setBounds(dstRegion);
+            }
+            return rect;
+        } else {
+            return null;
+        }
+    }
+
+    public boolean hasDestinationRegion() {
+        return hasDstRegion;
+    }
+
+    public ScaledBlit setBlendMode(BlendMode blendMode) {
+        if (blendMode == null) {
+            throw new NullPointerException();
+        }
+        this.blendMode = blendMode;
+        return this;
+    }
+
+    public BlendMode getBlendMode() {
+        return blendMode;
+    }
+
+    public ScaledBlit setOpacity(double opacity) {
+        if (opacity < 0 || opacity > 1) {
+            throw new IllegalArgumentException();
+        }
+        this.opacity = opacity;
+        return this;
+    }
+
+    public double getOpacity() {
+        return opacity;
+    }
+
     public void process(PixelData output, PixelData... inputs) {
         if (inputs.length < 1) {
             return;
         }
-        AlphaComposite cmp = compositeFromBlend(blend);
+        AlphaComposite cmp = compositeFromBlend();
         if (cmp != null) {
             processDirect(cmp, output, inputs[0]);
         } else {
             processIndirect(output, inputs[0]);
         }
-        
-        
     }
-    
+
     private void processDirect(AlphaComposite cmp, PixelData output, PixelData input) {
         BufferedImage out = ImageUtils.toImage(output);
         BufferedImage in = ImageUtils.toImage(input);
         Graphics2D g2d = out.createGraphics();
         g2d.setComposite(cmp);
-        int sx1 = srcBnds == null ? 0 : srcBnds.getX();
-        int sy1 = srcBnds == null ? 0 : srcBnds.getY();
-        int sx2 = srcBnds == null ? in.getWidth() : sx1 + srcBnds.getWidth();
-        int sy2 = srcBnds == null ? in.getHeight() : sy1 + srcBnds.getHeight();
-        int dx1 = dstBnds == null ? 0 : dstBnds.getX();
-        int dy1 = dstBnds == null ? 0 : dstBnds.getY();
-        int dx2 = dstBnds == null ? out.getWidth() : dx1 + dstBnds.getWidth();
-        int dy2 = dstBnds == null ? out.getHeight() : dy1 + dstBnds.getHeight();
+        int sx1 = hasSrcRegion ? srcRegion.x : 0;
+        int sy1 = hasSrcRegion ? srcRegion.y : 0;
+        int sx2 = hasSrcRegion ? sx1 + srcRegion.width : in.getWidth();
+        int sy2 = hasSrcRegion ? sy1 + srcRegion.height : in.getHeight();
+        int dx1 = hasDstRegion ? dstRegion.x : 0;
+        int dy1 = hasDstRegion ? dstRegion.y : 0;
+        int dx2 = hasDstRegion ? dx1 + dstRegion.width : out.getWidth();
+        int dy2 = hasDstRegion ? dy1 + dstRegion.height : out.getHeight();
         g2d.drawImage(in, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
     }
 
-    private AlphaComposite compositeFromBlend(BlendFunction blend) {
-        if (blend instanceof Blend) {
-            Blend b = (Blend) blend;
-            if (b.getType() == Blend.Type.Normal) {
-                return AlphaComposite.SrcOver.derive((float) b.getExtraAlpha());
-            }
+    private AlphaComposite compositeFromBlend() {
+        if (blendMode == BlendMode.Normal) {
+            return AlphaComposite.SrcOver.derive((float) opacity);
+        } else {
+            return null;
         }
-        return null;
+
     }
-    
+
     private void processIndirect(PixelData output, PixelData input) {
-        int sx1 = srcBnds == null ? 0 : srcBnds.getX();
-        int sy1 = srcBnds == null ? 0 : srcBnds.getY();
-        int sx2 = srcBnds == null ? input.getWidth() : sx1 + srcBnds.getWidth();
-        int sy2 = srcBnds == null ? input.getHeight() : sy1 + srcBnds.getHeight();
-        int dx = dstBnds == null ? 0 : dstBnds.getX();
-        int dy = dstBnds == null ? 0 : dstBnds.getY();
-        int dw = dstBnds == null ? output.getWidth() : dstBnds.getWidth();
-        int dh = dstBnds == null ? output.getHeight() : dstBnds.getHeight();
+        int sx1 = hasSrcRegion ? srcRegion.x : 0;
+        int sy1 = hasSrcRegion ? srcRegion.y : 0;
+        int sx2 = hasSrcRegion ? sx1 + srcRegion.width : input.getWidth();
+        int sy2 = hasSrcRegion ? sy1 + srcRegion.height : input.getHeight();
+        int dx = hasDstRegion ? dstRegion.x : 0;
+        int dy = hasDstRegion ? dstRegion.y : 0;
+        int dw = hasDstRegion ? dstRegion.width : output.getWidth();
+        int dh = hasDstRegion ? dstRegion.height : output.getHeight();
 
         if (dw <= 0 || dh <= 0) {
             return;
         }
 
         // get temp data
-        if (tmp == null || tmp.getWidth() != dw || tmp.getHeight() != dh ||
-                tmp.hasAlpha() != input.hasAlpha()) {
-            tmp = TempData.create(dw, dh, input.hasAlpha());
-        }
+        TempData tmp = TempData.create(dw, dh, input.hasAlpha());
 
         // draw to temp
         BufferedImage tmpIm = ImageUtils.toImage(tmp);
@@ -126,19 +205,22 @@ public class ScaledBlit implements SurfaceOp {
         g2d.setComposite(AlphaComposite.Src);
         g2d.drawImage(in, 0, 0, dw, dh, sx1, sy1, sx2, sy2, null);
 
-        Blit.op(blend, dx, dy).process(output, tmp);
+//        Blit.op(blend, dx, dy).process(output, tmp);
+        new Blit().setX(dx).setY(dy).setBlendMode(blendMode).setOpacity(opacity).process(output, tmp);
 
         tmp.release();
     }
 
-    
-    
-
     public static SurfaceOp op(BlendFunction blend, Bounds srcBnds, Bounds dstBnds) {
-        if (blend == null) {
-            throw new NullPointerException();
+        ScaledBlit blit = new ScaledBlit();
+        blit.setBlendMode(Blit.extractBlendMode(blend));
+        blit.setOpacity(((Blend)blend).getExtraAlpha());
+        if (srcBnds != null) {
+            blit.setSourceRegion(srcBnds.asRectangle());
         }
-        return new ScaledBlit(blend, srcBnds, dstBnds);
+        if (dstBnds != null) {
+            blit.setDestinationRegion(dstBnds.asRectangle());
+        }
+        return blit;
     }
-
 }
