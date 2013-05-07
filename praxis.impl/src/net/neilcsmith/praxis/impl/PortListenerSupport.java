@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,9 +21,6 @@
  */
 package net.neilcsmith.praxis.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.PortListener;
 import net.neilcsmith.praxis.util.ArrayUtils;
