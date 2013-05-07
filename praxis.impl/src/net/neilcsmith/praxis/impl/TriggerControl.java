@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -25,7 +25,6 @@ package net.neilcsmith.praxis.impl;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
-import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.Port;
@@ -34,7 +33,6 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
 /**
  *
  * @author Neil C Smith
- * @TODO implement latest check
  */
 public class TriggerControl implements Control {
     
@@ -42,7 +40,7 @@ public class TriggerControl implements Control {
     private Binding binding;
     
     private TriggerControl(Binding binding) {
-        this.info = ControlInfo.createTriggerInfo(null);
+        this.info = ControlInfo.createActionInfo(null);
         this.binding = binding;
     }
 
@@ -68,12 +66,6 @@ public class TriggerControl implements Control {
                 throw new IllegalArgumentException();
         }
     }
-
-    @Deprecated
-    public Component getComponent() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-    
     
     
     private class InputPort extends AbstractControlInputPort {

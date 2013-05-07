@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -34,9 +34,9 @@ import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.PacketRouter;
-import net.neilcsmith.praxis.core.VetoException;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.Root;
+import net.neilcsmith.praxis.core.VetoException;
 import net.neilcsmith.praxis.core.info.ComponentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.info.PortInfo;
