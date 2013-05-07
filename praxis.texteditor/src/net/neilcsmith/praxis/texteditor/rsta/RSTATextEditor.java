@@ -42,6 +42,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
  *
  * @author Neil C Smith
  */
+//@TODO switch to TokenMakerFactory
 public class RSTATextEditor extends TextEditor {
 
     private static Theme theme;
@@ -59,6 +60,8 @@ public class RSTATextEditor extends TextEditor {
         String syntax = getSyntaxStyle(mime);
         if (syntax != null) {
             rsta.setSyntaxEditingStyle(syntax);
+        } else if ("text/x-glsl-frag".equals(mime)) {
+            ((RSyntaxDocument) rsta.getDocument()).setSyntaxStyle(new GLSLTokenMaker());
         } else {
             ((RSyntaxDocument) rsta.getDocument()).setSyntaxStyle(new ExtendedPlainTokenMaker());
         }
