@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -27,12 +27,14 @@ import net.neilcsmith.praxis.impl.AbstractComponentFactory;
 import net.neilcsmith.praxis.video.components.analysis.Difference;
 import net.neilcsmith.praxis.video.components.analysis.FrameDelay;
 import net.neilcsmith.praxis.video.components.analysis.blobs.BlobTracker;
+import net.neilcsmith.praxis.video.components.container.VideoContainerInput;
+import net.neilcsmith.praxis.video.components.container.VideoContainerOutput;
 import net.neilcsmith.praxis.video.components.filters.Blur;
 import net.neilcsmith.praxis.video.components.mix.Composite;
 import net.neilcsmith.praxis.video.components.mix.XFader;
+import net.neilcsmith.praxis.video.components.source.Noise;
 import net.neilcsmith.praxis.video.components.test.DifferenceCalc;
 import net.neilcsmith.praxis.video.components.test.ImageSave;
-import net.neilcsmith.praxis.video.components.source.Noise;
 import net.neilcsmith.praxis.video.components.timefx.FrameDifference;
 import net.neilcsmith.praxis.video.components.timefx.Ripple;
 
@@ -88,12 +90,22 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
 
 
             // TEST COMPONENTS
-            addComponent("video:test:save", ImageSave.class);
-            addComponent("video:test:difference-calc", DifferenceCalc.class);
-            addComponent("video:test:noise", Noise.class);
-            addComponent("video:test:analysis:frame-delay", FrameDelay.class);
-            addComponent("video:test:analysis:difference", net.neilcsmith.praxis.video.components.analysis.Difference.class);
-            addComponent("video:test:analysis:blob-tracker", BlobTracker.class);
+//            addTestComponent("video:test:save", ImageSave.class, null);
+            addComponent("video:test:save", data(ImageSave.class).test());
+//            addTestComponent("video:test:difference-calc", DifferenceCalc.class, null);
+            addComponent("video:test:difference-calc", data(DifferenceCalc.class).test());
+//            addTestComponent("video:test:noise", Noise.class, "video:source:null");
+            addComponent("video:test:noise", data(Noise.class).test().replacement("video:source:null"));
+//            addTestComponent("video:test:analysis:frame-delay", FrameDelay.class, "video:analysis:frame-delay");
+            addComponent("video:test:analysis:frame-delay", data(FrameDelay.class).test().replacement("video:analysis:frame-delay"));
+//            addTestComponent("video:test:analysis:difference", Difference.class, "video:analysis:difference");
+            addComponent("video:test:analysis:difference", data(Difference.class).test().replacement("video:analysis:difference"));
+//            addTestComponent("video:test:analysis:blob-tracker", BlobTracker.class, "video:analysis:simple-tracker");
+            addComponent("video:test:analysis:blob-tracker", data(BlobTracker.class).test().replacement("video:analysis:simple-tracker"));
+            
+            
+            addComponent("video:container:input", data(VideoContainerInput.class).test());
+            addComponent("video:container:output", data(VideoContainerOutput.class).test());
 
         }
     }
