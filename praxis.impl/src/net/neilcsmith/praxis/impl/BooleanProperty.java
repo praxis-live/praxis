@@ -126,6 +126,9 @@ public class BooleanProperty extends AbstractSingleArgProperty {
         return new BooleanProperty(binding, info);
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public static interface Binding {
 
@@ -152,4 +155,35 @@ public class BooleanProperty extends AbstractSingleArgProperty {
             return value;
         }
     }
+    
+    
+    public static class Builder extends AbstractSingleArgProperty.Builder<Builder> {
+        
+        private boolean def;
+        private Binding binding;
+        
+        private Builder() {
+            super(PBoolean.class);
+        }
+        
+        public Builder defaultValue(boolean def) {
+            defaults(PBoolean.valueOf(def));
+            this.def = def;
+            return this;
+        }
+        
+        public Builder binding(Binding binding) {
+            this.binding = binding;
+            return this;
+        }
+        
+        public BooleanProperty build() {
+            Binding bdg = binding == null ? new DefaultBinding(def) : binding;
+            ControlInfo info = buildInfo();
+            return new BooleanProperty(binding, info);
+        }
+        
+    }
+    
+    
 }

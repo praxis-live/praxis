@@ -32,7 +32,7 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
  *
  * @author Neil C Smith
  */
-public abstract class AbstractProperty implements Control {
+public abstract class AbstractProperty extends AbstractControl {
 
     private ControlInfo info;
     private long latest;
@@ -40,11 +40,6 @@ public abstract class AbstractProperty implements Control {
 
     protected AbstractProperty(ControlInfo info) {
         this.info = info;
-    }
-
-    @Deprecated
-    public Component getComponent() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void call(Call call, PacketRouter router) throws Exception {
@@ -70,27 +65,6 @@ public abstract class AbstractProperty implements Control {
         }
     }
 
-//    protected Call processInvoke(Call call, boolean quiet) throws Exception {
-//        CallArguments args = call.getArgs();
-//        int argCount = args.getSize();
-//        long time = call.getTimecode();
-//        if (argCount > 0) {
-//            if (isLatest(time)) {
-//                setArguments(time, args);
-//                setLatest(time);
-//            }
-//            if (!quiet) {
-//                return Call.createReturnCall(call, args);
-//            } else {
-//                return null;
-//            }
-//        } else {
-//            // ignore quiet hint?
-//            return Call.createReturnCall(call, getArguments());
-//        }
-//
-//    }
-
     protected void setLatest(long time) {
         latestSet = true;
         latest = time;
@@ -112,4 +86,23 @@ public abstract class AbstractProperty implements Control {
     protected abstract void setArguments(long time, CallArguments args) throws Exception;
 
     protected abstract CallArguments getArguments();
+    
+    public static abstract class Builder<B extends Builder<B>> extends AbstractControl.Builder<B> {
+        
+        private boolean readOnly;
+        
+        @SuppressWarnings("unchecked")
+        public B readOnly() {
+            readOnly = true;
+            return (B) this;
+        }
+
+        @Override
+        protected ControlInfo buildInfo() {
+            controlType(readOnly ? ControlInfo.Type.ReadOnlyProperty : ControlInfo.Type.Property);
+            return super.buildInfo();
+        }
+        
+        
+    }
 }

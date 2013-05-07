@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,9 +22,9 @@
 package net.neilcsmith.praxis.impl;
 
 import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.core.types.PNumber;
 
 /**
@@ -91,6 +91,10 @@ public class IntProperty extends AbstractSingleArgProperty {
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
         return new IntProperty(binding, min, max, info);
     }
+    
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public static interface Binding {
 
@@ -116,5 +120,51 @@ public class IntProperty extends AbstractSingleArgProperty {
         public int getBoundValue() {
             return value;
         }
+    }
+    
+    public final static class Builder extends AbstractSingleArgProperty.Builder<Builder> {
+        
+        private int minimum;
+        private int maximum;
+        private int def;
+        private Binding binding;
+        
+        private Builder() {
+            super(PNumber.class);
+            putArgumentProperty(PNumber.KEY_IS_INTEGER, PBoolean.TRUE);
+            minimum = PNumber.MIN_VALUE;
+            maximum = PNumber.MAX_VALUE;
+        }
+        
+        public Builder minimum(int min) {
+            putArgumentProperty(PNumber.KEY_MINIMUM, PNumber.valueOf(min));
+            minimum = min;
+            return this;
+        }
+        
+        public Builder maximum(int max) {
+            putArgumentProperty(PNumber.KEY_MAXIMUM, PNumber.valueOf(max));
+            maximum = max;
+            return this;
+        }
+        
+        public Builder defaultValue(int value) {
+            defaults(PNumber.valueOf(value));
+            def = value;
+            return this;
+        }
+        
+        public Builder binding(Binding binding) {
+            this.binding = binding;
+            return this;
+        }
+        
+        public IntProperty build() {
+            ControlInfo info = buildInfo();
+            Binding b = binding == null ? new DefaultBinding(def) : binding;
+            return new IntProperty(b, minimum, maximum, info);
+        }
+        
+        
     }
 }

@@ -21,12 +21,18 @@
  */
 package net.neilcsmith.praxis.impl;
 
+import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.Lookup;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
+import net.neilcsmith.praxis.core.types.PBoolean;
+import net.neilcsmith.praxis.core.types.PMap;
+import net.neilcsmith.praxis.core.types.PString;
 
 /**
  *
@@ -85,5 +91,89 @@ public abstract class AbstractControl implements AbstractComponent.ExtendedContr
         }
         return sm.findService(service);
 
+    }
+    
+    public static abstract class Builder<B extends Builder<B>> {
+        
+        private final static ArgumentInfo[] EMPTY_INFO = new ArgumentInfo[0];
+        
+        private ControlInfo.Type type;
+        private ArgumentInfo[] inputs;
+        private ArgumentInfo[] outputs;
+        private Argument[] defaults;
+        private PMap.Builder controlProps;
+        
+        protected Builder() {
+            this.type = ControlInfo.Type.Function;
+        }
+         
+        public B markDeprecated() {
+            return putControlProperty(ControlInfo.KEY_DEPRECATED, PBoolean.TRUE);
+        }
+        
+        public B markTransient() {
+            return putControlProperty(ControlInfo.KEY_TRANSIENT, PBoolean.TRUE);
+        }
+        
+        @SuppressWarnings("unchecked")
+        protected B putControlProperty(String key, Argument value) {
+            if (controlProps == null) {
+                controlProps = PMap.builder();
+            }
+            controlProps.put(PString.valueOf(key), value);
+            return (B) this;
+        }
+        
+        @SuppressWarnings("unchecked")
+        protected B controlType(ControlInfo.Type type) {
+            if (type == null) {
+                throw new NullPointerException();
+            }
+            this.type = type;
+            return (B) this;
+        }
+        
+        @SuppressWarnings("unchecked")
+        protected B inputs(ArgumentInfo ... inputs) {
+            this.inputs = inputs;
+            return (B) this;
+        }
+        
+        @SuppressWarnings("unchecked")
+        protected B outputs(ArgumentInfo ... outputs) {
+            this.outputs = outputs;
+            return (B) this;
+        }
+        
+        @SuppressWarnings("unchecked")
+        protected B arguments(ArgumentInfo ... args) {
+            this.inputs = args;
+            this.outputs = args;
+            return (B) this;
+        }
+        
+        @SuppressWarnings("unchecked")
+        protected B defaults(Argument ... defaults) {
+            this.defaults = defaults;
+            return (B) this;
+        }
+        
+        protected ControlInfo buildInfo() {
+            ArgumentInfo[] ins = inputs == null ? EMPTY_INFO : inputs;
+            ArgumentInfo[] outs = outputs == null ? EMPTY_INFO : outputs;
+            PMap props = controlProps == null ? PMap.EMPTY : controlProps.build();
+            switch (type) {
+                case Action:
+                    return ControlInfo.createTriggerInfo(props);
+                case Property:
+                    return ControlInfo.createPropertyInfo(outs, defaults, props);
+                case ReadOnlyProperty:
+                    return ControlInfo.createReadOnlyPropertyInfo(outs, props);
+                default:
+                    return ControlInfo.createFunctionInfo(ins, outs, props);
+                
+            }
+        }
+        
     }
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -25,6 +25,8 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PArray;
+import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
 
@@ -34,7 +36,6 @@ import net.neilcsmith.praxis.core.types.PString;
  */
 public class ArgumentProperty extends AbstractSingleArgProperty {
 
-    private static Logger logger = Logger.getLogger(ArgumentProperty.class.getName());
     private ReadBinding reader;
     private Binding writer;
 
@@ -103,6 +104,10 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
         return new ArgumentProperty(binding, null, info);
     }
     
+    public static Builder builder() {
+        return new Builder();
+    }
+    
     
     public static interface ReadBinding {
         
@@ -135,4 +140,80 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
         }
     }
 
+    
+    public static class Builder extends AbstractSingleArgProperty.Builder<Builder> {
+        
+        private Argument defaultValue;
+        private Binding writeBinding;
+        private ReadBinding readBinding;
+        
+        private Builder() {
+            
+        }
+
+        public Builder type(Class<? extends Argument> typeClass) {
+            return super.argumentType(typeClass);
+        }
+        
+        public Builder defaultValue(Argument def) {
+            defaults(def);
+            defaultValue = def;
+            return this;
+        }
+        
+        public Builder binding(ReadBinding binding) {
+            if (binding instanceof Binding) {
+                return binding((Binding) binding);
+            } else {
+                if (binding != null) {
+                    readOnly();
+                }
+                readBinding = binding;
+                writeBinding = null;
+                return this;
+            }
+        }
+        
+        public Builder binding(Binding binding) {
+            readBinding = binding;
+            writeBinding = binding;
+            return this;
+        }
+        
+        public Builder allowEmpty() {
+            putArgumentProperty(ArgumentInfo.KEY_ALLOW_EMPTY, PBoolean.TRUE);
+            return this;
+        }
+        
+        public Builder emptyIsDefault() {
+            putArgumentProperty(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, PBoolean.TRUE);
+            return this;
+        }
+
+        public Builder suggestedValues(Argument ... values) {
+            putArgumentProperty(ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.valueOf(values));
+            return this;
+        }
+        
+        public Builder template(Argument template) {
+            putArgumentProperty(ArgumentInfo.KEY_TEMPLATE, template);
+            return this;
+        }
+        
+        
+        public ArgumentProperty build() {
+            Argument def = defaultValue == null ? PString.EMPTY : defaultValue;
+            ReadBinding read = readBinding;
+            Binding write = writeBinding;
+            if (read == null) {
+                write = new DefaultBinding(def);
+                read = write; 
+            }
+            ControlInfo info = buildInfo();
+            return new ArgumentProperty(read, write, info);
+        }
+        
+    }
+    
+    
 }

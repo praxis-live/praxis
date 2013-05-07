@@ -25,7 +25,11 @@ import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PMap;
+import net.neilcsmith.praxis.core.types.PString;
 
 /**
  *
@@ -81,4 +85,50 @@ public abstract class AbstractSingleArgProperty extends AbstractProperty {
             }
         }
     }
+    
+    public static abstract class Builder<B extends Builder<B>> extends AbstractProperty.Builder<B> {
+        
+        private Class<? extends Argument> typeClass;
+        private PMap.Builder argProps;
+        
+        protected Builder() {
+            this(Argument.class);
+        }
+        
+        protected Builder(Class<? extends Argument> typeClass) {
+            if (typeClass == null) {
+                throw new NullPointerException();
+            }
+            this.typeClass = typeClass;
+        }
+       
+        @SuppressWarnings("unchecked")
+        protected B putArgumentProperty(String key, Argument value) {
+            if (argProps == null) {
+                argProps = PMap.builder();
+            }
+            argProps.put(PString.valueOf(key), value);
+            return (B) this;
+        }
+        
+        @SuppressWarnings("unchecked")
+        protected B argumentType(Class<? extends Argument> typeClass) {
+            if (typeClass == null) {
+                throw new NullPointerException();
+            }
+            this.typeClass = typeClass;
+            return (B) this;
+        }
+
+        @Override
+        protected ControlInfo buildInfo() {
+            PMap props = argProps == null ? PMap.EMPTY : argProps.build();
+            arguments(ArgumentInfo.create(typeClass, props));
+            return super.buildInfo();
+        }
+        
+        
+        
+    }
+    
 }

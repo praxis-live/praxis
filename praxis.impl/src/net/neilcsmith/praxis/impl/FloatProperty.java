@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -115,6 +115,9 @@ public class FloatProperty extends AbstractSingleArgProperty {
         return new FloatProperty(binding, min, max, info);
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public static interface Binding {
 
@@ -140,5 +143,50 @@ public class FloatProperty extends AbstractSingleArgProperty {
         public double getBoundValue() {
             return value;
         }
+    }
+    
+    public final static class Builder extends AbstractSingleArgProperty.Builder<Builder> {
+        
+        private double minimum;
+        private double maximum;
+        private double def;
+        private Binding binding;
+        
+        private Builder() {
+            super(PNumber.class);
+            minimum = PNumber.MIN_VALUE;
+            maximum = PNumber.MAX_VALUE;
+        }
+        
+        public Builder minimum(double min) {
+            putArgumentProperty(PNumber.KEY_MINIMUM, PNumber.valueOf(min));
+            minimum = min;
+            return this;
+        }
+        
+        public Builder maximum(double max) {
+            putArgumentProperty(PNumber.KEY_MAXIMUM, PNumber.valueOf(max));
+            maximum = max;
+            return this;
+        }
+        
+        public Builder defaultValue(double value) {
+            defaults(PNumber.valueOf(value));
+            def = value;
+            return this;
+        }
+        
+        public Builder binding(Binding binding) {
+            this.binding = binding;
+            return this;
+        }
+        
+        public FloatProperty build() {
+            ControlInfo info = buildInfo();
+            Binding b = binding == null ? new DefaultBinding(def) : binding;
+            return new FloatProperty(b, minimum, maximum, info);
+        }
+        
+        
     }
 }

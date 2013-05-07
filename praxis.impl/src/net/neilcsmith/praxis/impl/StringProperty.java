@@ -29,6 +29,8 @@ import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PArray;
+import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PString;
 
@@ -124,6 +126,12 @@ public class StringProperty extends AbstractSingleArgProperty {
         return new StringProperty(binding, allowedValues, info);
     }
 
+    
+    public static Builder builder() {
+        return new Builder();
+    }
+    
+    
     public static interface Binding {
 
         public void setBoundValue(long time, String value);
@@ -148,6 +156,70 @@ public class StringProperty extends AbstractSingleArgProperty {
         public String getBoundValue() {
             return value;
         }
+    }
+    
+    public final static class Builder extends AbstractSingleArgProperty.Builder<Builder> {
+        
+        private Set<String> allowed;
+        private Binding binding;
+        private String defaultValue;
+        
+        private Builder() {
+            super(PString.class);
+        }
+        
+        public Builder defaultValue(String def) {
+            defaults(PString.valueOf(def));
+            defaultValue = def;
+            return this;
+        }
+        
+        public Builder allowedValues(String ... values) {
+            allowed = new LinkedHashSet<String>(Arrays.asList(values));
+            PString[] arr = new PString[values.length];
+            for (int i=0; i < arr.length; i++) {
+                arr[i] = PString.valueOf(values[i]);
+            }
+            putArgumentProperty(ArgumentInfo.KEY_ALLOWED_VALUES, PArray.valueOf(arr));
+            return this;
+        }
+        
+        public Builder suggestedValues(String ... values) {
+            PString[] arr = new PString[values.length];
+            for (int i=0; i < arr.length; i++) {
+                arr[i] = PString.valueOf(values[i]);
+            }
+            putArgumentProperty(ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.valueOf(arr));
+            return this;
+        }
+        
+        public Builder emptyIsDefault() {
+            putArgumentProperty(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, PBoolean.TRUE);
+            return this;
+        }
+        
+        public Builder mimeType(String mime) {
+            putArgumentProperty(PString.KEY_MIME_TYPE, PString.valueOf(mime));
+            return this;
+        }
+        
+        public Builder template(String template) {
+            putArgumentProperty(ArgumentInfo.KEY_TEMPLATE, PString.valueOf(template));
+            return this;
+        }
+        
+        public Builder binding(Binding binding) {
+            this.binding = binding;
+            return this;
+        }
+        
+        public StringProperty build() {
+            String def = defaultValue == null ? "" : defaultValue;
+            Binding bdg = binding == null ? new DefaultBinding(def) : binding;
+            ControlInfo info = buildInfo();
+            return new StringProperty(bdg, allowed, info);
+        }
+        
     }
 
 }
