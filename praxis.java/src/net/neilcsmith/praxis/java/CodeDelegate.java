@@ -56,20 +56,19 @@ public class CodeDelegate {
             // add param listeners
         }
     }
-    
+
     private void dispose() {
         context = null;
     }
 
     public void setup() {
     }
-    
+
     public void update() {
     }
 
 //    public void dispose() {
 //    }
-
     public Param p(int idx) {
         return context.getParam(idx - 1);
     }
@@ -141,45 +140,53 @@ public class CodeDelegate {
         return (a > b) ? ((a > c) ? a : c) : ((b > c) ? b : c);
     }
 
-  public final int constrain(int amt, int low, int high) {
-    return (amt < low) ? low : ((amt > high) ? high : amt);
-  }
+    public final int constrain(int amt, int low, int high) {
+        return (amt < low) ? low : ((amt > high) ? high : amt);
+    }
 
-  public final double constrain(double amt, double low, double high) {
-    return (amt < low) ? low : ((amt > high) ? high : amt);
-  }
+    public final double constrain(double amt, double low, double high) {
+        return (amt < low) ? low : ((amt > high) ? high : amt);
+    }
+    
+    public final double degrees(double radians) {
+        return Math.toDegrees(radians);
+    }
+    
+    public final double radians(double degrees) {
+        return Math.toRadians(degrees);
+    }
+    
+    public final double sin(double angle) {
+        return Math.sin(angle);
+    }
 
+    public final double cos(double angle) {
+        return Math.cos(angle);
+    }
 
-   public final double sin(double angle) {
-    return Math.sin(angle);
-  }
+    public final double tan(double angle) {
+        return Math.tan(angle);
+    }
 
-   public final double cos(double angle) {
-    return Math.cos(angle);
-  }
+    public final double asin(double value) {
+        return Math.asin(value);
+    }
 
-   public final double tan(double angle) {
-    return Math.tan(angle);
-  }
+    public final double acos(double value) {
+        return Math.acos(value);
+    }
 
+    public final double atan(double value) {
+        return Math.atan(value);
+    }
 
-   public final double asin(double value) {
-    return Math.asin(value);
-  }
-
-   public final double acos(double value) {
-    return Math.acos(value);
-  }
-
-   public final double atan(double value) {
-    return Math.atan(value);
-  }
-
-   public final double atan2(double a, double b) {
-    return Math.atan2(a, b);
-  }
-
-
+    public final double atan2(double a, double b) {
+        return Math.atan2(a, b);
+    }
+    
+    
+    
+    
     // PERLIN NOISE - copied from Processing core.
     // @TODO fully convert to double???
     private static final int PERLIN_YWRAPB = 4;
@@ -305,7 +312,6 @@ public class CodeDelegate {
         return r;
     }
 
-  
     private float noise_fsc(float i) {
         return 0.5f * (1.0f - perlin_cosTable[(int) (i * perlin_PI) % perlin_TWOPI]);
     }
@@ -336,22 +342,20 @@ public class CodeDelegate {
         perlin = null;
     }
     // end of Perlin noise functions
-    
-    
-    
+
     public static class Controller {
-        
+
         private CodeContext context;
         private CodeDelegate delegate;
         private boolean setupRequired;
-        
+
         public Controller(CodeDelegate delegate) {
             if (delegate == null) {
                 throw new NullPointerException();
             }
             this.delegate = delegate;
         }
-        
+
         public void init(CodeContext context) throws Exception {
             if (context == null) {
                 throw new NullPointerException();
@@ -360,7 +364,7 @@ public class CodeDelegate {
             setupRequired = true;
             this.context = context;
         }
-        
+
         public void update() throws Exception {
             if (context == null) {
                 throw new IllegalStateException("Calling update() on an uninited CodeDelegate");
@@ -371,14 +375,11 @@ public class CodeDelegate {
             }
             delegate.update();
         }
-        
+
         public void dispose() {
             delegate.setCodeContext(null);
             setupRequired = false;
             context = null;
         }
-        
     }
-    
-    
 }
