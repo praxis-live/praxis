@@ -25,7 +25,7 @@ package net.neilcsmith.praxis.midi;
 
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
-import net.neilcsmith.praxis.impl.ListenerUtils;
+import net.neilcsmith.praxis.util.ArrayUtils;
 
 /**
  *
@@ -41,11 +41,11 @@ public abstract class MidiInputContext {
 
 
     public void addListener(Listener listener) {
-        listeners = ListenerUtils.add(listeners, listener);
+        listeners = ArrayUtils.add(listeners, listener);
     }
 
     public void removeListener(Listener listener) {
-        listeners = ListenerUtils.remove(listeners, listener);
+        listeners = ArrayUtils.remove(listeners, listener);
     }
 
     protected void dispatch(MidiMessage msg, long time) {
