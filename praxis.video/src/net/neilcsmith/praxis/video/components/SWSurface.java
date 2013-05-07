@@ -32,27 +32,25 @@ import net.neilcsmith.praxis.video.render.ops.Blit;
 import net.neilcsmith.praxis.video.render.ops.Reverse;
 import net.neilcsmith.praxis.video.render.utils.ImageUtils;
 
-
 /**
  *
  * @author Neil C Smith
  */
 class SWSurface extends Surface {
-    
+
     private final static Logger LOG = Logger.getLogger(SWSurface.class.getName());
-
     private final static PixelData[] EMPTY_DATA = new PixelData[0];
-
-
     private SWSurfaceData sd;
     private boolean clear = true;
-    
+    private int modCount;
+
     SWSurface(int width, int height, boolean alpha) {
         super(width, height, alpha);
     }
-    
+
     @Override
     public void process(SurfaceOp op, Surface... inputs) {
+        modCount++;
         switch (inputs.length) {
             case 0:
                 processImpl(op);
@@ -72,7 +70,7 @@ class SWSurface extends Surface {
         }
         return sd;
     }
-    
+
     private SWSurfaceData getWritableData() {
         if (sd == null) {
             sd = SWSurfaceData.createSurfaceData(this, getWidth(), getHeight(), hasAlpha(), clear);
@@ -98,7 +96,7 @@ class SWSurface extends Surface {
 
     private void processImpl(SurfaceOp op, Surface[] inputs) {
         PixelData[] pixelInputs = new PixelData[inputs.length];
-        for (int i=0; i<inputs.length; i++) {
+        for (int i = 0; i < inputs.length; i++) {
             if (inputs[i] instanceof SWSurface) {
                 pixelInputs[i] = ((SWSurface) inputs[i]).getReadableData();
             } else {
@@ -107,8 +105,6 @@ class SWSurface extends Surface {
         }
         op.process(getWritableData(), pixelInputs);
     }
-
-
 
     @Override
     public void clear() {
@@ -123,6 +119,7 @@ class SWSurface extends Surface {
 
     @Override
     public void release() {
+        modCount++;
         if (sd != null) {
             sd.release();
             sd = null;
@@ -131,6 +128,7 @@ class SWSurface extends Surface {
 
     @Override
     public void copy(Surface source) {
+        modCount++;
         if (checkCompatible(source, true, true)) {
             release();
             SWSurface src = (SWSurface) source;
@@ -144,7 +142,11 @@ class SWSurface extends Surface {
             process(Blit.op(), source);
         }
     }
-    
+
+    @Override
+    public int getModCount() {
+        return modCount;
+    }
 
     @Override
     public boolean checkCompatible(Surface surface, boolean checkDimensions, boolean checkAlpha) {
@@ -166,7 +168,6 @@ class SWSurface extends Surface {
         return new SWSurface(width, height, alpha);
     }
 
-
     void draw(Graphics2D g2d, int x, int y, int w, int h) {
         if (sd == null) {
             g2d.setComposite(AlphaComposite.Clear);
@@ -176,6 +177,4 @@ class SWSurface extends Surface {
         BufferedImage im = ImageUtils.toImage(sd);
         g2d.drawImage(im, x, y, w, h, null);
     }
-
-
 }
