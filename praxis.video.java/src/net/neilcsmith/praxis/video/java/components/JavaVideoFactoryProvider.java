@@ -32,7 +32,7 @@ public class JavaVideoFactoryProvider implements ComponentFactoryProvider {
 
             addComponent("video:code:composite", JavaVideoComposite.class);
             
-            addComponent("video:test:java:processor", JavaVideoProcessor.class);
+            addComponent("video:test:java:processor", data(JavaVideoProcessor.class).test());
         }
 
     }
