@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -35,9 +35,6 @@ import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
-import net.neilcsmith.praxis.impl.ListenerUtils;
-import net.neilcsmith.praxis.util.interpolation.Interpolator;
-import net.neilcsmith.praxis.util.interpolation.LinearInterpolator;
 
 /**
  *
@@ -48,12 +45,18 @@ public class Param implements ArgumentProperty.Binding {
     private final static Logger LOG = Logger.getLogger(Param.class.getName());
 
     private final static long TO_NANO = 1000000000;
+    
+    private final static Interpolator LINEAR = LinearInterpolator.getInstance();
+    private final static Interpolator EASE_IN = new SplineInterpolator(0.42, 0, 1, 1);
+    private final static Interpolator EASE_OUT = new SplineInterpolator(0, 0, 0.58, 1);
+    private final static Interpolator EASE_IN_OUT = new SplineInterpolator(0.42, 0, 0.58, 1);
+    private final static Interpolator EASE = new SplineInterpolator(0.25, 0.1, 0.25, 1);
 
     private final Clock clock;
     private ClockListener clockListener;
     private Argument argValue;
     private double dblValue;
-    private Listener[] listeners;
+//    private Listener[] listeners;
     private boolean animating;
     private double toValue;
     private long duration;
@@ -74,8 +77,8 @@ public class Param implements ArgumentProperty.Binding {
             }
         };
         this.argValue = PString.EMPTY;
-        this.listeners = new Listener[0];
-        interpolator = LinearInterpolator.getInstance();
+//        this.listeners = new Listener[0];
+        interpolator = LINEAR;
     }
 
     public final void setBoundValue(long time, Argument value) throws Exception {
@@ -90,16 +93,16 @@ public class Param implements ArgumentProperty.Binding {
         }
     }
 
-    public void addListener(Listener listener) {
-        if (listener == null) {
-            throw new NullPointerException();
-        }
-        listeners = ListenerUtils.add(listeners, listener);
-    }
-
-    public void removeListener(Listener listener) {
-        listeners = ListenerUtils.remove(listeners, listener);
-    }
+//    public void addListener(Listener listener) {
+//        if (listener == null) {
+//            throw new NullPointerException();
+//        }
+//        listeners = ListenerUtils.add(listeners, listener);
+//    }
+//
+//    public void removeListener(Listener listener) {
+//        listeners = ListenerUtils.remove(listeners, listener);
+//    }
 
     public Argument get() {
         return getBoundValue();
@@ -172,6 +175,26 @@ public class Param implements ArgumentProperty.Binding {
     public boolean isAnimating() {
         return animating;
     }
+    
+    public void linear() {
+        interpolator = LINEAR;
+    }
+    
+    public void ease() {
+        interpolator = EASE;
+    }
+    
+    public void easeIn() {
+        interpolator = EASE_IN;
+    }
+    
+    public void easeOut() {
+        interpolator = EASE_OUT;
+    }
+    
+    public void easeInOut() {
+        interpolator = EASE_IN_OUT;
+    }
 
     private void tick() {
         if (!animating) {
@@ -215,10 +238,10 @@ public class Param implements ArgumentProperty.Binding {
 
     }
 
-    public static interface Listener {
-
-        public void valueChanged(Param p);
-    }
+//    public static interface Listener {
+//
+//        public void valueChanged(Param p);
+//    }
 
     public static interface Clock {
 
