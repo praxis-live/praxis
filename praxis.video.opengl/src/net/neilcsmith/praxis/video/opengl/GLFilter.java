@@ -95,8 +95,12 @@ public class GLFilter extends AbstractExecutionContextComponent {
             delegate.addSource(in);
             registerPort(Port.IN, new DefaultVideoInputPort(this, in));
             registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegate));
-            registerControl("fragment", ArgumentProperty.create(ArgumentInfo.create(PString.class, PMap.create(PString.KEY_MIME_TYPE, "text/x-glsl",
-                    ArgumentInfo.KEY_TEMPLATE, DEFAULT_FRAGMENT_SHADER)), new FragmentBinding(), PString.EMPTY));
+            registerControl("fragment", ArgumentProperty.create(
+                    ArgumentInfo.create(PString.class,
+                    PMap.create(PString.KEY_MIME_TYPE, "text/x-glsl-frag",
+                    ArgumentInfo.KEY_TEMPLATE, DEFAULT_FRAGMENT_SHADER)),
+                    new FragmentBinding(),
+                    PString.EMPTY));
             for (int i = 0; i < UNIFORM_COUNT; i++) {
                 FloatProperty u = FloatProperty.create(new UniformBinding(i), 0, 1, 0);
                 String ID = "u" + (i + 1);
