@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -24,14 +24,21 @@ package net.neilcsmith.praxis.video.components;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.core.Lookup;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.types.PArray;
+import net.neilcsmith.praxis.core.types.PMap;
+import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractRoot;
+import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.FloatProperty;
 import net.neilcsmith.praxis.impl.InstanceLookup;
 import net.neilcsmith.praxis.impl.IntProperty;
 import net.neilcsmith.praxis.impl.RootState;
+import net.neilcsmith.praxis.impl.StringProperty;
 import net.neilcsmith.praxis.settings.Settings;
 import net.neilcsmith.praxis.video.ClientConfiguration;
 import net.neilcsmith.praxis.video.ClientRegistrationException;
@@ -58,6 +65,8 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     private int height = HEIGHT_DEFAULT;
     private double fps = FPS_DEFAULT;
     private boolean fullScreen = FULL_SCREEN_DEFAULT;
+
+    private ArgumentProperty renderer;
 //    private String title;
     private Player player;
 //    private Placeholder placeholder;
@@ -72,6 +81,10 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     }
 
     private void buildControls() {
+        renderer = ArgumentProperty.create(
+                ArgumentInfo.create(PString.class,
+                PMap.create(ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.valueOf(PString.valueOf("Software"), PString.valueOf("OpenGL")))));
+        registerControl("renderer", renderer);
         registerControl("width", IntProperty.create(new WidthBinding(), 1, 2048, width));
         registerControl("height", IntProperty.create(new HeightBinding(), 1, 2048, height));
         registerControl("fps", FloatProperty.create(new FpsBinding(), 1, 100, fps));
@@ -103,8 +116,11 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     @Override
     protected void starting() {
         try {
-
-            player = createPlayer(VideoSettings.getRenderer());
+            String lib = renderer.getValue().toString();
+            if (lib.isEmpty()) {
+                lib = VideoSettings.getRenderer();
+            }
+            player = createPlayer(lib);
             player.addFrameRateListener(this);
             if (outputClient != null && outputClient.getOutputCount() > 0) {
                 player.getSink(0).addSource(outputClient.getOutputSource(0));
@@ -173,7 +189,7 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
             return null;
         }
         try {
-            for (PlayerFactory.Provider provider : getLookup().getAll(PlayerFactory.Provider.class)) {
+            for (PlayerFactory.Provider provider : Lookup.SYSTEM.getAll(PlayerFactory.Provider.class)) {
                 if (provider.getLibraryName().equals(lib)) {
                     return provider.getFactory();
                 }
@@ -305,4 +321,5 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
             return fullScreen;
         }
     }
+    
 }
