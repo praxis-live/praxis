@@ -47,11 +47,19 @@ public class DefaultAudioInputPort extends AudioPort.Input {
     private PortListenerSupport pls;
 
     public DefaultAudioInputPort(Component host, Pipe sink) {
-        this(host, sink, false);
+        this(sink, false);
     }
 
     public DefaultAudioInputPort(Component host, Pipe sink,
             boolean multiChannelCapable) {
+        this(sink, multiChannelCapable);
+    }
+    
+    public DefaultAudioInputPort(Pipe sink) {
+        this(sink, false);
+    }
+    
+    public DefaultAudioInputPort(Pipe sink, boolean multiChannelCapable) {
         if (sink == null) {
             throw new NullPointerException();
         }
