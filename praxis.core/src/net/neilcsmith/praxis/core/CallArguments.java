@@ -57,7 +57,7 @@ public abstract class CallArguments {
     
     private static class Empty extends CallArguments {
 
-        private static Argument[] NONE = new Argument[0];
+        private final static Argument[] NONE = new Argument[0];
 
         @Override
         public int getSize() {
@@ -97,7 +97,7 @@ public abstract class CallArguments {
     
     private static class Single extends CallArguments {
         
-        private Argument arg;
+        private final Argument arg;
         
         private Single(Argument arg) {
             this.arg = arg;
@@ -134,7 +134,7 @@ public abstract class CallArguments {
     
     private static class Multi extends CallArguments {
         
-        private Argument[] args;
+        private final Argument[] args;
         
         private Multi(Argument[] args) {
             this.args = args;

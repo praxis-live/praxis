@@ -211,11 +211,11 @@ public final class Call extends Packet {
 //    private String rootID;
 //    private long timeCode;
 //    private long id;
-    private Type type;
-    private CallArguments args;
-    private ControlAddress toAddress;
-    private ControlAddress fromAddress;
-    private int matchID;
+    private final Type type;
+    private final CallArguments args;
+    private final ControlAddress toAddress;
+    private final ControlAddress fromAddress;
+    private final int matchID;
 
     private Call(
             String root,
