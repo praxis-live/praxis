@@ -65,9 +65,16 @@ public class InstanceLookup implements Lookup {
         }
     }
     
+    public static InstanceLookup create(Object ... instances) {
+        return create(null, instances);
+    }
+    
     public static InstanceLookup create( Lookup parent, Object ... instances) {
-        if (instances == null || parent == null) {
+        if (instances == null) {
             throw new NullPointerException();
+        }
+        if (parent == null) {
+            parent = Lookup.EMPTY;
         }
         return new InstanceLookup(Arrays.copyOf(instances, instances.length), parent);
     }
