@@ -35,20 +35,20 @@ import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ComponentAddress;
-import net.neilcsmith.praxis.core.IllegalRootStateException;
-import net.neilcsmith.praxis.core.InvalidAddressException;
-import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentType;
+import net.neilcsmith.praxis.core.IllegalRootStateException;
+import net.neilcsmith.praxis.core.InterfaceDefinition;
+import net.neilcsmith.praxis.core.InvalidAddressException;
+import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.Packet;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.RootHub;
-import net.neilcsmith.praxis.core.interfaces.ServiceManager;
-import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.interfaces.ComponentFactoryService;
 import net.neilcsmith.praxis.core.interfaces.RootManagerService;
+import net.neilcsmith.praxis.core.interfaces.ServiceManager;
+import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
@@ -78,14 +78,14 @@ public class DefaultHub extends AbstractRoot {
     private Root[] extensions;
 
     public DefaultHub(Root... exts) {
-        this(null, null, exts);
+        this(null, exts);
     }
+    
+//    public DefaultHub(ComponentFactory factory, Root... exts) {
+//        this(null, factory, exts);
+//    }
     
     public DefaultHub(ComponentFactory factory, Root... exts) {
-        this(null, factory, exts);
-    }
-    
-    public DefaultHub(Lookup lookup, ComponentFactory factory, Root... exts) {
         super(EnumSet.of(AbstractRoot.Caps.Component));
         roots = new ConcurrentHashMap<String, Root.Controller>();
         rootList = new ArrayList<PString>();
@@ -93,12 +93,9 @@ public class DefaultHub extends AbstractRoot {
         serviceManager = new ServiceManagerImpl();
         services = new ConcurrentHashMap<InterfaceDefinition, ComponentAddress[]>();
         extensions = exts;
-        if (lookup == null) {
-            lookup = new ServiceLoaderLookup();
-        }
-        this.lookup = InstanceLookup.create(lookup, new Object[]{serviceManager});
+        lookup = InstanceLookup.create(serviceManager);
         if (factory == null) {
-            factory = LookupComponentFactory.getInstance(lookup);
+            factory = LookupComponentFactory.getInstance();
         }
         this.factory = factory;
     }

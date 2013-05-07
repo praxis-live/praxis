@@ -19,7 +19,6 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.hub;
 
 import java.util.LinkedHashMap;
@@ -31,7 +30,6 @@ import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
 import net.neilcsmith.praxis.core.ComponentInstantiationException;
 import net.neilcsmith.praxis.core.ComponentType;
-import net.neilcsmith.praxis.core.ComponentTypeNotFoundException;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.Root;
 
@@ -40,10 +38,9 @@ import net.neilcsmith.praxis.core.Root;
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public class LookupComponentFactory implements ComponentFactory {
-    
-    private final static Logger logger = 
-            Logger.getLogger(LookupComponentFactory.class.getName());
 
+    private final static Logger logger =
+            Logger.getLogger(LookupComponentFactory.class.getName());
     private Map<ComponentType, ComponentFactory> componentCache;
     private Map<ComponentType, ComponentFactory> rootCache;
 
@@ -63,37 +60,51 @@ public class LookupComponentFactory implements ComponentFactory {
         return keys.toArray(new ComponentType[keys.size()]);
     }
 
-    public Component createComponent(ComponentType type) throws ComponentTypeNotFoundException, ComponentInstantiationException {
+    public MetaData<? extends Component> getMetaData(ComponentType type) {
+        ComponentFactory factory = componentCache.get(type);
+        if (factory != null) {
+            return factory.getMetaData(type);
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    public MetaData<? extends Root> getRootMetaData(ComponentType type) {
+        ComponentFactory factory = rootCache.get(type);
+        if (factory != null) {
+            return factory.getRootMetaData(type);
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    public Component createComponent(ComponentType type) throws ComponentInstantiationException {
         ComponentFactory factory = componentCache.get(type);
         if (factory != null) {
             return factory.createComponent(type);
         } else {
-            throw new ComponentTypeNotFoundException();
+            throw new IllegalArgumentException();
         }
     }
 
-    public Root createRootComponent(ComponentType type) throws ComponentTypeNotFoundException, ComponentInstantiationException {
+    public Root createRootComponent(ComponentType type) throws ComponentInstantiationException {
         ComponentFactory factory = rootCache.get(type);
         if (factory != null) {
             return factory.createRootComponent(type);
         } else {
-            throw new ComponentTypeNotFoundException();
+            throw new IllegalArgumentException();
         }
     }
 
-    public ComponentType getTypeForClass(Class<? extends Component> clazz) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 
-
-    public static LookupComponentFactory getInstance(Lookup lookup) {
+    public static LookupComponentFactory getInstance() {
         Map<ComponentType, ComponentFactory> componentCache =
                 new LinkedHashMap<ComponentType, ComponentFactory>();
         Map<ComponentType, ComponentFactory> rootCache =
                 new LinkedHashMap<ComponentType, ComponentFactory>();
 
         Lookup.Result<ComponentFactoryProvider> providers =
-                lookup.getAll(ComponentFactoryProvider.class);
+                Lookup.SYSTEM.getAll(ComponentFactoryProvider.class);
         for (ComponentFactoryProvider provider : providers) {
             ComponentFactory factory = provider.getFactory();
             logger.info("Adding components from : " + factory.getClass());
@@ -106,6 +117,4 @@ public class LookupComponentFactory implements ComponentFactory {
         }
         return new LookupComponentFactory(componentCache, rootCache);
     }
-
-
 }
