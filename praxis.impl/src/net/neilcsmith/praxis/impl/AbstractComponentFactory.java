@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,7 +19,6 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.impl;
 
 import java.util.LinkedHashMap;
@@ -29,7 +28,7 @@ import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentInstantiationException;
 import net.neilcsmith.praxis.core.ComponentType;
-import net.neilcsmith.praxis.core.ComponentTypeNotFoundException;
+import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.Root;
 
 /**
@@ -37,13 +36,13 @@ import net.neilcsmith.praxis.core.Root;
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public class AbstractComponentFactory implements ComponentFactory {
-    
-    private Map<ComponentType, Class<? extends Component>> componentMap;
-    private Map<ComponentType, Class<? extends Root>> rootMap;
+
+    private Map<ComponentType, MetaData<? extends Component>> componentMap;
+    private Map<ComponentType, MetaData<? extends Root>> rootMap;
 
     protected AbstractComponentFactory() {
-        componentMap = new LinkedHashMap<ComponentType, Class<? extends Component>>();
-        rootMap = new LinkedHashMap<ComponentType, Class<? extends Root>>(1);
+        componentMap = new LinkedHashMap<ComponentType, MetaData<? extends Component>>();
+        rootMap = new LinkedHashMap<ComponentType, MetaData<? extends Root>>(1);
     }
 
     public ComponentType[] getComponentTypes() {
@@ -56,60 +55,138 @@ public class AbstractComponentFactory implements ComponentFactory {
         return keys.toArray(new ComponentType[keys.size()]);
     }
 
-    public Component createComponent(ComponentType type) throws
-            ComponentTypeNotFoundException, ComponentInstantiationException {
-        Class<? extends Component> cl = componentMap.get(type);
-        if (cl == null) {
-            throw new ComponentTypeNotFoundException();
+    public Component createComponent(ComponentType type) throws ComponentInstantiationException {
+        MetaData<? extends Component> data = componentMap.get(type);
+        if (data == null) {
+            throw new IllegalArgumentException();
         }
         try {
+            Class<? extends Component> cl = data.getComponentClass();
             return cl.newInstance();
         } catch (Exception ex) {
             throw new ComponentInstantiationException(ex);
         }
     }
 
-    public Root createRootComponent(ComponentType type) throws
-            ComponentTypeNotFoundException, ComponentInstantiationException {
-        Class<? extends Root> cl = rootMap.get(type);
-        if (cl == null) {
-            throw new ComponentTypeNotFoundException();
+    public Root createRootComponent(ComponentType type) throws ComponentInstantiationException {
+        MetaData<? extends Root> data = rootMap.get(type);
+        if (data == null) {
+            throw new IllegalArgumentException();
         }
         try {
-            return cl.newInstance();
+            Class<? extends Root> cl = data.getComponentClass();
+            return (Root) cl.newInstance();
         } catch (Exception ex) {
             throw new ComponentInstantiationException(ex);
         }
     }
 
-    public ComponentType getTypeForClass(Class<? extends Component> clazz) {
-        for (Map.Entry<ComponentType, Class<? extends Root>> entry : rootMap.entrySet()) {
-            if (entry.getValue().equals(clazz)) {
-                return entry.getKey();
-            }
-        }
-        for (Map.Entry<ComponentType, Class<? extends Component>> entry : componentMap.entrySet()) {
-            if (entry.getValue().equals(clazz)) {
-                return entry.getKey();
-            }
-        }
-        return null;
-    }
-
-    protected void addComponent(ComponentType type, Class<? extends Component> cl) {
-        componentMap.put(type, cl);
-    }
-
-    protected void addComponent(String type, Class<? extends Component> cl) {
-        addComponent(ComponentType.create(type), cl);
-    }
-
-    protected void addRoot(ComponentType type, Class<? extends Root> cl) {
-        rootMap.put(type, cl);
+    public ComponentFactory.MetaData<? extends Component> getMetaData(ComponentType type) {
+        return componentMap.get(type);
     }
     
-    protected void addRoot(String type, Class<? extends Root> cl) {
-        addRoot(ComponentType.create(type), cl);
+    public ComponentFactory.MetaData<? extends Root> getRootMetaData(ComponentType type) {
+        return rootMap.get(type);
     }
 
+    protected void addComponent(String type, Class<? extends Component> cls) {
+        addComponent(type, data(cls));
+    }
+    
+    protected void addComponent(String type, Data<? extends Component> info) {
+        componentMap.put(ComponentType.create(type), info.toMetaData());
+    }
+
+    protected void addRoot(String type, Class<? extends Root> cls) {
+        addRoot(type, data(cls));
+    }
+    
+    protected void addRoot(String type, Data<? extends Root> info) {
+        rootMap.put(ComponentType.create(type), info.toMetaData());
+    }
+    
+    public static <T> Data<T> data(Class<T> cls) {
+        return new Data<T>(cls);
+    }
+
+    private static class MetaDataImpl<T> extends ComponentFactory.MetaData<T> {
+
+        private final Class<T> cls;
+        private final boolean test;
+        private final boolean deprecated;
+        private final ComponentType replacement;
+        private final Lookup lookup;
+
+        private MetaDataImpl(Class<T> cls,
+                boolean test,
+                boolean deprecated,
+                ComponentType replacement,
+                Lookup lookup) {
+            this.cls = cls;
+            this.test = test;
+            this.deprecated = deprecated;
+            this.replacement = replacement;
+            this.lookup = lookup;
+        }
+
+        @Override
+        public Class<T> getComponentClass() {
+            return cls;
+        }
+
+        @Override
+        public boolean isTest() {
+            return test;
+        }
+
+        @Override
+        public boolean isDeprecated() {
+            return deprecated;
+        }
+
+        @Override
+        public ComponentType getReplacement() {
+            return replacement;
+        }
+
+        @Override
+        public Lookup getLookup() {
+            return lookup == null ? super.getLookup() : lookup;
+        }
+        
+        
+        
+    }
+    
+    public static class Data<T> {
+
+        private final Class<T> cls;
+        private boolean test;
+        private boolean deprecated;
+        private ComponentType replacement;
+        
+        private Data(Class<T> cls) {
+            this.cls = cls;
+        }
+        
+        public Data<T> test() {
+            test = true;
+            return this;
+        }
+        
+        public Data<T> deprecated() {
+            deprecated = true;
+            return this;
+        }
+        
+        public Data<T> replacement(String type) {
+            replacement = ComponentType.create(type);
+            deprecated = true;
+            return this;
+        }
+        
+        private MetaData<T> toMetaData() {
+            return new MetaDataImpl<T>(cls, test, deprecated, replacement, null);
+        }
+    }
 }
