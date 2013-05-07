@@ -49,6 +49,7 @@ public class BufferedImageSurface extends Surface {
     private BufferedImage image;
     private PixelWrapper pixelData;
     private boolean clear = true;
+    private int modCount;
 
     public BufferedImageSurface(int width, int height, boolean alpha) {
         super(width, height, alpha);
@@ -110,6 +111,7 @@ public class BufferedImageSurface extends Surface {
 
     @Override
     public void clear() {
+        modCount++;
         Graphics2D g = image.createGraphics();
         g.setComposite(AlphaComposite.Clear);
         g.fillRect(0, 0, getWidth(), getHeight());
@@ -124,6 +126,7 @@ public class BufferedImageSurface extends Surface {
 
     @Override
     public void copy(Surface source) {
+        modCount++;
         clear = false;
         if (source.hasAlpha() || source.getWidth() < getWidth() ||
                 source.getHeight() < getHeight()) {
@@ -142,6 +145,7 @@ public class BufferedImageSurface extends Surface {
 
     @Override
     public void process(SurfaceOp op, Surface... inputs) {
+        modCount++;
         if (op instanceof GraphicsOp) {
             Graphics2D g = image.createGraphics();
             ((GraphicsOp) op).getCallback().draw(g, createImageArray(inputs));
@@ -183,6 +187,11 @@ public class BufferedImageSurface extends Surface {
         if (!success) {
             throw new IOException("Can't find writer for supplied type : " + type);
         }
+    }
+
+    @Override
+    public int getModCount() {
+        return modCount;
     }
 
 

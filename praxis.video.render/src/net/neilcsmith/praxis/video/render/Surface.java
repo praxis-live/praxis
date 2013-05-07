@@ -32,6 +32,8 @@ public abstract class Surface {
     protected final int width;
     protected final int height;
     protected final boolean alpha;
+    
+    private final Surface[] holder;
 
     public Surface(int width, int height, boolean alpha) {
         if (width < 1 || height < 1) {
@@ -40,6 +42,8 @@ public abstract class Surface {
         this.width = width;
         this.height = height;
         this.alpha = alpha;
+        
+        holder = new Surface[1];
     }
 
     public final int getWidth() {
@@ -59,8 +63,13 @@ public abstract class Surface {
     }
 
     public void process(SurfaceOp op, Surface input) {
-        process(op, new Surface[] {input} );
+//        process(op, new Surface[] {input} );
+        holder[0] = input;
+        process(op, holder);
+        holder[0] = null;
     }
+    
+    public abstract int getModCount();
 
     public abstract void process(SurfaceOp op, Surface... inputs);
 
