@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,6 +23,10 @@ package net.neilcsmith.praxis.components;
 
 import net.neilcsmith.praxis.components.array.ArrayIterator;
 import net.neilcsmith.praxis.components.array.ArrayRandom;
+import net.neilcsmith.praxis.components.container.ContainerInput;
+import net.neilcsmith.praxis.components.container.ContainerOutput;
+import net.neilcsmith.praxis.components.container.ContainerProperty;
+import net.neilcsmith.praxis.components.container.UserContainer;
 import net.neilcsmith.praxis.components.file.Resolver;
 import net.neilcsmith.praxis.components.math.Add;
 import net.neilcsmith.praxis.components.math.Multiply;
@@ -80,7 +84,8 @@ public class FactoryProvider implements ComponentFactoryProvider {
             addComponent("core:math:multiply", Multiply.class);
             addComponent("core:math:add", Add.class);
             addComponent("core:math:scale", Scale.class);
-            addComponent("core:test:math:normalize", Normalize.class);
+//            addTestComponent("core:math:normalize", Normalize.class, null);
+            addComponent("core:math:normalize", data(Normalize.class).test());
 
             //ROUTING
             addComponent("core:routing:gate", Gate.class);
@@ -95,11 +100,21 @@ public class FactoryProvider implements ComponentFactoryProvider {
             addComponent("core:timing:timer", Timer.class);
 
 
+            // CONTAINER
+            addComponent("core:container", data(UserContainer.class).test());
+            addComponent("core:container:property", data(ContainerProperty.class).test());
+            addComponent("core:container:input", data(ContainerInput.class).test());
+            addComponent("core:container:output", data(ContainerOutput.class).test());
             
             // IN TESTING
-            addComponent("core:test:log", Log.class);
-            addComponent("core:test:routing:inhibitor", Inhibitor.class);
-            addComponent("core:test:routing:send", Send.class);
+//            addTestComponent("core:test:log", Log.class, null);
+            addComponent("core:test:log", data(Log.class).test());
+//            addTestComponent("core:test:routing:inhibitor", Inhibitor.class, "core:routing:inhibitor");
+            addComponent("core:test:routing:inhibitor", data(Inhibitor.class).test().replacement("core:routing:inhibitor"));
+//            addTestComponent("core:test:routing:send", Send.class, "core:routing:send");
+            addComponent("core:test:routing:send", data(Send.class).test().replacement("core:routing:send"));
+//            addTestComponent("core:test:math:normalize", Normalize.class, "core:math:normalize");
+            addComponent("core:test:math:normalize", data(Normalize.class).test().replacement("core:math:normalize"));
             
         }
     }
