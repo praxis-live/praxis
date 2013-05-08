@@ -96,6 +96,18 @@ public class OSCRoot extends AbstractRoot {
 
     @Override
     protected void stopping() {
+        terminateServer();
+    }
+
+    @Override
+    protected void terminating() {
+        terminateServer();
+    }
+    
+    private void terminateServer() {
+        if (server == null) {
+            return;
+        }
         try {
             server.stop();
         } catch (IOException ex) {
