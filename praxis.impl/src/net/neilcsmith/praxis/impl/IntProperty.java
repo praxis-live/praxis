@@ -33,74 +33,104 @@ import net.neilcsmith.praxis.core.types.PNumber;
  */
 public class IntProperty extends AbstractSingleArgProperty {
 
-    private int min;
-    private int max;
-    private Binding binding;
+    private final int min;
+    private final int max;
+    private final ReadBinding reader;
+    private final Binding writer;
 
-    private IntProperty(Binding binding, int min, int max, ControlInfo info) {
+    private PNumber lastSet;
+    
+    private IntProperty(ReadBinding reader, Binding writer, int min, int max, ControlInfo info) {
         super(info);
-        this.binding = binding;
+        this.reader = reader;
+        this.writer = writer;
         this.min = min;
         this.max = max;
     }
 
     @Override
     protected void set(long time, Argument value) throws Exception {
-        set(time, PNumber.coerce(value).toIntValue());
+        if (writer == null) {
+            throw new UnsupportedOperationException("Read Only Property");
+        }
+        PNumber number = PNumber.coerce(value);
+        int val = number.toIntValue();
+        if (val < min || val > max) {
+            throw new IllegalArgumentException();
+        }
+        writer.setBoundValue(time, val);
+        lastSet = number;
     }
 
     @Override
     protected void set(long time, double value) throws Exception {
-        set(time, (int) Math.round(value));
-    }
-    
-    private void set(long time, int value) {
+        if (writer == null) {
+            throw new UnsupportedOperationException("Read Only Property");
+        }
+        int val = (int) Math.round(value);
         if (value < min || value > max) {
             throw new IllegalArgumentException();
         }
-        binding.setBoundValue(time, value);
+        writer.setBoundValue(time, val);
+        lastSet = null;
     }
 
     @Override
     protected Argument get() {
-        return PNumber.valueOf(binding.getBoundValue());
+        int val = reader.getBoundValue();
+        if (lastSet != null) {
+            int last = lastSet.toIntValue();
+            if (val == last) {
+                return lastSet;
+            } else {
+                lastSet = null;
+            }
+        }
+        return PNumber.valueOf(val);
     }
     
-    
-
     public int getValue() {
-        return binding.getBoundValue();
+        return writer.getBoundValue();
     }
 
+    @SuppressWarnings("deprecation")
     public static IntProperty create(int min,
             int max, int def) {
         return create(null, min, max, def);
-
     }
 
+    @Deprecated
     public static IntProperty create( Binding binding,
             int min, int max, int def) {
-        if (min > max || def < min || def > max) {
-            throw new IllegalArgumentException();
+//        if (min > max || def < min || def > max) {
+//            throw new IllegalArgumentException();
+//        }
+//        if (binding == null) {
+//            binding = new DefaultBinding(def);
+//        }
+//        ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.integerInfo(min, max)};
+//        Argument[] defaults = new Argument[]{PNumber.valueOf(def)};
+//        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
+//        return new IntProperty(binding, binding, min, max, info);
+        Builder b = builder().minimum(min).maximum(max).defaultValue(def);
+        if (binding != null) {
+            b.binding(binding);
         }
-        if (binding == null) {
-            binding = new DefaultBinding(def);
-        }
-        ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.integerInfo(min, max)};
-        Argument[] defaults = new Argument[]{PNumber.valueOf(def)};
-        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
-        return new IntProperty(binding, min, max, info);
+        return b.build();
     }
     
     public static Builder builder() {
         return new Builder();
     }
 
-    public static interface Binding {
+    public static interface ReadBinding {
+        public int getBoundValue();
+    }
+    
+    public static interface Binding extends ReadBinding {
 
         public void setBoundValue(long time, int value);
 
-        public int getBoundValue();
     }
 
     private static class DefaultBinding implements Binding {
@@ -127,7 +157,8 @@ public class IntProperty extends AbstractSingleArgProperty {
         private int minimum;
         private int maximum;
         private int def;
-        private Binding binding;
+        private ReadBinding readBinding;
+        private Binding writeBinding;
         
         private Builder() {
             super(PNumber.class);
@@ -154,15 +185,37 @@ public class IntProperty extends AbstractSingleArgProperty {
             return this;
         }
         
+        public Builder binding(ReadBinding binding) {
+            if (binding instanceof Binding) {
+                return binding((Binding) binding);
+            } else {
+                if (binding != null) {
+                    readOnly();
+                }
+                readBinding = binding;
+                writeBinding = null;
+                return this;
+            }
+        }
+        
         public Builder binding(Binding binding) {
-            this.binding = binding;
+            readBinding = binding;
+            writeBinding = binding;
             return this;
         }
         
         public IntProperty build() {
+            ReadBinding read = readBinding;
+            Binding write = writeBinding;
+            if (read == null) {
+                write = new DefaultBinding(def);
+                read = write; 
+            }
             ControlInfo info = buildInfo();
-            Binding b = binding == null ? new DefaultBinding(def) : binding;
-            return new IntProperty(b, minimum, maximum, info);
+            if (info.getType() == ControlInfo.Type.ReadOnlyProperty) {
+                write = null;
+            }
+            return new IntProperty(read, write, minimum, maximum, info);
         }
         
         

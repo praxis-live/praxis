@@ -26,7 +26,7 @@ import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import org.jaudiolibs.audioops.impl.ContainerOp;
 import org.jaudiolibs.audioops.impl.LFODelayOp;
 import org.jaudiolibs.pipes.impl.OpHolder;
@@ -39,12 +39,12 @@ public class LFODelay extends AbstractComponent {
 
     private LFODelayOp op;
     private ContainerOp container;
-    private FloatProperty delay;
-    private FloatProperty range;
-    private FloatProperty rate;
+    private NumberProperty delay;
+    private NumberProperty range;
+    private NumberProperty rate;
 //    private FloatProperty phase;
-    private FloatProperty feedback;
-    private FloatProperty mix;
+    private NumberProperty feedback;
+    private NumberProperty mix;
 
     public LFODelay() {
         op = new LFODelayOp();
@@ -52,28 +52,28 @@ public class LFODelay extends AbstractComponent {
         OpHolder holder = new OpHolder(container);
         registerPort(Port.IN, new DefaultAudioInputPort(this, holder));
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, holder));
-        delay = FloatProperty.create(new DelayBinding(), 0, 1, 0);
+        delay = NumberProperty.create(new DelayBinding(), 0, 1, 0);
         registerControl("time", delay);
         registerPort("time", delay.createPort());
-        range = FloatProperty.create(new RangeBinding(), 0, 1, 0);
+        range = NumberProperty.create(new RangeBinding(), 0, 1, 0);
         registerControl("range", range);
         registerPort("range", range.createPort());
-        rate = FloatProperty.create(new RateBinding(), 0, 40, 0);
+        rate = NumberProperty.create(new RateBinding(), 0, 40, 0);
         registerControl("rate", rate);
         registerPort("rate", rate.createPort());
-        feedback = FloatProperty.create(new FeedbackBinding(),
+        feedback = NumberProperty.create(new FeedbackBinding(),
                 0, 1, 0);
         registerControl("feedback", feedback);
         registerPort("feedback", feedback.createPort());
 //        phase = FloatProperty.create(new PhaseBinding(), 0, 1, 0);
 //        registerControl("phase", phase);
-        mix = FloatProperty.create(new MixBinding(), 0, 1, 0);
+        mix = NumberProperty.create(new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
 
     }
 
-    private class MixBinding implements FloatProperty.Binding {
+    private class MixBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             container.setMix((float) value);
@@ -84,7 +84,7 @@ public class LFODelay extends AbstractComponent {
         }
     }
 
-    private class DelayBinding implements FloatProperty.Binding {
+    private class DelayBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             op.setDelay((float) value);
@@ -95,7 +95,7 @@ public class LFODelay extends AbstractComponent {
         }
     }
 
-    private class RangeBinding implements FloatProperty.Binding {
+    private class RangeBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             op.setRange((float) value);
@@ -106,7 +106,7 @@ public class LFODelay extends AbstractComponent {
         }
     }
 
-    private class RateBinding implements FloatProperty.Binding {
+    private class RateBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             op.setRate((float) value);
@@ -128,7 +128,7 @@ public class LFODelay extends AbstractComponent {
 //        }
 //        
 //    }
-    private class FeedbackBinding implements FloatProperty.Binding {
+    private class FeedbackBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             op.setFeedback((float) value);

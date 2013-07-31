@@ -24,7 +24,7 @@ package net.neilcsmith.praxis.video.components.timefx;
 import net.neilcsmith.praxis.video.components.test.*;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
@@ -51,7 +51,7 @@ public class FrameDifference extends AbstractComponent {
         StringProperty mode = StringProperty.create(new ModeBinding(),
                 getModeStrings(), diff.getMode().name());
         registerControl("mode", mode);
-        FloatProperty threshold = FloatProperty.create(new ThresholdBinding(), 0, 1, 0);
+        NumberProperty threshold = NumberProperty.create(new ThresholdBinding(), 0, 1, 0);
         registerControl("threshold", threshold);
         registerPort("threshold", threshold.createPort());
     }
@@ -76,7 +76,7 @@ public class FrameDifference extends AbstractComponent {
         }
     }
 
-    private class ThresholdBinding implements FloatProperty.Binding {
+    private class ThresholdBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             diff.setThreshold(value);

@@ -30,7 +30,7 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.BooleanProperty;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.FloatRangeProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import org.jaudiolibs.pipes.Buffer;
@@ -55,22 +55,22 @@ public class Looper extends AbstractComponent {
     }
 
     private void buildControls() {
-        FloatProperty loopSize = FloatProperty.create(new LoopSizeBinding(), 0, 60, 1);
+        NumberProperty loopSize = NumberProperty.create(new LoopSizeBinding(), 0, 60, 1);
         registerControl("loop-size", loopSize);
-        FloatProperty position = FloatProperty.create(new PositionBinding(), 0, 1, 0,
+        NumberProperty position = NumberProperty.create(new PositionBinding(), 0, 1, 0,
                 PMap.create(ControlInfo.KEY_TRANSIENT, true));
         registerControl("position", position);
         registerPort("position", position.createPort());
-        FloatProperty in = FloatProperty.create(new InBinding(), 0, 1, 0);
+        NumberProperty in = NumberProperty.create(new InBinding(), 0, 1, 0);
         registerControl("start", in);
         registerPort("start", in.createPort());
-        FloatProperty out = FloatProperty.create(new OutBinding(), 0, 1, 1);
+        NumberProperty out = NumberProperty.create(new OutBinding(), 0, 1, 1);
         registerControl("end", out);
         registerPort("end", out.createPort());
         FloatRangeProperty range = FloatRangeProperty.create(new RangeBinding(),
                 0, 1, 0, 1);
         registerControl("range", range);
-        FloatProperty speed = FloatProperty.create(new SpeedBinding(), -4, 4, 1);
+        NumberProperty speed = NumberProperty.create(new SpeedBinding(), -4, 4, 1);
         registerControl("speed", speed);
         registerPort("speed", speed.createPort());
 //        registerControl("loop", BooleanProperty.create(this, new LoopingBinding(), false));
@@ -136,7 +136,7 @@ public class Looper extends AbstractComponent {
         }
     }
 
-    private class SpeedBinding implements FloatProperty.Binding {
+    private class SpeedBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             looper.setSpeed((float) value);
@@ -147,7 +147,7 @@ public class Looper extends AbstractComponent {
         }
     }
 
-    private class PositionBinding implements FloatProperty.Binding {
+    private class PositionBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             looper.setPosition((float) value);
@@ -158,7 +158,7 @@ public class Looper extends AbstractComponent {
         }
     }
 
-    private class InBinding implements FloatProperty.Binding {
+    private class InBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             looper.setLoopStart((float) value);
@@ -169,7 +169,7 @@ public class Looper extends AbstractComponent {
         }
     }
 
-    private class OutBinding implements FloatProperty.Binding {
+    private class OutBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             looper.setLoopEnd((float) value);
@@ -210,7 +210,7 @@ public class Looper extends AbstractComponent {
 //        }
 //        
 //    }
-    private class LoopSizeBinding implements FloatProperty.Binding {
+    private class LoopSizeBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             looper.setLoopSize((float) value);

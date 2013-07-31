@@ -27,7 +27,7 @@ import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import org.jaudiolibs.audioops.impl.ContainerOp;
 import org.jaudiolibs.audioops.impl.gpl.OverdriveOp;
 import org.jaudiolibs.pipes.impl.OpHolder;
@@ -40,8 +40,8 @@ public class SimpleOverdrive extends AbstractComponent {
 
     private ContainerOp container;
     private OverdriveOp overdrive;
-    private FloatProperty drive;
-    private FloatProperty mix;
+    private NumberProperty drive;
+    private NumberProperty mix;
 
     public SimpleOverdrive() {
         overdrive = new OverdriveOp();
@@ -49,16 +49,16 @@ public class SimpleOverdrive extends AbstractComponent {
         OpHolder cmp = new OpHolder(container);
         registerPort(Port.IN, new DefaultAudioInputPort(this, cmp));
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, cmp));
-        drive = FloatProperty.create( new DriveBinding(), 0, 1, 0);
+        drive = NumberProperty.create( new DriveBinding(), 0, 1, 0);
         registerControl("drive", drive);
         registerPort("drive", drive.createPort());
-        mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
+        mix = NumberProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
         
     }
 
-    private class DriveBinding implements FloatProperty.Binding {
+    private class DriveBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             overdrive.setDrive((float) value);
@@ -70,7 +70,7 @@ public class SimpleOverdrive extends AbstractComponent {
 
     }
 
-    private class MixBinding implements FloatProperty.Binding {
+    private class MixBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             container.setMix((float) value);

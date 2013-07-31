@@ -28,7 +28,7 @@ import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.LinkPort;
 import net.neilcsmith.praxis.impl.StringProperty;
 import org.jaudiolibs.audioops.impl.ContainerOp;
@@ -44,9 +44,9 @@ public class IIRFilter extends AbstractComponent {
 
     private IIRFilterOp filter;
     private ContainerOp container;
-    private FloatProperty frequency;
-    private FloatProperty resonance;
-    private FloatProperty mix;
+    private NumberProperty frequency;
+    private NumberProperty resonance;
+    private NumberProperty mix;
     private StringProperty type;
     private LinkPort<IIRFilter> link;
 
@@ -58,15 +58,15 @@ public class IIRFilter extends AbstractComponent {
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, holder));
         type = createTypeControl();
         registerControl("type", type);
-        frequency =  FloatProperty.create( new FrequencyBinding(),
+        frequency =  NumberProperty.create( new FrequencyBinding(),
                 20, 20000, 20, PMap.create("scale-hint", "Exponential"));
         registerControl("frequency", frequency);
         registerPort("frequency", frequency.createPort());
-        resonance = FloatProperty.create( new ResonanceBinding(),
+        resonance = NumberProperty.create( new ResonanceBinding(),
                 0, 30, 0);
         registerControl("resonance", resonance);
         registerPort("resonance", resonance.createPort());
-        mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
+        mix = NumberProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
         link = new LinkPort<IIRFilter>(IIRFilter.class, new LinkHandler(), this);
@@ -95,7 +95,7 @@ public class IIRFilter extends AbstractComponent {
         return StringProperty.create(binding, allowed, filter.getFilterType().name());
     }
 
-    private class MixBinding implements FloatProperty.Binding {
+    private class MixBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             container.setMix((float) value);
@@ -108,7 +108,7 @@ public class IIRFilter extends AbstractComponent {
 
     }
 
-    private class FrequencyBinding implements FloatProperty.Binding {
+    private class FrequencyBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             filter.setFrequency((float) value);
@@ -121,7 +121,7 @@ public class IIRFilter extends AbstractComponent {
 
     }
 
-    private class ResonanceBinding implements FloatProperty.Binding {
+    private class ResonanceBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             filter.setResonance((float) value);

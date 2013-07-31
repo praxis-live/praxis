@@ -31,17 +31,20 @@ import net.neilcsmith.praxis.core.types.PNumber;
  *
  * @author Neil C Smith
  */
-@Deprecated
-public class FloatProperty extends AbstractSingleArgProperty {
+public class NumberProperty extends AbstractSingleArgProperty {
 
-    private double min;
-    private double max;
-    private Binding binding;
+    private final double min;
+    private final double max;
+    private final ReadBinding reader;
+    private final Binding writer;
+    
+    private PNumber lastSet;
 
-    private FloatProperty(Binding binding, double min, double max,
+    private NumberProperty(ReadBinding reader, Binding writer, double min, double max,
             ControlInfo info) {
         super(info);
-        this.binding = binding;
+        this.reader = reader;
+        this.writer = writer;
         this.min = min;
         this.max = max;
     }
@@ -49,36 +52,65 @@ public class FloatProperty extends AbstractSingleArgProperty {
 
     @Override
     protected void set(long time, Argument value) throws Exception {
-        set(time, PNumber.coerce(value).value());
+        if (writer == null) {
+            throw new UnsupportedOperationException("Read Only Property");
+        }
+        PNumber number = PNumber.coerce(value);
+        double val = number.value();
+        if (val < min || val > max) {
+            throw new IllegalArgumentException();
+        }
+        writer.setBoundValue(time, val);
+        lastSet = number;
     }
 
     @Override
     protected void set(long time, double value) throws Exception {
+        if (writer == null) {
+            throw new UnsupportedOperationException("Read Only Property");
+        }
         if (value < min || value > max) {
             throw new IllegalArgumentException();
         }
-        binding.setBoundValue(time, value);
+        writer.setBoundValue(time, value);
+        lastSet = null;
     }
 
     @Override
     protected Argument get() {
-        return PNumber.valueOf(binding.getBoundValue());
+        double val = reader.getBoundValue();
+        if (lastSet != null) {
+            double last = lastSet.value();
+            if (val == last || (float) val == (float) last) {
+                return lastSet;
+            } else {
+                lastSet = null;
+            }
+        }
+        return PNumber.valueOf(val);
     }
 
 
     public double getValue() {
-        return binding.getBoundValue();
+        return writer.getBoundValue();
     }
 
-    public static FloatProperty create( double def) {
-        return create( null, def, null);
+    @SuppressWarnings("deprecation")
+    public static NumberProperty create( double def) {
+        return create( null, def);
     }
 
-    public static FloatProperty create( Binding binding, double def) {
-        return create(binding, def, null);
+    @Deprecated
+    public static NumberProperty create( Binding binding, double def) {
+        Builder b = builder().defaultValue(def);
+        if (binding != null) {
+            b.binding(binding);
+        }
+        return b.build();
     }
 
-    public static FloatProperty create( Binding binding, double def, PMap properties) {
+    @Deprecated
+    public static NumberProperty create( Binding binding, double def, PMap properties) {
         if (def < PNumber.MIN_VALUE || def > PNumber.MAX_VALUE) {
             throw new IllegalArgumentException();
         }
@@ -88,21 +120,28 @@ public class FloatProperty extends AbstractSingleArgProperty {
         ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.info()};
         Argument[] defaults = new Argument[]{PNumber.valueOf(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
-        return new FloatProperty(binding, PNumber.MIN_VALUE, PNumber.MAX_VALUE, info);
+        return new NumberProperty(binding, binding, PNumber.MIN_VALUE, PNumber.MAX_VALUE, info);
     }
 
-    public static FloatProperty create( double min,
+    @SuppressWarnings("deprecation")
+    public static NumberProperty create( double min,
             double max, double def) {
-        return create( null, min, max, def, null);
+        return create( null, min, max, def);
 
     }
 
-    public static FloatProperty create( Binding binding,
+    @Deprecated
+    public static NumberProperty create( Binding binding,
             double min, double max, double def) {
-        return create(binding, min, max, def, null);
+        Builder b = builder().minimum(min).maximum(max).defaultValue(def);
+        if (binding != null) {
+            b.binding(binding);
+        }
+        return b.build();
     }
 
-    public static FloatProperty create( Binding binding,
+    @Deprecated
+    public static NumberProperty create( Binding binding,
             double min, double max, double def, PMap properties) {
         if (min > max || def < min || def > max) {
             throw new IllegalArgumentException();
@@ -113,18 +152,24 @@ public class FloatProperty extends AbstractSingleArgProperty {
         ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.info(min, max)};
         Argument[] defaults = new Argument[]{PNumber.valueOf(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
-        return new FloatProperty(binding, min, max, info);
+        return new NumberProperty(binding, binding, min, max, info);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static interface Binding {
+    
+    public static interface ReadBinding {
+        
+        public abstract double getBoundValue();
+    }
+    
+    public static interface Binding extends ReadBinding {
 
         public abstract void setBoundValue(long time, double value);
 
-        public abstract double getBoundValue();
+        
     }
 
     private static class DefaultBinding implements Binding {
@@ -151,7 +196,8 @@ public class FloatProperty extends AbstractSingleArgProperty {
         private double minimum;
         private double maximum;
         private double def;
-        private Binding binding;
+        private ReadBinding readBinding;
+        private Binding writeBinding;
         
         private Builder() {
             super(PNumber.class);
@@ -177,15 +223,37 @@ public class FloatProperty extends AbstractSingleArgProperty {
             return this;
         }
         
+        public Builder binding(ReadBinding binding) {
+            if (binding instanceof Binding) {
+                return binding((Binding) binding);
+            } else {
+                if (binding != null) {
+                    readOnly();
+                }
+                readBinding = binding;
+                writeBinding = null;
+                return this;
+            }
+        }
+        
         public Builder binding(Binding binding) {
-            this.binding = binding;
+            readBinding = binding;
+            writeBinding = binding;
             return this;
         }
         
-        public FloatProperty build() {
+        public NumberProperty build() {
+            ReadBinding read = readBinding;
+            Binding write = writeBinding;
+            if (read == null) {
+                write = new DefaultBinding(def);
+                read = write; 
+            }
             ControlInfo info = buildInfo();
-            Binding b = binding == null ? new DefaultBinding(def) : binding;
-            return new FloatProperty(b, minimum, maximum, info);
+            if (info.getType() == ControlInfo.Type.ReadOnlyProperty) {
+                write = null;
+            }
+            return new NumberProperty(read, write, minimum, maximum, info);
         }
         
         

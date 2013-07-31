@@ -27,7 +27,7 @@ import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import org.jaudiolibs.audioops.impl.GainOp;
 import org.jaudiolibs.pipes.impl.Mixer;
 import org.jaudiolibs.pipes.impl.OpHolder;
@@ -59,13 +59,13 @@ public class XFader extends AbstractComponent {
         registerPort(Port.IN + "-1", new DefaultAudioInputPort(this, g1h));
         registerPort(Port.IN + "-2", new DefaultAudioInputPort(this, g2h));
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, mixer));
-        FloatProperty mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
+        NumberProperty mix = NumberProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
         
     }
 
-    private class MixBinding implements FloatProperty.Binding {
+    private class MixBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             g1.setGain((float) (1 - value));

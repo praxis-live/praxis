@@ -27,7 +27,7 @@ import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.LinkPort;
 import org.jaudiolibs.audioops.AudioOp;
 import org.jaudiolibs.audioops.impl.GainOp;
@@ -46,7 +46,7 @@ public class Gain extends AbstractComponent {
     public Gain() {
         op = new GainOp();
         ug = new OpHolder(op);
-        FloatProperty level =  FloatProperty.create( new GainBinding(), 0, 2, op.getGain(), PMap.create("scale-hint", "Exponential"));
+        NumberProperty level =  NumberProperty.create( new GainBinding(), 0, 2, op.getGain(), PMap.create("scale-hint", "Exponential"));
         registerPort(Port.IN, new DefaultAudioInputPort(this, ug));
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, ug));
         registerControl("level", level);
@@ -55,7 +55,7 @@ public class Gain extends AbstractComponent {
         registerPort(LinkPort.ID, link);
     }
     
-    private class GainBinding implements FloatProperty.Binding {
+    private class GainBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             op.setGain((float) value);

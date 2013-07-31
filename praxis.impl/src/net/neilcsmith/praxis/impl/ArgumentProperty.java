@@ -21,7 +21,6 @@
  */
 package net.neilcsmith.praxis.impl;
 
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
@@ -36,8 +35,8 @@ import net.neilcsmith.praxis.core.types.PString;
  */
 public class ArgumentProperty extends AbstractSingleArgProperty {
 
-    private ReadBinding reader;
-    private Binding writer;
+    private final ReadBinding reader;
+    private final Binding writer;
 
 
     private ArgumentProperty(ReadBinding reader, Binding writer, ControlInfo info) {
@@ -68,10 +67,7 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
     @Override
     protected Argument get() {
         return reader.getBoundValue();
-    }
-
-    
-    
+    }    
     
     public static ArgumentProperty create() {
         return create(Argument.info(), null, PString.EMPTY);
@@ -210,6 +206,9 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
                 read = write; 
             }
             ControlInfo info = buildInfo();
+            if (info.getType() == ControlInfo.Type.ReadOnlyProperty) {
+                write = null;
+            }
             return new ArgumentProperty(read, write, info);
         }
         

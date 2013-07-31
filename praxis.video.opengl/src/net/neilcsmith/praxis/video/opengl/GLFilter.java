@@ -31,7 +31,7 @@ import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
 import net.neilcsmith.praxis.video.opengl.internal.Color;
@@ -102,7 +102,7 @@ public class GLFilter extends AbstractExecutionContextComponent {
                     new FragmentBinding(),
                     PString.EMPTY));
             for (int i = 0; i < UNIFORM_COUNT; i++) {
-                FloatProperty u = FloatProperty.create(new UniformBinding(i), 0, 1, 0);
+                NumberProperty u = NumberProperty.create(new UniformBinding(i), 0, 1, 0);
                 String ID = "u" + (i + 1);
                 registerControl(ID, u);
                 registerPort(ID, u.createPort());
@@ -139,7 +139,7 @@ public class GLFilter extends AbstractExecutionContextComponent {
         }
     }
 
-    private class UniformBinding implements FloatProperty.Binding {
+    private class UniformBinding implements NumberProperty.Binding {
 
         private int idx;
 

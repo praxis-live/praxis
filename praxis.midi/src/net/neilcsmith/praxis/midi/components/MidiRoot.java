@@ -46,7 +46,6 @@ import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.InstanceLookup;
 import net.neilcsmith.praxis.impl.RootState;
-import net.neilcsmith.praxis.impl.StringProperty;
 import net.neilcsmith.praxis.midi.MidiInputContext;
 
 /**
@@ -76,15 +75,12 @@ public class MidiRoot extends AbstractRoot {
         registerControl("device", device);
     }
 
-
     @Override
     protected void activating() {
         super.activating();
-        router = new MidiThreadRouter(getRootHub());
+        router = new MidiThreadRouter(getPacketRouter());
         receiver = new MidiContextReceiver();
     }
-
-
 
     @Override
     public Lookup getLookup() {
@@ -93,19 +89,6 @@ public class MidiRoot extends AbstractRoot {
         }
         return lookup;
     }
-
-    @Override
-    protected void processControlFrame(Packet packet, RootState currentState) {
-        try {
-            midiLock.lock();
-            super.processControlFrame(packet, currentState);
-        } finally {
-            midiLock.unlock();
-        }
-        
-    }
-    
-    
 
     @Override
     protected void starting() {
@@ -191,14 +174,15 @@ public class MidiRoot extends AbstractRoot {
     private class MidiContextReceiver
             extends MidiInputContext implements Receiver {
 
-        public void send(MidiMessage message, long timeStamp) {
-            try {
-                midiLock.lock();
-                dispatch(message, System.nanoTime());
-            } finally {
-                midiLock.unlock();
-            }
-            
+        public void send(final MidiMessage message, long timeStamp) {
+            final long time = System.nanoTime(); //@TODO use timestamp
+            invokeLater(new Runnable() {
+                public void run() {
+//                    if (getState() == RootState.ACTIVE_RUNNING) {
+                        dispatch(message, time);
+//                    } 
+                }
+            });
         }
 
         public void close() {
@@ -208,21 +192,18 @@ public class MidiRoot extends AbstractRoot {
 
     private class MidiThreadRouter implements PacketRouter {
 
-        private RootHub hub;
+        private PacketRouter delegate;
 
-        private MidiThreadRouter(RootHub hub) {
-            this.hub = hub;
+        private MidiThreadRouter(PacketRouter delegate) {
+            this.delegate = delegate;
         }
 
         public void route(Packet packet) {
-            try {
-                if (LOG.isLoggable(Level.FINEST)) {
-                    LOG.log(Level.FINEST, "Sending call\n" + packet);
-                }
-                hub.dispatch(packet);
-            } catch (InvalidAddressException ex) {
-                LOG.log(Level.WARNING, "Invalid Root Address - " + packet.getRootID());
+            if (LOG.isLoggable(Level.FINEST)) {
+                LOG.log(Level.FINEST, "Sending call\n" + packet);
             }
+            delegate.route(packet);
+
         }
     }
 }

@@ -32,6 +32,7 @@ import net.neilcsmith.praxis.core.types.PArray;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public class ArrayProperty extends AbstractSingleArgProperty {
 
     private static Logger logger = Logger.getLogger(ArrayProperty.class.getName());

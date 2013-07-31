@@ -28,7 +28,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
 
 /**
@@ -39,14 +39,14 @@ public class RandomFloat extends AbstractComponent {
     
     private Random rdm;
     private ControlPort.Output output;
-    private FloatProperty minimum;
-    private FloatProperty range;
+    private NumberProperty minimum;
+    private NumberProperty range;
     private TriggerControl trigger;
     
     public RandomFloat() {
         rdm = new Random();
-        minimum = FloatProperty.create( 0);
-        range = FloatProperty.create( 0, PNumber.MAX_VALUE, 1);
+        minimum = NumberProperty.create( 0);
+        range = NumberProperty.create( 0, PNumber.MAX_VALUE, 1);
         output = new DefaultControlOutputPort(this);
         trigger = TriggerControl.create( new TriggerBinding());
         registerControl("trigger", trigger);

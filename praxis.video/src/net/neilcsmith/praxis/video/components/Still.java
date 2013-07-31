@@ -35,7 +35,7 @@ import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
@@ -54,8 +54,8 @@ public class Still extends AbstractComponent {
     private ImageDelegate delegate;
     private ResizeMode resizeMode;
     private StringProperty resizeType;
-    private FloatProperty alignX;
-    private FloatProperty alignY;
+    private NumberProperty alignX;
+    private NumberProperty alignY;
     private ControlPort.Output rdyPort;
     private ControlPort.Output errPort;
 
@@ -63,8 +63,8 @@ public class Still extends AbstractComponent {
         delegator = new Delegator();
         resizeMode = new ResizeMode(ResizeMode.Type.Stretch, 0.5, 0.5);
         resizeType = createTypeControl();
-        alignX = FloatProperty.create(new AlignXBinding(), 0, 1, 0.5);
-        alignY = FloatProperty.create(new AlignYBinding(), 0, 1, 0.5);
+        alignX = NumberProperty.create(new AlignXBinding(), 0, 1, 0.5);
+        alignY = NumberProperty.create(new AlignYBinding(), 0, 1, 0.5);
         DelegateLoader loader = new DelegateLoader();
         registerPort(Port.IN, new DefaultVideoInputPort(this, delegator));
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));
@@ -119,7 +119,7 @@ public class Still extends AbstractComponent {
         }
     }
 
-    private class AlignXBinding implements FloatProperty.Binding {
+    private class AlignXBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             if (value != resizeMode.getHorizontalAlignment()) {
@@ -136,7 +136,7 @@ public class Still extends AbstractComponent {
         }
     }
 
-    private class AlignYBinding implements FloatProperty.Binding {
+    private class AlignYBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             if (value != resizeMode.getVerticalAlignment()) {

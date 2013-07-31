@@ -28,6 +28,7 @@ import net.neilcsmith.praxis.core.Root;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public interface ControlFrameListener extends OrderedListener {
     
     public void nextControlFrame(AbstractRoot root);

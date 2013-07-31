@@ -37,7 +37,7 @@ import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.IntProperty;
 import net.neilcsmith.praxis.midi.impl.AbstractMidiInComponent;
 
@@ -84,7 +84,7 @@ public class MidiControlIn extends AbstractMidiInComponent {
             }
         }, 0, 127, controller);
         minimum = 0;
-        FloatProperty min = FloatProperty.create(new FloatProperty.Binding() {
+        NumberProperty min = NumberProperty.create(new NumberProperty.Binding() {
 
             public void setBoundValue(long time, double value) {
                 minimum = value;
@@ -95,7 +95,7 @@ public class MidiControlIn extends AbstractMidiInComponent {
             }
         }, minimum);
         maximum = 1;
-        FloatProperty max = FloatProperty.create(new FloatProperty.Binding() {
+        NumberProperty max = NumberProperty.create(new NumberProperty.Binding() {
 
             public void setBoundValue(long time, double value) {
                 maximum = value;

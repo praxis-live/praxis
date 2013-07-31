@@ -26,6 +26,7 @@ package net.neilcsmith.praxis.impl;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public interface OrderedListener {
     
     public int getDepth();

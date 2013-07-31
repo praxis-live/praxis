@@ -24,7 +24,7 @@ package net.neilcsmith.praxis.video.components.mix;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.BooleanProperty;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
@@ -73,7 +73,7 @@ public class Composite extends AbstractComponent {
         registerControl("mode", mode);
         registerPort("mode", mode.createPort());
 
-        FloatProperty mix = createMixControl();
+        NumberProperty mix = createMixControl();
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
 
@@ -89,8 +89,8 @@ public class Composite extends AbstractComponent {
 
     }
 
-    private FloatProperty createMixControl() {
-        FloatProperty.Binding binding = new FloatProperty.Binding() {
+    private NumberProperty createMixControl() {
+        NumberProperty.Binding binding = new NumberProperty.Binding() {
             @Override
             public void setBoundValue(long time, double value) {
                 comp.setMix(value);
@@ -101,7 +101,7 @@ public class Composite extends AbstractComponent {
                 return comp.getMix();
             }
         };
-        return FloatProperty.create(binding, 0, 1, 0);
+        return NumberProperty.create(binding, 0, 1, 0);
     }
 
     private StringProperty createModeControl() {

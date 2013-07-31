@@ -27,7 +27,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.FloatInputPort;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import net.neilcsmith.praxis.util.Normalizer;
 
@@ -45,8 +45,8 @@ public class Normalize extends AbstractExecutionContextComponent {
         registerPort(Port.IN, FloatInputPort.create(new InputBinding()));
         output = new DefaultControlOutputPort(this);
         registerPort(Port.OUT, output);
-        registerControl("average", FloatProperty.create(new AverageBinding(), 0, 1, 0));
-        registerControl("correction", FloatProperty.create(new CorrectionBinding(), 0, 1, 0));
+        registerControl("average", NumberProperty.create(new AverageBinding(), 0, 1, 0));
+        registerControl("correction", NumberProperty.create(new CorrectionBinding(), 0, 1, 0));
         TriggerControl reset = TriggerControl.create(new ResetBinding());
         registerControl("reset", reset);
     }
@@ -64,7 +64,7 @@ public class Normalize extends AbstractExecutionContextComponent {
         
     }
     
-    private class AverageBinding implements FloatProperty.Binding {
+    private class AverageBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             normalizer.setAverage(value);
@@ -76,7 +76,7 @@ public class Normalize extends AbstractExecutionContextComponent {
         
     }
     
-    private class CorrectionBinding implements FloatProperty.Binding {
+    private class CorrectionBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             normalizer.setCorrection(value);

@@ -27,7 +27,7 @@ import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.LinkPort;
 import org.jaudiolibs.audioops.impl.ContainerOp;
 import org.jaudiolibs.audioops.impl.VariableDelayOp;
@@ -41,9 +41,9 @@ public class MonoDelay2s extends AbstractComponent {
 
     private VariableDelayOp delay;
     private ContainerOp container;
-    private FloatProperty time;
-    private FloatProperty feedback;
-    private FloatProperty mix;
+    private NumberProperty time;
+    private NumberProperty feedback;
+    private NumberProperty mix;
     private LinkPort<MonoDelay2s> link;
 
     public MonoDelay2s() {
@@ -52,22 +52,22 @@ public class MonoDelay2s extends AbstractComponent {
         OpHolder holder = new OpHolder(container);
         registerPort(Port.IN, new DefaultAudioInputPort(this, holder));
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, holder));
-        time =  FloatProperty.create( new TimeBinding(),
+        time =  NumberProperty.create( new TimeBinding(),
                 0, 2, 0);
         registerControl("time", time);
         registerPort("time", time.createPort());
-        feedback = FloatProperty.create( new FeedbackBinding(),
+        feedback = NumberProperty.create( new FeedbackBinding(),
                 0, 1, 0);
         registerControl("feedback", feedback);
         registerPort("feedback", feedback.createPort());
-        mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
+        mix = NumberProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
         link = new LinkPort<MonoDelay2s>(MonoDelay2s.class, new LinkHandler(), this);
         registerPort(LinkPort.ID, link);
     }
 
-    private class MixBinding implements FloatProperty.Binding {
+    private class MixBinding implements NumberProperty.Binding {
         
         public void setBoundValue(long time, double value) {
             container.setMix((float) value);
@@ -80,7 +80,7 @@ public class MonoDelay2s extends AbstractComponent {
 
     }
 
-    private class TimeBinding implements FloatProperty.Binding {
+    private class TimeBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             delay.setDelay((float) value);
@@ -93,7 +93,7 @@ public class MonoDelay2s extends AbstractComponent {
 
     }
 
-    private class FeedbackBinding implements FloatProperty.Binding {
+    private class FeedbackBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             delay.setFeedback((float) value);

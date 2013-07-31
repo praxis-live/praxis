@@ -8,7 +8,7 @@ import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import org.jaudiolibs.audioops.impl.FreeverbOp;
 import org.jaudiolibs.pipes.impl.MultiChannelOpHolder;
 import org.jaudiolibs.pipes.impl.Placeholder;
@@ -63,28 +63,28 @@ public class Freeverb extends AbstractComponent {
     }
 
     private void initControl() {
-        FloatProperty roomSize = createProperty(BindingTarget.RoomSize, INITIAL_ROOM_SIZE);
+        NumberProperty roomSize = createProperty(BindingTarget.RoomSize, INITIAL_ROOM_SIZE);
         registerControl("room-size", roomSize);
         registerPort("room-size", roomSize.createPort());
-        FloatProperty damp = createProperty(BindingTarget.Damp, INITIAL_DAMP);
+        NumberProperty damp = createProperty(BindingTarget.Damp, INITIAL_DAMP);
         registerControl("damp", damp);
         registerPort("damp", damp.createPort());
-        FloatProperty width = createProperty(BindingTarget.Width, INITIAL_WIDTH);
+        NumberProperty width = createProperty(BindingTarget.Width, INITIAL_WIDTH);
         registerControl("width", width);
         registerPort("width", width.createPort());
-        FloatProperty wet = createProperty(BindingTarget.Wet, INITIAL_WET);
+        NumberProperty wet = createProperty(BindingTarget.Wet, INITIAL_WET);
         registerControl("wet", wet);
         registerPort("wet", wet.createPort());
-        FloatProperty dry = createProperty(BindingTarget.Dry, INITIAL_DRY);
+        NumberProperty dry = createProperty(BindingTarget.Dry, INITIAL_DRY);
         registerControl("dry", dry);
         registerPort("dry", dry.createPort());
     }
     
-    private FloatProperty createProperty(BindingTarget target, double def) {
-        return FloatProperty.create(new Binding(target, def), 0, 1, def);
+    private NumberProperty createProperty(BindingTarget target, double def) {
+        return NumberProperty.create(new Binding(target, def), 0, 1, def);
     }
 
-    private class Binding implements FloatProperty.Binding {
+    private class Binding implements NumberProperty.Binding {
 
         private BindingTarget target;
         private double value;

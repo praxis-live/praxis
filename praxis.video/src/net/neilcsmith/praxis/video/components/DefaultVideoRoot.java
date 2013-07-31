@@ -34,7 +34,7 @@ import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.BooleanProperty;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.InstanceLookup;
 import net.neilcsmith.praxis.impl.IntProperty;
 import net.neilcsmith.praxis.impl.RootState;
@@ -87,7 +87,7 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
         registerControl("renderer", renderer);
         registerControl("width", IntProperty.create(new WidthBinding(), 1, 2048, width));
         registerControl("height", IntProperty.create(new HeightBinding(), 1, 2048, height));
-        registerControl("fps", FloatProperty.create(new FpsBinding(), 1, 100, fps));
+        registerControl("fps", NumberProperty.create(new FpsBinding(), 1, 100, fps));
         registerControl("full-screen", BooleanProperty.create(this, new FullScreenBinding(), fullScreen));
         ctxt = new Context();
     }
@@ -294,7 +294,7 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
         }
     }
 
-    private class FpsBinding implements FloatProperty.Binding {
+    private class FpsBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             if (getState() == RootState.ACTIVE_RUNNING) {

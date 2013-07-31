@@ -28,7 +28,7 @@ import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.LinkPort;
 import org.jaudiolibs.audioops.impl.CombOp;
 import org.jaudiolibs.audioops.impl.ContainerOp;
@@ -42,9 +42,9 @@ public class CombFilter extends AbstractComponent {
 
     private ContainerOp container;
     private CombOp comb;
-    private FloatProperty frequency;
-    private FloatProperty feedback;
-    private FloatProperty mix;
+    private NumberProperty frequency;
+    private NumberProperty feedback;
+    private NumberProperty mix;
     private LinkPort<CombFilter> link;
 
     public CombFilter() {
@@ -53,23 +53,23 @@ public class CombFilter extends AbstractComponent {
         OpHolder holder = new OpHolder(container);
         registerPort(Port.IN, new DefaultAudioInputPort(this, holder));
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, holder));
-        frequency =  FloatProperty.create( new FrequencyBinding(),
+        frequency =  NumberProperty.create( new FrequencyBinding(),
                 CombOp.MIN_FREQ, CombOp.MAX_FREQ, comb.getFrequency(),
                 PMap.create("scale-hint", "Exponential"));
         registerControl("frequency", frequency);
         registerPort("frequency", frequency.createPort());
-        feedback = FloatProperty.create( new FeedbackBinding(),
+        feedback = NumberProperty.create( new FeedbackBinding(),
                 0, 1, comb.getFeedback());
         registerControl("feedback", feedback);
         registerPort("feedback", feedback.createPort());
-        mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
+        mix = NumberProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
         link = new LinkPort<CombFilter>(CombFilter.class, new LinkHandler(), this);
         registerPort(LinkPort.ID, link);
     }
 
-    private class MixBinding implements FloatProperty.Binding {
+    private class MixBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             container.setMix((float) value);
@@ -82,7 +82,7 @@ public class CombFilter extends AbstractComponent {
 
     }
 
-    private class FrequencyBinding implements FloatProperty.Binding {
+    private class FrequencyBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             comb.setFrequency((float) value);
@@ -95,7 +95,7 @@ public class CombFilter extends AbstractComponent {
 
     }
 
-    private class FeedbackBinding implements FloatProperty.Binding {
+    private class FeedbackBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             comb.setFeedback((float) value);

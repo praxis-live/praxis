@@ -32,7 +32,7 @@ import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.FloatRangeProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import org.jaudiolibs.pipes.impl.MultiInOut;
@@ -71,20 +71,20 @@ public class StereoPlayer extends AbstractComponent {
         SampleTableLoader sample = new SampleTableLoader(new LoaderListener());
         registerControl("sample", sample);
         registerPort("sample", sample.createPort());
-        FloatProperty position = FloatProperty.create(new PositionBinding(), 0, 1, 0,
+        NumberProperty position = NumberProperty.create(new PositionBinding(), 0, 1, 0,
                 PMap.create(ControlInfo.KEY_TRANSIENT, true));
         registerControl("position", position);
         registerPort("position", position.createPort());
-        FloatProperty in = FloatProperty.create(new InBinding(), 0, 1, 0);
+        NumberProperty in = NumberProperty.create(new InBinding(), 0, 1, 0);
         registerControl("start", in);
         registerPort("start", in.createPort());
-        FloatProperty out = FloatProperty.create(new OutBinding(), 0, 1, 1);
+        NumberProperty out = NumberProperty.create(new OutBinding(), 0, 1, 1);
         registerControl("end", out);
         registerPort("end", out.createPort());
         FloatRangeProperty range = FloatRangeProperty.create(new RangeBinding(),
                 0, 1, 0, 1);
         registerControl("range", range);
-        FloatProperty speed = FloatProperty.create(new SpeedBinding(), -4, 4, 1);
+        NumberProperty speed = NumberProperty.create(new SpeedBinding(), -4, 4, 1);
         registerControl("speed", speed);
         registerPort("speed", speed.createPort());
         registerControl("loop", BooleanProperty.create(new LoopingBinding(), false));
@@ -134,7 +134,7 @@ public class StereoPlayer extends AbstractComponent {
         }
     }
 
-    private class SpeedBinding implements FloatProperty.Binding {
+    private class SpeedBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             for (SamplePlayerUG player : players) {
@@ -147,7 +147,7 @@ public class StereoPlayer extends AbstractComponent {
         }
     }
 
-    private class PositionBinding implements FloatProperty.Binding {
+    private class PositionBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             for (SamplePlayerUG player : players) {
@@ -160,7 +160,7 @@ public class StereoPlayer extends AbstractComponent {
         }
     }
 
-    private class InBinding implements FloatProperty.Binding {
+    private class InBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             int pos = (int) Math.round(value * tablesize);
@@ -174,7 +174,7 @@ public class StereoPlayer extends AbstractComponent {
         }
     }
 
-    private class OutBinding implements FloatProperty.Binding {
+    private class OutBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             int pos = (int) Math.round(value * tablesize);

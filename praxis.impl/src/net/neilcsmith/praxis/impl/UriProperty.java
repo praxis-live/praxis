@@ -33,6 +33,7 @@ import net.neilcsmith.praxis.core.types.PResource;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public class UriProperty extends AbstractSingleArgProperty {
 
     private static Logger logger = Logger.getLogger(UriProperty.class.getName());

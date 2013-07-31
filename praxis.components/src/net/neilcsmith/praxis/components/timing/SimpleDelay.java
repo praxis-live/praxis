@@ -28,7 +28,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractClockComponent;
 import net.neilcsmith.praxis.impl.ArgumentInputPort;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 
 /**
  *
@@ -49,13 +49,13 @@ public class SimpleDelay extends AbstractClockComponent {
         registerPort(Port.IN, createInputPort());
         output = new DefaultControlOutputPort(this);
         registerPort(Port.OUT, output);
-        FloatProperty delay = createDelayControl();
+        NumberProperty delay = createDelayControl();
         registerControl("time", delay);
         registerPort("time", delay.createPort());
     }
 
-    private FloatProperty createDelayControl() {
-        FloatProperty.Binding binding = new FloatProperty.Binding() {
+    private NumberProperty createDelayControl() {
+        NumberProperty.Binding binding = new NumberProperty.Binding() {
 
             public void setBoundValue(long time, double value) {
                 delayS = value;
@@ -66,7 +66,7 @@ public class SimpleDelay extends AbstractClockComponent {
                 return delayS;
             }
         };
-        return FloatProperty.create(binding, 0, 60 * 60, 0);
+        return NumberProperty.create(binding, 0, 60 * 60, 0);
     }
 
     private ArgumentInputPort createInputPort() {

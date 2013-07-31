@@ -33,7 +33,7 @@ import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.AbstractClockComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.FloatInputPort;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.SimpleControl;
 import net.neilcsmith.praxis.util.interpolation.Interpolator;
 import net.neilcsmith.praxis.util.interpolation.LinearInterpolator;
@@ -55,7 +55,7 @@ public class Animator extends AbstractClockComponent {
     private double toValue;
     private double pendingToValue;
     private long toTime;
-    private FloatProperty duration;
+    private NumberProperty duration;
     private boolean animating;
     private boolean needsConfiguring;
     private double currentValue;
@@ -65,10 +65,10 @@ public class Animator extends AbstractClockComponent {
     public Animator() {
         interpolator = LinearInterpolator.getInstance();
 //        ToControl to = new ToControl();
-        FloatProperty value = FloatProperty.create(new ValueBinding(), currentValue);
-        duration = FloatProperty.create(0, 60, 0);
+        NumberProperty value = NumberProperty.create(new ValueBinding(), currentValue);
+        duration = NumberProperty.create(0, 60, 0);
         output = new DefaultControlOutputPort();
-        FloatProperty to = FloatProperty.create(new ToBinding(), 0, PMap.create(ControlInfo.KEY_TRANSIENT, true));
+        NumberProperty to = NumberProperty.create(new ToBinding(), 0, PMap.create(ControlInfo.KEY_TRANSIENT, true));
         registerControl(TO, to);
         registerPort(TO, to.createPort());
         registerPort(Port.OUT, output);    
@@ -123,7 +123,7 @@ public class Animator extends AbstractClockComponent {
         }
     }
 
-    private class ValueBinding implements FloatProperty.Binding {
+    private class ValueBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             currentValue = toValue = fromValue = value;
@@ -137,7 +137,7 @@ public class Animator extends AbstractClockComponent {
         }
     }
 
-    private class ToBinding implements FloatProperty.Binding {
+    private class ToBinding implements NumberProperty.Binding {
         
         private double value = 0;
 

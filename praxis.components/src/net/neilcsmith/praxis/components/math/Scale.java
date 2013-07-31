@@ -26,7 +26,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.FloatInputPort;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 
 /**
  *
@@ -34,17 +34,17 @@ import net.neilcsmith.praxis.impl.FloatProperty;
  */
 public class Scale extends AbstractComponent {
 
-    private FloatProperty x1;
-    private FloatProperty x2;
-    private FloatProperty y1;
-    private FloatProperty y2;
+    private NumberProperty x1;
+    private NumberProperty x2;
+    private NumberProperty y1;
+    private NumberProperty y2;
     private ControlPort.Output output;
 
     public Scale() {
-        x1 = FloatProperty.create( 0);
-        x2 = FloatProperty.create( 1);
-        y1 = FloatProperty.create( 0);
-        y2 = FloatProperty.create( 1);
+        x1 = NumberProperty.create( 0);
+        x2 = NumberProperty.create( 1);
+        y1 = NumberProperty.create( 0);
+        y2 = NumberProperty.create( 1);
         FloatInputPort input = FloatInputPort.create( new InputBinding());
         output = new DefaultControlOutputPort(this);
         registerPort(Port.IN, input);

@@ -26,7 +26,7 @@ import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractClockComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 
 /**
  *
@@ -41,7 +41,7 @@ public class Timer extends AbstractClockComponent {
     private boolean first;
     
     public Timer() {
-        FloatProperty period = FloatProperty.create( new PeriodBinding(), 0, 60, 1);
+        NumberProperty period = NumberProperty.create( new PeriodBinding(), 0, 60, 1);
         output = new DefaultControlOutputPort();
         registerPort(Port.OUT, output);
         registerControl("period", period);
@@ -101,7 +101,7 @@ public class Timer extends AbstractClockComponent {
     
     
 
-    private class PeriodBinding implements FloatProperty.Binding {
+    private class PeriodBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             periodS = value;

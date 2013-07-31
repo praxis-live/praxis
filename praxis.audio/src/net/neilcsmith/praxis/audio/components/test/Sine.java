@@ -24,7 +24,7 @@ package net.neilcsmith.praxis.audio.components.test;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import org.jaudiolibs.pipes.Buffer;
 import org.jaudiolibs.pipes.impl.SingleInOut;
 import org.jaudiolibs.pipes.impl.SingleOut;
@@ -40,14 +40,14 @@ public class Sine extends AbstractComponent {
     public Sine() {
         sine = new SineUG(440);
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, sine));
-        FloatProperty freq = FloatProperty.create(new FrequencyBinding(),
+        NumberProperty freq = NumberProperty.create(new FrequencyBinding(),
                 110, 4 * 440, 440);
         registerControl("frequency", freq);
         registerPort("frequency", freq.createPort());
 
     }
 
-    private class FrequencyBinding implements FloatProperty.Binding {
+    private class FrequencyBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             sine.setFrequency((float) value);

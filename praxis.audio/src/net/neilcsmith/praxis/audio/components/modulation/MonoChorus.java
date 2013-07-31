@@ -27,7 +27,7 @@ import net.neilcsmith.praxis.audio.impl.DefaultAudioInputPort;
 import net.neilcsmith.praxis.audio.impl.DefaultAudioOutputPort;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractComponent;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import org.jaudiolibs.audioops.impl.ChorusOp;
 import org.jaudiolibs.audioops.impl.ContainerOp;
 import org.jaudiolibs.pipes.impl.OpHolder;
@@ -40,11 +40,11 @@ public class MonoChorus extends AbstractComponent {
 
     private ChorusOp chorus;
     private ContainerOp container;
-    private FloatProperty depth;
-    private FloatProperty rate;
+    private NumberProperty depth;
+    private NumberProperty rate;
 //    private FloatProperty phase;
-    private FloatProperty feedback;
-    private FloatProperty mix;
+    private NumberProperty feedback;
+    private NumberProperty mix;
 
     public MonoChorus() {
         chorus = new ChorusOp();
@@ -54,27 +54,27 @@ public class MonoChorus extends AbstractComponent {
         OpHolder holder = new OpHolder(container);
         registerPort(Port.IN, new DefaultAudioInputPort(this, holder));
         registerPort(Port.OUT, new DefaultAudioOutputPort(this, holder));
-        depth =  FloatProperty.create( new DepthBinding(),
+        depth =  NumberProperty.create( new DepthBinding(),
                 1, 40, 1);
         registerControl("depth", depth);
         registerPort("depth", depth.createPort());
-        rate = FloatProperty.create(new RateBinding(), 0, 15, 0);
+        rate = NumberProperty.create(new RateBinding(), 0, 15, 0);
         registerControl("rate", rate);
         registerPort("rate", rate.createPort());
-        feedback = FloatProperty.create( new FeedbackBinding(),
+        feedback = NumberProperty.create( new FeedbackBinding(),
                 0, 1, 0);
         
         registerControl("feedback", feedback);
         registerPort("feedback", feedback.createPort());
 //        phase = FloatProperty.create(new PhaseBinding(), 0, 1, 0);
 //        registerControl("phase", phase);
-        mix = FloatProperty.create( new MixBinding(), 0, 1, 0);
+        mix = NumberProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());
         
     }
 
-    private class MixBinding implements FloatProperty.Binding {
+    private class MixBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             container.setMix((float) value);
@@ -86,7 +86,7 @@ public class MonoChorus extends AbstractComponent {
 
     }
 
-    private class DepthBinding implements FloatProperty.Binding {
+    private class DepthBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             chorus.setDepth((float)value);
@@ -98,7 +98,7 @@ public class MonoChorus extends AbstractComponent {
 
     }
     
-    private class RateBinding implements FloatProperty.Binding {
+    private class RateBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             chorus.setRate((float) value);
@@ -110,7 +110,7 @@ public class MonoChorus extends AbstractComponent {
         
     }
     
-    private class PhaseBinding implements FloatProperty.Binding {
+    private class PhaseBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             chorus.setPhase((float)value);
@@ -122,7 +122,7 @@ public class MonoChorus extends AbstractComponent {
         
     }
 
-    private class FeedbackBinding implements FloatProperty.Binding {
+    private class FeedbackBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             chorus.setFeedback((float) value);

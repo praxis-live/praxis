@@ -28,7 +28,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.impl.AbstractControlInputPort;
 import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 
 /**
  *
@@ -46,7 +46,7 @@ public class Inhibitor extends AbstractExecutionContextComponent {
         registerPort(Port.IN, new InputPort());
         out = new DefaultControlOutputPort();
         registerPort(Port.OUT, out);
-        FloatProperty time = FloatProperty.create(new TimeBinding(), 0, 60, 1);
+        NumberProperty time = NumberProperty.create(new TimeBinding(), 0, 60, 1);
         registerControl("time", time);
         registerPort("time", time.createPort());
     }
@@ -55,7 +55,7 @@ public class Inhibitor extends AbstractExecutionContextComponent {
         inited = false;
     }
 
-    private class TimeBinding implements FloatProperty.Binding {
+    private class TimeBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             timeS = value;

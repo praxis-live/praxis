@@ -28,7 +28,7 @@ import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.FloatInputPort;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 
 /**
  *
@@ -36,14 +36,14 @@ import net.neilcsmith.praxis.impl.FloatProperty;
  */
 public class Multiply extends AbstractComponent {
     
-    private FloatProperty value;
+    private NumberProperty value;
     private ControlPort.Output output;
     
     public Multiply() {
         registerPort(Port.IN, FloatInputPort.create( new InputBinding()));
         output = new DefaultControlOutputPort(this);
         registerPort(Port.OUT, output);
-        value = FloatProperty.create( 0);
+        value = NumberProperty.create( 0);
         registerControl("value", value);
         registerPort("value", value.createPort());     
     }

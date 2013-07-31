@@ -263,6 +263,11 @@ public class PMap extends Argument {
             putImpl(key, value);
             return this;
         }
+        
+        public Builder put(String key, Argument value) {
+            put(PString.valueOf(key), value);
+            return this;
+        }
 
         public Builder put(String key, boolean value) {
             putImpl(PString.valueOf(key), PBoolean.valueOf(value));
