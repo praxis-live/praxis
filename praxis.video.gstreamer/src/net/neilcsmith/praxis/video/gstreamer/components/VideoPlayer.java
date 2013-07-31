@@ -28,7 +28,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
-import net.neilcsmith.praxis.impl.FloatProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import net.neilcsmith.praxis.video.gstreamer.components.VideoDelegate.StateException;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
@@ -54,7 +54,7 @@ public class VideoPlayer extends AbstractExecutionContextComponent {
         registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));
         loader = new VideoDelegateLoader(this, new VideoBinding(), false);
         registerControl("video", loader);
-        FloatProperty position = FloatProperty.create(new PositionBinding(), 0, 1, 0,
+        NumberProperty position = NumberProperty.create(new PositionBinding(), 0, 1, 0,
                 PMap.create(ControlInfo.KEY_TRANSIENT, true));
         registerControl("position", position);
         registerPort("position", position.createPort());
@@ -70,7 +70,7 @@ public class VideoPlayer extends AbstractExecutionContextComponent {
 
     }
 
-    private class PositionBinding implements FloatProperty.Binding {
+    private class PositionBinding implements NumberProperty.Binding {
 
         public void setBoundValue(long time, double value) {
             if (video != null && video.isSeekable()) {
