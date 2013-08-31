@@ -21,9 +21,6 @@
  */
 package net.neilcsmith.praxis.video.opengl;
 
-import net.neilcsmith.praxis.video.ClientConfiguration;
-import net.neilcsmith.praxis.video.Player;
-import net.neilcsmith.praxis.video.PlayerConfiguration;
 import net.neilcsmith.praxis.video.PlayerFactory;
 
 /**
@@ -33,7 +30,7 @@ import net.neilcsmith.praxis.video.PlayerFactory;
 public class GLPlayerFactoryProvider implements PlayerFactory.Provider {
     
     private final static String LIBRARY_NAME = "OpenGL";
-    private final static PlayerFactory factory = new Factory(); 
+    private final static PlayerFactory factory = GLPlayer.getFactory(); 
 
     @Override
     public PlayerFactory getFactory() {
@@ -43,33 +40,5 @@ public class GLPlayerFactoryProvider implements PlayerFactory.Provider {
     @Override
     public String getLibraryName() {
         return LIBRARY_NAME;
-    }
-    
-    private static class Factory implements PlayerFactory {
-
-        @Override
-        public Player createPlayer(PlayerConfiguration config, ClientConfiguration[] clients)
-            throws Exception {
-            if (clients.length != 1 || clients[0].getSourceCount() != 0 || clients[0].getSinkCount() != 1) {
-                throw new IllegalArgumentException("Invalid client configuration");
-            }
-            
-            boolean fullscreen = false;
-            Object val = clients[0].getHint(ClientConfiguration.CLIENT_KEY_FULLSCREEN);
-            if (val instanceof Boolean) {
-                fullscreen = ((Boolean)val).booleanValue();
-            }
-            
-            String title = "OpenGL";
-            val = clients[0].getHint(ClientConfiguration.CLIENT_KEY_TITLE);
-            if (val instanceof String) {
-                title = val.toString() + " [GL]";
-            }
-            
-            return GLPlayer.create(title, config.getWidth(), config.getHeight(), config.getFPS(), fullscreen);
-            
-        }
-        
-    }
-    
+    } 
 }

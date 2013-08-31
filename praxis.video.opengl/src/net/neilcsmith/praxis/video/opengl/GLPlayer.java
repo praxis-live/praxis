@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -38,10 +38,16 @@ import java.awt.image.BufferedImage;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
+import net.neilcsmith.praxis.video.ClientConfiguration;
 import net.neilcsmith.praxis.video.Player;
+import net.neilcsmith.praxis.video.PlayerConfiguration;
+import net.neilcsmith.praxis.video.PlayerFactory;
+import net.neilcsmith.praxis.video.QueueContext;
+import net.neilcsmith.praxis.video.WindowHints;
 import net.neilcsmith.praxis.video.opengl.internal.GLContext;
 import net.neilcsmith.praxis.video.opengl.internal.GLRenderer;
 import net.neilcsmith.praxis.video.opengl.internal.GLSurface;
@@ -58,13 +64,14 @@ import org.lwjgl.opengl.GL11;
  */
 public class GLPlayer implements Player {
 
-    private final Object LOCK = new Object();
-    private final static Logger LOGGER = Logger.getLogger(GLPlayer.class.getName());
+    private final static Factory FACTORY = new Factory();
+    private final static Logger LOG = Logger.getLogger(GLPlayer.class.getName());
     private final static double DEG_90 = Math.toRadians(90);
     private final static double DEG_180 = Math.toRadians(180);
     private final static double DEG_270 = Math.toRadians(270);
+    private final Object LOCK = new Object();
     private int width, height; // dimensions of surface
-    private int outputWidth, outputHeight, outputRotation;
+    private int outputWidth, outputHeight, outputRotation, outputDevice;
     private double fps; // frames per second
     private long period; // period per frame in nanosecs
 //    private long frameIndex; // index of current frame
@@ -87,6 +94,7 @@ public class GLPlayer implements Player {
 //    private Texture image;
 //    private TextureRenderer renderer;
     private GLContext context;
+    private QueueContext queue;
 
     private GLPlayer(String title,
             int width,
@@ -95,7 +103,9 @@ public class GLPlayer implements Player {
             boolean fullScreen,
             int outputWidth,
             int outputHeight,
-            int outputRotation) {
+            int outputRotation,
+            int outputDevice,
+            QueueContext queue) {
         if (width <= 0 || height <= 0 || fps <= 0) {
             throw new IllegalArgumentException();
         }
@@ -111,32 +121,23 @@ public class GLPlayer implements Player {
         this.outputWidth = outputWidth;
         this.outputHeight = outputHeight;
         this.outputRotation = outputRotation;
+        this.outputDevice = outputDevice;
+        this.queue = queue;
     }
 
     @Override
     public void run() {
-        LOGGER.info("Starting experimental OpenGL renderer.");
+        LOG.info("Starting experimental OpenGL renderer.");
         running = true;
         try {
             init();
         } catch (Exception ex) {
-            LOGGER.log(Level.WARNING, "Unable to start OpenGL player", ex);
+            LOG.log(Level.WARNING, "Unable to start OpenGL player", ex);
             running = false;
             dispose();
             return;
         }
         period = (long) (1000000000.0 / fps);
-
-
-        //render first frame
-        time = System.nanoTime();
-        updateAndRender();
-
-//        long afterTime = 0L; // time after render
-//        long sleepTime = 0L; // time to sleep
-//        long overSleepTime = 0L; // time over slept
-//        long excess = 0L; // excess time taken to render frame
-//        int noSleeps = 0;
 
         time = System.nanoTime();
 
@@ -148,16 +149,20 @@ public class GLPlayer implements Player {
             now = System.nanoTime();
             difference = now - time;
             if (difference > 0) {
+                fireListeners();
                 updateOnly();
-                if (LOGGER.isLoggable(Level.FINEST)) {
-                    LOGGER.log(Level.FINEST, "Frame skipped - Difference : {0}", (difference));
+                if (LOG.isLoggable(Level.FINEST)) {
+                    LOG.log(Level.FINEST, "Frame skipped - Difference : {0}", (difference));
                 }
                 skips++;
             } else {
+                fireListeners();
                 while (difference < -1000000L) {
                     try {
-                        Thread.sleep(1);
+                        queue.process(1, TimeUnit.MILLISECONDS);
+//                        Thread.sleep(1);
                     } catch (Exception ex) {
+                        LOG.log(Level.WARNING, "Queue exception", ex);
                     }
                     now = System.nanoTime();
                     difference = now - time;
@@ -184,7 +189,9 @@ public class GLPlayer implements Player {
                 } else {
                     dim = new Dimension(outputWidth, outputHeight);
                 }
-                frame = new JFrame(title);
+                GraphicsDevice gd = findScreenDevice();
+
+                frame = new JFrame(title, gd.getDefaultConfiguration());
                 ((JFrame) frame).getContentPane().setBackground(Color.BLACK);
                 ((JFrame) frame).setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
                 frame.addWindowListener(new WindowAdapter() {
@@ -214,8 +221,6 @@ public class GLPlayer implements Player {
                     frame.setUndecorated(true);
                     frame.setSize(Toolkit.getDefaultToolkit().getScreenSize());
                     frame.validate();
-                    GraphicsDevice gd =
-                            GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
                     gd.setFullScreenWindow(frame);
 
                 } else {
@@ -223,8 +228,8 @@ public class GLPlayer implements Player {
                     frame.setVisible(true);
                 }
 
-                LOGGER.log(Level.FINE, "Frame : {0}", frame.getBounds());
-                LOGGER.log(Level.FINE, "Canvas : {0}", canvas.getBounds());
+                LOG.log(Level.FINE, "Frame : {0}", frame.getBounds());
+                LOG.log(Level.FINE, "Canvas : {0}", canvas.getBounds());
 
             }
         });
@@ -243,6 +248,24 @@ public class GLPlayer implements Player {
 //
 //        }
 
+    }
+
+    private GraphicsDevice findScreenDevice() {
+        GraphicsEnvironment gEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gd = null;
+        if (outputDevice < 0) {
+            gd = gEnv.getDefaultScreenDevice();
+        } else {
+            GraphicsDevice[] screens = gEnv.getScreenDevices();
+            if (outputDevice < screens.length) {
+                gd = screens[outputDevice];
+            } else {
+                gd = screens[0];
+            }
+        }
+        LOG.log(Level.FINE, "Searching for screen index : {0}", outputDevice);
+        LOG.log(Level.FINE, "Found Screen Device : {0}", gd);
+        return gd;
     }
 
     private void dispose() {
@@ -284,13 +307,13 @@ public class GLPlayer implements Player {
 
     private void updateOnly() {
         rendering = false;
-        fireListeners();
+//        fireListeners();
         sink.process(surface, time, rendering);
     }
 
     private void updateAndRender() {
         rendering = true;
-        fireListeners();
+//        fireListeners();
 
         try {
             sink.process(surface, time, rendering);
@@ -313,7 +336,7 @@ public class GLPlayer implements Player {
 //                    break;
 //            }
         } catch (Exception exception) {
-            LOGGER.log(Level.WARNING, "Exception in render", exception);
+            LOG.log(Level.WARNING, "Exception in render", exception);
             return;
         }
     }
@@ -324,12 +347,12 @@ public class GLPlayer implements Player {
             renderer.target(null);
             renderer.clear(); // snapshot seems to have a bug where the background is released?!
             renderer.setBlendFunction(GL11.GL_ONE, GL11.GL_ZERO);
-            renderer.setColor(1,1,1,1);
-            renderer.draw(surface, 0, 0);
+            renderer.setColor(1, 1, 1, 1);
+            renderer.draw(surface, 0, 0, outputWidth, outputHeight);
             renderer.flush();
 //            GLRenderer.safe();
         } catch (Exception exception) {
-            LOGGER.log(Level.SEVERE, "Error in rendering surface", exception);
+            LOG.log(Level.SEVERE, "Error in rendering surface", exception);
         }
 
         Display.update();
@@ -489,28 +512,72 @@ public class GLPlayer implements Player {
         }
     }
 
-    public static GLPlayer create(
-            String title,
-            int width,
-            int height,
-            double fps,
-            boolean fullscreen) {
-        return new GLPlayer(title, width, height, fps, fullscreen, width, height, 0);
+    static PlayerFactory getFactory() {
+        return FACTORY;
     }
 
-    public static GLPlayer create(
-            String title,
-            int width,
-            int height,
-            double fps,
-            boolean fullscreen,
-            int outputWidth,
-            int outputHeight,
-            int rotation) {
-        if (rotation != 0 && rotation != 90 && rotation != 180 && rotation != 270) {
-            rotation = 0;
-            LOGGER.warning("Rotation should be 0, 90, 180 or 270. Switching to 0.");
+    private static class Factory implements PlayerFactory {
+
+        @Override
+        public Player createPlayer(PlayerConfiguration config, ClientConfiguration[] clients)
+                throws Exception {
+            if (clients.length != 1 || clients[0].getSourceCount() != 0 || clients[0].getSinkCount() != 1) {
+                throw new IllegalArgumentException("Invalid client configuration");
+            }
+
+
+            int width = config.getWidth();
+            int height = config.getHeight();
+            int outWidth = width;
+            int outHeight = height;
+            int rotation = 0;
+            int device = -1;
+            boolean fullscreen = false;
+            String title = "OpenGL";
+
+            WindowHints wHints = clients[0].getLookup().get(WindowHints.class);
+            if (wHints != null) {
+                fullscreen = wHints.isFullScreen();
+                title = wHints.getTitle() + " [GL]";
+            }
+
+            ClientConfiguration.Dimension dim =
+                    clients[0].getLookup().get(ClientConfiguration.Dimension.class);
+            if (dim != null) {
+                outWidth = dim.getWidth();
+                outHeight = dim.getHeight();
+            }
+
+            ClientConfiguration.Rotation rot =
+                    clients[0].getLookup().get(ClientConfiguration.Rotation.class);
+            if (rot != null) {
+                rotation = rot.getAngle();
+            }
+
+            if (rotation != 0) {
+                LOG.warning("OpenGL pipeline doesn't currently support rotation");
+                rotation = 0;
+            }
+
+            ClientConfiguration.DeviceIndex dev =
+                    clients[0].getLookup().get(ClientConfiguration.DeviceIndex.class);
+            if (dev != null) {
+                device = dev.getValue();
+            }
+
+            QueueContext queue = config.getLookup().get(QueueContext.class);
+
+            return new GLPlayer(title,
+                    config.getWidth(),
+                    config.getHeight(),
+                    config.getFPS(),
+                    fullscreen,
+                    outWidth,
+                    outHeight,
+                    rotation,
+                    device,
+                    queue);
+
         }
-        return new GLPlayer(title, width, height, fps, fullscreen, outputWidth, outputHeight, rotation);
     }
 }
