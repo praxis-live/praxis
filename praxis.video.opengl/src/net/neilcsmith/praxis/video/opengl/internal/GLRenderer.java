@@ -1,6 +1,6 @@
 /**
  * *****************************************************************************
- * Copyright 2011 See AUTHORS file.
+ * Copyright 2013 See AUTHORS file.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -65,7 +65,9 @@ public class GLRenderer implements Disposable {
     private Texture target;
     private boolean active;
     private IntBuffer scratchBuffer;
-    private Texture emptyTexture;
+    private Texture clearTexture;
+    private Texture blackTexture;
+//    private Texture whiteTexture;
 
     GLRenderer(GLContext context) {
         this(context, 1000, 1);
@@ -117,7 +119,7 @@ public class GLRenderer implements Disposable {
 
         createShader();
 
-        createEmptyTexture();
+        createFallbackTextures();
 
     }
 
@@ -152,15 +154,24 @@ public class GLRenderer implements Disposable {
         }
     }
 
-    private void createEmptyTexture() {
+    private void createFallbackTextures() {
         GLSurfaceData sd = new GLSurfaceData(32, 32, true);
         sd.pixels = PixelArrayCache.acquire(32 * 32, false);
         sd.texture = new Texture(32, 32);
-        int white = 0xFFFFFFFF;
-        Arrays.fill(sd.pixels, white);
+        int clear = 0;
+        Arrays.fill(sd.pixels, clear);
         syncPixelsToTexture(sd);
         PixelArrayCache.release(sd.pixels);
-        emptyTexture = sd.texture;
+        clearTexture = sd.texture;
+        
+        sd = new GLSurfaceData(32, 32, true);
+        sd.pixels = PixelArrayCache.acquire(32 * 32, false);
+        sd.texture = new Texture(32, 32);
+        int black = 0xFF000000;
+        Arrays.fill(sd.pixels, black);
+        syncPixelsToTexture(sd);
+        PixelArrayCache.release(sd.pixels);
+        blackTexture = sd.texture;
     }
 
     public void clear() {
@@ -346,16 +357,12 @@ public class GLRenderer implements Disposable {
 //        GLSurfaceData data = src.data;
         if (tr == null) {
             LOGGER.finest("Drawing empty Surface - using empty texture");
-            float col = color;
             if (src.hasAlpha()) {
-                setColor(0, 0, 0, 0);
+                region.setRegion(clearTexture);
             } else {
-                float a = ((Float.floatToRawIntBits(col) >>> 24) & 0xff) / 255f;
-                setColor(0, 0, 0, a);
+                region.setRegion(blackTexture);
             }
-            region.setRegion(emptyTexture);
             draw(region, x, y, width, height);
-            color = col;
         } else {
 //            if (data.texture == null) {
 //                LOGGER.finest("Surface texture is null - uploading pixels");
@@ -374,16 +381,12 @@ public class GLRenderer implements Disposable {
         TextureRegion tr = initRegion(region, src, (int) srcX, (int) srcY, (int) (srcWidth + 0.5f), (int) (srcHeight + 0.5f));
         if (tr == null) {
             LOGGER.finest("Drawing empty Surface - using empty texture");
-            float col = color;
             if (src.hasAlpha()) {
-                setColor(0, 0, 0, 0);
+                region.setRegion(clearTexture);
             } else {
-                float a = ((Float.floatToRawIntBits(col) >>> 24) & 0xff) / 255f;
-                setColor(0, 0, 0, a);
+                region.setRegion(blackTexture);
             }
-            region.setRegion(emptyTexture);
             draw(region, vts);
-            color = col;
         } else {
             draw(region, vts);
         }
@@ -575,15 +578,22 @@ public class GLRenderer implements Disposable {
     /**
      * Disposes all resources associated with this TextureRenderer
      */
+    @Override
     public void dispose() {
         for (int i = 0; i < buffers.length; i++) {
             buffers[i].dispose();
         }
         if (shader != null) {
             shader.dispose();
+            shader = null;
         }
-        if (emptyTexture != null) {
-            emptyTexture.dispose();
+        if (clearTexture != null) {
+            clearTexture.dispose();
+            clearTexture = null;
+        }
+        if (blackTexture != null) {
+            blackTexture.dispose();
+            blackTexture = null;
         }
     }
 
