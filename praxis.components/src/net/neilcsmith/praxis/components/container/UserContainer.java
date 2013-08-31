@@ -92,6 +92,16 @@ public class UserContainer extends AbstractContainer {
             // check port is correct
             UserContainer.this.unregisterPort(id);
         }
+
+        @Override
+        public void refreshControlInfo(String id, Control control) {
+            UserContainer.this.refreshControlInfo(id);
+        }
+
+        @Override
+        public void refreshPortInfo(String id, Port port) {
+            UserContainer.this.refreshPortInfo(id);
+        }
         
     }
     
