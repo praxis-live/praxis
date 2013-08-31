@@ -46,8 +46,8 @@ public class OSCFactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-                addRoot("root:osc", data(OSCRoot.class).test());
-                addComponent("osc:input", data(OSCInput.class).test());         
+                addRoot("root:osc", data(OSCRoot.class));
+                addComponent("osc:input", data(OSCInput.class));         
         }
         
     }
