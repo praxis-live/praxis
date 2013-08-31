@@ -66,7 +66,7 @@ public abstract class AbstractComponent implements Component {
     protected AbstractComponent() {
         this(true);
     }
-    
+
     protected AbstractComponent(boolean componentInterface) {
         controlMap = new LinkedHashMap<String, Control>();
         portMap = new LinkedHashMap<String, Port>();
@@ -75,7 +75,7 @@ public abstract class AbstractComponent implements Component {
             buildComponentInterface();
         }
     }
-    
+
     protected void markDynamic() {
         dynamic = true;
     }
@@ -84,11 +84,10 @@ public abstract class AbstractComponent implements Component {
         registerControl(ComponentInterface.INFO,
                 ArgumentProperty.createReadOnly(ComponentInfo.info(),
                 new ArgumentProperty.ReadBinding() {
-
-            public Argument getBoundValue() {
-                return getInfo();
-            }
-        }));
+                    public Argument getBoundValue() {
+                        return getInfo();
+                    }
+                }));
         registerInterface(ComponentInterface.INSTANCE);
     }
 
@@ -128,7 +127,9 @@ public abstract class AbstractComponent implements Component {
         }
         controlMap.put(id, control);
         if (control instanceof ExtendedControl) {
-            ((ExtendedControl) control).addNotify(this);
+            ExtendedControl exc = (ExtendedControl) control;
+            exc.addNotify(this);
+            exc.hierarchyChanged();
         }
         info = null;
     }
@@ -141,12 +142,18 @@ public abstract class AbstractComponent implements Component {
     protected Control unregisterControl(String id) {
         Control control = controlMap.remove(id);
         if (control instanceof ExtendedControl) {
-            ((ExtendedControl) control).removeNotify(this);
+            ExtendedControl exc = (ExtendedControl) control;
+            exc.removeNotify(this);
+            exc.hierarchyChanged();
         }
         if (control != null) {
             info = null;
         }
         return control;
+    }
+
+    protected void refreshControlInfo(String id) {
+        info = null;
     }
 
     public Port getPort(String id) {
@@ -187,6 +194,10 @@ public abstract class AbstractComponent implements Component {
             info = null;
         }
         return port;
+    }
+
+    protected void refreshPortInfo(String id) {
+        info = null;
     }
 
     protected void registerInterface(InterfaceDefinition id) {
@@ -232,15 +243,17 @@ public abstract class AbstractComponent implements Component {
             if (this.parent != null) {
                 this.parent = null;
                 disconnectAll();
-                hierarchyChanged(); // defer to hierarchy changed for all uncaching
+                // hierarchyChanged(); // defer to hierarchy changed for all uncaching
             }
         } else {
             if (this.parent != null) {
                 throw new VetoException();
             }
             this.parent = parent;
-            hierarchyChanged(); // as above
+            //  hierarchyChanged(); // as above
         }
+//        address = null;
+//        router = null;
     }
 
     private void disconnectAll() {
@@ -313,7 +326,7 @@ public abstract class AbstractComponent implements Component {
         return router;
     }
 
-     protected ComponentAddress findService(InterfaceDefinition service)
+    protected ComponentAddress findService(InterfaceDefinition service)
             throws ServiceUnavailableException {
         ServiceManager sm = getLookup().get(ServiceManager.class);
         if (sm == null) {
@@ -322,7 +335,6 @@ public abstract class AbstractComponent implements Component {
         return sm.findService(service);
 
     }
-
 
     public static interface ExtendedControl extends Control {
 

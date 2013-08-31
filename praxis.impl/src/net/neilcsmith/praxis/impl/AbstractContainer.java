@@ -98,6 +98,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             throw new VetoException();
         }
         childInfoValid = false;
+        notifyHierarchyChange(child);
     }
 
     public Component removeChild(String id) {
@@ -108,8 +109,10 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             } catch (VetoException ex) {
                 // it is an error for children to throw exception on removal
                 // should we throw an error?
+                LOG.log(Level.SEVERE, "Child throwing Veto on removal", ex);
             }
             childInfoValid = false;
+            notifyHierarchyChange(child);
         }
         return child;
     }
@@ -135,7 +138,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             return null;
         } else {
             return ComponentAddress.create(containerAddress, childID);
-        }   
+        }
     }
 
     public String[] getChildIDs() {
@@ -143,13 +146,27 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         return keyset.toArray(new String[keyset.size()]);
     }
 
-    @Override
-    public void hierarchyChanged() {
-        super.hierarchyChanged();
-        for (Map.Entry<String, Component> entry : childMap.entrySet()) {
-            entry.getValue().hierarchyChanged();
-        }
+//    @Override
+//    public void hierarchyChanged() {
+//        super.hierarchyChanged();
+//        for (Map.Entry<String, Component> entry : childMap.entrySet()) {
+//            entry.getValue().hierarchyChanged();
+//        }
+//    }
 
+    private void notifyHierarchyChange(Component cmp) {
+        cmp.hierarchyChanged();
+        if (cmp instanceof AbstractContainer) {
+            AbstractContainer cnt = (AbstractContainer) cmp;
+            for (Map.Entry<String, Component> entry : cnt.childMap.entrySet()) {
+                notifyHierarchyChange(entry.getValue());
+            }
+        } else if (cmp instanceof Container) {
+            Container cnt = (Container) cmp;
+            for (String id : cnt.getChildIDs()) {
+                notifyHierarchyChange(cnt.getChild(id));
+            }
+        }
     }
 
     @Override

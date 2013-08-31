@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -45,14 +45,12 @@ public abstract class AbstractControl implements AbstractComponent.ExtendedContr
 
     public void addNotify(AbstractComponent component) {
         this.host = component;
-        hierarchyChanged();
     }
 
     public void removeNotify(AbstractComponent component) {
         if (this.host == component) {
             this.host = null;
         }
-        hierarchyChanged();
     }
 
     public void hierarchyChanged() {
@@ -164,7 +162,7 @@ public abstract class AbstractControl implements AbstractComponent.ExtendedContr
             PMap props = controlProps == null ? PMap.EMPTY : controlProps.build();
             switch (type) {
                 case Action:
-                    return ControlInfo.createTriggerInfo(props);
+                    return ControlInfo.createActionInfo(props);
                 case Property:
                     return ControlInfo.createPropertyInfo(outs, defaults, props);
                 case ReadOnlyProperty:
