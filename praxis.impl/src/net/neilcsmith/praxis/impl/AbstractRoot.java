@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,12 +21,12 @@
  */
 package net.neilcsmith.praxis.impl;
 
-import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 import java.util.EnumSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.*;
@@ -48,7 +48,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         Component, Container, Startable, ExitableOnStop
     };
     private static final Logger LOG = Logger.getLogger(AbstractRoot.class.getName());
-    public static final int DEFAULT_FRAME_TIME = 100; // set in constructor?
+    public static final int DEFAULT_FRAME_TIME = 10; // set in constructor?
     private AtomicReference<RootState> state = new AtomicReference<RootState>(RootState.NEW);
     private RootState cachedState = RootState.NEW; // cache to pass to listeners for thread safety
     private RootState defaultRunState;
@@ -56,14 +56,16 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     private String ID;
     private ComponentAddress address;
     private PacketQueue orderedQueue = new PacketQueue();
-    private BlockingQueue<Packet> blockingQueue = new LinkedBlockingQueue<Packet>();
+    private BlockingQueue<Object> blockingQueue = new LinkedBlockingQueue<Object>();
     private long time;
     private Root.Controller controller;
-    private Runnable interrupt;
+    //private Runnable interrupt;
     private Lookup lookup;
     private ExecutionContextImpl context;
     private Router router;
     private ExitOnStopControl exitOnStop;
+    private Runnable delegate;
+    private boolean interrupted;
 
     protected AbstractRoot() {
         this(EnumSet.allOf(Caps.class));
@@ -88,7 +90,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         registerControl(StartableInterface.IS_RUNNING,
                 ArgumentProperty.createReadOnly(PBoolean.info(),
                 new ArgumentProperty.ReadBinding() {
-
                     public Argument getBoundValue() {
                         if (state.get() == RootState.ACTIVE_RUNNING) {
                             return PBoolean.TRUE;
@@ -99,7 +100,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                 }));
         registerInterface(StartableInterface.INSTANCE);
     }
-    
+
     private void createExitOnStopControl() {
         exitOnStop = new ExitOnStopControl();
         registerControl("exit-on-stop", BooleanProperty.create(exitOnStop, false));
@@ -121,7 +122,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             this.context = new ExecutionContextImpl(System.nanoTime());
             this.router = new Router();
             this.lookup = InstanceLookup.create(hub.getLookup(), router, context);
-//            initializing(); // hook for subclasses
             if (state.compareAndSet(RootState.INITIALIZING, RootState.INITIALIZED)) {
                 controller = new Controller();
                 return controller;
@@ -142,10 +142,11 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 
     //@TODO make protected.
     @Override
-    public PacketRouter getPacketRouter() {
+    protected PacketRouter getPacketRouter() {
         return router;
     }
 
+    @Deprecated
     protected RootHub getRootHub() {
         return hub;
     }
@@ -154,13 +155,9 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         return time;
     }
 
-    @Deprecated
-    protected void setTime(long time) {
-        this.time = time;
-    }
-
-//    // Empty hooks for subclasses to extend setup
-//    protected void initializing() {
+//    @Deprecated
+//    protected void setTime(long time) {
+//        this.time = time;
 //    }
     protected void activating() {
     }
@@ -174,6 +171,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     protected void stopping() {
     }
 
+    @Deprecated
     protected void processingControlFrame() {
     }
 
@@ -201,67 +199,40 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     }
 
     protected void run() {
-        while (true) {
-            RootState currentState = state.get();
-            if (currentState != RootState.ACTIVE_IDLE && currentState != RootState.ACTIVE_RUNNING) {
+        while (state.get() != RootState.TERMINATING) {
+            try {
+                if (delegate != null) {
+                    try {
+                        delegate.run();
+                    } catch (Exception ex) {
+                        LOG.log(Level.SEVERE, "Delegate threw Exception", ex);
+                    } finally {
+                        delegate = null;
+                    }
+                }
+                update(System.nanoTime(), true);
+                if (!interrupted) {
+                    poll(DEFAULT_FRAME_TIME, TimeUnit.MILLISECONDS);
+                }
+            } catch (InterruptedException ex) {
+                continue;
+            } catch (Exception ex) {
+                LOG.log(Level.FINEST, "", ex);
                 break;
             }
-            Packet packet = null;
-            try {
-                packet = blockingQueue.poll(DEFAULT_FRAME_TIME, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException ex) {
-                continue; // check state again if interrupted
-            }
-            time = System.nanoTime();
-            processControlFrame(packet, currentState);
-            if (interrupt != null) {
-                Runnable task = interrupt;
-                interrupt = null;
-                task.run();
-            }
         }
     }
 
-    protected void setInterrupt(Runnable task) {
-        if (interrupt == null) {
-            interrupt = task;
-        }
-    }
+    @SuppressWarnings("deprecation")
+    protected final void update(long time, boolean poll) throws IllegalRootStateException {
 
-//    protected final void processControlFrame(long time) throws IllegalRootStateException {
-//        processControlFrame(null);
-//    }
-//    protected final void processControlFrame(Call call) throws IllegalRootStateException {
-//        RootState currentState = state.get();
-//        if (currentState == RootState.ACTIVE_RUNNING || currentState == RootState.ACTIVE_IDLE) {
-//            processControlFrame(null, currentState);
-//        } else {
-//            throw new IllegalRootStateException();
-//        }
-//        if (interrupt != null) {
-//            Runnable task = interrupt;
-//            interrupt = null;
-//            task.run();
-//        }
-//    }
-    protected void nextControlFrame(long time) throws IllegalRootStateException {
-        this.time = time;
+        interrupted = false;
+
         RootState currentState = state.get();
-        if (currentState == RootState.ACTIVE_RUNNING || currentState == RootState.ACTIVE_IDLE) {
-            processControlFrame(null, currentState);
-        } else {
+        if (currentState != RootState.ACTIVE_IDLE && currentState != RootState.ACTIVE_RUNNING) {
             throw new IllegalRootStateException();
         }
-        if (interrupt != null) {
-            Runnable task = interrupt;
-            interrupt = null;
-            task.run();
-        }
-    }
-
-    protected void processControlFrame(Packet packet, RootState currentState) {
-        long t = getTime();
-
+   
         if (currentState != cachedState) {
             cachedState = currentState;
             if (cachedState == RootState.ACTIVE_RUNNING) {
@@ -270,29 +241,110 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                 context.setState(ExecutionContext.State.IDLE);
             }
         }
+        
+        if (poll) {
+            try {
+                poll(0, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(AbstractRoot.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
 
+        this.time = time;
         context.setTime(time);
+        orderedQueue.setTime(time);
 
         processingControlFrame();
 
-        if (packet == null) {
-            packet = blockingQueue.poll();
-        }
-        orderedQueue.setTime(t);
-        // drain blocking queue to ordered queue
-        while (packet != null) {
-            orderedQueue.add(packet);
-            packet = blockingQueue.poll();
-        }
-        // process ordered queue
-        packet = orderedQueue.poll();
-        while (packet != null) {
-            processPacket(packet);
-            if (interrupt != null) {
-                return;
+        Packet pkt = orderedQueue.poll();
+        while (pkt != null) {
+            processPacket(pkt);
+            if (interrupted) {
+                break;
             }
-            packet = orderedQueue.poll();
+            pkt = orderedQueue.poll();
         }
+
+
+    }
+
+    protected final void poll(long timeout, TimeUnit unit) throws InterruptedException {
+
+        if (interrupted) {
+            if (timeout > 0) {
+                LockSupport.parkNanos(unit.toNanos(timeout));
+            }
+            return;
+        }
+
+        Object obj;
+        if (timeout <= 0) {
+            obj = blockingQueue.poll();
+        } else {
+            obj = blockingQueue.poll(timeout, unit);
+        }
+
+        long now = time;
+        while (obj != null) {
+
+            if (obj instanceof Packet) {
+                Packet pkt = (Packet) obj;
+                if ((pkt.getTimecode() - now) > 0) {
+                    orderedQueue.add(pkt);
+                } else {
+                    processPacket(pkt);
+                }
+            } else if (obj instanceof Runnable) {
+                processTask((Runnable) obj);
+            } else {
+                LOG.log(Level.SEVERE, "Unknown Object in queue : {0}", obj);
+            }
+
+            if (interrupted) {
+                break;
+            }
+
+            obj = blockingQueue.poll();
+
+        }
+
+    }
+
+    protected final void setDelegate(Runnable del) {
+        if (delegate != null) {
+            LOG.log(Level.SEVERE, "Trying to set delegate while delegate already set");
+            throw new IllegalStateException("Delegate already set");
+        }
+        delegate = del;
+        interrupt();
+    }
+
+    protected final void interrupt() {
+        interrupted = true;
+    }
+
+    protected boolean invokeLater(Runnable task) {
+        return blockingQueue.offer(task);
+    }
+
+    @Deprecated
+    protected void setInterrupt(Runnable task) {
+        if (delegate == null) {
+            delegate = task;
+            interrupt();
+        } else {
+            task.run();
+            interrupt();
+        }
+    }
+
+    @Deprecated
+    protected void nextControlFrame(long time) throws IllegalRootStateException {
+        update(time, true);
+    }
+
+    protected void processTask(Runnable task) {
+        task.run();
     }
 
     protected void processPacket(Packet packet) {
@@ -359,12 +411,11 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         return this;
     }
 
-    @Deprecated
-    public ServiceManager getServiceManager() {
-//        return hub.getServiceManager();
-        return hub.getLookup().get(ServiceManager.class);
-    }
-
+//    @Deprecated
+//    public ServiceManager getServiceManager() {
+////        return hub.getServiceManager();
+//        return hub.getLookup().get(ServiceManager.class);
+//    }
     @Override
     public Lookup getLookup() {
         return lookup;
@@ -384,36 +435,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         }
     }
 
-//    protected void addComponent(ComponentAddress address, Component component)
-//            throws Exception {
-//        if (address == null || component == null) {
-//            throw new NullPointerException();
-//        }
-//        Component parent = findComponent(address, address.getDepth() - 1);
-//        if (parent instanceof Container) {
-//            ((Container) parent).addChild(
-//                    address.getComponentID(address.getDepth() - 1),
-//                    component);
-//        } else {
-//            throw new InvalidAddressException();
-//        }
-//    }
-//
-//    protected void removeComponent(ComponentAddress address) throws Exception {
-//        if (address == null) {
-//            throw new NullPointerException();
-//        }
-//        Component parent = findComponent(address, address.getDepth() - 1);
-//        if (parent instanceof Container) {
-//            Component child = ((Container) parent).removeChild(
-//                    address.getComponentID(address.getDepth() - 1));
-//            if (child == null) {
-//                throw new InvalidAddressException();
-//            }
-//        } else {
-//            throw new InvalidAddressException();
-//        }
-//    }
     public class Controller implements Root.Controller {
 
         private Controller() {
@@ -477,15 +498,15 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             }
         }
     }
-    
+
     private class ExitOnStopControl extends SimpleControl implements BooleanProperty.Binding {
-        
+
         private boolean exit;
 
         private ExitOnStopControl() {
             super(null);
         }
-        
+
         @Override
         protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
             throw new UnsupportedOperationException("Not supported.");
@@ -498,14 +519,14 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         public boolean getBoundValue() {
             return exit;
         }
-        
+
         private void idling() {
             if (exit) {
                 try {
                     ControlAddress to = ControlAddress.create(findService(SystemManagerService.INSTANCE),
                             SystemManagerService.SYSTEM_EXIT);
                     getPacketRouter().route(Call.createCall(
-                            to, 
+                            to,
                             ControlAddress.create(getAddress(), "_exit-log"),
                             getTime(),
                             CallArguments.EMPTY));
@@ -513,10 +534,9 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                     LOG.log(Level.WARNING, "Can't access SystemManagerService - exiting manually", ex);
                     System.exit(0);
                 }
-                
+
             }
         }
-        
     }
 
     private class Router implements PacketRouter {

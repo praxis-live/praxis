@@ -125,9 +125,9 @@ public class AbstractSwingRoot extends AbstractRoot {
         }
     }
 
-    private void nextControlFrame() {
+    private void update() {
         try {
-            nextControlFrame(System.nanoTime());
+            update(System.nanoTime(), true);
         } catch (IllegalRootStateException ex) {
             timer.stop();
             synchronized (lock) {
@@ -146,7 +146,7 @@ public class AbstractSwingRoot extends AbstractRoot {
             runner = new Runnable() {
 
                 public void run() {
-                    nextControlFrame();
+                    update();
                 }
             };
         }
@@ -173,7 +173,7 @@ public class AbstractSwingRoot extends AbstractRoot {
     private class TimerProcessor implements ActionListener {
 
         public void actionPerformed(ActionEvent e) {
-            nextControlFrame();
+            update();
         }
     }
 }
