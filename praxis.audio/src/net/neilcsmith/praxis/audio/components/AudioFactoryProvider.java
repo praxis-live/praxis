@@ -76,14 +76,14 @@ public class AudioFactoryProvider implements ComponentFactoryProvider {
             addComponent("audio:modulation:lfo-delay", LFODelay.class);
             addComponent("audio:reverb:freeverb", Freeverb.class);
             addComponent("audio:sampling:looper", Looper.class);
+            addComponent("audio:sampling:player", data(StereoPlayer.class));
+            
+            addComponent("audio:container:input", data(AudioContainerInput.class));
+            addComponent("audio:container:output", data(AudioContainerOutput.class));
             
             // test
             //addTestComponent("audio:test:analysis:level", Level.class, "audio:analysis:level");
             addComponent("audio:test:analysis:level", data(Level.class).test().replacement("audio:analysis:level"));
-            addComponent("audio:sampling:player", data(StereoPlayer.class).test());
-
-            addComponent("audio:container:input", data(AudioContainerInput.class).test());
-            addComponent("audio:container:output", data(AudioContainerOutput.class).test());
             
         }
     }
