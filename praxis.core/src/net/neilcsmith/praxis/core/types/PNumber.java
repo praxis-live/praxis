@@ -30,6 +30,9 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
  * @author Neil C Smith
  */
 public final class PNumber extends Argument implements Comparable<PNumber> {
+    
+    public final static PNumber ONE = PNumber.valueOf(1);
+    public final static PNumber ZERO = PNumber.valueOf(0);
 
     public final static String KEY_MINIMUM = "minimum";
     public final static String KEY_MAXIMUM = "maximum";
@@ -101,6 +104,11 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
         }
     }
 
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+    
     public int compareTo(PNumber o) {
         return Double.compare(value, o.value);
     }
@@ -132,6 +140,10 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
         try {
             if (str.indexOf('.') > -1) {
                 return valueOf(Double.parseDouble(str), str);
+            } else if ("true".equals(str)) {
+                return ONE;
+            } else if ("false".equals(str)) {
+                return ZERO;
             } else {
                 return new PNumber(Integer.parseInt(str), str);
             }
@@ -144,6 +156,8 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
             Argument arg) throws ArgumentFormatException {
         if (arg instanceof PNumber) {
             return (PNumber) arg;
+        } else if (arg instanceof PBoolean) {
+            return ((PBoolean) arg).value() ? ONE : ZERO;
         } else {
             return valueOf(arg.toString());
         }
@@ -161,10 +175,12 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
         return ArgumentInfo.create(PNumber.class, map);
     }
 
+    @Deprecated
     public static ArgumentInfo integerInfo() {
         return ArgumentInfo.create(PNumber.class, PMap.create(KEY_IS_INTEGER, true));
     }
     
+    @Deprecated
     public static ArgumentInfo integerInfo(
             int min, int max) {
         PMap map = PMap.create(KEY_MINIMUM, min,

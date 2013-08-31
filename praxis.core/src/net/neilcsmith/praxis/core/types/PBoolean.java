@@ -36,7 +36,6 @@ public final class PBoolean extends Argument {
     public static final PBoolean FALSE = new PBoolean(false);
     
     private boolean value;
-    private String str;
     
     private PBoolean(boolean value) {
         this.value = value;
@@ -74,7 +73,7 @@ public final class PBoolean extends Argument {
         } else if (str.equals("false")) {
             return FALSE;
         } else {
-            throw new ArgumentFormatException();
+            return PNumber.valueOf(str).value() > 0.5 ? TRUE : FALSE;
         }
     }
     
@@ -95,6 +94,8 @@ public final class PBoolean extends Argument {
     public static PBoolean coerce(Argument arg) throws ArgumentFormatException {
         if (arg instanceof PBoolean) {
             return (PBoolean) arg;
+        } else if (arg instanceof PNumber) {
+            return ((PNumber) arg).value() > 0.5 ? TRUE : FALSE;
         } else {
             return valueOf(arg.toString());
         }
