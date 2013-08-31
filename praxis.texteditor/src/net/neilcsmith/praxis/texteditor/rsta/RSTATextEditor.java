@@ -60,7 +60,8 @@ public class RSTATextEditor extends TextEditor {
         String syntax = getSyntaxStyle(mime);
         if (syntax != null) {
             rsta.setSyntaxEditingStyle(syntax);
-        } else if ("text/x-glsl-frag".equals(mime)) {
+        } else if ("text/x-glsl-frag".equals(mime) ||
+                "text/x-glsl-vert".equals(mime)) {
             ((RSyntaxDocument) rsta.getDocument()).setSyntaxStyle(new GLSLTokenMaker());
         } else {
             ((RSyntaxDocument) rsta.getDocument()).setSyntaxStyle(new ExtendedPlainTokenMaker());
@@ -72,6 +73,7 @@ public class RSTATextEditor extends TextEditor {
         theme.apply(rsta);
 
         rsta.setTabsEmulated(true);
+        rsta.setTabSize(2);
 //        rsta.setMarkOccurrences(true); @TODO fix highlight colour
         rsta.setCodeFoldingEnabled(true);
         rsta.setClearWhitespaceLinesEnabled(true);
