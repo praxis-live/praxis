@@ -101,10 +101,10 @@ public class FactoryProvider implements ComponentFactoryProvider {
 
 
             // CONTAINER
-            addComponent("core:container", data(UserContainer.class).test());
-            addComponent("core:container:property", data(ContainerProperty.class).test());
-            addComponent("core:container:input", data(ContainerInput.class).test());
-            addComponent("core:container:output", data(ContainerOutput.class).test());
+            addComponent("core:container", data(UserContainer.class));
+            addComponent("core:container:property", data(ContainerProperty.class));
+            addComponent("core:container:input", data(ContainerInput.class));
+            addComponent("core:container:output", data(ContainerOutput.class));
             
             // IN TESTING
 //            addTestComponent("core:test:log", Log.class, null);
