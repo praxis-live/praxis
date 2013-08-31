@@ -21,15 +21,19 @@
  */
 package net.neilcsmith.praxis.tinkerforge.components;
 
+import com.tinkerforge.BrickMaster;
+import com.tinkerforge.BrickServo;
 import com.tinkerforge.BrickletAmbientLight;
 import com.tinkerforge.BrickletDistanceIR;
+import com.tinkerforge.BrickletGPS;
+import com.tinkerforge.BrickletIO16;
+import com.tinkerforge.BrickletJoystick;
 import com.tinkerforge.BrickletLCD20x4;
+import com.tinkerforge.BrickletLinearPoti;
 import com.tinkerforge.BrickletRotaryPoti;
 import com.tinkerforge.Device;
 import com.tinkerforge.IPConnection;
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -38,34 +42,46 @@ import java.util.Map;
 class TFDeviceFactory {
 
     private final static TFDeviceFactory INSTANCE = new TFDeviceFactory();
+    
+    private TFDeviceFactory(){}
 
-    Device createDevice(int deviceID, String uid, IPConnection ipcon) {
-        switch (deviceID) {
-            case BrickletAmbientLight.DEVICE_IDENTIFIER:
-                return new BrickletAmbientLight(uid, ipcon);
-            case BrickletDistanceIR.DEVICE_IDENTIFIER:
-                return new BrickletDistanceIR(uid, ipcon);
-            case BrickletLCD20x4.DEVICE_IDENTIFIER:
-                return new BrickletLCD20x4(uid, ipcon);
-            case BrickletRotaryPoti.DEVICE_IDENTIFIER:
-                return new BrickletRotaryPoti(uid, ipcon);
+    Device createDevice(int deviceID, String uid, IPConnection ipcon) throws Exception {
+        Class<? extends Device> cls = getDeviceClass(deviceID);
+        if (cls == null) {
+            throw new IllegalArgumentException("Unknown Device");
         }
-        throw new IllegalArgumentException("Unknown device");
-
+        Constructor<? extends Device> con = cls.getConstructor(String.class, IPConnection.class);
+        return con.newInstance(uid, ipcon);
     }
 
-    String getDeviceName(int deviceID) {
+    Class<? extends Device> getDeviceClass(int deviceID) {
         switch (deviceID) {
+            // Bricklets
             case BrickletAmbientLight.DEVICE_IDENTIFIER:
-                return "Ambient Light Bricklet";
+                return BrickletAmbientLight.class;
             case BrickletDistanceIR.DEVICE_IDENTIFIER:
-                return "Distance IR Bricklet";
+                return BrickletDistanceIR.class;
+            case BrickletIO16.DEVICE_IDENTIFIER:
+                return BrickletIO16.class;
+            case BrickletJoystick.DEVICE_IDENTIFIER:
+                return BrickletJoystick.class;
             case BrickletLCD20x4.DEVICE_IDENTIFIER:
-                return "LCD 20x4 Bricklet";
+                return BrickletLCD20x4.class;
+            case BrickletGPS.DEVICE_IDENTIFIER:
+                return BrickletGPS.class;
+            case BrickletLinearPoti.DEVICE_IDENTIFIER:
+                return BrickletLinearPoti.class;
             case BrickletRotaryPoti.DEVICE_IDENTIFIER:
-                return "Rotary Poti Bricklet";
+                return BrickletRotaryPoti.class;
+                
+            // Bricks
+            case BrickServo.DEVICE_IDENTIFIER:
+                return BrickServo.class;
+            case BrickMaster.DEVICE_IDENTIFIER:
+                return BrickMaster.class;
+        
         }
-        return "Unknown Device";
+        return null;
     }
 
     static TFDeviceFactory getDefault() {

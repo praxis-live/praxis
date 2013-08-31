@@ -26,8 +26,7 @@ import com.tinkerforge.IPConnection;
 import com.tinkerforge.NotConnectedException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
@@ -49,18 +48,19 @@ public class TFRoot extends AbstractRoot {
     private final static String DEFAULT_HOST = "localhost";
     private final static int DEFAULT_PORT = 4223;
     private final static Logger LOG = Logger.getLogger(TFRoot.class.getName());
+    private final static long DEFAULT_PERIOD = TimeUnit.MILLISECONDS.toNanos(50);
     private String host = DEFAULT_HOST;
     private int port = DEFAULT_PORT;
     private Lookup lookup;
     private volatile IPConnection ipcon;
     private TFContext context;
-    private BlockingQueue<Runnable> queue;
+//    private BlockingQueue<Runnable> queue;
     private ComponentEnumerator enumerator;
     private Status status;
 
     public TFRoot() {
-        context = new TFContext();
-        queue = new LinkedBlockingQueue<Runnable>();
+        context = new TFContext(this);
+//        queue = new LinkedBlockingQueue<Runnable>();
         enumerator = new ComponentEnumerator();
         status = new Status();
         initControls();
@@ -87,6 +87,7 @@ public class TFRoot extends AbstractRoot {
             ipcon.connect(host, port);
             ipcon.addEnumerateListener(enumerator);
             ipcon.enumerate();
+            setDelegate(new Runner());
         } catch (Exception ex) {
             LOG.log(Level.WARNING, "Can't start connection.", ex);
         }
@@ -104,16 +105,47 @@ public class TFRoot extends AbstractRoot {
             }
             ipcon = null;
         }
+        interrupt();
     }
 
+//    @Override
+//    protected void processingControlFrame() {
+//        Runnable task = queue.poll();
+//        while (task != null) {
+//            task.run();
+//            task = queue.poll();
+//        }
+//    }
+
     @Override
-    protected void processingControlFrame() {
-        Runnable task = queue.poll();
-        while (task != null) {
-            task.run();
-            task = queue.poll();
-        }
+    protected boolean invokeLater(Runnable task) {
+        // allow context to access
+        return super.invokeLater(task);
     }
+    
+    
+    private class Runner implements Runnable {
+
+        @Override
+        public void run() {
+            LOG.info("Starting delegate runner");
+            long target = System.nanoTime();
+            while (getState() == RootState.ACTIVE_RUNNING) {
+                target += DEFAULT_PERIOD;
+                try {
+                    update(target, false);
+                    while (target - System.nanoTime() > 0) {
+                        poll(1, TimeUnit.MILLISECONDS);
+                    }
+                } catch (Exception ex) {
+                    continue;
+                }
+            }
+            LOG.info("Ending delegate");
+        }
+        
+    }
+    
 
     private class HostBinding implements StringProperty.Binding {
 
@@ -201,8 +233,8 @@ public class TFRoot extends AbstractRoot {
                 LOG.log(Level.FINE, "Component connected - UID:{0} Name:{1}", new Object[]{uid, deviceID});
                 try {
                     final Device device = TFDeviceFactory.getDefault().createDevice(deviceID ,uid, ipcon);
-                    final String name = TFDeviceFactory.getDefault().getDeviceName(deviceID);
-                    queue.add(new Runnable() {
+                    final String name = device.getClass().getSimpleName();
+                    invokeLater(new Runnable() {
                         @Override
                         public void run() {
                             if (getState() == RootState.ACTIVE_RUNNING) {
@@ -217,7 +249,7 @@ public class TFRoot extends AbstractRoot {
                 }
             } else {
                 LOG.log(Level.FINE, "Component disconnected - UID:{0} Name:{1}", new Object[]{uid, deviceID});
-                queue.add(new Runnable() {
+                invokeLater(new Runnable() {
                     @Override
                     public void run() {
                         if (getState() == RootState.ACTIVE_RUNNING) {

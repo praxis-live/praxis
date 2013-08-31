@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,6 +22,7 @@
 package net.neilcsmith.praxis.tinkerforge.components;
 
 import com.tinkerforge.Device;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
@@ -37,22 +38,29 @@ import net.neilcsmith.praxis.tinkerforge.components.TFContext.DeviceLockedExcept
  */
 public abstract class AbstractTFComponent<T extends Device> extends AbstractClockComponent {
 
+    private final static String AUTO = "<auto>";
+    
     private T device;
-    private Class<T> cls;
+    private Class<T> type;
     private String uid;
-    private TFContext context;
+    private volatile TFContext context;
     private TFContext.Listener listener;
 
-    protected AbstractTFComponent(Class<T> cls) {
-        this.cls = cls;
+    protected AbstractTFComponent(Class<T> type) {
+        this.type = type;
         listener = new ContextListener();
         uid = "";
         initControls();
     }
 
     private void initControls() {
-        registerControl("uid", StringProperty.create(new UIDBinding(), uid));
-        registerControl("active", ArgumentProperty.createReadOnly(PBoolean.info(), new ActiveBinding()));
+        registerControl("uid",
+                StringProperty.builder()
+                    .binding(new UIDBinding())
+                    .defaultValue("")
+                    .suggestedValues(AUTO)
+                    .build());
+        registerControl("connected", ArgumentProperty.createReadOnly(PBoolean.info(), new ConnectedBinding()));
     }
 
     @Override
@@ -87,17 +95,17 @@ public abstract class AbstractTFComponent<T extends Device> extends AbstractCloc
         if (context == null) {
             return;
         }
-        Device d = context.findDevice(uid);
+        Device d = findDevice();
         if (device != d) {
             if (device != null) {
                 disposeDevice(device);
                 context.releaseDevice(device);
                 device = null;
             }
-            if (d != null && cls.isInstance(d)) {
+            if (d != null && type.isInstance(d)) {
                 try {
                     context.lockDevice(d);
-                    device = cls.cast(d);
+                    device = type.cast(d);
                     initDevice(device);
                 } catch (DeviceLockedException ex) {
                     Logger.getLogger(AbstractTFComponent.class.getName()).log(Level.SEVERE, null, ex);
@@ -105,13 +113,43 @@ public abstract class AbstractTFComponent<T extends Device> extends AbstractCloc
             }
         }
     }
+    
+    private Device findDevice() {
+        if (AUTO.equals(uid)) {
+            List<Device> devices = context.findDevices(type);
+            for (Device dev : devices) {
+                if (dev == device || !context.isLocked(dev)) {
+                    return dev;
+                }
+            }
+            return null;
+        } else {
+            return context.findDevice(uid);
+        }
+    }
 
     protected abstract void initDevice(T device);
 
     protected abstract void disposeDevice(T device);
-
-    protected T getDevice() {
-        return device;
+    
+    // thread safe(?)
+    protected long getTime() {
+        TFContext ctxt = context;
+        if (ctxt == null) {
+            return System.nanoTime();
+        } else {
+            return ctxt.getTime();
+        }
+    }
+    
+    // thread safe(?)
+    protected boolean invokeLater(Runnable task) {
+        TFContext ctxt = context;
+        if (ctxt == null) {
+            return false;
+        } else {
+            return ctxt.invokeLater(task);
+        }
     }
 
     private class ContextListener implements TFContext.Listener {
@@ -136,7 +174,7 @@ public abstract class AbstractTFComponent<T extends Device> extends AbstractCloc
         }
     }
     
-    private class ActiveBinding implements ArgumentProperty.ReadBinding {
+    private class ConnectedBinding implements ArgumentProperty.ReadBinding {
 
         @Override
         public Argument getBoundValue() {

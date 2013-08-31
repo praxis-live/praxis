@@ -22,8 +22,10 @@
 package net.neilcsmith.praxis.tinkerforge.components;
 
 import com.tinkerforge.Device;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.neilcsmith.praxis.util.ArrayUtils;
@@ -34,13 +36,15 @@ import net.neilcsmith.praxis.util.ArrayUtils;
  */
 class TFContext {
 
-    private Map<String, Device> devices;
-    private Set<Device> locked;
+    private final Map<String, Device> devices;
+    private final Set<Device> locked;
+    private final TFRoot root;
     private Listener[] listeners;
     
-    TFContext() {
+    TFContext(TFRoot root) {
         devices = new LinkedHashMap<String, Device>();
         locked = new HashSet<Device>();
+        this.root = root;
         listeners = new Listener[0];
     }
     
@@ -75,6 +79,16 @@ class TFContext {
     public Device findDevice(String uid) {
         return devices.get(uid);
     }
+    
+    public List<Device> findDevices(Class<? extends Device> type) {
+        List<Device> list = new ArrayList<Device>();
+        for (Device device : devices.values()) {
+            if (type.isInstance(device)) {
+                list.add(device);
+            }            
+        }
+        return list;
+    }
 
     public void lockDevice(Device device) throws DeviceLockedException {
         if (!locked.add(device)) {
@@ -85,6 +99,10 @@ class TFContext {
     public void releaseDevice(Device device) {
         locked.remove(device);
     }
+    
+    public boolean isLocked(Device device) {
+        return locked.contains(device);
+    }
 
     public void addListener(Listener listener) {
         listeners = ArrayUtils.add(listeners, listener);
@@ -93,6 +111,15 @@ class TFContext {
     public void removeListener(Listener listener) {
         listeners = ArrayUtils.remove(listeners, listener);
     }
+    
+    public long getTime() {
+        return root.getTime();
+    }
+    
+    public boolean invokeLater(Runnable task) {
+        return root.invokeLater(task);
+    }
+    
 
     static interface Listener {
 

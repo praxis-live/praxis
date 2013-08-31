@@ -40,8 +40,7 @@ public class AmbientLight extends AbstractTFComponent<BrickletAmbientLight> {
     private BrickletAmbientLight device;
     private int value;
     private ControlPort.Output out;
-    private volatile int illuminance;
-    private volatile Listener active;
+    private Listener active;
 
     public AmbientLight() {
         super(BrickletAmbientLight.class);
@@ -76,20 +75,24 @@ public class AmbientLight extends AbstractTFComponent<BrickletAmbientLight> {
 
     @Override
     public void tick(ExecutionContext source) {
-        int lum = illuminance;
-        if (lum != value) {
-            value = lum;
-            out.send(source.getTime(), value);
-        }
+
     }
 
     private class Listener implements BrickletAmbientLight.IlluminanceListener {
 
         @Override
-        public void illuminance(int lum) {
-            if (active == this) {
-                illuminance = lum;
-            }
+        public void illuminance(final int lum) {
+            final long time = getTime();
+            invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    if (active == Listener.this) {
+                        value = lum;
+                        out.send(time, value);
+                    }
+                }
+            });
         }
     }
 

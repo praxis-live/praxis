@@ -21,7 +21,7 @@
  */
 package net.neilcsmith.praxis.tinkerforge.components;
 
-import com.tinkerforge.BrickletDistanceIR;
+import com.tinkerforge.BrickletLinearPoti;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
@@ -29,46 +29,50 @@ import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
+import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 
 /**
  *
  * @author Neil C Smith
  */
-public class DistanceIR extends AbstractTFComponent<BrickletDistanceIR> {
+public class LinearPoti extends AbstractTFComponent<BrickletLinearPoti> {
 
-    private BrickletDistanceIR device;
+    private BrickletLinearPoti device;
     private int value;
     private ControlPort.Output out;
-    private Listener active;
+    private BooleanProperty normalize;
+    private Listener listener;
 
-    public DistanceIR() {
-        super(BrickletDistanceIR.class);
-        registerControl("distance", ArgumentProperty.createReadOnly(PNumber.info(), new ValueBinding()));
+    public LinearPoti() {
+        super(BrickletLinearPoti.class);
+        registerControl("value", ArgumentProperty.createReadOnly(PNumber.info(), new ValueBinding()));
+        normalize = BooleanProperty.create(false);
+        registerControl("normalize", normalize);
         out = new DefaultControlOutputPort();
-        registerPort("distance", out);
+        registerPort("value", out);
     }
 
     @Override
-    protected void initDevice(BrickletDistanceIR device) {
+    protected void initDevice(BrickletLinearPoti device) {
         this.device = device;
         Listener l = new Listener();
-        active = l;
-        device.addDistanceListener(l);
+        listener = l;
+        device.addPositionListener(l);
         try {
-            device.setDistanceCallbackPeriod(50);
+            device.setPositionCallbackPeriod(50);
         } catch (Exception ex) {
-            Logger.getLogger(DistanceIR.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RotaryPoti.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
-    protected void disposeDevice(BrickletDistanceIR device) {
-        active = null;
+    protected void disposeDevice(BrickletLinearPoti device) {
+        listener = null;
         try {
-            device.setDistanceCallbackPeriod(0);
+            device.setPositionCallbackPeriod(0);
         } catch (Exception ex) {
-            Logger.getLogger(DistanceIR.class.getName()).log(Level.FINE, null, ex);
+            Logger.getLogger(RotaryPoti.class.getName()).log(Level.FINE, null, ex);
         }
         this.device = null;
     }
@@ -77,29 +81,43 @@ public class DistanceIR extends AbstractTFComponent<BrickletDistanceIR> {
     public void tick(ExecutionContext source) {
     }
 
-    private class Listener implements BrickletDistanceIR.DistanceListener {
+    private double normalize(int val) {
+        return val / 100.0;
+    }
+
+    private class Listener implements BrickletLinearPoti.PositionListener {
 
         @Override
-        public void distance(final int dist) {
+        public void position(final int pos) {
             final long time = getTime();
             invokeLater(new Runnable() {
-                
+
                 @Override
                 public void run() {
-                    if (active == Listener.this) {
-                        value = dist;
-                        out.send(time, value);
+                    if (listener == Listener.this) {
+                        value = pos;
+                        if (normalize.getValue()) {
+                            out.send(time, normalize(value));
+                        } else {
+                            out.send(time, value);
+                        }
                     }
                 }
             });
         }
+        
     }
 
     private class ValueBinding implements ArgumentProperty.ReadBinding {
 
         @Override
         public Argument getBoundValue() {
-            return PNumber.valueOf(value);
+            if (normalize.getValue()) {
+                return PNumber.valueOf(normalize(value));
+            } else {
+                return PNumber.valueOf(value);
+            }
+
         }
     }
 }

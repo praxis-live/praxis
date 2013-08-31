@@ -37,14 +37,12 @@ import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
  * @author Neil C Smith
  */
 public class RotaryPoti extends AbstractTFComponent<BrickletRotaryPoti> {
-    
+
     private BrickletRotaryPoti device;
     private int value;
     private ControlPort.Output out;
     private BooleanProperty normalize;
-    
-    private volatile int position;
-    private volatile Listener active;
+    private Listener active;
 
     public RotaryPoti() {
         super(BrickletRotaryPoti.class);
@@ -55,8 +53,6 @@ public class RotaryPoti extends AbstractTFComponent<BrickletRotaryPoti> {
         registerPort("value", out);
     }
 
-    
-    
     @Override
     protected void initDevice(BrickletRotaryPoti device) {
         this.device = device;
@@ -83,32 +79,35 @@ public class RotaryPoti extends AbstractTFComponent<BrickletRotaryPoti> {
 
     @Override
     public void tick(ExecutionContext source) {
-        int pos = position;
-        if (pos != value) {
-            value = pos;
-            if (normalize.getValue()) {
-                out.send(source.getTime(), normalize(value));
-            } else {
-                out.send(source.getTime(), value);
-            }         
-        }
     }
-    
+
     private double normalize(int val) {
         return (val + 150) / 300.0;
     }
-    
+
     private class Listener implements BrickletRotaryPoti.PositionListener {
 
         @Override
-        public void position(short pos) {
-            if (active == this) {
-                position = pos;
-            }
+        public void position(final short pos) {
+            final long time = getTime();
+            invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    if (active == Listener.this) {
+                        value = pos;
+                        if (normalize.getValue()) {
+                            out.send(time, normalize(value));
+                        } else {
+                            out.send(time, value);
+                        }
+                    }
+                }
+            });
         }
         
     }
-    
+
     private class ValueBinding implements ArgumentProperty.ReadBinding {
 
         @Override
@@ -118,9 +117,7 @@ public class RotaryPoti extends AbstractTFComponent<BrickletRotaryPoti> {
             } else {
                 return PNumber.valueOf(value);
             }
-            
+
         }
-        
     }
-    
 }
