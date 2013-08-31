@@ -45,6 +45,8 @@ public abstract class ContainerContext {
      * @param control
      */
     public abstract void unregisterControl(String id, Control control);
+    
+    public abstract void refreshControlInfo(String id, Control control);
 
      /**
      * Allows children to register a port on this container.
@@ -63,5 +65,7 @@ public abstract class ContainerContext {
      * @param port
      */
     public abstract void unregisterPort(String id, Port port);
+    
+    public abstract void refreshPortInfo(String id, Port port);
 
 }
