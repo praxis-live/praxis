@@ -38,7 +38,7 @@ public class IntProperty extends AbstractSingleArgProperty {
     private final ReadBinding reader;
     private final Binding writer;
 
-    private PNumber lastSet;
+    private PNumber lastValue;
     
     private IntProperty(ReadBinding reader, Binding writer, int min, int max, ControlInfo info) {
         super(info);
@@ -59,7 +59,7 @@ public class IntProperty extends AbstractSingleArgProperty {
             throw new IllegalArgumentException();
         }
         writer.setBoundValue(time, val);
-        lastSet = number;
+        lastValue = number;
     }
 
     @Override
@@ -72,21 +72,20 @@ public class IntProperty extends AbstractSingleArgProperty {
             throw new IllegalArgumentException();
         }
         writer.setBoundValue(time, val);
-        lastSet = null;
+        lastValue = null;
     }
 
     @Override
     protected Argument get() {
         int val = reader.getBoundValue();
-        if (lastSet != null) {
-            int last = lastSet.toIntValue();
+        if (lastValue != null) {
+            int last = lastValue.toIntValue();
             if (val == last) {
-                return lastSet;
-            } else {
-                lastSet = null;
+                return lastValue;
             }
         }
-        return PNumber.valueOf(val);
+        lastValue = PNumber.valueOf(val);
+        return lastValue;
     }
     
     public int getValue() {
