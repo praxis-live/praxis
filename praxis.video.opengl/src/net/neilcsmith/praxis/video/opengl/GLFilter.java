@@ -23,15 +23,12 @@ package net.neilcsmith.praxis.video.opengl;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.core.info.ArgumentInfo;
-import net.neilcsmith.praxis.core.types.PMap;
-import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
-import net.neilcsmith.praxis.impl.ArgumentProperty;
+import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.NumberProperty;
+import net.neilcsmith.praxis.impl.StringProperty;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
 import net.neilcsmith.praxis.video.opengl.internal.Color;
@@ -48,11 +45,10 @@ import org.lwjgl.opengl.GL11;
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public class GLFilter extends AbstractExecutionContextComponent {
-    
-    private final static Logger LOG = Logger.getLogger(GLFilter.class.getName());
 
+    private final static Logger LOG = Logger.getLogger(GLFilter.class.getName());
     private final static int UNIFORM_COUNT = 8;
-    private final static String VERTEX_SHADER =
+    private final static String DEFAULT_VERTEX_SHADER =
             "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
             + "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
             + "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
@@ -62,15 +58,14 @@ public class GLFilter extends AbstractExecutionContextComponent {
             + "\n" //
             + "void main()\n" //
             + "{\n" //
-            + "   v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
-            + "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
-            + "   gl_Position =  u_projectionViewMatrix * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
+            + "  v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
+            + "  v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
+            + "  gl_Position = u_projectionViewMatrix * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
             + "}\n";
     private final static String DEFAULT_FRAGMENT_SHADER =
             "varying vec2 v_texCoords;\n" //
             + "uniform sampler2D u_texture;\n" //
-            + "void main()\n"//
-            + "{\n" //
+            + "void main() {\n"//
             + "  gl_FragColor = texture2D(u_texture, v_texCoords);\n" //
             + "}";
     private final double[] uniforms;
@@ -78,13 +73,16 @@ public class GLFilter extends AbstractExecutionContextComponent {
     private final GLDelegate delegate;
     private ShaderProgram shader;
     private boolean dirty;
+    private String vertex;
     private String fragment;
+    private BooleanProperty clear;
 
     public GLFilter() {
         uniforms = new double[UNIFORM_COUNT];
         uniformIDs = new String[UNIFORM_COUNT];
         delegate = new GLDelegate();
         dirty = true;
+        vertex = "";
         fragment = "";
         init();
     }
@@ -93,20 +91,42 @@ public class GLFilter extends AbstractExecutionContextComponent {
         try {
             Placeholder in = new Placeholder();
             delegate.addSource(in);
-            registerPort(Port.IN, new DefaultVideoInputPort(this, in));
-            registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegate));
-            registerControl("fragment", ArgumentProperty.create(
-                    ArgumentInfo.create(PString.class,
-                    PMap.create(PString.KEY_MIME_TYPE, "text/x-glsl-frag",
-                    ArgumentInfo.KEY_TEMPLATE, DEFAULT_FRAGMENT_SHADER)),
-                    new FragmentBinding(),
-                    PString.EMPTY));
+            registerPort(Port.IN, new DefaultVideoInputPort(in));
+            registerPort(Port.OUT, new DefaultVideoOutputPort(delegate));
+//            registerControl("fragment", ArgumentProperty.create(
+//                    ArgumentInfo.create(PString.class,
+//                    PMap.create(PString.KEY_MIME_TYPE, "text/x-glsl-frag",
+//                    ArgumentInfo.KEY_TEMPLATE, DEFAULT_FRAGMENT_SHADER)),
+//                    new FragmentBinding(),
+//                    PString.EMPTY));
+            StringProperty v = StringProperty.builder()
+                    .mimeType("text/x-glsl-vert")
+                    .template(DEFAULT_VERTEX_SHADER)
+                    .emptyIsDefault()
+                    .binding(new VertexBinding())
+                    .build();
+            registerControl("vertex", v);
+            StringProperty f = StringProperty.builder()
+                    .mimeType("text/x-glsl-frag")
+                    .template(DEFAULT_FRAGMENT_SHADER)
+                    .emptyIsDefault()
+                    .binding(new FragmentBinding())
+                    .build();
+            registerControl("fragment", f);
             for (int i = 0; i < UNIFORM_COUNT; i++) {
-                NumberProperty u = NumberProperty.create(new UniformBinding(i), 0, 1, 0);
+//                NumberProperty u = NumberProperty.create(new UniformBinding(i), 0, 1, 0);
+                NumberProperty u = NumberProperty.builder()
+                        .minimum(0)
+                        .maximum(1)
+                        .defaultValue(0)
+                        .binding(new UniformBinding(i))
+                        .build();
                 String ID = "u" + (i + 1);
                 registerControl(ID, u);
                 registerPort(ID, u.createPort());
             }
+            clear = BooleanProperty.create(true);
+            registerControl("clear-screen", clear);
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }
@@ -121,21 +141,37 @@ public class GLFilter extends AbstractExecutionContextComponent {
         dirty = true;
     }
 
-    private class FragmentBinding implements ArgumentProperty.Binding {
+    private class VertexBinding implements StringProperty.Binding {
 
         @Override
-        public void setBoundValue(long time, Argument value) {
-            String frag = value.toString();
-            if (fragment.equals(frag)) {
+        public void setBoundValue(long time, String value) {
+            if (vertex.equals(value)) {
                 return;
             }
-            fragment = frag;
+            vertex = value;
             dirty = true;
         }
 
         @Override
-        public Argument getBoundValue() {
-            return PString.valueOf(fragment);
+        public String getBoundValue() {
+            return vertex;
+        }
+    }
+
+    private class FragmentBinding implements StringProperty.Binding {
+
+        @Override
+        public void setBoundValue(long time, String value) {
+            if (fragment.equals(value)) {
+                return;
+            }
+            fragment = value;
+            dirty = true;
+        }
+
+        @Override
+        public String getBoundValue() {
+            return fragment;
         }
     }
 
@@ -159,9 +195,9 @@ public class GLFilter extends AbstractExecutionContextComponent {
     }
 
     private class GLDelegate extends MultiInOut {
-        
+
         private GLDelegate() {
-            super(1,1);
+            super(1, 1);
         }
 
         @Override
@@ -181,10 +217,13 @@ public class GLFilter extends AbstractExecutionContextComponent {
                 GLSurface dst = (GLSurface) output;
                 GLRenderer r = dst.getGLContext().getRenderer();
                 r.target(dst);
+                if (clear.getValue()) {
+                    r.clear();
+                }
                 r.setBlendFunction(GL11.GL_ONE, GL11.GL_ZERO);
                 r.setColor(Color.WHITE);
                 r.bind(shader);
-                for (int i=0; i < uniformIDs.length; i++) {
+                for (int i = 0; i < uniformIDs.length; i++) {
                     String id = uniformIDs[i];
                     if (id == null) {
                         continue;
@@ -206,20 +245,18 @@ public class GLFilter extends AbstractExecutionContextComponent {
             if (shader != null) {
                 shader.dispose();
             }
+            String vert = vertex.isEmpty() ? DEFAULT_VERTEX_SHADER : vertex;
             String frag = fragment.isEmpty() ? DEFAULT_FRAGMENT_SHADER : fragment;
-            shader = new ShaderProgram(VERTEX_SHADER, frag);
+            shader = new ShaderProgram(vert, frag);
             LOG.log(Level.FINEST, "Compiled shader :\n{0}", frag);
-            
-            for (int i=0; i<uniformIDs.length; i++) {
-                uniformIDs[i] = "u" + (i+1);
+
+            for (int i = 0; i < uniformIDs.length; i++) {
+                uniformIDs[i] = "u" + (i + 1);
             }
             if (!shader.isCompiled()) {
                 LOG.warning("Shader not compiled");
             }
             LOG.log(Level.FINEST, "Shader log\n{0}", shader.getLog());
         }
-
-
-
     }
 }
