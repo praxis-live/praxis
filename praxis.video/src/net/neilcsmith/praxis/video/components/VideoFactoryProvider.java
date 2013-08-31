@@ -104,8 +104,8 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
             addComponent("video:test:analysis:blob-tracker", data(BlobTracker.class).test().replacement("video:analysis:simple-tracker"));
             
             
-            addComponent("video:container:input", data(VideoContainerInput.class).test());
-            addComponent("video:container:output", data(VideoContainerOutput.class).test());
+            addComponent("video:container:input", data(VideoContainerInput.class));
+            addComponent("video:container:output", data(VideoContainerOutput.class));
 
         }
     }
