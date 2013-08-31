@@ -95,7 +95,7 @@ public class GLContext {
         try {
             Display.setParent(canvas);
             createDisplayPixelFormat();
-            Display.setVSyncEnabled(true);
+//            Display.setVSyncEnabled(true);
             GLContext ctxt = new GLContext(canvas.getWidth(), canvas.getHeight());
             current = ctxt;
             return ctxt;
