@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.video;
 
+import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.video.pipes.VideoPipe;
 
 /**
@@ -44,9 +45,10 @@ public abstract class VideoContext {
         
         // @TODO add client listeners to allow some changes at runtime?
 
-        public Object getClientHint(String key) {
-            return null;
-        }
+//        public Object getClientHint(String key) {
+//            return null;
+//        }
+        public abstract Lookup getLookup();
 
     }
 

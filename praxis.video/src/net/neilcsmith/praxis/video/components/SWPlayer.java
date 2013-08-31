@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -33,20 +33,24 @@ import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagLayout;
 import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.settings.Settings;
+import net.neilcsmith.praxis.video.ClientConfiguration;
 import net.neilcsmith.praxis.video.Player;
+import net.neilcsmith.praxis.video.PlayerConfiguration;
+import net.neilcsmith.praxis.video.PlayerFactory;
+import net.neilcsmith.praxis.video.QueueContext;
+import net.neilcsmith.praxis.video.WindowHints;
 import net.neilcsmith.praxis.video.pipes.FrameRateListener;
 import net.neilcsmith.praxis.video.pipes.VideoPipe;
 import net.neilcsmith.praxis.video.pipes.SinkIsFullException;
@@ -58,16 +62,16 @@ import net.neilcsmith.praxis.video.render.Surface;
  */
 class SWPlayer implements Player {
 
+    private final static Factory FACTORY = new Factory();
     private final static Logger LOG = Logger.getLogger(SWPlayer.class.getName());
-
     private final static double DEG_90 = Math.toRadians(90);
     private final static double DEG_180 = Math.toRadians(180);
     private final static double DEG_270 = Math.toRadians(270);
-
+    
     private int noSleepsPerYield = 0; // maximum number of frames without sleep before yielding
     private int maxSkip = 2; // maximum number of frames that can be skipped before rendering
-    private int width,  height; // dimensions of surface
-    private int outputWidth, outputHeight, outputRotation;
+    private int width, height; // dimensions of surface
+    private int outputWidth, outputHeight, outputRotation, outputDevice;
     private double fps; // frames per second
     private long period; // period per frame in nanosecs
 //    private long frameIndex; // index of current frame
@@ -84,6 +88,7 @@ class SWPlayer implements Player {
     private boolean rendering = false; // used by frame rate listeners
     private String title;
     private boolean fullScreen;
+    private QueueContext queueContext;
 
     private SWPlayer(String title,
             int width,
@@ -92,7 +97,9 @@ class SWPlayer implements Player {
             boolean fullScreen,
             int outputWidth,
             int outputHeight,
-            int outputRotation) {
+            int outputRotation,
+            int outputDevice,
+            QueueContext queue) {
         if (width <= 0 || height <= 0 || fps <= 0) {
             throw new IllegalArgumentException();
         }
@@ -108,6 +115,8 @@ class SWPlayer implements Player {
         this.outputWidth = outputWidth;
         this.outputHeight = outputHeight;
         this.outputRotation = outputRotation;
+        this.outputDevice = outputDevice;
+        this.queueContext = queue;
     }
 
     public void run() {
@@ -125,7 +134,7 @@ class SWPlayer implements Player {
 
         //render first frame
         time = System.nanoTime();
-        updateAndRender();
+//        updateAndRender();
 
         long afterTime = 0L; // time after render
         long sleepTime = 0L; // time to sleep
@@ -136,38 +145,6 @@ class SWPlayer implements Player {
         time = System.nanoTime();
 
         // animation loop
-//        while (running) {
-//            updateAndRender();
-//            afterTime = System.nanoTime();
-//            sleepTime = (period - (afterTime - time)) - overSleepTime;
-//            if (sleepTime > 0) {
-//                try {
-//                    Thread.sleep(sleepTime / 1000000L);
-//                } catch (InterruptedException ex) {
-//                }
-//                overSleepTime = (System.nanoTime() - afterTime) - sleepTime;
-//            } else {
-//                excess -= sleepTime;
-//                overSleepTime = 0L;
-//                noSleeps++;
-//                if (noSleeps > noSleepsPerYield) {
-//                    Thread.yield();
-//                    noSleeps = 0;
-//                }
-//            }
-//            time += period;
-//
-//            int skips = 0;
-//            while ((excess > period) && (skips < maxSkip)) {
-//                excess -= period;
-//                updateOnly();
-//                time += period;
-//                skips++;
-//            }
-//
-//        }
-
-//        long minSleepTime = 1000000L;
         long now = 0L;
         long difference = 0L;
         while (running) {
@@ -175,15 +152,19 @@ class SWPlayer implements Player {
             now = System.nanoTime();
             difference = now - time;
             if (difference > 0) {
+                fireListeners();
                 updateOnly();
                 if (LOG.isLoggable(Level.FINEST)) {
                     LOG.log(Level.FINEST, "Frame skipped - Difference : " + (difference));
                 }
             } else {
+                fireListeners();
                 while (difference < -1000000L) {
                     try {
-                        Thread.sleep(1);
-                    } catch (Exception ex) {}
+                        queueContext.process(1, TimeUnit.MILLISECONDS);
+//                        Thread.sleep(1);
+                    } catch (InterruptedException ex) {
+                    }
                     now = System.nanoTime();
                     difference = now - time;
                 }
@@ -199,7 +180,6 @@ class SWPlayer implements Player {
 
     private void init() throws Exception {
         EventQueue.invokeAndWait(new Runnable() {
-
             public void run() {
                 Dimension dim;
                 if (outputRotation == 90 || outputRotation == 270) {
@@ -207,16 +187,17 @@ class SWPlayer implements Player {
                 } else {
                     dim = new Dimension(outputWidth, outputHeight);
                 }
-                frame = new Frame(title);
+                GraphicsDevice gd = findScreenDevice();
+                
+                frame = new Frame(title, gd.getDefaultConfiguration());
 //                frame.setIgnoreRepaint(true);
                 frame.setBackground(Color.BLACK);
                 frame.addWindowListener(new WindowAdapter() {
-
                     @Override
                     public void windowClosing(WindowEvent e) {
                         terminate();
                     }
-                    });
+                });
                 frame.setLayout(new GridBagLayout());
                 Cursor cursor = Toolkit.getDefaultToolkit().createCustomCursor(new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB), new Point(0, 0), "blank");
                 frame.setCursor(cursor);
@@ -227,13 +208,15 @@ class SWPlayer implements Player {
                 canvas.setIgnoreRepaint(true);
                 frame.add(canvas);
                 if (fullScreen) {
+                    boolean fakeFullScreen = Settings.getBoolean("video._fakefs", false);
                     frame.setUndecorated(true);
-                    frame.setSize(Toolkit.getDefaultToolkit().getScreenSize());
                     frame.validate();
-                    GraphicsDevice gd =
-                            GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-                    gd.setFullScreenWindow(frame);
-                    
+                    if (fakeFullScreen) {
+                        frame.setVisible(true);
+                        frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+                    } else {
+                        gd.setFullScreenWindow(frame);
+                    }
                 } else {
                     frame.pack();
                     frame.setVisible(true);
@@ -249,14 +232,14 @@ class SWPlayer implements Player {
                 }
 
             }
-            });
+        });
 
         canvas.createBufferStrategy(2);
         bs = canvas.getBufferStrategy();
 
         surface = new SWSurface(width, height, false);
 
-        switch(outputRotation) {
+        switch (outputRotation) {
             case 90:
             case 270:
                 rotated = new SWSurface(height, width, false);
@@ -269,10 +252,27 @@ class SWPlayer implements Player {
 
     }
 
+    private GraphicsDevice findScreenDevice() {
+        GraphicsEnvironment gEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gd = null;
+        if (outputDevice < 0) {
+            gd = gEnv.getDefaultScreenDevice();
+        } else {
+            GraphicsDevice[] screens = gEnv.getScreenDevices();
+            if (outputDevice < screens.length) {
+                gd = screens[outputDevice];
+            } else {
+                gd = screens[0];
+            }
+        }
+        LOG.log(Level.FINE, "Searching for screen index : {0}", outputDevice);
+        LOG.log(Level.FINE, "Found Screen Device : {0}", gd);
+        return gd;
+    }
+
     private void dispose() {
         try {
             EventQueue.invokeAndWait(new Runnable() {
-
                 public void run() {
                     if (frame != null) {
                         frame.setVisible(false);
@@ -295,13 +295,13 @@ class SWPlayer implements Player {
 
     private void updateOnly() {
         rendering = false;
-        fireListeners();
+//        fireListeners();
         sink.process(surface, time, rendering);
     }
 
     private void updateAndRender() {
         rendering = true;
-        fireListeners();
+//        fireListeners();
         Graphics2D g2d = (Graphics2D) bs.getDrawGraphics();
         try {
             sink.process(surface, time, rendering);
@@ -333,8 +333,6 @@ class SWPlayer implements Player {
         }
         g2d.dispose();
     }
-
-
 
     private void fireListeners() {
         int count = listeners.size();
@@ -391,6 +389,10 @@ class SWPlayer implements Player {
 
     public boolean isRendering() {
         return rendering;
+    }
+
+    static PlayerFactory getFactory() {
+        return FACTORY;
     }
 
     private class OutputSink extends VideoPipe {
@@ -481,39 +483,71 @@ class SWPlayer implements Player {
         }
     }
 
-
     private class ScreenSaverListener extends KeyAdapter {
 
         @Override
         public void keyPressed(KeyEvent e) {
             System.exit(0);
         }
-        
     }
 
-    public static SWPlayer create(
-            String title,
-            int width,
-            int height,
-            double fps,
-            boolean fullscreen) {
-        return new SWPlayer(title, width, height, fps, fullscreen, width, height, 0);
-    }
+    private static class Factory implements PlayerFactory {
 
-    public static SWPlayer create(
-            String title,
-            int width,
-            int height,
-            double fps,
-            boolean fullscreen,
-            int outputWidth,
-            int outputHeight,
-            int rotation) {
-        if (rotation != 0 && rotation != 90 && rotation != 180 && rotation != 270) {
-            rotation = 0;
-            LOG.warning("Rotation should be 0, 90, 180 or 270. Switching to 0.");
+        @Override
+        public Player createPlayer(PlayerConfiguration config, ClientConfiguration[] clients)
+                throws Exception {
+            if (clients.length != 1 || clients[0].getSourceCount() != 0 || clients[0].getSinkCount() != 1) {
+                throw new IllegalArgumentException("Invalid client configuration");
+            }
+
+
+            int width = config.getWidth();
+            int height = config.getHeight();
+            int outWidth = width;
+            int outHeight = height;
+            int rotation = 0;
+            int device = -1;
+            boolean fullscreen = false;
+            String title = "OpenGL";
+
+            WindowHints wHints = clients[0].getLookup().get(WindowHints.class);
+            if (wHints != null) {
+                fullscreen = wHints.isFullScreen();
+                title = wHints.getTitle();
+            }
+
+            ClientConfiguration.Dimension dim =
+                    clients[0].getLookup().get(ClientConfiguration.Dimension.class);
+            if (dim != null) {
+                outWidth = dim.getWidth();
+                outHeight = dim.getHeight();
+            }
+
+            ClientConfiguration.Rotation rot =
+                    clients[0].getLookup().get(ClientConfiguration.Rotation.class);
+            if (rot != null) {
+                rotation = rot.getAngle();
+            }
+
+            ClientConfiguration.DeviceIndex dev =
+                    clients[0].getLookup().get(ClientConfiguration.DeviceIndex.class);
+            if (dev != null) {
+                device = dev.getValue();
+            }
+
+            QueueContext queue = config.getLookup().get(QueueContext.class);
+
+            return new SWPlayer(title,
+                    config.getWidth(),
+                    config.getHeight(),
+                    config.getFPS(),
+                    fullscreen,
+                    outWidth,
+                    outHeight,
+                    rotation,
+                    device,
+                    queue);
+
         }
-        return new SWPlayer(title, width, height, fps, fullscreen, outputWidth, outputHeight, rotation);
     }
-
 }

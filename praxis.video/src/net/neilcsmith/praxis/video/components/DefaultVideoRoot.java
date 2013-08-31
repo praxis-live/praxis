@@ -21,10 +21,9 @@
  */
 package net.neilcsmith.praxis.video.components;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import net.neilcsmith.praxis.core.Argument;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
@@ -34,19 +33,19 @@ import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.BooleanProperty;
-import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.InstanceLookup;
 import net.neilcsmith.praxis.impl.IntProperty;
+import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.RootState;
-import net.neilcsmith.praxis.impl.StringProperty;
-import net.neilcsmith.praxis.settings.Settings;
 import net.neilcsmith.praxis.video.ClientConfiguration;
 import net.neilcsmith.praxis.video.ClientRegistrationException;
 import net.neilcsmith.praxis.video.Player;
 import net.neilcsmith.praxis.video.PlayerConfiguration;
 import net.neilcsmith.praxis.video.PlayerFactory;
+import net.neilcsmith.praxis.video.QueueContext;
 import net.neilcsmith.praxis.video.VideoContext;
 import net.neilcsmith.praxis.video.VideoSettings;
+import net.neilcsmith.praxis.video.WindowHints;
 import net.neilcsmith.praxis.video.pipes.FrameRateListener;
 import net.neilcsmith.praxis.video.pipes.FrameRateSource;
 
@@ -55,6 +54,8 @@ import net.neilcsmith.praxis.video.pipes.FrameRateSource;
  * @author Neil C Smith
  */
 public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener {
+    
+    private final static Logger LOG = Logger.getLogger(DefaultVideoRoot.class.getName());
 
     private final static int WIDTH_DEFAULT = 640;
     private final static int HEIGHT_DEFAULT = 480;
@@ -65,14 +66,13 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     private int height = HEIGHT_DEFAULT;
     private double fps = FPS_DEFAULT;
     private boolean fullScreen = FULL_SCREEN_DEFAULT;
-
     private ArgumentProperty renderer;
 //    private String title;
     private Player player;
 //    private Placeholder placeholder;
 //    private OutputServer outputServer;
     private VideoContext.OutputClient outputClient;
-    private Context ctxt;
+    private VideoContextImpl ctxt;
     private Lookup lookup;
 
     public DefaultVideoRoot() {
@@ -89,7 +89,7 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
         registerControl("height", IntProperty.create(new HeightBinding(), 1, 2048, height));
         registerControl("fps", NumberProperty.create(new FpsBinding(), 1, 100, fps));
         registerControl("full-screen", BooleanProperty.create(this, new FullScreenBinding(), fullScreen));
-        ctxt = new Context();
+        ctxt = new VideoContextImpl();
     }
 
     @Override
@@ -126,7 +126,6 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
                 player.getSink(0).addSource(outputClient.getOutputSource(0));
             }
             setInterrupt(new Runnable() {
-
                 public void run() {
                     player.run();
                     try {
@@ -137,82 +136,72 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
                 }
             });
         } catch (Exception ex) {
+            LOG.log(Level.SEVERE, "Couldn't start video renderer", ex);
+            try {
+                setIdle();
+            } catch (IllegalRootStateException ex1) {
+                // ignore - state already changed?
+            }
         }
     }
 
-    private Player createPlayer(String library) {
+    private Player createPlayer(String library) throws Exception {
         String title = "PRAXIS : " + getAddress();
-        int outWidth = width;
-        int outHeight = height;
-        int rotation = 0;
+//        int outWidth = width;
+//        int outHeight = height;
+//        int rotation = 0;
+        Lookup clientLookup = Lookup.EMPTY;
         if (outputClient != null) {
-            Object w = outputClient.getClientHint(ClientConfiguration.CLIENT_KEY_WIDTH);
-            Object h = outputClient.getClientHint(ClientConfiguration.CLIENT_KEY_HEIGHT);
-            Object r = outputClient.getClientHint(ClientConfiguration.CLIENT_KEY_ROTATION);
-            if (w instanceof Integer) {
-                outWidth = ((Integer) w).intValue();
-            }
-            if (h instanceof Integer) {
-                outHeight = ((Integer) h).intValue();
-            }
-            if (r instanceof Integer) {
-                rotation = ((Integer) r).intValue();
-            }
-        }        
-//        if ("Reference".equals(library)) {
-//            return new ReferencePlayer(title, width, height, fps, fullScreen);
-//        } else {           
-            PlayerFactory factory = findPlayerFactory(library);
-            if (factory != null) {
-                try {
-                    Map<String, Object> clientMap = new HashMap<String, Object>(2);
-                    clientMap.put(ClientConfiguration.CLIENT_KEY_TITLE, title);
-                    clientMap.put(ClientConfiguration.CLIENT_KEY_FULLSCREEN, fullScreen);
-                    return factory.createPlayer(new PlayerConfiguration(width, height, fps),
-                            new ClientConfiguration[] {
-                                new ClientConfiguration(0, 1, clientMap)
-                            });
-                } catch (Exception ex) {
-                    // fall through
-                }
-            }
-            if (outWidth == width && outHeight == height && rotation == 0) {
-                return SWPlayer.create(title, width, height, fps, fullScreen);
-            } else {
-                return SWPlayer.create(title, width, height, fps, fullScreen, outWidth, outHeight, rotation);
-            }
-//        }
-    }
-    
-    private PlayerFactory findPlayerFactory(String lib) {
-        if (lib == null || lib.isEmpty()) {
-            return null;
+            clientLookup = outputClient.getLookup();
+//            ClientConfiguration.Dimension dim = clientLookup.get(ClientConfiguration.Dimension.class);
+//            if (dim != null) {
+//                outWidth = dim.getWidth();
+//                outHeight = dim.getHeight();
+//            }
+//            ClientConfiguration.Rotation rot = clientLookup.get(ClientConfiguration.Rotation.class);
+//            if (rot != null) {
+//                rotation = rot.getAngle();
+//            }
         }
-        try {
-            for (PlayerFactory.Provider provider : Lookup.SYSTEM.getAll(PlayerFactory.Provider.class)) {
-                if (provider.getLibraryName().equals(lib)) {
-                    return provider.getFactory();
-                }
-            }
-        } catch (Exception e) {
-        }
-        return null;
+        PlayerFactory factory = findPlayerFactory(library);
+        WindowHints wHints = new WindowHints();
+        wHints.setTitle(title);
+        wHints.setFullScreen(fullScreen);
+        Lookup clLkp = InstanceLookup.create(clientLookup, wHints);
+        Lookup plLkp = InstanceLookup.create(new QueueContextImpl());
+        return factory.createPlayer(new PlayerConfiguration(width, height, fps, plLkp),
+                new ClientConfiguration[]{
+                    new ClientConfiguration(0, 1, clLkp)
+                });
     }
-    
+
+    private PlayerFactory findPlayerFactory(String lib) throws Exception {
+        if (lib == null || lib.isEmpty() || "Software".equals(lib)) {
+            return SWPlayer.getFactory();
+        }
+        for (PlayerFactory.Provider provider : Lookup.SYSTEM.getAll(PlayerFactory.Provider.class)) {
+            if (provider.getLibraryName().equals(lib)) {
+                return provider.getFactory();
+            }
+        }
+        throw new IllegalArgumentException("No valid renderer found");
+    }
 
     @Override
     protected void stopping() {
-        setInterrupt(new Runnable() {
+//        setInterrupt(new Runnable() {
+//            public void run() {
+////                player.getOutputSink().removeSource(placeholder);
+//                player.terminate();
+//            }
+//        });
+        player.terminate();
+        interrupt();
 
-            public void run() {
-//                player.getOutputSink().removeSource(placeholder);
-                player.terminate();
-            }
-        });
 
     }
 
-    private class Context extends VideoContext {
+    private class VideoContextImpl extends VideoContext {
 
         public int registerVideoInputClient(InputClient client) throws ClientRegistrationException {
             throw new UnsupportedOperationException("Not supported yet.");
@@ -239,33 +228,13 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
         }
     }
 
-//    private class OutputServer implements VideoOutputProxy {
-//
-//        public Sink getOutputSink(int index) {
-//            if (index == 0) {
-//                return placeholder;
-//            }
-//            throw new IndexOutOfBoundsException();
-//        }
-//
-//        public int getOutputCount() {
-//            return 1;
-//        }
-//    }
-//    private class TitleBinding implements StringProperty.Binding {
-//
-//        public void setBoundValue(String value) {
-//            if (getState() == Root.State.ACTIVE_RUNNING) {
-//                throw new UnsupportedOperationException("Can't set title while running");
-//            }
-//            title = value;
-//        }
-//
-//        public String getBoundValue() {
-//            return title;
-//        }
-//        
-//    }
+    private class QueueContextImpl implements QueueContext {
+
+        public void process(long time, TimeUnit unit) throws InterruptedException {
+            poll(time, unit);
+        }
+    }
+
     private class WidthBinding implements IntProperty.Binding {
 
         public void setBoundValue(long time, int value) {
@@ -321,5 +290,4 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
             return fullScreen;
         }
     }
-    
 }
