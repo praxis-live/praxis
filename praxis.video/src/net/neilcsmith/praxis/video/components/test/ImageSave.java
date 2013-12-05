@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -67,8 +67,8 @@ public class ImageSave extends AbstractComponent {
         callback = new SaveCallback();
         uri = UriProperty.create(PResource.valueOf(new File("image").toURI()));
         SavePipe savePipe = new SavePipe();
-        registerPort(Port.IN, new DefaultVideoInputPort(this, savePipe));
-        registerPort(Port.OUT, new DefaultVideoOutputPort(this, savePipe));
+        registerPort(Port.IN, new DefaultVideoInputPort(savePipe));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(savePipe));
         registerControl("file", uri);
         TriggerControl trigger = TriggerControl.create(new TriggerBinding());
         registerControl("trigger", trigger);
