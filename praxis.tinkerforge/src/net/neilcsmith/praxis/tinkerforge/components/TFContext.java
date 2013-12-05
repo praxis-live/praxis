@@ -49,9 +49,9 @@ class TFContext {
     }
     
     void addDevice(String uid, Device device) {
-        if (devices.containsKey(uid)) {
-            throw new IllegalStateException("Context already has device for UID: " + uid);
-        }
+//        if (devices.containsKey(uid)) {
+//            throw new IllegalStateException("Context already has device for UID: " + uid);
+//        }
         devices.put(uid, device);
         fireListeners();
     }
@@ -113,14 +113,15 @@ class TFContext {
     }
     
     public long getTime() {
-        return root.getTime();
+//        return root.getTime();
+        return System.nanoTime();
     }
     
     public boolean invokeLater(Runnable task) {
         return root.invokeLater(task);
     }
     
-
+    // @TODO change to deviceAdded, deviceRemoved, deviceReset?
     static interface Listener {
 
         void stateChanged(TFContext context);

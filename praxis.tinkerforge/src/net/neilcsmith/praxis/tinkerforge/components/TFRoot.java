@@ -24,8 +24,10 @@ package net.neilcsmith.praxis.tinkerforge.components;
 import com.tinkerforge.Device;
 import com.tinkerforge.IPConnection;
 import com.tinkerforge.NotConnectedException;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,7 +63,7 @@ public class TFRoot extends AbstractRoot {
     public TFRoot() {
         context = new TFContext(this);
 //        queue = new LinkedBlockingQueue<Runnable>();
-        enumerator = new ComponentEnumerator();
+//        enumerator = new ComponentEnumerator();
         status = new Status();
         initControls();
     }
@@ -85,6 +87,7 @@ public class TFRoot extends AbstractRoot {
         try {
             ipcon = new IPConnection();
             ipcon.connect(host, port);
+            enumerator = new ComponentEnumerator();
             ipcon.addEnumerateListener(enumerator);
             ipcon.enumerate();
             setDelegate(new Runner());
@@ -95,15 +98,17 @@ public class TFRoot extends AbstractRoot {
 
     @Override
     protected void stopping() {
-        status.clear();
+        enumerator = null;
         context.removeAll();
+        status.clear();
         if (ipcon != null) {
             try {
                 ipcon.disconnect();
             } catch (NotConnectedException ex) {
                 Logger.getLogger(TFRoot.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                ipcon = null;
             }
-            ipcon = null;
         }
         interrupt();
     }
@@ -116,14 +121,12 @@ public class TFRoot extends AbstractRoot {
 //            task = queue.poll();
 //        }
 //    }
-
     @Override
     protected boolean invokeLater(Runnable task) {
         // allow context to access
         return super.invokeLater(task);
     }
-    
-    
+
     private class Runner implements Runnable {
 
         @Override
@@ -143,9 +146,7 @@ public class TFRoot extends AbstractRoot {
             }
             LOG.info("Ending delegate");
         }
-        
     }
-    
 
     private class HostBinding implements StringProperty.Binding {
 
@@ -216,6 +217,12 @@ public class TFRoot extends AbstractRoot {
 
     private class ComponentEnumerator implements IPConnection.EnumerateListener {
 
+//        private Set<String> uids;
+
+        private ComponentEnumerator() {
+//            uids = new HashSet<String>();
+        }
+
         @Override
         public void enumerate(final String uid,
                 String connectedUid,
@@ -229,15 +236,18 @@ public class TFRoot extends AbstractRoot {
                 LOG.fine("enumerate() called but IPConnection is null - ignoring!");
                 return; // removed from under us?
             }
-            if (enumerationType != IPConnection.ENUMERATION_TYPE_DISCONNECTED) {
+            if (enumerationType != IPConnection.ENUMERATION_TYPE_DISCONNECTED /*&&
+                     !uids.contains(uid)*/) {
                 LOG.log(Level.FINE, "Component connected - UID:{0} Name:{1}", new Object[]{uid, deviceID});
                 try {
-                    final Device device = TFDeviceFactory.getDefault().createDevice(deviceID ,uid, ipcon);
+                    final Device device = TFDeviceFactory.getDefault().createDevice(deviceID, uid, ip);
                     final String name = device.getClass().getSimpleName();
+//                    uids.add(uid);
                     invokeLater(new Runnable() {
                         @Override
                         public void run() {
-                            if (getState() == RootState.ACTIVE_RUNNING) {
+                            if (getState() == RootState.ACTIVE_RUNNING &&
+                                    enumerator == ComponentEnumerator.this) {
                                 context.addDevice(uid, device);
                                 status.add(uid, name + " UID:" + uid);
                             }
@@ -247,12 +257,15 @@ public class TFRoot extends AbstractRoot {
                     LOG.log(Level.FINE, "Unable to create device for UID: {0} Name: {1}", new Object[]{uid, deviceID});
                     LOG.log(Level.FINE, "", ex);
                 }
-            } else {
+            } else if (enumerationType == IPConnection.ENUMERATION_TYPE_DISCONNECTED /*&&
+                     uids.contains(uid)*/) {
                 LOG.log(Level.FINE, "Component disconnected - UID:{0} Name:{1}", new Object[]{uid, deviceID});
+//                uids.remove(uid);
                 invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        if (getState() == RootState.ACTIVE_RUNNING) {
+                        if (getState() == RootState.ACTIVE_RUNNING &&
+                                enumerator == ComponentEnumerator.this) {
                             context.removeDevice(uid);
                             status.remove(uid);
                         }
