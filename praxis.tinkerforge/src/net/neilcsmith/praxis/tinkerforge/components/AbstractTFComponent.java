@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.impl.AbstractClockComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
@@ -131,6 +132,18 @@ public abstract class AbstractTFComponent<T extends Device> extends AbstractCloc
     protected abstract void initDevice(T device);
 
     protected abstract void disposeDevice(T device);
+
+    @Override
+    public void tick(ExecutionContext source) {
+        if (device == null || source.getState() != ExecutionContext.State.ACTIVE) {
+            return;
+        }
+        updateDevice(device);
+    }
+
+    protected void updateDevice(T device) {
+        // no op hook
+    }
     
     // thread safe(?)
     protected long getTime() {
@@ -150,6 +163,10 @@ public abstract class AbstractTFComponent<T extends Device> extends AbstractCloc
         } else {
             return ctxt.invokeLater(task);
         }
+    }
+    
+    protected int getCallbackPeriod() {
+        return 20;
     }
 
     private class ContextListener implements TFContext.Listener {

@@ -26,7 +26,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlPort;
-import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
@@ -40,7 +39,7 @@ public class DistanceIR extends AbstractTFComponent<BrickletDistanceIR> {
     private BrickletDistanceIR device;
     private int value;
     private ControlPort.Output out;
-    private Listener active;
+    private DistanceListener dListener;
 
     public DistanceIR() {
         super(BrickletDistanceIR.class);
@@ -52,11 +51,10 @@ public class DistanceIR extends AbstractTFComponent<BrickletDistanceIR> {
     @Override
     protected void initDevice(BrickletDistanceIR device) {
         this.device = device;
-        Listener l = new Listener();
-        active = l;
-        device.addDistanceListener(l);
+        dListener = new DistanceListener();
+        device.addDistanceListener(dListener);
         try {
-            device.setDistanceCallbackPeriod(50);
+            device.setDistanceCallbackPeriod(getCallbackPeriod());
         } catch (Exception ex) {
             Logger.getLogger(DistanceIR.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -64,7 +62,8 @@ public class DistanceIR extends AbstractTFComponent<BrickletDistanceIR> {
 
     @Override
     protected void disposeDevice(BrickletDistanceIR device) {
-        active = null;
+        device.removeDistanceListener(dListener);
+        dListener = null;
         try {
             device.setDistanceCallbackPeriod(0);
         } catch (Exception ex) {
@@ -73,11 +72,7 @@ public class DistanceIR extends AbstractTFComponent<BrickletDistanceIR> {
         this.device = null;
     }
 
-    @Override
-    public void tick(ExecutionContext source) {
-    }
-
-    private class Listener implements BrickletDistanceIR.DistanceListener {
+    private class DistanceListener implements BrickletDistanceIR.DistanceListener {
 
         @Override
         public void distance(final int dist) {
@@ -86,7 +81,7 @@ public class DistanceIR extends AbstractTFComponent<BrickletDistanceIR> {
                 
                 @Override
                 public void run() {
-                    if (active == Listener.this) {
+                    if (dListener == DistanceListener.this) {
                         value = dist;
                         out.send(time, value);
                     }

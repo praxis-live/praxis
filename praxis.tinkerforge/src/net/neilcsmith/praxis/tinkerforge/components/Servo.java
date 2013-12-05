@@ -146,10 +146,7 @@ public class Servo extends AbstractTFComponent<BrickServo> {
     }
 
     @Override
-    public void tick(ExecutionContext source) {
-        if (device == null || source.getState() != ExecutionContext.State.ACTIVE) {
-            return;
-        }
+    protected void updateDevice(BrickServo device) {
         if (configDirty) {
             configureDevice();
         }

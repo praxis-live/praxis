@@ -27,7 +27,6 @@ import com.tinkerforge.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.ControlPort;
-import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
@@ -74,10 +73,32 @@ public class IO16 extends AbstractTFComponent<BrickletIO16> {
     }
 
     @Override
-    public void tick(ExecutionContext source) {
-        if (device == null || source.getState() != ExecutionContext.State.ACTIVE) {
-            return;
+    protected void initDevice(BrickletIO16 device) {
+        this.device = device;
+        listener = new Listener();
+        device.addInterruptListener(listener);
+        try {
+            device.setPortInterrupt('a', (short) 0xFF);
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
         }
+        forceRefresh();
+    }
+
+    @Override
+    protected void disposeDevice(BrickletIO16 device) {
+        device.removeInterruptListener(listener);
+        try {
+            device.setPortInterrupt('a', (short) 0);
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, null, ex);
+        }
+        listener = null;
+        this.device = null;
+    }
+
+    @Override
+    protected void updateDevice(BrickletIO16 device) {
         for (Pin p : pinsA) {
             if (p.dirty) {
                 refreshConfiguration(p);
@@ -88,35 +109,6 @@ public class IO16 extends AbstractTFComponent<BrickletIO16> {
                 refreshConfiguration(p);
             }
         }
-    }
-
-    @Override
-    protected void initDevice(BrickletIO16 device) {
-        this.device = device;
-        listener = new Listener();
-        device.addInterruptListener(listener);
-        try {
-            device.setPortInterrupt('a', (short) 0xFF);
-        } catch (TimeoutException ex) {
-            Logger.getLogger(IO16.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NotConnectedException ex) {
-            Logger.getLogger(IO16.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        forceRefresh();
-    }
-
-    @Override
-    protected void disposeDevice(BrickletIO16 device) {
-        device.removeInterruptListener(listener);
-        try {
-            device.setPortInterrupt('a', (short) 0);
-        } catch (TimeoutException ex) {
-            Logger.getLogger(IO16.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (NotConnectedException ex) {
-            Logger.getLogger(IO16.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        listener = null;
-        this.device = null;
     }
 
     private void refreshConfiguration(Pin p) {

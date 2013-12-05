@@ -26,7 +26,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlPort;
-import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.BooleanProperty;
@@ -60,7 +59,7 @@ public class LinearPoti extends AbstractTFComponent<BrickletLinearPoti> {
         listener = l;
         device.addPositionListener(l);
         try {
-            device.setPositionCallbackPeriod(50);
+            device.setPositionCallbackPeriod(getCallbackPeriod());
         } catch (Exception ex) {
             Logger.getLogger(RotaryPoti.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -75,10 +74,6 @@ public class LinearPoti extends AbstractTFComponent<BrickletLinearPoti> {
             Logger.getLogger(RotaryPoti.class.getName()).log(Level.FINE, null, ex);
         }
         this.device = null;
-    }
-
-    @Override
-    public void tick(ExecutionContext source) {
     }
 
     private double normalize(int val) {

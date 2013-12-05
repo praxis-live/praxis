@@ -96,7 +96,7 @@ public class Joystick extends AbstractTFComponent<BrickletJoystick> {
         device.addPressedListener(buttonListener);
         device.addReleasedListener(buttonListener);
         try {
-            device.setPositionCallbackPeriod(50);
+            device.setPositionCallbackPeriod(getCallbackPeriod());
         } catch (Exception ex) {
             Logger.getLogger(Joystick.class.getName()).log(Level.SEVERE, null, ex);
         } 

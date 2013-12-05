@@ -25,7 +25,6 @@ import com.tinkerforge.BrickletLCD20x4;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.ControlPort;
-import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
@@ -106,19 +105,9 @@ public class LCD20x4 extends AbstractTFComponent<BrickletLCD20x4> {
         buttonListener = null;
         this.device = null;
     }
-    
-    private void forceRefresh() {
-        for (LineBinding line : lines) {
-            line.dirty = true;
-        }
-        backlight.dirty = true;
-    }
 
     @Override
-    public void tick(ExecutionContext source) {
-        if (device == null || source.getState() != ExecutionContext.State.ACTIVE) {
-            return;
-        }
+    protected void updateDevice(BrickletLCD20x4 device) {
         for (LineBinding line : lines) {
             if (line.dirty) {
                 refreshLine(line);
@@ -128,7 +117,14 @@ public class LCD20x4 extends AbstractTFComponent<BrickletLCD20x4> {
             refreshBacklight(backlight);
         }
     }
-    
+      
+    private void forceRefresh() {
+        for (LineBinding line : lines) {
+            line.dirty = true;
+        }
+        backlight.dirty = true;
+    }
+ 
     private void refreshLine(LineBinding line) {
         
         String txt = line.value;

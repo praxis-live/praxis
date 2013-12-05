@@ -26,7 +26,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlPort;
-import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
@@ -56,7 +55,7 @@ public class AmbientLight extends AbstractTFComponent<BrickletAmbientLight> {
         active = l;
         device.addIlluminanceListener(l);
         try {
-            device.setIlluminanceCallbackPeriod(50);
+            device.setIlluminanceCallbackPeriod(getCallbackPeriod());
         } catch (Exception ex) {
             Logger.getLogger(AmbientLight.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -64,6 +63,7 @@ public class AmbientLight extends AbstractTFComponent<BrickletAmbientLight> {
 
     @Override
     protected void disposeDevice(BrickletAmbientLight device) {
+        device.removeIlluminanceListener(active);
         active = null;
         try {
             device.setIlluminanceCallbackPeriod(0);
@@ -71,11 +71,6 @@ public class AmbientLight extends AbstractTFComponent<BrickletAmbientLight> {
             Logger.getLogger(AmbientLight.class.getName()).log(Level.FINE, null, ex);
         }
         this.device = null;
-    }
-
-    @Override
-    public void tick(ExecutionContext source) {
-
     }
 
     private class Listener implements BrickletAmbientLight.IlluminanceListener {
