@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -34,7 +34,9 @@ import javax.imageio.ImageIO;
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
+import net.neilcsmith.praxis.video.render.ops.Blit;
 import net.neilcsmith.praxis.video.render.ops.GraphicsOp;
+import net.neilcsmith.praxis.video.render.ops.Reverse;
 
 /**
  *
@@ -43,7 +45,6 @@ import net.neilcsmith.praxis.video.render.ops.GraphicsOp;
 public class BufferedImageSurface extends Surface {
 
     private final static Logger LOG = Logger.getLogger(BufferedImageSurface.class.getName());
-
     private final static PixelData[] EMPTY_INPUTS = new PixelData[0];
     private final static Image[] EMPTY_IMAGES = new Image[0];
     private BufferedImage image;
@@ -86,14 +87,13 @@ public class BufferedImageSurface extends Surface {
         return pixelData;
     }
 
-    private PixelData getPixelData(Surface surface) {
-        if (surface instanceof BufferedImageSurface) {
-            return ((BufferedImageSurface) surface).getPixelData();
-        } else {
-            throw new RuntimeException();
-        }
-    }
-
+//    private PixelData getPixelData(Surface surface) {
+//        if (surface instanceof BufferedImageSurface) {
+//            return ((BufferedImageSurface) surface).getPixelData();
+//        } else {
+//            throw new RuntimeException();
+//        }
+//    }
     @Override
     public boolean checkCompatible(Surface surface, boolean checkDimensions, boolean checkAlpha) {
         if (!(surface instanceof BufferedImageSurface)) {
@@ -128,41 +128,66 @@ public class BufferedImageSurface extends Surface {
     public void copy(Surface source) {
         modCount++;
         clear = false;
-        if (source.hasAlpha() || source.getWidth() < getWidth() ||
-                source.getHeight() < getHeight()) {
+        if (source.hasAlpha() || source.getWidth() < getWidth()
+                || source.getHeight() < getHeight()) {
             clear();
         }
-        if (source instanceof BufferedImageSurface) {
-            Graphics2D g = image.createGraphics();
-            g.drawImage(((BufferedImageSurface) source).getImage(), 0, 0, null);
-            g.dispose();
-        } else {
-            throw new RuntimeException();
-        }
+        processImpl(new Blit(), source);
     }
-
-
 
     @Override
     public void process(SurfaceOp op, Surface... inputs) {
         modCount++;
-        if (op instanceof GraphicsOp) {
-            Graphics2D g = image.createGraphics();
-            ((GraphicsOp) op).getCallback().draw(g, createImageArray(inputs));
-            return;
+        switch (inputs.length) {
+            case 0:
+                processImpl(op);
+                break;
+            case 1:
+                processImpl(op, inputs[0]);
+                break;
+            default:
+                processImpl(op, inputs);
         }
-        PixelData[] inputData;
-        int inLen = inputs.length;
-        if (inLen > 0) {
-            inputData = new PixelData[inLen];
-            for (int i = 0; i < inLen; i++) {
-                inputData[i] = getPixelData(inputs[i]);
+        clear = false;
+    }
+
+    private void processImpl(SurfaceOp op) {
+        if (op instanceof GraphicsOp) {
+            processGraphicsOp((GraphicsOp) op, EMPTY_IMAGES);
+        } else {
+            op.process(getPixelData(), EMPTY_INPUTS);
+        }
+    }
+
+    private void processImpl(SurfaceOp op, Surface input) {
+        if (input instanceof BufferedImageSurface) {
+            if (op instanceof GraphicsOp) {
+                processGraphicsOp((GraphicsOp) op,
+                        new Image[]{((BufferedImageSurface) input).getImage()});
+            } else {
+                op.process(getPixelData(),
+                        new PixelData[]{((BufferedImageSurface) input).getPixelData()});
             }
         } else {
-            inputData = EMPTY_INPUTS;
+            SurfaceOp rev = Reverse.op(op, getPixelData());
+            input.process(rev);
         }
-        op.process(getPixelData(), inputData);
-        clear = false;
+    }
+
+    private void processImpl(SurfaceOp op, Surface[] inputs) {
+        if (op instanceof GraphicsOp) {
+            processGraphicsOp((GraphicsOp) op, createImageArray(inputs));
+        } else {
+            PixelData[] pixelInputs = new PixelData[inputs.length];
+            for (int i = 0; i < inputs.length; i++) {
+                if (inputs[i] instanceof BufferedImageSurface) {
+                    pixelInputs[i] = ((BufferedImageSurface) inputs[i]).getPixelData();
+                } else {
+                    throw new UnsupportedOperationException("not yet implemented");
+                }
+            }
+            op.process(pixelData, pixelInputs);
+        }
     }
 
     private Image[] createImageArray(Surface[] inputs) {
@@ -170,16 +195,21 @@ public class BufferedImageSurface extends Surface {
             return EMPTY_IMAGES;
         } else {
             Image[] ret = new Image[inputs.length];
-            for (int i=0; i < ret.length; i++) {
+            for (int i = 0; i < ret.length; i++) {
                 Surface s = inputs[i];
                 if (s instanceof BufferedImageSurface) {
-                    ret[i] = ((BufferedImageSurface) s).image;
+                    ret[i] = ((BufferedImageSurface) s).getImage();
                 } else {
-                    ret[i] = ImageUtils.toImage(getPixelData(s));
+                    throw new UnsupportedOperationException("not yet implemented");
                 }
             }
             return ret;
         }
+    }
+
+    private void processGraphicsOp(GraphicsOp op, Image[] images) {
+        Graphics2D g = getImage().createGraphics();
+        op.getCallback().draw(g, images);
     }
 
     public void save(String type, File file) throws IOException {
@@ -193,7 +223,6 @@ public class BufferedImageSurface extends Surface {
     public int getModCount() {
         return modCount;
     }
-
 
     private class PixelWrapper implements PixelData {
 
