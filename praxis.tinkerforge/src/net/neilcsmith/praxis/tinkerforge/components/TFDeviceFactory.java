@@ -24,13 +24,19 @@ package net.neilcsmith.praxis.tinkerforge.components;
 import com.tinkerforge.BrickMaster;
 import com.tinkerforge.BrickServo;
 import com.tinkerforge.BrickletAmbientLight;
+import com.tinkerforge.BrickletAnalogIn;
+import com.tinkerforge.BrickletAnalogOut;
+import com.tinkerforge.BrickletBarometer;
 import com.tinkerforge.BrickletDistanceIR;
+import com.tinkerforge.BrickletDualRelay;
 import com.tinkerforge.BrickletGPS;
 import com.tinkerforge.BrickletIO16;
 import com.tinkerforge.BrickletJoystick;
 import com.tinkerforge.BrickletLCD20x4;
 import com.tinkerforge.BrickletLinearPoti;
 import com.tinkerforge.BrickletRotaryPoti;
+import com.tinkerforge.BrickletTemperature;
+import com.tinkerforge.BrickletTemperatureIR;
 import com.tinkerforge.Device;
 import com.tinkerforge.IPConnection;
 import java.lang.reflect.Constructor;
@@ -59,8 +65,16 @@ class TFDeviceFactory {
             // Bricklets
             case BrickletAmbientLight.DEVICE_IDENTIFIER:
                 return BrickletAmbientLight.class;
+            case BrickletAnalogIn.DEVICE_IDENTIFIER:
+                return BrickletAnalogIn.class;
+            case BrickletAnalogOut.DEVICE_IDENTIFIER:
+                return BrickletAnalogOut.class;
+            case BrickletBarometer.DEVICE_IDENTIFIER:
+                return BrickletBarometer.class;
             case BrickletDistanceIR.DEVICE_IDENTIFIER:
                 return BrickletDistanceIR.class;
+            case BrickletDualRelay.DEVICE_IDENTIFIER:
+                return BrickletDualRelay.class;
             case BrickletIO16.DEVICE_IDENTIFIER:
                 return BrickletIO16.class;
             case BrickletJoystick.DEVICE_IDENTIFIER:
@@ -73,6 +87,10 @@ class TFDeviceFactory {
                 return BrickletLinearPoti.class;
             case BrickletRotaryPoti.DEVICE_IDENTIFIER:
                 return BrickletRotaryPoti.class;
+            case BrickletTemperature.DEVICE_IDENTIFIER:
+                return BrickletTemperature.class;
+            case BrickletTemperatureIR.DEVICE_IDENTIFIER:
+                return BrickletTemperatureIR.class;
                 
             // Bricks
             case BrickServo.DEVICE_IDENTIFIER:

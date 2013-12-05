@@ -45,16 +45,29 @@ public class TFComponentFactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-                addRoot("root:tinkerforge", data(TFRoot.class));
-                addComponent("tinkerforge:ambient-light", data(AmbientLight.class));
-                addComponent("tinkerforge:distance-ir", data(DistanceIR.class));
-                addComponent("tinkerforge:io16", data(IO16.class));
-                addComponent("tinkerforge:joystick", data(Joystick.class));
-                addComponent("tinkerforge:lcd20x4", data(LCD20x4.class));
-                addComponent("tinkerforge:linear-poti", data(LinearPoti.class));
-                addComponent("tinkerforge:rotary-poti", data(RotaryPoti.class));
-                addComponent("tinkerforge:servo", data(Servo.class));
+
+            // Root
+            addRoot("root:tinkerforge", data(TFRoot.class));
+
+            // Components
+            addComponent("tinkerforge:ambient-light", data(AmbientLight.class));
+            addComponent("tinkerforge:analog-in", data(AnalogIn.class));
+            addComponent("tinkerforge:analog-out", data(AnalogOut.class));
+            addComponent("tinkerforge:barometer", data(Barometer.class));
+            addComponent("tinkerforge:distance-ir", data(DistanceIR.class));
+            addComponent("tinkerforge:dual-relay", data(DualRelay.class));
+            addComponent("tinkerforge:io16", data(IO16.class));
+            addComponent("tinkerforge:joystick", data(Joystick.class));
+            addComponent("tinkerforge:lcd20x4", data(LCD20x4.class));
+            addComponent("tinkerforge:linear-poti", data(LinearPoti.class));
+            addComponent("tinkerforge:rotary-poti", data(RotaryPoti.class));
+            addComponent("tinkerforge:servo", data(Servo.class));
+            addComponent("tinkerforge:temperature", data(Temperature.class));
+            addComponent("tinkerforge:temperature-ir", data(TemperatureIR.class));
+
+            // Test components
+            addComponent("tinkerforge:lcd16x2", data(LCD16x2.class).test());
+
         }
-        
     }
 }
