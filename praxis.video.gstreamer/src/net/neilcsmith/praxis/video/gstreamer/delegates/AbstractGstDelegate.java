@@ -37,7 +37,6 @@ import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
 import net.neilcsmith.praxis.video.render.ops.ScaledBlit;
-import net.neilcsmith.praxis.video.render.utils.BufferedImageSurface;
 import net.neilcsmith.praxis.video.utils.ResizeMode;
 import net.neilcsmith.praxis.video.utils.ResizeUtils;
 import org.gstreamer.Buffer;
