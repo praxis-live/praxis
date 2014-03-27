@@ -37,8 +37,8 @@ public class PMap extends Argument {
     public final static PMap EMPTY = new PMap(PArray.EMPTY, "");
     private final static int BUILDER_INIT_CAPACITY = 8;
 //    private Map<String, Argument> map;
-    private PArray array;
-    private String string;
+    private final PArray array;
+    private final String string;
 
 //    private PMap(Map<String, Argument> map, String str) {
 //        this.map = map;
