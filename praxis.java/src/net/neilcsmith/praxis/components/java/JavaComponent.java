@@ -22,6 +22,8 @@
 package net.neilcsmith.praxis.components.java;
 
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.compiler.ClassBodyCompiler;
+import net.neilcsmith.praxis.compiler.ClassBodyContext;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
@@ -32,7 +34,6 @@ import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
 import net.neilcsmith.praxis.java.CodeDelegate;
 import net.neilcsmith.praxis.java.impl.AbstractJavaComponent;
-import org.codehaus.janino.ClassBodyEvaluator;
 
 /**
  *
@@ -103,13 +104,24 @@ public class JavaComponent extends AbstractJavaComponent {
             this.code = code;
         }
 
+        @Override
         public Argument execute() throws Exception {
-            ClassBodyEvaluator compiler = new ClassBodyEvaluator();
-            compiler.setExtendedType(CodeDelegate.class);
-            compiler.setDefaultImports(IMPORTS.clone());
-            compiler.cook(code);
-            CodeDelegate delegate = (CodeDelegate) compiler.getClazz().newInstance();
+            Class<CodeDelegate> cls = ClassBodyCompiler.getDefault().compile(new ContextImpl(), code);
+            CodeDelegate delegate = cls.newInstance();
             return PReference.wrap(delegate);
         }
+    }
+    
+    private static class ContextImpl extends ClassBodyContext<CodeDelegate> {
+        
+        protected ContextImpl() {
+            super(CodeDelegate.class);
+        }
+
+        @Override
+        public String[] getDefaultImports() {
+            return IMPORTS.clone();
+        }
+  
     }
 }

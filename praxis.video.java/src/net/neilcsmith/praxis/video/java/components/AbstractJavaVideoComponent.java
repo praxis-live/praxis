@@ -23,6 +23,8 @@ package net.neilcsmith.praxis.video.java.components;
 
 import java.net.URI;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.compiler.ClassBodyCompiler;
+import net.neilcsmith.praxis.compiler.ClassBodyContext;
 import net.neilcsmith.praxis.core.interfaces.TaskService.Task;
 import net.neilcsmith.praxis.java.Output;
 import net.neilcsmith.praxis.java.Param;
@@ -44,7 +46,6 @@ import net.neilcsmith.praxis.java.impl.AbstractJavaComponent;
 import net.neilcsmith.praxis.video.java.VideoCodeContext;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.utils.BufferedImageSurface;
-import org.codehaus.janino.ClassBodyEvaluator;
 
 /**
  *
@@ -189,12 +190,22 @@ public abstract class AbstractJavaVideoComponent extends AbstractJavaComponent {
         }
 
         public Argument execute() throws Exception {
-            ClassBodyEvaluator compiler = new ClassBodyEvaluator();
-            compiler.setExtendedType(VideoCodeDelegate.class);
-            compiler.setDefaultImports(IMPORTS.clone());
-            compiler.cook(code);
-            VideoCodeDelegate delegate = (VideoCodeDelegate) compiler.getClazz().newInstance();
+            Class<VideoCodeDelegate> cls = ClassBodyCompiler.getDefault()
+                    .compile(new ContextImpl(), code);
+            VideoCodeDelegate delegate = cls.newInstance();
             return PReference.wrap(delegate);
+        }
+    }
+    
+    private static class ContextImpl extends ClassBodyContext<VideoCodeDelegate> {
+        
+        private ContextImpl() {
+            super(VideoCodeDelegate.class);
+        }
+
+        @Override
+        public String[] getDefaultImports() {
+            return IMPORTS.clone();
         }
     }
 

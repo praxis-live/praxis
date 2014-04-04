@@ -22,12 +22,9 @@
 
 package net.neilcsmith.praxis.video.java.components;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
-import net.neilcsmith.praxis.video.java.VideoCodeDelegate;
 import net.neilcsmith.praxis.video.pipes.impl.MultiInOut;
 import net.neilcsmith.praxis.video.pipes.impl.Placeholder;
 import net.neilcsmith.praxis.video.render.Surface;
