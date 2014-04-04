@@ -20,7 +20,7 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.nblookup;
+package net.neilcsmith.praxis.nb.lookup;
 
 import java.util.Collection;
 import java.util.Iterator;
