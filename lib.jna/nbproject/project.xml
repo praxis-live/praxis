@@ -3,7 +3,7 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>org.netbeans.libs.jna</code-name-base>
+            <code-name-base>com.sun.jna</code-name-base>
             <suite-component/>
             <module-dependencies>
                 <dependency>
@@ -11,7 +11,7 @@
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
-                        <specification-version>7.23.1</specification-version>
+                        <specification-version>7.39.1</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>
@@ -19,7 +19,7 @@
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
-                        <specification-version>8.15.1</specification-version>
+                        <specification-version>8.33.2</specification-version>
                     </run-dependency>
                 </dependency>
             </module-dependencies>
@@ -29,8 +29,8 @@
                 <package>com.sun.jna.win32</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/jna-3.4.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jna-3.4.0.jar</binary-origin>
+                <runtime-relative-path>ext/jna-4.1.0.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jna-4.1.0.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

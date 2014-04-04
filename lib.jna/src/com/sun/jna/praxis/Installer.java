@@ -1,4 +1,4 @@
-package org.netbeans.libs.jna;
+package com.sun.jna.praxis;
 
 import org.openide.modules.ModuleInstall;
 
@@ -10,11 +10,10 @@ public class Installer extends ModuleInstall {
             System.setProperty("jna.nosys", "true");
         }
     }
-    
-    
 
     @Override
     public void restored() {
-        // no op
+        // nothing
     }
+
 }
