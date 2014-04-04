@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+OpenIDE-Module: net.neilcsmith.praxis.nb.classpath
+OpenIDE-Module-Install: net/neilcsmith/praxis/nb/classpath/Installer.class
+OpenIDE-Module-Localizing-Bundle: net/neilcsmith/praxis/nb/classpath/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+
