@@ -7,12 +7,11 @@
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>org.netbeans.libs.jna</code-name-base>
+                    <code-name-base>com.sun.jna</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
-                        <release-version>1</release-version>
-                        <specification-version>3.4.0</specification-version>
+                        <specification-version>4.1.0</specification-version>
                     </run-dependency>
                 </dependency>
             </module-dependencies>
