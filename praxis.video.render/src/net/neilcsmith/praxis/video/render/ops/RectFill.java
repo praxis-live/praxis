@@ -61,7 +61,7 @@ public class RectFill implements SurfaceOp {
         if (rect == null) {
             return new Rectangle(bounds);
         } else {
-            rect.setBounds(rect);
+            rect.setBounds(bounds);
             return rect;
         }
     }
