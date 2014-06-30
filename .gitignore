@@ -108,3 +108,10 @@
 /lib.janino.commons/nbproject/private/
 /praxis.logging/nbproject/private/
 /praxis.logging/build/
+/lib.jogl/build/
+/lib.processing/build/
+/lib.jogl/nbproject/private/
+/lib.processing/nbproject/private/
+/praxis.video.pgl/nbproject/private/
+/praxis.video.pgl/build/
+/dist/

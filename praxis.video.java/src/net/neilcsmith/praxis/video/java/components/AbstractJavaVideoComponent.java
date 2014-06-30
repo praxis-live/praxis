@@ -21,10 +21,14 @@
  */
 package net.neilcsmith.praxis.video.java.components;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.net.URI;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.compiler.ClassBodyCompiler;
 import net.neilcsmith.praxis.compiler.ClassBodyContext;
+import net.neilcsmith.praxis.compiler.CompilationException;
 import net.neilcsmith.praxis.core.interfaces.TaskService.Task;
 import net.neilcsmith.praxis.java.Output;
 import net.neilcsmith.praxis.java.Param;
@@ -190,11 +194,42 @@ public abstract class AbstractJavaVideoComponent extends AbstractJavaComponent {
         }
 
         public Argument execute() throws Exception {
-            Class<VideoCodeDelegate> cls = ClassBodyCompiler.getDefault()
-                    .compile(new ContextImpl(), code);
-            VideoCodeDelegate delegate = cls.newInstance();
-            return PReference.wrap(delegate);
+            Class<VideoCodeDelegate> cls;
+            try {
+                cls = compile(code);
+            } catch (Exception ex) {
+                String cc = attemptCorrection(code);
+                cls = compile(cc);
+            } 
+            return PReference.wrap(cls.newInstance());
         }
+        
+        private Class<VideoCodeDelegate> compile(String code) throws Exception {
+            return ClassBodyCompiler.getDefault()
+                        .compile(new ContextImpl(), code);
+        }
+        
+        //@TODO move this to ClassBodyCompiler?
+        private String attemptCorrection(String code) throws IOException {
+            StringBuilder sb = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new StringReader(code));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.isEmpty()) {
+                    continue;
+                }
+                if (line.startsWith("void")) {
+                    line = line.replaceAll("void *draw", "public void draw");
+                    line = line.replaceAll("void *setup", "public void setup");
+                }
+                sb.append(line);
+                sb.append("\n");
+            }
+            return sb.toString();
+            
+        }
+        
     }
     
     private static class ContextImpl extends ClassBodyContext<VideoCodeDelegate> {
