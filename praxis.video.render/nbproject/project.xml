@@ -11,6 +11,7 @@
                 <friend>net.neilcsmith.praxis.video.gstreamer</friend>
                 <friend>net.neilcsmith.praxis.video.java</friend>
                 <friend>net.neilcsmith.praxis.video.opengl</friend>
+                <friend>net.neilcsmith.praxis.video.pgl</friend>
                 <friend>net.neilcsmith.praxis.video.pipes</friend>
                 <package>net.neilcsmith.praxis.video.render</package>
                 <package>net.neilcsmith.praxis.video.render.ops</package>

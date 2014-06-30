@@ -20,6 +20,7 @@
                 <friend>net.neilcsmith.praxis.video.gstreamer</friend>
                 <friend>net.neilcsmith.praxis.video.java</friend>
                 <friend>net.neilcsmith.praxis.video.opengl</friend>
+                <friend>net.neilcsmith.praxis.video.pgl</friend>
                 <package>net.neilcsmith.praxis.video.pipes</package>
                 <package>net.neilcsmith.praxis.video.pipes.impl</package>
             </friend-packages>
