@@ -107,7 +107,7 @@ class BlendUtil {
 //            System.out.println("Composing ARGB");
         if (srcSL == width && dstSL == width) {
 //                System.out.println("Composing full array");
-            cmp.rgb(srcData, srcOffset, dstData, dstOffset, width * height, alpha);
+            cmp.argb(srcData, srcOffset, dstData, dstOffset, width * height, alpha);
         } else {
 //                System.out.println("Composing line by line");
             for (int y = 0; y < height; y++) {
