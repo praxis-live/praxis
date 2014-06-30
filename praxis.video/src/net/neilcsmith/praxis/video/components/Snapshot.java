@@ -148,7 +148,6 @@ public class Snapshot extends AbstractComponent {
         }
 
         private void mix(Surface src, Surface destIn, Surface destOut, double amount) {
-            float fAmount = (float) amount;
             if (destOut.hasAlpha()) {
                 Surface dest;
                 if (destIn == destOut) {
@@ -162,8 +161,8 @@ public class Snapshot extends AbstractComponent {
                 }
                 dest.clear();
 
-                dest.process(Blit.op(Blend.ADD.opacity(1 - fAmount)), destIn);
-                dest.process(Blit.op(Blend.ADD.opacity(fAmount)), src);
+                dest.process(Blit.op(Blend.ADD.opacity(1 - amount)), destIn);
+                dest.process(Blit.op(Blend.ADD.opacity(amount)), src);
 
                 if (dest != destOut) {
                     destOut.clear();
@@ -174,7 +173,7 @@ public class Snapshot extends AbstractComponent {
                 if (destIn != destOut) {
                     destOut.copy(destIn);
                 }
-                destOut.process(Blit.op(Blend.NORMAL.opacity(fAmount)), src);
+                destOut.process(Blit.op(Blend.NORMAL.opacity(amount)), src);
             }
         }
 
