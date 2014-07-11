@@ -27,6 +27,8 @@ package net.neilcsmith.praxis.compiler;
  */
 public abstract class ClassBodyContext<T> {
     
+    public final static String KEY = "class-body-context";
+    
     private final Class<T> superClass;
     
     protected ClassBodyContext(Class<T> cls) {
