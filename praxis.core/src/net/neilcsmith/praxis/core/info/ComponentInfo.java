@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -40,23 +40,24 @@ public class ComponentInfo extends Argument {
     
     public final static String KEY_DYNAMIC = "dynamic";
 
-    private Class<? extends Component> type;
+//    private Class<? extends Component> type;
     private InterfaceDefinition[] interfaces;
     private Map<String, ControlInfo> controls;
     private Map<String, PortInfo> ports;
     private PMap properties;
 
-    private ComponentInfo(Class<? extends Component> type, InterfaceDefinition[] interfaces,
+    private ComponentInfo(InterfaceDefinition[] interfaces,
             Map<String, ControlInfo> controls, Map<String, PortInfo> ports, PMap properties) {
-        this.type = type;
+//        this.type = type;
         this.interfaces = interfaces;
         this.controls = controls;
         this.ports = ports;
         this.properties = properties;
     }
 
+    @Deprecated
     public Class<? extends Component> getType() {
-        return type;
+        return Component.class;
     }
 
     public InterfaceDefinition[] getInterfaces() {
@@ -101,8 +102,7 @@ public class ComponentInfo extends Argument {
         }
         if (obj instanceof ComponentInfo) {
             ComponentInfo o = (ComponentInfo) obj;
-            return type.equals(o.type) &&
-                    Arrays.equals(interfaces, interfaces) &&
+            return Arrays.equals(interfaces, interfaces) &&
                     controls.equals(o.controls) &&
                     ports.equals(o.ports) &&
                     properties.equals(o.properties);
@@ -113,7 +113,7 @@ public class ComponentInfo extends Argument {
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 79 * hash + (this.type != null ? this.type.hashCode() : 0);
+//        hash = 79 * hash + (this.type != null ? this.type.hashCode() : 0);
         hash = 79 * hash + Arrays.deepHashCode(this.interfaces);
         hash = 79 * hash + (this.controls != null ? this.controls.hashCode() : 0);
         hash = 79 * hash + (this.ports != null ? this.ports.hashCode() : 0);
@@ -121,25 +121,21 @@ public class ComponentInfo extends Argument {
         return hash;
     }
 
-
-//    public static ComponentInfo create(
-//            Class<? extends Component> clas,
-//            Map<String, ControlInfo> controls,
-//            Map<String, PortInfo> ports,
-//            PMap properties) {
-//        return create(clas, controls, ports, null, properties);
-//    }
-
-
+    @Deprecated
     public static ComponentInfo create(
             Class<? extends Component> type,
             Set<InterfaceDefinition> interfaces,
             Map<String, ControlInfo> controls,
             Map<String, PortInfo> ports,
             PMap properties) {
-        if (type == null) {
-            throw new NullPointerException();
-        }
+        return create(interfaces, controls, ports, properties);
+    }
+    
+    public static ComponentInfo create(
+            Set<InterfaceDefinition> interfaces,
+            Map<String, ControlInfo> controls,
+            Map<String, PortInfo> ports,
+            PMap properties) {
         InterfaceDefinition[] ids = new InterfaceDefinition[0];
         if (interfaces != null && !interfaces.isEmpty()) {
             ids = interfaces.toArray(ids);
@@ -158,7 +154,7 @@ public class ComponentInfo extends Argument {
             properties = PMap.EMPTY;
         }
 
-        return new ComponentInfo(type, ids, controls, ports, properties);
+        return new ComponentInfo(ids, controls, ports, properties);
 
     }
 
