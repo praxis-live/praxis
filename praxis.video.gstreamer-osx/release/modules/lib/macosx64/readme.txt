@@ -1,0 +1,1 @@
+GStreamer native libraries for OSX 64bit go here.
