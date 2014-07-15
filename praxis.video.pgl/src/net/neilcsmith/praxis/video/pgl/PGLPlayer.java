@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2013 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,9 +21,7 @@
  */
 package net.neilcsmith.praxis.video.pgl;
 
-import java.awt.Canvas;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -49,7 +47,6 @@ import net.neilcsmith.praxis.video.PlayerConfiguration;
 import net.neilcsmith.praxis.video.PlayerFactory;
 import net.neilcsmith.praxis.video.QueueContext;
 import net.neilcsmith.praxis.video.WindowHints;
-import net.neilcsmith.praxis.video.pgl.ops.PGLOp;
 import net.neilcsmith.praxis.video.pipes.FrameRateListener;
 import net.neilcsmith.praxis.video.pipes.SinkIsFullException;
 import net.neilcsmith.praxis.video.pipes.VideoPipe;
@@ -166,12 +163,9 @@ public class PGLPlayer implements Player {
                 applet.requestDraw(time);
             }
 
-
         }
 
         dispose();
-
-
 
     }
 
@@ -226,7 +220,7 @@ public class PGLPlayer implements Player {
                 }
 
                 applet.init();
-                
+
                 LOG.log(Level.FINE, "Frame : {0}", frame.getBounds());
                 LOG.log(Level.FINE, "Canvas : {0}", applet.getBounds());
 
@@ -235,7 +229,6 @@ public class PGLPlayer implements Player {
 
 //        context = GLContext.createContext(canvas);
 //        surface = context.createSurface(width, height, false);
-
 //        switch (outputRotation) {
 //            case 90:
 //            case 270:
@@ -246,7 +239,6 @@ public class PGLPlayer implements Player {
 //                break;
 //
 //        }
-
     }
 
     private GraphicsDevice findScreenDevice() {
@@ -269,6 +261,9 @@ public class PGLPlayer implements Player {
 
     private void dispose() {
         applet.dispose();
+
+        sink.disconnect();
+
         disposeFrame();
     }
 
@@ -281,7 +276,6 @@ public class PGLPlayer implements Player {
 //            LOCK.notifyAll();
 //        }
 //    }
-
     private void disposeFrame() {
         try {
             EventQueue.invokeAndWait(new Runnable() {
@@ -297,11 +291,7 @@ public class PGLPlayer implements Player {
         } catch (Exception ex) {
         }
 //        surface = null;
-//        Source[] sources = sink.getSources();
-//        for (Source src : sources) {
-//            sink.removeSource(src);
-//        }
-//        sink.removeSource(sink.source);
+
     }
 
 //    private void updateOnly() {
@@ -309,7 +299,6 @@ public class PGLPlayer implements Player {
 ////        fireListeners();
 //        sink.process(surface, time, rendering);
 //    }
-
 //    private void updateAndRender() {
 //        rendering = true;
 ////        fireListeners();
@@ -339,7 +328,6 @@ public class PGLPlayer implements Player {
 //            return;
 //        }
 //    }
-
 //    private void renderToScreen(GLSurface surface) throws Exception {
 //        try {
 //            GLRenderer renderer = context.getRenderer();
@@ -356,7 +344,6 @@ public class PGLPlayer implements Player {
 //
 //        Display.update();
 //    }
-
     private void fireListeners() {
         int count = listeners.size();
         for (int i = 0; i < count; i++) {
@@ -524,7 +511,6 @@ public class PGLPlayer implements Player {
                 throw new IllegalArgumentException("Invalid client configuration");
             }
 
-
             int width = config.getWidth();
             int height = config.getHeight();
             int outWidth = width;
@@ -540,15 +526,15 @@ public class PGLPlayer implements Player {
                 title = wHints.getTitle() + " [GL]";
             }
 
-            ClientConfiguration.Dimension dim =
-                    clients[0].getLookup().get(ClientConfiguration.Dimension.class);
+            ClientConfiguration.Dimension dim
+                    = clients[0].getLookup().get(ClientConfiguration.Dimension.class);
             if (dim != null) {
                 outWidth = dim.getWidth();
                 outHeight = dim.getHeight();
             }
 
-            ClientConfiguration.Rotation rot =
-                    clients[0].getLookup().get(ClientConfiguration.Rotation.class);
+            ClientConfiguration.Rotation rot
+                    = clients[0].getLookup().get(ClientConfiguration.Rotation.class);
             if (rot != null) {
                 rotation = rot.getAngle();
             }
@@ -558,8 +544,8 @@ public class PGLPlayer implements Player {
                 rotation = 0;
             }
 
-            ClientConfiguration.DeviceIndex dev =
-                    clients[0].getLookup().get(ClientConfiguration.DeviceIndex.class);
+            ClientConfiguration.DeviceIndex dev
+                    = clients[0].getLookup().get(ClientConfiguration.DeviceIndex.class);
             if (dev != null) {
                 device = dev.getValue();
             }

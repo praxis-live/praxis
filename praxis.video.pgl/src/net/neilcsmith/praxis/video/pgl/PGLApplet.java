@@ -21,13 +21,10 @@
  */
 package net.neilcsmith.praxis.video.pgl;
 
-import java.beans.Beans;
 import java.util.logging.Logger;
-import net.neilcsmith.praxis.video.pipes.VideoPipe;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
-import processing.opengl.PJOGL;
 
 /**
  *
