@@ -59,13 +59,19 @@ public abstract class CodeComponent<T extends CodeDelegate> implements Component
         if (parent == null) {
             if (this.parent != null) {
                 this.parent = null;
-                // dispose
+                disconnectAll();
             }
         } else {
             if (this.parent != null) {
                 throw new VetoException();
             }
             this.parent = parent;
+        }
+    }
+    
+    private void disconnectAll() {
+        for (String portID : getPortIDs()) {
+            getPort(portID).disconnectAll();
         }
     }
 
