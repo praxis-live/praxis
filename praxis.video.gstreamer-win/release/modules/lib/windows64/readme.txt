@@ -1,0 +1,1 @@
+GStreamer native libraries for Windows 64bit go here.
