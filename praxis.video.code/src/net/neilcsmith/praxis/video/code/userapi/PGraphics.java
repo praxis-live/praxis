@@ -170,11 +170,8 @@ public abstract class PGraphics {
         image.getSurface().clear();
     }
     
-    public void copy(PImage src, boolean release) {
+    public void copy(PImage src) {
         image.getSurface().copy(src.getSurface());
-        if (release) {
-            src.getSurface().release();
-        }
     }
 
     public void ellipse(double x, double y, double w, double h) {
@@ -351,6 +348,10 @@ public abstract class PGraphics {
 
         renderShape(new Rectangle2D.Double(x, y, w, h));
 
+    }
+    
+    public void release(PImage image) {
+        image.getSurface().release();
     }
 
     public void resetMatrix() {

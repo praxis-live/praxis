@@ -99,8 +99,8 @@ public class VideoCodeDelegate extends DefaultCodeDelegate {
         pg.clear();
     }
 
-    public void copy(PImage src, boolean release) {
-        pg.copy(src, release);
+    public void copy(PImage src) {
+        pg.copy(src);
     }
 
     public void ellipse(double x, double y, double w, double h) {
@@ -183,6 +183,10 @@ public class VideoCodeDelegate extends DefaultCodeDelegate {
         pg.rect(x, y, w, h);
     }
 
+    public void release(PImage image) {
+        pg.release(image);
+    }
+    
     public void resetMatrix() {
         pg.resetMatrix();
     }
