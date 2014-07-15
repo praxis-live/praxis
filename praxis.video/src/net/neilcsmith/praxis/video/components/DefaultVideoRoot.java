@@ -37,6 +37,7 @@ import net.neilcsmith.praxis.impl.InstanceLookup;
 import net.neilcsmith.praxis.impl.IntProperty;
 import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.RootState;
+import net.neilcsmith.praxis.impl.StringProperty;
 import net.neilcsmith.praxis.video.ClientConfiguration;
 import net.neilcsmith.praxis.video.ClientRegistrationException;
 import net.neilcsmith.praxis.video.Player;
@@ -55,6 +56,10 @@ import net.neilcsmith.praxis.video.pipes.FrameRateSource;
  */
 public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener {
     
+    // @TODO build list from player search
+    private final static String SOFTWARE = "Software";
+    private final static String OPENGL = "OpenGL";
+    
     private final static Logger LOG = Logger.getLogger(DefaultVideoRoot.class.getName());
 
     private final static int WIDTH_DEFAULT = 640;
@@ -66,7 +71,7 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     private int height = HEIGHT_DEFAULT;
     private double fps = FPS_DEFAULT;
     private boolean fullScreen = FULL_SCREEN_DEFAULT;
-    private ArgumentProperty renderer;
+    private StringProperty renderer;
 //    private String title;
     private Player player;
 //    private Placeholder placeholder;
@@ -81,9 +86,8 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     }
 
     private void buildControls() {
-        renderer = ArgumentProperty.create(
-                ArgumentInfo.create(PString.class,
-                PMap.create(ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.valueOf(PString.valueOf("Software"), PString.valueOf("OpenGL")))));
+        renderer = StringProperty.builder().defaultValue(SOFTWARE).allowedValues(SOFTWARE, OPENGL).build();
+        
         registerControl("renderer", renderer);
         registerControl("width", IntProperty.create(new WidthBinding(), 1, 2048, width));
         registerControl("height", IntProperty.create(new HeightBinding(), 1, 2048, height));
@@ -116,7 +120,7 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     @Override
     protected void starting() {
         try {
-            String lib = renderer.getValue().toString();
+            String lib = renderer.getValue();
             if (lib.isEmpty()) {
                 lib = VideoSettings.getRenderer();
             }
