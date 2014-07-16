@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 OpenIDE-Module: com.sun.jna
 OpenIDE-Module-Install: com/sun/jna/praxis/Installer.class
 OpenIDE-Module-Localizing-Bundle: com/sun/jna/Bundle.properties
-OpenIDE-Module-Specification-Version: 3.5.2
+OpenIDE-Module-Specification-Version: 3.5.1
 AutoUpdate-Essential-Module: true
 AutoUpdate-Show-In-Client: false
 
