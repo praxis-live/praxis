@@ -48,7 +48,7 @@ class PGLApplet extends PApplet {
         this.w = width;
         this.h = height;
         this.context = new Context();
-        
+
     }
 
     @Override
@@ -62,6 +62,10 @@ class PGLApplet extends PApplet {
             PGLGraphics pgl = new PGLGraphics(context, primary, w, h);
             pgl.setParent(this);
             return pgl;
+        } else if (PGLGraphics3D.ID.equals(renderer)) {
+            PGLGraphics3D pgl3d = new PGLGraphics3D(context, primary, w, h);
+            pgl3d.setParent(this);
+            return pgl3d;
         } else {
             throw new Error();
 //            return super.makeGraphics(w, h, renderer, path, primary);
@@ -111,7 +115,7 @@ class PGLApplet extends PApplet {
         image(img, 0, 0);
 //        rect(100,100,100,100);
     }
-    
+
     void requestDraw(long time) {
         renderTime = time;
         g.requestDraw();
@@ -130,6 +134,5 @@ class PGLApplet extends PApplet {
         }
 
     }
-
 
 }

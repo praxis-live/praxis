@@ -29,6 +29,7 @@
                 <friend>net.neilcsmith.praxis.live.pxj</friend>
                 <friend>net.neilcsmith.praxis.video.code</friend>
                 <friend>net.neilcsmith.praxis.video.java</friend>
+                <friend>net.neilcsmith.praxis.video.pgl.custom</friend>
                 <package>net.neilcsmith.praxis.compiler</package>
             </friend-packages>
         </data>
