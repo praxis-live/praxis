@@ -18,7 +18,7 @@
             <friend-packages>
                 <friend>net.neilcsmith.praxis.code</friend>
                 <friend>net.neilcsmith.praxis.video.pgl</friend>
-                <friend>net.neilcsmith.praxis.video.pgl.custom</friend>
+                <friend>net.neilcsmith.praxis.video.pgl.code</friend>
                 <package>processing.core</package>
                 <package>processing.data</package>
                 <package>processing.event</package>

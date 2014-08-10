@@ -3,9 +3,17 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>net.neilcsmith.praxis.code</code-name-base>
+            <code-name-base>net.neilcsmith.praxis.video.pgl.code</code-name-base>
             <suite-component/>
             <module-dependencies>
+                <dependency>
+                    <code-name-base>net.neilcsmith.praxis.code</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>1.0</specification-version>
+                    </run-dependency>
+                </dependency>
                 <dependency>
                     <code-name-base>net.neilcsmith.praxis.compiler</code-name-base>
                     <build-prerequisite/>
@@ -31,7 +39,31 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.util</code-name-base>
+                    <code-name-base>net.neilcsmith.praxis.video</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>1.0</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
+                    <code-name-base>net.neilcsmith.praxis.video.pgl</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <implementation-version/>
+                    </run-dependency>
+                </dependency>
+                <dependency>
+                    <code-name-base>net.neilcsmith.praxis.video.pipes</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>1.0</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
+                    <code-name-base>net.neilcsmith.praxis.video.render</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -47,12 +79,7 @@
                     </run-dependency>
                 </dependency>
             </module-dependencies>
-            <friend-packages>
-                <friend>net.neilcsmith.praxis.video.code</friend>
-                <friend>net.neilcsmith.praxis.video.pgl.code</friend>
-                <package>net.neilcsmith.praxis.code</package>
-                <package>net.neilcsmith.praxis.code.userapi</package>
-            </friend-packages>
+            <public-packages/>
         </data>
     </configuration>
 </project>

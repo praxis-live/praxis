@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: net.neilcsmith.praxis.video.pgl.custom
-OpenIDE-Module-Localizing-Bundle: net/neilcsmith/praxis/video/pgl/custom/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.0
-
