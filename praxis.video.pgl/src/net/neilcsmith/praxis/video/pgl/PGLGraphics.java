@@ -65,9 +65,6 @@ public class PGLGraphics extends PGraphics2D {
         blendMode(curBlend);
     }
 
-    
-    
-
     protected void readPixelsARGB(int[] pixels) {
         this.pixels = pixels;
         this.pixelBuffer = context.getScratchBuffer(pixels.length);
@@ -77,7 +74,7 @@ public class PGLGraphics extends PGraphics2D {
         readPixels();
         this.pixels = null;
         this.pixelBuffer = null;
-        
+
     }
 
     @Override
@@ -203,8 +200,6 @@ public class PGLGraphics extends PGraphics2D {
         super.endDraw();
         context.current = getPrimaryPG();
     }
-    
-    
 
     void endOffscreen() {
 //        PGraphics current = getCurrentPG();
@@ -221,11 +216,142 @@ public class PGLGraphics extends PGraphics2D {
             context.current = getPrimaryPG();
         }
     }
-    
+
 //    protected PGraphics getCurrent() {
 //        return ((PGLGraphics)getPrimaryPG()).getCurrentPG();
 //    }
+    @Override
+    protected void colorCalc(float gray, float alpha) {
+        if (gray > colorModeX) {
+            gray = colorModeX;
+        }
+        if (alpha > colorModeA) {
+            alpha = colorModeA;
+        }
 
-      
+        if (gray < 0) {
+            gray = 0;
+        }
+        if (alpha < 0) {
+            alpha = 0;
+        }
 
+        calcA = (alpha == colorModeA) ? 1 : alpha / colorModeA;
+
+        calcR = gray / colorModeX;
+        calcR = (alpha == colorModeA) ? calcR : calcR * calcA;
+        calcG = calcR;
+        calcB = calcR;
+
+        calcRi = (int) (calcR * 255);
+        calcGi = (int) (calcG * 255);
+        calcBi = (int) (calcB * 255);
+        calcAi = (int) (calcA * 255);
+        calcColor = (calcAi << 24) | (calcRi << 16) | (calcGi << 8) | calcBi;
+        calcAlpha = (calcAi != 255);
+    }
+
+    @Override
+    protected void colorCalc(float x, float y, float z, float a) {
+        if (x > colorModeX) {
+            x = colorModeX;
+        }
+        if (y > colorModeY) {
+            y = colorModeY;
+        }
+        if (z > colorModeZ) {
+            z = colorModeZ;
+        }
+        if (a > colorModeA) {
+            a = colorModeA;
+        }
+
+        if (x < 0) {
+            x = 0;
+        }
+        if (y < 0) {
+            y = 0;
+        }
+        if (z < 0) {
+            z = 0;
+        }
+        if (a < 0) {
+            a = 0;
+        }
+
+        calcA = (a == colorModeA) ? 1 : a / colorModeA;
+        
+        switch (colorMode) {
+            case RGB:
+                calcR = x / colorModeX;
+                calcG = y / colorModeY;
+                calcB = z / colorModeZ;         
+                break;
+
+            case HSB:
+                x /= colorModeX; // h
+                y /= colorModeY; // s
+                z /= colorModeZ; // b
+
+                if (y == 0) {  // saturation == 0
+                    calcR = calcG = calcB = z;
+
+                } else {
+                    float which = (x - (int) x) * 6.0f;
+                    float f = which - (int) which;
+                    float p = z * (1.0f - y);
+                    float q = z * (1.0f - y * f);
+                    float t = z * (1.0f - (y * (1.0f - f)));
+
+                    switch ((int) which) {
+                        case 0:
+                            calcR = z;
+                            calcG = t;
+                            calcB = p;
+                            break;
+                        case 1:
+                            calcR = q;
+                            calcG = z;
+                            calcB = p;
+                            break;
+                        case 2:
+                            calcR = p;
+                            calcG = z;
+                            calcB = t;
+                            break;
+                        case 3:
+                            calcR = p;
+                            calcG = q;
+                            calcB = z;
+                            break;
+                        case 4:
+                            calcR = t;
+                            calcG = p;
+                            calcB = z;
+                            break;
+                        case 5:
+                            calcR = z;
+                            calcG = p;
+                            calcB = q;
+                            break;
+                    }
+                }
+                break;
+        }
+        
+        if (a != colorModeA) {
+            calcR *= calcA;
+            calcG *= calcA;
+            calcB *= calcA;
+        }
+        
+        calcRi = (int) (255 * calcR);
+        calcGi = (int) (255 * calcG);
+        calcBi = (int) (255 * calcB);
+        calcAi = (int) (255 * calcA);
+        calcColor = (calcAi << 24) | (calcRi << 16) | (calcGi << 8) | calcBi;
+        calcAlpha = (calcAi != 255);
+    }
+   
+    
 }

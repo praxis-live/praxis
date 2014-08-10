@@ -21,11 +21,9 @@
  */
 package net.neilcsmith.praxis.video.pgl.ops;
 
-import java.util.EnumSet;
 import net.neilcsmith.praxis.video.pgl.PGLGraphics;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
 import net.neilcsmith.praxis.video.render.ops.BlendMode;
-import static net.neilcsmith.praxis.video.render.ops.BlendMode.*;
 
 /**
  *
@@ -42,7 +40,7 @@ abstract class AbstractBlitOp extends AbstractBlendOp {
 //        renderer.enableBlending();
         setupBlending(g, mode);
         opacity *= 255;
-        g.tint(opacity, opacity, opacity, opacity);
+        g.tint(255, 255, 255, opacity);
         
     }
 }

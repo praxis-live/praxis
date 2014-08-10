@@ -49,23 +49,25 @@ abstract class AbstractDrawOp extends AbstractBlendOp {
         
         setupBlending(pg, mode);
         if (fillColor != null) {
-            int a = fillColor.getAlpha();
-            int r = fillColor.getRed();
-            int g = fillColor.getGreen();
-            int b = fillColor.getBlue();
-            float xa = a == 255 ? opacity : opacity * (a / 255.f);
-            pg.fill(r * xa, g * xa, b * xa, a * opacity);
+//            int a = fillColor.getAlpha();
+//            int r = fillColor.getRed();
+//            int g = fillColor.getGreen();
+//            int b = fillColor.getBlue();
+//            float xa = a == 255 ? opacity : opacity * (a / 255.f);
+//            pg.fill(r * xa, g * xa, b * xa, a * opacity);
+            pg.fill(fillColor.getRed(), fillColor.getGreen(), fillColor.getBlue(), fillColor.getAlpha());
         } else {
             pg.noFill();
         }
         
         if (strokeColor != null) {
-            int a = strokeColor.getAlpha();
-            int r = strokeColor.getRed();
-            int g = strokeColor.getGreen();
-            int b = strokeColor.getBlue();
-            float xa = a == 255 ? opacity : opacity * (a / 255.f);
-            pg.stroke(r * xa, g * xa, b * xa, a * opacity);
+//            int a = strokeColor.getAlpha();
+//            int r = strokeColor.getRed();
+//            int g = strokeColor.getGreen();
+//            int b = strokeColor.getBlue();
+//            float xa = a == 255 ? opacity : opacity * (a / 255.f);
+//            pg.stroke(r * xa, g * xa, b * xa, a * opacity);
+            pg.stroke(strokeColor.getRed(), strokeColor.getGreen(), strokeColor.getBlue(), strokeColor.getAlpha());
         } else {
             pg.noStroke();
         }
