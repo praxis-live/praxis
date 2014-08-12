@@ -47,7 +47,7 @@ public class PGLCustomFactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-            addComponent(data(new P2DCodeFactory.Custom("video:gl:p2d")));
+            //addComponent(data(new P2DCodeFactory.Custom("video:gl:p2d")));
             addComponent(data(new P3DCodeFactory.Custom("video:gl:p3d")));
         }
 
