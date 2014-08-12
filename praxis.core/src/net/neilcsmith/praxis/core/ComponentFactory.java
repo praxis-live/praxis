@@ -41,6 +41,7 @@ public interface ComponentFactory {
 
     public static abstract class MetaData<T> {
 
+        @Deprecated
         public abstract Class<T> getComponentClass();
 
         public boolean isTest() {
