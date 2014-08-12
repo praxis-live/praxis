@@ -169,7 +169,7 @@ public class TriggerControl extends Trigger implements Control {
         private ControlInput port;
 
         private PortDescImpl(String id, int index, TriggerControl control) {
-            super(id, Category.Property, index);
+            super(id, Category.Action, index);
             this.control = control;
         }
 
