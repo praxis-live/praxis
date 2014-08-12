@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeConnector;
+import net.neilcsmith.praxis.code.CodeFactory;
 import net.neilcsmith.praxis.code.userapi.In;
 import net.neilcsmith.praxis.code.userapi.Out;
 import net.neilcsmith.praxis.core.Port;
@@ -36,7 +37,7 @@ import net.neilcsmith.praxis.video.code.userapi.PImage;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public abstract class VideoCodeConnector<T extends VideoCodeDelegate> extends CodeConnector<T> {
+public class VideoCodeConnector<T extends VideoCodeDelegate> extends CodeConnector<T> {
     
     private final static Logger LOG = Logger.getLogger(VideoCodeConnector.class.getName());
     
@@ -48,8 +49,8 @@ public abstract class VideoCodeConnector<T extends VideoCodeDelegate> extends Co
     private VideoOutputPort.Descriptor output;
     
 
-    public VideoCodeConnector(T delegate) {
-        super(delegate);
+    public VideoCodeConnector(CodeFactory<T> factory, T delegate) {
+        super(factory, delegate);
     }
 
     protected Method extractSetupMethod() {

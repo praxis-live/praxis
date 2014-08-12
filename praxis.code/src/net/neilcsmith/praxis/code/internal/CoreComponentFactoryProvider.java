@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2012 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -18,27 +18,38 @@
  *
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
- *
  */
 
-package net.neilcsmith.praxis.video.code.custom;
+package net.neilcsmith.praxis.code.internal;
 
-import net.neilcsmith.praxis.code.ControlDescriptor;
-import net.neilcsmith.praxis.video.code.VideoCodeConnector;
+import net.neilcsmith.praxis.code.AbstractComponentFactory;
+import net.neilcsmith.praxis.code.CoreCodeFactory;
+import net.neilcsmith.praxis.core.ComponentFactory;
+import net.neilcsmith.praxis.core.ComponentFactoryProvider;
 
 /**
  *
- * @author Neil C Smith <http://neilcsmith.net>
+ * @author Neil C Smith (http://neilcsmith.net)
  */
-public class CustomVideoConnector extends VideoCodeConnector<CustomVideoDelegate> {
+public class CoreComponentFactoryProvider implements ComponentFactoryProvider {
 
-    public CustomVideoConnector(CustomVideoDelegate delegate) {
-        super(delegate);
+
+    private static Factory instance = new Factory();
+
+    public ComponentFactory getFactory() {
+        return instance;
     }
 
-    @Override
-    protected ControlDescriptor createCodeControl(int index) {
-        return new CustomCodeProperty.Descriptor("code", index);
+    private static class Factory extends AbstractComponentFactory {
+
+        private Factory() {
+            build();
+        }
+
+        private void build() {
+            addComponent(data(new CoreCodeFactory.Custom("core:custom")));
+        }
+
     }
-    
+
 }

@@ -57,6 +57,7 @@ public abstract class CodeConnector <D extends CodeDelegate> {
     
     private final static Logger LOG = Logger.getLogger(CodeConnector.class.getName());
     
+    private final CodeFactory<D> factory;
     private final D delegate;
     private final Map<ControlDescriptor.Category, Map<Integer, ControlDescriptor>> controls;
     private final Map<PortDescriptor.Category, Map<Integer, PortDescriptor>> ports;
@@ -65,7 +66,8 @@ public abstract class CodeConnector <D extends CodeDelegate> {
     private Map<String, PortDescriptor> extPorts;
     private ComponentInfo info;
 
-    public CodeConnector(D delegate) {
+    public CodeConnector(CodeFactory<D> factory, D delegate) {
+        this.factory = factory;
         this.delegate = delegate;
         controls = new EnumMap<>(ControlDescriptor.Category.class);
         for (ControlDescriptor.Category cat : ControlDescriptor.Category.values()) {
@@ -87,6 +89,10 @@ public abstract class CodeConnector <D extends CodeDelegate> {
     }
     protected D getDelegate() {
         return delegate;
+    }
+    
+    protected CodeFactory<D> getCodeFactory() {
+        return factory;
     }
     
     protected Map<String, ControlDescriptor> extractControls() {
@@ -164,7 +170,9 @@ public abstract class CodeConnector <D extends CodeDelegate> {
         return new InfoProperty.Descriptor(index);
     }
     
-    protected abstract ControlDescriptor createCodeControl(int index);
+    protected ControlDescriptor createCodeControl(int index) {
+        return new CodeProperty.Descriptor<>(factory, index);
+    }
 
     protected void addDefaultPorts() {
         // no op hook

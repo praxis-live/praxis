@@ -22,9 +22,10 @@
 
 package net.neilcsmith.praxis.video.code.custom;
 
+import net.neilcsmith.praxis.code.AbstractComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
-import net.neilcsmith.praxis.impl.AbstractComponentFactory;
+import net.neilcsmith.praxis.video.code.VideoCodeFactory;
 
 /**
  *
@@ -46,7 +47,7 @@ public class VideoCustomFactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-            addComponent("video:custom", CustomVideoComponent.class);
+            addComponent(data(new VideoCodeFactory.Custom("video:custom")));
         }
 
     }

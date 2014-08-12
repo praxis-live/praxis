@@ -21,22 +21,35 @@
  *
  */
 
-package net.neilcsmith.praxis.video.code.custom;
+package net.neilcsmith.praxis.code;
 
-import net.neilcsmith.praxis.video.code.VideoCodeComponent;
 
-/**
- *
- * @author Neil C Smith <http://neilcsmith.net>
- */
-public class CustomVideoComponent extends VideoCodeComponent<CustomVideoDelegate> {
+public class CoreCodeFactory extends CodeFactory<CoreCodeDelegate> {
     
-    public CustomVideoComponent() {
-        super(createInitialContext());
+    private final static CoreBodyContext CBC = new CoreBodyContext();
+
+    public CoreCodeFactory(String type, String sourceTemplate) {
+        super(CBC, type, sourceTemplate);
+    }
+
+    @Override
+    protected CodeContext<CoreCodeDelegate> createCodeContext(CoreCodeDelegate delegate) {
+        return new CoreCodeContext(new CoreCodeConnector(this, delegate));
     }
     
-    private static CustomVideoContext createInitialContext() {
-        return new CustomVideoContext(new CustomVideoConnector(new CustomVideoDelegate(){
-        }));
+    public static class Custom extends CoreCodeFactory {
+        
+        public Custom(String type) {
+            super(type, CoreBodyContext.TEMPLATE);
+        }
+
+        @Override
+        protected CoreCodeDelegate createDefaultDelegate() throws Exception {
+            return new CoreCodeDelegate(){};
+        }
+        
+        
+        
     }
+    
 }

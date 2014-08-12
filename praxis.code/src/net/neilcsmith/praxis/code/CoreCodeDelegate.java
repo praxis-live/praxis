@@ -20,36 +20,16 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.code.custom;
+package net.neilcsmith.praxis.code;
 
-import net.neilcsmith.praxis.compiler.ClassBodyContext;
+import net.neilcsmith.praxis.code.DefaultCodeDelegate;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class CustomBodyContext extends ClassBodyContext<CustomCodeDelegate> {
+public class CoreCodeDelegate extends DefaultCodeDelegate {
     
-    public final static String MIME_TYPE = "text/x-praxis-java";
-    public final static String TEMPLATE =
-            "\npublic void setup() {\n  \n}\n\npublic void update() {\n  \n}";
-            
-    
-    private final static String[] IMPORTS = {
-        "java.util.*",
-        "net.neilcsmith.praxis.code.userapi.*",
-        "static net.neilcsmith.praxis.code.userapi.Constants.*"
-    };
-    
-    public CustomBodyContext() {
-        super(CustomCodeDelegate.class);
-    }
-
-    @Override
-    public String[] getDefaultImports() {
-        return IMPORTS.clone();
-    }
-    
-    
+   
     
 }

@@ -35,18 +35,14 @@ import net.neilcsmith.praxis.core.info.ComponentInfo;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public abstract class CodeComponent<T extends CodeDelegate> implements Component {
+public class CodeComponent<D extends CodeDelegate> implements Component {
 
     private Container parent;
-    private CodeContext<T> codeCtxt;
+    private CodeContext<D> codeCtxt;
     private ComponentAddress address;
     
-    protected CodeComponent(CodeContext<T> codeCtxt) {
-        if (codeCtxt == null) {
-            throw new NullPointerException();
-        }
-        this.codeCtxt = codeCtxt;
-        codeCtxt.configure(this, null);
+    CodeComponent() {
+
     }
 
     @Override
@@ -115,7 +111,7 @@ public abstract class CodeComponent<T extends CodeDelegate> implements Component
         return codeCtxt.getInterfaces();
     }
 
-    protected Lookup getLookup() {
+    Lookup getLookup() {
         if (parent != null) {
             return parent.getLookup();
         } else {
@@ -123,13 +119,15 @@ public abstract class CodeComponent<T extends CodeDelegate> implements Component
         }
     }
     
-    protected void install(CodeContext<T> cc) {
+    void install(CodeContext<D> cc) {
         cc.configure(this, codeCtxt);
-        codeCtxt.dispose();
+        if (codeCtxt != null) {
+            codeCtxt.dispose();
+        }  
         codeCtxt = cc;
     }
     
-    protected ComponentAddress getAddress() {
+    ComponentAddress getAddress() {
         return address;
     }
     

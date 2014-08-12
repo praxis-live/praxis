@@ -7,7 +7,7 @@ import net.neilcsmith.praxis.video.pgl.code.userapi.PGraphics3D;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
 
 
-public abstract class P3DCodeDelegate extends DefaultCodeDelegate {
+public class P3DCodeDelegate extends DefaultCodeDelegate {
 
     public int width;
     public int height;
@@ -22,7 +22,7 @@ public abstract class P3DCodeDelegate extends DefaultCodeDelegate {
 
     public void setup() {}
     
-    public abstract void draw();
+    public void draw() {}
     
     // delegate methods
     public void beginCamera() {

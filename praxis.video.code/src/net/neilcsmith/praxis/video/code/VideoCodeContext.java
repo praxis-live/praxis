@@ -41,7 +41,7 @@ import net.neilcsmith.praxis.video.render.Surface;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public abstract class VideoCodeContext<T extends VideoCodeDelegate> extends CodeContext<T> {
+public class VideoCodeContext<T extends VideoCodeDelegate> extends CodeContext<T> {
 
     private final StateListener stateListener;
 

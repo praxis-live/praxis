@@ -26,80 +26,77 @@ import net.neilcsmith.praxis.compiler.ClassBodyContext;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Control;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.TaskService;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
 
-/**
- *
- * @author Neil C Smith <http://neilcsmith.net>
- */
-public abstract class CodeProperty<T extends CodeDelegate>
+
+class CodeProperty<D extends CodeDelegate>
         extends AbstractAsyncProperty<CodeProperty.Result> {
+    
+    public final static String MIME_TYPE = "text/x-praxis-java";
 
-    private CodeContext<T> context;
+    private final CodeFactory<D> factory;
+    private final ControlInfo info;
+    private CodeContext<D> context;
 
-    public CodeProperty() {
+    private CodeProperty(CodeFactory<D> factory, ControlInfo info) {
         super(PString.EMPTY, Result.class, null);
+        this.factory = factory;
+        this.info = info;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     protected void attach(CodeContext<?> context) {
         super.attach(context);
-        this.context = (CodeContext<T>) context;
+        this.context = (CodeContext<D>) context;
     }
-    
 
     @Override
-    protected final Task<T> createTask(CallArguments keys) throws Exception {
+    protected final Task<D> createTask(CallArguments keys) throws Exception {
         String code = keys.get(0).toString();
-        return createTask(code);
+        return new Task<>(factory, code);
     }
-
-    protected abstract Task<T> createTask(String code);
 
     @Override
     @SuppressWarnings("unchecked")
     protected void valueChanged(long time) {
-        Result<T> r = getValue();
+        Result<D> r = getValue();
         if (r != null) {
             context.getComponent().install(r.getCodeContext());
         }
     }
 
-    public static abstract class Task<T extends CodeDelegate> implements TaskService.Task {
+    @Override
+    public ControlInfo getInfo() {
+        return info;
+    }
 
-        private final ClassBodyContext<T> cbc;
+    static class Task<T extends CodeDelegate> implements TaskService.Task {
+
+        private final CodeFactory<T> factory;
         private final String code;
 
-        protected Task(ClassBodyContext<T> cbc, String code) {
-            if (cbc == null || code == null) {
-                throw new NullPointerException();
-            }
-            this.cbc = cbc;
+        protected Task(CodeFactory<T> factory, String code) {
+            this.factory = factory;
             this.code = code;
         }
 
         @Override
         public final Argument execute() throws Exception {
-            Class<T> cls = compile(code);
-            T delegate = createDelegate(cls);
-            CodeContext<T> ctxt = createCodeContext(delegate);
+            String src = code.trim();
+            CodeContext<T> ctxt;
+            if (src.isEmpty()) {
+                ctxt = factory.createDefaultCodeContext();
+            } else {
+                ctxt = factory.createCodeContext(src);
+            }
             return PReference.wrap(new Result<T>(ctxt));
         }
-
-        protected Class<T> compile(String code) throws Exception {
-            return ClassBodyCompiler.getDefault().compile(
-                    cbc, code);
-        }
-
-        protected T createDelegate(Class<T> cls)
-                throws Exception {
-            return cls.newInstance();
-        }
-
-        protected abstract CodeContext<T> createCodeContext(T delegate);
 
     }
 
@@ -120,24 +117,41 @@ public abstract class CodeProperty<T extends CodeDelegate>
 
     }
 
-    public static abstract class Descriptor<P extends CodeProperty<? extends CodeDelegate>>
+    static class Descriptor<D extends CodeDelegate>
             extends ControlDescriptor {
 
-        private final Class<P> controlCls;
-        private P control;
+        private final CodeFactory<D> factory;
+        private final ControlInfo info;
+        private CodeProperty<D> control;
 
-        public Descriptor(String id, int index, Class<P> cls) {
-            super(id, Category.Property, index);
-            this.controlCls = cls;
+        public Descriptor(CodeFactory<D> factory, int index) {
+            super("code", Category.Property, index);
+            this.factory = factory;
+            this.info = createInfo(factory);
+        }
+
+        private ControlInfo createInfo(CodeFactory<D> factory) {
+            return ControlInfo.createPropertyInfo(
+                    new ArgumentInfo[]{
+                        ArgumentInfo.create(PString.class,
+                                PMap.create(
+                                        PString.KEY_MIME_TYPE, MIME_TYPE,
+                                        ArgumentInfo.KEY_TEMPLATE, factory.getSourceTemplate(),
+                                        ClassBodyContext.KEY, factory.getClassBodyContext().getClass().getName()
+                                ))
+                    },
+                    new Argument[]{PString.EMPTY},
+                    PMap.EMPTY);
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public void attach(CodeContext<?> context, Control previous) {
-            if (controlCls.isInstance(previous)) {
-                control = (P) previous;
+            if (previous instanceof CodeProperty
+                    && ((CodeProperty<?>) previous).factory == factory) {
+                control = (CodeProperty) previous;
             } else {
-                control = createControl();
+                control = new CodeProperty(factory, info);
             }
             control.attach(context);
         }
@@ -147,7 +161,10 @@ public abstract class CodeProperty<T extends CodeDelegate>
             return control;
         }
 
-        protected abstract P createControl();
+        @Override
+        public ControlInfo getInfo() {
+            return info;
+        }
 
     }
 

@@ -22,16 +22,36 @@
 
 package net.neilcsmith.praxis.video.code;
 
-import net.neilcsmith.praxis.code.CodeComponent;
+import net.neilcsmith.praxis.compiler.ClassBodyContext;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public abstract class VideoCodeComponent<T extends VideoCodeDelegate> extends CodeComponent<T> {
+public class VideoBodyContext extends ClassBodyContext<VideoCodeDelegate> {
     
-    protected VideoCodeComponent(VideoCodeContext<T> context) {
-        super(context);
+    public final static String MIME_TYPE = "text/x-praxis-java";
+    public final static String TEMPLATE =
+            "\npublic void setup() {\n  \n}\n\npublic void draw() {\n  \n}";
+            
+    
+    private final static String[] IMPORTS = {
+        "java.util.*",
+        "net.neilcsmith.praxis.code.userapi.*",
+        "net.neilcsmith.praxis.video.code.userapi.*",
+        "static net.neilcsmith.praxis.code.userapi.Constants.*",
+        "static net.neilcsmith.praxis.video.code.userapi.VideoConstants.*"
+    };
+    
+    public VideoBodyContext() {
+        super(VideoCodeDelegate.class);
     }
-     
+
+    @Override
+    public String[] getDefaultImports() {
+        return IMPORTS.clone();
+    }
+    
+    
+    
 }

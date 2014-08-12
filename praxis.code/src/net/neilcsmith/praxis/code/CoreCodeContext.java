@@ -20,21 +20,20 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.code.custom;
+package net.neilcsmith.praxis.code;
 
 import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.core.ExecutionContext;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class CustomCodeContext extends CodeContext<CustomCodeDelegate> {
+public class CoreCodeContext extends CodeContext<CoreCodeDelegate> {
 
-    private final static Logger LOG = Logger.getLogger(CustomCodeContext.class.getName());
+    private final static Logger LOG = Logger.getLogger(CoreCodeContext.class.getName());
 
     private final Driver driver;
     private final Method setupMethod;
@@ -42,7 +41,7 @@ public class CustomCodeContext extends CodeContext<CustomCodeDelegate> {
 
     private ExecutionContext execCtxt;
 
-    public CustomCodeContext(CustomCodeConnector connector) {
+    public CoreCodeContext(CoreCodeConnector connector) {
         super(connector);
         driver = new Driver();
         Method s = connector.extractSetupMethod();

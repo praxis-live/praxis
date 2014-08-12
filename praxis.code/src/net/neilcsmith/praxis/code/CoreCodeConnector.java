@@ -21,21 +21,19 @@
  *
  */
 
-package net.neilcsmith.praxis.code.custom;
+package net.neilcsmith.praxis.code;
 
 import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.neilcsmith.praxis.code.CodeConnector;
-import net.neilcsmith.praxis.code.ControlDescriptor;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class CustomCodeConnector extends CodeConnector<CustomCodeDelegate> {
+public class CoreCodeConnector extends CodeConnector<CoreCodeDelegate> {
     
-    private final static Logger LOG = Logger.getLogger(CustomCodeConnector.class.getName());
+    private final static Logger LOG = Logger.getLogger(CoreCodeConnector.class.getName());
     
     public final static String SETUP = "setup";
     public final static String UPDATE = "update";
@@ -43,13 +41,8 @@ public class CustomCodeConnector extends CodeConnector<CustomCodeDelegate> {
     private Method setupMethod;
     private Method updateMethod;
     
-    public CustomCodeConnector(CustomCodeDelegate delegate) {
-        super(delegate);
-    }
-
-    @Override
-    protected ControlDescriptor createCodeControl(int index) {
-        return new CustomCodeProperty.Descriptor("code", index);
+    public CoreCodeConnector(CoreCodeFactory factory, CoreCodeDelegate delegate) {
+        super(factory, delegate);
     }
     
     protected Method extractSetupMethod() {

@@ -9,7 +9,7 @@ import net.neilcsmith.praxis.video.pgl.code.userapi.PGraphics2D;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
 
 
-public abstract class P2DCodeDelegate extends DefaultCodeDelegate {
+public class P2DCodeDelegate extends DefaultCodeDelegate {
     
     public int width;
     public int height;
@@ -24,7 +24,7 @@ public abstract class P2DCodeDelegate extends DefaultCodeDelegate {
     
     public void setup() {}
     
-    public abstract void draw();
+    public void draw() {}
     
     // delegate methods
     public void beginShape() {

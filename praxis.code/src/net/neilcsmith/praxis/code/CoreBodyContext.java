@@ -20,14 +20,35 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.video.code.custom;
+package net.neilcsmith.praxis.code;
 
-import net.neilcsmith.praxis.video.code.VideoCodeDelegate;
+import net.neilcsmith.praxis.compiler.ClassBodyContext;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class CustomVideoDelegate extends VideoCodeDelegate {
+public class CoreBodyContext extends ClassBodyContext<CoreCodeDelegate> {
+    
+    public final static String TEMPLATE =
+            "\npublic void setup() {\n  \n}\n\npublic void update() {\n  \n}";
+            
+    
+    private final static String[] IMPORTS = {
+        "java.util.*",
+        "net.neilcsmith.praxis.code.userapi.*",
+        "static net.neilcsmith.praxis.code.userapi.Constants.*"
+    };
+    
+    public CoreBodyContext() {
+        super(CoreCodeDelegate.class);
+    }
+
+    @Override
+    public String[] getDefaultImports() {
+        return IMPORTS.clone();
+    }
+    
+    
     
 }

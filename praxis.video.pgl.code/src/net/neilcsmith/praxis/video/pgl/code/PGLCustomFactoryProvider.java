@@ -22,9 +22,10 @@
 
 package net.neilcsmith.praxis.video.pgl.code;
 
+import net.neilcsmith.praxis.code.AbstractComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
-import net.neilcsmith.praxis.impl.AbstractComponentFactory;
+
 
 /**
  *
@@ -46,8 +47,8 @@ public class PGLCustomFactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-            addComponent("video:gl:p2d", P2DCodeComponent.class);
-            addComponent("video:gl:p3d", P3DCodeComponent.class);
+            addComponent(data(new P2DCodeFactory.Custom("video:gl:p2d")));
+            addComponent(data(new P3DCodeFactory.Custom("video:gl:p3d")));
         }
 
     }

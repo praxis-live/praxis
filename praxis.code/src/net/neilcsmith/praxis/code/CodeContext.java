@@ -42,7 +42,7 @@ import net.neilcsmith.praxis.util.ArrayUtils;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public abstract class CodeContext<T extends CodeDelegate> {
+public abstract class CodeContext<D extends CodeDelegate> {
 
     private final static Logger LOG = Logger.getLogger(CodeContext.class.getName());
     
@@ -55,13 +55,14 @@ public abstract class CodeContext<T extends CodeDelegate> {
     private final Map<String, PortDescriptor> ports;
     private final ComponentInfo info;
 
-    private final T delegate;
+    private final CodeFactory<D> factory;
+    private final D delegate;
 
-    private CodeComponent<T> cmp;
+    private CodeComponent<D> cmp;
 
     private ClockListener[] clockListeners;
 
-    public CodeContext(CodeConnector<T> connector) {
+    public CodeContext(CodeConnector<D> connector) {
         clockListeners = new ClockListener[0];
         try {
             connector.process();
@@ -69,13 +70,14 @@ public abstract class CodeContext<T extends CodeDelegate> {
             ports = connector.extractPorts();
             info = connector.extractInfo();
             delegate = connector.getDelegate();
+            factory = connector.getCodeFactory();
         } catch (Exception e) {
             LOG.log(Level.FINE, "", e);
             throw e;
         }
     }
 
-    protected void configure(CodeComponent<T> cmp, CodeContext<T> oldCtxt) {
+    protected void configure(CodeComponent<D> cmp, CodeContext<D> oldCtxt) {
         this.cmp = cmp;
         configureControls(oldCtxt);
         configurePorts(oldCtxt);
@@ -83,7 +85,7 @@ public abstract class CodeContext<T extends CodeDelegate> {
         delegate.setContext(this);
     }
     
-    private void configureControls(CodeContext<T> oldCtxt) {
+    private void configureControls(CodeContext<D> oldCtxt) {
         Map<String, ControlDescriptor> oldControls = oldCtxt == null ?
                 Collections.<String, ControlDescriptor>emptyMap() : oldCtxt.controls;
         for (Map.Entry<String, ControlDescriptor> entry : controls.entrySet()) {
@@ -96,7 +98,7 @@ public abstract class CodeContext<T extends CodeDelegate> {
         }
     }
 
-    private void configurePorts(CodeContext<T> oldCtxt) {
+    private void configurePorts(CodeContext<D> oldCtxt) {
         Map<String, PortDescriptor> oldPorts = oldCtxt == null ?
                 Collections.<String, PortDescriptor>emptyMap() : oldCtxt.ports;
         for (Map.Entry<String, PortDescriptor> entry : ports.entrySet()) {
@@ -123,12 +125,16 @@ public abstract class CodeContext<T extends CodeDelegate> {
         ports.clear();
     }
     
-    public CodeComponent<T> getComponent() {
+    public CodeComponent<D> getComponent() {
         return cmp;
     }
     
-    public T getDelegate() {
+    public D getDelegate() {
         return delegate;
+    }
+    
+    public CodeFactory<D> getCodeFactory() {
+        return factory;
     }
 
     protected Control getControl(String id) {
