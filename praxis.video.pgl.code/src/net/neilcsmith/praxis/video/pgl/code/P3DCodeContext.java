@@ -178,6 +178,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             PGLGraphics g = pglOut.getGraphics();
             g.beginDraw();
             g.blendMode(PConstants.REPLACE);
+            g.tint(255.0f);
             g.image(p3d, 0, 0);
         }
 
