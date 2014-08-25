@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2013 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,7 +21,9 @@
  */
 package net.neilcsmith.praxis.impl;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.neilcsmith.praxis.core.Component;
@@ -164,6 +166,7 @@ public class AbstractComponentFactory implements ComponentFactory {
         private boolean test;
         private boolean deprecated;
         private ComponentType replacement;
+        private List<Object> lookupList;
         
         private Data(Class<T> cls) {
             this.cls = cls;
@@ -185,8 +188,17 @@ public class AbstractComponentFactory implements ComponentFactory {
             return this;
         }
         
+        public Data<T> add(Object obj) {
+            if (lookupList == null) {
+                lookupList = new ArrayList<Object>();
+            }
+            lookupList.add(obj);
+            return this;
+        }
+        
         private MetaData<T> toMetaData() {
-            return new MetaDataImpl<T>(cls, test, deprecated, replacement, null);
+            return new MetaDataImpl<T>(cls, test, deprecated, replacement,
+                    lookupList == null ? null : InstanceLookup.create(lookupList.toArray()));
         }
     }
 }
