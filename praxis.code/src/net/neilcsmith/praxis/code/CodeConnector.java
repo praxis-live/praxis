@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import net.neilcsmith.praxis.code.userapi.ID;
 import net.neilcsmith.praxis.code.userapi.Out;
 import net.neilcsmith.praxis.code.userapi.Output;
@@ -53,15 +54,25 @@ import net.neilcsmith.praxis.core.types.PNumber;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public abstract class CodeConnector <D extends CodeDelegate> {
-    
+public abstract class CodeConnector<D extends CodeDelegate> {
+
     private final static Logger LOG = Logger.getLogger(CodeConnector.class.getName());
     
+    // adapted from http://stackoverflow.com/questions/2559759/how-do-i-convert-camelcase-into-human-readable-names-in-java
+    private final static Pattern idRegex = Pattern.compile(
+            String.format("%s|%s|%s|%s",
+                    "(?<=.)_",
+                    "(?<=[A-Z])(?=[A-Z][a-z])",
+                    "(?<=[^A-Z])(?=[A-Z])",
+                    "(?<=[A-Za-z])(?=[^A-Za-z])"
+                    )
+    );
+
     private final CodeFactory<D> factory;
     private final D delegate;
     private final Map<ControlDescriptor.Category, Map<Integer, ControlDescriptor>> controls;
     private final Map<PortDescriptor.Category, Map<Integer, PortDescriptor>> ports;
-    
+
     private Map<String, ControlDescriptor> extControls;
     private Map<String, PortDescriptor> extPorts;
     private ComponentInfo info;
@@ -78,7 +89,7 @@ public abstract class CodeConnector <D extends CodeDelegate> {
             ports.put(cat, new TreeMap<Integer, PortDescriptor>());
         }
     }
-    
+
     protected void process() {
         Class<? extends CodeDelegate> cls = delegate.getClass();
         analyseFields(cls.getDeclaredFields());
@@ -87,32 +98,33 @@ public abstract class CodeConnector <D extends CodeDelegate> {
         addDefaultPorts();
         buildExternalData();
     }
+
     protected D getDelegate() {
         return delegate;
     }
-    
+
     protected CodeFactory<D> getCodeFactory() {
         return factory;
     }
-    
+
     protected Map<String, ControlDescriptor> extractControls() {
         return extControls;
     }
-    
+
     protected Map<String, PortDescriptor> extractPorts() {
         return extPorts;
     }
-    
+
     protected ComponentInfo extractInfo() {
         return info;
     }
- 
+
     private void buildExternalData() {
         extControls = buildExternalControlMap();
         extPorts = buildExternalPortMap();
         info = buildComponentInfo(extControls, extPorts);
     }
-    
+
     private Map<String, ControlDescriptor> buildExternalControlMap() {
         Map<String, ControlDescriptor> map = new LinkedHashMap<>();
         for (Map<Integer, ControlDescriptor> cat : controls.values()) {
@@ -122,7 +134,7 @@ public abstract class CodeConnector <D extends CodeDelegate> {
         }
         return map;
     }
-    
+
     private Map<String, PortDescriptor> buildExternalPortMap() {
         Map<String, PortDescriptor> map = new LinkedHashMap<>();
         for (Map<Integer, PortDescriptor> cat : ports.values()) {
@@ -132,7 +144,7 @@ public abstract class CodeConnector <D extends CodeDelegate> {
         }
         return map;
     }
-    
+
     protected ComponentInfo buildComponentInfo(Map<String, ControlDescriptor> controls,
             Map<String, PortDescriptor> ports) {
         LOG.fine("Building component info");
@@ -165,11 +177,11 @@ public abstract class CodeConnector <D extends CodeDelegate> {
         addControl(createInfoControl(Integer.MIN_VALUE));
         addControl(createCodeControl(Integer.MIN_VALUE + 1));
     }
-    
+
     protected ControlDescriptor createInfoControl(int index) {
         return new InfoProperty.Descriptor(index);
     }
-    
+
     protected ControlDescriptor createCodeControl(int index) {
         return new CodeProperty.Descriptor<>(factory, index);
     }
@@ -200,7 +212,7 @@ public abstract class CodeConnector <D extends CodeDelegate> {
             return;
         }
     }
-    
+
     protected boolean analyseOutputField(Out ann, Field field) {
         LOG.log(Level.FINE, "Field is output");
         int index = ann.value();
@@ -216,7 +228,7 @@ public abstract class CodeConnector <D extends CodeDelegate> {
         }
         return false;
     }
-    
+
     protected boolean analyseTriggerField(T ann, Field field) {
         LOG.log(Level.FINE, "Field is trigger");
         int index = ann.value();
@@ -236,7 +248,7 @@ public abstract class CodeConnector <D extends CodeDelegate> {
         }
         return false;
     }
-    
+
     protected boolean analysePropertyField(P ann, Field field) {
         LOG.log(Level.FINE, "Field is property");
         int index = ann.value();
@@ -256,7 +268,7 @@ public abstract class CodeConnector <D extends CodeDelegate> {
         }
         return false;
     }
-    
+
     protected PropertyControl.Binding createPropertyBinding(Field field) {
         if (field.isAnnotationPresent(Type.Number.class)) {
             return createNumberBinding(field);
@@ -266,20 +278,20 @@ public abstract class CodeConnector <D extends CodeDelegate> {
             return null; // default binding
         }
     }
-    
+
     private PropertyControl.Binding createNumberBinding(Field field) {
         Type.Number ann = field.getAnnotation(Type.Number.class);
         double min = ann.min();
         double max = ann.max();
         double def = ann.def();
-        if (min != PNumber.MIN_VALUE ||
-                 max != PNumber.MAX_VALUE) {
+        if (min != PNumber.MIN_VALUE
+                || max != PNumber.MAX_VALUE) {
             return new NumberBinding(min, max, def);
         } else {
             return new NumberBinding(def);
         }
     }
-    
+
     private PropertyControl.Binding createStringBinding(Field field) {
         Type.String ann = field.getAnnotation(Type.String.class);
         String[] allowed = ann.allowed();
@@ -291,7 +303,7 @@ public abstract class CodeConnector <D extends CodeDelegate> {
             return new StringBinding(mime, def);
         }
     }
-    
+
     protected String findID(Field field) {
         ID ann = field.getAnnotation(ID.class);
         if (ann != null) {
@@ -300,7 +312,12 @@ public abstract class CodeConnector <D extends CodeDelegate> {
                 return id;
             }
         }
-        return field.getName();
+        return javaNameToID(field.getName());
+    }
+
+    private String javaNameToID(String javaName) {
+        String ret = idRegex.matcher(javaName).replaceAll("-");
+        return ret.toLowerCase();
     }
     
     private boolean shouldAddPort(Field field) {
@@ -310,7 +327,7 @@ public abstract class CodeConnector <D extends CodeDelegate> {
         }
         return true;
     }
-    
+
     protected void analyseMethods(Method[] methods) {
         for (Method m : methods) {
             analyseMethod(m);
@@ -318,8 +335,7 @@ public abstract class CodeConnector <D extends CodeDelegate> {
     }
 
     protected void analyseMethod(Method method) {
-        
+
     }
-    
-    
+
 }
