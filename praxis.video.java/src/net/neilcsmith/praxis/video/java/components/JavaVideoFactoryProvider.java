@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package net.neilcsmith.praxis.video.java.components;
 
@@ -30,9 +26,10 @@ public class JavaVideoFactoryProvider implements ComponentFactoryProvider {
 
         private void build() {      
 
-            addComponent("video:code:composite", JavaVideoComposite.class);
+            addComponent("video:code:composite", data(JavaVideoComposite.class)
+                    .deprecated().replacement("video:custom"));
             
-            addComponent("video:test:java:processor", data(JavaVideoProcessor.class).test());
+            addComponent("video:test:java:processor", data(JavaVideoProcessor.class).test().deprecated());
         }
 
     }
