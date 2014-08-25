@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2013 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -45,6 +45,7 @@ import net.neilcsmith.praxis.components.timing.Timer;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
 import net.neilcsmith.praxis.impl.AbstractComponentFactory;
+import net.neilcsmith.praxis.meta.TypeRewriter;
 
 /**
  *
@@ -76,7 +77,7 @@ public class FactoryProvider implements ComponentFactoryProvider {
 
             // FILE
             //addComponent("core:file:random", RandomFile.class);
-            addComponent("core:file:resolver", Resolver.class);
+            addComponent("core:file:resolver", data(Resolver.class).deprecated());
 
             // MATH
             addComponent("core:math:random", RandomFloat.class);
@@ -84,7 +85,6 @@ public class FactoryProvider implements ComponentFactoryProvider {
             addComponent("core:math:multiply", Multiply.class);
             addComponent("core:math:add", Add.class);
             addComponent("core:math:scale", Scale.class);
-//            addTestComponent("core:math:normalize", Normalize.class, null);
             addComponent("core:math:normalize", data(Normalize.class).test());
 
             //ROUTING
@@ -107,14 +107,13 @@ public class FactoryProvider implements ComponentFactoryProvider {
             addComponent("core:container:output", data(ContainerOutput.class));
             
             // IN TESTING
-//            addTestComponent("core:test:log", Log.class, null);
             addComponent("core:test:log", data(Log.class).test());
-//            addTestComponent("core:test:routing:inhibitor", Inhibitor.class, "core:routing:inhibitor");
-            addComponent("core:test:routing:inhibitor", data(Inhibitor.class).test().replacement("core:routing:inhibitor"));
-//            addTestComponent("core:test:routing:send", Send.class, "core:routing:send");
-            addComponent("core:test:routing:send", data(Send.class).test().replacement("core:routing:send"));
-//            addTestComponent("core:test:math:normalize", Normalize.class, "core:math:normalize");
-            addComponent("core:test:math:normalize", data(Normalize.class).test().replacement("core:math:normalize"));
+            addComponent("core:test:routing:inhibitor", data(Inhibitor.class).test()
+                    .replacement("core:routing:inhibitor").add(TypeRewriter.getIdentity()));
+            addComponent("core:test:routing:send", data(Send.class).test()
+                    .replacement("core:routing:send").add(TypeRewriter.getIdentity()));
+            addComponent("core:test:math:normalize", data(Normalize.class).test()
+                    .replacement("core:math:normalize").add(TypeRewriter.getIdentity()));
             
         }
     }
