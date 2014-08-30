@@ -220,7 +220,7 @@ public class PGLPlayer implements Player {
                 }
 
                 applet.init();
-
+                applet.requestDraw(0);
                 LOG.log(Level.FINE, "Frame : {0}", frame.getBounds());
                 LOG.log(Level.FINE, "Canvas : {0}", applet.getBounds());
 
