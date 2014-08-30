@@ -140,7 +140,8 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
 
             for (int i = 0; i < in.length; i++) {
                 PGLImage img = images[i];
-                processing.core.PImage inImg = ((PGLSurface) in[i]).getGraphics();
+//                processing.core.PImage inImg = ((PGLSurface) in[i]).getGraphics();
+                processing.core.PImage inImg = pglOut.getContext().asImage(in[i]);
                 if (img == null || img.img != inImg) {
                     img = new PGLImage(inImg);
                     setImageField(del, inputs[i].getField(), img);
