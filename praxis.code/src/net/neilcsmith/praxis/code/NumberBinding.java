@@ -48,14 +48,16 @@ class NumberBinding extends PropertyControl.Binding {
         min = PNumber.MIN_VALUE;
         max = PNumber.MAX_VALUE;
         this.def = def;
+        this.value = def;
         ranged = false;
     }
     
     NumberBinding(double min, double max, double def) {
         this.min = min;
         this.max = max;
-        this.ranged = true;
         this.def = def;
+        this.value = def;
+        ranged = true;
     }
 
     @Override
