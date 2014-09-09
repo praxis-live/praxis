@@ -21,9 +21,11 @@
  */
 package net.neilcsmith.praxis.texteditor;
 
+import java.awt.EventQueue;
 import javax.swing.JComponent;
+import javax.swing.JEditorPane;
+import javax.swing.JScrollPane;
 import javax.swing.text.JTextComponent;
-import net.neilcsmith.praxis.texteditor.rsta.RSTATextEditor;
 
 /**
  *
@@ -57,7 +59,50 @@ public abstract class TextEditor {
         if (mimeType == null) {
             mimeType = "text/plain";
         }
-        return RSTATextEditor.create(mimeType, initialText);
+        return new DefaultTextEditor(mimeType, initialText);
+    }
+    
+ 
+    private static class DefaultTextEditor extends TextEditor {
+        
+        private final String mimeType;
+        private final String initialText;
+        
+        private JScrollPane scrollPane;
+        private JEditorPane editorPane;
+        
+        private DefaultTextEditor(String mimeType, String initialText) {
+            this.mimeType = mimeType;
+            this.initialText = initialText;
+        }
+
+        @Override
+        public JComponent getEditorComponent() {
+            assert EventQueue.isDispatchThread();
+            if (scrollPane == null) {
+                init();
+            }
+            return scrollPane;
+        }
+
+        @Override
+        public JTextComponent getTextComponent() {
+            assert EventQueue.isDispatchThread();
+            if (editorPane == null) {
+                init();
+            }
+            return editorPane;
+        }
+
+        private void init() {
+            assert scrollPane == null && editorPane == null;
+            editorPane = new JEditorPane(mimeType, initialText);
+            scrollPane = new JScrollPane(editorPane);
+        }
+        
+        
+        
+        
     }
     
 }
