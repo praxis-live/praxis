@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,7 +22,9 @@
 package net.neilcsmith.praxis.core.info;
 
 import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.Port;
+import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PMap;
 
 /**
@@ -33,14 +35,20 @@ public final class PortInfo extends Argument {
 
     public static enum Direction { IN, OUT, BIDI };
 
-    private Class<? extends Port> type;
-    private Direction direction;
-    private PMap properties;
+    private final Class<? extends Port> type;
+    private final Direction direction;
+    private final PMap properties;
+    
+    private volatile String string;
 
-    private PortInfo(Class<? extends Port> type, Direction direction, PMap properties) {
+    private PortInfo(Class<? extends Port> type,
+            Direction direction,
+            PMap properties,
+            String string) {
         this.type = type;
         this.direction = direction;
         this.properties = properties;
+        this.string = string;
     }
 
     public Class<? extends Port> getType() {
@@ -57,21 +65,27 @@ public final class PortInfo extends Argument {
 
     @Override
     public String toString() {
-        StringBuilder str = new StringBuilder();
-        str.append(type.getName());
-        str.append(" ");
-        str.append(direction.name());
-        str.append(" ");
-        str.append("{");
-        str.append(properties.toString());
-        str.append("}");
-        return str.toString();
+//        StringBuilder str = new StringBuilder();
+//        str.append(type.getName());
+//        str.append(" ");
+//        str.append(direction.name());
+//        str.append(" ");
+//        str.append("{");
+//        str.append(properties.toString());
+//        str.append("}");
+//        return str.toString();
+        String str = string;
+        if (str == null) {
+            str = type.getName() + " " + direction.name() + " {" + properties.toString() + "}";
+            string = str;
+        }
+        return str;
     }
 
-    @Override
-    public boolean isEquivalent(Argument arg) {
-        return equals(arg);
-    }
+//    @Override
+//    public boolean isEquivalent(Argument arg) {
+//        return equals(arg);
+//    }
 
     @Override
     public boolean equals(Object obj) {
@@ -101,7 +115,35 @@ public final class PortInfo extends Argument {
         if (properties == null) {
             properties = PMap.EMPTY;
         }
-        return new PortInfo(typeClass, direction, properties);
+        return new PortInfo(typeClass, direction, properties, null);
 
     }
+    
+    /**
+     * Coerce the given Argument into an ArgumentInfo object.
+     * 
+     * @param arg Argument to be coerced.
+     * @return ArgumentInfo
+     * @throws ArgumentFormatException if Argument cannot be coerced.
+     */
+    public static PortInfo coerce(Argument arg) throws ArgumentFormatException {
+        if (arg instanceof PortInfo) {
+            return (PortInfo) arg;
+        } else {
+            return valueOf(arg.toString());
+        }
+    }
+    
+    private static PortInfo valueOf(String string) throws ArgumentFormatException {
+        PArray arr = PArray.valueOf(string);
+        try {
+            Class<? extends Port> cls = (Class<? extends Port>) Class.forName(arr.get(0).toString());
+            Direction direction = Direction.valueOf(arr.get(1).toString());
+            PMap properties = PMap.coerce(arr.get(2));
+            return new PortInfo(cls, direction, properties, string);
+        } catch (Exception ex) {
+            throw new ArgumentFormatException(ex);
+        }
+    }
+    
 }

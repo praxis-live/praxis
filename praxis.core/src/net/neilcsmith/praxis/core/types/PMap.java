@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2013 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,7 +23,6 @@ package net.neilcsmith.praxis.core.types;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 
@@ -107,6 +106,15 @@ public class PMap extends Argument {
         return array.getSize() / 2;
     }
 
+    public String[] getKeys() {
+        int size = getSize();
+        String[] keys = new String[size];
+        for (int i = 0; i < size; i++) {
+            keys[i] = array.get(i * 2).toString();
+        }
+        return keys;
+    }
+
     @Override
     public String toString() {
         if (string == null) {
@@ -122,12 +130,43 @@ public class PMap extends Argument {
     }
 
     @Override
+    public boolean isEquivalent(Argument arg) {
+        if (arg == this) {
+            return true;
+        }
+        try {
+            PMap other = PMap.coerce(arg);
+            int size = getSize();
+            if (size != other.getSize()) {
+                return false;
+            }
+            size *= 2;
+            for (int i=0; i<size; i+=2) {
+                if (!array.get(i).toString().equals(other.array.get(i).toString())) {
+                    return false;
+                }
+                if (!Argument.equivalent(null, array.get(i+1), other.array.get(i+1))) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (ArgumentFormatException ex) {
+            return false;
+        }
+    }
+    
+    
+
+    @Override
     public int hashCode() {
         return array.hashCode(); // should we cache?
     }
 
     @Override
     public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
         if (obj instanceof PMap) {
             if (this.array.equals(((PMap) obj).array)) {
                 return true;
@@ -193,51 +232,41 @@ public class PMap extends Argument {
         return new PMap(array, null);
     }
 
-    public static PMap create(Map<String, ? extends Argument> map) {
-        throw new UnsupportedOperationException();
-//        if (map.isEmpty()) {
-//            return PMap.EMPTY;
-//        }
-//        Map<String, Argument> m = new LinkedHashMap<String, Argument>(map);
-//        if (m.containsKey(null) || m.containsValue(null)) {
-//            throw new NullPointerException(); // need to replace with something more efficient
-//        }
-////        m = Collections.unmodifiableMap(m);
-//        return new PMap(m, null);
-    }
-
     public static PMap valueOf(String str) throws ArgumentFormatException {
-        throw new UnsupportedOperationException();
-//        if (str.length() == 0) {
-//            return PMap.EMPTY;
-//        }        
-//        
-//        PArray vals = PArray.valueOf(str);
-//        int size = vals.getSize();
-//        if (size == 0) {
-//            return PMap.EMPTY;
+        PArray arr = PArray.valueOf(str);
+        if (arr.isEmpty()) {
+            return PMap.EMPTY;
+        }
+        int size = arr.getSize();
+        if (size % 2 != 0) {
+            throw new ArgumentFormatException("Uneven number of tokens passed to PMap.valueOf()");
+        }
+//        switch (size) {
+//            case 2:
+//                return PMap.create(arr.get(0).toString(), arr.get(1));
+//            case 4:
+//                return PMap.create(arr.get(0).toString(), arr.get(1),
+//                        arr.get(2).toString(), arr.get(3));
+//            case 6:
+//                return PMap.create(arr.get(0).toString(), arr.get(1),
+//                        arr.get(2).toString(), arr.get(3),
+//                        arr.get(4).toString(), arr.get(5));
 //        }
-//        if ((size % 2) != 0) {
-//            throw new ArgumentFormatException();
-//        }
-//        Map<String, Argument> map = new LinkedHashMap<String, Argument>();
-//        for (int i=0; i<size;) {
-//            String key = vals.get(i++).toString();
-//            Argument value = vals.get(i++);
-//            value = map.put(key, value);
-//            if (value != null) {
-//                throw new ArgumentFormatException();
-//            }
-//        }
-////        map = Collections.unmodifiableMap(map);
-//        return new PMap(map, str);
+        PMap.Builder builder = builder(size / 2);
+        for (int i = 0; i < size; i += 2) {
+            builder.put(
+                    PString.coerce(arr.get(i)),
+                    arr.get(i + 1));
+        }
+        return builder.build(str);
     }
 
     public static PMap coerce(Argument arg) throws ArgumentFormatException {
         if (arg instanceof PMap) {
             return (PMap) arg;
+        } else {
+            return valueOf(arg.toString());
         }
-        throw new UnsupportedOperationException();
     }
 
     public static Builder builder() {
@@ -245,7 +274,7 @@ public class PMap extends Argument {
     }
 
     public static Builder builder(int initialCapacity) {
-        return new Builder(initialCapacity);
+        return new Builder(initialCapacity * 2);
     }
 
     public static class Builder {
@@ -263,7 +292,7 @@ public class PMap extends Argument {
             putImpl(key, value);
             return this;
         }
-        
+
         public Builder put(String key, Argument value) {
             put(PString.valueOf(key), value);
             return this;
@@ -292,6 +321,11 @@ public class PMap extends Argument {
         public PMap build() {
             PArray array = PArray.valueOf(storage);
             return new PMap(array, null);
+        }
+
+        private PMap build(String str) {
+            PArray array = PArray.valueOf(storage);
+            return new PMap(array, str);
         }
 
         private void putImpl(PString key, Argument value) {

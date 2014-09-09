@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,8 +21,11 @@
  */
 package net.neilcsmith.praxis.core.info;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
+import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PMap;
 
 /**
@@ -43,14 +46,20 @@ public final class ArgumentInfo extends Argument {
 
     public static enum Presence { Always, Optional, Variable }
 
-    private Class<? extends Argument> type;
-    private Presence presence;
-    private PMap properties;
+    private final Class<? extends Argument> type;
+    private final Presence presence;
+    private final PMap properties;
 
-    private ArgumentInfo(Class<? extends Argument> type, Presence presence, PMap properties) {
+    private volatile String string;
+    
+    private ArgumentInfo(Class<? extends Argument> type,
+            Presence presence,
+            PMap properties,
+            String string) {
         this.type = type;
         this.presence = presence;
         this.properties = properties;
+        this.string = string;
     }
 
     
@@ -77,13 +86,18 @@ public final class ArgumentInfo extends Argument {
 
     @Override
     public String toString() {
-        return type + " " + presence + " {" + properties.toString() + "}";
+        String str = string;
+        if (str == null) {
+            str = type.getName() + " " + presence.name() + " {" + properties.toString() + "}";
+            string = str;
+        }
+        return str;
     }
-
-    @Override
-    public boolean isEquivalent(Argument arg) {
-        return equals(arg);
-    }
+//
+//    @Override
+//    public boolean isEquivalent(Argument arg) {
+//        return equals(arg);
+//    }
 
     
 
@@ -140,7 +154,7 @@ public final class ArgumentInfo extends Argument {
         if (properties == null) {
             properties = PMap.EMPTY;
         }
-        return new ArgumentInfo(argClass, presence, properties);
+        return new ArgumentInfo(argClass, presence, properties, null);
 
     }
     
@@ -154,9 +168,21 @@ public final class ArgumentInfo extends Argument {
     public static ArgumentInfo coerce(Argument arg) throws ArgumentFormatException {
         if (arg instanceof ArgumentInfo) {
             return (ArgumentInfo) arg;
+        } else {
+            return valueOf(arg.toString());
         }
-        throw new ArgumentFormatException();
     }
 
-
+    private static ArgumentInfo valueOf(String string) throws ArgumentFormatException {
+        PArray arr = PArray.valueOf(string);
+        try {
+            Class<? extends Argument> cls = (Class<? extends Argument>) Class.forName(arr.get(0).toString());
+            Presence presence = Presence.valueOf(arr.get(1).toString());
+            PMap properties = PMap.coerce(arr.get(2));
+            return new ArgumentInfo(cls, presence, properties, string);
+        } catch (Exception ex) {
+            throw new ArgumentFormatException(ex);
+        }
+    }
+ 
 }

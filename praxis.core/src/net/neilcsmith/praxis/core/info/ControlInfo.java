@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -24,15 +24,16 @@ package net.neilcsmith.praxis.core.info;
 import java.util.Arrays;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
-//import net.neilcsmith.praxis.core.Control.Type;
+import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PMap;
+import net.neilcsmith.praxis.core.types.PString;
 
 /**
  *
  * @author Neil C Smith
  */
 public class ControlInfo extends Argument {
-    
+
     public final static String KEY_TRANSIENT = "transient";
     public final static String KEY_DEPRECATED = "deprecated";
     public final static String KEY_EXPERT = "expert";
@@ -42,36 +43,77 @@ public class ControlInfo extends Argument {
 
         Function, Action, Property, ReadOnlyProperty
     };
-    
-    private final static ArgumentInfo[] EMPTY_INFO = new ArgumentInfo[0];
-    
-    private ArgumentInfo[] inputs;
-    private ArgumentInfo[] outputs;
-    private Argument[] defaults;
-    private PMap properties;
-    private Type type;
 
-    private ControlInfo(ArgumentInfo[] inputs, ArgumentInfo[] outputs,
-            Argument[] defaults, Type type, PMap properties) {
+    private final static ArgumentInfo[] EMPTY_INFO = new ArgumentInfo[0];
+    private final static Argument[] EMPTY_DEFAULTS = new Argument[0];
+
+    private final ArgumentInfo[] inputs;
+    private final ArgumentInfo[] outputs;
+    private final Argument[] defaults;
+    private final PMap properties;
+    private final Type type;
+
+    private volatile String string;
+
+    private ControlInfo(ArgumentInfo[] inputs,
+            ArgumentInfo[] outputs,
+            Argument[] defaults,
+            Type type,
+            PMap properties,
+            String string
+    ) {
 
         this.inputs = inputs;
         this.outputs = outputs;
         this.defaults = defaults;
         this.type = type;
         this.properties = properties;
-
+        this.string = string;
     }
 
     @Override
     public String toString() {
-        return "ControlInfo toString() unsupported";
+        String str = string;
+        if (str == null) {
+            str = buildString();
+            string = str;
+        }
+        return str;
     }
 
-    @Override
-    public boolean isEquivalent(Argument arg) {
-        return equals(arg);
+    private String buildString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(type.toString());
+        if (type != Type.Action) {
+            sb.append(" {");
+            for (ArgumentInfo input : inputs) {
+                sb.append('{').append(input.toString()).append('}');
+            }
+            sb.append('}');
+            if (type == Type.Function) {
+                sb.append(" {");
+                for (ArgumentInfo output : outputs) {
+                    sb.append('{').append(output.toString()).append('}');
+                }
+                sb.append('}');
+            } else {
+                sb.append(" {");
+                for (Argument def : defaults) {
+                    sb.append('{').append(def.toString()).append('}');
+                }
+                sb.append('}');
+            }
+        }
+        if (!properties.isEmpty()) {
+            sb.append(" {").append(properties.toString()).append('}');
+        }
+        return sb.toString();
     }
-    
+
+//    @Override
+//    public boolean isEquivalent(Argument arg) {
+//        return equals(arg);
+//    }
 
     @Override
     public boolean equals(Object obj) {
@@ -123,31 +165,27 @@ public class ControlInfo extends Argument {
     }
 
     public Argument[] getDefaults() {
-        if (defaults == null) {
-            return null;
-        } else {
-            return Arrays.copyOf(defaults, defaults.length);
-        }
+        return defaults.clone();
     }
 
     public ArgumentInfo[] getInputsInfo() {
-        return Arrays.copyOf(inputs, inputs.length);
+        return inputs.clone();
     }
 
     public ArgumentInfo[] getOutputsInfo() {
-        return Arrays.copyOf(outputs, outputs.length);
+        return outputs.clone();
     }
 
     public static ControlInfo createFunctionInfo(ArgumentInfo[] inputs,
             ArgumentInfo[] outputs, PMap properties) {
         return create(inputs, outputs, null, Type.Function, properties);
     }
-    
+
     @Deprecated
     public static ControlInfo createTriggerInfo(PMap properties) {
         return create(EMPTY_INFO, EMPTY_INFO, null, Type.Action, properties);
     }
-    
+
     public static ControlInfo createActionInfo(PMap properties) {
         return create(EMPTY_INFO, EMPTY_INFO, null, Type.Action, properties);
     }
@@ -166,30 +204,108 @@ public class ControlInfo extends Argument {
             Type type,
             PMap properties) {
 
-        ArgumentInfo[] ins = Arrays.copyOf(inputs, inputs.length);
+        ArgumentInfo[] ins = inputs.clone();
         ArgumentInfo[] outs;
         if (outputs == inputs) {
             // property - make same as inputs
             outs = ins;
         } else {
-            outs = Arrays.copyOf(outputs, outputs.length);
+            outs = outputs.clone();
         }
         if (defaults != null) {
             defaults = defaults.clone();
+        } else {
+            defaults = EMPTY_DEFAULTS;
         }
         if (properties == null) {
             properties = PMap.EMPTY;
         }
 
-        return new ControlInfo(ins, outs, defaults, type, properties);
-
+        return new ControlInfo(ins, outs, defaults, type, properties, null);
 
     }
 
     public static ControlInfo coerce(Argument arg) throws ArgumentFormatException {
         if (arg instanceof ControlInfo) {
             return (ControlInfo) arg;
+        } else {
+            return valueOf(arg.toString());
         }
-        throw new ArgumentFormatException();
     }
+
+    private static ControlInfo valueOf(String string) throws ArgumentFormatException {
+        try {
+            PArray arr = PArray.valueOf(string);
+            Type type = Type.valueOf(arr.get(0).toString());
+            switch (type) {
+                case Function :
+                    return parseFunction(string, arr);
+                case Action :
+                    return parseAction(string, arr);
+                default : 
+                    return parseProperty(string, type, arr);
+            }
+        } catch (Exception ex) {
+            throw new ArgumentFormatException(ex);
+        }
+        
+    }
+    
+    private static ControlInfo parseFunction(String string, PArray array) throws Exception {
+        // array(1) is inputs
+        PArray args = PArray.coerce(array.get(1));
+        ArgumentInfo[] inputs = new ArgumentInfo[args.getSize()];
+        for (int i=0; i<inputs.length; i++) {
+            inputs[i] = ArgumentInfo.coerce(args.get(i));
+        }
+        // array(2) is outputs
+        args = PArray.coerce(array.get(2));
+        ArgumentInfo[] outputs = new ArgumentInfo[args.getSize()];
+        for (int i=0; i<outputs.length; i++) {
+            outputs[i] = ArgumentInfo.coerce(args.get(i));
+        }
+        // optional array(3) is properties
+        PMap properties;
+        if (array.getSize() > 3) {
+            properties = PMap.coerce(array.get(3));
+        } else {
+            properties = PMap.EMPTY;
+        }
+        return new ControlInfo(inputs, outputs, EMPTY_DEFAULTS, Type.Function, properties, string);
+    }
+    
+    private static ControlInfo parseAction(String string, PArray array) throws Exception {
+        // optional array(1) is properties
+        PMap properties;
+        if (array.getSize() > 1) {
+            properties = PMap.coerce(array.get(1));
+        } else {
+            properties = PMap.EMPTY;
+        }
+        return new ControlInfo(EMPTY_INFO, EMPTY_INFO, EMPTY_DEFAULTS, Type.Action, properties, string);
+    }
+    
+    private static ControlInfo parseProperty(String string, Type type, PArray array) throws Exception {
+        // array(1) is inputs / outputs
+        PArray args = PArray.coerce(array.get(1));
+        ArgumentInfo[] inputs = new ArgumentInfo[args.getSize()];
+        for (int i=0; i<inputs.length; i++) {
+            inputs[i] = ArgumentInfo.coerce(args.get(i));
+        }
+        // array(2) is defaults
+        args = PArray.coerce(array.get(2));
+        Argument[] defs = new Argument[args.getSize()];
+        for (int i=0; i<defs.length; i++) {
+            defs[i] = PString.coerce(args.get(i));
+        }
+        // optional array(3) is properties
+        PMap properties;
+        if (array.getSize() > 3) {
+            properties = PMap.coerce(array.get(3));
+        } else {
+            properties = PMap.EMPTY;
+        }
+        return new ControlInfo(inputs, inputs, defs, type, properties, string);
+    }
+
 }

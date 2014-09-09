@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -38,7 +38,7 @@ import java.io.Serializable;
  *
  * @author Neil C Smith
  */
-public abstract class Argument implements Serializable {
+public abstract class Argument /*implements Serializable*/ {
 
 //    public final static String KEY_ALLOW_EMPTY = "allow-empty";
     
@@ -65,7 +65,7 @@ public abstract class Argument implements Serializable {
      * of the same type as the implementing Argument.  Arguments of an unknown
      * type should be coerced before calling this method.  This method does not
      * have to guarantee that
-     * <code>this.equals(that) == this.toString().eauals(that.toString()</code>
+     * <code>this.equals(that) == this.toString().equals(that.toString())</code>
      *
      * @param obj
      * @return boolean
@@ -87,7 +87,7 @@ public abstract class Argument implements Serializable {
 
 
     public boolean isEquivalent(Argument arg) {
-        return this.toString().equals(arg.toString());
+        return this == arg || this.toString().equals(arg.toString());
     }
     
     /**

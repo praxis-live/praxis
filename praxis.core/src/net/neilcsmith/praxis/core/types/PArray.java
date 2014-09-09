@@ -33,7 +33,6 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.syntax.Token;
 import net.neilcsmith.praxis.core.syntax.Tokenizer;
 
-
 /**
  *
  * @author Neil C Smith
@@ -73,14 +72,13 @@ public final class PArray extends Argument implements Iterable<Argument> {
                         sb.append(" {");
                     }
 
-                    String s = String.valueOf(entry);
-                    if (s.indexOf('{') > -1 || s.indexOf('}') > -1) {
-                        s = s.replace("{", "\\{");
-                        s = s.replace("}", "\\}");
-                    }
-                    sb.append(s);
+                        String s = String.valueOf(entry);
+                        if (s.indexOf('{') > -1 || s.indexOf('}') > -1) {
+                            s = s.replace("{", "\\{");
+                            s = s.replace("}", "\\}");
+                        }
+                        sb.append(s);
 //                sb.append(String.valueOf(entry));
-
                     sb.append("}");
                 }
                 str = sb.toString();
@@ -97,8 +95,28 @@ public final class PArray extends Argument implements Iterable<Argument> {
     public boolean isEmpty() {
         return data.length == 0;
     }
-    
-    
+
+    @Override
+    public boolean isEquivalent(Argument arg) {
+        try {
+            if (arg == this) {
+                return true;
+            }
+            PArray other = PArray.coerce(arg);
+            int size = data.length;
+            if (size != other.data.length) {
+                return false;
+            }
+            for (int i = 0; i < size; i++) {
+                if (!Argument.equivalent(null, data[i], other.data[i])) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (ArgumentFormatException ex) {
+            return false;
+        }
+    }
 
     @Override
     public int hashCode() {
@@ -146,7 +164,7 @@ public final class PArray extends Argument implements Iterable<Argument> {
 
     }
 
-    public static PArray valueOf(Argument ... args) {
+    public static PArray valueOf(Argument... args) {
         int size = args.length;
         if (size == 0) {
             return PArray.EMPTY;
@@ -205,7 +223,6 @@ public final class PArray extends Argument implements Iterable<Argument> {
             throw new ArgumentFormatException(ex);
         }
 
-
     }
 
     public static PArray coerce(Argument arg) throws ArgumentFormatException {
@@ -215,7 +232,7 @@ public final class PArray extends Argument implements Iterable<Argument> {
             return valueOf(arg.toString());
         }
     }
-    
+
     public static ArgumentInfo info() {
         return ArgumentInfo.create(PArray.class, null);
     }
