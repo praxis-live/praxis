@@ -65,7 +65,7 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
             addComponent("video:output", VideoOutput.class);
             addComponent("video:still", Still.class);
             addComponent("video:snapshot", Snapshot.class);
-            addComponent("video:splitter", Splitter.class);
+            addComponent("video:splitter", data(Splitter.class).deprecated());
             addComponent("video:composite", Composite.class);
             addComponent("video:xfader", XFader.class);
 

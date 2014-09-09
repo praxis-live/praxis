@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,10 +21,16 @@
  */
 package net.neilcsmith.praxis.video.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.*;
 import net.neilcsmith.praxis.impl.PortListenerSupport;
 import net.neilcsmith.praxis.video.VideoPort;
 import net.neilcsmith.praxis.video.pipes.VideoPipe;
+import net.neilcsmith.praxis.video.pipes.impl.MultiInOut;
+import net.neilcsmith.praxis.video.render.Surface;
 
 /**
  *
@@ -32,10 +38,16 @@ import net.neilcsmith.praxis.video.pipes.VideoPipe;
  */
 public class DefaultVideoOutputPort extends VideoPort.Output {
 
-    private VideoPipe source;
-    private VideoPort.Input connection;
-    private PortListenerSupport pls;
-
+    private final static Logger LOG = Logger.getLogger(DefaultVideoOutputPort.class.getName());
+    private final static int MAX_CONNECTIONS = 8;
+    
+    private final VideoPipe source;
+    private final List<VideoPort.Input> connections;
+    private final PortListenerSupport pls;
+    
+    private VideoPipe portSource;
+    private Splitter splitter;
+    
     @Deprecated
     public DefaultVideoOutputPort(Component host, VideoPipe source) {
         this(source);
@@ -46,42 +58,58 @@ public class DefaultVideoOutputPort extends VideoPort.Output {
             throw new NullPointerException();
         }
         this.source = source;
+        this.portSource = source;
+        connections = new ArrayList<Input>(MAX_CONNECTIONS);
         pls = new PortListenerSupport(this);
     }
-    
-    
 
     public void connect(Port port) throws PortConnectionException {
-        if (connection != null) {
-            throw new PortConnectionException();
-        }
         if (port instanceof VideoPort.Input) {
-            VideoPort.Input ip = (VideoPort.Input) port;
-            makeConnection(ip, source);
-            connection = ip;
+            VideoPort.Input input = (VideoPort.Input) port;
+            if (connections.contains(input)) {
+                throw new PortConnectionException();
+            }
+            if (connections.size() == 1) {
+                switchToMultichannel();
+            }
+            try {
+                makeConnection(input, portSource);
+                connections.add(input);
+            } catch (PortConnectionException ex) {
+                if (connections.size() == 1) {
+                    switchToSingleChannel();
+                }
+                throw ex;
+            }
             pls.fireListeners();
         } else {
             throw new PortConnectionException();
         }
+
     }
 
     public void disconnect(Port port) {
-        if (connection != null && connection == port) {
-            breakConnection(connection, source);
-            connection = null;
-            pls.fireListeners();
+        if (port instanceof VideoPort.Input) {
+            VideoPort.Input input = (VideoPort.Input) port;
+            if (connections.contains(input)) {
+                breakConnection(input, portSource);
+                connections.remove(input);
+                if (connections.size() == 1) {
+                    switchToSingleChannel();
+                }
+                pls.fireListeners();
+            }
         }
     }
 
     public void disconnectAll() {
-        if (connection != null) {
-            disconnect(connection);
-            pls.fireListeners();
+        for (VideoPort.Input port : getConnections()) {
+            disconnect(port);
         }
     }
 
-    public Port[] getConnections() {
-        return connection == null ? new Port[0] : new Port[]{connection};
+    public VideoPort.Input[] getConnections() {
+        return connections.toArray(new VideoPort.Input[connections.size()]);
     }
 
     public void addListener(PortListener listener) {
@@ -92,6 +120,83 @@ public class DefaultVideoOutputPort extends VideoPort.Output {
         pls.removeListener(listener);
     }
 
+    private void switchToMultichannel() {
+        if (portSource == splitter) {
+            return;
+        }
+        LOG.fine("VideoOutput switching to multichannel");
+        VideoPipe[] sinks = removeSinks(source);
+        try {
+            if (splitter == null) {
+                splitter = new Splitter(MAX_CONNECTIONS);
+            }
+            splitter.addSource(source);
+            for (VideoPipe sink : sinks) {
+                sink.addSource(splitter);
+            }
+            portSource = splitter;
+        } catch (Exception ex) {
+            LOG.log(Level.WARNING, "Error converting port to multi channel", ex);
+            removeSinks(splitter);
+            removeSinks(source);
+            portSource = source;
+            connections.clear();
+        }
+    }
 
-   
+    private void switchToSingleChannel() {
+        if (portSource == source) {
+            return;
+        }
+        LOG.fine("VideoOutput switching to single channel");
+        VideoPipe[] sinks = removeSinks(splitter);
+        try {
+            splitter.removeSource(source);
+            for (VideoPipe sink : sinks) {
+                sink.addSource(source);
+            }
+            portSource = source;
+        } catch (Exception ex) {
+            LOG.log(Level.WARNING, "Error converting port to single channel", ex);
+            removeSinks(source);
+            removeSinks(splitter);
+            portSource = source;
+            connections.clear();
+        }
+
+    }
+
+    private VideoPipe[] removeSinks(VideoPipe source) {
+        VideoPipe[] sinks = new VideoPipe[source.getSinkCount()];
+        for (int i = 0; i < sinks.length; i++) {
+            sinks[i] = source.getSink(i);
+        }
+        for (VideoPipe sink : sinks) {
+            sink.removeSource(source);
+        }
+        return sinks;
+    }
+
+    private static class Splitter extends MultiInOut {
+
+        public Splitter(int maxOutputs) {
+            super(1, maxOutputs);
+        }
+
+        @Override
+        protected void process(Surface[] inputs, Surface output, int index, boolean rendering) {
+            if (!rendering) {
+                return;
+            }
+            if (inputs.length == 1) {
+                Surface input = inputs[0];
+                assert input != output;
+                output.copy(input);
+            } else {
+                output.clear();
+            }
+        }
+
+    }
+
 }
