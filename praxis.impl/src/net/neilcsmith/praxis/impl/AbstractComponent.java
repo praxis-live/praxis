@@ -21,8 +21,10 @@
  */
 package net.neilcsmith.praxis.impl;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.neilcsmith.praxis.core.Argument;
@@ -41,8 +43,10 @@ import net.neilcsmith.praxis.core.info.ComponentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.core.interfaces.ComponentInterface;
+import net.neilcsmith.praxis.core.interfaces.Service;
 import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
+import net.neilcsmith.praxis.core.interfaces.Services;
 import net.neilcsmith.praxis.core.types.PMap;
 
 /**
@@ -51,9 +55,10 @@ import net.neilcsmith.praxis.core.types.PMap;
  */
 public abstract class AbstractComponent implements Component {
 
-    private Map<String, Control> controlMap;
-    private Map<String, Port> portMap;
-    private Set<InterfaceDefinition> interfaceSet;
+    private final Map<String, Control> controlMap;
+    private final Map<String, Port> portMap;
+    private final Set<Class<? extends InterfaceDefinition>> interfaceSet;
+    
     private Container parent;
     private ComponentAddress address;
     private ComponentInfo info;
@@ -68,9 +73,9 @@ public abstract class AbstractComponent implements Component {
     }
 
     protected AbstractComponent(boolean componentInterface) {
-        controlMap = new LinkedHashMap<String, Control>();
-        portMap = new LinkedHashMap<String, Port>();
-        interfaceSet = new LinkedHashSet<InterfaceDefinition>();
+        controlMap = new LinkedHashMap<>();
+        portMap = new LinkedHashMap<>();
+        interfaceSet = new LinkedHashSet<>();
         if (componentInterface) {
             buildComponentInterface();
         }
@@ -200,15 +205,29 @@ public abstract class AbstractComponent implements Component {
         info = null;
     }
 
+    @Deprecated
     protected void registerInterface(InterfaceDefinition id) {
-        if (id == null) {
+        registerInterface(id.getClass());
+    }
+    
+    protected void registerInterface(Class<? extends InterfaceDefinition> type) {
+        if (type == null) {
             throw new NullPointerException();
         }
-        interfaceSet.add(id);
+        interfaceSet.add(type);
+        info = null;
     }
 
+    @Deprecated
     public final InterfaceDefinition[] getInterfaces() {
-        return interfaceSet.toArray(new InterfaceDefinition[interfaceSet.size()]);
+        List<InterfaceDefinition> ids = new ArrayList<>();
+        for (Class<? extends InterfaceDefinition> idClass : interfaceSet) {
+            try {
+                ids.add(idClass.newInstance());
+            } catch (Exception ex) {
+            }
+        }
+        return ids.toArray(new InterfaceDefinition[ids.size()]);
     }
 
     public Container getParent() {
@@ -278,10 +297,9 @@ public abstract class AbstractComponent implements Component {
             Map<String, ControlInfo> controls = buildControlInfoMap();
             Map<String, PortInfo> ports = buildPortInfoMap();
             info = ComponentInfo.create(
-                    getClass(),
-                    interfaceSet,
                     controls,
                     ports,
+                    interfaceSet,
                     dynamic ? PMap.create(ComponentInfo.KEY_DYNAMIC, true) : PMap.EMPTY);
         }
         return info;
@@ -326,6 +344,7 @@ public abstract class AbstractComponent implements Component {
         return router;
     }
 
+    @Deprecated
     protected ComponentAddress findService(InterfaceDefinition service)
             throws ServiceUnavailableException {
         ServiceManager sm = getLookup().get(ServiceManager.class);
@@ -333,7 +352,15 @@ public abstract class AbstractComponent implements Component {
             throw new ServiceUnavailableException("No ServiceManager in Lookup");
         }
         return sm.findService(service);
-
+    }
+    
+    protected ComponentAddress findService(Class<? extends Service> service)
+            throws ServiceUnavailableException {
+        Services srvs = getLookup().get(Services.class);
+        if (srvs == null) {
+            throw new ServiceUnavailableException("No Services found in Lookup");
+        }
+        return srvs.findService(service);
     }
 
     public static interface ExtendedControl extends Control {

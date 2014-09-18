@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2013 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -28,8 +28,10 @@ import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.interfaces.Service;
 import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
+import net.neilcsmith.praxis.core.interfaces.Services;
 import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PString;
@@ -81,6 +83,7 @@ public abstract class AbstractControl implements AbstractComponent.ExtendedContr
         }
     }
 
+    @Deprecated
     protected ComponentAddress findService(InterfaceDefinition service)
             throws ServiceUnavailableException {
         ServiceManager sm = getLookup().get(ServiceManager.class);
@@ -89,6 +92,15 @@ public abstract class AbstractControl implements AbstractComponent.ExtendedContr
         }
         return sm.findService(service);
 
+    }
+    
+    protected ComponentAddress findService(Class<? extends Service> service)
+            throws ServiceUnavailableException {
+        Services srvs = getLookup().get(Services.class);
+        if (srvs == null) {
+            throw new ServiceUnavailableException("No Services found in Lookup");
+        }
+        return srvs.findService(service);
     }
     
     public static abstract class Builder<B extends Builder<B>> {
