@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module: net.neilcsmith.praxis.hub.net
+OpenIDE-Module-Localizing-Bundle: net/neilcsmith/praxis/hub/net/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+
