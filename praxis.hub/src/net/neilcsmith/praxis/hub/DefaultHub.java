@@ -61,6 +61,7 @@ import net.neilcsmith.praxis.impl.SimpleControl;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public class DefaultHub extends AbstractRoot {
 
     private static final Logger LOG = Logger.getLogger(DefaultHub.class.getName());

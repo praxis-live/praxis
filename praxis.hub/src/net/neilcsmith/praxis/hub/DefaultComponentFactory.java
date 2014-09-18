@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.hub;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ComponentFactory;
@@ -37,30 +38,32 @@ import net.neilcsmith.praxis.core.Root;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-@Deprecated
-public class LookupComponentFactory implements ComponentFactory {
+class DefaultComponentFactory implements ComponentFactory {
 
     private final static Logger logger =
-            Logger.getLogger(LookupComponentFactory.class.getName());
+            Logger.getLogger(DefaultComponentFactory.class.getName());
     private Map<ComponentType, ComponentFactory> componentCache;
     private Map<ComponentType, ComponentFactory> rootCache;
 
-    private LookupComponentFactory(Map<ComponentType, ComponentFactory> componentCache,
+    private DefaultComponentFactory(Map<ComponentType, ComponentFactory> componentCache,
             Map<ComponentType, ComponentFactory> rootCache) {
         this.componentCache = componentCache;
         this.rootCache = rootCache;
     }
 
+    @Override
     public ComponentType[] getComponentTypes() {
         Set<ComponentType> keys = componentCache.keySet();
         return keys.toArray(new ComponentType[keys.size()]);
     }
 
+    @Override
     public ComponentType[] getRootComponentTypes() {
         Set<ComponentType> keys = rootCache.keySet();
         return keys.toArray(new ComponentType[keys.size()]);
     }
 
+    @Override
     public MetaData<? extends Component> getMetaData(ComponentType type) {
         ComponentFactory factory = componentCache.get(type);
         if (factory != null) {
@@ -70,6 +73,7 @@ public class LookupComponentFactory implements ComponentFactory {
         }
     }
 
+    @Override
     public MetaData<? extends Root> getRootMetaData(ComponentType type) {
         ComponentFactory factory = rootCache.get(type);
         if (factory != null) {
@@ -79,6 +83,7 @@ public class LookupComponentFactory implements ComponentFactory {
         }
     }
 
+    @Override
     public Component createComponent(ComponentType type) throws ComponentInstantiationException {
         ComponentFactory factory = componentCache.get(type);
         if (factory != null) {
@@ -88,6 +93,7 @@ public class LookupComponentFactory implements ComponentFactory {
         }
     }
 
+    @Override
     public Root createRootComponent(ComponentType type) throws ComponentInstantiationException {
         ComponentFactory factory = rootCache.get(type);
         if (factory != null) {
@@ -98,17 +104,17 @@ public class LookupComponentFactory implements ComponentFactory {
     }
 
 
-    public static LookupComponentFactory getInstance() {
+    public static DefaultComponentFactory getInstance() {
         Map<ComponentType, ComponentFactory> componentCache =
-                new LinkedHashMap<ComponentType, ComponentFactory>();
+                new LinkedHashMap<>();
         Map<ComponentType, ComponentFactory> rootCache =
-                new LinkedHashMap<ComponentType, ComponentFactory>();
+                new LinkedHashMap<>();
 
         Lookup.Result<ComponentFactoryProvider> providers =
                 Lookup.SYSTEM.getAll(ComponentFactoryProvider.class);
         for (ComponentFactoryProvider provider : providers) {
             ComponentFactory factory = provider.getFactory();
-            logger.info("Adding components from : " + factory.getClass());
+            logger.log(Level.INFO, "Adding components from : {0}", factory.getClass());
             for (ComponentType type : factory.getComponentTypes()) {
                 componentCache.put(type, factory);
             }
@@ -116,6 +122,6 @@ public class LookupComponentFactory implements ComponentFactory {
                 rootCache.put(type, factory);
             }
         }
-        return new LookupComponentFactory(componentCache, rootCache);
+        return new DefaultComponentFactory(componentCache, rootCache);
     }
 }
