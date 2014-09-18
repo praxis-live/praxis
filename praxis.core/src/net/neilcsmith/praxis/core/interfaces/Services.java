@@ -1,54 +1,37 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- *
- * Copyright 2010 Neil C Smith.
- *
+ * 
+ * Copyright 2014 Neil C Smith.
+ * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
  * published by the Free Software Foundation.
- *
+ * 
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
  * version 3 for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
  * 
- *
+ * 
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.core;
+package net.neilcsmith.praxis.core.interfaces;
 
-import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.ComponentAddress;
+import net.neilcsmith.praxis.core.InterfaceDefinition;
 
 /**
  *
- * @author Neil C Smith (http://neilcsmith.net)
+ * @author Neil C Smith
  */
-public abstract class InterfaceDefinition {
-    
-    public abstract String[] getControls();
+public abstract class Services {
 
-    public abstract ControlInfo getControlInfo(String control);
+   public abstract ComponentAddress findService(Class<? extends InterfaceDefinition> info) throws ServiceUnavailableException;
 
-    @Override
-    public final boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        return obj == null ? false : this.getClass().equals(obj.getClass());
-    }
-
-    @Override
-    public final int hashCode() {
-        return this.getClass().hashCode();
-    }
-
-    @Override
-    public final String toString() {
-        return this.getClass().getName();
-    }
+   public abstract ComponentAddress[] findAllServices(InterfaceDefinition info) throws ServiceUnavailableException;
 
 }

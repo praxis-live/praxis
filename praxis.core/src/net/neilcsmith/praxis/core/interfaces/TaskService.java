@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,7 +21,6 @@
  */
 package net.neilcsmith.praxis.core.interfaces;
 
-import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
@@ -32,7 +31,7 @@ import net.neilcsmith.praxis.core.types.PReference;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class TaskService extends InterfaceDefinition {
+public class TaskService extends Service {
 
     public final static TaskService INSTANCE = new TaskService();
     public final static String SUBMIT = "submit";

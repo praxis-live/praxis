@@ -21,7 +21,11 @@
  */
 package net.neilcsmith.praxis.core.info;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -46,14 +50,14 @@ public class ComponentInfo extends Argument {
     private final static String INFO_PREFIX = "INFO:";
 
 //    private Class<? extends Component> type;
-    private final InterfaceDefinition[] interfaces;
+    private final Set<Class<? extends InterfaceDefinition>> interfaces;
     private final PMap controls;
     private final PMap ports;
     private final PMap properties;
 
     private volatile String string;
 
-    private ComponentInfo(InterfaceDefinition[] interfaces,
+    private ComponentInfo(Set<Class<? extends InterfaceDefinition>> interfaces,
             PMap controls,
             PMap ports,
             PMap properties,
@@ -72,8 +76,25 @@ public class ComponentInfo extends Argument {
         return Component.class;
     }
 
+    @Deprecated
     public InterfaceDefinition[] getInterfaces() {
-        return interfaces.clone();
+        List<InterfaceDefinition> ids = new ArrayList<>();
+        for (Class<? extends InterfaceDefinition> idClass : interfaces) {
+            try {
+                ids.add(idClass.newInstance());
+            } catch (Exception ex) {
+                Logger.getLogger(ComponentInfo.class.getName()).log(Level.WARNING, null, ex);
+            }
+        }
+        return ids.toArray(new InterfaceDefinition[ids.size()]);
+    }
+
+    public boolean hasInterface(Class<? extends InterfaceDefinition> type) {
+        return interfaces.contains(type);
+    }
+
+    public Set<Class<? extends InterfaceDefinition>> getAllInterfaces() {
+        return interfaces;
     }
 
     public String[] getControls() {
@@ -124,8 +145,8 @@ public class ComponentInfo extends Argument {
         sb.append("} {");
         sb.append(ports.toString());
         sb.append("} {");
-        for (InterfaceDefinition id : interfaces) {
-            sb.append(id.toString()).append(' ');
+        for (Class<? extends InterfaceDefinition> id : interfaces) {
+            sb.append(id.getName()).append(' ');
         }
         sb.append('}');
         if (!properties.isEmpty()) {
@@ -141,7 +162,7 @@ public class ComponentInfo extends Argument {
                 return true;
             }
             ComponentInfo other = ComponentInfo.coerce(arg);
-            return Arrays.equals(interfaces, other.interfaces)
+            return interfaces.equals(other.interfaces)
                     && controls.isEquivalent(other.controls)
                     && ports.isEquivalent(other.ports)
                     && properties.isEquivalent(other.properties);
@@ -149,7 +170,7 @@ public class ComponentInfo extends Argument {
             return false;
         }
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -157,7 +178,7 @@ public class ComponentInfo extends Argument {
         }
         if (obj instanceof ComponentInfo) {
             ComponentInfo o = (ComponentInfo) obj;
-            return Arrays.equals(interfaces, o.interfaces)
+            return interfaces.equals(o.interfaces)
                     && controls.equals(o.controls)
                     && ports.equals(o.ports)
                     && properties.equals(o.properties);
@@ -169,7 +190,7 @@ public class ComponentInfo extends Argument {
     public int hashCode() {
         int hash = 5;
 //        hash = 79 * hash + (this.type != null ? this.type.hashCode() : 0);
-        hash = 79 * hash + Arrays.deepHashCode(this.interfaces);
+        hash = 79 * hash + interfaces.hashCode();
         hash = 79 * hash + (this.controls != null ? this.controls.hashCode() : 0);
         hash = 79 * hash + (this.ports != null ? this.ports.hashCode() : 0);
         hash = 79 * hash + (this.properties != null ? this.properties.hashCode() : 0);
@@ -186,15 +207,30 @@ public class ComponentInfo extends Argument {
         return create(interfaces, controls, ports, properties);
     }
 
+    @Deprecated
     public static ComponentInfo create(
             Set<InterfaceDefinition> interfaces,
             Map<String, ControlInfo> controls,
             Map<String, PortInfo> ports,
             PMap properties) {
-        InterfaceDefinition[] ids = new InterfaceDefinition[0];
-        if (interfaces != null && !interfaces.isEmpty()) {
-            ids = interfaces.toArray(ids);
+        Set<Class<? extends InterfaceDefinition>> ids;
+        if (interfaces.isEmpty()) {
+            ids = Collections.emptySet();
+        } else {
+            ids = new LinkedHashSet<>();
+            for (InterfaceDefinition id : interfaces) {
+                ids.add(id.getClass());
+            }
         }
+        return create(controls, ports, ids, properties);
+    }
+
+    public static ComponentInfo create(
+            Map<String, ControlInfo> controls,
+            Map<String, PortInfo> ports,
+            Set<Class<? extends InterfaceDefinition>> interfaces,
+            PMap properties) {
+
         PMap ctrls;
         if (controls == null || controls.isEmpty()) {
             ctrls = PMap.EMPTY;
@@ -215,11 +251,16 @@ public class ComponentInfo extends Argument {
             }
             prts = pBld.build();
         }
+        if (interfaces == null || interfaces.isEmpty()) {
+            interfaces = Collections.emptySet();
+        } else {
+            interfaces = Collections.unmodifiableSet(new LinkedHashSet<>(interfaces));
+        }
         if (properties == null) {
             properties = PMap.EMPTY;
         }
 
-        return new ComponentInfo(ids, ctrls, prts, properties, null);
+        return new ComponentInfo(interfaces, ctrls, prts, properties, null);
 
     }
 
@@ -277,11 +318,17 @@ public class ComponentInfo extends Argument {
                 ports = pBld.build();
             }
 
-            // arr(3) is interfaces
-            PArray ints = PArray.coerce(arr.get(3));
-            InterfaceDefinition[] interfaces = new InterfaceDefinition[ints.getSize()];
-            for (int i = 0; i < interfaces.length; i++) {
-                interfaces[i] = (InterfaceDefinition) Class.forName(ints.get(i).toString()).newInstance();
+            // optional arr(3) is interfaces
+            Set<Class<? extends InterfaceDefinition>> interfaces;
+            if (arr.getSize() > 3) {
+                PArray ints = PArray.coerce(arr.get(3));
+                interfaces = new LinkedHashSet<>();
+                for (int i = 0; i < ints.getSize(); i++) {
+                    interfaces.add((Class<? extends InterfaceDefinition>) Class.forName(ints.get(i).toString()));
+                }
+                interfaces = Collections.unmodifiableSet(interfaces);
+            } else {
+                interfaces = Collections.emptySet();
             }
 
             // optional arr(4) is properties

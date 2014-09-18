@@ -22,7 +22,6 @@
 
 package net.neilcsmith.praxis.core.interfaces;
 
-import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PMap;
@@ -30,7 +29,7 @@ import net.neilcsmith.praxis.core.types.PMap;
 /**
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class SystemManagerService extends InterfaceDefinition {
+public class SystemManagerService extends Service {
 
     public final static SystemManagerService INSTANCE = new SystemManagerService();
 

@@ -30,6 +30,7 @@ public interface Root {
     
     public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException;
 
+    @Deprecated
     public InterfaceDefinition[] getInterfaces();
 
     

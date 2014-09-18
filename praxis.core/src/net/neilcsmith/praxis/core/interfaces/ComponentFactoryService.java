@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,7 +22,6 @@
 package net.neilcsmith.praxis.core.interfaces;
 
 import net.neilcsmith.praxis.core.Component;
-import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.ComponentType;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
@@ -34,17 +33,17 @@ import net.neilcsmith.praxis.core.types.PReference;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ComponentFactoryService extends InterfaceDefinition {
+public class ComponentFactoryService extends Service {
 
     public final static ComponentFactoryService INSTANCE = new ComponentFactoryService();
     public final static String NEW_INSTANCE = "new-instance";
-    public final static String TYPES = "types";
+    @Deprecated public final static String TYPES = "types";
     public final static ControlInfo NEW_INSTANCE_INFO =
             ControlInfo.createFunctionInfo(
             new ArgumentInfo[]{ComponentType.info()},
             new ArgumentInfo[]{PReference.info(Component.class)},
             PMap.EMPTY);
-    public final static ControlInfo TYPES_INFO =
+    @Deprecated public final static ControlInfo TYPES_INFO =
             ControlInfo.createReadOnlyPropertyInfo(
             new ArgumentInfo[]{PArray.info()},
             PMap.EMPTY);
@@ -58,9 +57,6 @@ public class ComponentFactoryService extends InterfaceDefinition {
     public ControlInfo getControlInfo(String control) {
         if (NEW_INSTANCE.equals(control)) {
             return NEW_INSTANCE_INFO;
-        }
-        if (TYPES.equals(control)) {
-            return TYPES_INFO;
         }
         throw new IllegalArgumentException();
     }

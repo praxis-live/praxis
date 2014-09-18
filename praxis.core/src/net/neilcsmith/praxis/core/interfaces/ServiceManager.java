@@ -28,6 +28,7 @@ import net.neilcsmith.praxis.core.InterfaceDefinition;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public interface ServiceManager {
 
    public ComponentAddress findService(InterfaceDefinition info) throws ServiceUnavailableException;

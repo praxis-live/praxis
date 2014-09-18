@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,7 +22,6 @@
 
 package net.neilcsmith.praxis.core.interfaces;
 
-import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.ComponentType;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
@@ -33,7 +32,7 @@ import net.neilcsmith.praxis.core.types.PString;
 /**
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class RootManagerService extends InterfaceDefinition {
+public class RootManagerService extends Service {
 
     public final static RootManagerService INSTANCE = new RootManagerService();
 

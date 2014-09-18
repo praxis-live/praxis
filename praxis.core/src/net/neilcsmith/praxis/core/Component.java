@@ -93,6 +93,7 @@ public interface Component {
      */
     public ComponentInfo getInfo();
 
+    @Deprecated
     public InterfaceDefinition[] getInterfaces();
 
 }

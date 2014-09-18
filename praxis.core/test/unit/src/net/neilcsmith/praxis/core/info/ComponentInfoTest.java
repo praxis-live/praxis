@@ -47,9 +47,9 @@ public class ComponentInfoTest {
     
     @Before
     public void setUp() {
-        Set<InterfaceDefinition> interfaces = new LinkedHashSet<>(2);
-        interfaces.add(ComponentInterface.INSTANCE);
-        interfaces.add(StartableInterface.INSTANCE);
+        Set<Class<? extends InterfaceDefinition>> interfaces = new LinkedHashSet<>(2);
+        interfaces.add(ComponentInterface.class);
+        interfaces.add(StartableInterface.class);
         
         Map<String, ControlInfo> controls = new LinkedHashMap<>();
         controls.put("p1", ControlInfo.createPropertyInfo(new ArgumentInfo[]{PNumber.info(0, 1)}, new Argument[]{PNumber.ONE}, PMap.create(ControlInfo.KEY_TRANSIENT, true)));
@@ -61,7 +61,7 @@ public class ComponentInfoTest {
         
         PMap properties = PMap.create(ComponentInfo.KEY_DYNAMIC, true);
         
-        info = ComponentInfo.create(interfaces, controls, ports, properties);
+        info = ComponentInfo.create(controls, ports, interfaces, properties);
     }
     
     @After
