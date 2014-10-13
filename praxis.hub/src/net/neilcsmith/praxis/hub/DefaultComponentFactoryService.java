@@ -46,8 +46,8 @@ class DefaultComponentFactoryService extends AbstractRoot {
         factory = DefaultComponentFactory.getInstance();
         registerControl(ComponentFactoryService.NEW_INSTANCE, new NewInstanceControl());
         registerControl(RootFactoryService.NEW_ROOT_INSTANCE, new NewRootInstanceControl());
-        registerInterface(ComponentFactoryService.INSTANCE);
-        registerInterface(RootFactoryService.INSTANCE);
+        registerInterface(ComponentFactoryService.class);
+        registerInterface(RootFactoryService.class);
     }
     
     

@@ -28,6 +28,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.ComponentAddress;
@@ -43,6 +48,7 @@ import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.interfaces.Services;
 import net.neilcsmith.praxis.impl.InstanceLookup;
 import net.neilcsmith.praxis.script.impl.ScriptServiceImpl;
+import net.neilcsmith.praxis.util.ArrayUtils;
 
 /**
  *
@@ -60,7 +66,9 @@ public final class Hub {
     private final Lookup lookup;
     private final RootHubImpl rootHub;
 
-    private Thread coreThread;
+//    private Thread coreThread;
+    private String[] rootIDs;
+    private FutureTask<?> coreExecutor;
     private Root.Controller coreController;
 
     private Hub(Builder builder) {
@@ -74,6 +82,7 @@ public final class Hub {
         roots = new ConcurrentHashMap<>();
         services = new ConcurrentHashMap<>();
         rootHub = new RootHubImpl();
+        rootIDs = new String[0];
     }
 
     private void extractExtensions(Builder builder, List<Root> exts) {
@@ -89,14 +98,14 @@ public final class Hub {
             exts.addAll(builder.extensions);
     }
     
-    public void start() throws Exception {
-        if (coreThread != null) {
+    public synchronized void start() throws Exception {
+        if (coreExecutor != null) {
             throw new IllegalStateException();
         }
         String coreID = CORE_PREFIX + Integer.toHexString(core.hashCode());
         coreController = core.initialize(coreID, rootHub);
         roots.put(coreID, coreController);
-        Runnable runner = new Runnable() {
+        coreExecutor = new FutureTask<>( new Runnable() {
 
             @Override
             public void run() {
@@ -106,22 +115,26 @@ public final class Hub {
                     Logger.getLogger(Hub.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-        };
-        coreThread = new Thread(runner, "PRAXIS_CORE_THREAD");
-        coreThread.start();
+        }, null);
+        Thread t = new Thread(coreExecutor, "PRAXIS_CORE_THREAD");
+        t.start();
     }
 
     public void shutdown() {
         coreController.shutdown();
     }
 
-    public void await(long ms) throws InterruptedException {
-        coreThread.join(ms);
+    public void await() throws InterruptedException, ExecutionException {
+        coreExecutor.get();
+    }
+    
+    public void await(long time, TimeUnit unit) throws InterruptedException,
+            ExecutionException, TimeoutException {
+        coreExecutor.get(time, unit);
     }
     
     public boolean isAlive() {
-        Thread t = coreThread;
-        return t == null ? false : t.isAlive();
+        return !coreExecutor.isDone();
     }
 
     private boolean registerRootController(String id, Root.Controller controller) {
@@ -129,10 +142,16 @@ public final class Hub {
             throw new NullPointerException();
         }
         Root.Controller existing = roots.putIfAbsent(id, controller);
-        return existing == null;
+        if (existing == null) {
+            rootIDs = ArrayUtils.add(rootIDs, id);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private Root.Controller unregisterRootController(String id) {
+        rootIDs = ArrayUtils.remove(rootIDs, id);
         return roots.remove(id);
     }
 
@@ -140,8 +159,8 @@ public final class Hub {
         return roots.get(id);
     }
 
-    private Set<String> getRootIDs() {
-        return Collections.unmodifiableSet(roots.keySet());
+    private String[] getRootIDs() {
+        return rootIDs;
     }
     
     private RootHub getRootHub() {
@@ -243,7 +262,7 @@ public final class Hub {
             return Hub.this.getRootController(id);
         }
 
-        public Set<String> getRootIDs() {
+        public String[] getRootIDs() {
             return Hub.this.getRootIDs();
         }
 

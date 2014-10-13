@@ -23,6 +23,8 @@
 package net.neilcsmith.praxis.hub;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -65,6 +67,7 @@ public class DefaultCoreRoot extends AbstractRoot {
     private String ID;
     
     protected DefaultCoreRoot(Hub.Accessor hubAccess, List<Root> exts) {
+        super(EnumSet.noneOf(Caps.class));
         if (hubAccess == null || exts == null) {
             throw new NullPointerException();
         }
@@ -89,7 +92,7 @@ public class DefaultCoreRoot extends AbstractRoot {
 
     @Override
     protected void terminating() {
-        String[] ids = hubAccess.getRootIDs().toArray(new String[0]);
+        String[] ids = hubAccess.getRootIDs();
         for (String id : ids) {
             uninstallRoot(id);
         }
@@ -105,6 +108,10 @@ public class DefaultCoreRoot extends AbstractRoot {
     }
     
     protected void createDefaultControls() {
+        createRootManagerService();
+    }
+    
+    protected void createRootManagerService() {
         registerControl(RootManagerService.ADD_ROOT, new AddRootControl());
         registerControl(RootManagerService.REMOVE_ROOT, new RemoveRootControl());
         registerControl(RootManagerService.ROOTS, new RootsControl());
@@ -245,26 +252,30 @@ public class DefaultCoreRoot extends AbstractRoot {
         
         @Override
         protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            String id = args.get(0).toString();
+            uninstallRoot(id);
+            return CallArguments.EMPTY;
         }
         
     }
 
     private class RootsControl extends SimpleControl {
 
-        private Set<String> knownIDs;
+        private String[] knownIDs;
         private PArray ret;
         
         private RootsControl() {
             super(RootManagerService.ROOTS_INFO);
+            knownIDs = new String[0];
+            ret = PArray.EMPTY;
         }
 
         @Override
         protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
-            Set<String> ids = hubAccess.getRootIDs();
-            if (!ids.equals(knownIDs)) {
+            String[] ids = hubAccess.getRootIDs();
+            if (!Arrays.equals(ids, knownIDs)) {
                 knownIDs = ids;
-                List<PString> list = new ArrayList<>(ids.size());
+                List<PString> list = new ArrayList<>(ids.length);
                 for (String id : ids) {
                     list.add(PString.valueOf(id));
                 }
