@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -30,18 +30,15 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.UIManager;
-import net.neilcsmith.praxis.core.IllegalRootStateException;
-import net.neilcsmith.praxis.hub.TaskServiceImpl;
-import net.neilcsmith.praxis.hub.DefaultHub;
+import net.neilcsmith.praxis.hub.Hub;
+import net.neilcsmith.praxis.hub.net.SlaveFactory;
 import net.neilcsmith.praxis.laf.PraxisLAFManager;
-import net.neilcsmith.praxis.script.impl.ScriptServiceImpl;
 import org.netbeans.api.sendopts.CommandException;
 import org.netbeans.spi.sendopts.Env;
 import org.netbeans.spi.sendopts.Option;
 import org.netbeans.spi.sendopts.OptionProcessor;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.modules.ModuleInfo;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -54,13 +51,19 @@ public class CLIProcessor extends OptionProcessor {
 
     private final static Logger LOG = Logger.getLogger(CLIProcessor.class.getName());
     private final static Option ALWAYS = Option.always();
-    private final static Option FILE = Option.defaultArguments();
+    private final static Option SLAVE = Option.withoutArgument(Option.NO_SHORT_NAME, "slave");
+    private final static Option PORT = Option.requiredArgument(Option.NO_SHORT_NAME, "port");
+    private final static Option NETWORK = Option.requiredArgument(Option.NO_SHORT_NAME, "network");
+    private final static Option FILES = Option.defaultArguments();
 
     @Override
     protected Set<Option> getOptions() {
-        Set<Option> opts = new HashSet<Option>(3);
+        Set<Option> opts = new HashSet<Option>(5);
         opts.add(ALWAYS);
-        opts.add(FILE);        
+        opts.add(FILES);
+        opts.add(SLAVE);
+        opts.add(PORT);
+        opts.add(NETWORK);
         return opts;
     }
 
@@ -76,47 +79,70 @@ public class CLIProcessor extends OptionProcessor {
             LOG.log(Level.FINE, "netbeans.user.dir : {0}", System.getProperty("netbeans.user.dir"));
         }
 
-        String script = null;
+        if (optionValues.containsKey(SLAVE)) {
+            processSlave(env, optionValues);
+        } else if (optionValues.containsKey(FILES)) {
+            processScript(env, optionValues.get(FILES));
 
-        if (optionValues.containsKey(FILE)) {
-            String[] files = optionValues.get(FILE);
-            if (files.length != 1) {
-                throw new CommandException(1, "Too many script files specified on command line.");
-            }
+        }
+
+    }
+
+    private void processSlave(Env env, Map<Option, String[]> options) throws CommandException {
+        int port = SlaveFactory.DEFAULT_PORT;
+        String netMask = null;
+        if (options.containsKey(PORT)) {
             try {
-                script = loadScript(env, files[0]);
+                port = Integer.valueOf(options.get(PORT)[0]);
             } catch (Exception ex) {
-                LOG.log(Level.SEVERE, "Error loading script file", ex);
-                throw new CommandException(1, "Error loading script file.");
+                throw new CommandException(1, "Port must be a number");
             }
         }
-
-        for (ModuleInfo info : Lookup.getDefault().lookupAll(ModuleInfo.class)) {
-            if (info.owns(this.getClass())) {
-                System.setProperty("net.neilcsmith.praxisplayer.version",
-                        info.getImplementationVersion());
-                break;
+        if (options.containsKey(NETWORK)) {
+            netMask = options.get(NETWORK)[0];
+        }
+        
+        while (true) {
+            SlaveFactory sf = null;
+            try {
+                sf = new SlaveFactory(port, netMask);
+            } catch (Exception e) {
+                throw new CommandException(1, e.getMessage());
+            }
+            Hub hub = Hub.builder()
+                    .setCoreRootFactory(sf)
+                    .build();
+            try {
+                hub.start();
+                hub.await();
+            } catch (Exception ex) {
+                throw new CommandException(1, ex.getMessage());
             }
         }
+        
+        
+    }
 
+    private void processScript(Env env, String[] files) throws CommandException {
+        if (files.length != 1) {
+            throw new CommandException(1, "Too many script files specified on command line.");
+        }
+        String script;
         try {
-
-            if (script == null) {
-                throw new CommandException(1,
-                        "You must pass in a valid script or project.");
-            }
-            startNonGuiPlayer(script);
-
-
-        } catch (IllegalRootStateException ex) {
-            throw new CommandException(1, "Error starting hub.");
+            script = loadScript(env, files[0]);
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, "Error loading script file", ex);
+            throw new CommandException(1, "Error loading script file.");
         }
-
-
-
-
-
-//       
+        try {
+            Hub hub = Hub.builder()
+                    .addExtension(new NonGuiPlayer(script))
+                    .build();
+            hub.start();
+            hub.await();
+        } catch (Exception ex) {
+            throw new CommandException(1, "Error starting hub");
+        }
     }
 
     private String loadScript(Env env, String filename) throws IOException {
@@ -167,11 +193,4 @@ public class CLIProcessor extends OptionProcessor {
         throw new IOException("No project file found");
     }
 
-    private void startNonGuiPlayer(String script) throws IllegalRootStateException {
-        DefaultHub hub = new DefaultHub(new ScriptServiceImpl(),
-                new TaskServiceImpl(), new NonGuiPlayer(script));
-
-        hub.activate();
-
-    }
 }
