@@ -38,6 +38,7 @@ import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.PortAddress;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PMap;
+import net.neilcsmith.praxis.core.types.PString;
 
 /**
  *
@@ -138,21 +139,19 @@ public class ComponentInfo extends Argument {
     }
 
     private String buildString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(INFO_PREFIX);
-        sb.append(" {");
-        sb.append(controls.toString());
-        sb.append("} {");
-        sb.append(ports.toString());
-        sb.append("} {");
+        PString[] ints = new PString[interfaces.size()];
+        int i=0;
         for (Class<? extends InterfaceDefinition> id : interfaces) {
-            sb.append(id.getName()).append(' ');
+            ints[i++] = PString.valueOf(id.getName());
         }
-        sb.append('}');
-        if (!properties.isEmpty()) {
-            sb.append(" {").append(properties.toString()).append('}');
-        }
-        return sb.toString();
+        PArray arr = PArray.valueOf(
+                PString.valueOf(INFO_PREFIX),
+                controls,
+                ports,
+                PArray.valueOf(ints),
+                properties
+        );
+        return arr.toString();           
     }
 
     @Override
@@ -323,8 +322,9 @@ public class ComponentInfo extends Argument {
             if (arr.getSize() > 3) {
                 PArray ints = PArray.coerce(arr.get(3));
                 interfaces = new LinkedHashSet<>();
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
                 for (int i = 0; i < ints.getSize(); i++) {
-                    interfaces.add((Class<? extends InterfaceDefinition>) Class.forName(ints.get(i).toString()));
+                    interfaces.add((Class<? extends InterfaceDefinition>) cl.loadClass(ints.get(i).toString()));
                 }
                 interfaces = Collections.unmodifiableSet(interfaces);
             } else {
@@ -339,7 +339,7 @@ public class ComponentInfo extends Argument {
                 properties = PMap.EMPTY;
             }
 
-            return new ComponentInfo(interfaces, controls, ports, properties, string);
+            return new ComponentInfo(interfaces, controls, ports, properties, null);
         } catch (Exception ex) {
             throw new ArgumentFormatException(ex);
         }

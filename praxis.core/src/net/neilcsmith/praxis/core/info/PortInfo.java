@@ -137,7 +137,8 @@ public final class PortInfo extends Argument {
     private static PortInfo valueOf(String string) throws ArgumentFormatException {
         PArray arr = PArray.valueOf(string);
         try {
-            Class<? extends Port> cls = (Class<? extends Port>) Class.forName(arr.get(0).toString());
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            Class<? extends Port> cls = (Class<? extends Port>) cl.loadClass(arr.get(0).toString());
             Direction direction = Direction.valueOf(arr.get(1).toString());
             PMap properties = PMap.coerce(arr.get(2));
             return new PortInfo(cls, direction, properties, string);

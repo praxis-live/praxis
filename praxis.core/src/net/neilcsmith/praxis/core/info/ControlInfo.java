@@ -82,39 +82,37 @@ public class ControlInfo extends Argument {
     }
 
     private String buildString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(type.toString());
-        if (type != Type.Action) {
-            sb.append(" {");
-            for (ArgumentInfo input : inputs) {
-                sb.append('{').append(input.toString()).append('}');
-            }
-            sb.append('}');
-            if (type == Type.Function) {
-                sb.append(" {");
-                for (ArgumentInfo output : outputs) {
-                    sb.append('{').append(output.toString()).append('}');
-                }
-                sb.append('}');
-            } else {
-                sb.append(" {");
-                for (Argument def : defaults) {
-                    sb.append('{').append(def.toString()).append('}');
-                }
-                sb.append('}');
-            }
+        
+        switch (type) {
+            case Action:
+                return PArray.valueOf(
+                        PString.valueOf(type),
+                        properties)
+                        .toString();
+            case Function:
+                return PArray.valueOf(
+                        PString.valueOf(type),
+                        PArray.valueOf(inputs),
+                        PArray.valueOf(outputs),
+                        properties)
+                        .toString();
+            default:
+                return PArray.valueOf(
+                        PString.valueOf(type),
+                        PArray.valueOf(inputs),
+                        PArray.valueOf(defaults),
+                        properties)
+                        .toString();
+                
         }
-        if (!properties.isEmpty()) {
-            sb.append(" {").append(properties.toString()).append('}');
-        }
-        return sb.toString();
+        
     }
 
 //    @Override
 //    public boolean isEquivalent(Argument arg) {
 //        return equals(arg);
 //    }
-
+ 
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {

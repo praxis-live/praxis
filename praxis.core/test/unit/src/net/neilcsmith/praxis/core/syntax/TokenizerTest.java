@@ -42,9 +42,9 @@ public class TokenizerTest {
     @Test
     public void testIterator() {
         System.out.println("iterator");
-        Tokenizer tokens = new Tokenizer("this \"is\"; [a] {{test}} in\\; for you; now");
+        Tokenizer tokens = new Tokenizer("this \"is\"; [a] {{test\\}}} in\\; for you; now");
         for (Token tok : tokens) {
-            System.out.println(tok);
+            System.out.println(tok.getText());
         }
     }
 

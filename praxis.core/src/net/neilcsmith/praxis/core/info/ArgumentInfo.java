@@ -27,31 +27,36 @@ import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PMap;
+import net.neilcsmith.praxis.core.types.PString;
 
 /**
- * Info object for an Argument, usually used to define the valid input and output
- * arguments of a Control. As well as giving the type of the argument, an ArgumentInfo
- * can have an optional set of properties. This might be used for defining the "minimum"
- * and "maximum" values of a PNumber argument, for example.
+ * Info object for an Argument, usually used to define the valid input and
+ * output arguments of a Control. As well as giving the type of the argument, an
+ * ArgumentInfo can have an optional set of properties. This might be used for
+ * defining the "minimum" and "maximum" values of a PNumber argument, for
+ * example.
  *
  * @author Neil C Smith
  */
 public final class ArgumentInfo extends Argument {
-    
+
     public final static String KEY_ALLOWED_VALUES = "allowed-values";
     public final static String KEY_SUGGESTED_VALUES = "suggested-values";
     public final static String KEY_ALLOW_EMPTY = "allow-empty";
     public final static String KEY_EMPTY_IS_DEFAULT = "empty-is-default";
     public final static String KEY_TEMPLATE = "template";
 
-    public static enum Presence { Always, Optional, Variable }
+    public static enum Presence {
+
+        Always, Optional, Variable
+    }
 
     private final Class<? extends Argument> type;
     private final Presence presence;
     private final PMap properties;
 
     private volatile String string;
-    
+
     private ArgumentInfo(Class<? extends Argument> type,
             Presence presence,
             PMap properties,
@@ -62,7 +67,6 @@ public final class ArgumentInfo extends Argument {
         this.string = string;
     }
 
-    
     /**
      *
      * @return String name of Argument subclass
@@ -82,13 +86,18 @@ public final class ArgumentInfo extends Argument {
     public PMap getProperties() {
         return properties;
     }
-    
 
     @Override
     public String toString() {
         String str = string;
         if (str == null) {
-            str = type.getName() + " " + presence.name() + " {" + properties.toString() + "}";
+//            str = type.getName() + " " + presence.name() + " {" + escape(properties.toString()) + "}";
+            str = PArray.valueOf(
+                    PString.valueOf(type.getName()),
+                    PString.valueOf(presence.name()),
+                    properties
+            
+            ).toString();
             string = str;
         }
         return str;
@@ -98,8 +107,6 @@ public final class ArgumentInfo extends Argument {
 //    public boolean isEquivalent(Argument arg) {
 //        return equals(arg);
 //    }
-
-    
 
     @Override
     public boolean equals(Object obj) {
@@ -119,9 +126,6 @@ public final class ArgumentInfo extends Argument {
         hash = 53 * hash + (this.properties != null ? this.properties.hashCode() : 0);
         return hash;
     }
-
-
-
 
     /**
      * Create an ArgumentInfo from the Argument class and optional PMap of
@@ -157,10 +161,10 @@ public final class ArgumentInfo extends Argument {
         return new ArgumentInfo(argClass, presence, properties, null);
 
     }
-    
+
     /**
      * Coerce the given Argument into an ArgumentInfo object.
-     * 
+     *
      * @param arg Argument to be coerced.
      * @return ArgumentInfo
      * @throws ArgumentFormatException if Argument cannot be coerced.
@@ -176,7 +180,9 @@ public final class ArgumentInfo extends Argument {
     private static ArgumentInfo valueOf(String string) throws ArgumentFormatException {
         PArray arr = PArray.valueOf(string);
         try {
-            Class<? extends Argument> cls = (Class<? extends Argument>) Class.forName(arr.get(0).toString());
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            Class<? extends Argument> cls = (Class<? extends Argument>) cl.loadClass(arr.get(0).toString());
+//            Class<? extends Argument> cls = (Class<? extends Argument>) Class.forName(arr.get(0).toString());
             Presence presence = Presence.valueOf(arr.get(1).toString());
             PMap properties = PMap.coerce(arr.get(2));
             return new ArgumentInfo(cls, presence, properties, string);
@@ -184,5 +190,5 @@ public final class ArgumentInfo extends Argument {
             throw new ArgumentFormatException(ex);
         }
     }
- 
+
 }

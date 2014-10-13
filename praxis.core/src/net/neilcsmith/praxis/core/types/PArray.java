@@ -41,7 +41,7 @@ public final class PArray extends Argument implements Iterable<Argument> {
 
     public final static PArray EMPTY = new PArray(new Argument[0], "");
     private Argument[] data;
-    private String str;
+    private volatile String str;
 
     private PArray(Argument[] data, String str) {
         this.data = data;
@@ -66,20 +66,24 @@ public final class PArray extends Argument implements Iterable<Argument> {
             if (data.length > 0) {
                 StringBuilder sb = new StringBuilder();
                 for (Argument entry : data) {
-                    if (sb.length() == 0) {
-                        sb.append("{");
-                    } else {
-                        sb.append(" {");
+//                    if (sb.length() == 0) {
+//                        sb.append("{");
+//                    } else {
+//                        sb.append(" {");
+//                    }
+//
+//                        String s = String.valueOf(entry);
+////                        if (s.indexOf('{') > -1 || s.indexOf('}') > -1) {
+//                            s = s.replace("{", "\\{");
+//                            s = s.replace("}", "\\}");
+////                        }
+//                        sb.append(s);
+////                sb.append(String.valueOf(entry));
+//                    sb.append("}");
+                    if (sb.length() > 0) {
+                        sb.append(' ');
                     }
-
-                        String s = String.valueOf(entry);
-                        if (s.indexOf('{') > -1 || s.indexOf('}') > -1) {
-                            s = s.replace("{", "\\{");
-                            s = s.replace("}", "\\}");
-                        }
-                        sb.append(s);
-//                sb.append(String.valueOf(entry));
-                    sb.append("}");
+                    sb.append(SyntaxUtils.escape(String.valueOf(entry)));
                 }
                 str = sb.toString();
             } else {
@@ -201,10 +205,10 @@ public final class PArray extends Argument implements Iterable<Argument> {
                         break;
                     case BRACED:
                         String s = t.getText();
-                        if (s.indexOf('{') > -1 || s.indexOf('}') > -1) {
-                            s = s.replace("\\{", "{");
-                            s = s.replace("\\}", "}");
-                        }
+//                        if (s.indexOf('{') > -1 || s.indexOf('}') > -1) {
+//                            s = s.replace("\\{", "{");
+//                            s = s.replace("\\}", "}");
+//                        }
                         list.add(PString.valueOf(s));
                         break;
                     case EOL:
