@@ -24,7 +24,6 @@ package net.neilcsmith.praxis.hub.net;
 import de.sciss.net.OSCListener;
 import de.sciss.net.OSCMessage;
 import de.sciss.net.OSCPacket;
-import de.sciss.net.OSCPacketCodec;
 import de.sciss.net.OSCServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -73,6 +72,7 @@ class SlaveCoreRoot extends DefaultCoreRoot {
     protected void activating() {
         try {
             server = OSCServer.newUsing(codec, OSCServer.TCP, port, clientValidator == null);
+            server.setBufferSize(65536);
             server.addOSCListener(new OSCListener() {
 
                 @Override
@@ -91,7 +91,7 @@ class SlaveCoreRoot extends DefaultCoreRoot {
         } catch (IOException ex) {
             Logger.getLogger(SlaveCoreRoot.class.getName()).log(Level.SEVERE, null, ex);
             forceTermination();
-            return;
+            throw new RuntimeException(ex);
         }
         getLookup().get(ExecutionContext.class).addClockListener(new ExecutionContext.ClockListener() {
 
@@ -129,7 +129,7 @@ class SlaveCoreRoot extends DefaultCoreRoot {
 
     private void tick(ExecutionContext source) {
         if ((source.getTime() - lastPurgeTime) > TimeUnit.SECONDS.toNanos(1)) {
-            LOG.fine("Triggering dispatcher purge");
+//            LOG.fine("Triggering dispatcher purge");
             dispatcher.purge(10, TimeUnit.SECONDS);
             lastPurgeTime = source.getTime();
         }

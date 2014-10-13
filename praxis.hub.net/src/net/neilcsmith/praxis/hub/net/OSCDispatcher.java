@@ -3,6 +3,7 @@ package net.neilcsmith.praxis.hub.net;
 import de.sciss.net.OSCBundle;
 import de.sciss.net.OSCMessage;
 import de.sciss.net.OSCPacket;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -142,6 +143,25 @@ abstract class OSCDispatcher {
                 break;
         }
     }
+    
+    void handleAddRoot(Call call) {
+        Object[] oscArgs = new Object[4];
+        oscArgs[0] = call.getMatchID();
+        oscArgs[1] = call.getFromAddress().toString();
+        oscArgs[2] = codec.toOSCObject(call.getArgs().get(0));
+        oscArgs[3] = codec.toOSCObject(call.getArgs().get(1));
+        send(ADD, call.getTimecode(), oscArgs);
+        sentCalls.put(call.getMatchID(), new SentCallInfo(System.nanoTime(), call));
+    }
+    
+    void handleRemoveRoot(Call call) {
+        Object[] oscArgs = new Object[3];
+        oscArgs[0] = call.getMatchID();
+        oscArgs[1] = call.getFromAddress().toString();
+        oscArgs[2] = codec.toOSCObject(call.getArgs().get(0));
+        send(DEL, call.getTimecode(), oscArgs);
+        sentCalls.put(call.getMatchID(), new SentCallInfo(System.nanoTime(), call));
+    }
 
     void handleInvoke(String target, Call call) {
         CallArguments callArgs = call.getArgs();
@@ -175,6 +195,9 @@ abstract class OSCDispatcher {
         OSCBundle b = new OSCBundle();
         b.setTimeTagRaw(nanosToTimeTag(nanos));
         b.addPacket(new OSCMessage(target, args));
+        if (LOG.isLoggable(Level.FINE)) {
+            LOG.log(Level.FINE, "{0} : {1}", new Object[]{target, Arrays.toString(args)});
+        }
         send(b);
     }
     
