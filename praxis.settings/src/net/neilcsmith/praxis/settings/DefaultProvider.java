@@ -107,7 +107,12 @@ class DefaultProvider extends Settings.Provider {
                 LOGGER.log(Level.WARNING, "Couldn't persist setting.", ex);
             }
         }
-        map.put(key, value);
+        if (value == null) {
+            map.remove(key);
+        } else {
+            map.put(key, value);
+        }
+        
     }
 
     @Override
