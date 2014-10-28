@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2013 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -35,6 +35,7 @@ import net.neilcsmith.praxis.core.interfaces.SystemManagerService;
 import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.util.ArrayUtils;
 
 /**
  *
@@ -61,7 +62,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     private Root.Controller controller;
     //private Runnable interrupt;
     private Lookup lookup;
-    private ExecutionContextImpl context;
+    private Context context;
     private Router router;
     private ExitOnStopControl exitOnStop;
     private Runnable delegate;
@@ -89,15 +90,15 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         registerControl(StartableInterface.STOP, new TransportControl(false));
         registerControl(StartableInterface.IS_RUNNING,
                 ArgumentProperty.createReadOnly(PBoolean.info(),
-                new ArgumentProperty.ReadBinding() {
-                    public Argument getBoundValue() {
-                        if (state.get() == RootState.ACTIVE_RUNNING) {
-                            return PBoolean.TRUE;
-                        } else {
-                            return PBoolean.FALSE;
-                        }
-                    }
-                }));
+                        new ArgumentProperty.ReadBinding() {
+                            public Argument getBoundValue() {
+                                if (state.get() == RootState.ACTIVE_RUNNING) {
+                                    return PBoolean.TRUE;
+                                } else {
+                                    return PBoolean.FALSE;
+                                }
+                            }
+                        }));
         registerInterface(StartableInterface.INSTANCE);
     }
 
@@ -119,7 +120,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             }
             this.ID = ID;
             this.hub = hub;
-            this.context = new ExecutionContextImpl(System.nanoTime());
+            this.context = createContext();
             this.router = new Router();
             this.lookup = InstanceLookup.create(hub.getLookup(), router, context);
             if (state.compareAndSet(RootState.INITIALIZING, RootState.INITIALIZED)) {
@@ -159,6 +160,11 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 //    protected void setTime(long time) {
 //        this.time = time;
 //    }
+    
+    protected Context createContext() {
+        return new Context();
+    }
+    
     protected void activating() {
     }
 
@@ -232,7 +238,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         if (currentState != RootState.ACTIVE_IDLE && currentState != RootState.ACTIVE_RUNNING) {
             throw new IllegalRootStateException();
         }
-   
+
         if (currentState != cachedState) {
             cachedState = currentState;
             if (cachedState == RootState.ACTIVE_RUNNING) {
@@ -241,7 +247,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                 context.setState(ExecutionContext.State.IDLE);
             }
         }
-        
+
         if (poll) {
             try {
                 poll(0, TimeUnit.MILLISECONDS);
@@ -264,7 +270,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             }
             pkt = orderedQueue.poll();
         }
-
 
     }
 
@@ -556,6 +561,96 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                 } else {
                     throw new UnsupportedOperationException();
                 }
+            }
+        }
+    }
+
+    protected class Context extends ExecutionContext {
+
+        private ExecutionContext.StateListener[] stateListeners;
+        private ExecutionContext.ClockListener[] clockListeners;
+        private ExecutionContext.State state;
+        private long time;
+
+        public Context() {
+            this.stateListeners = new ExecutionContext.StateListener[0];
+            this.clockListeners = new ExecutionContext.ClockListener[0];
+            this.state = ExecutionContext.State.NEW;
+            this.time = System.nanoTime();
+        }
+
+        @Override
+        public void addStateListener(ExecutionContext.StateListener listener) {
+            stateListeners = ArrayUtils.add(stateListeners, listener);
+        }
+
+        @Override
+        public void removeStateListener(ExecutionContext.StateListener listener) {
+            stateListeners = ArrayUtils.add(stateListeners, listener);
+        }
+
+        @Override
+        public void addClockListener(ExecutionContext.ClockListener listener) {
+            clockListeners = ArrayUtils.add(clockListeners, listener);
+        }
+
+        @Override
+        public void removeClockListener(ExecutionContext.ClockListener listener) {
+            clockListeners = ArrayUtils.remove(clockListeners, listener);
+        }
+
+        @SuppressWarnings("fallthrough")
+        void setState(ExecutionContext.State state) {
+            switch (state) {
+                case ACTIVE:
+                case IDLE:
+                    if (this.state == ExecutionContext.State.TERMINATED) {
+                        throw new IllegalStateException("Execution Context terminated");
+                    }
+                // fall through
+                case TERMINATED:
+                    if (this.state != state) {
+                        this.state = state;
+                        fireStateListeners();
+                    }
+                    break;
+                case NEW:
+                    if (this.state != ExecutionContext.State.NEW) {
+                        throw new IllegalStateException("Can't make Execution Context NEW again.");
+                    }
+                    break;
+                default:
+                    throw new RuntimeException();
+
+            }
+        }
+
+        @Override
+        public ExecutionContext.State getState() {
+            return state;
+        }
+
+        void setTime(long time) {
+            this.time = time;
+            if (state == ExecutionContext.State.ACTIVE) {
+                fireClockListeners();
+            }
+        }
+
+        @Override
+        public long getTime() {
+            return time;
+        }
+
+        private void fireStateListeners() {
+            for (ExecutionContext.StateListener l : stateListeners) {
+                l.stateChanged(this);
+            }
+        }
+
+        private void fireClockListeners() {
+            for (ExecutionContext.ClockListener l : clockListeners) {
+                l.tick(this);
             }
         }
     }

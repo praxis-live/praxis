@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.impl;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.util.ArrayUtils;
 
+@Deprecated
 public class ExecutionContextImpl extends ExecutionContext {
 
     private StateListener[] stateListeners;
