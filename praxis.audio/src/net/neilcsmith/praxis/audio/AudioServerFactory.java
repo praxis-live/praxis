@@ -29,6 +29,7 @@ import org.jaudiolibs.audioservers.AudioServer;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public interface AudioServerFactory {
     
     public AudioServer getServer(String device, int inChannels, int outChannels,

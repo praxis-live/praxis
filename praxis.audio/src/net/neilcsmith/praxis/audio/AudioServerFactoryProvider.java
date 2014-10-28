@@ -26,6 +26,7 @@ package net.neilcsmith.praxis.audio;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public interface AudioServerFactoryProvider {
     
     public String getLibraryName();

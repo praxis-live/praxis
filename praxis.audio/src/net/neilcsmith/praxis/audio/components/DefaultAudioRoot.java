@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,23 +21,28 @@
  */
 package net.neilcsmith.praxis.audio.components;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.audio.AudioContext;
 import net.neilcsmith.praxis.audio.AudioSettings;
 import net.neilcsmith.praxis.audio.ClientRegistrationException;
-import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.core.Lookup;
-import net.neilcsmith.praxis.core.info.ArgumentInfo;
-import net.neilcsmith.praxis.core.types.PMap;
-import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.AbstractRoot;
-import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.InstanceLookup;
+import net.neilcsmith.praxis.impl.IntProperty;
+import net.neilcsmith.praxis.impl.RootState;
+import net.neilcsmith.praxis.impl.StringProperty;
 import org.jaudiolibs.audioservers.AudioConfiguration;
 import org.jaudiolibs.audioservers.AudioServer;
+import org.jaudiolibs.audioservers.AudioServerProvider;
+import org.jaudiolibs.audioservers.ext.ClientID;
+import org.jaudiolibs.audioservers.ext.Device;
 import org.jaudiolibs.pipes.BufferRateListener;
 import org.jaudiolibs.pipes.BufferRateSource;
 import org.jaudiolibs.pipes.impl.BusClient;
@@ -47,65 +52,157 @@ import org.jaudiolibs.pipes.impl.BusClient;
  * @author Neil C Smith
  */
 public class DefaultAudioRoot extends AbstractRoot {
-    
+
     private final static Logger LOG = Logger.getLogger(DefaultAudioRoot.class.getName());
     private final static int MAX_CHANNELS = 16;
-    private final static int DEFAULT_INTERNAL_BUFFERSIZE = 64;
+    private final static int DEFAULT_SAMPLERATE = 48000;
+    private final static int DEFAULT_BLOCKSIZE = 64;
+
+    private Map<String, LibraryInfo> libraries;
     private AudioContext.InputClient inputClient;
     private AudioContext.OutputClient outputClient;
     private BusClient bus;
     private BusListener busListener;
     private AudioServer server;
-    private ArgumentProperty sampleRate;
-    private ArgumentProperty bufferSize;
-    private ArgumentProperty audioLib;
-    private ArgumentProperty device;
-    private AudioContext hub;
+
+    // Permanent controls 
+    private CheckedIntBinding sampleRate;
+    private CheckedIntBinding blockSize;
+    private LibraryBinding audioLib;
+
+    // Dynamic controls
+    private CheckedIntBinding extBufferSize;
+    private DeviceBinding deviceName;
+    private DeviceBinding inputDeviceName;
+
+    private AudioContext audioCtxt;
     private Lookup lookup;
-//    private Placeholder[] inputs;
-//    private Placeholder[] outputs;
     private long period = -1;
 
     public DefaultAudioRoot() {
-        buildControls();
-//        inputs = new Placeholder[2];
-//        inputs[0] = new Placeholder();
-//        inputs[1] = new Placeholder();
-//        outputs = new Placeholder[2];
-//        outputs[0] = new Placeholder();
-//        outputs[1] = new Placeholder();
+        extractLibraryInfo();
+        buildDefaultControls();
+        markDynamic();
     }
 
-    private void buildControls() {
-        ArgumentInfo sharedInfo = ArgumentInfo.create(
-                Argument.class, PMap.create(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
-        sampleRate = ArgumentProperty.create(sharedInfo);
-        bufferSize = ArgumentProperty.create(sharedInfo);
-        audioLib = ArgumentProperty.create(sharedInfo);
-        device = ArgumentProperty.create(sharedInfo);
-        registerControl("samplerate", sampleRate);
-        registerControl("buffersize", bufferSize);
-        registerControl("library", audioLib);
-        registerControl("device", device);
-        hub = new Hub();
+    private void extractLibraryInfo() {
+        libraries = new LinkedHashMap<String, LibraryInfo>();
+        List<Device> devices = new ArrayList<Device>();
+        List<Device> inputDevices = new ArrayList<Device>();
+        for (AudioServerProvider lib
+                : Lookup.SYSTEM.getAll(AudioServerProvider.class)) {
+            LOG.log(Level.FINE, "Audio Library : {0}", lib.getLibraryName());
+            devices.clear();
+            inputDevices.clear();
+            for (Device device : lib.findAll(Device.class)) {
+                if (device.getMaxOutputChannels() > 0) {
+                    LOG.log(Level.FINE, "-- Found device : {0}", device.getName());
+                    devices.add(device);
+                } else if (device.getMaxInputChannels() > 0) {
+                    LOG.log(Level.FINE, "-- Found input device : {0}", device.getName());
+                    inputDevices.add(device);
+                }
+            }
+            libraries.put(lib.getLibraryName(),
+                    new LibraryInfo(lib,
+                            devices.toArray(new Device[devices.size()]),
+                            inputDevices.toArray(new Device[inputDevices.size()])));
+        }
     }
+
+    private void buildDefaultControls() {
+        sampleRate = new CheckedIntBinding(DEFAULT_SAMPLERATE);
+        IntProperty srCtl = IntProperty.builder()
+                .binding(sampleRate)
+                .minimum(2000)
+                .maximum(192000)
+                .defaultValue(DEFAULT_SAMPLERATE)  
+                .suggestedValues(22050, 32000, 44100, 48000, 88200, 96000, 192000)
+                .build();
+        registerControl("sample-rate", srCtl);
+
+        blockSize = new CheckedIntBinding(DEFAULT_BLOCKSIZE);
+        IntProperty brCtl = IntProperty.builder()
+                .binding(blockSize)
+                .minimum(1)
+                .maximum(512)
+                .defaultValue(DEFAULT_BLOCKSIZE)
+                .build();
+        registerControl("block-size", brCtl);
+
+        List<String> libs = new ArrayList<String>(libraries.keySet());
+        Collections.sort(libs);
+        libs.add(0, "");
+
+        audioLib = new LibraryBinding();
+        StringProperty libCtl = StringProperty.builder()
+                .binding(audioLib)
+                .defaultValue("")
+                .emptyIsDefault()
+                .allowedValues(libs.toArray(new String[libs.size()]))
+                .build();
+        registerControl("library", libCtl);
+
+        audioCtxt = new AudioCtxt();
+    }
+
+    private void updateLibrary(String lib) {
+        unregisterControl("device");
+        deviceName = null;
+        unregisterControl("input-device");
+        inputDeviceName = null;
+        unregisterControl("ext-buffer-size");
+        extBufferSize = null;
+
+        if (lib.isEmpty()) {
+            return;
+        }
+
+        LibraryInfo info = libraries.get(lib);
+        if (info == null) {
+            return;
+        }
+
+        if (!"JACK".equals(lib)) {
+            deviceName = new DeviceBinding();
+            StringProperty devCtl = StringProperty.builder()
+                    .binding(deviceName)
+                    .defaultValue("")
+                    .emptyIsDefault()
+                    .suggestedValues(deviceNames(info.devices))
+                    .build();
+            registerControl("device", devCtl);
+            inputDeviceName = new DeviceBinding();
+            StringProperty inCtl = StringProperty.builder()
+                    .binding(inputDeviceName)
+                    .defaultValue("")
+                    .emptyIsDefault()
+                    .suggestedValues(deviceNames(info.inputDevices))
+                    .build();
+            registerControl("input-device", inCtl);
+            extBufferSize = new CheckedIntBinding(AudioSettings.getBuffersize());
+            IntProperty bsCtl = IntProperty.builder()
+                    .binding(extBufferSize)
+                    .suggestedValues(64, 128, 256, 512, 1024, 2048, 4096)
+                    .build();
+            registerControl("ext-buffer-size", bsCtl);
+        }
+
+    }
+    
+    
 
     @Override
     public Lookup getLookup() {
         if (lookup == null) {
-            initLookup();
+            lookup = InstanceLookup.create(super.getLookup(), audioCtxt);
         }
         return lookup;
     }
 
-    private void initLookup() {
-        ExecutionContext exctxt = super.getLookup().get(ExecutionContext.class);
-        if (exctxt == null) {
-            LOG.warning("No ExecutionContext found for DefaultAudioRoot");
-            lookup = InstanceLookup.create(super.getLookup(), hub);
-        } else {
-            lookup = InstanceLookup.create(super.getLookup(), hub, new AudioExecutionContext(exctxt));
-        }
+    @Override
+    protected AbstractRoot.Context createContext() {
+        return new Context();
     }
 
     @Override
@@ -117,15 +214,7 @@ public class DefaultAudioRoot extends AbstractRoot {
             }
             return;
         }
-        int bsize = DEFAULT_INTERNAL_BUFFERSIZE;
-        if (!bufferSize.getValue().isEmpty()) {
-            try {
-                bsize = PNumber.coerce(bufferSize.getValue()).toIntValue();
-            } catch (Exception ex) {
-                //fall through
-            }
-        }
-        bus = new BusClient(bsize,
+        bus = new BusClient(blockSize.value,
                 inputClient == null ? 0 : inputClient.getInputCount(),
                 outputClient.getOutputCount());
         busListener = new BusListener();
@@ -145,7 +234,7 @@ public class DefaultAudioRoot extends AbstractRoot {
             }
             return;
         }
-        setInterrupt(new Runnable() {
+        setDelegate(new Runnable() {
             public void run() {
                 try {
                     server.run();
@@ -159,75 +248,142 @@ public class DefaultAudioRoot extends AbstractRoot {
                 }
             }
         });
+        interrupt();
     }
 
     private AudioServer createServer(BusClient bus) throws Exception {
-        float srate = getSamplerate();
-        int bsize = getBuffersize();
-        String lib = getLibrary();
+        float srate = sampleRate.value;
+        int buffersize = getBuffersize();
 
-        String dev = "";
-        Argument arg = device.getValue();
-        if (!arg.isEmpty()) {
-            dev = arg.toString();
+        boolean usingDefault = false;
+        LibraryInfo info = libraries.get(audioLib.value);
+        if (info == null) {
+            info = libraries.get(AudioSettings.getLibrary());
+            if (info == null) {
+                throw new IllegalStateException("Audio library not found");
+            }
+            usingDefault = true;
         }
+        LOG.log(Level.FINE, "Found audio library {0}\n{1}", new Object[]{
+            info.provider.getLibraryName(), info.provider.getLibraryDescription()
+        });
+
+        Device device = findDevice(info, usingDefault, false);
+        if (device != null) {
+            LOG.log(Level.FINE, "Found device : {0}", device.getName());
+        }
+        Device inputDevice = null;
+        if (device != null && device.getMaxInputChannels() == 0 && bus.getSourceCount() > 0) {
+            inputDevice = findDevice(info, usingDefault, true);
+            if (inputDevice != null) {
+                LOG.log(Level.FINE, "Found input device : {0}", inputDevice.getName());
+            }
+        }
+
+        ClientID clientID = new ClientID("PraxisLIVE-" + getAddress().getRootID());
 
         AudioConfiguration ctxt = new AudioConfiguration(srate,
                 bus.getSourceCount(),
-                bus.getSinkCount(), 
-                bsize, true);
-        return AudioServerLoader.getInstance().load(getLookup(), lib, dev,
-                "praxis-" + getAddress().getRootID(), ctxt, bus, null);
-    }
-
-    private int getSamplerate() {
-        Argument arg = sampleRate.getValue();
-        if (!arg.isEmpty()) {
-            try {
-                return PNumber.coerce(arg).toIntValue();
-            } catch (Exception ex) {
-            }
-        }
-        return AudioSettings.getSamplerate();
+                bus.getSinkCount(),
+                buffersize,
+                createCheckedExts(device, inputDevice, clientID)
+        );
+        return info.provider.createServer(ctxt, bus);
     }
 
     private int getBuffersize() {
-        Argument arg = bufferSize.getValue();
-        if (!arg.isEmpty()) {
-            try {
-                return PNumber.coerce(arg).toIntValue();
-            } catch (Exception ex) {
+        int req = extBufferSize == null
+                ? AudioSettings.getBuffersize()
+                : extBufferSize.value;
+        int block = blockSize.value;
+        if (req < 1 || block < 1) {
+            throw new IllegalArgumentException("Buffer / block values out of range");
+        }
+        if (block > req) {
+            return block;
+        }
+        int bsize = block;
+        while (bsize < req) {
+            bsize += block;
+        }
+        LOG.log(Level.FINE, "Requesting buffersize of : {0}", bsize);
+        return bsize;
+    }
+
+    private Device findDevice(LibraryInfo info, boolean usingDefault, boolean input) {
+        String name = null;
+        
+        if (usingDefault) {
+            name = input ? AudioSettings.getInputDeviceName() : AudioSettings.getDeviceName();
+        } else {
+            if (input) {
+                name = inputDeviceName == null ? null : inputDeviceName.value;
+            } else {
+                name = deviceName == null ? null : deviceName.value;
             }
         }
-        return AudioSettings.getBuffersize();
-    }
-
-    private String getLibrary() {
-        Argument arg = audioLib.getValue();
-        if (!arg.isEmpty()) {
-            return arg.toString();
+        
+        if (name == null || name.trim().isEmpty()) {
+            return null;
         }
-        return AudioSettings.getLibrary();
+        
+        Device[] devices = input ? info.inputDevices : info.devices;
+        for (Device device : devices) {
+            if (device.getName().equals(name)) {
+                return device;
+            }
+        }
+        for (Device device : devices) {
+            if (device.getName().contains(name)) {
+                return device;
+            }
+        }
+        return null;
+    }
+    
+    private void validateDevices() {
+        if (deviceName == null || inputDeviceName == null) {
+            return;
+        }
+        LibraryInfo info = libraries.get(audioLib.value);
+        if (info == null) {
+            return;
+        }
+        Device primary = findDevice(info, false, false);
+        if (primary != null && primary.getMaxInputChannels() > 0) {
+            inputDeviceName.value = "";
+        }
     }
 
-    // @TODO fix this!
-//    private void makeConnections(Bus bus) {
-//        bus.getSink(0).addSource(outputs[0]);
-//        bus.getSink(1).addSource(outputs[1]);
-//        inputs[0].addSource(bus.getSource(0));
-//        inputs[1].addSource(bus.getSource(1));
-//    }
-    
+    private String[] deviceNames(Device[] devices) {
+        String[] names = new String[devices.length + 1];
+        names[0] = "";
+        for (int i = 0; i < devices.length; i++) {
+            names[i+1] = devices[i].getName();
+        }
+        return names;
+    }
+
+    private Object[] createCheckedExts(Object... exts) {
+        List<Object> lst = new ArrayList<Object>(exts.length);
+        for (Object o : exts) {
+            if (o != null) {
+                lst.add(o);
+            }
+        }
+        return lst.toArray();
+    }
+
     private void makeInputConnections() {
         int count = Math.min(inputClient.getInputCount(), bus.getSourceCount());
-        for (int i=0; i<count; i++) {
+        for (int i = 0; i < count; i++) {
             inputClient.getInputSink(i).addSource(bus.getSource(i));
         }
     }
-    
+
     private void makeOutputConnections() {
         int count = Math.min(outputClient.getOutputCount(), bus.getSinkCount());
-        for (int i=0; i<count; i++) {
+        for (int i = 0; i < count; i++) {
             bus.getSink(i).addSource(outputClient.getOutputSource(i));
         }
     }
@@ -237,15 +393,16 @@ public class DefaultAudioRoot extends AbstractRoot {
         if (bus == null) {
             return;
         }
-        setInterrupt(new Runnable() {
-            public void run() {
-                server.shutdown();
-                bus.disconnectAll();
-                server = null;
-                bus = null;
-                busListener = null;
-            }
-        });
+//        setInterrupt(new Runnable() {
+//            public void run() {
+        server.shutdown();
+        bus.disconnectAll();
+        server = null;
+        bus = null;
+        busListener = null;
+//            }
+//        });
+        interrupt();
     }
 
     @Override
@@ -267,15 +424,20 @@ public class DefaultAudioRoot extends AbstractRoot {
 
         public void nextBuffer(BufferRateSource source) {
             try {
-                nextControlFrame(source.getTime());
+//                nextControlFrame(source.getTime());
+                update(source.getTime(), true);
             } catch (IllegalRootStateException ex) {
                 server.shutdown();
             }
         }
 
         public void configure(AudioConfiguration context) throws Exception {
+            float srate = context.getSampleRate();
+            if (Math.round(srate) != sampleRate.value) {
+                sampleRate.value = Math.round(srate);
+            }
             period = (long) ((context.getMaxBufferSize()
-                    / context.getSampleRate()) * 1000000000);
+                    / srate) * 1000000000);
         }
 
         public void shutdown() {
@@ -283,7 +445,7 @@ public class DefaultAudioRoot extends AbstractRoot {
         }
     }
 
-    private class Hub extends AudioContext {
+    private class AudioCtxt extends AudioContext {
 
         public int registerAudioInputClient(AudioContext.InputClient client) throws ClientRegistrationException {
             if (inputClient == null) {
@@ -306,7 +468,7 @@ public class DefaultAudioRoot extends AbstractRoot {
 
         public int registerAudioOutputClient(AudioContext.OutputClient client) throws ClientRegistrationException {
             if (outputClient == null) {
-                    outputClient = client;                 
+                outputClient = client;
             } else {
                 throw new ClientRegistrationException();
             }
@@ -328,41 +490,113 @@ public class DefaultAudioRoot extends AbstractRoot {
         }
     }
 
-    private class AudioExecutionContext extends ExecutionContext {
-
-        private ExecutionContext delegate;
-
-        private AudioExecutionContext(ExecutionContext delegate) {
-            this.delegate = delegate;
-        }
+    private class Context extends AbstractRoot.Context {
 
         @Override
         public long getPeriod() {
             return period;
         }
 
-        public void removeStateListener(StateListener listener) {
-            delegate.removeStateListener(listener);
+    }
+
+    private class CheckedIntBinding implements IntProperty.Binding {
+
+        private int value;
+
+        private CheckedIntBinding(int defaultValue) {
+            this.value = defaultValue;
         }
 
-        public void removeClockListener(ClockListener listener) {
-            delegate.removeClockListener(listener);
+        public void setBoundValue(long time, int value) {
+            if (getState() == RootState.ACTIVE_RUNNING) {
+                throw new IllegalStateException();
+            }
+            this.value = value;
         }
 
-        public long getTime() {
-            return delegate.getTime();
+        public int getBoundValue() {
+            return value;
         }
 
-        public State getState() {
-            return delegate.getState();
+    }
+
+    private class CheckedStringBinding implements StringProperty.Binding {
+
+        private String value;
+
+        private CheckedStringBinding(String defaultValue) {
+            this.value = defaultValue;
         }
 
-        public void addStateListener(StateListener listener) {
-            delegate.addStateListener(listener);
+        public void setBoundValue(long time, String value) {
+            if (getState() == RootState.ACTIVE_RUNNING) {
+                throw new IllegalStateException();
+            }
+            this.value = value;
         }
 
-        public void addClockListener(ClockListener listener) {
-            delegate.addClockListener(listener);
+        public String getBoundValue() {
+            return value;
         }
+
+    }
+
+    private class LibraryBinding implements StringProperty.Binding {
+
+        private String value = "";
+
+        public void setBoundValue(long time, String value) {
+            if (getState() == RootState.ACTIVE_RUNNING) {
+                throw new IllegalStateException();
+            }
+            if (this.value.equals(value)) {
+                return;
+            }
+            if (value.isEmpty() || libraries.containsKey(value)) {
+                this.value = value;
+                updateLibrary(value);
+            }
+        }
+
+        public String getBoundValue() {
+            return value;
+        }
+
+    }
+    
+    private class DeviceBinding implements StringProperty.Binding {
+
+        private String value = "";
+        
+        public void setBoundValue(long time, String value) {
+            if (getState() == RootState.ACTIVE_RUNNING) {
+                throw new IllegalStateException();
+            }
+            if (this.value.equals(value)) {
+                return;
+            }
+            this.value = value;
+            validateDevices();
+        }
+
+        public String getBoundValue() {
+            return value;
+        }
+
+    }
+
+    private static class LibraryInfo {
+
+        private final AudioServerProvider provider;
+        private final Device[] devices;
+        private final Device[] inputDevices;
+
+        private LibraryInfo(AudioServerProvider provider,
+                Device[] devices, Device[] inputDevices) {
+            this.provider = provider;
+            this.devices = devices;
+            this.inputDevices = inputDevices;
+        }
+
     }
 }
