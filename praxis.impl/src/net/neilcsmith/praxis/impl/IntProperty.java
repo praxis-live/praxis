@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2013 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.impl;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.core.types.PNumber;
 
@@ -181,6 +182,15 @@ public class IntProperty extends AbstractSingleArgProperty {
         public Builder defaultValue(int value) {
             defaults(PNumber.valueOf(value));
             def = value;
+            return this;
+        }
+               
+        public Builder suggestedValues(int ... values) {
+            PNumber[] arr = new PNumber[values.length];
+            for (int i=0; i < arr.length; i++) {
+                arr[i] = PNumber.valueOf(values[i]);
+            }
+            putArgumentProperty(ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.valueOf(arr));
             return this;
         }
         
