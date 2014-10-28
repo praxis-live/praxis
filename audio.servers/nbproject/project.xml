@@ -8,10 +8,12 @@
             <module-dependencies/>
             <public-packages>
                 <package>org.jaudiolibs.audioservers</package>
+                <package>org.jaudiolibs.audioservers.ext</package>
+                <package>org.jaudiolibs.audioservers.util</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/audioservers-api-1.0-130327.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/audioservers-api-1.0-130327.jar</binary-origin>
+                <runtime-relative-path>ext/audioservers-api-1.1.1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/audioservers-api-1.1.1.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

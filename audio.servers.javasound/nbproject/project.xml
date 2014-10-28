@@ -11,7 +11,7 @@
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
-                        <specification-version>1.0</specification-version>
+                        <specification-version>1.1.0</specification-version>
                     </run-dependency>
                 </dependency>
             </module-dependencies>
@@ -19,8 +19,8 @@
                 <package>org.jaudiolibs.audioservers.javasound</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/audioservers-javasound-1.0-130327.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/audioservers-javasound-1.0-130327.jar</binary-origin>
+                <runtime-relative-path>ext/audioservers-javasound-1.1.1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/audioservers-javasound-1.1.1.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>
