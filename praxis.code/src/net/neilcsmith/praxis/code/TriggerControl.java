@@ -23,8 +23,11 @@
 package net.neilcsmith.praxis.code;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.code.userapi.T;
 import net.neilcsmith.praxis.code.userapi.Trigger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Call;
@@ -70,8 +73,21 @@ public class TriggerControl extends Trigger implements Control {
         return INFO;
     }
 
-    private void trigger(long time) {
+    private void trigger(long time) throws Exception {
         binding.trigger(time);
+    }
+    
+    private void attach(CodeContext<?> context, Control previous) {
+        binding.attach(context);
+        if (previous instanceof TriggerControl) {
+            try {
+                boolean val = ((TriggerControl) previous).poll();
+                if (val) {
+                    binding.trigger(context.getTime());
+                }
+            } catch (Exception exception) {
+            }
+        }
     }
 
     @Override
@@ -81,11 +97,11 @@ public class TriggerControl extends Trigger implements Control {
 
     public static abstract class Binding {
 
-        protected void attach(CodeDelegate delegate) {
+        protected void attach(CodeContext<?> delegate) {
             // no op hook
         }
 
-        public abstract void trigger(long time);
+        public abstract void trigger(long time) throws Exception;
 
         public abstract boolean poll();
 
@@ -118,20 +134,106 @@ public class TriggerControl extends Trigger implements Control {
         }
 
     }
+    
+    private static class BooleanBinding extends Binding {
+        
+        private final Field field;
+        private CodeDelegate delegate;
+        
+        private BooleanBinding(Field field) {
+            this.field = field;
+        }
+
+        @Override
+        protected void attach(CodeContext<?> context) {
+            this.delegate = context.getDelegate();
+        }
+
+        @Override
+        public void trigger(long time) throws Exception {
+            field.setBoolean(delegate, true);
+        }
+
+        @Override
+        public boolean poll() {
+            try {
+                boolean val = field.getBoolean(delegate);
+                if (val) {
+                    field.setBoolean(delegate, false);
+                }
+                return val;
+            } catch (Exception ex) {
+                return false;
+            }      
+        }
+
+        @Override
+        public boolean peek() {
+            try {
+                return field.getBoolean(delegate);
+            } catch (Exception ex) {
+                return false;
+            }
+        }
+        
+    }
+    
+    private static class MethodBinding extends Binding implements CodeContext.Invoker {
+
+        private final Method method;
+        private CodeContext<?> context;
+        private boolean triggered;
+        
+        private MethodBinding(Method method) {
+            this.method = method;
+        }
+
+        @Override
+        protected void attach(CodeContext<?> context) {
+            this.context = context;
+        }
+ 
+        @Override
+        public void trigger(long time) throws Exception {
+            triggered = true;
+            context.invoke(time, this);
+        }
+
+        @Override
+        public boolean poll() {
+            return triggered;
+        }
+
+        @Override
+        public boolean peek() {
+            return triggered;
+        }
+
+        @Override
+        public void invoke() {
+            try {
+                method.invoke(context.getDelegate());
+                triggered = false;
+            } catch (Exception ex) {
+                
+            }
+        }
+        
+    }
 
     public static class Descriptor extends ControlDescriptor {
 
         private final TriggerControl control;
-        private Field field;
+        private Field triggerField;
 
         public Descriptor(String id, int index, Binding binding) {
             this(id, index, binding, null);
         }
 
-        public Descriptor(String id, int index, Binding binding, Field field) {
+        public Descriptor(String id, int index, Binding binding, Field triggerField) {
             super(id, Category.Action, index);
             control = new TriggerControl(binding);
-            this.field = field;
+            this.triggerField = triggerField;
         }
 
         @Override
@@ -141,10 +243,10 @@ public class TriggerControl extends Trigger implements Control {
 
         @Override
         public void attach(CodeContext<?> context, Control previous) {
-            if (field != null) {
+            control.attach(context, previous);
+            if (triggerField != null) {
                 try {
-                    field.setAccessible(true);
-                    field.set(context.getDelegate(), control);
+                    triggerField.set(context.getDelegate(), control);
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, null, ex);
                 }
@@ -159,7 +261,34 @@ public class TriggerControl extends Trigger implements Control {
         public PortDescriptor createPortDescriptor() {
             return new PortDescImpl(getID(), getIndex(), control);
         }
-
+        
+        public static Descriptor create(CodeConnector<?> connector,
+                T ann, Field field) {
+            field.setAccessible(true);
+            String id = connector.findID(field);
+            int index = ann.value();
+            Class<?> type = field.getType();
+            if (type == boolean.class) {
+                return new Descriptor(id, index, new BooleanBinding(field));
+            } else if (Trigger.class.isAssignableFrom(type)) {
+                return new Descriptor(id, index, new DefaultBinding(), field);
+            } else {
+                return null;
+            }
+        }
+        
+        public static Descriptor create(CodeConnector<?> connector, 
+                T ann, Method method) {
+            method.setAccessible(true);
+            if (method.getParameterTypes().length > 0) {
+                return null;
+            }
+            String id = connector.findID(method);
+            int index = ann.value();
+            return new Descriptor(id, index, new MethodBinding(method));
+        }
+        
+        
     }
 
     private static class PortDescImpl extends PortDescriptor implements ControlInput.Link {
@@ -199,12 +328,20 @@ public class TriggerControl extends Trigger implements Control {
 
         @Override
         public void receive(long time, double value) {
-            control.trigger(time);
+            try {
+                control.trigger(time);
+            } catch (Exception ex) {
+                
+            }
         }
 
         @Override
         public void receive(long time, Argument value) {
-            control.trigger(time);
+            try {
+                control.trigger(time);
+            } catch (Exception ex) {
+                
+            }
         }
 
     }

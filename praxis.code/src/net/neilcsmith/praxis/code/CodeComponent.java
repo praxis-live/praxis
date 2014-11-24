@@ -25,11 +25,18 @@ import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.Control;
+import net.neilcsmith.praxis.core.ControlAddress;
+import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.Lookup;
+import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.VetoException;
 import net.neilcsmith.praxis.core.info.ComponentInfo;
+import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
+import net.neilcsmith.praxis.core.interfaces.Services;
+import net.neilcsmith.praxis.logging.LogLevel;
+import net.neilcsmith.praxis.logging.LogService;
 
 /**
  *
@@ -40,7 +47,10 @@ public class CodeComponent<D extends CodeDelegate> implements Component {
     private Container parent;
     private CodeContext<D> codeCtxt;
     private ComponentAddress address;
-    
+    private ExecutionContext execCtxt;
+    private PacketRouter router;
+    private LogInfo logInfo;
+
     CodeComponent() {
 
     }
@@ -64,7 +74,7 @@ public class CodeComponent<D extends CodeDelegate> implements Component {
             this.parent = parent;
         }
     }
-    
+
     private void disconnectAll() {
         for (String portID : getPortIDs()) {
             getPort(portID).disconnectAll();
@@ -78,6 +88,9 @@ public class CodeComponent<D extends CodeDelegate> implements Component {
         } else {
             address = null;
         }
+        execCtxt = null;
+        router = null;
+        logInfo = null;
         codeCtxt.hierarchyChanged();
     }
 
@@ -118,17 +131,86 @@ public class CodeComponent<D extends CodeDelegate> implements Component {
             return Lookup.EMPTY;
         }
     }
-    
+
     void install(CodeContext<D> cc) {
         cc.configure(this, codeCtxt);
         if (codeCtxt != null) {
             codeCtxt.dispose();
-        }  
+        }
         codeCtxt = cc;
     }
-    
+
     ComponentAddress getAddress() {
         return address;
     }
     
+    ExecutionContext getExecutionContext() {
+        if (execCtxt == null) {
+            execCtxt = getLookup().get(ExecutionContext.class);
+        }
+        return execCtxt;
+    }
+
+    PacketRouter getPacketRouter() {
+        if (router == null) {
+            router = getLookup().get(PacketRouter.class);
+        }
+        return router;
+    }
+    
+    LogLevel getLogLevel() {
+        if (logInfo == null) {
+            initLogInfo();
+        }
+        return logInfo.level;
+    }
+
+    ControlAddress getLogToAddress() {
+        if (logInfo == null) {
+            initLogInfo();
+        }
+        return logInfo.toAddress;
+    }
+    
+    ControlAddress getLogFromAddress() {
+         if (logInfo == null) {
+            initLogInfo();
+        }
+        return logInfo.fromAddress;
+    }
+    
+    private void initLogInfo() {
+        ControlAddress toAddress = null;
+        Services srvs = getLookup().get(Services.class);
+        if (srvs != null) {
+            ComponentAddress srv;
+            try {
+                srv = srvs.findService(LogService.class);
+                toAddress = ControlAddress.create(srv, LogService.LOG);
+            } catch (ServiceUnavailableException ex) {
+            }
+        }
+        LogLevel level = getLookup().get(LogLevel.class);
+        if (level == null || toAddress == null) {
+            level = LogLevel.ERROR;
+        }
+        ControlAddress fromAddress = ControlAddress.create(getAddress(), "_log");
+        logInfo = new LogInfo(level, toAddress, fromAddress);
+    }
+
+    private static class LogInfo {
+
+        private final LogLevel level;
+        private final ControlAddress toAddress;
+        private final ControlAddress fromAddress;
+
+        private LogInfo(LogLevel level,
+                ControlAddress toAddress,
+                ControlAddress fromAddress) {
+            this.level = level;
+            this.toAddress = toAddress;
+            this.fromAddress = fromAddress;
+        }
+    }
+
 }

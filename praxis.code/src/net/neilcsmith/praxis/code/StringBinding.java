@@ -22,38 +22,39 @@
  */
 package net.neilcsmith.praxis.code;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import net.neilcsmith.praxis.code.userapi.Type;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PMap;
+import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-class StringBinding extends PropertyControl.Binding {
+abstract class StringBinding extends PropertyControl.Binding {
 
     private final Set<PString> allowed;
     private final PString mime;
-    private final PString def;
+    final PString def;
 
     private PString value;
 
-    StringBinding() {
-        this("","");
-    }
-    
-    StringBinding(String mime, String def) {
+    private StringBinding(String mime, String def) {
         allowed = null;
         this.mime = mime == null ? PString.EMPTY : PString.valueOf(mime);
         this.def = def == null ? PString.EMPTY : PString.valueOf(def);
     }
-    
-    StringBinding(String[] allowedValues, String def) {
+
+    private StringBinding(String[] allowedValues, String def) {
         if (allowedValues.length == 0) {
             throw new IllegalArgumentException();
         }
@@ -65,33 +66,27 @@ class StringBinding extends PropertyControl.Binding {
                 foundDef = true;
             }
         }
-        this.def = foundDef ? PString.valueOf(def) :
-                PString.valueOf(allowedValues[0]);
+        this.def = foundDef ? PString.valueOf(def)
+                : PString.valueOf(allowedValues[0]);
         mime = PString.EMPTY;
     }
 
     @Override
     public void set(long time, Argument value) throws Exception {
-        set(PString.coerce(value));
-    }
-
-    @Override
-    public void set(long time, double value) throws Exception {
-        set(PString.valueOf(Double.toString(value)));
-    }
-
-    private void set(PString value) throws Exception {
-        if (allowed == null || allowed.contains(value)) {
-            this.value = value;
+        PString pstr = PString.coerce(value);
+        if (allowed == null || allowed.contains(pstr)) {
+            set(pstr);
         } else {
             throw new IllegalArgumentException();
         }
     }
 
     @Override
-    public Argument get() {
-        return value;
+    public void set(long time, double value) throws Exception {
+        set(time, PNumber.valueOf(value));
     }
+
+    abstract void set(PString value) throws Exception;
 
     @Override
     public ArgumentInfo getArgumentInfo() {
@@ -107,6 +102,101 @@ class StringBinding extends PropertyControl.Binding {
     @Override
     public Argument getDefaultValue() {
         return PString.valueOf(def);
+    }
+
+    static boolean isBindableFieldType(Class<?> type) {
+        return type == String.class;
+    }
+
+    static StringBinding create(CodeConnector<?> connector, Field field) {
+        String[] allowed = null;
+        String mime = "";
+        String def = "";
+        Type.String ann = field.getAnnotation(Type.String.class);
+        if (ann != null) {
+            allowed = ann.allowed();
+            mime = ann.mime();
+            def = ann.def();
+        }
+        if (field.getType() == String.class) {
+            if (allowed != null && allowed.length > 0) {
+                return new StringField(field, allowed, def);
+            } else {
+                return new StringField(field, mime, def);
+            }
+        } else {
+            if (allowed != null && allowed.length > 0) {
+                return new NoField(allowed, def);
+            } else {
+                return new NoField(mime, def);
+            }
+        }
+    }
+
+    private static class NoField extends StringBinding {
+
+        private PString value;
+
+        private NoField(String mime, String def) {
+            super(mime, def);
+            value = this.def;
+        }
+        
+        private NoField(String[] allowed, String def) {
+            super(allowed, def);
+            value = this.def;
+        }
+               
+        void set(PString value) throws Exception {
+            this.value = value;
+        }
+
+        @Override
+        public Argument get() {
+            return value;
+        }
+        
+    }
+    
+    private static class StringField extends StringBinding {
+        
+        private final Field field;
+        private CodeDelegate delegate;
+        
+        private StringField(Field field, String mime, String def) {
+            super(mime, def);
+            this.field = field;
+        }
+        
+        private StringField(Field field, String[] allowed, String def) {
+            super(allowed, def);
+            this.field = field;
+        }
+
+        @Override
+        protected void attach(CodeDelegate delegate) {
+            this.delegate = delegate;
+            try {
+                set(def);
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+
+        @Override
+        void set(PString value) throws Exception {
+            field.set(delegate, value.toString());
+        }
+
+        @Override
+        public Argument get() {
+            try {
+                return PString.valueOf(field.get(delegate));
+            } catch (Exception ex) {
+                return PString.EMPTY;
+            }
+        }
+        
     }
 
 }

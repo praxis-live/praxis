@@ -209,7 +209,7 @@ public abstract class AbstractAsyncProperty<V> implements Control {
     }
 
     private ControlAddress getTaskSubmitAddress() throws ServiceUnavailableException {
-        ComponentAddress service = context.findService(TaskService.INSTANCE);
+        ComponentAddress service = context.findService(TaskService.class);
         return ControlAddress.create(service, TaskService.SUBMIT);
     }
 

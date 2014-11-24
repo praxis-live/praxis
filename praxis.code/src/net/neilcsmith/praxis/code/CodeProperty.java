@@ -21,7 +21,6 @@
  */
 package net.neilcsmith.praxis.code;
 
-import net.neilcsmith.praxis.compiler.ClassBodyCompiler;
 import net.neilcsmith.praxis.compiler.ClassBodyContext;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
@@ -32,6 +31,8 @@ import net.neilcsmith.praxis.core.interfaces.TaskService;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.logging.LogBuilder;
+import net.neilcsmith.praxis.logging.LogLevel;
 
 
 class CodeProperty<D extends CodeDelegate>
@@ -59,7 +60,7 @@ class CodeProperty<D extends CodeDelegate>
     @Override
     protected final Task<D> createTask(CallArguments keys) throws Exception {
         String code = keys.get(0).toString();
-        return new Task<>(factory, code);
+        return new Task<>(factory, code, context.getLogLevel());
     }
 
     @Override
@@ -67,7 +68,8 @@ class CodeProperty<D extends CodeDelegate>
     protected void valueChanged(long time) {
         Result<D> r = getValue();
         if (r != null) {
-            context.getComponent().install(r.getCodeContext());
+            context.getComponent().install(r.context);
+            context.log(r.log);
         }
     }
 
@@ -80,39 +82,39 @@ class CodeProperty<D extends CodeDelegate>
 
         private final CodeFactory<T> factory;
         private final String code;
+        private final LogLevel logLevel;
 
-        protected Task(CodeFactory<T> factory, String code) {
+        private Task(CodeFactory<T> factory, String code, LogLevel logLevel) {
             this.factory = factory;
             this.code = code;
+            this.logLevel = logLevel;
         }
 
         @Override
         public final Argument execute() throws Exception {
             String src = code.trim();
             CodeContext<T> ctxt;
+            LogBuilder log = new LogBuilder(logLevel);
             if (src.isEmpty()) {
-                ctxt = factory.createDefaultCodeContext();
+                ctxt = factory.task().createDefaultCodeContext();
             } else {
-                ctxt = factory.createCodeContext(src);
+                ctxt = factory.task()
+                        .attachLogging(log)
+                        .createCodeContext(src);
             }
-            return PReference.wrap(new Result<T>(ctxt));
+            return PReference.wrap(new Result<T>(ctxt, log));
         }
 
     }
 
-    public static class Result<T extends CodeDelegate> {
+    static class Result<T extends CodeDelegate> {
 
         private final CodeContext<T> context;
+        private final LogBuilder log;
 
-        public Result(CodeContext<T> context) {
-            if (context == null) {
-                throw new NullPointerException();
-            }
+        private Result(CodeContext<T> context, LogBuilder log) {
             this.context = context;
-        }
-
-        public CodeContext<T> getCodeContext() {
-            return context;
+            this.log = log;
         }
 
     }

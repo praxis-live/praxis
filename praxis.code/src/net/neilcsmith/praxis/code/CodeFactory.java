@@ -23,7 +23,10 @@ package net.neilcsmith.praxis.code;
 
 import net.neilcsmith.praxis.compiler.ClassBodyCompiler;
 import net.neilcsmith.praxis.compiler.ClassBodyContext;
+import net.neilcsmith.praxis.compiler.MessageHandler;
 import net.neilcsmith.praxis.core.ComponentType;
+import net.neilcsmith.praxis.logging.LogBuilder;
+import net.neilcsmith.praxis.logging.LogLevel;
 
 /**
  *
@@ -44,7 +47,7 @@ public abstract class CodeFactory<D extends CodeDelegate> {
         this.type = type;
         this.template = template;
     }
-    
+
     protected CodeFactory(
             ClassBodyContext<D> cbc,
             String type,
@@ -55,7 +58,7 @@ public abstract class CodeFactory<D extends CodeDelegate> {
     public final ComponentType getComponentType() {
         return type;
     }
-    
+
     public final ClassBodyContext<D> getClassBodyContext() {
         return cbc;
     }
@@ -64,37 +67,99 @@ public abstract class CodeFactory<D extends CodeDelegate> {
         return template;
     }
 
-    public CodeContext<D> createCodeContext(String source) throws Exception {
-        return createCodeContext(createDelegate(source));
-    }
-
-    public CodeContext<D> createDefaultCodeContext() throws Exception {
-        return createCodeContext(createDefaultDelegate());
-    }
-
     public CodeComponent<D> createComponent() throws Exception {
-        CodeContext<D> ctxt = createDefaultCodeContext();
+        CodeContext<D> ctxt = task().createDefaultCodeContext();
         CodeComponent<D> cmp = new CodeComponent<>();
         cmp.install(ctxt);
         return cmp;
     }
 
-    protected D createDelegate(String source) throws Exception {
-        Class<D> cls = compile(source);
-        return cls.newInstance();
+    public abstract Task<D> task();
+
+   
+
+    public static abstract class Task<D extends CodeDelegate> {
+
+        private final CodeFactory<D> factory;
+        
+        private LogBuilder log;
+        private Class<D> previous;
+
+        public Task(CodeFactory<D> factory) {
+            this.factory = factory;
+        }
+
+        public Task<D> attachLogging(LogBuilder log) {
+            this.log = log;
+            return this;
+        }
+        
+        public Task<D> attachPrevious(Class<D> previous) {
+            this.previous = previous;
+            return this;
+        }
+        
+        public CodeContext<D> createCodeContext(String source) throws Exception {
+            return createCodeContext(createDelegate(source));
+        }
+        
+        public CodeContext<D> createDefaultCodeContext() throws Exception {
+            return createCodeContext(createDefaultDelegate());
+        }
+
+        protected LogBuilder getLog() {
+            return log;
+        }
+        
+        protected Class<D> getPrevious() {
+            return previous;
+        }
+        
+        protected CodeFactory<D> getFactory() {
+            return factory;
+        }
+        
+        protected D createDelegate(String source) throws Exception {
+            Class<D> cls = compile(source);
+            return cls.newInstance();
+        }
+
+        protected D createDefaultDelegate() throws Exception {
+            Class<D> cls = compile(factory.template);
+            //@TODO cache result
+            return cls.newInstance();
+        }
+
+        protected Class<D> compile(String source) throws Exception {
+            MessageHandler handler = null;
+            if (log != null) {
+                handler = new LogMessageHandler(log);
+            }
+            return ClassBodyCompiler.getDefault().compile(factory.cbc, handler, source);
+        }
+        
+         protected abstract CodeContext<D> createCodeContext(D delegate);
+
     }
 
-    protected D createDefaultDelegate() throws Exception {
-        Class<D> cls = compile(template);
-        //@TODO cache result
-        return cls.newInstance();
-    }
+    private static class LogMessageHandler implements MessageHandler {
 
-    protected Class<D> compile(String source) throws Exception {
-        return ClassBodyCompiler.getDefault().compile(
-                cbc, source);
-    }
+        private final LogBuilder log;
 
-    protected abstract CodeContext<D> createCodeContext(D delegate);
+        private LogMessageHandler(LogBuilder log) {
+            this.log = log;
+        }
+
+        @Override
+        public void handleError(String msg) {
+            log.log(LogLevel.ERROR, msg);
+        }
+
+        @Override
+        public void handleWarning(String msg) {
+            log.log(LogLevel.WARNING, msg);
+        }
+
+    }
 
 }

@@ -26,16 +26,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.core.Call;
+import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.ControlAddress;
+import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.Lookup;
+import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.info.ComponentInfo;
-import net.neilcsmith.praxis.core.interfaces.ServiceManager;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
-import net.neilcsmith.praxis.core.interfaces.TaskService;
+import net.neilcsmith.praxis.core.interfaces.Services;
+import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.logging.LogBuilder;
+import net.neilcsmith.praxis.logging.LogLevel;
 import net.neilcsmith.praxis.util.ArrayUtils;
 
 /**
@@ -45,32 +51,27 @@ import net.neilcsmith.praxis.util.ArrayUtils;
 public abstract class CodeContext<D extends CodeDelegate> {
 
     private final static Logger LOG = Logger.getLogger(CodeContext.class.getName());
-    
-//    protected final static String INPUTS = "Inputs";
-//    protected final static String OUTPUTS = "Outputs";
-//    protected final static String PROPERTIES = "Properties";
-//    protected final static String TRIGGERS = "Triggers";
 
     private final Map<String, ControlDescriptor> controls;
     private final Map<String, PortDescriptor> ports;
     private final ComponentInfo info;
 
-    private final CodeFactory<D> factory;
     private final D delegate;
 
     private CodeComponent<D> cmp;
-
+    private long time;
     private ClockListener[] clockListeners;
 
     public CodeContext(CodeConnector<D> connector) {
         clockListeners = new ClockListener[0];
+        time = System.nanoTime() - 10 * 1000_000_000;
+        // @TODO what is maximum allowed amount a root can be behind system time?
         try {
             connector.process();
             controls = connector.extractControls();
             ports = connector.extractPorts();
             info = connector.extractInfo();
             delegate = connector.getDelegate();
-            factory = connector.getCodeFactory();
         } catch (Exception e) {
             LOG.log(Level.FINE, "", e);
             throw e;
@@ -84,10 +85,10 @@ public abstract class CodeContext<D extends CodeDelegate> {
         hierarchyChanged();
         delegate.setContext(this);
     }
-    
+
     private void configureControls(CodeContext<D> oldCtxt) {
-        Map<String, ControlDescriptor> oldControls = oldCtxt == null ?
-                Collections.<String, ControlDescriptor>emptyMap() : oldCtxt.controls;
+        Map<String, ControlDescriptor> oldControls = oldCtxt == null
+                ? Collections.<String, ControlDescriptor>emptyMap() : oldCtxt.controls;
         for (Map.Entry<String, ControlDescriptor> entry : controls.entrySet()) {
             ControlDescriptor oldCD = oldControls.remove(entry.getKey());
             if (oldCD != null) {
@@ -99,8 +100,8 @@ public abstract class CodeContext<D extends CodeDelegate> {
     }
 
     private void configurePorts(CodeContext<D> oldCtxt) {
-        Map<String, PortDescriptor> oldPorts = oldCtxt == null ?
-                Collections.<String, PortDescriptor>emptyMap() : oldCtxt.ports;
+        Map<String, PortDescriptor> oldPorts = oldCtxt == null
+                ? Collections.<String, PortDescriptor>emptyMap() : oldCtxt.ports;
         for (Map.Entry<String, PortDescriptor> entry : ports.entrySet()) {
             PortDescriptor oldPD = oldPorts.remove(entry.getKey());
             if (oldPD != null) {
@@ -113,9 +114,9 @@ public abstract class CodeContext<D extends CodeDelegate> {
             oldPD.getPort().disconnectAll();
         }
     }
-    
+
     protected void hierarchyChanged() {
-        //no op hook
+
     }
 
     protected void dispose() {
@@ -124,24 +125,20 @@ public abstract class CodeContext<D extends CodeDelegate> {
         controls.clear();
         ports.clear();
     }
-    
+
     public CodeComponent<D> getComponent() {
         return cmp;
     }
-    
+
     public D getDelegate() {
         return delegate;
-    }
-    
-    public CodeFactory<D> getCodeFactory() {
-        return factory;
     }
 
     protected Control getControl(String id) {
         ControlDescriptor cd = controls.get(id);
         return cd == null ? null : cd.getControl();
     }
-    
+
     protected ControlDescriptor getControlDescriptor(String id) {
         return controls.get(id);
     }
@@ -155,7 +152,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
         PortDescriptor pd = ports.get(id);
         return pd == null ? null : pd.getPort();
     }
-    
+
     protected PortDescriptor getPortDescriptor(String id) {
         return ports.get(id);
     }
@@ -190,17 +187,18 @@ public abstract class CodeContext<D extends CodeDelegate> {
     }
 
     // @TODO implement caching?
-    public ComponentAddress findService(InterfaceDefinition service)
+    public ComponentAddress findService(Class<? extends InterfaceDefinition> type)
             throws ServiceUnavailableException {
-        ServiceManager sm = getLookup().get(ServiceManager.class);
+        Services sm = getLookup().get(Services.class);
         if (sm == null) {
             throw new ServiceUnavailableException("Can't find Service Manager");
         }
-        return sm.findService(TaskService.INSTANCE);
-
+        return sm.findService(type);
     }
 
-    public abstract long getTime();
+    public long getTime() {
+        return time;
+    }
 
     public void addClockListener(ClockListener listener) {
         clockListeners = ArrayUtils.add(clockListeners, listener);
@@ -210,13 +208,60 @@ public abstract class CodeContext<D extends CodeDelegate> {
         clockListeners = ArrayUtils.remove(clockListeners, listener);
     }
 
-    protected void processClock() {
-        for (ClockListener l : clockListeners) {
-            l.tick();
+    protected ExecutionContext getExecutionContext() {
+        return cmp.getExecutionContext();
+    }
+
+    protected boolean isActive() {
+        ExecutionContext ctxt = getExecutionContext();
+        return ctxt == null ? false : ctxt.getState() == ExecutionContext.State.ACTIVE;
+    }
+
+    protected void updateClock(long time) {
+        if (time - this.time > 0) {
+            this.time = time;
+            for (ClockListener l : clockListeners) {
+                l.tick();
+            }
         }
     }
 
-    
+    protected void invoke(long time, Invoker invoker) {
+        if (isActive()) {
+            updateClock(time);
+            invoker.invoke();
+        }
+    }
+
+    LogLevel getLogLevel() {
+        return cmp.getLogLevel();
+    }
+
+    void log(LogLevel level, String msg) {
+        if (!cmp.getLogLevel().isLoggable(level)) {
+            return;
+        }
+        CallArguments args = CallArguments.create(
+                level.asPString(), PString.valueOf(msg));
+        log(args);
+    }
+
+    void log(LogBuilder log) {
+        if (log.isEmpty()) {
+            return;
+        }
+        log(log.toCallArguments());
+    }
+
+    private void log(CallArguments args) {
+        PacketRouter router = cmp.getPacketRouter();
+        ControlAddress to = cmp.getLogToAddress();
+        ControlAddress from = cmp.getLogFromAddress();
+        if (router == null || to == null) {
+            return;
+        }
+        router.route(Call.createCall(to, from, time, args));
+    }
 
     public static interface ClockListener {
 
@@ -224,5 +269,10 @@ public abstract class CodeContext<D extends CodeDelegate> {
 
     }
 
+    public static interface Invoker {
+
+        public void invoke();
+
+    }
 
 }

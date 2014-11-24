@@ -22,6 +22,7 @@
  */
 package net.neilcsmith.praxis.code;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -29,8 +30,6 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import net.neilcsmith.praxis.code.userapi.ID;
 import net.neilcsmith.praxis.code.userapi.Out;
@@ -49,6 +48,8 @@ import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.core.interfaces.ComponentInterface;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
+import net.neilcsmith.praxis.logging.LogBuilder;
+import net.neilcsmith.praxis.logging.LogLevel;
 
 /**
  *
@@ -56,8 +57,6 @@ import net.neilcsmith.praxis.core.types.PNumber;
  */
 public abstract class CodeConnector<D extends CodeDelegate> {
 
-    private final static Logger LOG = Logger.getLogger(CodeConnector.class.getName());
-    
     // adapted from http://stackoverflow.com/questions/2559759/how-do-i-convert-camelcase-into-human-readable-names-in-java
     private final static Pattern idRegex = Pattern.compile(
             String.format("%s|%s|%s|%s",
@@ -65,10 +64,11 @@ public abstract class CodeConnector<D extends CodeDelegate> {
                     "(?<=[A-Z])(?=[A-Z][a-z])",
                     "(?<=[^A-Z])(?=[A-Z])",
                     "(?<=[A-Za-z])(?=[^A-Za-z])"
-                    )
+            )
     );
 
     private final CodeFactory<D> factory;
+    private final LogBuilder log;
     private final D delegate;
     private final Map<ControlDescriptor.Category, Map<Integer, ControlDescriptor>> controls;
     private final Map<PortDescriptor.Category, Map<Integer, PortDescriptor>> ports;
@@ -77,8 +77,9 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     private Map<String, PortDescriptor> extPorts;
     private ComponentInfo info;
 
-    public CodeConnector(CodeFactory<D> factory, D delegate) {
-        this.factory = factory;
+    public CodeConnector(CodeFactory.Task<D> contextCreator, D delegate) {
+        this.factory = contextCreator.getFactory();
+        this.log = contextCreator.getLog();
         this.delegate = delegate;
         controls = new EnumMap<>(ControlDescriptor.Category.class);
         for (ControlDescriptor.Category cat : ControlDescriptor.Category.values()) {
@@ -103,8 +104,8 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         return delegate;
     }
 
-    protected CodeFactory<D> getCodeFactory() {
-        return factory;
+    protected LogBuilder getLog() {
+        return log;
     }
 
     protected Map<String, ControlDescriptor> extractControls() {
@@ -147,22 +148,24 @@ public abstract class CodeConnector<D extends CodeDelegate> {
 
     protected ComponentInfo buildComponentInfo(Map<String, ControlDescriptor> controls,
             Map<String, PortDescriptor> ports) {
-        LOG.fine("Building component info");
-        LOG.fine("Building control info");
+//        LOG.fine("Building component info");
+//        LOG.fine("Building control info");
         Map<String, ControlInfo> controlInfo = new LinkedHashMap<>(controls.size());
         for (Map.Entry<String, ControlDescriptor> e : controls.entrySet()) {
-            LOG.log(Level.FINE, "Adding {0}\n{1}", new Object[]{e.getKey(), e.getValue().getInfo()});
+//            LOG.log(Level.FINE, "Adding {0}\n{1}", new Object[]{e.getKey(), e.getValue().getInfo()});
             controlInfo.put(e.getKey(), e.getValue().getInfo());
         }
-        LOG.fine("Building port info");
+//        LOG.fine("Building port info");
         Map<String, PortInfo> portInfo = new LinkedHashMap<>(ports.size());
         for (Map.Entry<String, PortDescriptor> e : ports.entrySet()) {
-            LOG.log(Level.FINE, "Adding {0}\n{1}", new Object[]{e.getKey(), e.getValue().getInfo()});
+//            LOG.log(Level.FINE, "Adding {0}\n{1}", new Object[]{e.getKey(), e.getValue().getInfo()});
             portInfo.put(e.getKey(), e.getValue().getInfo());
         }
         return ComponentInfo.create(
-                Collections.<InterfaceDefinition>singleton(ComponentInterface.INSTANCE),
-                controlInfo, portInfo, PMap.create(ComponentInfo.KEY_DYNAMIC, true));
+                controlInfo,
+                portInfo,
+                Collections.<Class<? extends InterfaceDefinition>>singleton(ComponentInterface.class),
+                PMap.create(ComponentInfo.KEY_DYNAMIC, true));
     }
 
     protected void addControl(ControlDescriptor ctl) {
@@ -191,14 +194,21 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     }
 
     protected void analyseFields(Field[] fields) {
-        LOG.fine("Analysing fields");
+//        LOG.fine("Analysing fields");
         for (Field f : fields) {
             analyseField(f);
         }
     }
 
+    protected void analyseMethods(Method[] methods) {
+        for (Method m : methods) {
+            analyseMethod(m);
+        }
+    }
+
     protected void analyseField(Field field) {
-        LOG.log(Level.FINE, "Analysing field : {0}", field);
+//        LOG.log(Level.FINE, "Analysing field : {0}", field);
+
         P prop = field.getAnnotation(P.class);
         if (prop != null && analysePropertyField(prop, field)) {
             return;
@@ -213,8 +223,15 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         }
     }
 
+    protected void analyseMethod(Method method) {
+        T trig = method.getAnnotation(T.class);
+        if (trig != null && analyseTriggerMethod(trig, method)) {
+            return;
+        }
+    }
+
     protected boolean analyseOutputField(Out ann, Field field) {
-        LOG.log(Level.FINE, "Field is output");
+//        LOG.log(Level.FINE, "Field is output");
         int index = ann.value();
         if (Output.class.isAssignableFrom(field.getType())) {
             DefaultOutput.Descriptor odsc = new DefaultOutput.Descriptor(
@@ -222,7 +239,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
                     index,
                     field
             );
-            LOG.log(Level.FINE, "Adding port for output {0}", field.getName());
+//            LOG.log(Level.FINE, "Adding port for output {0}", field.getName());
             addPort(odsc);
             return true;
         }
@@ -230,77 +247,44 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     }
 
     protected boolean analyseTriggerField(T ann, Field field) {
-        LOG.log(Level.FINE, "Field is trigger");
-        int index = ann.value();
-        if (Trigger.class.isAssignableFrom(field.getType())) {
-            TriggerControl.Descriptor tdsc = new TriggerControl.Descriptor(
-                    findID(field),
-                    index,
-                    null,
-                    field
-            );
-            LOG.log(Level.FINE, "Adding control for trigger {0}", field.getName());
+        TriggerControl.Descriptor tdsc
+                = TriggerControl.Descriptor.create(this, ann, field);
+        if (tdsc != null) {
             addControl(tdsc);
             if (shouldAddPort(field)) {
                 addPort(tdsc.createPortDescriptor());
             }
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     protected boolean analysePropertyField(P ann, Field field) {
-        LOG.log(Level.FINE, "Field is property");
-        int index = ann.value();
-        if (Property.class.isAssignableFrom(field.getType())) {
-            PropertyControl.Descriptor pdsc = new PropertyControl.Descriptor(
-                    findID(field),
-                    index,
-                    createPropertyBinding(field),
-                    field
-            );
-            LOG.log(Level.FINE, "Adding control for property {0}", field.getName());
+        PropertyControl.Descriptor pdsc
+                = PropertyControl.Descriptor.create(this, ann, field);
+        if (pdsc != null) {
             addControl(pdsc);
             if (shouldAddPort(field)) {
                 addPort(pdsc.createPortDescriptor());
             }
             return true;
-        }
-        return false;
-    }
-
-    protected PropertyControl.Binding createPropertyBinding(Field field) {
-        if (field.isAnnotationPresent(Type.Number.class)) {
-            return createNumberBinding(field);
-        } else if (field.isAnnotationPresent(Type.String.class)) {
-            return createStringBinding(field);
         } else {
-            return null; // default binding
+            return false;
         }
     }
 
-    private PropertyControl.Binding createNumberBinding(Field field) {
-        Type.Number ann = field.getAnnotation(Type.Number.class);
-        double min = ann.min();
-        double max = ann.max();
-        double def = ann.def();
-        if (min != PNumber.MIN_VALUE
-                || max != PNumber.MAX_VALUE) {
-            return new NumberBinding(min, max, def);
+    protected boolean analyseTriggerMethod(T ann, Method method) {
+        TriggerControl.Descriptor tdsc
+                = TriggerControl.Descriptor.create(this, ann, method);
+        if (tdsc != null) {
+            addControl(tdsc);
+            if (shouldAddPort(method)) {
+                addPort(tdsc.createPortDescriptor());
+            }
+            return true;
         } else {
-            return new NumberBinding(def);
-        }
-    }
-
-    private PropertyControl.Binding createStringBinding(Field field) {
-        Type.String ann = field.getAnnotation(Type.String.class);
-        String[] allowed = ann.allowed();
-        String mime = ann.mime();
-        String def = ann.def();
-        if (allowed.length > 0) {
-            return new StringBinding(allowed, def);
-        } else {
-            return new StringBinding(mime, def);
+            return false;
         }
     }
 
@@ -315,27 +299,28 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         return javaNameToID(field.getName());
     }
 
+    protected String findID(Method method) {
+        ID ann = method.getAnnotation(ID.class);
+        if (ann != null) {
+            String id = ann.value();
+            if (ControlAddress.isValidID(id)) {
+                return id;
+            }
+        }
+        return javaNameToID(method.getName());
+    }
+
     private String javaNameToID(String javaName) {
         String ret = idRegex.matcher(javaName).replaceAll("-");
         return ret.toLowerCase();
     }
-    
-    private boolean shouldAddPort(Field field) {
-        Port ann = field.getAnnotation(Port.class);
+
+    private boolean shouldAddPort(AnnotatedElement element) {
+        Port ann = element.getAnnotation(Port.class);
         if (ann != null) {
             return ann.value();
         }
         return true;
-    }
-
-    protected void analyseMethods(Method[] methods) {
-        for (Method m : methods) {
-            analyseMethod(m);
-        }
-    }
-
-    protected void analyseMethod(Method method) {
-
     }
 
 }

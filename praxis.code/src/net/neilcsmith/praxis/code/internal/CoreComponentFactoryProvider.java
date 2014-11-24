@@ -47,7 +47,7 @@ public class CoreComponentFactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-            addComponent(data(new CoreCodeFactory.Custom("core:custom")));
+            addComponent(data(new CoreCodeFactory("core:custom")));
         }
 
     }

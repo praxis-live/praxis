@@ -20,64 +20,40 @@
  * have any questions.
  *
  */
-
 package net.neilcsmith.praxis.code;
 
 import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public class CoreCodeConnector extends CodeConnector<CoreCodeDelegate> {
-    
-    private final static Logger LOG = Logger.getLogger(CoreCodeConnector.class.getName());
-    
+
     public final static String SETUP = "setup";
     public final static String UPDATE = "update";
-    
-    private Method setupMethod;
-    private Method updateMethod;
-    
-    public CoreCodeConnector(CoreCodeFactory factory, CoreCodeDelegate delegate) {
-        super(factory, delegate);
-    }
-    
-    protected Method extractSetupMethod() {
-        return setupMethod;
-    }
-    
-    protected Method extractUpdateMethod() {
-        return updateMethod;
+
+    private boolean foundUpdate;
+
+    public CoreCodeConnector(CodeFactory.Task<CoreCodeDelegate> contextCreator,
+            CoreCodeDelegate delegate) {
+        super(contextCreator, delegate);
     }
 
-    @Override
-    protected void analyseMethod(Method method) {
-        LOG.log(Level.FINE, "Analysing method : {0}", method);
-        try {
-            if (method.getParameterTypes().length == 0
-                    && method.getReturnType().equals(Void.TYPE)) {
-                if (SETUP.equals(method.getName())) {
-                    LOG.log(Level.FINE, "Adding setup method");
-                    method.setAccessible(true);
-                    setupMethod = method;
-                    return;
-                } else if (UPDATE.equals(method.getName())) {
-                    LOG.log(Level.FINE, "Adding update method");
-                    method.setAccessible(true);
-                    updateMethod = method;
-                    return;
-                }
-            }
-        } catch (SecurityException securityException) {
-        }
-        super.analyseMethod(method);
+    protected boolean hasUpdateMethod() {
+        return foundUpdate;
     }
     
-    
-    
-    
-    
+    @Override
+    protected void analyseMethod(Method method) {
+
+        if (UPDATE.equals(method.getName())
+                && method.getParameterTypes().length == 0
+                && method.getReturnType().equals(Void.TYPE)) {
+            foundUpdate = true;
+        }
+
+        super.analyseMethod(method);
+    }
+
 }

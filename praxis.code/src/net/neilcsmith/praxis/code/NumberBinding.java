@@ -20,12 +20,13 @@
  * have any questions.
  *
  */
-
 package net.neilcsmith.praxis.code;
 
 import java.lang.reflect.Field;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.code.userapi.Property;
+import net.neilcsmith.praxis.code.userapi.Type;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.types.PNumber;
@@ -34,35 +35,29 @@ import net.neilcsmith.praxis.core.types.PNumber;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-class NumberBinding extends PropertyControl.Binding {
-    
+abstract class NumberBinding extends PropertyControl.Binding {
+
     private final double min;
     private final double max;
-    private final double def;
+    final double def;
     private final boolean ranged;
-    
-    private double value;
-    private PNumber lastGet;
-    
-    NumberBinding(double def) {
-        min = PNumber.MIN_VALUE;
-        max = PNumber.MAX_VALUE;
-        this.def = def;
-        this.value = def;
-        ranged = false;
-    }
-    
-    NumberBinding(double min, double max, double def) {
+
+    private NumberBinding(double min, double max, double def) {
         this.min = min;
         this.max = max;
         this.def = def;
-        this.value = def;
-        ranged = true;
+        ranged = (min != PNumber.MIN_VALUE
+                || max != PNumber.MAX_VALUE);
     }
 
     @Override
     public void set(long time, Argument value) throws Exception {
-        set(time, PNumber.coerce(value).value());
+        PNumber n = PNumber.coerce(value);
+        double d = n.value();
+        if (d < min || d > max) {
+            throw new IllegalArgumentException();
+        }
+        set(n);
     }
 
     @Override
@@ -70,21 +65,12 @@ class NumberBinding extends PropertyControl.Binding {
         if (value < min || value > max) {
             throw new IllegalArgumentException();
         }
-        this.value = value;
+        set(value);
     }
 
-    @Override
-    public double get(double def) {
-        return value;
-    }
+    abstract void set(PNumber value) throws Exception;
 
-    @Override
-    public Argument get() {
-        if (lastGet == null || lastGet.value() != value) {
-            lastGet = PNumber.valueOf(value);
-        }
-        return lastGet;
-    }
+    abstract void set(double value) throws Exception;
 
     @Override
     public ArgumentInfo getArgumentInfo() {
@@ -99,50 +85,99 @@ class NumberBinding extends PropertyControl.Binding {
     public Argument getDefaultValue() {
         return PNumber.valueOf(def);
     }
-    
-    
-    static class Reflect extends NumberBinding {
-        
-        private final Field field;
-        private final boolean isDouble;
-        private CodeDelegate delegate;
 
+    static boolean isBindableFieldType(Class<?> type) {
+        return type == double.class || type == float.class;
+//                || type == Double.class || type == Float.class;
+    }
 
-        public Reflect(Field field, double def) {
-            super(def);
-            this.field = field;
-            isDouble = checkDouble();
+    static NumberBinding create(CodeConnector<?> connector, Field field) {
+        double min = PNumber.MIN_VALUE;
+        double max = PNumber.MAX_VALUE;
+        double def = 0;
+        Type.Number ann = field.getAnnotation(Type.Number.class);
+        if (ann != null) {
+            min = ann.min();
+            max = ann.max();
+            def = ann.def();
         }
-        
-        public Reflect(Field field, double min, double max, double def) {
+        Class<?> type = field.getType();
+        if (type == double.class) { // || type == Double.class) {
+            return new DoubleField(field, min, max, def);
+        } else if (Property.class.isAssignableFrom(type)) {
+            return new NoField(min, max, def);
+        } else {
+            return null;
+        }
+
+    }
+
+    static class NoField extends NumberBinding {
+
+        private double value;
+        private PNumber last = PNumber.ZERO;
+
+        public NoField(double min, double max, double def) {
+            super(min, max, def);
+            value = def;
+        }
+
+        @Override
+        public Argument get() {
+            if (last.value() != value) {
+                last = PNumber.valueOf(value);
+            }
+            return last;
+        }
+
+        @Override
+        public double get(double def) {
+            return value;
+        }
+
+        @Override
+        void set(PNumber value) throws Exception {
+            set(value.value());
+            last = value;
+        }
+
+        @Override
+        void set(double value) throws Exception {
+            this.value = value;
+        }
+
+    }
+
+    static class DoubleField extends NumberBinding {
+
+        private final Field field;
+        private CodeDelegate delegate;
+        private PNumber last;
+
+        public DoubleField(Field field, double min, double max, double def) {
             super(min, max, def);
             this.field = field;
-            isDouble = checkDouble();
-        }
-        
-        private boolean checkDouble() {
-            Class<?> cls = field.getType();
-            if (cls == double.class || cls == Double.class) {
-                return true;
-            } else if (cls == float.class || cls == Float.class) {
-                return false;
-            }
-            throw new IllegalArgumentException("Field type is not supported");
         }
 
         @Override
         protected void attach(CodeDelegate delegate) {
             this.delegate = delegate;
+            try {
+                set(def);
+            } catch (Exception ex) {
+                // ignore
+            }
         }
 
         @Override
-        public void set(long time, double value) throws Exception {
-            super.set(time, value);
-            if (isDouble) {
-                field.setDouble(delegate, value);
-            } else {
-                field.setFloat(delegate, (float) value);
-            }
+        void set(PNumber value) throws Exception {
+            set(value.value());
+            last = value;
+        }
+
+        @Override
+        void set(double value) throws Exception {
+            field.setDouble(delegate, value);
         }
 
         @Override
@@ -156,12 +191,13 @@ class NumberBinding extends PropertyControl.Binding {
 
         @Override
         public Argument get() {
-            return PNumber.valueOf(get(0));
-        }
+            double value = get(0);
+            if (last.value() != value) {
+                last = PNumber.valueOf(value);
+            }
+            return last;
 
-        
-        
-        
+        }
     }
-    
+
 }

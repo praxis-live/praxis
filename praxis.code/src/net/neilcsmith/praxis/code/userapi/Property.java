@@ -77,7 +77,7 @@ public abstract class Property {
     protected abstract Argument getImpl();
 
     protected abstract double getImpl(double def);
-
+    
     public Argument get() {
         return getImpl();
     }

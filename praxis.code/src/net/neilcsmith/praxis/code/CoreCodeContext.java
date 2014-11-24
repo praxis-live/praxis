@@ -22,8 +22,6 @@
  */
 package net.neilcsmith.praxis.code;
 
-import java.lang.reflect.Method;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.ExecutionContext;
 
@@ -36,18 +34,14 @@ public class CoreCodeContext extends CodeContext<CoreCodeDelegate> {
     private final static Logger LOG = Logger.getLogger(CoreCodeContext.class.getName());
 
     private final Driver driver;
-    private final Method setupMethod;
-    private final Method updateMethod;
+    private final boolean hasUpdateMethod;
 
     private ExecutionContext execCtxt;
 
     public CoreCodeContext(CoreCodeConnector connector) {
         super(connector);
+        hasUpdateMethod = connector.hasUpdateMethod();
         driver = new Driver();
-        Method s = connector.extractSetupMethod();
-        Method u = connector.extractUpdateMethod();
-        setupMethod = s;
-        updateMethod = u;
     }
 
     @Override
@@ -59,58 +53,36 @@ public class CoreCodeContext extends CodeContext<CoreCodeDelegate> {
                 execCtxt.removeStateListener(driver);
                 execCtxt.removeClockListener(driver);
             }
+            execCtxt = ctxt;
             if (ctxt != null) {
                 ctxt.addStateListener(driver);
-                ctxt.addClockListener(driver);
-                driver.stateChanged(ctxt);
+                if (hasUpdateMethod) {
+                    ctxt.addClockListener(driver);
+                }
+                if (ctxt.getState() == ExecutionContext.State.ACTIVE) {
+                    updateClock(ctxt.getTime());
+                    getDelegate().setup();
+                }
             }
-            execCtxt = ctxt;
         }
-    }
-
-    @Override
-    public long getTime() {
-        return execCtxt.getTime();
     }
 
     private class Driver implements ExecutionContext.StateListener,
             ExecutionContext.ClockListener {
 
-        boolean setupRequired;
-
-        private Driver() {
-            setupRequired = true;
-        }
-
         @Override
         public void stateChanged(ExecutionContext source) {
-            setupRequired = true;
+            if (source.getState() == ExecutionContext.State.ACTIVE) {
+                updateClock(source.getTime());
+                getDelegate().setup();
+                getDelegate().starting();
+            }
         }
 
         @Override
         public void tick(ExecutionContext source) {
-            processClock();
-            if (setupRequired) {
-                if (setupMethod != null) {
-                    try {
-                        LOG.log(Level.FINE, "Invoking setup method");
-                        setupMethod.invoke(getDelegate());
-                    } catch (Exception ex) {
-                        // @TODO logging
-                    } finally {
-                        setupRequired = false;
-                    }
-                }
-            }
-            if (updateMethod != null) {
-                try {
-                    LOG.log(Level.FINE, "Invoking update method");
-                    updateMethod.invoke(getDelegate());
-                } catch (Exception ex) {
-                    //@TODO logging
-                }
-            }
-
+            updateClock(source.getTime());
+            getDelegate().update();
         }
 
     }

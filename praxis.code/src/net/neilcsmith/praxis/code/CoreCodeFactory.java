@@ -20,36 +20,50 @@
  * have any questions.
  *
  */
-
 package net.neilcsmith.praxis.code;
 
-
 public class CoreCodeFactory extends CodeFactory<CoreCodeDelegate> {
-    
+
     private final static CoreBodyContext CBC = new CoreBodyContext();
 
+    private final boolean emptyDefault;
+    
+    public CoreCodeFactory(String type) {
+        super(CBC, type, CoreBodyContext.TEMPLATE);
+        emptyDefault = true;
+    }
+    
     public CoreCodeFactory(String type, String sourceTemplate) {
         super(CBC, type, sourceTemplate);
+        emptyDefault = false;
     }
 
     @Override
-    protected CodeContext<CoreCodeDelegate> createCodeContext(CoreCodeDelegate delegate) {
-        return new CoreCodeContext(new CoreCodeConnector(this, delegate));
+    public Task<CoreCodeDelegate> task() {
+        return new CoreContextCreator();
     }
-    
-    public static class Custom extends CoreCodeFactory {
-        
-        public Custom(String type) {
-            super(type, CoreBodyContext.TEMPLATE);
+
+    private class CoreContextCreator extends Task<CoreCodeDelegate> {
+
+        private CoreContextCreator() {
+            super(CoreCodeFactory.this);
+        }
+
+        @Override
+        protected CodeContext<CoreCodeDelegate> createCodeContext(CoreCodeDelegate delegate) {
+            return new CoreCodeContext(new CoreCodeConnector(this, delegate));
         }
 
         @Override
         protected CoreCodeDelegate createDefaultDelegate() throws Exception {
-            return new CoreCodeDelegate(){};
+            if (emptyDefault) {
+                return new CoreCodeDelegate() {
+                };
+            } else {
+                return super.createDefaultDelegate();
+            }
         }
-        
-        
-        
+
     }
-    
+
 }
