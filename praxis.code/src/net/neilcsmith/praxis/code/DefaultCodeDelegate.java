@@ -58,7 +58,12 @@ public class DefaultCodeDelegate extends CodeDelegate {
 
     public final Property p(String id) {
         Control c = getContext().getControl(id);
-        return c instanceof Property ? (Property) c : null;
+//        return c instanceof Property ? (Property) c : null;
+        if (c instanceof Property) {
+            return (Property) c;
+        } else {
+            return null;
+        }
     }
 
     public final double random(double max) {
