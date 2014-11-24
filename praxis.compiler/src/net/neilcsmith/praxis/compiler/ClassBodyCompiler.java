@@ -22,6 +22,10 @@
 
 package net.neilcsmith.praxis.compiler;
 
+import org.codehaus.commons.compiler.CompileException;
+import org.codehaus.commons.compiler.ErrorHandler;
+import org.codehaus.commons.compiler.Location;
+import org.codehaus.commons.compiler.WarningHandler;
 import org.praxislive.compiler.ClassBodyEvaluator;
 
 /**
@@ -38,17 +42,52 @@ public class ClassBodyCompiler {
     
     public <T> Class<T> compile(ClassBodyContext<T> context, String code)
             throws CompilationException {
+        return compile(context, null, code);
+    }
+    
+    public <T> Class<T> compile(ClassBodyContext<T> context,
+            MessageHandler messageHandler, String code)
+            throws CompilationException {
         try {
             ClassBodyEvaluator cbe = new ClassBodyEvaluator();
             cbe.setExtendedClass(context.getExtendedClass());
             cbe.setImplementedInterfaces(context.getImplementedInterfaces());
             cbe.setDefaultImports(context.getDefaultImports());
+            if (messageHandler != null) {
+                MessageDispatcher dsp = new MessageDispatcher(messageHandler);
+                cbe.setWarningHandler(dsp);
+                cbe.setCompileErrorHandler(dsp);
+            }
             cbe.cook(code);
             return (Class<T>) cbe.getClazz();
-        } catch (Exception ex) {
+        } catch (CompileException ex) {
             throw new CompilationException(ex);
-        }  
+        }  catch (Exception ex) {
+            throw new CompilationException(ex);
+        }
     }
+    
+    private static class MessageDispatcher implements ErrorHandler, WarningHandler {
+        
+        private final MessageHandler handler;
+        
+        private MessageDispatcher(MessageHandler handler) {
+            this.handler = handler;
+        }
+
+        @Override
+        public void handleError(String message, Location location) throws CompileException {
+            handler.handleError(message);
+            throw new CompileException(message, location);
+        }
+
+        @Override
+        public void handleWarning(String handle, String message, Location location) throws CompileException {
+            handler.handleWarning(message);
+        }
+        
+    }
+    
     
     public static ClassBodyCompiler getDefault() {
         return INSTANCE;
