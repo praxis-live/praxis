@@ -33,7 +33,7 @@ import net.neilcsmith.praxis.core.types.PReference;
  */
 public class TaskService extends Service {
 
-    public final static TaskService INSTANCE = new TaskService();
+    @Deprecated public final static TaskService INSTANCE = new TaskService();
     public final static String SUBMIT = "submit";
     public final static ControlInfo SUBMIT_INFO =
             ControlInfo.createFunctionInfo(
