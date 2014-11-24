@@ -32,7 +32,6 @@ import java.lang.annotation.Target;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
 public @interface Port {
     boolean value();
 }
