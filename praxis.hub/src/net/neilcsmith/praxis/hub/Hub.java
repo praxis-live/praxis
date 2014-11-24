@@ -25,11 +25,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -76,7 +76,8 @@ public final class Hub {
         List<Root> exts = new ArrayList<>();
         extractExtensions(builder, exts);
         core = coreFactory.createCoreRoot(new Accessor(), exts);
-        Lookup lkp = InstanceLookup.create(new ServicesImpl());
+        builder.lookupContent.add(0, new ServicesImpl());
+        Lookup lkp = InstanceLookup.create(builder.lookupContent.toArray());
         lkp = coreFactory.extendLookup(lkp);
         lookup = lkp;
         roots = new ConcurrentHashMap<>();
@@ -294,6 +295,7 @@ public final class Hub {
     public static class Builder {
 
         private final List<Root> extensions;
+        private final List<Object> lookupContent;
         private CoreRootFactory coreRootFactory;
         private Root componentFactory;
         private Root scriptService;
@@ -301,14 +303,12 @@ public final class Hub {
 
         private Builder() {
             extensions = new ArrayList<>();
+            lookupContent = new ArrayList<>();
             coreRootFactory = DefaultCoreRoot.factory();
         }
        
         public Builder setCoreRootFactory(CoreRootFactory coreRootFactory) {
-            if (coreRootFactory == null) {
-                throw new NullPointerException();
-            }
-            this.coreRootFactory = coreRootFactory;
+            this.coreRootFactory = Objects.requireNonNull(coreRootFactory);
             return this;
         }
                
@@ -328,10 +328,12 @@ public final class Hub {
         }
         
         public Builder addExtension(Root extension) {
-            if (extension == null) {
-                throw new NullPointerException();
-            }
-            extensions.add(extension);
+            extensions.add(Objects.requireNonNull(extension));
+            return this;
+        }
+        
+        public Builder extendLookup(Object obj) {
+            lookupContent.add(Objects.requireNonNull(obj));
             return this;
         }
         
