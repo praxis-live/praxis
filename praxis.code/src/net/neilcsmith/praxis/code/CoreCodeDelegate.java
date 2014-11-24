@@ -22,14 +22,16 @@
 
 package net.neilcsmith.praxis.code;
 
-import net.neilcsmith.praxis.code.DefaultCodeDelegate;
-
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public class CoreCodeDelegate extends DefaultCodeDelegate {
     
+   public void setup() {}
    
+   public void starting() {}
+   
+   public void update() {}
     
 }
