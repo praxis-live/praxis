@@ -32,7 +32,7 @@ import java.lang.annotation.Target;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.METHOD})
 public @interface T {
     int value();
 }
