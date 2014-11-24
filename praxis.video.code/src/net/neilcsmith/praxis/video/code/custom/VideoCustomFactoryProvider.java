@@ -47,7 +47,7 @@ public class VideoCustomFactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-            addComponent(data(new VideoCodeFactory.Custom("video:custom")));
+            addComponent(data(new VideoCodeFactory("video:custom")));
         }
 
     }

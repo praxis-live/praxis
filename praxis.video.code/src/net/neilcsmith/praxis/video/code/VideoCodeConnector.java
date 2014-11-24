@@ -44,21 +44,12 @@ public class VideoCodeConnector<T extends VideoCodeDelegate> extends CodeConnect
     public final static String SETUP = "setup";
     public final static String DRAW = "draw";
     
-    private Method setupMethod;
-    private Method drawMethod;
     private VideoOutputPort.Descriptor output;
     
 
-    public VideoCodeConnector(CodeFactory<T> factory, T delegate) {
-        super(factory, delegate);
-    }
-
-    protected Method extractSetupMethod() {
-        return setupMethod;
-    }
-    
-    protected Method extractDrawMethod() {
-        return drawMethod;
+    public VideoCodeConnector(CodeFactory.Task<T> contextCreator,
+            T delegate) {
+        super(contextCreator, delegate);
     }
     
     VideoOutputPort.Descriptor extractOutput() {
@@ -89,31 +80,6 @@ public class VideoCodeConnector<T extends VideoCodeDelegate> extends CodeConnect
     protected boolean analyseOutputField(Out ann, Field field) {
         LOG.warning("Output fields not currently supported in video components");
         return false;
-    }
-    
-    
-    
-    @Override
-    protected void analyseMethod(Method method) {
-        LOG.log(Level.FINE, "Analysing method : {0}", method);
-        try {
-            if (method.getParameterTypes().length == 0
-                    && method.getReturnType().equals(Void.TYPE)) {
-                if (SETUP.equals(method.getName())) {
-                    LOG.log(Level.FINE, "Adding setup method");
-                    method.setAccessible(true);
-                    setupMethod = method;
-                    return;
-                } else if (DRAW.equals(method.getName())) {
-                    LOG.log(Level.FINE, "Adding update method");
-                    method.setAccessible(true);
-                    drawMethod = method;
-                    return;
-                }
-            }
-        } catch (SecurityException securityException) {
-        }
-        super.analyseMethod(method);
     }
 
 }

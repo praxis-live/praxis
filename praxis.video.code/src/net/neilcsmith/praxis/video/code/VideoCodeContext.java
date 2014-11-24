@@ -23,7 +23,6 @@
 package net.neilcsmith.praxis.video.code;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -31,6 +30,7 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeComponent;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.code.PortDescriptor;
+import net.neilcsmith.praxis.code.QueuedCodeContext;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.video.code.userapi.PGraphics;
 import net.neilcsmith.praxis.video.code.userapi.PImage;
@@ -41,26 +41,22 @@ import net.neilcsmith.praxis.video.render.Surface;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class VideoCodeContext<T extends VideoCodeDelegate> extends CodeContext<T> {
+public class VideoCodeContext<D extends VideoCodeDelegate> extends QueuedCodeContext<D> {
 
     private final StateListener stateListener;
 
     private final VideoOutputPort.Descriptor output;
-    private final Method setupMethod;
-    private final Method drawMethod;
     private final VideoInputPort.Descriptor[] inputs;
     private final Processor processor;
 
     private ExecutionContext execCtxt;
     private boolean setupRequired;
 
-    public VideoCodeContext(VideoCodeConnector<T> connector) {
+    public VideoCodeContext(VideoCodeConnector<D> connector) {
         super(connector);
         stateListener = new StateListener();
         setupRequired = true;
         output = connector.extractOutput();
-        setupMethod = connector.extractSetupMethod();
-        drawMethod = connector.extractDrawMethod();
 
         List<VideoInputPort.Descriptor> ins = new ArrayList<>();
 
@@ -76,7 +72,7 @@ public class VideoCodeContext<T extends VideoCodeDelegate> extends CodeContext<T
     }
 
     @Override
-    protected void configure(CodeComponent<T> cmp, CodeContext<T> oldCtxt) {
+    protected void configure(CodeComponent<D> cmp, CodeContext<D> oldCtxt) {
         super.configure(cmp, oldCtxt);
         output.getPort().getPipe().addSource(processor);
         for (VideoInputPort.Descriptor vidp : inputs) {
@@ -98,11 +94,6 @@ public class VideoCodeContext<T extends VideoCodeDelegate> extends CodeContext<T
             }
             execCtxt = ctxt;
         }
-    }
-
-    @Override
-    public long getTime() {
-        return execCtxt.getTime();
     }
 
     private class StateListener implements ExecutionContext.StateListener {
@@ -139,12 +130,13 @@ public class VideoCodeContext<T extends VideoCodeDelegate> extends CodeContext<T
                     setImageField(del, inputs[i].getField(), img);
                 }
             }
-            processClock();
+            updateClock(execCtxt.getTime());
             pg.resetMatrix();
             if (setupRequired) {
                 invokeSetup(del);
                 setupRequired = false;
             }
+            runInvokeQueue();
             invokeDraw(del);
             
         }
@@ -159,9 +151,7 @@ public class VideoCodeContext<T extends VideoCodeDelegate> extends CodeContext<T
         
         private void invokeSetup(VideoCodeDelegate delegate) {
             try {
-                if (setupMethod != null) {
-                    setupMethod.invoke(delegate);
-                }
+                delegate.setup();
             } catch (Exception ex) {
                 Logger.getLogger(VideoCodeContext.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -169,9 +159,7 @@ public class VideoCodeContext<T extends VideoCodeDelegate> extends CodeContext<T
         
         private void invokeDraw(VideoCodeDelegate delegate) {
             try {
-                if (drawMethod != null) {
-                    drawMethod.invoke(delegate);
-                }
+                delegate.draw();
             } catch (Exception ex) {
                 Logger.getLogger(VideoCodeContext.class.getName()).log(Level.SEVERE, null, ex);
             }

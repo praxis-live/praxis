@@ -99,11 +99,6 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         }
     }
 
-    @Override
-    public long getTime() {
-        return execCtxt.getTime();
-    }
-
     private class StateListener implements ExecutionContext.StateListener {
 
         @Override
@@ -160,7 +155,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             p3d.clear();
             pg.setGraphics(p3d);
             del.setupGraphics(pg, output.getWidth(), output.getHeight());
-            processClock();
+            updateClock(execCtxt.getTime());
 //            pg.resetMatrix();
             if (setupRequired) {
                 try {

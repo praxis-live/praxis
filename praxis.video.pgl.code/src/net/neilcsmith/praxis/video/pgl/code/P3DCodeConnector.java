@@ -26,7 +26,6 @@ import java.lang.reflect.Field;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeConnector;
 import net.neilcsmith.praxis.code.CodeFactory;
-import net.neilcsmith.praxis.code.ControlDescriptor;
 import net.neilcsmith.praxis.code.userapi.In;
 import net.neilcsmith.praxis.code.userapi.Out;
 import net.neilcsmith.praxis.core.Port;
@@ -47,8 +46,9 @@ public class P3DCodeConnector extends CodeConnector<P3DCodeDelegate> {
     private PGLVideoOutputPort.Descriptor output;
     
 
-    public P3DCodeConnector(CodeFactory<P3DCodeDelegate> factory, P3DCodeDelegate delegate) {
-        super(factory, delegate);
+    public P3DCodeConnector(CodeFactory.Task<P3DCodeDelegate> creator,
+            P3DCodeDelegate delegate) {
+        super(creator, delegate);
     }
     
     PGLVideoOutputPort.Descriptor extractOutput() {

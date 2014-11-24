@@ -20,37 +20,53 @@
  * have any questions.
  *
  */
-
 package net.neilcsmith.praxis.video.code;
 
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.code.CodeFactory;
 
-
 public class VideoCodeFactory extends CodeFactory<VideoCodeDelegate> {
-    
+
     private final static VideoBodyContext VBC = new VideoBodyContext();
+
+    private final boolean emptyDefault;
+
+    public VideoCodeFactory(String type) {
+        super(VBC, type, VideoBodyContext.TEMPLATE);
+        emptyDefault = true;
+    }
 
     public VideoCodeFactory(String type, String sourceTemplate) {
         super(VBC, type, sourceTemplate);
+        emptyDefault = false;
     }
 
     @Override
-    protected CodeContext<VideoCodeDelegate> createCodeContext(VideoCodeDelegate delegate) {
-        return new VideoCodeContext(new VideoCodeConnector(this, delegate));
+    public Task<VideoCodeDelegate> task() {
+        return new VideoContextCreator();
     }
-    
-    public static class Custom extends VideoCodeFactory {
-        
-        public Custom(String type) {
-            super(type, VideoBodyContext.TEMPLATE);
+
+    private class VideoContextCreator extends Task<VideoCodeDelegate> {
+
+        private VideoContextCreator() {
+            super(VideoCodeFactory.this);
+        }
+
+        @Override
+        protected CodeContext<VideoCodeDelegate> createCodeContext(VideoCodeDelegate delegate) {
+            return new VideoCodeContext(new VideoCodeConnector(this, delegate));
         }
 
         @Override
         protected VideoCodeDelegate createDefaultDelegate() throws Exception {
-            return new VideoCodeDelegate(){};
+            if (emptyDefault) {
+                return new VideoCodeDelegate() {
+                };
+            } else {
+                return super.createDefaultDelegate();
+            }
         }
-    
+
     }
-    
+
 }

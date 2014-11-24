@@ -53,6 +53,9 @@ public class VideoCodeDelegate extends DefaultCodeDelegate {
         this.height = height;
     }
 
+    public void setup(){}
+    
+    public void draw(){}
     
     // Start generated PGraphics 
     public void background(double grey) {
