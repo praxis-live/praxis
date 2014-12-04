@@ -36,10 +36,7 @@ import net.neilcsmith.praxis.code.userapi.Out;
 import net.neilcsmith.praxis.code.userapi.Output;
 import net.neilcsmith.praxis.code.userapi.P;
 import net.neilcsmith.praxis.code.userapi.Port;
-import net.neilcsmith.praxis.code.userapi.Property;
 import net.neilcsmith.praxis.code.userapi.T;
-import net.neilcsmith.praxis.code.userapi.Trigger;
-import net.neilcsmith.praxis.code.userapi.Type;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.info.ComponentInfo;
@@ -47,9 +44,7 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.core.interfaces.ComponentInterface;
 import net.neilcsmith.praxis.core.types.PMap;
-import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.logging.LogBuilder;
-import net.neilcsmith.praxis.logging.LogLevel;
 
 /**
  *
@@ -77,9 +72,9 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     private Map<String, PortDescriptor> extPorts;
     private ComponentInfo info;
 
-    public CodeConnector(CodeFactory.Task<D> contextCreator, D delegate) {
-        this.factory = contextCreator.getFactory();
-        this.log = contextCreator.getLog();
+    public CodeConnector(CodeFactory.Task<D> task, D delegate) {
+        this.factory = task.getFactory();
+        this.log = task.getLog();
         this.delegate = delegate;
         controls = new EnumMap<>(ControlDescriptor.Category.class);
         for (ControlDescriptor.Category cat : ControlDescriptor.Category.values()) {
