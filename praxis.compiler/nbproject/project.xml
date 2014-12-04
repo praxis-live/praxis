@@ -27,6 +27,7 @@
                 <friend>net.neilcsmith.praxis.code</friend>
                 <friend>net.neilcsmith.praxis.java</friend>
                 <friend>net.neilcsmith.praxis.live.pxj</friend>
+                <friend>net.neilcsmith.praxis.tinkerforge</friend>
                 <friend>net.neilcsmith.praxis.video.code</friend>
                 <friend>net.neilcsmith.praxis.video.java</friend>
                 <friend>net.neilcsmith.praxis.video.pgl.code</friend>
