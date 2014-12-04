@@ -65,6 +65,7 @@
                 </test-type>
             </test-dependencies>
             <friend-packages>
+                <friend>net.neilcsmith.praxis.tinkerforge</friend>
                 <friend>net.neilcsmith.praxis.video.code</friend>
                 <friend>net.neilcsmith.praxis.video.pgl.code</friend>
                 <package>net.neilcsmith.praxis.code</package>
