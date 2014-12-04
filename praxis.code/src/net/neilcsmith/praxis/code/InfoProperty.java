@@ -33,12 +33,7 @@ import net.neilcsmith.praxis.core.interfaces.ComponentInterface;
  */
 public class InfoProperty implements Control {
 
-    private final CodeContext<?> context;
-    
-    private InfoProperty(CodeContext<?> context) {
-        this.context = context;
-                
-    }
+    private CodeContext<?> context;
 
     @Override
     public void call(Call call, PacketRouter router) throws Exception {
@@ -58,20 +53,21 @@ public class InfoProperty implements Control {
 
     public static class Descriptor extends ControlDescriptor {
 
-        private InfoProperty control;
+        private final InfoProperty control;
 
         public Descriptor(int index) {
             super(ComponentInterface.INFO, Category.Property, index);
+            control = new InfoProperty();
         }
 
         @Override
         public ControlInfo getInfo() {
-            return ComponentInterface.INFO_INFO;
+            return control.getInfo();
         }
 
         @Override
         public void attach(CodeContext<?> context, Control previous) {
-            control = new InfoProperty(context);
+            control.context = context;
         }
 
         @Override
