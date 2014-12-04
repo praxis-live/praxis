@@ -35,23 +35,23 @@ class SyntaxUtils {
         if (res == null) {
             res = doQuoted(input);
         }
-        if (res == null) {
-            res = doBraced(input);
-        }
+//        if (res == null) {
+//            res = doBraced(input);
+//        }
         return res;
     }
 
     public static String escapeQuoted(String input) {
         String res = doQuoted(input);
-        if (res == null) {
-            res = doBraced(input);
-        }
+//        if (res == null) {
+//            res = doBraced(input);
+//        }
         return res;
     }
 
-    public static String escapeBraced(String input) {
-        return doBraced(input);
-    }
+//    public static String escapeBraced(String input) {
+//        return doBraced(input);
+//    }
 
     private static String doPlain(String input) {
         int len = input.length();
@@ -79,7 +79,7 @@ class SyntaxUtils {
 //            return "\"\"";
 //        }
         if (len == 0 /*|| len > 128*/) {
-            return null;
+            return "\"\"";
         }
         StringBuilder sb = new StringBuilder(len * 2);
         sb.append("\"");
@@ -91,16 +91,18 @@ class SyntaxUtils {
                 case '[':
                 case ']':
 //                case '\\':
-                    return null;
-                case '\t':
-                    sb.append("\\t");
+                    sb.append('\\');
+                    sb.append(c);
                     break;
-                case '\n':
-                    sb.append("\\n");
-                    break;
-                case '\r':
-                    sb.append("\\r");
-                    break;
+//                case '\t':
+//                    sb.append("\\t");
+//                    break;
+//                case '\n':
+//                    sb.append("\\n");
+//                    break;
+//                case '\r':
+//                    sb.append("\\r");
+//                    break;
                 case '\"':
                     sb.append("\\\"");
                     break;
@@ -115,21 +117,21 @@ class SyntaxUtils {
         return sb.toString();
     }
 
-    private static String doBraced(String input) {
-        StringBuilder sb = new StringBuilder();
-        sb.append('{');
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            switch (c) {
-                case '{':
-                case '}':
-//                case '\\': @TODO fix tokenizer to allow escaped slash?
-                    sb.append('\\');
-                default:
-                    sb.append(c);
-            }
-        }
-        sb.append('}');
-        return sb.toString();
-    }
+//    private static String doBraced(String input) {
+//        StringBuilder sb = new StringBuilder();
+//        sb.append('{');
+//        for (int i = 0; i < input.length(); i++) {
+//            char c = input.charAt(i);
+//            switch (c) {
+//                case '{':
+//                case '}':
+////                case '\\': @TODO fix tokenizer to allow escaped slash?
+//                    sb.append('\\');
+//                default:
+//                    sb.append(c);
+//            }
+//        }
+//        sb.append('}');
+//        return sb.toString();
+//    }
 }

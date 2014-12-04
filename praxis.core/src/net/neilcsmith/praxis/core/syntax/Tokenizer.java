@@ -226,13 +226,13 @@ public class Tokenizer implements Iterable<Token> {
                     if (text.charAt(index - 1) != '\\') {
                         level--;
                     } else {
-                        buf.delete(buf.length() - 1, buf.length());
+//                        buf.delete(buf.length() - 1, buf.length());
                     }
                 } else if (ch == '{') {
                     if (text.charAt(index - 1) != '\\') {
                         level++;
                     } else {
-                        buf.delete(buf.length() - 1, buf.length());
+//                        buf.delete(buf.length() - 1, buf.length());
                     }
                 }
                 if (level > 0) {

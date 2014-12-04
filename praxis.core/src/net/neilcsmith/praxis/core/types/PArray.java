@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -83,7 +83,13 @@ public final class PArray extends Argument implements Iterable<Argument> {
                     if (sb.length() > 0) {
                         sb.append(' ');
                     }
-                    sb.append(SyntaxUtils.escape(String.valueOf(entry)));
+                    if (entry instanceof PArray || entry instanceof PMap) {
+                        sb.append('{')
+                                .append(entry.toString())
+                                .append('}');
+                    } else {
+                        sb.append(SyntaxUtils.escape(String.valueOf(entry)));
+                    }
                 }
                 str = sb.toString();
             } else {
