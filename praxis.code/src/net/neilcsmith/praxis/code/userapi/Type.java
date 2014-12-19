@@ -23,16 +23,17 @@ package net.neilcsmith.praxis.code.userapi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.types.PNumber;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class Type {
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Type {
 
-    private Type() {
-    }
+//    Class<? extends Argument> cls() default Argument.class;
 
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface Number {
@@ -40,12 +41,27 @@ public class Type {
         double max() default PNumber.MAX_VALUE;
         double def() default 0;
     }
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    public static @interface Integer {
+        int min() default PNumber.MIN_VALUE;
+        int max() default PNumber.MAX_VALUE;
+        int def() default 0;
+    }
 
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface String {
         java.lang.String[] allowed() default {};
+        java.lang.String[] suggested() default {};
+        boolean emptyIsDefault() default false;
         java.lang.String mime() default "";
         java.lang.String def() default "";
     }
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    public static @interface Boolean {
+        boolean def() default false;
+    }
+    
 
 }
