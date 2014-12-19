@@ -25,6 +25,8 @@ package net.neilcsmith.praxis.code.userapi;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.ArgumentFormatException;
+import net.neilcsmith.praxis.core.types.PBoolean;
 
 /**
  *
@@ -97,7 +99,19 @@ public abstract class Property {
     public int getInt(int def) {
         return (int) Math.round(getDouble(def));
     }
-
+    
+    public boolean getBoolean() {
+        return getBoolean(false);
+    }
+    
+    public boolean getBoolean(boolean def) {
+        try {
+            return PBoolean.coerce(get()).value();
+        } catch (ArgumentFormatException ex) {
+            return def;
+        }
+    }
+    
     public Property set(Argument arg) {
         if (arg == null) {
             throw new NullPointerException();
