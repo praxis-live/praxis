@@ -46,7 +46,7 @@ public class ExecutionContextImpl extends ExecutionContext {
 
     @Override
     public void removeStateListener(StateListener listener) {
-        stateListeners = ArrayUtils.add(stateListeners, listener);
+        stateListeners = ArrayUtils.remove(stateListeners, listener);
     }
 
     @Override

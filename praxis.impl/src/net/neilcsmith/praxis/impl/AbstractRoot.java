@@ -586,7 +586,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 
         @Override
         public void removeStateListener(ExecutionContext.StateListener listener) {
-            stateListeners = ArrayUtils.add(stateListeners, listener);
+            stateListeners = ArrayUtils.remove(stateListeners, listener);
         }
 
         @Override
