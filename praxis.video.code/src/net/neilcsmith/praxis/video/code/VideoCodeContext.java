@@ -130,7 +130,7 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends QueuedCodeCon
                     setImageField(del, inputs[i].getField(), img);
                 }
             }
-            updateClock(execCtxt.getTime());
+            update(execCtxt.getTime());
             pg.resetMatrix();
             if (setupRequired) {
                 invokeSetup(del);
