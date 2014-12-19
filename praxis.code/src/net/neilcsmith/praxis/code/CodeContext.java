@@ -57,6 +57,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
     private final ComponentInfo info;
 
     private final D delegate;
+    private final LogBuilder log;
 
     private CodeComponent<D> cmp;
     private long time;
@@ -72,6 +73,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
             ports = connector.extractPorts();
             info = connector.extractInfo();
             delegate = connector.getDelegate();
+            log = new LogBuilder(LogLevel.ERROR);
         } catch (Exception e) {
             LOG.log(Level.FINE, "", e);
             throw e;
@@ -80,10 +82,10 @@ public abstract class CodeContext<D extends CodeDelegate> {
 
     protected void configure(CodeComponent<D> cmp, CodeContext<D> oldCtxt) {
         this.cmp = cmp;
+        delegate.setContext(this);
         configureControls(oldCtxt);
         configurePorts(oldCtxt);
         hierarchyChanged();
-        delegate.setContext(this);
     }
 
     private void configureControls(CodeContext<D> oldCtxt) {
@@ -116,7 +118,11 @@ public abstract class CodeContext<D extends CodeDelegate> {
     }
 
     protected void hierarchyChanged() {
-
+        LogLevel level = getLookup().get(LogLevel.class);
+        if (level == null) {
+            level = LogLevel.ERROR;
+        }
+        log.setLevel(level);
     }
 
     protected void dispose() {
@@ -209,7 +215,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
     }
 
     protected ExecutionContext getExecutionContext() {
-        return cmp.getExecutionContext();
+        return cmp == null ? null : cmp.getExecutionContext();
     }
 
     protected boolean isActive() {
@@ -217,7 +223,11 @@ public abstract class CodeContext<D extends CodeDelegate> {
         return ctxt == null ? false : ctxt.getState() == ExecutionContext.State.ACTIVE;
     }
 
-    protected void updateClock(long time) {
+    protected void update(long time) {
+        if (!log.isEmpty()) {
+            log(log.toCallArguments());
+            log.clear();
+        }
         if (time - this.time > 0) {
             this.time = time;
             for (ClockListener l : clockListeners) {
@@ -228,31 +238,26 @@ public abstract class CodeContext<D extends CodeDelegate> {
 
     protected void invoke(long time, Invoker invoker) {
         if (isActive()) {
-            updateClock(time);
+            update(time);
             invoker.invoke();
         }
     }
 
-    LogLevel getLogLevel() {
-        return cmp.getLogLevel();
+    protected LogLevel getLogLevel() {
+        return log.getLevel();
     }
 
-    void log(LogLevel level, String msg) {
-        if (!cmp.getLogLevel().isLoggable(level)) {
-            return;
-        }
-        CallArguments args = CallArguments.create(
-                level.asPString(), PString.valueOf(msg));
-        log(args);
+    protected void log(LogLevel level, String msg) {
+        log.log(level, msg);
     }
 
-    void log(LogBuilder log) {
+    protected void log(LogBuilder log) {
         if (log.isEmpty()) {
             return;
         }
         log(log.toCallArguments());
     }
-
+    
     private void log(CallArguments args) {
         PacketRouter router = cmp.getPacketRouter();
         ControlAddress to = cmp.getLogToAddress();
