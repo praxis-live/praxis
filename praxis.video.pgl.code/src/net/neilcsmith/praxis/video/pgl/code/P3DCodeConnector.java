@@ -28,6 +28,7 @@ import net.neilcsmith.praxis.code.CodeConnector;
 import net.neilcsmith.praxis.code.CodeFactory;
 import net.neilcsmith.praxis.code.userapi.In;
 import net.neilcsmith.praxis.code.userapi.Out;
+import net.neilcsmith.praxis.code.userapi.Output;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
 
@@ -72,14 +73,13 @@ public class P3DCodeConnector extends CodeConnector<P3DCodeDelegate> {
                 return;
             }
         }
+        if (Output.class.isAssignableFrom(field.getType())) {
+            LOG.warning("Output fields not currently supported in video components");
+            return;
+        }
         super.analyseField(field);
     }
 
-    @Override
-    protected boolean analyseOutputField(Out ann, Field field) {
-        LOG.warning("Output fields not currently supported in video components");
-        return false;
-    }
 
  
 }

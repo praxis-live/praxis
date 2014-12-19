@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeComponent;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.code.PortDescriptor;
+import net.neilcsmith.praxis.code.QueuedCodeContext;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.video.pgl.PGLSurface;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PGraphics2D;
@@ -41,7 +42,7 @@ import net.neilcsmith.praxis.video.render.Surface;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
+public class P2DCodeContext extends QueuedCodeContext<P2DCodeDelegate> {
 
     private final StateListener stateListener;
 
@@ -139,7 +140,7 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
             pg.initGraphics(pglOut.getGraphics());    
             del.setupGraphics(pg, output.getWidth(), output.getHeight());
             
-            updateClock(execCtxt.getTime());
+            update(execCtxt.getTime());
             pg.resetMatrix();
             if (setupRequired) {
                 try {
@@ -149,6 +150,7 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
                 }
                 setupRequired = false;
             }
+            runInvokeQueue();
             try {
                 del.draw();
             } catch (Exception ex) {

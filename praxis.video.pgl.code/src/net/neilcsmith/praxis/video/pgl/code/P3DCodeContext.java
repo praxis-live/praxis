@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeComponent;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.code.PortDescriptor;
+import net.neilcsmith.praxis.code.QueuedCodeContext;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.video.pgl.PGLGraphics;
 import net.neilcsmith.praxis.video.pgl.PGLGraphics3D;
@@ -44,7 +45,7 @@ import processing.core.PConstants;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
+public class P3DCodeContext extends QueuedCodeContext<P3DCodeDelegate> {
 
     private final StateListener stateListener;
 
@@ -155,7 +156,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             p3d.clear();
             pg.setGraphics(p3d);
             del.setupGraphics(pg, output.getWidth(), output.getHeight());
-            updateClock(execCtxt.getTime());
+            update(execCtxt.getTime());
 //            pg.resetMatrix();
             if (setupRequired) {
                 try {
@@ -165,6 +166,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
                 }
                 setupRequired = false;
             }
+            runInvokeQueue();
             try {
                 del.draw();
             } catch (Exception ex) {
