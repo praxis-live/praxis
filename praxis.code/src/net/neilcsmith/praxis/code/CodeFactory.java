@@ -21,6 +21,9 @@
  */
 package net.neilcsmith.praxis.code;
 
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import net.neilcsmith.praxis.compiler.ClassBodyCompiler;
 import net.neilcsmith.praxis.compiler.ClassBodyContext;
 import net.neilcsmith.praxis.compiler.MessageHandler;
@@ -34,10 +37,14 @@ import net.neilcsmith.praxis.logging.LogLevel;
  */
 public abstract class CodeFactory<D extends CodeDelegate> {
 
+    private final static ConcurrentMap<ClassCacheKey<? extends CodeDelegate>,
+            Class<? extends CodeDelegate>> classCache = new ConcurrentHashMap<>();
+
     private final ComponentType type;
     private final ClassBodyContext<D> cbc;
     private final String template;
-
+    private final ClassCacheKey<D> cacheKey;
+    
     protected CodeFactory(
             ClassBodyContext<D> cbc,
             ComponentType type,
@@ -46,6 +53,7 @@ public abstract class CodeFactory<D extends CodeDelegate> {
         this.cbc = cbc;
         this.type = type;
         this.template = template;
+        cacheKey = new ClassCacheKey<>(cbc, template);
     }
 
     protected CodeFactory(
@@ -76,12 +84,10 @@ public abstract class CodeFactory<D extends CodeDelegate> {
 
     public abstract Task<D> task();
 
-   
-
     public static abstract class Task<D extends CodeDelegate> {
 
         private final CodeFactory<D> factory;
-        
+
         private LogBuilder log;
         private Class<D> previous;
 
@@ -93,16 +99,16 @@ public abstract class CodeFactory<D extends CodeDelegate> {
             this.log = log;
             return this;
         }
-        
+
         public Task<D> attachPrevious(Class<D> previous) {
             this.previous = previous;
             return this;
         }
-        
+
         public CodeContext<D> createCodeContext(String source) throws Exception {
             return createCodeContext(createDelegate(source));
         }
-        
+
         public CodeContext<D> createDefaultCodeContext() throws Exception {
             return createCodeContext(createDefaultDelegate());
         }
@@ -110,22 +116,30 @@ public abstract class CodeFactory<D extends CodeDelegate> {
         protected LogBuilder getLog() {
             return log;
         }
-        
+
         protected Class<D> getPrevious() {
             return previous;
         }
-        
+
         protected CodeFactory<D> getFactory() {
             return factory;
         }
-        
+
         protected D createDelegate(String source) throws Exception {
             Class<D> cls = compile(source);
             return cls.newInstance();
         }
 
         protected D createDefaultDelegate() throws Exception {
-            Class<D> cls = compile(factory.template);
+            @SuppressWarnings("unchecked")
+            Class<D> cls = (Class<D>) classCache.get(factory.cacheKey);
+            if (cls == null) {
+                cls = compile(factory.template);
+                final Class<D> val = (Class<D>) classCache.putIfAbsent(factory.cacheKey, cls);
+                if (val != null) {
+                    cls = val;
+                }
+            }
             //@TODO cache result
             return cls.newInstance();
         }
@@ -137,8 +151,8 @@ public abstract class CodeFactory<D extends CodeDelegate> {
             }
             return ClassBodyCompiler.getDefault().compile(factory.cbc, handler, source);
         }
-        
-         protected abstract CodeContext<D> createCodeContext(D delegate);
+
+        protected abstract CodeContext<D> createCodeContext(D delegate);
 
     }
 
@@ -158,6 +172,44 @@ public abstract class CodeFactory<D extends CodeDelegate> {
         @Override
         public void handleWarning(String msg) {
             log.log(LogLevel.WARNING, msg);
+        }
+
+    }
+
+    private static class ClassCacheKey<D> {
+
+        private final ClassBodyContext<D> cbc;
+        private final String source;
+
+        private ClassCacheKey(ClassBodyContext<D> cbc, String source) {
+            this.cbc = cbc;
+            this.source = source;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 3;
+            hash = 37 * hash + Objects.hashCode(this.cbc);
+            hash = 37 * hash + Objects.hashCode(this.source);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final ClassCacheKey<?> other = (ClassCacheKey<?>) obj;
+            if (!Objects.equals(this.cbc, other.cbc)) {
+                return false;
+            }
+            if (!Objects.equals(this.source, other.source)) {
+                return false;
+            }
+            return true;
         }
 
     }

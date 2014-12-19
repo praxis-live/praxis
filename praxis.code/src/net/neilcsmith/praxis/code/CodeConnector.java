@@ -25,17 +25,23 @@ package net.neilcsmith.praxis.code;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
+import static net.neilcsmith.praxis.code.PortDescriptor.Category.AuxIn;
+import net.neilcsmith.praxis.code.userapi.AuxIn;
+import net.neilcsmith.praxis.code.userapi.AuxOut;
 import net.neilcsmith.praxis.code.userapi.ID;
+import net.neilcsmith.praxis.code.userapi.In;
 import net.neilcsmith.praxis.code.userapi.Out;
 import net.neilcsmith.praxis.code.userapi.Output;
 import net.neilcsmith.praxis.code.userapi.P;
 import net.neilcsmith.praxis.code.userapi.Port;
+import net.neilcsmith.praxis.code.userapi.ReadOnly;
 import net.neilcsmith.praxis.code.userapi.T;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
@@ -191,12 +197,18 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     protected void analyseFields(Field[] fields) {
 //        LOG.fine("Analysing fields");
         for (Field f : fields) {
+            if (Modifier.isStatic(f.getModifiers())) {
+                continue;
+            }
             analyseField(f);
         }
     }
 
     protected void analyseMethods(Method[] methods) {
         for (Method m : methods) {
+            if (Modifier.isStatic(m.getModifiers())) {
+                continue;
+            }
             analyseMethod(m);
         }
     }
@@ -216,6 +228,10 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         if (out != null && analyseOutputField(out, field)) {
             return;
         }
+        AuxOut aux = field.getAnnotation(AuxOut.class);
+        if (aux != null && analyseAuxOutputField(aux, field)) {
+            return;
+        }
     }
 
     protected void analyseMethod(Method method) {
@@ -223,25 +239,37 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         if (trig != null && analyseTriggerMethod(trig, method)) {
             return;
         }
+        In in = method.getAnnotation(In.class);
+        if (in != null && analyseInputMethod(in, method)) {
+            return;
+        }
+        AuxIn aux = method.getAnnotation(AuxIn.class);
+        if (aux != null && analyseAuxInputMethod(aux, method)) {
+            return;
+        }
     }
 
-    protected boolean analyseOutputField(Out ann, Field field) {
-//        LOG.log(Level.FINE, "Field is output");
-        int index = ann.value();
-        if (Output.class.isAssignableFrom(field.getType())) {
-            DefaultOutput.Descriptor odsc = new DefaultOutput.Descriptor(
-                    findID(field),
-                    index,
-                    field
-            );
-//            LOG.log(Level.FINE, "Adding port for output {0}", field.getName());
+    private boolean analyseOutputField(Out ann, Field field) {
+        OutputImpl.Descriptor odsc = OutputImpl.createDescriptor(this, ann, field);
+        if (odsc != null) {
             addPort(odsc);
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
-    protected boolean analyseTriggerField(T ann, Field field) {
+    private boolean analyseAuxOutputField(AuxOut ann, Field field) {
+        OutputImpl.Descriptor odsc = OutputImpl.createDescriptor(this, ann, field);
+        if (odsc != null) {
+            addPort(odsc);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean analyseTriggerField(T ann, Field field) {
         TriggerControl.Descriptor tdsc
                 = TriggerControl.Descriptor.create(this, ann, field);
         if (tdsc != null) {
@@ -255,7 +283,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         }
     }
 
-    protected boolean analysePropertyField(P ann, Field field) {
+    private boolean analysePropertyField(P ann, Field field) {
         PropertyControl.Descriptor pdsc
                 = PropertyControl.Descriptor.create(this, ann, field);
         if (pdsc != null) {
@@ -269,7 +297,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         }
     }
 
-    protected boolean analyseTriggerMethod(T ann, Method method) {
+    private boolean analyseTriggerMethod(T ann, Method method) {
         TriggerControl.Descriptor tdsc
                 = TriggerControl.Descriptor.create(this, ann, method);
         if (tdsc != null) {
@@ -277,6 +305,28 @@ public abstract class CodeConnector<D extends CodeDelegate> {
             if (shouldAddPort(method)) {
                 addPort(tdsc.createPortDescriptor());
             }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean analyseInputMethod(In ann, Method method) {
+        MethodInput.Descriptor desc
+                = MethodInput.createDescriptor(this, ann, method);
+        if (desc != null) {
+            addPort(desc);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean analyseAuxInputMethod(AuxIn ann, Method method) {
+        MethodInput.Descriptor desc
+                = MethodInput.createDescriptor(this, ann, method);
+        if (desc != null) {
+            addPort(desc);
             return true;
         } else {
             return false;
@@ -311,6 +361,9 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     }
 
     private boolean shouldAddPort(AnnotatedElement element) {
+        if (element.isAnnotationPresent(ReadOnly.class)) {
+            return false;
+        }
         Port ann = element.getAnnotation(Port.class);
         if (ann != null) {
             return ann.value();

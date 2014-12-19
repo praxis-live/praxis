@@ -23,11 +23,8 @@
 package net.neilcsmith.praxis.code;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.userapi.Type;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
@@ -45,8 +42,6 @@ abstract class StringBinding extends PropertyControl.Binding {
     private final Set<PString> allowed;
     private final PString mime;
     final PString def;
-
-    private PString value;
 
     private StringBinding(String mime, String def) {
         allowed = null;
@@ -174,8 +169,8 @@ abstract class StringBinding extends PropertyControl.Binding {
         }
 
         @Override
-        protected void attach(CodeDelegate delegate) {
-            this.delegate = delegate;
+        protected void attach(CodeContext<?> context) {
+            this.delegate = context.getDelegate();
             try {
                 set(def);
             } catch (Exception ex) {

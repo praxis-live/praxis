@@ -35,6 +35,7 @@ import net.neilcsmith.praxis.core.VetoException;
 import net.neilcsmith.praxis.core.info.ComponentInfo;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.interfaces.Services;
+import net.neilcsmith.praxis.logging.LogBuilder;
 import net.neilcsmith.praxis.logging.LogLevel;
 import net.neilcsmith.praxis.logging.LogService;
 
@@ -158,13 +159,13 @@ public class CodeComponent<D extends CodeDelegate> implements Component {
         return router;
     }
     
-    LogLevel getLogLevel() {
-        if (logInfo == null) {
-            initLogInfo();
-        }
-        return logInfo.level;
-    }
-
+//    LogLevel getLogLevel() {
+//        if (logInfo == null) {
+//            initLogInfo();
+//        }
+//        return logInfo.level;
+//    }
+    
     ControlAddress getLogToAddress() {
         if (logInfo == null) {
             initLogInfo();
@@ -194,7 +195,7 @@ public class CodeComponent<D extends CodeDelegate> implements Component {
         if (level == null || toAddress == null) {
             level = LogLevel.ERROR;
         }
-        ControlAddress fromAddress = ControlAddress.create(getAddress(), "_log");
+        ControlAddress fromAddress = ControlAddress.create(address, "_log");
         logInfo = new LogInfo(level, toAddress, fromAddress);
     }
 

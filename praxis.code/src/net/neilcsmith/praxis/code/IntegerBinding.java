@@ -33,14 +33,14 @@ import net.neilcsmith.praxis.core.types.PNumber;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-abstract class NumberBinding extends PropertyControl.Binding {
+abstract class IntegerBinding extends PropertyControl.Binding {
 
-    private final double min;
-    private final double max;
-    final double def;
+    private final int min;
+    private final int max;
+    final int def;
     private final boolean ranged;
 
-    private NumberBinding(double min, double max, double def) {
+    private IntegerBinding(int min, int max, int def) {
         this.min = min;
         this.max = max;
         this.def = def;
@@ -85,15 +85,15 @@ abstract class NumberBinding extends PropertyControl.Binding {
     }
 
     static boolean isBindableFieldType(Class<?> type) {
-        return type == double.class || type == float.class;
+        return type == int.class;
 //                || type == Double.class || type == Float.class;
     }
 
-    static NumberBinding create(CodeConnector<?> connector, Field field) {
-        double min = PNumber.MIN_VALUE;
-        double max = PNumber.MAX_VALUE;
-        double def = 0;
-        Type.Number ann = field.getAnnotation(Type.Number.class);
+    static IntegerBinding create(CodeConnector<?> connector, Field field) {
+        int min = PNumber.MIN_VALUE;
+        int max = PNumber.MAX_VALUE;
+        int def = 0;
+        Type.Integer ann = field.getAnnotation(Type.Integer.class);
         if (ann != null) {
             min = ann.min();
             max = ann.max();
@@ -101,9 +101,7 @@ abstract class NumberBinding extends PropertyControl.Binding {
         }
         Class<?> type = field.getType();
         if (type == double.class) { // || type == Double.class) {
-            return new DoubleField(field, min, max, def);
-        } else if (type == float.class) {
-            return new FloatField(field, min, max, def);
+            return new IntField(field, min, max, def);
         } else if (Property.class.isAssignableFrom(type)) {
             return new NoField(min, max, def);
         } else {
@@ -112,19 +110,19 @@ abstract class NumberBinding extends PropertyControl.Binding {
 
     }
 
-    static class NoField extends NumberBinding {
+    static class NoField extends IntegerBinding {
 
-        private double value;
+        private int value;
         private PNumber last = PNumber.ZERO;
 
-        public NoField(double min, double max, double def) {
+        public NoField(int min, int max, int def) {
             super(min, max, def);
             value = def;
         }
 
         @Override
         public Argument get() {
-            if (last.value() != value) {
+            if (!last.isInteger() || last.value() != value) {
                 last = PNumber.valueOf(value);
             }
             return last;
@@ -137,24 +135,24 @@ abstract class NumberBinding extends PropertyControl.Binding {
 
         @Override
         void set(PNumber value) throws Exception {
-            set(value.value());
+            this.value = value.toIntValue();
             last = value;
         }
 
         @Override
         void set(double value) throws Exception {
-            this.value = value;
+            this.value = (int) Math.round(value);
         }
 
     }
 
-    static class DoubleField extends NumberBinding {
+    static class IntField extends IntegerBinding {
 
         private final Field field;
         private CodeDelegate delegate;
         private PNumber last = PNumber.ZERO;
 
-        public DoubleField(Field field, double min, double max, double def) {
+        public IntField(Field field, int min, int max, int def) {
             super(min, max, def);
             this.field = field;
         }
@@ -171,19 +169,27 @@ abstract class NumberBinding extends PropertyControl.Binding {
 
         @Override
         void set(PNumber value) throws Exception {
-            set(value.value());
+            set(value.toIntValue());
             last = value;
         }
 
         @Override
         void set(double value) throws Exception {
-            field.setDouble(delegate, value);
+            set((int) Math.round(value));
+        }
+        
+        private void set(int value) throws Exception {
+            field.setInt(delegate, value);
         }
 
         @Override
         public double get(double def) {
+            return get((int) Math.round(def));
+        }
+        
+        private int get(int def) {
             try {
-                return field.getDouble(delegate);
+                return field.getInt(delegate);
             } catch (Exception ex) {
                 return def;
             }
@@ -191,60 +197,8 @@ abstract class NumberBinding extends PropertyControl.Binding {
 
         @Override
         public Argument get() {
-            double value = get(0);
-            if (last.value() != value) {
-                last = PNumber.valueOf(value);
-            }
-            return last;
-
-        }
-    }
-
-    static class FloatField extends NumberBinding {
-
-        private final Field field;
-        private CodeDelegate delegate;
-        private PNumber last = PNumber.ZERO;
-
-        public FloatField(Field field, double min, double max, double def) {
-            super(min, max, def);
-            this.field = field;
-        }
-
-        @Override
-        protected void attach(CodeContext<?> context) {
-            this.delegate = context.getDelegate();
-            try {
-                set(def);
-            } catch (Exception ex) {
-                // ignore
-            }
-        }
-
-        @Override
-        void set(PNumber value) throws Exception {
-            set(value.value());
-            last = value;
-        }
-
-        @Override
-        void set(double value) throws Exception {
-            field.setFloat(delegate, (float) value);
-        }
-
-        @Override
-        public double get(double def) {
-            try {
-                return field.getFloat(delegate);
-            } catch (Exception ex) {
-                return def;
-            }
-        }
-
-        @Override
-        public Argument get() {
-            double value = get(0);
-            if ((float)last.value() != value) {
+            int value = get(0);
+            if (!last.isInteger() || last.toIntValue() != value) {
                 last = PNumber.valueOf(value);
             }
             return last;
