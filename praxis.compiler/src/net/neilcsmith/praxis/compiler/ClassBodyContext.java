@@ -46,5 +46,20 @@ public abstract class ClassBodyContext<T> {
     public String[] getDefaultImports() {
         return new String[0];
     }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        return obj == null ? false : this.getClass().equals(obj.getClass());
+    }
+    
+    
     
 }
