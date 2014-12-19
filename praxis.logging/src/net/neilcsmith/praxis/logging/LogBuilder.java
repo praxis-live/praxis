@@ -26,6 +26,7 @@ package net.neilcsmith.praxis.logging;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.types.PString;
@@ -36,11 +37,12 @@ import net.neilcsmith.praxis.core.types.PString;
  */
 public class LogBuilder {
       
-    private final LogLevel level;
     private final List<Argument> log;
     
+    private LogLevel level;
+    
     public LogBuilder(LogLevel level) {
-        this.level = level;
+        this.level = Objects.requireNonNull(level);
         this.log = new ArrayList<Argument>();
     }
     
@@ -51,6 +53,14 @@ public class LogBuilder {
         }
     }
     
+    public void setLevel(LogLevel level) {
+        this.level = Objects.requireNonNull(level);
+    }
+
+    public LogLevel getLevel() {
+        return level;
+    }
+
     public boolean isLoggable(LogLevel level) {
         return this.level.isLoggable(level);
     }
