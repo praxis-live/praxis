@@ -60,7 +60,7 @@ public class CoreCodeContext extends CodeContext<CoreCodeDelegate> {
                     ctxt.addClockListener(driver);
                 }
                 if (ctxt.getState() == ExecutionContext.State.ACTIVE) {
-                    updateClock(ctxt.getTime());
+                    update(ctxt.getTime());
                     getDelegate().setup();
                 }
             }
@@ -73,7 +73,7 @@ public class CoreCodeContext extends CodeContext<CoreCodeDelegate> {
         @Override
         public void stateChanged(ExecutionContext source) {
             if (source.getState() == ExecutionContext.State.ACTIVE) {
-                updateClock(source.getTime());
+                update(source.getTime());
                 getDelegate().setup();
                 getDelegate().starting();
             }
@@ -81,7 +81,7 @@ public class CoreCodeContext extends CodeContext<CoreCodeDelegate> {
 
         @Override
         public void tick(ExecutionContext source) {
-            updateClock(source.getTime());
+            update(source.getTime());
             getDelegate().update();
         }
 
