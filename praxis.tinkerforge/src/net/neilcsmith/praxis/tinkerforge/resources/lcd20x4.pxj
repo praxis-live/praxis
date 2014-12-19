@@ -1,0 +1,118 @@
+    @TinkerForge BrickletLCD20x4 lcd;
+    
+    @P(1) @OnChange("updateLines")
+    String line1;
+    @P(2) @OnChange("updateLines")
+    String line2;
+    @P(3) @OnChange("updateLines")
+    String line3;
+    @P(4) @OnChange("updateLines")
+    String line4;
+    
+    @P(5) @OnChange("updateLight")
+    boolean backlight;
+    
+    @P(6) @Type.String(allowed = {"Value", "Signal"}, def = "Value") @Port(false)
+    String button_mode;
+    
+    @Out(1) Output button1;
+    @Out(2) Output button2;
+    @Out(3) Output button3;
+    @Out(4) Output button4;
+
+    Listener listener =  new Listener();
+    
+    @Override
+    public void setup() {
+        lcd.addButtonPressedListener(listener);
+        lcd.addButtonReleasedListener(listener);
+        updateLines();
+        updateLight();
+    }
+
+    @Override
+    public void dispose() {
+        try {
+            lcd.clearDisplay();
+            lcd.backlightOff();
+            lcd.removeButtonPressedListener(listener);
+            lcd.removeButtonReleasedListener(listener);
+        } catch (Exception ex) {
+        }
+    }
+    
+    void updateLines() {
+        try {
+            lcd.writeLine((short) 0, (short) 0, lcdString(line1, 20));
+            lcd.writeLine((short) 1, (short) 0, lcdString(line2, 20));
+            lcd.writeLine((short) 2, (short) 0, lcdString(line3, 20));
+            lcd.writeLine((short) 3, (short) 0, lcdString(line4, 20));
+        } catch (Exception ex) {
+        }
+    }
+    
+    void updateLight() {
+        try {
+            if (backlight) {
+                lcd.backlightOn();
+            } else {
+                lcd.backlightOff();
+            }
+        } catch (Exception ex) {
+        }
+    }
+    
+    private class Listener implements BrickletLCD20x4.ButtonPressedListener,
+            BrickletLCD20x4.ButtonReleasedListener {
+
+        @Override
+        public void buttonPressed(short button) {
+            if ("Value".equals(button_mode)) {
+                sendValue(button, true);
+            } else {
+                sendSignal(button);
+            }
+        }
+
+        @Override
+        public void buttonReleased(short button) {
+            if ("Value".equals(button_mode)) {
+                sendValue(button, false);
+            }
+        }
+        
+        void sendValue(short button, boolean value) {
+            switch (button) {
+                    case 0 :
+                        button1.send(value);
+                        break;
+                    case 1 :
+                        button2.send(value);
+                        break;
+                    case 2 :
+                        button3.send(value);
+                        break;
+                    case 3 :
+                        button4.send(value);
+                        break;
+                }
+        }
+        
+        void sendSignal(short button) {
+            switch (button) {
+                    case 0 :
+                        button1.send();
+                        break;
+                    case 1 :
+                        button2.send();
+                        break;
+                    case 2 :
+                        button3.send();
+                        break;
+                    case 3 :
+                        button4.send();
+                        break;
+                }
+        }
+        
+    }

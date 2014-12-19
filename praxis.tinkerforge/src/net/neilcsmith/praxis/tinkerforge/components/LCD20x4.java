@@ -48,6 +48,8 @@ public class LCD20x4 extends AbstractTFComponent<BrickletLCD20x4> {
     private StringProperty buttonMode;
     private ButtonListener buttonListener;
 
+//    private Thread thread;
+    
     public LCD20x4() {
         super(BrickletLCD20x4.class);
         int lineCount = 4;
@@ -85,6 +87,7 @@ public class LCD20x4 extends AbstractTFComponent<BrickletLCD20x4> {
 
     @Override
     protected void initDevice(BrickletLCD20x4 device) {
+//        thread = Thread.currentThread();
         this.device = device;
         buttonListener = new ButtonListener();
         device.addButtonPressedListener(buttonListener);
@@ -209,6 +212,7 @@ public class LCD20x4 extends AbstractTFComponent<BrickletLCD20x4> {
         }
         
         private void update(final boolean pressed, final int button) {
+//            assert Thread.currentThread() == thread;
             final long time = getTime();
             invokeLater(new Runnable() {
 

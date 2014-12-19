@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.tinkerforge.components;
 
+import net.neilcsmith.praxis.tinkerforge.TFRoot;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
 import net.neilcsmith.praxis.impl.AbstractComponentFactory;
@@ -57,8 +58,8 @@ public class TFComponentFactoryProvider implements ComponentFactoryProvider {
             addComponent("tinkerforge:distance-ir", data(DistanceIR.class));
             addComponent("tinkerforge:dual-relay", data(DualRelay.class));
             addComponent("tinkerforge:io16", data(IO16.class));
-            addComponent("tinkerforge:joystick", data(Joystick.class));
-            addComponent("tinkerforge:lcd20x4", data(LCD20x4.class));
+//            addComponent("tinkerforge:joystick", data(Joystick.class));
+//            addComponent("tinkerforge:lcd20x4", data(LCD20x4.class));
             addComponent("tinkerforge:linear-poti", data(LinearPoti.class));
             addComponent("tinkerforge:rotary-poti", data(RotaryPoti.class));
             addComponent("tinkerforge:servo", data(Servo.class));

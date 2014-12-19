@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.tinkerforge.components;
 
+import net.neilcsmith.praxis.tinkerforge.TFContext;
 import com.tinkerforge.Device;
 import java.util.List;
 import java.util.logging.Level;
@@ -31,7 +32,7 @@ import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.impl.AbstractClockComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
-import net.neilcsmith.praxis.tinkerforge.components.TFContext.DeviceLockedException;
+import net.neilcsmith.praxis.tinkerforge.TFContext.DeviceLockedException;
 
 /**
  *
@@ -40,9 +41,9 @@ import net.neilcsmith.praxis.tinkerforge.components.TFContext.DeviceLockedExcept
 public abstract class AbstractTFComponent<T extends Device> extends AbstractClockComponent {
 
     private final static String AUTO = "<auto>";
-    
+
     private T device;
-    private Class<T> type;
+    private final Class<T> type;
     private String uid;
     private volatile TFContext context;
     private TFContext.Listener listener;
@@ -57,10 +58,10 @@ public abstract class AbstractTFComponent<T extends Device> extends AbstractCloc
     private void initControls() {
         registerControl("uid",
                 StringProperty.builder()
-                    .binding(new UIDBinding())
-                    .defaultValue("")
-                    .suggestedValues(AUTO)
-                    .build());
+                .binding(new UIDBinding())
+                .defaultValue("")
+                .suggestedValues(AUTO)
+                .build());
         registerControl("connected", ArgumentProperty.createReadOnly(PBoolean.info(), new ConnectedBinding()));
     }
 
@@ -107,14 +108,14 @@ public abstract class AbstractTFComponent<T extends Device> extends AbstractCloc
                 try {
                     context.lockDevice(d);
                     device = type.cast(d);
-                    initDevice(device);
+                initDevice(device);
                 } catch (DeviceLockedException ex) {
                     Logger.getLogger(AbstractTFComponent.class.getName()).log(Level.SEVERE, null, ex);
-                }
             }
         }
     }
-    
+    }
+
     private Device findDevice() {
         if (AUTO.equals(uid)) {
             List<Device> devices = context.findDevices(type);
@@ -144,7 +145,7 @@ public abstract class AbstractTFComponent<T extends Device> extends AbstractCloc
     protected void updateDevice(T device) {
         // no op hook
     }
-    
+
     // thread safe(?)
     protected long getTime() {
         TFContext ctxt = context;
@@ -154,7 +155,7 @@ public abstract class AbstractTFComponent<T extends Device> extends AbstractCloc
             return ctxt.getTime();
         }
     }
-    
+
     // thread safe(?)
     protected boolean invokeLater(Runnable task) {
         TFContext ctxt = context;
@@ -164,7 +165,7 @@ public abstract class AbstractTFComponent<T extends Device> extends AbstractCloc
             return ctxt.invokeLater(task);
         }
     }
-    
+
     protected int getCallbackPeriod() {
         return 20;
     }
@@ -190,7 +191,7 @@ public abstract class AbstractTFComponent<T extends Device> extends AbstractCloc
             return uid;
         }
     }
-    
+
     private class ConnectedBinding implements ArgumentProperty.ReadBinding {
 
         @Override
@@ -201,6 +202,6 @@ public abstract class AbstractTFComponent<T extends Device> extends AbstractCloc
                 return PBoolean.FALSE;
             }
         }
-        
+
     }
 }

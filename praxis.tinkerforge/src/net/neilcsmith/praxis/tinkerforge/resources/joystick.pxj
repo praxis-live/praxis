@@ -1,0 +1,90 @@
+
+    final String VALUE = "Value";
+    final String SIGNAL = "Signal";
+    
+    @TinkerForge BrickletJoystick joystick;
+    
+    @P(1) @Port(false) @OnChange("updatePosition")
+            boolean normalize;
+    @P(2) @Port(false) @Type.String(allowed = {VALUE, SIGNAL})
+            String buttonMode;
+    
+    @P(3) @ReadOnly @Port(false) double x;
+    @P(4) @ReadOnly @Port(false) double y;
+    @P(5) @ReadOnly @Port(false) boolean button;
+    
+    
+    @Out(1) @ID("x") Output outX;
+    @Out(2) @ID("y") Output outY;
+    @Out(3) @ID("button") Output outButton;
+    
+    Listener listener = new Listener();
+    int rawX, rawY;
+    
+    @Override
+    public void setup() {
+        joystick.addPositionListener(listener);
+        joystick.addPressedListener(listener);
+        joystick.addReleasedListener(listener);
+        try {
+            joystick.setPositionCallbackPeriod(20);
+        } catch (TimeoutException | NotConnectedException ex) {
+        }
+    }
+
+    @Override
+    public void dispose() {
+        joystick.removePositionListener(listener);
+        joystick.removePressedListener(listener);
+        joystick.removeReleasedListener(listener);
+        try {
+            joystick.setPositionCallbackPeriod(0);
+        } catch (TimeoutException | NotConnectedException ex) {
+        }
+    }
+    
+    private void updatePosition() {
+        if (normalize) {
+            x = normalize(rawX);
+            y = normalize(rawY);
+        } else {
+            x = rawX;
+            y = rawY;
+        }
+        outX.send(x);
+        outY.send(y);
+    }
+    
+    private double normalize(int val) {
+        return (val + 100) / 200.0;
+    }
+    
+    class Listener implements BrickletJoystick.PositionListener,
+            BrickletJoystick.PressedListener, BrickletJoystick.ReleasedListener {
+
+        @Override
+        public void position(short sx, short sy) {
+            rawX = sx;
+            rawY = sy;
+            updatePosition();
+        }
+
+        @Override
+        public void pressed() {
+            button = true;
+            if (VALUE.equals(buttonMode)) {
+                outButton.send(true);
+            } else {
+                outButton.send();
+            }
+        }
+
+        @Override
+        public void released() {
+            button = false;
+            if (VALUE.equals(buttonMode)) {
+                outButton.send(false);
+            }
+        }
+        
+    }
