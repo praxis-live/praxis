@@ -20,8 +20,6 @@
  * have any questions.
  *
  */
-
-
 package net.neilcsmith.praxis.logging;
 
 import java.util.ArrayList;
@@ -29,30 +27,56 @@ import java.util.List;
 import java.util.Objects;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
+import net.neilcsmith.praxis.core.types.PError;
 import net.neilcsmith.praxis.core.types.PString;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class LogBuilder {
-      
+public final class LogBuilder {
+
     private final List<Argument> log;
-    
+
     private LogLevel level;
-    
+
     public LogBuilder(LogLevel level) {
         this.level = Objects.requireNonNull(level);
         this.log = new ArrayList<Argument>();
     }
-    
+
     public void log(LogLevel level, String msg) {
         if (isLoggable(level)) {
+            PString m = PString.valueOf(msg);
             log.add(level.asPString());
-            log.add(PString.valueOf(msg));
+            log.add(m);
+        }
+    }
+
+    public void log(LogLevel level, Exception ex) {
+        if (isLoggable(level)) {
+            PError e = PError.create(ex);
+            log.add(level.asPString());
+            log.add(e);
         }
     }
     
+    public void log(LogLevel level, Exception ex, String msg) {
+        if (isLoggable(level)) {
+            PError e = PError.create(ex, msg);
+            log.add(level.asPString());
+            log.add(e);
+        }
+    }
+    
+    public void log(LogLevel level, Class<? extends Exception> type, String msg) {
+        if (isLoggable(level)) {
+            PError e = PError.create(type, msg);
+            log.add(level.asPString());
+            log.add(e);
+        }
+    }
+
     public void setLevel(LogLevel level) {
         this.level = Objects.requireNonNull(level);
     }
@@ -64,15 +88,15 @@ public class LogBuilder {
     public boolean isLoggable(LogLevel level) {
         return this.level.isLoggable(level);
     }
-    
+
     public CallArguments toCallArguments() {
         return CallArguments.create(log);
     }
-    
+
     public void clear() {
         log.clear();
     }
-    
+
     public boolean isEmpty() {
         return log.isEmpty();
     }
