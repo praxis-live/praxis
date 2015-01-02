@@ -175,12 +175,10 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
         return ArgumentInfo.create(PNumber.class, map);
     }
 
-    @Deprecated
     public static ArgumentInfo integerInfo() {
         return ArgumentInfo.create(PNumber.class, PMap.create(KEY_IS_INTEGER, true));
     }
     
-    @Deprecated
     public static ArgumentInfo integerInfo(
             int min, int max) {
         PMap map = PMap.create(KEY_MINIMUM, min,
