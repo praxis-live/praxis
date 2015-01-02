@@ -73,9 +73,9 @@ abstract class IntegerBinding extends PropertyControl.Binding {
     @Override
     public ArgumentInfo getArgumentInfo() {
         if (ranged) {
-            return PNumber.info(min, max);
+            return PNumber.integerInfo(min, max);
         } else {
-            return PNumber.info();
+            return PNumber.integerInfo();
         }
     }
 
@@ -86,7 +86,6 @@ abstract class IntegerBinding extends PropertyControl.Binding {
 
     static boolean isBindableFieldType(Class<?> type) {
         return type == int.class;
-//                || type == Double.class || type == Float.class;
     }
 
     static IntegerBinding create(CodeConnector<?> connector, Field field) {
@@ -100,7 +99,7 @@ abstract class IntegerBinding extends PropertyControl.Binding {
             def = ann.def();
         }
         Class<?> type = field.getType();
-        if (type == double.class) { // || type == Double.class) {
+        if (type == int.class) { // || type == Double.class) {
             return new IntField(field, min, max, def);
         } else if (Property.class.isAssignableFrom(type)) {
             return new NoField(min, max, def);

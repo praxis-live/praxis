@@ -375,6 +375,9 @@ public class PropertyControl extends Property implements Control {
             if (field.isAnnotationPresent(Type.Number.class)
                     || NumberBinding.isBindableFieldType(type)) {
                 binding = NumberBinding.create(connector, field);
+            } else if (field.isAnnotationPresent(Type.Integer.class)
+                    || IntegerBinding.isBindableFieldType(type)) {
+                binding = IntegerBinding.create(connector, field);
             } else if (field.isAnnotationPresent(Type.String.class)
                     || StringBinding.isBindableFieldType(type)) {
                 binding = StringBinding.create(connector, field);
