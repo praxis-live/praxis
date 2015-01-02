@@ -66,7 +66,7 @@ public class FactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-            addComponent("core:control-rate", ControlFrameTrigger.class);
+            addComponent("core:control-rate", data(ControlFrameTrigger.class).deprecated());
             addComponent("core:start-trigger", StartTrigger.class);
             addComponent("core:property", Property.class);
             addComponent("core:variable", Variable.class);
