@@ -1,0 +1,8 @@
+
+    @P(1) double value;
+    
+    @Out(1) Output out;
+    
+    @In(1) void in(double x) {
+        out.send(x * value);
+    }
