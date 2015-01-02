@@ -242,9 +242,9 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         if (currentState != cachedState) {
             cachedState = currentState;
             if (cachedState == RootState.ACTIVE_RUNNING) {
-                context.setState(ExecutionContext.State.ACTIVE);
+                context.updateState(time, ExecutionContext.State.ACTIVE);
             } else {
-                context.setState(ExecutionContext.State.IDLE);
+                context.updateState(time, ExecutionContext.State.IDLE);
             }
         }
 
@@ -257,7 +257,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         }
 
         this.time = time;
-        context.setTime(time);
+        context.updateClock(time);
         orderedQueue.setTime(time);
 
         processingControlFrame();
@@ -471,7 +471,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                 AbstractRoot.this.run();
                 state.set(RootState.TERMINATING); // in case run finished before shutdown called
                 terminating();
-                context.setState(ExecutionContext.State.TERMINATED);
+                context.updateState(System.nanoTime(), ExecutionContext.State.TERMINATED);
                 disconnect();
                 // disconnect all children?
                 state.set(RootState.TERMINATED);
@@ -571,12 +571,14 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         private ExecutionContext.ClockListener[] clockListeners;
         private ExecutionContext.State state;
         private long time;
+        private long startTime;
 
         public Context() {
             this.stateListeners = new ExecutionContext.StateListener[0];
             this.clockListeners = new ExecutionContext.ClockListener[0];
             this.state = ExecutionContext.State.NEW;
             this.time = System.nanoTime();
+            this.startTime = this.time;
         }
 
         @Override
@@ -600,9 +602,14 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         }
 
         @SuppressWarnings("fallthrough")
-        void setState(ExecutionContext.State state) {
+        protected void updateState(long time, ExecutionContext.State state) {
+            // make sure time is set before state listeners called.
+            this.time = time;
             switch (state) {
                 case ACTIVE:
+                    if (this.state != State.ACTIVE) {
+                        startTime = time;
+                    }
                 case IDLE:
                     if (this.state == ExecutionContext.State.TERMINATED) {
                         throw new IllegalStateException("Execution Context terminated");
@@ -630,7 +637,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             return state;
         }
 
-        void setTime(long time) {
+        protected void updateClock(long time) {
             this.time = time;
             if (state == ExecutionContext.State.ACTIVE) {
                 fireClockListeners();
@@ -640,6 +647,16 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         @Override
         public long getTime() {
             return time;
+        }
+
+        @Override
+        public boolean supportsStartTime() {
+            return true;
+        }
+
+        @Override
+        public long getStartTime() {
+            return startTime;
         }
 
         private void fireStateListeners() {
