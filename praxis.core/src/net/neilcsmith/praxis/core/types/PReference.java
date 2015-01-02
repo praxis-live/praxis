@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -34,7 +34,7 @@ public class PReference extends Argument {
     
     public final static String REFERENCE_TYPE = "reference-type";
     
-    private transient Object ref;
+    private Object ref;
     private Class refClass;
     private int refHash;
     
