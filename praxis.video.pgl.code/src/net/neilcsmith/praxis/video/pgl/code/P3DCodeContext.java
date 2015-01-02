@@ -25,13 +25,11 @@ package net.neilcsmith.praxis.video.pgl.code;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeComponent;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.code.PortDescriptor;
-import net.neilcsmith.praxis.code.QueuedCodeContext;
 import net.neilcsmith.praxis.core.ExecutionContext;
+import net.neilcsmith.praxis.logging.LogLevel;
 import net.neilcsmith.praxis.video.pgl.PGLGraphics;
 import net.neilcsmith.praxis.video.pgl.PGLGraphics3D;
 import net.neilcsmith.praxis.video.pgl.PGLSurface;
@@ -45,7 +43,7 @@ import processing.core.PConstants;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class P3DCodeContext extends QueuedCodeContext<P3DCodeDelegate> {
+public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
 
     private final StateListener stateListener;
 
@@ -162,15 +160,14 @@ public class P3DCodeContext extends QueuedCodeContext<P3DCodeDelegate> {
                 try {
                     del.setup();
                 } catch (Exception ex) {
-                    Logger.getLogger(P3DCodeContext.class.getName()).log(Level.SEVERE, null, ex);
+                    getLog().log(LogLevel.ERROR, ex);
                 }
                 setupRequired = false;
             }
-            runInvokeQueue();
             try {
                 del.draw();
             } catch (Exception ex) {
-                Logger.getLogger(P3DCodeContext.class.getName()).log(Level.SEVERE, null, ex);
+                getLog().log(LogLevel.ERROR, ex);
             }
             p3d.endDraw();
             PGLGraphics g = pglOut.getGraphics();
@@ -178,13 +175,14 @@ public class P3DCodeContext extends QueuedCodeContext<P3DCodeDelegate> {
             g.blendMode(PConstants.REPLACE);
             g.tint(255.0f);
             g.image(p3d, 0, 0);
+            flush();
         }
 
         private void setImageField(P3DCodeDelegate delegate, Field field, PImage image) {
             try {
                 field.set(delegate, image);
             } catch (Exception ex) {
-                Logger.getLogger(P3DCodeContext.class.getName()).log(Level.SEVERE, null, ex);
+                getLog().log(LogLevel.ERROR, ex);
             }
         }
         
