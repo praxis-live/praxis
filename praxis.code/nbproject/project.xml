@@ -64,13 +64,10 @@
                     </test-dependency>
                 </test-type>
             </test-dependencies>
-            <friend-packages>
-                <friend>net.neilcsmith.praxis.tinkerforge</friend>
-                <friend>net.neilcsmith.praxis.video.code</friend>
-                <friend>net.neilcsmith.praxis.video.pgl.code</friend>
+            <public-packages>
                 <package>net.neilcsmith.praxis.code</package>
                 <package>net.neilcsmith.praxis.code.userapi</package>
-            </friend-packages>
+            </public-packages>
         </data>
     </configuration>
 </project>
