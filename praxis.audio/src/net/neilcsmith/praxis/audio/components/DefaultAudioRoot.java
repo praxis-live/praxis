@@ -497,6 +497,11 @@ public class DefaultAudioRoot extends AbstractRoot {
             return period;
         }
 
+        @Override
+        public boolean supportsPeriod() {
+            return true;
+        }
+
     }
 
     private class CheckedIntBinding implements IntProperty.Binding {
