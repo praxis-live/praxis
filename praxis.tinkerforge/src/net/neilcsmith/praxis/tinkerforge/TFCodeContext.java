@@ -29,7 +29,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeComponent;
 import net.neilcsmith.praxis.code.CodeContext;
-import net.neilcsmith.praxis.code.QueuedCodeContext;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.types.PBoolean;
 
@@ -37,7 +36,7 @@ import net.neilcsmith.praxis.core.types.PBoolean;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-class TFCodeContext extends QueuedCodeContext<TFCodeDelegate> {
+class TFCodeContext extends CodeContext<TFCodeDelegate> {
 
     static final String AUTO = "<auto>";
 
@@ -201,7 +200,6 @@ class TFCodeContext extends QueuedCodeContext<TFCodeDelegate> {
                 }
                 doSetup = false;
             }
-            runInvokeQueue();
             try {
                 getDelegate().update();
             } catch (Exception e) {
