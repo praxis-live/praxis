@@ -25,13 +25,11 @@ package net.neilcsmith.praxis.video.code;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeComponent;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.code.PortDescriptor;
-import net.neilcsmith.praxis.code.QueuedCodeContext;
 import net.neilcsmith.praxis.core.ExecutionContext;
+import net.neilcsmith.praxis.logging.LogLevel;
 import net.neilcsmith.praxis.video.code.userapi.PGraphics;
 import net.neilcsmith.praxis.video.code.userapi.PImage;
 import net.neilcsmith.praxis.video.pipes.impl.MultiInOut;
@@ -41,7 +39,7 @@ import net.neilcsmith.praxis.video.render.Surface;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class VideoCodeContext<D extends VideoCodeDelegate> extends QueuedCodeContext<D> {
+public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D> {
 
     private final StateListener stateListener;
 
@@ -136,16 +134,15 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends QueuedCodeCon
                 invokeSetup(del);
                 setupRequired = false;
             }
-            runInvokeQueue();
             invokeDraw(del);
-            
+            flush();
         }
         
         private void setImageField(VideoCodeDelegate delegate, Field field, PImage image) {
             try {
                 field.set(delegate, image);
             } catch (Exception ex) {
-                Logger.getLogger(VideoCodeContext.class.getName()).log(Level.SEVERE, null, ex);
+                getLog().log(LogLevel.ERROR, ex);
             }
         }
         
@@ -153,7 +150,7 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends QueuedCodeCon
             try {
                 delegate.setup();
             } catch (Exception ex) {
-                Logger.getLogger(VideoCodeContext.class.getName()).log(Level.SEVERE, null, ex);
+                getLog().log(LogLevel.ERROR, ex, "Exception thrown from setup()");
             }
         }
         
@@ -161,7 +158,7 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends QueuedCodeCon
             try {
                 delegate.draw();
             } catch (Exception ex) {
-                Logger.getLogger(VideoCodeContext.class.getName()).log(Level.SEVERE, null, ex);
+                getLog().log(LogLevel.ERROR, ex, "Exception thrown from draw()");
             }
         }
 
