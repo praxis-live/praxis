@@ -149,24 +149,31 @@ public abstract class CodeConnector<D extends CodeDelegate> {
 
     protected ComponentInfo buildComponentInfo(Map<String, ControlDescriptor> controls,
             Map<String, PortDescriptor> ports) {
-//        LOG.fine("Building component info");
-//        LOG.fine("Building control info");
         Map<String, ControlInfo> controlInfo = new LinkedHashMap<>(controls.size());
         for (Map.Entry<String, ControlDescriptor> e : controls.entrySet()) {
-//            LOG.log(Level.FINE, "Adding {0}\n{1}", new Object[]{e.getKey(), e.getValue().getInfo()});
-            controlInfo.put(e.getKey(), e.getValue().getInfo());
+            if (!excludeFromInfo(e.getKey(), e.getValue())) {
+               controlInfo.put(e.getKey(), e.getValue().getInfo()); 
+            }
         }
-//        LOG.fine("Building port info");
         Map<String, PortInfo> portInfo = new LinkedHashMap<>(ports.size());
         for (Map.Entry<String, PortDescriptor> e : ports.entrySet()) {
-//            LOG.log(Level.FINE, "Adding {0}\n{1}", new Object[]{e.getKey(), e.getValue().getInfo()});
-            portInfo.put(e.getKey(), e.getValue().getInfo());
+            if (!excludeFromInfo(e.getKey(), e.getValue())) {
+                portInfo.put(e.getKey(), e.getValue().getInfo());
+            }
         }
         return ComponentInfo.create(
                 controlInfo,
                 portInfo,
                 Collections.<Class<? extends InterfaceDefinition>>singleton(ComponentInterface.class),
                 PMap.create(ComponentInfo.KEY_DYNAMIC, true));
+    }
+    
+    private boolean excludeFromInfo(String id, ControlDescriptor desc) {
+        return id.startsWith("_");
+    }
+    
+    private boolean excludeFromInfo(String id, PortDescriptor desc) {
+        return id.startsWith("_");
     }
 
     protected void addControl(ControlDescriptor ctl) {
