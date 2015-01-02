@@ -46,8 +46,20 @@ public class TFComponents implements ComponentFactoryProvider {
 
         private void build() {
             
+            add("tinkerforge:ambient-light", "resources/ambient_light.pxj");
+            add("tinkerforge:analog-in", "resources/analog_in.pxj");
+            add("tinkerforge:analog-out", "resources/analog_out.pxj");
+            add("tinkerforge:barometer", "resources/barometer.pxj");
+            add("tinkerforge:distance-ir", "resources/distance_ir.pxj");
+            add("tinkerforge:dual-relay", "resources/dual_relay.pxj");
+            add("tinkerforge:io16", "resources/io16.pxj");
             add("tinkerforge:joystick", "resources/joystick.pxj");
             add("tinkerforge:lcd20x4", "resources/lcd20x4.pxj");
+            add("tinkerforge:linear-poti", "resources/linear_poti.pxj");
+            add("tinkerforge:rotary-poti", "resources/rotary_poti.pxj");
+            add("tinkerforge:servo", "resources/servo.pxj");
+            add("tinkerforge:temperature", "resources/temperature.pxj");
+            add("tinkerforge:temperature-ir", "resources/temperature_ir.pxj");
                       
             addComponent(data(new TFCodeFactory("tinkerforge:custom")));
 

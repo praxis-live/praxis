@@ -1,0 +1,57 @@
+
+    @TinkerForge BrickletTemperatureIR device;
+    
+    @P(1) @ReadOnly
+    double object;
+    @P(2) @ReadOnly
+    double ambient;
+    @Out(1) @ID("object")
+    Output objOut;
+    @Out(2) @ID("ambient")
+    Output ambOut;
+    
+    Listener listener = new Listener();
+    
+    @Override
+    public void setup() {
+        device.addAmbientTemperatureListener(listener);
+        device.addObjectTemperatureListener(listener);
+        try {
+            device.setAmbientTemperatureCallbackPeriod(CALLBACK_PERIOD);
+            device.setObjectTemperatureCallbackPeriod(CALLBACK_PERIOD);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        device.removeAmbientTemperatureListener(listener);
+        device.removeObjectTemperatureListener(listener);
+        try {
+            device.setAmbientTemperatureCallbackPeriod(0);
+            device.setObjectTemperatureCallbackPeriod(0);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+    
+    private class Listener implements
+            BrickletTemperatureIR.AmbientTemperatureListener,
+            BrickletTemperatureIR.ObjectTemperatureListener {
+
+        @Override
+        public void ambientTemperature(short amb) {
+            double t = amb / 10.0;
+            ambient = t;
+            ambOut.send(t);
+        }
+
+        @Override
+        public void objectTemperature(short obj) {
+            double t = obj / 10.0;
+            object = t;
+            objOut.send(t);
+        }
+        
+    }

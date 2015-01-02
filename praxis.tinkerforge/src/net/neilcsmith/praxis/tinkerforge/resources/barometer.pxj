@@ -1,0 +1,79 @@
+
+    final static double DEFAULT_REFERENCE_PRESSURE = 1013.25;
+    
+    @TinkerForge BrickletBarometer device;
+    
+    @P(1) @OnChange("referenceChanged") @ID("reference-pressure")
+    @Port(false) @Type.Number(def = DEFAULT_REFERENCE_PRESSURE)
+    double reference;
+    @P(2) @ReadOnly
+    double pressure;
+    @P(3) @ReadOnly
+    double altitude;
+    @Out(1) @ID("pressure")
+    Output pressureOut;
+    @Out(2) @ID("altitude")
+    Output altitudeOut;
+    
+    Listener listener = new Listener();
+    boolean updateReference;
+    
+    @Override
+    public void setup() {
+        device.addAirPressureListener(listener);
+        device.addAltitudeListener(listener);
+        try {
+            device.setAirPressureCallbackPeriod(CALLBACK_PERIOD);
+            device.setAltitudeCallbackPeriod(CALLBACK_PERIOD);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+        updateReference = true;
+    }
+
+    @Override
+    public void update() {
+        if (updateReference) {
+            try {
+                device.setReferenceAirPressure((int) (reference * 1000));
+            } catch (TimeoutException | NotConnectedException ex) {
+                log(WARNING, ex);
+            }
+            updateReference = false;
+        }
+    }
+
+    @Override
+    public void dispose() {
+        device.removeAirPressureListener(listener);
+        device.removeAltitudeListener(listener);
+        try {
+            device.setAirPressureCallbackPeriod(0);
+            device.setAltitudeCallbackPeriod(0);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+    
+    void referenceChanged() {
+        updateReference = true;
+    }
+    
+    private class Listener implements BrickletBarometer.AirPressureListener,
+            BrickletBarometer.AltitudeListener {
+
+        @Override
+        public void airPressure(int air) {
+            double p = air / 1000.0;
+            pressure = p;
+            pressureOut.send(p);
+        }
+
+        @Override
+        public void altitude(int alt) {
+            double a = alt / 100.0;
+            altitude = a;
+            altitudeOut.send(a);
+        }
+        
+    }

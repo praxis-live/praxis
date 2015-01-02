@@ -1,0 +1,40 @@
+
+    @TinkerForge BrickletTemperature device;
+    
+    @P(1) @ReadOnly
+    double temperature;
+    @Out(1) @ID("temperature")
+    Output out;
+    
+    Listener listener = new Listener();
+    
+    @Override
+    public void setup() {
+        device.addTemperatureListener(listener);
+        try {
+            device.setTemperatureCallbackPeriod(CALLBACK_PERIOD);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        device.removeTemperatureListener(listener);
+        try {
+            device.setTemperatureCallbackPeriod(0);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+    
+    private class Listener implements BrickletTemperature.TemperatureListener {
+
+        @Override
+        public void temperature(short temp) {
+            double t = temp / 100.0;
+            temperature = t;
+            out.send(t);
+        }
+        
+    }

@@ -1,0 +1,141 @@
+
+    @TinkerForge BrickServo device;
+    
+    @P(1) @Type.Number(min = 0, max = 1, def = 0.5) @OnChange("positionChanged")
+    double position_1;
+    @P(2) @Type.Number(min = 0, max = 1, def = 0.5) @OnChange("positionChanged")
+    double position_2;
+    @P(3) @Type.Number(min = 0, max = 1, def = 0.5) @OnChange("positionChanged")
+    double position_3;
+    @P(4) @Type.Number(min = 0, max = 1, def = 0.5) @OnChange("positionChanged")
+    double position_4;
+    @P(5) @Type.Number(min = 0, max = 1, def = 0.5) @OnChange("positionChanged")
+    double position_5;
+    @P(6) @Type.Number(min = 0, max = 1, def = 0.5) @OnChange("positionChanged")
+    double position_6;
+    @P(7) @Type.Number(min = 0, max = 1, def = 0.5) @OnChange("positionChanged")
+    double position_7;
+    
+    @P(11) @Port(false) @OnChange("enabledChanged")
+    boolean enabled_1;
+    @P(12) @Port(false) @OnChange("enabledChanged")
+    boolean enabled_2;
+    @P(13) @Port(false) @OnChange("enabledChanged")
+    boolean enabled_3;
+    @P(14) @Port(false) @OnChange("enabledChanged")
+    boolean enabled_4;
+    @P(15) @Port(false) @OnChange("enabledChanged")
+    boolean enabled_5;
+    @P(16) @Port(false) @OnChange("enabledChanged")
+    boolean enabled_6;
+    @P(17) @Port(false) @OnChange("enabledChanged")
+    boolean enabled_7;
+    
+    @P(100) @Port(false) @OnChange("configChanged")
+    @Type.Integer(min = 2000, max = 65535, def = 19500) 
+    int period;
+    @P(101) @Port(false) @OnChange("configChanged")
+    @Type.Integer(min = 1, max = 65535, def = 1000)
+    int minPulseWidth;
+    @P(102) @Port(false) @OnChange("configChanged")
+    @Type.Integer(min = 1, max = 65535, def = 2000)
+    int maxPulseWidth;
+    @P(103) @Port(false) @OnChange("configChanged")
+    @Type.Integer(min = 5000, max = 9000, def = 5000)
+    int outputVoltage;
+    
+    boolean updateConfig, updateEnabled, updatePositions;
+    
+    @Override
+    public void setup() {
+        updateConfig = true;
+        updateEnabled = true;
+        updatePositions = true;
+    }
+
+    @Override
+    public void update() {
+        if (updateConfig) {
+            configure();
+            updateConfig = false;
+        }
+        if (updateEnabled) {
+            enabled((short) 0, enabled_1);
+            enabled((short) 1, enabled_2);
+            enabled((short) 2, enabled_3);
+            enabled((short) 3, enabled_4);
+            enabled((short) 4, enabled_5);
+            enabled((short) 5, enabled_6);
+            enabled((short) 6, enabled_7);
+            updateEnabled = false;
+        }
+        if (updatePositions) {
+            position((short) 0, convert(position_1));
+            position((short) 1, convert(position_2));
+            position((short) 2, convert(position_3));
+            position((short) 3, convert(position_4));
+            position((short) 4, convert(position_5));
+            position((short) 5, convert(position_6));
+            position((short) 6, convert(position_7));
+            updatePositions = false;
+        }
+    }
+
+    @Override
+    public void dispose() {
+        enabled((short) 0, false);
+        enabled((short) 1, false);
+        enabled((short) 2, false);
+        enabled((short) 3, false);
+        enabled((short) 4, false);
+        enabled((short) 5, false);
+        enabled((short) 6, false);
+    }
+    
+    void configChanged() {
+        updateConfig = true;
+    }
+    
+    void enabledChanged() {
+        updateEnabled = true;
+    }
+    
+    void positionChanged() {
+        updatePositions = true;
+    }
+    
+    void configure() {
+        try {
+            device.setOutputVoltage(outputVoltage);
+            for (short i = 0; i < 7; i++) {
+                device.setPeriod(i, period);
+                device.setPulseWidth(i, minPulseWidth, maxPulseWidth);
+            }
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+    
+    void enabled(short idx, boolean value) {
+        try {
+            if (value) {
+                device.enable(idx);
+            } else {
+                device.disable(idx);
+            }
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+    
+    void position(short idx, short pos) {
+        try {
+            device.setPosition(idx, pos);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+
+    short convert(double pos) {
+        return (short) ((pos * 18000) - 9000);
+    }

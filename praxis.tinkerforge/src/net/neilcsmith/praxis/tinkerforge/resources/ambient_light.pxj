@@ -1,0 +1,39 @@
+
+    @TinkerForge BrickletAmbientLight device;
+    
+    @P(1) @ReadOnly
+    int illuminance;
+    @Out(1) @ID("illuminance")
+    Output out;
+    
+    Listener listener = new Listener();
+    
+    @Override
+    public void setup() {
+        device.addIlluminanceListener(listener);
+        try {
+            device.setIlluminanceCallbackPeriod(CALLBACK_PERIOD);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        device.removeIlluminanceListener(listener);
+        try {
+            device.setIlluminanceCallbackPeriod(0);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+    
+    private class Listener implements BrickletAmbientLight.IlluminanceListener {
+
+        @Override
+        public void illuminance(int lum) {
+            illuminance = lum;
+            out.send(lum);
+        }
+        
+    }

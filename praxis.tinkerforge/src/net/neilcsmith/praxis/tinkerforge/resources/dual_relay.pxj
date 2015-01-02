@@ -1,0 +1,37 @@
+
+    @TinkerForge BrickletDualRelay relays;
+    
+    @P(1) @OnChange("refresh")
+    boolean relay1;
+    @P(2) @OnChange("refresh")
+    boolean relay2;
+    
+    boolean needsUpdate;
+    
+    @Override
+    public void setup() {
+        needsUpdate = true;
+    }
+
+    @Override
+    public void update() {
+        if (needsUpdate) {
+            try {
+                relays.setState(relay1, relay2);
+            } catch (TimeoutException | NotConnectedException ex) {
+            }
+            needsUpdate = false;
+        }
+    }
+
+    @Override
+    public void dispose() {
+        try {
+            relays.setState(false, false);
+        } catch (TimeoutException | NotConnectedException ex) {
+        }
+    }
+
+    private void refresh() {
+        needsUpdate = true;
+    }

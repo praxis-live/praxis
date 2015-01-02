@@ -1,0 +1,48 @@
+
+    @TinkerForge BrickletAnalogOut device;
+    
+    @P(1) @Type.Number(min = 0, max = 5) @OnChange("voltageChanged")
+    double voltage;
+    
+    boolean updateVoltage;
+    
+    @Override
+    public void setup() {
+        try {
+            device.setMode(BrickletAnalogOut.MODE_ANALOG_VALUE);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+        updateVoltage = true;
+    }
+
+    @Override
+    public void update() {
+        if (updateVoltage) {
+            int v = (int) ((voltage * 1000) + 0.5);
+            if (v < 0) {
+                v = 0;
+            } else if (v > 5000) {
+                v = 5000;
+            }
+            try {
+                device.setVoltage(v);
+            } catch (TimeoutException | NotConnectedException ex) {
+                log(WARNING, ex);
+            }
+            updateVoltage = false;
+        }
+    }
+
+    @Override
+    public void dispose() {
+        try {
+            device.setVoltage(0);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+    
+    void voltageChanged() {
+        updateVoltage = true;
+    }

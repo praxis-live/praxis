@@ -1,33 +1,59 @@
+
     @TinkerForge BrickletLCD20x4 lcd;
     
-    @P(1) @OnChange("updateLines")
+    @P(1) @OnChange("linesChanged")
     String line1;
-    @P(2) @OnChange("updateLines")
+    @P(2) @OnChange("linesChanged")
     String line2;
-    @P(3) @OnChange("updateLines")
+    @P(3) @OnChange("linesChanged")
     String line3;
-    @P(4) @OnChange("updateLines")
+    @P(4) @OnChange("linesChanged")
     String line4;
     
-    @P(5) @OnChange("updateLight")
+    @P(5) @OnChange("lightChanged")
     boolean backlight;
     
     @P(6) @Type.String(allowed = {"Value", "Signal"}, def = "Value") @Port(false)
     String button_mode;
     
-    @Out(1) Output button1;
-    @Out(2) Output button2;
-    @Out(3) Output button3;
-    @Out(4) Output button4;
+    @AuxOut(1) Output button1;
+    @AuxOut(2) Output button2;
+    @AuxOut(3) Output button3;
+    @AuxOut(4) Output button4;
 
     Listener listener =  new Listener();
+    boolean updateLines, updateLight;
     
     @Override
     public void setup() {
         lcd.addButtonPressedListener(listener);
         lcd.addButtonReleasedListener(listener);
-        updateLines();
-        updateLight();
+        updateLines = true;
+        updateLight = true;
+    }
+
+    @Override
+    public void update() {
+        if (updateLines) {
+            try {
+                lcd.writeLine((short) 0, (short) 0, lcdString(line1, 20));
+                lcd.writeLine((short) 1, (short) 0, lcdString(line2, 20));
+                lcd.writeLine((short) 2, (short) 0, lcdString(line3, 20));
+                lcd.writeLine((short) 3, (short) 0, lcdString(line4, 20));
+            } catch (Exception ex) {
+            }
+            updateLines = false;
+        }
+        if (updateLight) {
+            try {
+                if (backlight) {
+                    lcd.backlightOn();
+                } else {
+                    lcd.backlightOff();
+                }      
+            } catch (Exception ex) {
+            }
+        }
     }
 
     @Override
@@ -41,25 +67,12 @@
         }
     }
     
-    void updateLines() {
-        try {
-            lcd.writeLine((short) 0, (short) 0, lcdString(line1, 20));
-            lcd.writeLine((short) 1, (short) 0, lcdString(line2, 20));
-            lcd.writeLine((short) 2, (short) 0, lcdString(line3, 20));
-            lcd.writeLine((short) 3, (short) 0, lcdString(line4, 20));
-        } catch (Exception ex) {
-        }
+    void linesChanged() {
+        updateLines = true;
     }
     
-    void updateLight() {
-        try {
-            if (backlight) {
-                lcd.backlightOn();
-            } else {
-                lcd.backlightOff();
-            }
-        } catch (Exception ex) {
-        }
+    void lightChanged() {
+        updateLight = true;
     }
     
     private class Listener implements BrickletLCD20x4.ButtonPressedListener,

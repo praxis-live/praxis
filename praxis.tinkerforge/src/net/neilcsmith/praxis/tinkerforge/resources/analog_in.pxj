@@ -1,0 +1,40 @@
+
+    @TinkerForge BrickletAnalogIn device;
+    
+    @P(1) @ReadOnly
+    double voltage;
+    @Out(1) @ID("voltage")
+    Output out;
+    
+    Listener listener = new Listener();
+    
+    @Override
+    public void setup() {
+        device.addVoltageListener(listener);
+        try {
+            device.setVoltageCallbackPeriod(CALLBACK_PERIOD);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        device.removeVoltageListener(listener);
+        try {
+            device.setVoltageCallbackPeriod(0);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+    
+    private class Listener implements BrickletAnalogIn.VoltageListener {
+
+        @Override
+        public void voltage(int mv) {
+            double v = mv / 1000.0;
+            voltage = v;
+            out.send(v);
+        }
+        
+    }

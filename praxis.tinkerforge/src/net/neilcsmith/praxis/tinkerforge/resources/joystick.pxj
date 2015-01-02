@@ -9,9 +9,9 @@
     @P(2) @Port(false) @Type.String(allowed = {VALUE, SIGNAL})
             String buttonMode;
     
-    @P(3) @ReadOnly @Port(false) double x;
-    @P(4) @ReadOnly @Port(false) double y;
-    @P(5) @ReadOnly @Port(false) boolean button;
+    @P(3) @ReadOnly double x;
+    @P(4) @ReadOnly double y;
+    @P(5) @ReadOnly boolean button;
     
     
     @Out(1) @ID("x") Output outX;
@@ -27,7 +27,7 @@
         joystick.addPressedListener(listener);
         joystick.addReleasedListener(listener);
         try {
-            joystick.setPositionCallbackPeriod(20);
+            joystick.setPositionCallbackPeriod(CALLBACK_PERIOD);
         } catch (TimeoutException | NotConnectedException ex) {
         }
     }

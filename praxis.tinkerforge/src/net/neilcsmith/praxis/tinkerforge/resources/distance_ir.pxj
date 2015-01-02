@@ -1,0 +1,39 @@
+
+    @TinkerForge BrickletDistanceIR device;
+    
+    @P(1) @ReadOnly
+    int distance;
+    @Out(1) @ID("distance")
+    Output out;
+    
+    Listener listener = new Listener();
+    
+    @Override
+    public void setup() {
+        device.addDistanceListener(listener);
+        try {
+            device.setDistanceCallbackPeriod(CALLBACK_PERIOD);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+
+    @Override
+    public void dispose() {
+        device.removeDistanceListener(listener);
+        try {
+            device.setDistanceCallbackPeriod(0);
+        } catch (TimeoutException | NotConnectedException ex) {
+            log(WARNING, ex);
+        }
+    }
+    
+    private class Listener implements BrickletDistanceIR.DistanceListener {
+
+        @Override
+        public void distance(int dist) {
+            distance = dist;
+            out.send(dist);
+        }
+        
+    }

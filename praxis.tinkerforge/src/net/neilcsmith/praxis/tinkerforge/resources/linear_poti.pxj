@@ -1,0 +1,53 @@
+
+    @TinkerForge BrickletLinearPoti poti;
+    
+    @P(1) @Port(false) @OnChange("updateValue")
+    boolean normalize;
+    @P(2) @ReadOnly
+    double value;
+    @Out(1) @ID("value")
+    Output out;
+    
+    Listener listener = new Listener();
+    int raw;
+    
+    @Override
+    public void setup() {
+        poti.addPositionListener(listener);
+        try {
+            poti.setPositionCallbackPeriod(CALLBACK_PERIOD);
+        } catch (TimeoutException | NotConnectedException ex) {
+        }
+    }
+
+    @Override
+    public void dispose() {
+        poti.removePositionListener(listener);
+        try {
+            poti.setPositionCallbackPeriod(0);
+        } catch (TimeoutException | NotConnectedException ex) {
+        }
+    }
+    
+    private void updateValue() {
+        if (normalize) {
+            value = normalize(raw);
+        } else {
+            value = raw;
+        }
+        out.send(value);
+    }
+    
+    private double normalize(int val) {
+        return val / 100.0;
+    }
+    
+    private class Listener implements BrickletLinearPoti.PositionListener {
+
+        @Override
+        public void position(int position) {
+            raw = position;
+            updateValue();
+        }
+        
+    }
