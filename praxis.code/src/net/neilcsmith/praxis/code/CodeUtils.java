@@ -19,28 +19,39 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.code;
 
-import net.neilcsmith.praxis.compiler.ClassBodyContext;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Scanner;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class CoreBodyContext extends ClassBodyContext<CoreCodeDelegate> {
+public class CodeUtils {
+ 
     
-    public final static String TEMPLATE =
-            CodeUtils.load(CoreBodyContext.class, "resources/core_template.pxj");
-            
+    private CodeUtils() {}
     
-    public CoreBodyContext() {
-        super(CoreCodeDelegate.class);
+    
+    public static String load(Class<?> cls, String location) {
+        try (InputStream is = cls.getResourceAsStream(location);
+                Scanner s = new Scanner(is, "UTF-8").useDelimiter("\\A");) {
+            return s.hasNext() ? s.next() : ""; 
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
-
-    @Override
-    public String[] getDefaultImports() {
-        return CodeUtils.defaultImports();
+    
+    public static <T> T[] join(T[] a, T[] b) {
+        T[] r = Arrays.copyOf(a, a.length + b.length);
+        System.arraycopy(b, 0, r, a.length, b.length);
+        return r;
     }
-
+    
+    public static String[] defaultImports() {
+        return DefaultCodeDelegate.IMPORTS.clone();
+    }
+    
 }

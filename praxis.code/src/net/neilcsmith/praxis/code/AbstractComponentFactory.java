@@ -98,14 +98,7 @@ public class AbstractComponentFactory implements ComponentFactory {
     }
 
     protected String source(String location) {
-        try (InputStream is = getClass().getResourceAsStream(location);
-                Scanner s = new Scanner(is, "UTF-8").useDelimiter("\\A");) {
-            return s.hasNext() ? s.next() : ""; 
-        } catch (Exception e) {
-            Logger.getLogger(AbstractComponentFactory.class.getName())
-                    .log(Level.SEVERE, "Failed to read source file", e);
-            return null;
-        }
+        return CodeUtils.load(getClass(), location);
     }
 
     private static class MetaData extends ComponentFactory.MetaData<Component> {
