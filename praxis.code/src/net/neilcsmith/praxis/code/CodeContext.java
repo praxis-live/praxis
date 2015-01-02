@@ -39,7 +39,6 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.info.ComponentInfo;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.interfaces.Services;
-import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.logging.LogBuilder;
 import net.neilcsmith.praxis.logging.LogLevel;
 import net.neilcsmith.praxis.util.ArrayUtils;
@@ -224,10 +223,6 @@ public abstract class CodeContext<D extends CodeDelegate> {
     }
 
     protected void update(long time) {
-        if (!log.isEmpty()) {
-            log(log.toCallArguments());
-            log.clear();
-        }
         if (time - this.time > 0) {
             this.time = time;
             for (ClockListener l : clockListeners) {
@@ -239,16 +234,28 @@ public abstract class CodeContext<D extends CodeDelegate> {
     protected void invoke(long time, Invoker invoker) {
         if (isActive()) {
             update(time);
-            invoker.invoke();
+            try {
+                invoker.invoke();
+            } catch (Exception ex) {
+                log.log(LogLevel.ERROR, ex);
+            }
+            flush();
+        }
+    }
+    
+    protected void flush() {
+        if (!log.isEmpty()) {
+            log(log.toCallArguments());
+            log.clear();
         }
     }
 
+    protected LogBuilder getLog() {
+        return log;
+    }
+    
     protected LogLevel getLogLevel() {
         return log.getLevel();
-    }
-
-    protected void log(LogLevel level, String msg) {
-        log.log(level, msg);
     }
 
     protected void log(LogBuilder log) {

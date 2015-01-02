@@ -30,6 +30,8 @@
 
 package net.neilcsmith.praxis.code.userapi;
 
+import net.neilcsmith.praxis.logging.LogLevel;
+
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
@@ -37,6 +39,11 @@ package net.neilcsmith.praxis.code.userapi;
 public class Constants {
 
     private Constants() {}
+    
+    public final static LogLevel ERROR = LogLevel.ERROR;
+    public final static LogLevel WARNING = LogLevel.WARNING;
+    public final static LogLevel INFO = LogLevel.INFO;
+    public final static LogLevel DEBUG = LogLevel.DEBUG;
 
     public final static double PI = Math.PI;
     public final static double HALF_PI = PI / 2;

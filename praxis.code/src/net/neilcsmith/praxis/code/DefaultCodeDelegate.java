@@ -26,9 +26,16 @@ import java.util.Random;
 import net.neilcsmith.praxis.code.userapi.Constants;
 import net.neilcsmith.praxis.code.userapi.Property;
 import net.neilcsmith.praxis.core.Control;
+import net.neilcsmith.praxis.logging.LogLevel;
 import processing.core.PApplet;
 
 public class DefaultCodeDelegate extends CodeDelegate {
+    
+    final static String[] IMPORTS = {
+        "java.util.*",
+        "net.neilcsmith.praxis.code.userapi.*",
+        "static net.neilcsmith.praxis.code.userapi.Constants.*"
+    };
 
     private final Random rnd;
 
@@ -36,7 +43,27 @@ public class DefaultCodeDelegate extends CodeDelegate {
         rnd = new Random();
     }
 
-    public long getTime() {
+    public final void log(LogLevel level, String msg) {
+        getContext().getLog().log(level, msg);
+    }
+    
+    public final void log(LogLevel level, Exception ex) {
+        getContext().getLog().log(level, ex);
+    }
+    
+    public final void log(LogLevel level, Exception ex, String msg) {
+        getContext().getLog().log(level, ex, msg);
+    }
+    
+    public final void log(LogLevel level, Class<? extends Exception> type, String msg) {
+        getContext().getLog().log(level, type, msg);
+    }
+    
+    public final boolean isLoggable(LogLevel level) {
+        return getContext().getLogLevel().isLoggable(level);
+    }
+    
+    public final long time() {
         return getContext().getTime();
     }
 

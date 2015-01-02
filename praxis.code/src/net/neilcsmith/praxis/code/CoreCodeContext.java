@@ -83,6 +83,7 @@ public class CoreCodeContext extends CodeContext<CoreCodeDelegate> {
         public void tick(ExecutionContext source) {
             update(source.getTime());
             getDelegate().update();
+            flush();
         }
 
     }
