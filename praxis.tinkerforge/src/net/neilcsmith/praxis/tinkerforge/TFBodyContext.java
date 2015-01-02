@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.tinkerforge;
 
+import net.neilcsmith.praxis.code.CodeUtils;
 import net.neilcsmith.praxis.compiler.ClassBodyContext;
 
 /**
@@ -28,20 +29,17 @@ import net.neilcsmith.praxis.compiler.ClassBodyContext;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public class TFBodyContext extends ClassBodyContext<TFCodeDelegate> {
-    
-    public final static String TEMPLATE =
-            "\npublic void setup() {\n  \n}\n\npublic void update() {\n  \n}";
-            
-    
-    private final static String[] IMPORTS = {
-        "java.util.*",
-        "net.neilcsmith.praxis.code.userapi.*",
-        "com.tinkerforge.*",
-        "net.neilcsmith.praxis.tinkerforge.userapi.*",
-        "static net.neilcsmith.praxis.code.userapi.Constants.*",
-        "static net.neilcsmith.praxis.tinkerforge.userapi.Constants.*"
-    }; 
-   
+
+    public final static String TEMPLATE
+            = CodeUtils.load(TFBodyContext.class, "resources/tf_template.pxj");
+
+    private final static String[] IMPORTS = CodeUtils.join(
+            CodeUtils.defaultImports(), new String[]{
+                "com.tinkerforge.*",
+                "net.neilcsmith.praxis.tinkerforge.userapi.*",
+                "static net.neilcsmith.praxis.tinkerforge.userapi.Constants.*"
+            });
+
     public TFBodyContext() {
         super(TFCodeDelegate.class);
     }
@@ -50,7 +48,5 @@ public class TFBodyContext extends ClassBodyContext<TFCodeDelegate> {
     public String[] getDefaultImports() {
         return IMPORTS.clone();
     }
-    
-    
-    
+
 }
