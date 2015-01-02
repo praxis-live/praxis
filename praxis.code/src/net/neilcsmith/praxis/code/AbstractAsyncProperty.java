@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.code;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ComponentAddress;
@@ -33,6 +34,7 @@ import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.interfaces.TaskService;
+import net.neilcsmith.praxis.core.types.PError;
 import net.neilcsmith.praxis.core.types.PReference;
 
 /**
@@ -148,7 +150,18 @@ public abstract class AbstractAsyncProperty<V> implements Control {
             router.route(Call.createErrorCall(activeCall, call.getArgs()));
             activeCall = null;
         }
-        taskError(call.getTimecode());
+        CallArguments args = call.getArgs();
+        PError err = null;
+        if (args.getSize() > 0) {
+            try {
+                err = PError.coerce(args.get(0));
+            } catch (ArgumentFormatException ex) {
+                err = PError.create(ex, args.get(0).toString());
+            }
+        } else {
+            err = PError.create("");
+        }
+        taskError(latest, err);
     }
 
     private void respond(Call call, CallArguments args, PacketRouter router) {
@@ -262,7 +275,7 @@ public abstract class AbstractAsyncProperty<V> implements Control {
     protected void valueChanged(long time) {
     }
 
-    protected void taskError(long time) {
+    protected void taskError(long time, PError error) {
     }
 
 }

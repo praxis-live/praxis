@@ -28,6 +28,7 @@ import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.TaskService;
+import net.neilcsmith.praxis.core.types.PError;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
@@ -73,6 +74,11 @@ class CodeProperty<D extends CodeDelegate>
         }
     }
 
+    @Override
+    protected void taskError(long time, PError error) {
+        context.getLog().log(LogLevel.ERROR, error.getType() + " : " + error.getMessage());
+    }
+ 
     @Override
     public ControlInfo getInfo() {
         return info;
