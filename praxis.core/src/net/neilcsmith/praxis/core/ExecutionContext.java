@@ -46,7 +46,18 @@ public abstract class ExecutionContext {
         return -1;
     }
 
+    public boolean supportsPeriod() {
+        return getPeriod() > 0;
+    }
 
+    public long getStartTime() {
+        throw new UnsupportedOperationException();
+    }
+    
+    public boolean supportsStartTime() {
+        return false;
+    }
+    
     public static interface StateListener {
 
         public void stateChanged(ExecutionContext source);
