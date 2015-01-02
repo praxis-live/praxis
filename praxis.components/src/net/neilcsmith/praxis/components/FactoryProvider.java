@@ -80,11 +80,11 @@ public class FactoryProvider implements ComponentFactoryProvider {
             addComponent("core:file:resolver", data(Resolver.class).deprecated());
 
             // MATH
-            addComponent("core:math:random", RandomFloat.class);
-            addComponent("core:math:threshold", Threshold.class);
-            addComponent("core:math:multiply", Multiply.class);
-            addComponent("core:math:add", Add.class);
-            addComponent("core:math:scale", Scale.class);
+//            addComponent("core:math:random", RandomFloat.class);
+//            addComponent("core:math:threshold", Threshold.class);
+//            addComponent("core:math:multiply", Multiply.class);
+//            addComponent("core:math:add", Add.class);
+//            addComponent("core:math:scale", Scale.class);
             addComponent("core:math:normalize", data(Normalize.class).test());
 
             //ROUTING
