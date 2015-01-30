@@ -33,7 +33,8 @@ import net.neilcsmith.praxis.core.types.PNumber;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Type {
 
-//    Class<? extends Argument> cls() default Argument.class;
+    Class<? extends Argument> cls() default Argument.class;
+//    String[] properties() default {};
 
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface Number {

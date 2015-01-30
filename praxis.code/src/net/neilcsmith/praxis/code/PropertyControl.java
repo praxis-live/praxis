@@ -241,13 +241,22 @@ public class PropertyControl extends Property implements Control {
 
     private static class DefaultBinding extends Binding {
 
+        private final ArgumentInfo argInfo;
+        private final Argument def;
+        
         private Argument argValue;
         private double dblValue;
 
         private DefaultBinding() {
-            this.argValue = getDefaultValue();
+            this(Argument.info(), PString.EMPTY);
         }
 
+        private DefaultBinding(ArgumentInfo argInfo, Argument def) {
+            this.argInfo = argInfo;
+            this.def = def;
+            this.argValue = def;
+        }
+        
         @Override
         public void set(long time, Argument value) throws Exception {
             this.argValue = value;
@@ -279,12 +288,12 @@ public class PropertyControl extends Property implements Control {
 
         @Override
         public ArgumentInfo getArgumentInfo() {
-            return Argument.info();
+            return argInfo;
         }
 
         @Override
         public Argument getDefaultValue() {
-            return PString.EMPTY;
+            return def;
         }
 
     }
@@ -385,9 +394,18 @@ public class PropertyControl extends Property implements Control {
                     || BooleanBinding.isBindableFieldType(type)) {
                 binding = BooleanBinding.create(connector, field);
             }
+            
             if (binding == null) {
-                binding = new DefaultBinding();
+                Type typeAnn = field.getAnnotation(Type.class);
+                if (typeAnn != null) {
+                    binding = new DefaultBinding(
+                            ArgumentInfo.create(typeAnn.cls(), PMap.EMPTY),
+                            PString.EMPTY);
+                } else {
+                    binding = new DefaultBinding();
+                }
             }
+            
             return binding;
         }
 
