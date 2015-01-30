@@ -101,11 +101,11 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         buildExternalData();
     }
 
-    protected D getDelegate() {
+    public D getDelegate() {
         return delegate;
     }
 
-    protected LogBuilder getLog() {
+    public LogBuilder getLog() {
         return log;
     }
 
@@ -340,7 +340,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         }
     }
 
-    protected String findID(Field field) {
+    public String findID(Field field) {
         ID ann = field.getAnnotation(ID.class);
         if (ann != null) {
             String id = ann.value();
@@ -351,7 +351,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         return javaNameToID(field.getName());
     }
 
-    protected String findID(Method method) {
+    public String findID(Method method) {
         ID ann = method.getAnnotation(ID.class);
         if (ann != null) {
             String id = ann.value();
@@ -362,12 +362,12 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         return javaNameToID(method.getName());
     }
 
-    private String javaNameToID(String javaName) {
+    protected String javaNameToID(String javaName) {
         String ret = idRegex.matcher(javaName).replaceAll("-");
         return ret.toLowerCase();
     }
 
-    private boolean shouldAddPort(AnnotatedElement element) {
+    protected boolean shouldAddPort(AnnotatedElement element) {
         if (element.isAnnotationPresent(ReadOnly.class)) {
             return false;
         }

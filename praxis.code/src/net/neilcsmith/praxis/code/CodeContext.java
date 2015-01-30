@@ -78,13 +78,17 @@ public abstract class CodeContext<D extends CodeDelegate> {
             throw e;
         }
     }
-
-    protected void configure(CodeComponent<D> cmp, CodeContext<D> oldCtxt) {
+    
+    void setComponent(CodeComponent<D> cmp) {
         this.cmp = cmp;
         delegate.setContext(this);
+    }
+
+    protected void configure(CodeComponent<D> cmp, CodeContext<D> oldCtxt) {
+        
         configureControls(oldCtxt);
         configurePorts(oldCtxt);
-        hierarchyChanged();
+//        hierarchyChanged();
     }
 
     private void configureControls(CodeContext<D> oldCtxt) {
@@ -231,7 +235,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
         }
     }
 
-    protected void invoke(long time, Invoker invoker) {
+    public void invoke(long time, Invoker invoker) {
         if (isActive()) {
             update(time);
             try {
@@ -250,7 +254,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
         }
     }
 
-    protected LogBuilder getLog() {
+    public LogBuilder getLog() {
         return log;
     }
     
