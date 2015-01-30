@@ -55,10 +55,11 @@ class OffScreenGraphicsInfo {
         this.context = context;
         if (previous != null) {
             for (OffScreenGraphicsInfo old : previous) {
-                if (old.id.equals(id) &&
-                        width == old.width &&
-                        height == old.height &&
-                        format == old.format) {
+                if (old.id.equals(id)
+                        && old.graphics != null
+                        && width == old.width
+                        && height == old.height
+                        && format == old.format) {
                     graphics = new OffScreenGraphics(old.graphics.surface);
                     old.graphics = null;
                     try {
