@@ -64,14 +64,16 @@ class TFCodeContext extends CodeContext<TFCodeDelegate> {
         super.configure(cmp, oldCtxt);
         if (oldCtxt instanceof TFCodeContext) {
             TFCodeContext old = (TFCodeContext) oldCtxt;
+            // tinkerforge not set yet as hierarchyChanged not called
+            TFContext tf = getLookup().get(TFContext.class);
             this.uid = old.uid; // copy over UID
             if (this.deviceClass == old.deviceClass &&
-                    tinkerforge != null &&
+                    tf != null &&
                     old.device != null) {
-                tinkerforge.releaseDevice(old.device);
+                tf.releaseDevice(old.device);
                 old.device = null;
             }
-            refresh();
+//            refresh();
         }
         
     }
