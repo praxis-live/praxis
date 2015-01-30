@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2013 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -54,12 +54,12 @@ import net.neilcsmith.praxis.video.render.ops.TransformBlit;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public abstract class PGraphics {
+public abstract class PGraphics extends PImage {
 
     private final static Logger LOG = Logger.getLogger(PGraphics.class.getName());
     private final static Set<String> warned = new HashSet<String>();
     private final static double alphaOpaque = 0.999;
-    private PImage image;
+//    private PImage image;
     private BlendMode blendMode = BlendMode.Normal;
     private double opacity = 1;
     private Color fillColor = Color.WHITE;
@@ -73,11 +73,8 @@ public abstract class PGraphics {
     private final RectFill rectFill;
     private final ShapeRender shapeRender;
 
-    protected PGraphics(PImage image) {
-        if (image == null) {
-            throw new NullPointerException();
-        }
-        this.image = image;
+    protected PGraphics(int width, int height) {
+        super(width, height);
         this.blit = new Blit();
         this.scaledBlit = new ScaledBlit();
         this.transformBlit = new TransformBlit();
@@ -85,10 +82,8 @@ public abstract class PGraphics {
         this.shapeRender = new ShapeRender();
     }
 
-//    protected PImage getImage() {
-//        return image;
-//    }
-
+    protected abstract Surface getSurface();
+    
     private static void warn(String msg) {
         if (!warned.contains(msg)) {
             LOG.warning(msg);
@@ -96,6 +91,14 @@ public abstract class PGraphics {
         }
     }
 
+    public void beginDraw() {
+        resetMatrix();
+    }
+    
+    public void endDraw() {
+        
+    }
+    
     // BEGINNING OF PUBLIC DRAWING METHODS
     public void background(double grey) {
         background(grey, grey, grey, 255);
@@ -110,7 +113,7 @@ public abstract class PGraphics {
     }
 
     public void background(double r, double g, double b, double a) {
-        Surface s = image.getSurface();
+        Surface s = getSurface();
         s.clear();
         int ir = round(r);
         int ig = round(g);
@@ -167,11 +170,11 @@ public abstract class PGraphics {
     }
 
     public void clear() {
-        image.getSurface().clear();
+        getSurface().clear();
     }
     
     public void copy(PImage src) {
-        image.getSurface().copy(src.getSurface());
+        getSurface().copy(src.getSurface());
     }
 
     public void ellipse(double x, double y, double w, double h) {
@@ -215,7 +218,7 @@ public abstract class PGraphics {
                 .setBlendMode(blendMode)
                 .setOpacity(opacity)
                 .setSourceRegion(null);
-        image.getSurface().process(blit, src.getSurface());
+        getSurface().process(blit, src.getSurface());
     }
 
     public void image(PImage src, double x, double y, double w, double h,
@@ -229,7 +232,7 @@ public abstract class PGraphics {
                 .setBlendMode(blendMode)
                 .setOpacity(opacity)
                 .setSourceRegion((int) u, (int) v, (int) w, (int) h);
-        image.getSurface().process(blit, src.getSurface());
+        getSurface().process(blit, src.getSurface());
     }
 
     public void image(PImage src, double x, double y, double w, double h) {
@@ -256,7 +259,7 @@ public abstract class PGraphics {
                     .setSourceRegion(iu1, iv1, srcW, srcH)
                     .setDestinationRegion(ix, iy, iw, ih)
                     .setTransform(transform);
-            image.getSurface().process(transformBlit, src.getSurface());
+            getSurface().process(transformBlit, src.getSurface());
         } else {
             if (iw == srcW && ih == srcH) {
                 blit.setX(ix)
@@ -264,13 +267,13 @@ public abstract class PGraphics {
                         .setBlendMode(blendMode)
                         .setOpacity(opacity)
                         .setSourceRegion(iu1, iv1, srcW, srcH);
-                image.getSurface().process(blit, src.getSurface());
+                getSurface().process(blit, src.getSurface());
             } else {
                 scaledBlit.setBlendMode(blendMode)
                         .setOpacity(opacity)
                         .setSourceRegion(iu1, iv1, srcW, srcH)
                         .setDestinationRegion(ix, iy, iw, ih);
-                image.getSurface().process(scaledBlit, src.getSurface());
+                getSurface().process(scaledBlit, src.getSurface());
             }
         }
     }
@@ -294,11 +297,11 @@ public abstract class PGraphics {
     }
 
     public void op(SurfaceOp op) {
-        image.getSurface().process(op);
+        getSurface().process(op);
     }
 
     public void op(SurfaceOp op, PImage src) {
-        image.getSurface().process(op, src.getSurface());
+        getSurface().process(op, src.getSurface());
     }
 
     public void point(double x, double y) {
@@ -313,7 +316,7 @@ public abstract class PGraphics {
                 .setOpacity(opacity)
                 .setColor(strokeColor)
                 .setBounds(round(x), round(y), 1, 1);
-        image.getSurface().process(rectFill);
+        getSurface().process(rectFill);
     }
 
     public void quad(double x1, double y1, double x2, double y2,
@@ -341,7 +344,7 @@ public abstract class PGraphics {
                         .setOpacity(opacity)
                         .setColor(fillColor)
                         .setBounds((int) x, (int) y, round(w), round(h));
-                image.getSurface().process(rectFill);
+                getSurface().process(rectFill);
                 return;
             }
         }
@@ -442,7 +445,7 @@ public abstract class PGraphics {
                 .setStrokeColor(strokeColor)
                 .setStroke(stroke)
                 .setShape(shape);
-        image.getSurface().process(shapeRender);
+        getSurface().process(shapeRender);
 
     }
 

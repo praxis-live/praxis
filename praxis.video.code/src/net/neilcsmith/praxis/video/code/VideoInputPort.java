@@ -66,6 +66,7 @@ class VideoInputPort extends DefaultVideoInputPort {
         Descriptor(String id, int index, Field field) {
             super(id, Category.In, index);
             this.field = field;
+            field.setAccessible(true);
         }
 
         @Override

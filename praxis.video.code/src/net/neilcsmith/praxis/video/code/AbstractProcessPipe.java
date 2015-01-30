@@ -1,0 +1,132 @@
+
+package net.neilcsmith.praxis.video.code;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import net.neilcsmith.praxis.video.pipes.SourceIsFullException;
+import net.neilcsmith.praxis.video.pipes.VideoPipe;
+import net.neilcsmith.praxis.video.render.Surface;
+
+/**
+ *
+ * @author Neil C Smith <http://neilcsmith.net>
+ */
+abstract class AbstractProcessPipe extends VideoPipe {
+
+    private int maxSources;
+    private List<VideoPipe> sources;
+    private VideoPipe sink;
+    private long renderReqTime;
+    private boolean renderReqCache;
+
+    protected AbstractProcessPipe(int maxSources) {
+        if (maxSources < 0) {
+            throw new IllegalArgumentException();
+        }
+        this.maxSources = maxSources;
+        this.sources = new ArrayList<>(maxSources);
+    }
+
+    @Override
+    protected void process(VideoPipe sink, Surface output, long time) {
+        if (this.sink == sink) {
+            callSources(output, time);
+            if (isRendering(time)) {
+                render(output, time);
+            }
+        }
+    }
+        
+    protected abstract void callSources(Surface output, long time);
+    
+    protected abstract void render(Surface output, long time);
+    
+    @Override
+    protected void registerSink(VideoPipe sink) throws SourceIsFullException {
+        if (this.sink != null) {
+            throw new SourceIsFullException();
+        }
+        this.sink = Objects.requireNonNull(sink);
+    }
+
+    @Override
+    protected void unregisterSink(VideoPipe sink) {
+        if (this.sink == sink) {
+            this.sink = null;
+        }
+    }
+
+    @Override
+    protected void registerSource(VideoPipe source) {
+        if (source == null) {
+            throw new NullPointerException();
+        }
+        if (sources.contains(source)) {
+            throw new IllegalArgumentException();
+        }
+        if (sources.size() == maxSources) {
+            throw new SourceIsFullException();
+        }
+        sources.add(source);
+    }
+
+    @Override
+    public void unregisterSource(VideoPipe source) {
+        sources.remove(source);
+    }
+
+    @Override
+    protected boolean isRenderRequired(VideoPipe source, long time) {
+        return isRendering(time);
+    }
+
+    protected boolean isRendering(long time) {
+        if (time != renderReqTime) {
+            if (sink == null) {
+                renderReqCache = false;
+            } else {
+                renderReqCache = sinkRequiresRender(sink, time);
+            }
+            renderReqTime = time;
+        }
+        return renderReqCache;
+    }
+
+    @Override
+    public int getSourceCount() {
+        return sources.size();
+    }
+
+    @Override
+    public int getSourceCapacity() {
+        return maxSources;
+    }
+
+    @Override
+    public VideoPipe getSource(int idx) {
+        return sources.get(idx);
+    }
+    
+    protected int getSourceIndex(VideoPipe source) {
+        return sources.indexOf(source);
+    }
+
+    @Override
+    public int getSinkCount() {
+        return sink == null ? 0 : 1;
+    }
+
+    @Override
+    public int getSinkCapacity() {
+        return 1;
+    }
+
+    @Override
+    public VideoPipe getSink(int idx) {
+        if (idx == 0 && sink != null) {
+            return sink;
+        }
+        throw new IndexOutOfBoundsException();
+    }
+}

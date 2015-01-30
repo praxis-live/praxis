@@ -19,33 +19,25 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  *
- *
- * Parts of the API of this package, as well as some of the code, is derived from
- * the Processing project (http://processing.org)
- *
- * Copyright (c) 2004-09 Ben Fry and Casey Reas
- * Copyright (c) 2001-04 Massachusetts Institute of Technology
- *
  */
-
 package net.neilcsmith.praxis.video.code.userapi;
 
-import net.neilcsmith.praxis.video.render.Surface;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public abstract class PImage {
+@Retention(RetentionPolicy.RUNTIME)
+public @interface OffScreen {
     
-    public final int width;
-    public final int height;
+    public int width() default 0;
+    public int height() default 0;
+    public Format format() default Format.Default;
     
-    public PImage(int width, int height) {
-        this.width = width;
-        this.height = height;
+    public static enum Format {
+        Default, RGB, ARGB;
     }
-    
-    protected abstract Surface getSurface();
     
 }

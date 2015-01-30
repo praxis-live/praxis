@@ -32,7 +32,6 @@ import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.logging.LogLevel;
 import net.neilcsmith.praxis.video.code.userapi.PGraphics;
 import net.neilcsmith.praxis.video.code.userapi.PImage;
-import net.neilcsmith.praxis.video.pipes.impl.MultiInOut;
 import net.neilcsmith.praxis.video.render.Surface;
 
 /**
@@ -45,6 +44,7 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
 
     private final VideoOutputPort.Descriptor output;
     private final VideoInputPort.Descriptor[] inputs;
+    private final OffScreenGraphicsInfo[] offscreen;
     private final Processor processor;
 
     private ExecutionContext execCtxt;
@@ -66,6 +66,9 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
         }
 
         inputs = ins.toArray(new VideoInputPort.Descriptor[ins.size()]);
+        
+        offscreen = connector.extractOffScreenInfo();
+        
         processor = new Processor(inputs.length);
     }
 
@@ -75,6 +78,14 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
         output.getPort().getPipe().addSource(processor);
         for (VideoInputPort.Descriptor vidp : inputs) {
             processor.addSource(vidp.getPort().getPipe());
+        }
+        configureOffScreen((VideoCodeContext<D>) oldCtxt);
+    }
+    
+    private void configureOffScreen(VideoCodeContext<D> oldCtxt) {
+        OffScreenGraphicsInfo[] previous = oldCtxt == null ? null : oldCtxt.offscreen;
+        for (OffScreenGraphicsInfo info : offscreen) {
+            info.attach(this, previous);
         }
     }
 
@@ -103,39 +114,61 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
 
     }
 
-    private class Processor extends MultiInOut {
+    private class Processor extends AbstractProcessPipe {
         
         private SurfacePGraphics pg;
         private SurfacePImage[] images;
 
         private Processor(int inputs) {
-            super(inputs, 1);
+            super(inputs);
             images = new SurfacePImage[inputs];
         }
 
         @Override
-        protected void process(Surface[] in, Surface output, int index, boolean rendering) {
+        protected void callSources(Surface output, long time) {
+            validateImages(output);
+            int count = getSourceCount();
+            for (int i=0; i < count; i++) {
+                callSource(getSource(i), images[i].surface, time);
+            }
+        }
+
+        @Override
+        protected void render(Surface output, long time) {
+            update(time);
             output.clear();
             if (pg == null || pg.surface != output) {
                 pg = new SurfacePGraphics(output);
+                setupRequired = true;
             }
             VideoCodeDelegate del = getDelegate();
             del.setupGraphics(pg, output.getWidth(), output.getHeight());
-            for (int i=0; i<in.length;i++) {
-                SurfacePImage img = images[i];
-                if (img == null || img.surface != in[i]) {
-                    img = new SurfacePImage(in[i]);
-                    setImageField(del, inputs[i].getField(), img);
-                }
-            }
-            update(execCtxt.getTime());
-            pg.resetMatrix();
+            pg.beginDraw();
+            validateOffscreen(output);
             if (setupRequired) {
                 invokeSetup(del);
                 setupRequired = false;
             }
             invokeDraw(del);
+            pg.endDraw();
             flush();
+        }
+        
+        private void validateImages(Surface output) {
+            VideoCodeDelegate del = getDelegate();
+            for (int i=0; i<images.length; i++) {
+                SurfacePImage img = images[i];
+                Surface s = img == null ? null : img.surface;
+                if (s == null || !output.checkCompatible(s, true, true)) {
+                    if (s != null) {
+                        s.release();
+                    }
+                    s = output.createSurface();
+                    img = new SurfacePImage(s);
+                    images[i] = img;
+                    setImageField(del, inputs[i].getField(), img);
+                }
+            }
         }
         
         private void setImageField(VideoCodeDelegate delegate, Field field, PImage image) {
@@ -143,6 +176,12 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
                 field.set(delegate, image);
             } catch (Exception ex) {
                 getLog().log(LogLevel.ERROR, ex);
+            }
+        }
+        
+        private void validateOffscreen(Surface output) {
+            for (OffScreenGraphicsInfo info : offscreen) {
+                info.validate(output);
             }
         }
         
@@ -162,6 +201,8 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
             }
         }
 
+        
+
     }
 
     private static class SurfacePGraphics extends PGraphics {
@@ -169,8 +210,13 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
         private final Surface surface;
 
         SurfacePGraphics(Surface surface) {
-            super(new SurfacePImage(surface));
+            super(surface.getWidth(), surface.getHeight());
             this.surface = surface;
+        }
+
+        @Override
+        protected Surface getSurface() {
+            return surface;
         }
 
     }

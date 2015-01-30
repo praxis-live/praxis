@@ -23,13 +23,15 @@
 package net.neilcsmith.praxis.video.code;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeConnector;
 import net.neilcsmith.praxis.code.CodeFactory;
 import net.neilcsmith.praxis.code.userapi.In;
-import net.neilcsmith.praxis.code.userapi.Out;
-import net.neilcsmith.praxis.code.userapi.Output;
+import net.neilcsmith.praxis.code.userapi.P;
 import net.neilcsmith.praxis.core.Port;
+import net.neilcsmith.praxis.video.code.userapi.OffScreen;
 import net.neilcsmith.praxis.video.code.userapi.PImage;
 
 /**
@@ -40,21 +42,26 @@ public class VideoCodeConnector<T extends VideoCodeDelegate> extends CodeConnect
     
     private final static Logger LOG = Logger.getLogger(VideoCodeConnector.class.getName());
     
-    public final static String SETUP = "setup";
-    public final static String DRAW = "draw";
+//    public final static String SETUP = "setup";
+//    public final static String DRAW = "draw";
     
     private VideoOutputPort.Descriptor output;
-    
+    private List<OffScreenGraphicsInfo> offscreen;
 
     public VideoCodeConnector(CodeFactory.Task<T> contextCreator,
             T delegate) {
         super(contextCreator, delegate);
+        offscreen = new ArrayList<>();
     }
     
     VideoOutputPort.Descriptor extractOutput() {
         return output;
     }
 
+    OffScreenGraphicsInfo[] extractOffScreenInfo() {
+        return offscreen.toArray(new OffScreenGraphicsInfo[offscreen.size()]);
+    }
+    
     @Override
     protected void addDefaultPorts() {
         super.addDefaultPorts();
@@ -65,18 +72,38 @@ public class VideoCodeConnector<T extends VideoCodeDelegate> extends CodeConnect
     @Override
     protected void analyseField(Field field) {
         if (PImage.class.isAssignableFrom(field.getType())) {
-            In ann = field.getAnnotation(In.class);
-            if (ann != null) {
-                field.setAccessible(true);
-                addPort(new VideoInputPort.Descriptor(findID(field), ann.value(), field));
+            In in = field.getAnnotation(In.class);
+            if (in != null) {
+                addPort(new VideoInputPort.Descriptor(findID(field), in.value(), field));
+                return;
+            }
+            
+            P p = field.getAnnotation(P.class);
+            if (p != null) {
+                ImageProperty.Descriptor ipd =
+                        ImageProperty.Descriptor.create(this, p, field);
+                if (ipd != null) {
+                    addControl(ipd);
+                    if (shouldAddPort(field)) {
+                        addPort(ipd.createPortDescriptor());
+                    }
+                    return;
+                }
+            }
+        }
+        
+        if (field.isAnnotationPresent(OffScreen.class)) {
+            OffScreenGraphicsInfo osgi = OffScreenGraphicsInfo.create(field);
+            if (osgi != null) {
+                offscreen.add(osgi);
                 return;
             }
         }
-        if (Output.class.isAssignableFrom(field.getType())) {
-            LOG.warning("Output fields not currently supported in video components");
-            return;
-        }
+        
         super.analyseField(field);
     }
+    
+
+    
 
 }
