@@ -30,8 +30,8 @@ import java.lang.reflect.Method;
  */
 public class CoreCodeConnector extends CodeConnector<CoreCodeDelegate> {
 
-    public final static String SETUP = "setup";
-    public final static String UPDATE = "update";
+//    public final static String SETUP = "setup";
+    private final static String UPDATE = "update";
 
     private boolean foundUpdate;
 
