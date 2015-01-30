@@ -116,6 +116,14 @@ class PGLApplet extends PApplet {
 //        rect(100,100,100,100);
     }
 
+    @Override
+    public void dispose() {
+        context.dispose();
+        super.dispose();
+    }
+
+    
+    
     void requestDraw(long time) {
         renderTime = time;
         g.requestDraw();
