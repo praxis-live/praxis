@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -59,17 +59,17 @@ class CodeProperty<D extends CodeDelegate>
     }
 
     @Override
-    protected final Task<D> createTask(CallArguments keys) throws Exception {
+    protected final Task createTask(CallArguments keys) throws Exception {
         String code = keys.get(0).toString();
-        return new Task<>(factory, code, context.getLogLevel());
+        return new Task(factory, code, context.getLogLevel());
     }
 
     @Override
     @SuppressWarnings("unchecked")
     protected void valueChanged(long time) {
-        Result<D> r = getValue();
+        Result r = getValue();
         if (r != null) {
-            context.getComponent().install(r.context);
+            context.getComponent().install((CodeContext<D>) r.context);
             context.log(r.log);
         }
     }
@@ -84,13 +84,13 @@ class CodeProperty<D extends CodeDelegate>
         return info;
     }
 
-    static class Task<T extends CodeDelegate> implements TaskService.Task {
+    private static class Task implements TaskService.Task {
 
-        private final CodeFactory<T> factory;
+        private final CodeFactory<?> factory;
         private final String code;
         private final LogLevel logLevel;
 
-        private Task(CodeFactory<T> factory, String code, LogLevel logLevel) {
+        private Task(CodeFactory<?> factory, String code, LogLevel logLevel) {
             this.factory = factory;
             this.code = code;
             this.logLevel = logLevel;
@@ -99,7 +99,7 @@ class CodeProperty<D extends CodeDelegate>
         @Override
         public final Argument execute() throws Exception {
             String src = code.trim();
-            CodeContext<T> ctxt;
+            CodeContext<?> ctxt;
             LogBuilder log = new LogBuilder(logLevel);
             if (src.isEmpty()) {
                 ctxt = factory.task().createDefaultCodeContext();
@@ -108,17 +108,17 @@ class CodeProperty<D extends CodeDelegate>
                         .attachLogging(log)
                         .createCodeContext(src);
             }
-            return PReference.wrap(new Result<T>(ctxt, log));
+            return PReference.wrap(new Result(ctxt, log));
         }
 
     }
 
-    static class Result<T extends CodeDelegate> {
+    static class Result {
 
-        private final CodeContext<T> context;
+        private final CodeContext<?> context;
         private final LogBuilder log;
 
-        private Result(CodeContext<T> context, LogBuilder log) {
+        private Result(CodeContext<?> context, LogBuilder log) {
             this.context = context;
             this.log = log;
         }
@@ -130,7 +130,7 @@ class CodeProperty<D extends CodeDelegate>
 
         private final CodeFactory<D> factory;
         private final ControlInfo info;
-        private CodeProperty<D> control;
+        private CodeProperty<?> control;
 
         public Descriptor(CodeFactory<D> factory, int index) {
             super("code", Category.Property, index);
@@ -157,9 +157,9 @@ class CodeProperty<D extends CodeDelegate>
         public void attach(CodeContext<?> context, Control previous) {
             if (previous instanceof CodeProperty
                     && ((CodeProperty<?>) previous).factory == factory) {
-                control = (CodeProperty) previous;
+                control = (CodeProperty<?>) previous;
             } else {
-                control = new CodeProperty(factory, info);
+                control = new CodeProperty<>(factory, info);
             }
             control.attach(context);
         }
