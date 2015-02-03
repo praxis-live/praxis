@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeConnector;
 import net.neilcsmith.praxis.code.CodeFactory;
+import net.neilcsmith.praxis.code.ResourceProperty;
 import net.neilcsmith.praxis.code.userapi.In;
 import net.neilcsmith.praxis.code.userapi.P;
 import net.neilcsmith.praxis.core.Port;
@@ -80,8 +81,8 @@ public class VideoCodeConnector<T extends VideoCodeDelegate> extends CodeConnect
             
             P p = field.getAnnotation(P.class);
             if (p != null) {
-                ImageProperty.Descriptor ipd =
-                        ImageProperty.Descriptor.create(this, p, field);
+                ResourceProperty.Descriptor<PImage> ipd =
+                        ResourceProperty.Descriptor.create(this, p, field, ImageLoader.getDefault());
                 if (ipd != null) {
                     addControl(ipd);
                     if (shouldAddPort(field)) {
