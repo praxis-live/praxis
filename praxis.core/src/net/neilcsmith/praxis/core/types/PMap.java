@@ -82,7 +82,7 @@ public class PMap extends Argument {
         return def;
     }
 
-    public double getDouble(String key, int def) {
+    public double getDouble(String key, double def) {
         Argument val = get(key);
         if (val != null) {
             try {
