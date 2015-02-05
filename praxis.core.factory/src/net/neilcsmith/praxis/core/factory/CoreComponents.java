@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.core.components;
+package net.neilcsmith.praxis.core.factory;
 
 import net.neilcsmith.praxis.code.AbstractComponentFactory;
 import net.neilcsmith.praxis.code.CoreCodeFactory;
