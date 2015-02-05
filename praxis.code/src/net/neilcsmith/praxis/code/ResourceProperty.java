@@ -225,7 +225,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
         }
 
         public PortDescriptor createPortDescriptor() {
-            return new PortDescImpl(getID(), getIndex(), control);
+            return new PortDescImpl(getID(), getIndex(), this);
         }
         
         public static <V> Descriptor<V> create(CodeConnector<?> connector, P ann,
@@ -264,13 +264,13 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
     
     private static class PortDescImpl extends PortDescriptor implements ControlInput.Link {
 
-        private final ResourceProperty<?> control;
+        private final Descriptor<?> dsc;
 
         private ControlInput port;
 
-        private PortDescImpl(String id, int index, ResourceProperty<?> control) {
+        private PortDescImpl(String id, int index, Descriptor<?> dsc) {
             super(id, PortDescriptor.Category.Property, index);
-            this.control = control;
+            this.dsc = dsc;
         }
 
         @Override
@@ -304,7 +304,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
 
         @Override
         public void receive(long time, Argument value) {
-            control.portInvoke(time, value);
+            dsc.control.portInvoke(time, value);
         }
 
     }
