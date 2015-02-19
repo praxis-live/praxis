@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -71,16 +71,6 @@ public final class PGLSurface extends Surface {
         }
     }
 
-//    public GLContext getGLContext() {
-//        return context;
-//    }
-//    void setData(PGLSurfaceData data) {
-//        this.data = data;
-//    }
-//
-//    Data getData() {
-//        return data;
-//    }
     public PGLGraphics getGraphics() {
         if (data == null) {
             LOG.fine("Data null - clearing graphics");
@@ -88,14 +78,6 @@ public final class PGLSurface extends Surface {
             data.graphics = context.acquireGraphics(width, height);
             data.graphics.beginDraw();
             data.graphics.background(0, 0, 0, alpha ? 0 : 255);
-//            data.graphics.noStroke();
-//            data.graphics.blendMode(PConstants.BLEND);
-//            data.graphics.fill(0, 255, 0, 255);
-//            data.graphics.rect(0, 0, width, height);
-//            data.graphics.blendMode(PConstants.ADD);
-//            data.graphics.fill(0, 0, 255, 255);
-//            data.graphics.rect(0, 0, width, height);
-//            data.graphics.blendMode(PConstants.BLEND);
         } else if (data.usage > 1) {
             Data tmp = new Data(width, height, alpha);
             tmp.graphics = context.acquireGraphics(width, height);
@@ -117,9 +99,6 @@ public final class PGLSurface extends Surface {
             data.graphics = context.acquireGraphics(width, height);
             data.graphics.beginDraw();
             data.graphics.background(0, 0, 0, alpha ? 0 : 255);
-//            data.graphics.noStroke();
-//            data.graphics.fill(0, 0, 0);
-//            data.graphics.rect(0, 0, width, height);
             data.graphics.writePixelsARGB(data.pixels, alpha);
             PixelArrayCache.release(data.pixels);
         }
@@ -129,17 +108,9 @@ public final class PGLSurface extends Surface {
 
     protected PImage asImage() {
         if (data != null && data.graphics != null) {
-//            if (data.usage > 1) {
-//                LOG.fine("Getting shared image from PGLSurface");
-//                return null;
-//            }
-            
             return data.graphics;
         } else {
             LOG.fine("Creating PGLGraphics for pixel data image");
-//            getGraphics();
-//            data.graphics.endDraw();
-//            return data.graphics;
             return null;
         }
     }
@@ -159,7 +130,6 @@ public final class PGLSurface extends Surface {
     }
 
     private void makeSWWritable() {
-//        context.getRenderer().invalidate(this);
         makeSWReadable();
         if (data.usage > 1) {
             Data tmp = new Data(width, height, alpha);
@@ -202,7 +172,6 @@ public final class PGLSurface extends Surface {
                 }
                 if (data.graphics != null) {
                     LOG.log(Level.FINEST, "Releasing Texture");
-//                    context.getTextureManager().release(data.texture);
                     context.releaseGraphics(data.graphics);
                     data.graphics = null;
                 }
