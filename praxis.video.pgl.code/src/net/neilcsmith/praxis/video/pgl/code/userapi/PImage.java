@@ -30,6 +30,8 @@
 
 package net.neilcsmith.praxis.video.pgl.code.userapi;
 
+import net.neilcsmith.praxis.video.pgl.PGLContext;
+
 
 /**
  *
@@ -45,6 +47,6 @@ public abstract class PImage {
         this.height = height;
     }
     
-    protected abstract processing.core.PImage unwrap();
+    protected abstract processing.core.PImage unwrap(PGLContext context);
     
 }

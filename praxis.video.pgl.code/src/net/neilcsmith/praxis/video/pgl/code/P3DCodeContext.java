@@ -30,6 +30,7 @@ import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.code.PortDescriptor;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.logging.LogLevel;
+import net.neilcsmith.praxis.video.pgl.PGLContext;
 import net.neilcsmith.praxis.video.pgl.PGLGraphics;
 import net.neilcsmith.praxis.video.pgl.PGLGraphics3D;
 import net.neilcsmith.praxis.video.pgl.PGLSurface;
@@ -112,7 +113,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
 
         private final PGraphics pg;
         private PGLImage[] images;
-        private processing.core.PApplet applet;
+        private PGLContext context;
         private PGLGraphics3D p3d;
 
         private Processor(int inputs) {
@@ -142,17 +143,15 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
                 }
             }
 
-            processing.core.PApplet curApp = pglOut.getGraphics().parent;
-            if (curApp != applet) {
-                applet = curApp;
-                p3d = (PGLGraphics3D) curApp.createGraphics(
-                        output.getWidth(), output.getHeight(),
-                        PGLGraphics3D.ID);
+            PGLContext curCtxt = pglOut.getContext();
+            if (curCtxt != context) {
+                context = curCtxt;
+                p3d = context.create3DGraphics(output.getWidth(), output.getHeight());
             }
 
             p3d.beginDraw();
             p3d.clear();
-            pg.setGraphics(p3d);
+            pg.init(p3d);
             del.setupGraphics(pg, output.getWidth(), output.getHeight());
             update(execCtxt.getTime());
 //            pg.resetMatrix();
@@ -169,6 +168,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             } catch (Exception ex) {
                 getLog().log(LogLevel.ERROR, ex);
             }
+            pg.release();
             p3d.endDraw();
             PGLGraphics g = pglOut.getGraphics();
             g.beginDraw();
@@ -191,17 +191,21 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
                 p3d.dispose();
             }
             p3d = null;
-            applet = null;
+            context = null;
         }
 
     }
 
     private static class PGraphics extends PGraphics3D {
 
-        private void setGraphics(processing.core.PGraphics graphics) {
-            g = graphics;
+        private void init(PGLGraphics3D g) {
+            initGraphics(g);
         }
 
+        private void release() {
+            releaseGraphics();
+        }
+        
     }
 
     private static class PGLImage extends PImage {
@@ -214,7 +218,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         }
 
         @Override
-        protected processing.core.PImage unwrap() {
+        protected processing.core.PImage unwrap(PGLContext context) {
             return img;
         }
 

@@ -26,9 +26,11 @@ import java.lang.reflect.Field;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeConnector;
 import net.neilcsmith.praxis.code.CodeFactory;
+import net.neilcsmith.praxis.code.ResourceProperty;
 import net.neilcsmith.praxis.code.userapi.In;
 import net.neilcsmith.praxis.code.userapi.Out;
 import net.neilcsmith.praxis.code.userapi.Output;
+import net.neilcsmith.praxis.code.userapi.P;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
 
@@ -72,6 +74,20 @@ public class P3DCodeConnector extends CodeConnector<P3DCodeDelegate> {
                 addPort(new PGLVideoInputPort.Descriptor(findID(field), ann.value(), field));
                 return;
             }
+            
+            P p = field.getAnnotation(P.class);
+            if (p != null) {
+                ResourceProperty.Descriptor<PImage> ipd =
+                        ResourceProperty.Descriptor.create(this, p, field, ImageLoader.getDefault());
+                if (ipd != null) {
+                    addControl(ipd);
+                    if (shouldAddPort(field)) {
+                        addPort(ipd.createPortDescriptor());
+                    }
+                    return;
+                }
+            }
+            
         }
         if (Output.class.isAssignableFrom(field.getType())) {
             LOG.warning("Output fields not currently supported in video components");

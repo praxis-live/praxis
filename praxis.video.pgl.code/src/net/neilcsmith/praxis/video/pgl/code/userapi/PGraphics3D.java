@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,33 +21,48 @@
  */
 package net.neilcsmith.praxis.video.pgl.code.userapi;
 
+import net.neilcsmith.praxis.video.pgl.PGLGraphics3D;
+
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class PGraphics3D extends PGraphics2D {
+public class PGraphics3D extends PGraphics {
 
+    protected void initGraphics(PGLGraphics3D graphics) {
+        this.g = graphics;
+        this.context = graphics.getContext();
+    }
+
+    protected PGLGraphics3D releaseGraphics() {
+        PGLGraphics3D ret = (PGLGraphics3D) g;
+        this.g = null;
+        this.context = null;
+        return ret;
+    }
+
+    // PROCESSING API BELOW
     public void beginCamera() {
         g.beginCamera();
     }
 
     public void bezier(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4) {
-        g.bezier((float)x1, (float)y1, (float)z1, (float)x2, (float)y2, (float)z2,
-                (float)x3, (float)y3, (float)z3, (float)x4, (float)y4, (float)z4);
+        g.bezier((float) x1, (float) y1, (float) z1, (float) x2, (float) y2, (float) z2,
+                (float) x3, (float) y3, (float) z3, (float) x4, (float) y4, (float) z4);
     }
-    
+
     public void bezierVertex(double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4) {
-        g.bezierVertex((float)x2, (float)y2, (float)z2,
-                (float)x3, (float)y3, (float)z3,
-                (float)x4, (float)y4, (float)z4);
+        g.bezierVertex((float) x2, (float) y2, (float) z2,
+                (float) x3, (float) y3, (float) z3,
+                (float) x4, (float) y4, (float) z4);
     }
 
     public void box(double size) {
-        g.box((float)size);
+        g.box((float) size);
     }
 
     public void box(double w, double h, double d) {
-        g.box((float)w, (float)h, (float)d);
+        g.box((float) w, (float) h, (float) d);
     }
 
     public void camera() {
@@ -55,20 +70,20 @@ public class PGraphics3D extends PGraphics2D {
     }
 
     public void camera(double eyeX, double eyeY, double eyeZ, double centerX, double centerY, double centerZ, double upX, double upY, double upZ) {
-        g.camera((float)eyeX, (float)eyeY, (float)eyeZ,
-                (float)centerX, (float)centerY, (float)centerZ,
-                (float)upX, (float)upY, (float)upZ);
+        g.camera((float) eyeX, (float) eyeY, (float) eyeZ,
+                (float) centerX, (float) centerY, (float) centerZ,
+                (float) upX, (float) upY, (float) upZ);
     }
 
     public void curve(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4) {
-        g.curve((float)x1, (float)y1, (float)z1,
-                (float)x2, (float)y2, (float)z2,
-                (float)x3, (float)y3, (float)z3,
-                (float)x4, (float)y4, (float)z4);
+        g.curve((float) x1, (float) y1, (float) z1,
+                (float) x2, (float) y2, (float) z2,
+                (float) x3, (float) y3, (float) z3,
+                (float) x4, (float) y4, (float) z4);
     }
 
     public void curveVertex(double x, double y, double z) {
-        g.curveVertex((float)x, (float)y, (float)z);
+        g.curveVertex((float) x, (float) y, (float) z);
     }
 
     public void endCamera() {
@@ -76,24 +91,24 @@ public class PGraphics3D extends PGraphics2D {
     }
 
     public void frustum(double left, double right, double bottom, double top, double near, double far) {
-        g.frustum((float)left, (float)right, (float)bottom,
-                (float)top, (float)near, (float)far);
+        g.frustum((float) left, (float) right, (float) bottom,
+                (float) top, (float) near, (float) far);
     }
 
     public double modelX(double x, double y, double z) {
-        return g.modelX((float)x, (float)y, (float)z);
+        return g.modelX((float) x, (float) y, (float) z);
     }
 
     public double modelY(double x, double y, double z) {
-        return g.modelY((float)x, (float)y, (float)z);
+        return g.modelY((float) x, (float) y, (float) z);
     }
 
     public double modelZ(double x, double y, double z) {
-        return g.modelZ((float)x, (float)y, (float)z);
+        return g.modelZ((float) x, (float) y, (float) z);
     }
 
     public void normal(double nx, double ny, double nz) {
-        g.normal((float)nx, (float)ny, (float)nz);
+        g.normal((float) nx, (float) ny, (float) nz);
     }
 
     public void ortho() {
@@ -101,11 +116,11 @@ public class PGraphics3D extends PGraphics2D {
     }
 
     public void ortho(double left, double right, double bottom, double top) {
-        g.ortho((float)left, (float)right, (float)bottom, (float)top);
+        g.ortho((float) left, (float) right, (float) bottom, (float) top);
     }
 
     public void ortho(double left, double right, double bottom, double top, double near, double far) {
-        g.ortho((float)left, (float)right, (float)bottom, (float)top, (float)near, (float)far);
+        g.ortho((float) left, (float) right, (float) bottom, (float) top, (float) near, (float) far);
     }
 
     public void perspective() {
@@ -113,52 +128,52 @@ public class PGraphics3D extends PGraphics2D {
     }
 
     public void perspective(double fovy, double aspect, double zNear, double zFar) {
-        g.perspective((float)fovy, (float)aspect, (float)zNear, (float)zFar);
+        g.perspective((float) fovy, (float) aspect, (float) zNear, (float) zFar);
     }
 
     public void point(double x, double y, double z) {
-        g.point((float)x, (float)y, (float)z);
+        g.point((float) x, (float) y, (float) z);
     }
 
     public void quadraticVertex(double cx, double cy, double cz, double x3, double y3, double z3) {
-        g.quadraticVertex((float)cx, (float)cy, (float)cz,
-                (float)x3, (float)y3, (float)z3);
+        g.quadraticVertex((float) cx, (float) cy, (float) cz,
+                (float) x3, (float) y3, (float) z3);
     }
 
     public void rotate(double angle, double x, double y, double z) {
-        g.rotate((float)angle, (float)x, (float)y, (float)z);
+        g.rotate((float) angle, (float) x, (float) y, (float) z);
     }
 
     public void rotateZ(double angle) {
-        g.rotateZ((float)angle);
+        g.rotateZ((float) angle);
     }
 
     public void scale(double x, double y, double z) {
-        g.scale((float)x, (float)y, (float)z);
+        g.scale((float) x, (float) y, (float) z);
     }
 
     public double screenX(double x, double y) {
-        return g.screenX((float)x, (float)y);
+        return g.screenX((float) x, (float) y);
     }
 
     public double screenX(double x, double y, double z) {
-        return g.screenX((float)x, (float)y, (float)z);
+        return g.screenX((float) x, (float) y, (float) z);
     }
 
     public double screenY(double x, double y) {
-        return g.screenY((float)x, (float)y);
+        return g.screenY((float) x, (float) y);
     }
 
     public double screenY(double x, double y, double z) {
-        return g.screenY((float)x, (float)y, (float)z);
+        return g.screenY((float) x, (float) y, (float) z);
     }
 
     public double screenZ(double x, double y, double z) {
-        return g.screenZ((float)x, (float)y, (float)z);
+        return g.screenZ((float) x, (float) y, (float) z);
     }
 
     public void sphere(double r) {
-        g.sphere((float)r);
+        g.sphere((float) r);
     }
 
     public void sphereDetail(int res) {
@@ -170,43 +185,43 @@ public class PGraphics3D extends PGraphics2D {
     }
 
     public void translate(double x, double y, double z) {
-        g.translate((float)x, (float)y, (float)z);
+        g.translate((float) x, (float) y, (float) z);
     }
 
     public void vertex(double x, double y, double z) {
-        g.vertex((float)x, (float)y, (float)z);
+        g.vertex((float) x, (float) y, (float) z);
     }
 
     public void vertex(double x, double y, double z, double u, double v) {
-        g.vertex((float)x, (float)y, (float)z, (float)u, (float)v);
+        g.vertex((float) x, (float) y, (float) z, (float) u, (float) v);
     }
 
-     public void ambient(double gray) {
-        g.ambient((float)gray);
+    public void ambient(double gray) {
+        g.ambient((float) gray);
     }
 
     public void ambient(double v1, double v2, double v3) {
-        g.ambient((float)v1, (float)v2, (float)v3);
+        g.ambient((float) v1, (float) v2, (float) v3);
     }
 
     public void specular(double gray) {
-        g.specular((float)gray);
+        g.specular((float) gray);
     }
 
     public void specular(double v1, double v2, double v3) {
-        g.specular((float)v1, (float)v2, (float)v3);
+        g.specular((float) v1, (float) v2, (float) v3);
     }
 
     public void shininess(double shine) {
-        g.shininess((float)shine);
+        g.shininess((float) shine);
     }
 
     public void emissive(double gray) {
-        g.emissive((float)gray);
+        g.emissive((float) gray);
     }
 
     public void emissive(double v1, double v2, double v3) {
-        g.emissive((float)v1, (float)v2, (float)v3);
+        g.emissive((float) v1, (float) v2, (float) v3);
     }
 
     public void lights() {
@@ -218,34 +233,34 @@ public class PGraphics3D extends PGraphics2D {
     }
 
     public void ambientLight(double v1, double v2, double v3) {
-        g.ambientLight((float)v1, (float)v2, (float)v3);
+        g.ambientLight((float) v1, (float) v2, (float) v3);
     }
 
     public void ambientLight(double v1, double v2, double v3, double x, double y, double z) {
-        g.ambientLight((float)v1, (float)v2, (float)v3, (float)x, (float)y, (float)z);
+        g.ambientLight((float) v1, (float) v2, (float) v3, (float) x, (float) y, (float) z);
     }
 
     public void directionalLight(double v1, double v2, double v3, double nx, double ny, double nz) {
-        g.directionalLight((float)v1, (float)v2, (float)v3, (float)nx, (float)ny, (float)nz);
+        g.directionalLight((float) v1, (float) v2, (float) v3, (float) nx, (float) ny, (float) nz);
     }
 
     public void pointLight(double v1, double v2, double v3, double x, double y, double z) {
-        g.pointLight((float)v1, (float)v2, (float)v3, (float)x, (float)y, (float)z);
+        g.pointLight((float) v1, (float) v2, (float) v3, (float) x, (float) y, (float) z);
     }
 
     public void spotLight(double v1, double v2, double v3, double x, double y, double z, double nx, double ny, double nz, double angle, double concentration) {
-        g.spotLight((float)v1, (float)v2, (float)v3,
-                (float)x, (float)y, (float)z,
-                (float)nx, (float)ny, (float)nz,
-                (float)angle, (float)concentration);
+        g.spotLight((float) v1, (float) v2, (float) v3,
+                (float) x, (float) y, (float) z,
+                (float) nx, (float) ny, (float) nz,
+                (float) angle, (float) concentration);
     }
 
     public void lightFalloff(double constant, double linear, double quadratic) {
-        g.lightFalloff((float)constant, (float)linear, (float)quadratic);
+        g.lightFalloff((float) constant, (float) linear, (float) quadratic);
     }
 
     public void lightSpecular(double v1, double v2, double v3) {
-        g.lightSpecular((float)v1, (float)v2, (float)v3);
+        g.lightSpecular((float) v1, (float) v2, (float) v3);
     }
-    
+
 }

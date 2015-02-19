@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -25,13 +25,13 @@ package net.neilcsmith.praxis.video.pgl.code;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeComponent;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.code.PortDescriptor;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.logging.LogLevel;
+import net.neilcsmith.praxis.video.pgl.PGLContext;
+import net.neilcsmith.praxis.video.pgl.PGLGraphics;
 import net.neilcsmith.praxis.video.pgl.PGLSurface;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PGraphics2D;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
@@ -127,7 +127,7 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
             }
 
             P2DCodeDelegate del = getDelegate();
-            
+
             for (int i = 0; i < in.length; i++) {
                 PGLImage img = images[i];
                 processing.core.PImage inImg = ((PGLSurface) in[i]).getGraphics();
@@ -136,10 +136,10 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
                     setImageField(del, inputs[i].getField(), img);
                 }
             }
-            
-            pg.initGraphics(pglOut.getGraphics());    
+
+            pg.init(pglOut.getGraphics());
             del.setupGraphics(pg, output.getWidth(), output.getHeight());
-            
+
             update(execCtxt.getTime());
             pg.resetMatrix();
             if (setupRequired) {
@@ -155,7 +155,7 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
             } catch (Exception ex) {
                 getLog().log(LogLevel.ERROR, ex);
             }
-            pg.releaseGraphics();
+            pg.release();
             flush();
         }
 
@@ -171,13 +171,14 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
 
     private static class PGraphics extends PGraphics2D {
 
-        private void initGraphics(processing.core.PGraphics pg) {
+        private void init(PGLGraphics pg) {
             pg.beginDraw();
             pg.pushStyle();
-            g = pg;
+            initGraphics(pg);
         }
         
-        private void releaseGraphics() {
+        private void release() {
+            PGLGraphics g = super.releaseGraphics();
             g.popStyle();
         }
 
@@ -193,7 +194,7 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
         }
 
         @Override
-        protected processing.core.PImage unwrap() {
+        protected processing.core.PImage unwrap(PGLContext context) {
             return img;
         }
 
