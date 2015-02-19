@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -132,13 +132,18 @@ class PGLApplet extends PApplet {
     class Context extends PGLContext {
 
         @Override
-        protected PGLGraphics createGraphics(int width, int height) {
+        public PGLGraphics createGraphics(int width, int height) {
             return (PGLGraphics) PGLApplet.this.createGraphics(width, height, PGLGraphics.ID);
         }
 
         @Override
-        protected PGLGraphics primary() {
+        public PGLGraphics primary() {
             return (PGLGraphics) g;
+        }
+
+        @Override
+        public PGLGraphics3D create3DGraphics(int width, int height) {
+            return (PGLGraphics3D) PGLApplet.this.createGraphics(width, height, PGLGraphics3D.ID);
         }
 
     }

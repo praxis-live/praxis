@@ -32,7 +32,7 @@ import processing.opengl.PGraphics2D;
  */
 public class PGLGraphics extends PGraphics2D {
 
-    public final static String ID = PGLGraphics.class.getName();
+    final static String ID = PGLGraphics.class.getName();
 
     private final PGLContext context;
     private PGLTexture pixelTexture;
@@ -44,6 +44,10 @@ public class PGLGraphics extends PGraphics2D {
         setSize(w, h);
     }
 
+    public PGLContext getContext() {
+        return context;
+    }
+    
     void writePixelsARGB(int[] pixels, boolean hasAlpha) {
         if (drawing) {
             flush();

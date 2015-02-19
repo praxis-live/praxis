@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -32,7 +32,7 @@ import processing.opengl.PGraphics3D;
  */
 public class PGLGraphics3D extends PGraphics3D {
 
-    public final static String ID = PGLGraphics3D.class.getName();
+    final static String ID = PGLGraphics3D.class.getName();
 
     private final PGLContext context;
     private PGLTexture pixelTexture;
@@ -42,6 +42,10 @@ public class PGLGraphics3D extends PGraphics3D {
         this.context = context;
         setPrimary(primary);
         setSize(w, h);
+    }
+    
+    public PGLContext getContext() {
+        return context;
     }
 
     void writePixelsARGB(int[] pixels, boolean hasAlpha) {

@@ -35,6 +35,7 @@ import net.neilcsmith.praxis.video.render.NativePixelData;
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
+import processing.core.PApplet;
 import processing.core.PConstants;
 import static processing.core.PConstants.ARGB;
 import processing.core.PGraphics;
@@ -62,35 +63,35 @@ public abstract class PGLContext {
     private IntBuffer scratchBuffer;
 
     protected PGLContext() {
-        cache = new ArrayList<PGLGraphics>(cacheMax);
-        aliens = new ArrayList<AlienImageReference>(cacheMax);
-        surfaces = new WeakHashMap<PGLSurface, Boolean>();
+        cache = new ArrayList<>(cacheMax);
+        aliens = new ArrayList<>(cacheMax);
+        surfaces = new WeakHashMap<>();
         readOp = new ReadPixelsOp();
     }
 
-    protected PGLSurface createSurface(int width, int height, boolean alpha) {
+    public PImage asImage(Surface surface) {
+        if (surface instanceof PGLSurface) {
+            PImage img = ((PGLSurface) surface).asImage();
+            if (img != null) {
+                return img;
+            }
+        }
+        return asAlienImage(surface);
+    }
+
+    public abstract PGLGraphics createGraphics(int width, int height);
+    
+    public abstract PGLGraphics3D create3DGraphics(int width, int height);
+
+    public abstract PGLGraphics primary();
+    
+    public PGLSurface createSurface(int width, int height, boolean alpha) {
         PGLSurface s = new PGLSurface(this, width, height, alpha);
         surfaces.put(s, Boolean.TRUE);
         return s;
     }
 
-//    public void makeCurrent(PGraphics pgl) {
-//        if (pgl == current) {
-//            return;
-//        }
-//        if (current != null) {
-//            current.endDraw();
-//        }
-//        if (pgl != null) {
-//            pgl.beginDraw();
-//        }
-//        current = pgl;
-//    }
-//
-//    public boolean isCurrent(PGraphics pgl) {
-//        return current == pgl;
-//    }
-    protected PGLGraphics acquireGraphics(int width, int height) {
+    PGLGraphics acquireGraphics(int width, int height) {
         PGLGraphics pgl = null;
         for (int i = 0; i < cache.size(); i++) {
             PGLGraphics g = cache.get(i);
@@ -112,7 +113,7 @@ public abstract class PGLContext {
         return pgl;
     }
 
-    protected void releaseGraphics(PGLGraphics pgl) {
+    void releaseGraphics(PGLGraphics pgl) {
         pgl.endDraw();
         while (cache.size() >= cacheMax) {
             LOG.log(Level.FINE, "Trimming graphics cache");
@@ -121,8 +122,8 @@ public abstract class PGLContext {
         cache.add(0, pgl);
     }
 
-    protected void writePixelsARGB(IntBuffer data, Texture tex, boolean hasAlpha) {
-        PGL pgl = ((PGLGraphics)primary()).pgl;
+    void writePixelsARGB(IntBuffer data, Texture tex, boolean hasAlpha) {
+        PGL pgl = ((PGLGraphics) primary()).pgl;
         GL2 gl2 = ((PJOGL) pgl).gl.getGL2();
         boolean enabledTex = false;
         if (!pgl.isEnabled(tex.glTarget)) {
@@ -155,9 +156,7 @@ public abstract class PGLContext {
         tex.updateTexels();
     }
 
-    protected abstract PGLGraphics createGraphics(int width, int height);
-
-    protected abstract PGLGraphics primary();
+    
 
     IntBuffer getScratchBuffer(int size) {
         if (scratchBuffer == null || scratchBuffer.capacity() < size) {
@@ -165,28 +164,6 @@ public abstract class PGLContext {
         }
         scratchBuffer.clear();
         return scratchBuffer;
-    }
-
-    public PImage asImage(Surface surface) {
-//        if (surface instanceof PGLSurface) {
-//            PGraphics cur = primary().getCurrent();
-//            PImage img = ((PGLSurface) surface).asImage();
-//            if (primary().getCurrent() != cur) {
-//                assert cur != primary();
-//                cur.beginDraw();
-//            }
-//            return img;
-//        } else {
-
-        if (surface instanceof PGLSurface) {
-            PImage img = ((PGLSurface) surface).asImage();
-            if (img != null) {
-                return img;
-            }
-        }
-        return asAlienImage(surface);
-
-//        }
     }
 
     private PImage asAlienImage(Surface alien) {
