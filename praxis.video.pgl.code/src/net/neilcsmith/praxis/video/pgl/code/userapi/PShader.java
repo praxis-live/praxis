@@ -1,21 +1,52 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright 2015 Neil C Smith.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 3 only, as
+ * published by the Free Software Foundation.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 3 for more details.
+ *
+ * You should have received a copy of the GNU General Public License version 3
+ * along with this work; if not, see http://www.gnu.org/licenses/
+ *
+ *
+ * Please visit http://neilcsmith.net if you need additional information or
+ * have any questions.
+ *
  */
-
 package net.neilcsmith.praxis.video.pgl.code.userapi;
 
-import processing.core.PImage;
+import net.neilcsmith.praxis.video.pgl.PGLContext;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public abstract class PShader {
+public class PShader {
     
-    private processing.opengl.PShader shader;
+    private final PGLContext context;
+    private final processing.opengl.PShader shader;
 
+    PShader(PGLContext context, processing.opengl.PShader shader) {
+        this.context = context;
+        this.shader = shader;
+    }
+    
+    processing.opengl.PShader unwrap(PGLContext context) {
+        if (this.context == context) {
+            return shader;
+        }
+        throw new IllegalStateException("Shader context is invalid");
+    }
+    
+    // PROCESSING API
+    
     public void set(String name, int x) {
         shader.set(name, x);
     }
@@ -65,9 +96,7 @@ public abstract class PShader {
     }
 
     public void set(String name, PImage tex) {
-        shader.set(name, tex);
+        shader.set(name, tex.unwrap(context));
     }
-    
-    protected abstract processing.opengl.PShader unwrap();
     
 }

@@ -33,6 +33,21 @@ abstract class PGraphics /*extends PImage*/ {
     PGLContext context;
 
     
+    // EXTENSION METHODS
+    
+    public PShader createShader(String vertShader, String fragShader) {
+        return new PShader(context, new ShaderProgram(context, vertShader, fragShader));
+    }
+    
+    private class ShaderProgram extends processing.opengl.PShader {
+
+        private ShaderProgram(PGLContext context, String vertex, String fragment) {
+            super(context.primary().parent);
+            setVertexShader(new String[]{vertex});
+            setFragmentShader(new String[]{fragment});
+            setType(TEXTURE);
+        }
+    }
     
     // PROCESSING API BELOW
     
@@ -106,25 +121,25 @@ abstract class PGraphics /*extends PImage*/ {
 //        return g.loadShader(fragFilename, vertFilename);
 //    }
 
-//    public void shader(PShader shader) {
-//        g.shader(shader.unwrap());
-//    }
+    public void shader(PShader shader) {
+        g.shader(shader.unwrap(context));
+    }
 //
 //    public void shader(PShader shader, int kind) {
 //        g.shader(shader.unwrap(), kind);
 //    }
 //
-//    public void resetShader() {
-//        g.resetShader();
-//    }
+    public void resetShader() {
+        g.resetShader();
+    }
 //
 //    public void resetShader(int kind) {
 //        g.resetShader(kind);
 //    }
 //
-//    public void filter(PShader shader) {
-//        g.filter(shader.unwrap());
-//    }
+    public void filter(PShader shader) {
+        g.filter(shader.unwrap(context));
+    }
 
     public void clip(double a, double b, double c, double d) {
         g.clip((float)a, (float)b, (float)c, (float)d);
@@ -493,16 +508,16 @@ abstract class PGraphics /*extends PImage*/ {
         g.noStroke();
     }
 
-    public void stroke(int rgb) {
-        g.stroke(rgb);
-    }
+//    public void stroke(int rgb) {
+//        g.stroke(rgb);
+//    }
 
     public void stroke(double gray) {
-//        g.stroke(gray);
+        g.stroke((float) gray);
     }
 
     public void stroke(double gray, double alpha) {
-//        g.stroke(gray, alpha);
+        g.stroke((float) gray, (float) alpha);
     }
 
     public void stroke(double v1, double v2, double v3) {

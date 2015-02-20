@@ -68,6 +68,13 @@ public class Constants {
     
     public final static ShapeEndMode OPEN = ShapeEndMode.Open;
     public final static ShapeEndMode CLOSE = ShapeEndMode.Close;
+    
+    public final static String DEFAULT_VERTEX_SHADER = 
+            ShaderConstants.DEFAULT_VERTEX_SHADER;
+    public final static String DEFAULT_FRAGMENT_SHADER = 
+            ShaderConstants.DEFAULT_FRAGMENT_SHADER;
+    public final static String GLSL_VERTEX_MIME = "text/x-glsl-vert";
+    public final static String GLSL_FRAGMENT_MIME = "text/x-glsl-frag";
 
     public static enum BlendMode {
 
