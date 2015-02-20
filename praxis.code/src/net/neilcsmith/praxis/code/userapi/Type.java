@@ -53,10 +53,11 @@ public @interface Type {
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface String {
         java.lang.String[] allowed() default {};
-        java.lang.String[] suggested() default {};
+//        java.lang.String[] suggested() default {};
         boolean emptyIsDefault() default false;
         java.lang.String mime() default "";
         java.lang.String def() default "";
+        java.lang.String template() default "";
     }
     
     @Retention(RetentionPolicy.RUNTIME)

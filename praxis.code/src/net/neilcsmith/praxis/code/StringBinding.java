@@ -41,11 +41,13 @@ abstract class StringBinding extends PropertyControl.Binding {
 
     private final Set<PString> allowed;
     private final PString mime;
+    private final PString template;
     final PString def;
 
-    private StringBinding(String mime, String def) {
+    private StringBinding(String mime, String template, String def) {
         allowed = null;
         this.mime = mime == null ? PString.EMPTY : PString.valueOf(mime);
+        this.template = template == null ? PString.EMPTY : PString.valueOf(template);
         this.def = def == null ? PString.EMPTY : PString.valueOf(def);
     }
 
@@ -64,6 +66,7 @@ abstract class StringBinding extends PropertyControl.Binding {
         this.def = foundDef ? PString.valueOf(def)
                 : PString.valueOf(allowedValues[0]);
         mime = PString.EMPTY;
+        template = PString.EMPTY;
     }
 
     @Override
@@ -89,7 +92,13 @@ abstract class StringBinding extends PropertyControl.Binding {
         if (allowed != null) {
             keys = PMap.create(PString.KEY_ALLOWED_VALUES, PArray.valueOf(allowed));
         } else if (!mime.isEmpty()) {
-            keys = PMap.create(PString.KEY_MIME_TYPE, mime);
+            if (!template.isEmpty()) {
+                keys = PMap.create(
+                        PString.KEY_MIME_TYPE, mime,
+                        ArgumentInfo.KEY_TEMPLATE, template);
+            } else {
+                keys = PMap.create(PString.KEY_MIME_TYPE, mime);
+            }
         }
         return ArgumentInfo.create(PString.class, keys);
     }
@@ -107,23 +116,25 @@ abstract class StringBinding extends PropertyControl.Binding {
         String[] allowed = null;
         String mime = "";
         String def = "";
+        String template = "";
         Type.String ann = field.getAnnotation(Type.String.class);
         if (ann != null) {
             allowed = ann.allowed();
             mime = ann.mime();
             def = ann.def();
+            template = ann.template();
         }
         if (field.getType() == String.class) {
             if (allowed != null && allowed.length > 0) {
                 return new StringField(field, allowed, def);
             } else {
-                return new StringField(field, mime, def);
+                return new StringField(field, mime, template, def);
             }
         } else {
             if (allowed != null && allowed.length > 0) {
                 return new NoField(allowed, def);
             } else {
-                return new NoField(mime, def);
+                return new NoField(mime, template, def);
             }
         }
     }
@@ -132,8 +143,8 @@ abstract class StringBinding extends PropertyControl.Binding {
 
         private PString value;
 
-        private NoField(String mime, String def) {
-            super(mime, def);
+        private NoField(String mime, String template, String def) {
+            super(mime, template, def);
             value = this.def;
         }
         
@@ -158,8 +169,8 @@ abstract class StringBinding extends PropertyControl.Binding {
         private final Field field;
         private CodeDelegate delegate;
         
-        private StringField(Field field, String mime, String def) {
-            super(mime, def);
+        private StringField(Field field, String mime, String template, String def) {
+            super(mime, template, def);
             this.field = field;
         }
         
