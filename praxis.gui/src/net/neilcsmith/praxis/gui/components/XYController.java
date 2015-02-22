@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -32,7 +32,6 @@ import javax.swing.event.AncestorListener;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
-import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
@@ -40,7 +39,7 @@ import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.gui.impl.AbstractGuiComponent;
 import net.neilcsmith.praxis.gui.impl.BoundedValueAdaptor;
 import net.neilcsmith.praxis.gui.BindingContext;
-import net.neilcsmith.praxis.swing.JXYController;
+import net.neilcsmith.praxis.gui.swing.JXYController;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
 
