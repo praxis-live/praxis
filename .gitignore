@@ -127,3 +127,6 @@
 /praxis.video.factory/build/
 /praxis.core.factory/nbproject/private/
 /praxis.video.factory/nbproject/private/
+/praxis.video.gstreamer-osx/release/modules/lib/macosx64/
+/praxis.video.gstreamer-win/release/modules/lib/windows32/
+/praxis.video.gstreamer-win/release/modules/lib/windows64/
