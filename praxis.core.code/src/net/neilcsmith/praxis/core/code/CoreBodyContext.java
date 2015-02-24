@@ -20,18 +20,28 @@
  * have any questions.
  */
 
-package net.neilcsmith.praxis.code;
+package net.neilcsmith.praxis.core.code;
+
+import net.neilcsmith.praxis.code.CodeUtils;
+import net.neilcsmith.praxis.compiler.ClassBodyContext;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class CoreCodeDelegate extends DefaultCodeDelegate {
+public class CoreBodyContext extends ClassBodyContext<CoreCodeDelegate> {
     
-   public void setup() {}
-   
-   public void starting() {}
-   
-   public void update() {}
+    public final static String TEMPLATE =
+            CodeUtils.load(CoreBodyContext.class, "resources/core_template.pxj");
+            
     
+    public CoreBodyContext() {
+        super(CoreCodeDelegate.class);
+    }
+
+    @Override
+    public String[] getDefaultImports() {
+        return CodeUtils.defaultImports();
+    }
+
 }

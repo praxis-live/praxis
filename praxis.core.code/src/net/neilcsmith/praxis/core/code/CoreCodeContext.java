@@ -20,10 +20,12 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.code;
+package net.neilcsmith.praxis.core.code;
 
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.core.ExecutionContext;
+import net.neilcsmith.praxis.logging.LogLevel;
 
 /**
  *
@@ -61,7 +63,11 @@ public class CoreCodeContext extends CodeContext<CoreCodeDelegate> {
                 }
                 if (ctxt.getState() == ExecutionContext.State.ACTIVE) {
                     update(ctxt.getTime());
-                    getDelegate().setup();
+                    try {
+                        getDelegate().setup();
+                    } catch (Exception e) {
+                        getLog().log(LogLevel.ERROR, e, "Exception thrown during setup()");
+                    }
                 }
             }
         }
@@ -74,15 +80,35 @@ public class CoreCodeContext extends CodeContext<CoreCodeDelegate> {
         public void stateChanged(ExecutionContext source) {
             if (source.getState() == ExecutionContext.State.ACTIVE) {
                 update(source.getTime());
-                getDelegate().setup();
-                getDelegate().starting();
+                try {
+                    getDelegate().setup();
+                } catch (Exception e) {
+                    getLog().log(LogLevel.ERROR, e, "Exception thrown during setup()");
+                }
+                try {
+                    getDelegate().starting();
+                } catch (Exception e) {
+                    getLog().log(LogLevel.ERROR, e, "Exception thrown during starting()");
+                }
+            } else {
+                update(source.getTime());
+                try {
+                    getDelegate().stopping();
+                } catch (Exception e) {
+                    getLog().log(LogLevel.ERROR, e, "Exception thrown during stopping()");
+                }
             }
+            flush();
         }
 
         @Override
         public void tick(ExecutionContext source) {
             update(source.getTime());
-            getDelegate().update();
+            try {
+                getDelegate().update();
+            } catch (Exception e) {
+                getLog().log(LogLevel.ERROR, e, "Exception thrown during update()");
+            }
             flush();
         }
 

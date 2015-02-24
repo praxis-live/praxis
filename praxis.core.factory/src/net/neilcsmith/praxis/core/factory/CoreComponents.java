@@ -22,7 +22,7 @@
 package net.neilcsmith.praxis.core.factory;
 
 import net.neilcsmith.praxis.code.AbstractComponentFactory;
-import net.neilcsmith.praxis.code.CoreCodeFactory;
+import net.neilcsmith.praxis.core.code.CoreCodeFactory;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
 
@@ -46,6 +46,10 @@ public class CoreComponents implements ComponentFactoryProvider {
 
         private void build() {
             
+            // custom
+            addComponent(data(new CoreCodeFactory("core:custom")));
+            
+            // built-in
             add("core:math:add", "resources/math_add.pxj");
             add("core:math:multiply", "resources/math_multiply.pxj");
             add("core:math:random", "resources/math_random.pxj");

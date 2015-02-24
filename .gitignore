@@ -130,3 +130,5 @@
 /praxis.video.gstreamer-osx/release/modules/lib/macosx64/
 /praxis.video.gstreamer-win/release/modules/lib/windows32/
 /praxis.video.gstreamer-win/release/modules/lib/windows64/
+/praxis.core.code/build/
+/praxis.core.code/nbproject/private/

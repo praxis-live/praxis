@@ -20,7 +20,10 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.code;
+package net.neilcsmith.praxis.core.code;
+
+import net.neilcsmith.praxis.code.CodeContext;
+import net.neilcsmith.praxis.code.CodeFactory;
 
 public class CoreCodeFactory extends CodeFactory<CoreCodeDelegate> {
 

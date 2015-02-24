@@ -18,42 +18,24 @@
  *
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
- *
  */
-package net.neilcsmith.praxis.code;
 
-import java.lang.reflect.Method;
+package net.neilcsmith.praxis.core.code;
+
+import net.neilcsmith.praxis.code.DefaultCodeDelegate;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class CoreCodeConnector extends CodeConnector<CoreCodeDelegate> {
-
-//    public final static String SETUP = "setup";
-    private final static String UPDATE = "update";
-
-    private boolean foundUpdate;
-
-    public CoreCodeConnector(CodeFactory.Task<CoreCodeDelegate> contextCreator,
-            CoreCodeDelegate delegate) {
-        super(contextCreator, delegate);
-    }
-
-    protected boolean hasUpdateMethod() {
-        return foundUpdate;
-    }
+public class CoreCodeDelegate extends DefaultCodeDelegate {
     
-    @Override
-    protected void analyseMethod(Method method) {
-
-        if (UPDATE.equals(method.getName())
-                && method.getParameterTypes().length == 0
-                && method.getReturnType().equals(Void.TYPE)) {
-            foundUpdate = true;
-        }
-
-        super.analyseMethod(method);
-    }
-
+   public void setup() {}
+   
+   public void starting() {}
+   
+   public void update() {}
+   
+   public void stopping() {}
+    
 }
