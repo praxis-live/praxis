@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,9 +19,9 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.video.pgl.code;
 
+import net.neilcsmith.praxis.code.CodeUtils;
 import net.neilcsmith.praxis.compiler.ClassBodyContext;
 
 /**
@@ -29,19 +29,15 @@ import net.neilcsmith.praxis.compiler.ClassBodyContext;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public class P3DClassBodyContext extends ClassBodyContext<P3DCodeDelegate> {
-    
-    public final static String MIME_TYPE = "text/x-praxis-java";
-    public final static String TEMPLATE =
-            "\n@Override\npublic void setup() {\n  \n}\n@Override\npublic void draw() {\n  \n}";
-            
-    
-    private final static String[] IMPORTS = {
-        "java.util.*",
-        "net.neilcsmith.praxis.code.userapi.*",
-        "net.neilcsmith.praxis.video.pgl.code.userapi.*",
-        "static net.neilcsmith.praxis.code.userapi.Constants.*",
-        "static net.neilcsmith.praxis.video.pgl.code.userapi.Constants.*"
-    };
+
+    public final static String TEMPLATE
+            = CodeUtils.load(P3DClassBodyContext.class, "resources/p3d_template.pxj");
+
+    private final static String[] IMPORTS = CodeUtils.join(
+            CodeUtils.defaultImports(), new String[]{
+                "net.neilcsmith.praxis.video.pgl.code.userapi.*",
+                "static net.neilcsmith.praxis.video.pgl.code.userapi.Constants.*"
+            });
     
     public P3DClassBodyContext() {
         super(P3DCodeDelegate.class);
@@ -51,7 +47,5 @@ public class P3DClassBodyContext extends ClassBodyContext<P3DCodeDelegate> {
     public String[] getDefaultImports() {
         return IMPORTS.clone();
     }
-    
-    
-    
+
 }
