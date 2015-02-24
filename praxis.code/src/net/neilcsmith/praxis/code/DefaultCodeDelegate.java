@@ -33,6 +33,9 @@ public class DefaultCodeDelegate extends CodeDelegate {
     
     final static String[] IMPORTS = {
         "java.util.*",
+        "net.neilcsmith.praxis.core.Argument",
+        "net.neilcsmith.praxis.core.ArgumentFormatException",
+        "net.neilcsmith.praxis.core.types.*",
         "net.neilcsmith.praxis.code.userapi.*",
         "static net.neilcsmith.praxis.code.userapi.Constants.*"
     };
