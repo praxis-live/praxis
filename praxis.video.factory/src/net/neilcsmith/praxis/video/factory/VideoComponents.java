@@ -46,8 +46,14 @@ public class VideoComponents implements ComponentFactoryProvider {
 
         private void build() {
             
+            // custom
+            addComponent(data(new VideoCodeFactory("video:custom")));
+            
+            // built-in
             add("video:snapshot", "resources/snapshot.pxj");
             add("video:still", "resources/still.pxj");
+            
+            
             
         }
 
