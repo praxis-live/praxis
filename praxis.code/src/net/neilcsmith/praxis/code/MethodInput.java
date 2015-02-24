@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -92,8 +92,12 @@ abstract class MethodInput {
             Class<?> type = types[0];
             if (type == double.class) {
                 input = new DoubleInput(method);
+            } else if (type == int.class) {
+                input = new IntInput(method);
             } else if (type == String.class) {
                 input = new StringInput(method);
+            } else if (type == Argument.class) {
+                input = new ArgumentInput(method);
             }
         }
         if (input == null) {
@@ -173,10 +177,32 @@ abstract class MethodInput {
         }
         
     }
+    
+    private static class IntInput extends MethodInput {
+        
+        private IntInput(Method method) {
+            super(method);
+        }
+
+        @Override
+        public void receive(long time, double value) {
+            invoke(time, (int) Math.round(value));
+        }
+
+        @Override
+        public void receive(long time, Argument value) {
+            try {
+                invoke(time, PNumber.coerce(value).toIntValue());
+            } catch (ArgumentFormatException ex) {
+                invoke(time, 0.0);
+            }
+        }
+        
+    }
 
     private static class StringInput extends MethodInput {
 
-        public StringInput(Method method) {
+        private StringInput(Method method) {
             super(method);
         }
 
@@ -188,6 +214,24 @@ abstract class MethodInput {
         @Override
         public void receive(long time, Argument value) {
             invoke(time, value.toString());
+        }
+        
+    }
+    
+    private static class ArgumentInput extends MethodInput {
+
+        private ArgumentInput(Method method) {
+            super(method);
+        }
+        
+        @Override
+        void receive(long time, double value) {
+            invoke(time, PNumber.valueOf(value));
+        }
+
+        @Override
+        void receive(long time, Argument value) {
+            invoke(time, value);
         }
         
     }
