@@ -89,26 +89,15 @@ public class PropertyControl extends Property implements Control {
 
     @Override
     protected void setImpl(long time, Argument arg) throws Exception {
-        try {
-            binding.set(time, arg);
-            setLatest(time);
-            checkInvoke(time, false);
-        } catch (Exception ex) {
-            checkInvoke(time, true);
-            throw ex;
-        }
+        binding.set(time, arg);
+        setLatest(time);
     }
 
     @Override
     protected void setImpl(long time, double value) throws Exception {
-        try {
-            binding.set(time, value);
-            setLatest(time);
-            checkInvoke(time, false);
-        } catch (Exception ex) {
-            checkInvoke(time, true);
-            throw ex;
-        }
+        binding.set(time, value);
+        setLatest(time);
+
     }
 
     private void checkInvoke(long time, boolean error) {
@@ -147,7 +136,13 @@ public class PropertyControl extends Property implements Control {
             if (argCount > 0) {
                 if (isLatest(time)) {
                     finishAnimating();
-                    setImpl(time, args.get(0));
+                    try {
+                        setImpl(time, args.get(0));
+                        checkInvoke(time, false);
+                    } catch (Exception ex) {
+                        checkInvoke(time, true);
+                        throw ex;
+                    }
                 }
                 if (type == Call.Type.INVOKE) {
                     router.route(Call.createReturnCall(call, args));
@@ -243,7 +238,7 @@ public class PropertyControl extends Property implements Control {
 
         private final ArgumentInfo argInfo;
         private final Argument def;
-        
+
         private Argument argValue;
         private double dblValue;
 
@@ -256,7 +251,7 @@ public class PropertyControl extends Property implements Control {
             this.def = def;
             this.argValue = def;
         }
-        
+
         @Override
         public void set(long time, Argument value) throws Exception {
             this.argValue = value;
@@ -394,7 +389,7 @@ public class PropertyControl extends Property implements Control {
                     || BooleanBinding.isBindableFieldType(type)) {
                 binding = BooleanBinding.create(connector, field);
             }
-            
+
             if (binding == null) {
                 Type typeAnn = field.getAnnotation(Type.class);
                 if (typeAnn != null) {
@@ -405,7 +400,7 @@ public class PropertyControl extends Property implements Control {
                     binding = new DefaultBinding();
                 }
             }
-            
+
             return binding;
         }
 
@@ -463,7 +458,9 @@ public class PropertyControl extends Property implements Control {
         public void receive(long time, double value) {
             try {
                 control.setImpl(time, value);
+                control.checkInvoke(time, false);
             } catch (Exception ex) {
+                control.checkInvoke(time, true);
                 // @TODO log to user
             }
         }
@@ -472,7 +469,9 @@ public class PropertyControl extends Property implements Control {
         public void receive(long time, Argument value) {
             try {
                 control.setImpl(time, value);
+                control.checkInvoke(time, false);
             } catch (Exception ex) {
+                control.checkInvoke(time, true);
                 // @TODO log to user
             }
         }
