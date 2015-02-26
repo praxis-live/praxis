@@ -1,0 +1,33 @@
+
+    @P(1) @ReadOnly boolean latch1;
+    @P(2) @ReadOnly boolean latch2;
+    
+    @Out(1) Output out;
+
+    @Override
+    public void stopping() {
+        reset();
+    }
+
+    @In(1) void in1(Argument arg) {
+        if (latch2) {
+            out.send(arg);
+            reset();
+        } else {
+            latch1 = true;
+        }
+    }
+    
+    @In(2) void in2(Argument arg) {
+        if (latch1) {
+            out.send(arg);
+            reset();
+        } else {
+            latch2 = true;
+        }
+    }
+    
+    @T(1) void reset() {
+        latch1 = false;
+        latch2 = false;
+    }

@@ -1,0 +1,33 @@
+
+    @P(1) @Type(cls = PArray.class) @OnChange("extractArray")
+    Property values;
+    @P(2) @ReadOnly
+    int index;
+    
+    @Out(1) Output out;
+    
+    PArray array;
+    
+    @Override
+    public void setup() {
+        extractArray();
+    }
+
+    @T(1) void trigger() {
+        if (array.isEmpty()) {
+            index = -1;
+            out.send();
+        } else {
+            index = (int) random(array.getSize());
+            out.send(array.get(index));
+        }
+    }
+    
+    void extractArray() {
+        try {
+            array = PArray.coerce(values.get());
+        } catch (ArgumentFormatException ex) {
+            log(ERROR, ex, "values isn't an array");
+            array = PArray.EMPTY;
+        }
+    }

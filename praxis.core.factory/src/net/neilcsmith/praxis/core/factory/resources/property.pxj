@@ -1,0 +1,14 @@
+
+    @P(1) @Port(false) @OnChange("valueChanged")
+    Property value;
+
+    @Out(1) Output out;
+    
+    @Override
+    public void starting() {
+        out.send(value.get());
+    }
+    
+    void valueChanged() {
+        out.send(value.get());
+    }

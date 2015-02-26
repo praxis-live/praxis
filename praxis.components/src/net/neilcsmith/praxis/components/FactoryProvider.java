@@ -68,12 +68,12 @@ public class FactoryProvider implements ComponentFactoryProvider {
         private void build() {
             addComponent("core:control-rate", data(ControlFrameTrigger.class).deprecated());
             addComponent("core:start-trigger", StartTrigger.class);
-            addComponent("core:property", Property.class);
-            addComponent("core:variable", Variable.class);
+//            addComponent("core:property", Property.class);
+//            addComponent("core:variable", Variable.class);
 
             // ARRAY
-            addComponent("core:array:random", ArrayRandom.class);
-            addComponent("core:array:iterator", ArrayIterator.class);
+//            addComponent("core:array:random", ArrayRandom.class);
+//            addComponent("core:array:iterator", ArrayIterator.class);
 
             // FILE
             //addComponent("core:file:random", RandomFile.class);
@@ -88,16 +88,16 @@ public class FactoryProvider implements ComponentFactoryProvider {
             addComponent("core:math:normalize", data(Normalize.class).test());
 
             //ROUTING
-            addComponent("core:routing:gate", Gate.class);
-            addComponent("core:routing:join", Join.class);
-            addComponent("core:routing:inhibitor", Inhibitor.class);
+//            addComponent("core:routing:gate", Gate.class);
+//            addComponent("core:routing:join", Join.class);
+//            addComponent("core:routing:inhibitor", Inhibitor.class);
             addComponent("core:routing:send", Send.class);
 
             
             // TIMING
-            addComponent("core:timing:animator", Animator.class);
-            addComponent("core:timing:delay", SimpleDelay.class);
-            addComponent("core:timing:timer", Timer.class);
+//            addComponent("core:timing:animator", Animator.class);
+//            addComponent("core:timing:delay", SimpleDelay.class);
+//            addComponent("core:timing:timer", Timer.class);
 
 
             // CONTAINER
@@ -107,13 +107,13 @@ public class FactoryProvider implements ComponentFactoryProvider {
             addComponent("core:container:output", data(ContainerOutput.class));
             
             // IN TESTING
-            addComponent("core:test:log", data(Log.class).test());
-            addComponent("core:test:routing:inhibitor", data(Inhibitor.class).test()
-                    .replacement("core:routing:inhibitor").add(TypeRewriter.getIdentity()));
-            addComponent("core:test:routing:send", data(Send.class).test()
-                    .replacement("core:routing:send").add(TypeRewriter.getIdentity()));
-            addComponent("core:test:math:normalize", data(Normalize.class).test()
-                    .replacement("core:math:normalize").add(TypeRewriter.getIdentity()));
+//            addComponent("core:test:log", data(Log.class).test());
+//            addComponent("core:test:routing:inhibitor", data(Inhibitor.class).test()
+//                    .replacement("core:routing:inhibitor").add(TypeRewriter.getIdentity()));
+//            addComponent("core:test:routing:send", data(Send.class).test()
+//                    .replacement("core:routing:send").add(TypeRewriter.getIdentity()));
+//            addComponent("core:test:math:normalize", data(Normalize.class).test()
+//                    .replacement("core:math:normalize").add(TypeRewriter.getIdentity()));
             
         }
     }
