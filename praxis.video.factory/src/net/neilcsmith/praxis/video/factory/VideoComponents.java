@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.video.factory;
 import net.neilcsmith.praxis.code.AbstractComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
+import net.neilcsmith.praxis.meta.TypeRewriter;
 import net.neilcsmith.praxis.video.code.VideoCodeFactory;
 
 /**
@@ -47,18 +48,38 @@ public class VideoComponents implements ComponentFactoryProvider {
         private void build() {
             
             // custom
-            addComponent(data(new VideoCodeFactory("video:custom")));
+            add(data(new VideoCodeFactory("video:custom")));
             
             // built-in
+            
+            // CORE VIDEO
             add("video:snapshot", "resources/snapshot.pxj");
             add("video:still", "resources/still.pxj");
             
+            // ANALYSIS
+            add("video:analysis:frame-delay", "resources/analysis_framedelay.pxj");
+            add("video:analysis:difference", "resources/analysis_difference.pxj");
+            
+            // FX
+            add("video:fx:blur", "resources/fx_blur.pxj");
+            
+            // SOURCE
+            add("video:source:noise", "resources/source_noise.pxj");
+            
+            
+            // DEPRECATED COMPONENTs
+            add(data("video:filter:blur", "resources/fx_blur.pxj")
+                    .deprecated().replacement("video:fx:blur").add(TypeRewriter.getIdentity()));
             
             
         }
 
         private void add(String type, String sourceFile) {
-            addComponent(data(new VideoCodeFactory(type, source(sourceFile))));
+            add(data(type, sourceFile));
+        }
+        
+        private Data data(String type, String sourceFile) {
+            return data(new VideoCodeFactory(type, source(sourceFile)));
         }
         
     }

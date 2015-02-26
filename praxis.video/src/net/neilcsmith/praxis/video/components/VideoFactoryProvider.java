@@ -70,18 +70,18 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
             addComponent("video:xfader", XFader.class);
 
             // ANALYSIS
-            addComponent("video:analysis:frame-delay", FrameDelay.class);
-            addComponent("video:analysis:difference", Difference.class);
+//            addComponent("video:analysis:frame-delay", FrameDelay.class);
+//            addComponent("video:analysis:difference", Difference.class);
             addComponent("video:analysis:simple-tracker", BlobTracker.class);
 
             // FX
-            addComponent("video:fx:blur", data(Blur.class));
-            addComponent("video:fx:difference", data(FrameDifference.class));
+//            addComponent("video:fx:blur", data(Blur.class));
+            addComponent("video:fx:difference", data(FrameDifference.class).deprecated());
             addComponent("video:fx:ripple", data(Ripple.class));
 
             // FILTER
-            addComponent("video:filter:blur", data(Blur.class).deprecated()
-                    .replacement("video:fx:blur").add(TypeRewriter.getIdentity()));
+//            addComponent("video:filter:blur", data(Blur.class).deprecated()
+//                    .replacement("video:fx:blur").add(TypeRewriter.getIdentity()));
 
             // MIX
             addComponent("video:mix:xfader", data(XFader.class).deprecated()
@@ -90,7 +90,7 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
                     .replacement("video:composite").add(TypeRewriter.getIdentity()));
 
             // SOURCE
-            addComponent("video:source:noise", Noise.class);
+//            addComponent("video:source:noise", Noise.class);
 
             // TIME-FX
             addComponent("video:time-fx:ripple", data(Ripple.class).deprecated()
@@ -100,17 +100,17 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
 
             // TEST COMPONENTS
             addComponent("video:test:save", data(ImageSave.class).test());
-            addComponent("video:test:difference-calc", data(DifferenceCalc.class).test());
-            
-            
-            addComponent("video:test:noise", data(Noise.class).test()
-                    .replacement("video:source:noise").add(TypeRewriter.getIdentity()));
-            addComponent("video:test:analysis:frame-delay", data(FrameDelay.class).test()
-                    .replacement("video:analysis:frame-delay").add(TypeRewriter.getIdentity()));
-            addComponent("video:test:analysis:difference", data(Difference.class).test()
-                    .replacement("video:analysis:difference").add(TypeRewriter.getIdentity()));
-            addComponent("video:test:analysis:blob-tracker", data(BlobTracker.class).test()
-                    .replacement("video:analysis:simple-tracker").add(TypeRewriter.getIdentity()));
+//            addComponent("video:test:difference-calc", data(DifferenceCalc.class).test());
+//            
+//            
+//            addComponent("video:test:noise", data(Noise.class).test()
+//                    .replacement("video:source:noise").add(TypeRewriter.getIdentity()));
+//            addComponent("video:test:analysis:frame-delay", data(FrameDelay.class).test()
+//                    .replacement("video:analysis:frame-delay").add(TypeRewriter.getIdentity()));
+//            addComponent("video:test:analysis:difference", data(Difference.class).test()
+//                    .replacement("video:analysis:difference").add(TypeRewriter.getIdentity()));
+//            addComponent("video:test:analysis:blob-tracker", data(BlobTracker.class).test()
+//                    .replacement("video:analysis:simple-tracker").add(TypeRewriter.getIdentity()));
 
             addComponent("video:container:input", data(VideoContainerInput.class));
             addComponent("video:container:output", data(VideoContainerOutput.class));

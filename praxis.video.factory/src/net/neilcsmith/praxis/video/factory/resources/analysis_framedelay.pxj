@@ -1,0 +1,11 @@
+
+    @In(1) PImage in;
+    
+    @OffScreen PGraphics previous;
+    
+    @Override
+    public void draw() {
+        copy(previous);
+        previous.copy(in);
+        release(in);
+    }
