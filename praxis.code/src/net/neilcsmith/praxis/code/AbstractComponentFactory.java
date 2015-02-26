@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,22 +21,18 @@
  */
 package net.neilcsmith.praxis.code;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentInstantiationException;
 import net.neilcsmith.praxis.core.ComponentType;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.Root;
+import net.neilcsmith.praxis.impl.InstanceLookup;
 
 /**
  *
@@ -76,7 +72,7 @@ public class AbstractComponentFactory implements ComponentFactory {
 
     @Override
     public Root createRootComponent(ComponentType type) throws ComponentInstantiationException {
-        throw new IllegalArgumentException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -89,7 +85,12 @@ public class AbstractComponentFactory implements ComponentFactory {
         return null;
     }
 
+    @Deprecated
     protected void addComponent(Data info) {
+        add(info);
+    }
+    
+    protected void add(Data info) {
         componentMap.put(info.factory.getComponentType(), info.toMetaData());
     }
 
@@ -160,6 +161,7 @@ public class AbstractComponentFactory implements ComponentFactory {
         private boolean test;
         private boolean deprecated;
         private ComponentType replacement;
+        private List<Object> lookupList;
 
         private Data(CodeFactory<?> factory) {
             this.factory = factory;
@@ -180,9 +182,18 @@ public class AbstractComponentFactory implements ComponentFactory {
             deprecated = true;
             return this;
         }
+        
+        public Data add(Object obj) {
+            if (lookupList == null) {
+                lookupList = new ArrayList<>();
+            }
+            lookupList.add(obj);
+            return this;
+        }
 
         private MetaData toMetaData() {
-            return new MetaData(factory, test, deprecated, replacement, null);
+            return new MetaData(factory, test, deprecated, replacement, 
+            lookupList == null ? null : InstanceLookup.create(lookupList.toArray()));
         }
     }
 }
