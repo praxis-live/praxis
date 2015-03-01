@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -68,11 +68,17 @@ public class PraxisLookAndFeel extends NimbusLookAndFeel {
         res.put("info", Color.BLACK);// new Color(128,128,128) );
         res.put("nimbusBase", BASE);
         res.put("nimbusBlueGrey", MEDIUM_GREY);
+////        res.put("nimbusBlueGrey", Color.decode("#4545a1"));
+//        res.put("nimbusAlertYellow", new Color(248, 187, 0));
+//        res.put("nimbusDisabledText", new Color(196, 196, 196));
         res.put("nimbusDisabledText", LIGHT_GREY);
         res.put("nimbusFocus", SECONDARY);
+//        res.put("nimbusGreen", new Color(176, 179, 50));
         res.put("nimbusInfoBlue", MEDIUM_GREY);
         res.put("nimbusLightBackground", Color.BLACK);
+//        res.put("nimbusOrange", new Color(191, 98, 4));
         res.put("nimbusOrange", PRIMARY);
+//        res.put("nimbusRed", new Color(169, 46, 34));
         res.put("nimbusSelectedText", Color.WHITE);
         res.put("nimbusSelectionBackground", PRIMARY);
         res.put("text", OFF_WHITE);
@@ -100,6 +106,13 @@ public class PraxisLookAndFeel extends NimbusLookAndFeel {
         res.put("CheckBoxMenuItem[MouseOver].backgroundPainter", primaryBG);
         res.put("CheckBoxMenuItem[MouseOver+Selected].backgroundPainter", primaryBG);
 
+        res.put("Slider:SliderThumb[Pressed].backgroundPainter",
+                res.get("Slider:SliderThumb[MouseOver].backgroundPainter"));
+        res.put("Slider:SliderThumb[Focused+Pressed].backgroundPainter",
+                res.get("Slider:SliderThumb[Focused+MouseOver].backgroundPainter"));
+        res.put("Slider:SliderThumb[MouseOver].backgroundPainter",
+                res.get("Slider:SliderThumb[Focused].backgroundPainter"));
+        
         res.put("Tree[Enabled].collapsedIconPainter", res.get("Tree[Enabled+Selected].collapsedIconPainter"));
         res.put("Tree[Enabled].expandedIconPainter", res.get("Tree[Enabled+Selected].expandedIconPainter"));
 
