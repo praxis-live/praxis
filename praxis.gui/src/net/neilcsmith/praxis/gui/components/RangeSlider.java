@@ -38,7 +38,6 @@ import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.gui.ControlBinding.Adaptor;
-import net.neilcsmith.praxis.gui.swing.JRangeSlider;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 
 /**

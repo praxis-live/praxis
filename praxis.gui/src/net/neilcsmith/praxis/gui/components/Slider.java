@@ -29,6 +29,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.JSlider;
+import javax.swing.UIDefaults;
 import javax.swing.border.Border;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
@@ -96,6 +97,9 @@ class Slider extends SingleBindingGuiComponent {
     private void createComponentAndAdaptor() {
         slider = new JSlider(vertical ? JSlider.VERTICAL : JSlider.HORIZONTAL, 0, 500, 0);
         slider.putClientProperty("JSlider.isFilled", Boolean.TRUE);
+        slider.putClientProperty("Nimbus.Overrides", new UIDefaults(new Object[]{
+            "Slider.thumbHeight", 24,
+            "Slider.thumbWidth", 24}));
         adaptor = new BoundedValueAdaptor(slider.getModel());
         if (prefMin != null) {
             adaptor.setPreferredMinimum(prefMin);

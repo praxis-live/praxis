@@ -39,7 +39,6 @@ import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.gui.impl.AbstractGuiComponent;
 import net.neilcsmith.praxis.gui.impl.BoundedValueAdaptor;
 import net.neilcsmith.praxis.gui.BindingContext;
-import net.neilcsmith.praxis.gui.swing.JXYController;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
 

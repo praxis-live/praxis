@@ -20,9 +20,8 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.gui.swing;
+package net.neilcsmith.praxis.gui.components;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -33,10 +32,9 @@ import java.awt.event.MouseEvent;
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.JTextField;
+import javax.swing.Painter;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.MouseInputAdapter;
@@ -45,9 +43,9 @@ import javax.swing.event.MouseInputAdapter;
  *
  * @author Neil C Smith
  */
-public class JXYController extends JComponent {
+class JXYController extends JComponent {
 
-    private int controlWidth = 24;
+    private int controlWidth = 32;
     private int controlXPos;
     private int controlYPos;
     protected transient ChangeEvent changeEvent = null;
@@ -59,7 +57,15 @@ public class JXYController extends JComponent {
     private int mouseYOffset;
     private boolean draggingControl;
 
-    /** Creates a new instance of XYController */
+    private Painter<JComponent> thumbPainter;
+    private Painter<JComponent> selectedThumbPainter;
+    private Color foreground;
+    private Color selectedForeground;
+    private Color background;
+
+    /**
+     * Creates a new instance of XYController
+     */
     public JXYController() {
         setPreferredSize(new Dimension(200, 200));
 
@@ -76,6 +82,33 @@ public class JXYController extends JComponent {
         ModelListener modelListener = new ModelListener();
         xRangeModel.addChangeListener(modelListener);
         yRangeModel.addChangeListener(modelListener);
+        updateUI();
+    }
+
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        UIDefaults defs = UIManager.getDefaults();
+        Object val = defs.get("Slider:SliderThumb[Enabled].backgroundPainter");
+        if (val instanceof Painter) {
+            thumbPainter = (Painter<JComponent>) val;
+        }
+        val = defs.get("Slider:SliderThumb[Focused+Pressed].backgroundPainter");
+        if (val instanceof Painter) {
+            selectedThumbPainter = (Painter<JComponent>) val;
+        }
+        val = defs.get("controlShadow");
+        if (val instanceof Color) {
+            foreground = (Color) val;
+        }
+        val = defs.get("nimbusFocus");
+        if (val instanceof Color) {
+            selectedForeground = (Color) val;
+        }
+        val = defs.get("desktop");
+        if (val instanceof Color) {
+            background = (Color) val;
+        }
     }
 
     public BoundedRangeModel getXRangeModel() {
@@ -126,31 +159,32 @@ public class JXYController extends JComponent {
         Graphics2D g2d = (Graphics2D) graphics;
         int width = getWidth();
         int height = getHeight();
-        g2d.setColor(Color.BLACK);
-        g2d.fillRect(0, 0, width, height);
-
-//        g2d.setColor(Color.WHITE);
-//        int radius = controlWidth / 2;
-//        g2d.drawLine(controlXPos + radius, 0, controlXPos + radius, height);
-//        g2d.drawLine(0, controlYPos + radius, width, controlYPos + radius);
-//        if (draggingControl) {
-//            g2d.setColor(Color.GREEN);
-//        } else {
-//            g2d.setColor(Color.RED);
-//        }
-//        g2d.fillOval(controlXPos, controlYPos, controlWidth, controlWidth);
-
-        if (draggingControl) {
-            g2d.setColor(Color.WHITE);
-        } else {
-            g2d.setColor(Color.GRAY);
+        if (background != null) {
+            g2d.setColor(background);
+            g2d.fillRect(0, 0, width, height);
         }
+
+        Painter<JComponent> p;
+        if (draggingControl) {
+            g2d.setColor(selectedForeground == null ? getForeground().brighter() : selectedForeground);
+            p = selectedThumbPainter;
+        } else {
+            g2d.setColor(foreground == null ? getForeground() : foreground);
+            p = thumbPainter;
+        }
+
         int radius = controlWidth / 2;
         g2d.drawLine(controlXPos + radius, 0, controlXPos + radius, height);
         g2d.drawLine(0, controlYPos + radius, width, controlYPos + radius);
-        g2d.drawRect(controlXPos + 1, controlYPos + 1,
-                controlWidth - 1, controlWidth - 1);
 
+        if (p != null) {
+            g2d.translate(controlXPos, controlYPos);
+            p.paint(g2d, this, controlWidth, controlWidth);
+            g2d.translate(-controlXPos, -controlYPos);
+        } else {
+            g2d.drawRect(controlXPos + 1, controlYPos + 1,
+                    controlWidth - 1, controlWidth - 1);
+        }
 
     }
 
@@ -258,8 +292,8 @@ public class JXYController extends JComponent {
         public void mousePressed(MouseEvent mouseEvent) {
             int x = mouseEvent.getX();
             int y = mouseEvent.getY();
-            if (x >= controlXPos && x < (controlXPos + controlWidth) &&
-                    y >= controlYPos && y < (controlYPos + controlWidth)) {
+            if (x >= controlXPos && x < (controlXPos + controlWidth)
+                    && y >= controlYPos && y < (controlYPos + controlWidth)) {
                 mouseXOffset = x - controlXPos;
                 mouseYOffset = y - controlYPos;
 
@@ -315,43 +349,4 @@ public class JXYController extends JComponent {
         }
     }
 
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("XY-controller test");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
-
-        final JXYController xy = new JXYController();
-
-        final JTextField textField = new JTextField(15);
-
-        JSlider xSlider = new JSlider(xy.getXRangeModel());
-        JSlider ySlider = new JSlider(xy.getYRangeModel());
-        ySlider.setOrientation(JSlider.VERTICAL);
-
-        xy.addChangeListener(new ChangeListener() {
-
-            public void stateChanged(ChangeEvent changeEvent) {
-                textField.setText("X: " + xy.getXValue() + "  Y: " + xy.getYValue()
-                        + "Updating: " + xy.getXRangeModel().getValueIsAdjusting());
-            }
-        });
-
-        panel.add(ySlider, BorderLayout.WEST);
-        panel.add(xSlider, BorderLayout.NORTH);
-        panel.add(xy, BorderLayout.CENTER);
-        panel.add(textField, BorderLayout.SOUTH);
-
-
-        frame.add(panel);
-        frame.pack();
-        frame.setVisible(true);
-
-
-
-
-    }
 }
-
