@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -34,7 +34,6 @@ import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -46,13 +45,12 @@ import net.neilcsmith.praxis.video.Player;
 import net.neilcsmith.praxis.video.PlayerConfiguration;
 import net.neilcsmith.praxis.video.PlayerFactory;
 import net.neilcsmith.praxis.video.QueueContext;
+import net.neilcsmith.praxis.video.VideoSettings;
 import net.neilcsmith.praxis.video.WindowHints;
 import net.neilcsmith.praxis.video.pipes.FrameRateListener;
 import net.neilcsmith.praxis.video.pipes.SinkIsFullException;
 import net.neilcsmith.praxis.video.pipes.VideoPipe;
 import net.neilcsmith.praxis.video.render.Surface;
-//import org.lwjgl.opengl.Display;
-//import org.lwjgl.opengl.GL11;
 
 /**
  *
@@ -62,59 +60,43 @@ public class PGLPlayer implements Player {
 
     private final static Factory FACTORY = new Factory();
     private final static Logger LOG = Logger.getLogger(PGLPlayer.class.getName());
-    private final static double DEG_90 = Math.toRadians(90);
-    private final static double DEG_180 = Math.toRadians(180);
-    private final static double DEG_270 = Math.toRadians(270);
-//    private final Object LOCK = new Object();
     private int width, height; // dimensions of surface
     private int outputWidth, outputHeight, outputRotation, outputDevice;
     private double fps; // frames per second
     private long period; // period per frame in nanosecs
-//    private long frameIndex; // index of current frame
     private long time; // time of currently computing frame in relation to System.nanotime
     private volatile boolean running = false; // flag to control animation
     private Frame frame = null;
     private PGLApplet applet = null;
-//    private BufferStrategy bs = null;
     private PGLOutputSink sink = null;
-    // listener list
-    private List<FrameRateListener> listeners = new ArrayList<FrameRateListener>();
+    private List<FrameRateListener> listeners = new ArrayList<>();
     private boolean rendering = false; // used by frame rate listeners
-    private String title;
-    private boolean fullScreen;
-    private IntBuffer imageBuffer;
+    private final WindowHints wHints;
     private int frames;
     private int skips;
-//    private Texture image;
-//    private TextureRenderer renderer;
     private QueueContext queue;
 
-    private PGLPlayer(String title,
-            int width,
+    private PGLPlayer(int width,
             int height,
             double fps,
-            boolean fullScreen,
             int outputWidth,
             int outputHeight,
             int outputRotation,
             int outputDevice,
+            WindowHints wHints,
             QueueContext queue) {
         if (width <= 0 || height <= 0 || fps <= 0) {
             throw new IllegalArgumentException();
         }
-        if (title == null) {
-            throw new NullPointerException();
-        }
         this.width = width;
         this.height = height;
         this.fps = fps;
-        this.title = title;
-        this.fullScreen = fullScreen;
         sink = new PGLOutputSink();
         this.outputWidth = outputWidth;
         this.outputHeight = outputHeight;
         this.outputRotation = outputRotation;
         this.outputDevice = outputDevice;
+        this.wHints = wHints;
         this.queue = queue;
     }
 
@@ -180,7 +162,12 @@ public class PGLPlayer implements Player {
                     dim = new Dimension(outputWidth, outputHeight);
                 }
                 GraphicsDevice gd = findScreenDevice();
-
+                String title = wHints.getTitle();
+                if (title.isEmpty()) {
+                    title = "Praxis LIVE [GL]";
+                } else {
+                    title += " [GL]";
+                }
                 frame = new JFrame(title, gd.getDefaultConfiguration());
                 ((JFrame) frame).getContentPane().setBackground(Color.BLACK);
                 ((JFrame) frame).setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -188,33 +175,40 @@ public class PGLPlayer implements Player {
                     @Override
                     public void windowClosing(WindowEvent e) {
                         terminate();
-//                        frame.setVisible(false);
-//                        synchronized (LOCK) {
-//                            try {
-//                                LOCK.wait(10000);
-//                                frame.setVisible(false);
-//                            } catch (InterruptedException ex) {
-//                                Logger.getLogger(PGLPlayer.class.getName()).log(Level.SEVERE, null, ex);
-//                            }
-//                        }
                     }
                 });
                 frame.setLayout(new GridBagLayout());
                 Cursor cursor = Toolkit.getDefaultToolkit().createCustomCursor(new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB), new Point(0, 0), "blank");
                 frame.setCursor(cursor);
-                applet = new PGLApplet(sink, width, height);
+                applet = new PGLApplet(sink,
+                        width,
+                        height,
+                        dim.width,
+                        dim.height,
+                        outputRotation);
                 applet.setMinimumSize(dim);
                 applet.setPreferredSize(dim);
                 applet.setBackground(Color.BLACK);
                 applet.setIgnoreRepaint(true);
                 frame.add(applet);
-                if (fullScreen) {
+                if (wHints.isFullScreen()) {
+                    boolean fsem = VideoSettings.isFullScreenExclusive();
                     frame.setUndecorated(true);
-                    frame.setSize(Toolkit.getDefaultToolkit().getScreenSize());
                     frame.validate();
-                    gd.setFullScreenWindow(frame);
+                    if (fsem) {
+                        gd.setFullScreenWindow(frame);
+                    } else {
+                        frame.setVisible(true);
+                        frame.setExtendedState(Frame.MAXIMIZED_BOTH);
+                    }
 
                 } else {
+                    if (wHints.isUndecorated()) {
+                        frame.setUndecorated(true);
+                    }
+                    if (wHints.isAlwaysOnTop()) {
+                        frame.setAlwaysOnTop(true);
+                    }
                     frame.pack();
                     frame.setVisible(true);
                 }
@@ -227,18 +221,6 @@ public class PGLPlayer implements Player {
             }
         });
 
-//        context = GLContext.createContext(canvas);
-//        surface = context.createSurface(width, height, false);
-//        switch (outputRotation) {
-//            case 90:
-//            case 270:
-//                rotated = new GLSurface(height, width, false);
-//                break;
-//            case 180:
-//                rotated = new GLSurface(width, height, false);
-//                break;
-//
-//        }
     }
 
     private GraphicsDevice findScreenDevice() {
@@ -267,15 +249,6 @@ public class PGLPlayer implements Player {
         disposeFrame();
     }
 
-//    private void disposeGL() {
-//        if (context != null) {
-//            context.dispose();
-//            context = null;
-//        }
-//        synchronized (LOCK) {
-//            LOCK.notifyAll();
-//        }
-//    }
     private void disposeFrame() {
         try {
             EventQueue.invokeAndWait(new Runnable() {
@@ -294,56 +267,6 @@ public class PGLPlayer implements Player {
 
     }
 
-//    private void updateOnly() {
-//        rendering = false;
-////        fireListeners();
-//        sink.process(surface, time, rendering);
-//    }
-//    private void updateAndRender() {
-//        rendering = true;
-////        fireListeners();
-//
-//        try {
-//            sink.process(surface, time, rendering);
-//            renderToScreen(surface);
-////            switch (outputRotation) {
-////                case 0:
-////                    surface.draw(g2d, 0, 0, outputWidth, outputHeight);
-////                    break;
-////                case 90:
-////                    rotated.process(GLTransform.ROTATE_90, surface);
-////                    rotated.draw(g2d, 0, 0, outputHeight, outputWidth);
-////                    break;
-////                case 180:
-////                    rotated.process(GLTransform.ROTATE_180, surface);
-////                    rotated.draw(g2d, 0, 0, outputWidth, outputHeight);
-////                    break;
-////                case 270:
-////                    rotated.process(GLTransform.ROTATE_270, surface);
-////                    rotated.draw(g2d, 0, 0, outputHeight, outputWidth);
-////                    break;
-////            }
-//        } catch (Exception exception) {
-//            LOG.log(Level.WARNING, "Exception in render", exception);
-//            return;
-//        }
-//    }
-//    private void renderToScreen(GLSurface surface) throws Exception {
-//        try {
-//            GLRenderer renderer = context.getRenderer();
-//            renderer.target(null);
-//            renderer.clear(); // snapshot seems to have a bug where the background is released?!
-//            renderer.setBlendFunction(GL11.GL_ONE, GL11.GL_ZERO);
-//            renderer.setColor(1, 1, 1, 1);
-//            renderer.draw(surface, 0, 0, outputWidth, outputHeight);
-//            renderer.flush();
-////            GLRenderer.safe();
-//        } catch (Exception exception) {
-//            LOG.log(Level.SEVERE, "Error in rendering surface", exception);
-//        }
-//
-//        Display.update();
-//    }
     private void fireListeners() {
         int count = listeners.size();
         for (int i = 0; i < count; i++) {
@@ -517,15 +440,7 @@ public class PGLPlayer implements Player {
             int outHeight = height;
             int rotation = 0;
             int device = -1;
-            boolean fullscreen = false;
-            String title = "OpenGL";
-
-            WindowHints wHints = clients[0].getLookup().get(WindowHints.class);
-            if (wHints != null) {
-                fullscreen = wHints.isFullScreen();
-                title = wHints.getTitle() + " [GL]";
-            }
-
+            
             ClientConfiguration.Dimension dim
                     = clients[0].getLookup().get(ClientConfiguration.Dimension.class);
             if (dim != null) {
@@ -538,10 +453,15 @@ public class PGLPlayer implements Player {
             if (rot != null) {
                 rotation = rot.getAngle();
             }
-
-            if (rotation != 0) {
-                LOG.warning("OpenGL pipeline doesn't currently support rotation");
-                rotation = 0;
+            switch (rotation) {
+                case 0:
+                case 90:
+                case 180:
+                case 270:
+                    break;
+                default:
+                    LOG.warning("OpenGL pipeline doesn't currently support that rotation");
+                    rotation = 0;
             }
 
             ClientConfiguration.DeviceIndex dev
@@ -550,17 +470,22 @@ public class PGLPlayer implements Player {
                 device = dev.getValue();
             }
 
+            WindowHints wHints = clients[0].getLookup().get(WindowHints.class);
+            if (wHints == null) {
+                wHints = new WindowHints();
+            }
+            
             QueueContext queue = config.getLookup().get(QueueContext.class);
 
-            return new PGLPlayer(title,
+            return new PGLPlayer(
                     config.getWidth(),
                     config.getHeight(),
                     config.getFPS(),
-                    fullscreen,
                     outWidth,
                     outHeight,
                     rotation,
                     device,
+                    wHints,
                     queue);
 
         }

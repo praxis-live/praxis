@@ -34,8 +34,7 @@ class PGLApplet extends PApplet {
 
     private final static Logger LOG = Logger.getLogger(PGLApplet.class.getName());
 
-    private final int w;
-    private final int h;
+    private final int frameWidth, frameHeight, sketchWidth, sketchHeight, rotation;
     private final Context context;
     private final PGLOutputSink sink;
 
@@ -43,12 +42,19 @@ class PGLApplet extends PApplet {
     private long lastRenderTime;
     private PGLSurface surface;
 
-    PGLApplet(PGLOutputSink sink, int width, int height) {
+    PGLApplet(PGLOutputSink sink,
+            int frameWidth,
+            int frameHeight,
+            int sketchWidth,
+            int sketchHeight,
+            int rotation) {
         this.sink = sink;
-        this.w = width;
-        this.h = height;
+        this.frameWidth = frameWidth;
+        this.frameHeight = frameHeight;
+        this.sketchWidth = sketchWidth;
+        this.sketchHeight = sketchHeight;
+        this.rotation = rotation;
         this.context = new Context();
-
     }
 
     @Override
@@ -74,12 +80,12 @@ class PGLApplet extends PApplet {
 
     @Override
     public int sketchWidth() {
-        return w;
+        return sketchWidth;
     }
 
     @Override
     public int sketchHeight() {
-        return h;
+        return sketchHeight;
     }
 
     @Override
@@ -91,14 +97,12 @@ class PGLApplet extends PApplet {
     public void setup() {
         assert surface == null;
         if (surface == null) {
-            surface = context.createSurface(w, h, false);
+            surface = context.createSurface(frameWidth, frameHeight, false);
         }
     }
 
     @Override
     public synchronized void draw() {
-//        assert renderTime != lastRenderTime;
-//        System.out.println(((PJOGL)((PGLGraphics)g).pgl).gl.getGL2().getContext());
         if (renderTime == lastRenderTime) {
             return;
         }
@@ -109,11 +113,20 @@ class PGLApplet extends PApplet {
         }
         PImage img = context.asImage(surface);
         context.primary().endOffscreen();
-//        background(0,0,0);
-//        blendMode(REPLACE);
         clear();
-        image(img, 0, 0);
-//        rect(100,100,100,100);
+        if (rotation == 0) {
+            image(img, 0, 0, sketchWidth, sketchHeight);
+        } else {
+            translate(sketchWidth / 2, sketchHeight / 2);
+            rotate(radians(rotation));
+            if (rotation == 180) {
+                image(img, -sketchWidth / 2, -sketchHeight / 2,
+                        sketchWidth, sketchHeight);
+            } else {
+                image(img, -sketchHeight / 2, -sketchWidth / 2,
+                        sketchHeight, sketchWidth);
+            }
+        }
     }
 
     @Override
@@ -122,8 +135,6 @@ class PGLApplet extends PApplet {
         super.dispose();
     }
 
-    
-    
     void requestDraw(long time) {
         renderTime = time;
         g.requestDraw();
