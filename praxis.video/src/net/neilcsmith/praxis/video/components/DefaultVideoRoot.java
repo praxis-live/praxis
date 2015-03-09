@@ -56,7 +56,7 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
 
     private final static int WIDTH_DEFAULT = 640;
     private final static int HEIGHT_DEFAULT = 480;
-    private final static double FPS_DEFAULT = 24;
+    private final static double FPS_DEFAULT = 30;
     private int skipcount;
     private int width = WIDTH_DEFAULT;
     private int height = HEIGHT_DEFAULT;
