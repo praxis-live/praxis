@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2013 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -50,6 +50,7 @@ import net.neilcsmith.praxis.video.Player;
 import net.neilcsmith.praxis.video.PlayerConfiguration;
 import net.neilcsmith.praxis.video.PlayerFactory;
 import net.neilcsmith.praxis.video.QueueContext;
+import net.neilcsmith.praxis.video.VideoSettings;
 import net.neilcsmith.praxis.video.WindowHints;
 import net.neilcsmith.praxis.video.pipes.FrameRateListener;
 import net.neilcsmith.praxis.video.pipes.VideoPipe;
@@ -86,36 +87,31 @@ class SWPlayer implements Player {
     // listener list
     private List<FrameRateListener> listeners = new ArrayList<FrameRateListener>();
     private boolean rendering = false; // used by frame rate listeners
-    private String title;
-    private boolean fullScreen;
-    private QueueContext queueContext;
+    private final WindowHints wHints;
+    private final QueueContext queueContext;
 
-    private SWPlayer(String title,
+    private SWPlayer(
             int width,
             int height,
             double fps,
-            boolean fullScreen,
             int outputWidth,
             int outputHeight,
             int outputRotation,
             int outputDevice,
+            WindowHints wHints,
             QueueContext queue) {
         if (width <= 0 || height <= 0 || fps <= 0) {
             throw new IllegalArgumentException();
         }
-        if (title == null) {
-            throw new NullPointerException();
-        }
         this.width = width;
         this.height = height;
         this.fps = fps;
-        this.title = title;
-        this.fullScreen = fullScreen;
         sink = new OutputSink();
         this.outputWidth = outputWidth;
         this.outputHeight = outputHeight;
         this.outputRotation = outputRotation;
         this.outputDevice = outputDevice;
+        this.wHints = wHints;
         this.queueContext = queue;
     }
 
@@ -188,9 +184,11 @@ class SWPlayer implements Player {
                     dim = new Dimension(outputWidth, outputHeight);
                 }
                 GraphicsDevice gd = findScreenDevice();
-                
+                String title = wHints.getTitle();
+                if (title.isEmpty()) {
+                    title = "Praxis LIVE";
+                }
                 frame = new Frame(title, gd.getDefaultConfiguration());
-//                frame.setIgnoreRepaint(true);
                 frame.setBackground(Color.BLACK);
                 frame.addWindowListener(new WindowAdapter() {
                     @Override
@@ -207,17 +205,23 @@ class SWPlayer implements Player {
                 canvas.setBackground(Color.BLACK);
                 canvas.setIgnoreRepaint(true);
                 frame.add(canvas);
-                if (fullScreen) {
-                    boolean fakeFullScreen = Settings.getBoolean("video._fakefs", false);
+                if (wHints.isFullScreen()) {
+                    boolean fsem = VideoSettings.isFullScreenExclusive();
                     frame.setUndecorated(true);
                     frame.validate();
-                    if (fakeFullScreen) {
+                    if (fsem) {
+                        gd.setFullScreenWindow(frame);
+                    } else {
                         frame.setVisible(true);
                         frame.setExtendedState(Frame.MAXIMIZED_BOTH);
-                    } else {
-                        gd.setFullScreenWindow(frame);
                     }
                 } else {
+                    if (wHints.isUndecorated()) {
+                        frame.setUndecorated(true);
+                    }
+                    if (wHints.isAlwaysOnTop()) {
+                        frame.setAlwaysOnTop(true);
+                    }
                     frame.pack();
                     frame.setVisible(true);
                 }
@@ -507,14 +511,6 @@ class SWPlayer implements Player {
             int outHeight = height;
             int rotation = 0;
             int device = -1;
-            boolean fullscreen = false;
-            String title = "OpenGL";
-
-            WindowHints wHints = clients[0].getLookup().get(WindowHints.class);
-            if (wHints != null) {
-                fullscreen = wHints.isFullScreen();
-                title = wHints.getTitle();
-            }
 
             ClientConfiguration.Dimension dim =
                     clients[0].getLookup().get(ClientConfiguration.Dimension.class);
@@ -535,17 +531,22 @@ class SWPlayer implements Player {
                 device = dev.getValue();
             }
 
+            WindowHints wHints = clients[0].getLookup().get(WindowHints.class);
+            if (wHints == null) {
+                wHints = new WindowHints();
+            }
+            
             QueueContext queue = config.getLookup().get(QueueContext.class);
 
-            return new SWPlayer(title,
+            return new SWPlayer(
                     config.getWidth(),
                     config.getHeight(),
                     config.getFPS(),
-                    fullscreen,
                     outWidth,
                     outHeight,
                     rotation,
                     device,
+                    wHints,
                     queue);
 
         }

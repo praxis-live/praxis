@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2013 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -26,13 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.core.Lookup;
-import net.neilcsmith.praxis.core.info.ArgumentInfo;
-import net.neilcsmith.praxis.core.types.PArray;
-import net.neilcsmith.praxis.core.types.PMap;
-import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractRoot;
-import net.neilcsmith.praxis.impl.ArgumentProperty;
-import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.InstanceLookup;
 import net.neilcsmith.praxis.impl.IntProperty;
 import net.neilcsmith.praxis.impl.NumberProperty;
@@ -45,8 +39,6 @@ import net.neilcsmith.praxis.video.PlayerConfiguration;
 import net.neilcsmith.praxis.video.PlayerFactory;
 import net.neilcsmith.praxis.video.QueueContext;
 import net.neilcsmith.praxis.video.VideoContext;
-import net.neilcsmith.praxis.video.VideoSettings;
-import net.neilcsmith.praxis.video.WindowHints;
 import net.neilcsmith.praxis.video.pipes.FrameRateListener;
 import net.neilcsmith.praxis.video.pipes.FrameRateSource;
 
@@ -65,23 +57,17 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     private final static int WIDTH_DEFAULT = 640;
     private final static int HEIGHT_DEFAULT = 480;
     private final static double FPS_DEFAULT = 24;
-    private final static boolean FULL_SCREEN_DEFAULT = false;
     private int skipcount;
     private int width = WIDTH_DEFAULT;
     private int height = HEIGHT_DEFAULT;
     private double fps = FPS_DEFAULT;
-    private boolean fullScreen = FULL_SCREEN_DEFAULT;
     private StringProperty renderer;
-//    private String title;
     private Player player;
-//    private Placeholder placeholder;
-//    private OutputServer outputServer;
     private VideoContext.OutputClient outputClient;
     private VideoContextImpl ctxt;
     private Lookup lookup;
 
     public DefaultVideoRoot() {
-//        placeholder = new Placeholder();
         buildControls();
     }
 
@@ -89,10 +75,9 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
         renderer = StringProperty.builder().defaultValue(SOFTWARE).allowedValues(SOFTWARE, OPENGL).build();
         
         registerControl("renderer", renderer);
-        registerControl("width", IntProperty.create(new WidthBinding(), 1, 2048, width));
-        registerControl("height", IntProperty.create(new HeightBinding(), 1, 2048, height));
-        registerControl("fps", NumberProperty.create(new FpsBinding(), 1, 100, fps));
-        registerControl("full-screen", BooleanProperty.create(this, new FullScreenBinding(), fullScreen));
+        registerControl("width", IntProperty.create(new WidthBinding(), 1, 16384, width));
+        registerControl("height", IntProperty.create(new HeightBinding(), 1, 16384, height));
+        registerControl("fps", NumberProperty.create(new FpsBinding(), 1, 256, fps));
         ctxt = new VideoContextImpl();
     }
 
@@ -108,9 +93,8 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
         try {
             if (!source.isRendering()) {
                 skipcount++;
-//                System.out.println("Frame skipped " + skipcount);
             }
-            nextControlFrame(source.getTime());
+            update(source.getTime(), true);
         } catch (IllegalRootStateException ex) {
             // @TODO remove source
             player.terminate();
@@ -121,15 +105,12 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     protected void starting() {
         try {
             String lib = renderer.getValue();
-            if (lib.isEmpty()) {
-                lib = VideoSettings.getRenderer();
-            }
             player = createPlayer(lib);
             player.addFrameRateListener(this);
             if (outputClient != null && outputClient.getOutputCount() > 0) {
                 player.getSink(0).addSource(outputClient.getOutputSource(0));
             }
-            setInterrupt(new Runnable() {
+            setDelegate(new Runnable() {
                 public void run() {
                     player.run();
                     try {
@@ -150,32 +131,15 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     }
 
     private Player createPlayer(String library) throws Exception {
-        String title = "PRAXIS : " + getAddress();
-//        int outWidth = width;
-//        int outHeight = height;
-//        int rotation = 0;
         Lookup clientLookup = Lookup.EMPTY;
         if (outputClient != null) {
             clientLookup = outputClient.getLookup();
-//            ClientConfiguration.Dimension dim = clientLookup.get(ClientConfiguration.Dimension.class);
-//            if (dim != null) {
-//                outWidth = dim.getWidth();
-//                outHeight = dim.getHeight();
-//            }
-//            ClientConfiguration.Rotation rot = clientLookup.get(ClientConfiguration.Rotation.class);
-//            if (rot != null) {
-//                rotation = rot.getAngle();
-//            }
         }
         PlayerFactory factory = findPlayerFactory(library);
-        WindowHints wHints = new WindowHints();
-        wHints.setTitle(title);
-        wHints.setFullScreen(fullScreen);
-        Lookup clLkp = InstanceLookup.create(clientLookup, wHints);
         Lookup plLkp = InstanceLookup.create(new QueueContextImpl());
         return factory.createPlayer(new PlayerConfiguration(width, height, fps, plLkp),
                 new ClientConfiguration[]{
-                    new ClientConfiguration(0, 1, clLkp)
+                    new ClientConfiguration(0, 1, clientLookup)
                 });
     }
 
@@ -193,12 +157,6 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
 
     @Override
     protected void stopping() {
-//        setInterrupt(new Runnable() {
-//            public void run() {
-////                player.getOutputSink().removeSource(placeholder);
-//                player.terminate();
-//            }
-//        });
         player.terminate();
         interrupt();
 
@@ -281,17 +239,4 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
         }
     }
 
-    private class FullScreenBinding implements BooleanProperty.Binding {
-
-        public void setBoundValue(long time, boolean value) {
-            if (getState() == RootState.ACTIVE_RUNNING) {
-                throw new UnsupportedOperationException("Can't set full screen state while running");
-            }
-            fullScreen = value;
-        }
-
-        public boolean getBoundValue() {
-            return fullScreen;
-        }
-    }
 }

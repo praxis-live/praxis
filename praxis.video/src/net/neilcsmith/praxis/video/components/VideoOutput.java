@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -27,16 +27,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
+import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
+import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.InstanceLookup;
-import net.neilcsmith.praxis.impl.IntProperty;
+import net.neilcsmith.praxis.impl.StringProperty;
 import net.neilcsmith.praxis.video.ClientConfiguration;
 import net.neilcsmith.praxis.video.ClientRegistrationException;
 import net.neilcsmith.praxis.video.VideoContext;
+import net.neilcsmith.praxis.video.WindowHints;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.pipes.VideoPipe;
 import net.neilcsmith.praxis.video.pipes.impl.Placeholder;
@@ -47,38 +50,60 @@ import net.neilcsmith.praxis.video.pipes.impl.Placeholder;
  */
 public class VideoOutput extends AbstractComponent {
 
-    private Placeholder placeholder;
+    private final static String DEF_TITLE_PREFIX = "PRAXIS : ";
+    
+    private final Placeholder placeholder;
+    private final VideoContext.OutputClient client;
+    private final ArgumentProperty width;
+    private final ArgumentProperty height;
+    private final ArgumentProperty rotation;
+    private final ArgumentProperty device;
+    private final WindowHints wHints;
     private VideoContext context;
-    private VideoContext.OutputClient client;
-    private ArgumentProperty width;
-    private ArgumentProperty height;
-    private ArgumentProperty rotation;
-    private ArgumentProperty device;
+    private String title = "";
+    private String defaultTitle = "";
 
     public VideoOutput() {
         placeholder = new Placeholder();
         registerPort(Port.IN, new DefaultVideoInputPort(placeholder));
         client = new OutputClientImpl();
+        wHints = new WindowHints();
+
+        registerControl("title", StringProperty.builder()
+                .binding(new TitleBinding())
+                .emptyIsDefault()
+                .build());
+        
         device = ArgumentProperty.builder()
+                .emptyIsDefault()
                 .suggestedValues(
-                    PNumber.valueOf(1),
-                    PNumber.valueOf(2),
-                    PNumber.valueOf(3),
-                    PNumber.valueOf(4))
+                        PNumber.valueOf(1),
+                        PNumber.valueOf(2),
+                        PNumber.valueOf(3),
+                        PNumber.valueOf(4))
                 .build();
-        width = ArgumentProperty.create();
-        height = ArgumentProperty.create();
+        width = ArgumentProperty.builder().emptyIsDefault().build();
+        height = ArgumentProperty.builder().emptyIsDefault().build();
         rotation = ArgumentProperty.builder()
+                .emptyIsDefault()
                 .suggestedValues(
-                    PNumber.valueOf(0),
-                    PNumber.valueOf(90),
-                    PNumber.valueOf(180),
-                    PNumber.valueOf(270))
+                        PNumber.valueOf(0),
+                        PNumber.valueOf(90),
+                        PNumber.valueOf(180),
+                        PNumber.valueOf(270))
                 .build();
         registerControl("device", device);
         registerControl("width", width);
         registerControl("height", height);
         registerControl("rotation", rotation);
+        
+        registerControl("full-screen",
+                BooleanProperty.create(new FullScreenBinding(), false));
+        registerControl("always-on-top",
+                BooleanProperty.create(new AlwaysOnTopBinding(), false));
+        registerControl("undecorated",
+                BooleanProperty.create(new UndecoratedBinding(), false));
+        
     }
 
     @Override
@@ -99,6 +124,67 @@ public class VideoOutput extends AbstractComponent {
             } catch (ClientRegistrationException ex) {
                 Logger.getLogger(VideoOutput.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
+        ComponentAddress ad = getAddress();
+        if (ad != null) {
+            defaultTitle = DEF_TITLE_PREFIX + "/" + ad.getRootID();
+        } else {
+            defaultTitle = DEF_TITLE_PREFIX;
+        }
+        if (title.isEmpty()) {
+            wHints.setTitle(defaultTitle);
+        }
+    }
+
+    private class TitleBinding implements StringProperty.Binding {
+
+        public void setBoundValue(long time, String value) {
+            title = value;
+            if (title.isEmpty()) {
+                wHints.setTitle(defaultTitle);
+            } else {
+                wHints.setTitle(title);
+            }
+        }
+
+        public String getBoundValue() {
+            return title;
+        }
+
+    }
+
+    private class FullScreenBinding implements BooleanProperty.Binding {
+
+        public void setBoundValue(long time, boolean value) {
+            wHints.setFullScreen(value);
+        }
+
+        public boolean getBoundValue() {
+            return wHints.isFullScreen();
+        }
+
+    }
+
+    private class AlwaysOnTopBinding implements BooleanProperty.Binding {
+
+        public void setBoundValue(long time, boolean value) {
+            wHints.setAlwaysOnTop(value);
+        }
+
+        public boolean getBoundValue() {
+            return wHints.isAlwaysOnTop();
+        }
+
+    }
+
+    private class UndecoratedBinding implements BooleanProperty.Binding {
+
+        public void setBoundValue(long time, boolean value) {
+            wHints.setUndecorated(value);
+        }
+
+        public boolean getBoundValue() {
+            return wHints.isUndecorated();
         }
 
     }
@@ -143,6 +229,7 @@ public class VideoOutput extends AbstractComponent {
             if (dev != null) {
                 items.add(new ClientConfiguration.DeviceIndex(dev - 1));
             }
+            items.add(wHints);
             return InstanceLookup.create(items.toArray());
         }
 
