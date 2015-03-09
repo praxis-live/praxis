@@ -69,14 +69,15 @@ class CodeProperty<D extends CodeDelegate>
     protected void valueChanged(long time) {
         Result r = getValue();
         if (r != null) {
+            context.flush();
             context.getComponent().install((CodeContext<D>) r.context);
-            context.log(r.log);
         }
     }
 
     @Override
     protected void taskError(long time, PError error) {
-        context.getLog().log(LogLevel.ERROR, error.getType() + " : " + error.getMessage());
+        context.getLog().log(LogLevel.ERROR, error);
+        context.flush();
     }
  
     @Override
