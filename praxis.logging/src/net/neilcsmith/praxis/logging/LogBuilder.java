@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -53,6 +53,13 @@ public final class LogBuilder {
         }
     }
 
+    public void log(LogLevel level, PError err) {
+        if (isLoggable(level)) {
+            log.add(level.asPString());
+            log.add(err);
+        }
+    }
+    
     public void log(LogLevel level, Exception ex) {
         if (isLoggable(level)) {
             PError e = PError.create(ex);
