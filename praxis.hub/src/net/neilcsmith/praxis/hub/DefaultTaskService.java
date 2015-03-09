@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -62,6 +63,7 @@ class DefaultTaskService extends AbstractRoot {
         super(EnumSet.noneOf(Caps.class));
         threadService = Executors.newCachedThreadPool(new ThreadFactory() {
 
+            @Override
             public Thread newThread(Runnable r) {
                Thread thr = new Thread(r);
                thr.setPriority(Thread.MIN_PRIORITY);
@@ -70,8 +72,8 @@ class DefaultTaskService extends AbstractRoot {
         });
         Control submitter = new SubmitControl();
         registerControl(TaskService.SUBMIT, submitter);
-        registerInterface(TaskService.INSTANCE);
-        futures = new HashMap<Future<Argument>, Call>();
+        registerInterface(TaskService.class);
+        futures = new HashMap<>();
         completed = new ArrayList<Future>();
     }
 
@@ -93,6 +95,12 @@ class DefaultTaskService extends AbstractRoot {
                         completed.add(future);
                     } catch (Exception ex) {
                         LOG.log(Level.FINEST, null, ex);
+                        if (ex instanceof ExecutionException) {
+                            Throwable t = ex.getCause();
+                            if (t instanceof Exception) {
+                                ex = (Exception) t;
+                            }
+                        }
                         Call call = futures.get(future);
                         call = Call.createErrorCall(call, PReference.wrap(ex));
                         getPacketRouter().route(call);
@@ -108,6 +116,7 @@ class DefaultTaskService extends AbstractRoot {
 
     private class SubmitControl implements Control {
 
+        @Override
         public void call(Call call, PacketRouter router) throws Exception {
             switch (call.getType()) {
                 case INVOKE :
@@ -130,6 +139,7 @@ class DefaultTaskService extends AbstractRoot {
                         Future<Argument> future = threadService.submit(
                                 new Callable<Argument>() {
 
+                                    @Override
                                     public Argument call() throws Exception {
                                         return task.execute();
                                     }
@@ -143,6 +153,7 @@ class DefaultTaskService extends AbstractRoot {
             
         }
 
+        @Override
         public ControlInfo getInfo() {
             return TaskService.SUBMIT_INFO;
         }
