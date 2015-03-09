@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -27,8 +27,6 @@ import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pipeline;
-import org.gstreamer.elements.RGBDataSink;
-import org.gstreamer.elements.RGBDataSink.Listener;
 
 /**
  *
@@ -36,7 +34,6 @@ import org.gstreamer.elements.RGBDataSink.Listener;
  */
 public class V4LDelegate extends AbstractGstDelegate {
 
-    private final static String V4LSRC = "v4lsrc";
     private final static String V4L2SRC = "v4l2src";
     private final static String DEFAULT_CAPS = "video/x-raw-rgb";
     private String capsString;
@@ -49,16 +46,6 @@ public class V4LDelegate extends AbstractGstDelegate {
         this.srcDevice = srcDevice;
     }
 
-//    public V4LDelegate() {
-//        this("video/x-raw-rgb");
-//    }
-//
-//    public V4LDelegate(String caps) {
-//        if (caps == null) {
-//            throw new NullPointerException();
-//        }
-//        this.capsString = caps;
-//    }
     @Override
     protected Pipeline buildPipeline(Element sink) {
         Pipeline pipe = new Pipeline();
@@ -67,8 +54,6 @@ public class V4LDelegate extends AbstractGstDelegate {
         Element caps = ElementFactory.make("capsfilter", "caps");
         Element fcs = ElementFactory.make("ffmpegcolorspace", "fcs");
         caps.setCaps(Caps.fromString(capsString));
-//        RGBDataSink sink = new RGBDataSink("sink", listener);
-//        sink.setPassDirectBuffer(true);
         pipe.addMany(src, fcs, caps, sink);
         Pipeline.linkMany(src, fcs, caps, sink);
         return pipe;
@@ -87,9 +72,7 @@ public class V4LDelegate extends AbstractGstDelegate {
     private static String getSrcType(URI resource) {
         String scheme = resource.getScheme();
         String srcType;
-        if (scheme.equals("v4l")) {
-            srcType = V4LSRC;
-        } else if (scheme.equals("v4l2")) {
+        if (scheme.equals("v4l2")) {
             srcType = V4L2SRC;
         } else {
             throw new IllegalArgumentException();

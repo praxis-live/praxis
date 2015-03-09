@@ -27,11 +27,11 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.video.InvalidVideoResourceException;
+import net.neilcsmith.praxis.video.VideoSettings;
 import net.neilcsmith.praxis.video.gstreamer.GStreamerLibraryLoader;
-import net.neilcsmith.praxis.video.gstreamer.delegates.DV1394Delegate;
-import net.neilcsmith.praxis.video.gstreamer.delegates.IPCamDelegate;
+import net.neilcsmith.praxis.video.gstreamer.delegates.BinDelegate;
 import net.neilcsmith.praxis.video.gstreamer.delegates.KSDelegate;
-import net.neilcsmith.praxis.video.gstreamer.delegates.PlaybinDelegate;
+import net.neilcsmith.praxis.video.gstreamer.delegates.PlayBinDelegate;
 import net.neilcsmith.praxis.video.gstreamer.delegates.QTKitDelegate;
 import net.neilcsmith.praxis.video.gstreamer.delegates.V4LDelegate;
 import org.openide.util.Lookup;
@@ -40,20 +40,33 @@ import org.openide.util.Lookup;
  *
  * @author Neil C Smith
  */
-class GStreamerFactory {
-    
-    private final static Logger LOG = Logger.getLogger(GStreamerFactory.class.getName());
+class VideoDelegateFactory {
 
-    private static GStreamerFactory instance = new GStreamerFactory();
+    private static String DEFAULT_CAPTURE_SCHEME = "v4l2";
 
-    private GStreamerFactory() {
+    static {
+        String os = System.getProperty("os.name");
+        if (os != null) {
+            if (os.contains("Windows")) {
+                DEFAULT_CAPTURE_SCHEME = "ks";
+            } else if (os.contains("Mac") || os.contains("Darwin")) {
+                DEFAULT_CAPTURE_SCHEME = "qtkit";
+            }
+        }
+    }
+
+    private final static Logger LOG = Logger.getLogger(VideoDelegateFactory.class.getName());
+
+    private static VideoDelegateFactory instance = new VideoDelegateFactory();
+
+    private VideoDelegateFactory() {
         preloadLibs();
     }
 
     private void preloadLibs() {
         try {
             for (GStreamerLibraryLoader loader : Lookup.getDefault().lookupAll(GStreamerLibraryLoader.class)) {
-                
+
                 try {
                     loader.load();
                 } catch (Exception ex) {
@@ -64,62 +77,75 @@ class GStreamerFactory {
             LOG.log(Level.WARNING, "Exception thrown while trying to load GStreamer library loaders", ex);
         }
     }
-    
-    public static GStreamerFactory getInstance() {
+
+    static VideoDelegateFactory getInstance() {
         return instance;
     }
 
-    public VideoDelegate create(URI resource) throws InvalidVideoResourceException, InstantiationException {
+    VideoDelegate createCaptureDelegate(URI resource) throws InvalidVideoResourceException, InstantiationException {
         String scheme = resource.getScheme();
         if (scheme == null) {
             throw new InvalidVideoResourceException();
         }
-        if (scheme.equals("file") || scheme.equals("http")) {
-            return createPlaybinDelegate(resource);
-        } else if (scheme.equals("v4l") || scheme.equals("v4l2")) {
-            return createV4LDelegate(resource);
-        } else if (scheme.equals("ks")) {
-            return createKSDelegate(resource);
-        } else if (scheme.equals("qtkit")) {
-            return createQTKitDelegate(resource);        
-        } else if (scheme.equals("ipcam")) {
-            return createIPCamDelegate(resource);
-        } else if (scheme.equals("dv1394")) {
-            return createDV1394Delegate(resource);
+        if ("capture".equals(scheme)) {
+            resource = translateCapture(resource);
+            scheme = resource.getScheme();
         }
-        throw new InvalidVideoResourceException();
-    }
 
-    private VideoDelegate createDV1394Delegate(URI resource) {
-        return DV1394Delegate.create(resource);
-    }
-
-    private VideoDelegate createPlaybinDelegate(URI resource) {
-        return PlaybinDelegate.create(resource);
-    }
-
-    private VideoDelegate createIPCamDelegate(URI resource) {
-        if (resource.getScheme().equals("ipcam")) {
-            try {
-                resource = new URI("http", resource.getSchemeSpecificPart(), resource.getFragment());
-            } catch (URISyntaxException ex) {
-                Logger.getLogger(GStreamerFactory.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        switch (scheme) {
+            case "v4l2":
+                return createV4LDelegate(resource);
+            case "ks":
+                return createKSDelegate(resource);
+            case "qtkit":
+                return createQTKitDelegate(resource);
+            default:
+                return createPlayBinDelegate(resource);
         }
-        return IPCamDelegate.create(resource);
     }
     
+    VideoDelegate createCaptureDelegate(String binDescription) {
+        return BinDelegate.create(binDescription);
+    }
+
+    VideoDelegate createPlayBinDelegate(URI resource) {
+        return PlayBinDelegate.create(resource);
+    }
+
     private VideoDelegate createV4LDelegate(URI resource) {
         return V4LDelegate.create(resource);
     }
-    
-    
+
     private VideoDelegate createKSDelegate(URI resource) {
         return KSDelegate.create(resource);
     }
-    
+
     private VideoDelegate createQTKitDelegate(URI resource) {
         return QTKitDelegate.create(resource);
     }
-    
+
+    private URI translateCapture(URI uri) {
+        int idx = 0;
+        try {
+            String auth = uri.getAuthority();
+            if (auth != null) {
+                idx = Integer.parseInt(uri.getAuthority());
+            }
+        } catch (Exception ex) {
+        }
+        String dev = DEFAULT_CAPTURE_SCHEME + "://" + idx;
+        try {
+            URI out = new URI(dev);
+            if (out.getQuery() == null) {
+                String query = uri.getQuery();
+                if (query != null) {
+                    out = new URI(out.getScheme(), out.getAuthority(), null, query, null);
+                }
+            }
+            return out;
+        } catch (URISyntaxException ex) {
+            return uri;
+        }
+    }
+
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -27,8 +27,6 @@ import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pipeline;
-import org.gstreamer.elements.RGBDataSink;
-import org.gstreamer.elements.RGBDataSink.Listener;
 
 /**
  *
@@ -55,8 +53,6 @@ public class KSDelegate extends AbstractGstDelegate {
         Element caps = ElementFactory.make("capsfilter", "caps");
         Element fcs = ElementFactory.make("ffmpegcolorspace", "fcs");
         caps.setCaps(Caps.fromString(capsString));
-//        RGBDataSink sink = new RGBDataSink("sink", listener);
-//        sink.setPassDirectBuffer(true);
         pipe.addMany(src, fcs, caps, sink);
         Pipeline.linkMany(src, fcs, caps, sink);
         return pipe;

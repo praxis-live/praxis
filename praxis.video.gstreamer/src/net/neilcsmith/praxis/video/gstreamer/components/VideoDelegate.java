@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,7 +22,6 @@
 
 package net.neilcsmith.praxis.video.gstreamer.components;
 
-import javax.sound.sampled.AudioInputStream;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.utils.ResizeMode;
 
@@ -83,40 +82,50 @@ public abstract class VideoDelegate {
         }
     }
     
-    public boolean isVariableRate() {
+    public boolean isVariableSpeed() {
         return false;
     }
     
-    public double getRate() {
+    public double getSpeed() {
         return 1;
     }
     
-    public void setRate(double rate) {
+    public void setSpeed(double speed) {
         throw new UnsupportedOperationException();
     }
     
-    public boolean isAudioStreamAvailable() {
+    public boolean supportsFrameSizeRequest() {
         return false;
     }
     
-    public AudioInputStream getAudioStream() {
+    public void requestFrameWidth(int width) {
         throw new UnsupportedOperationException();
     }
     
-    public boolean canWaitOnFrame() {
+    public void requestFrameHeight(int height) {
+        throw new UnsupportedOperationException();
+    }
+    
+    public void defaultFrameWidth() {
+        requestFrameWidth(-1);
+    }
+    
+    public void defaultFrameHeight() {
+        requestFrameHeight(-1);
+    }
+    
+    public boolean supportsFrameRateRequest() {
         return false;
     }
     
-    public void setWaitOnFrame(boolean wait) {
-        if (wait) {
-            throw new UnsupportedOperationException();
-        }
+    public void requestFrameRate(double rate) {
+        throw new UnsupportedOperationException();
     }
     
-    public boolean getWaitOnFrame() {
-        return false;
+    public void defaultFrameRate() {
+        requestFrameRate(-1);
     }
-    
+         
     public abstract State initialize() throws StateException;
     
     public abstract void play() throws StateException;
@@ -128,7 +137,8 @@ public abstract class VideoDelegate {
     public abstract void dispose();
     
     public abstract State getState();
-
+    
+    
     public static class StateException extends Exception {
         
         public StateException() {}

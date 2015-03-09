@@ -42,7 +42,6 @@ class GstUtils {
             return Collections.emptyMap();
         }
         LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
-//        Pattern ValidURI = Pattern.compile("(?:([a-zA-Z0-9]+)=([^=&]*)&)*([a-zA-Z0-9]+)=([^=&]*)");
         Pattern queryPattern = Pattern.compile("([a-zA-Z0-9]+)=([^=&]*)&*");
         Matcher params = queryPattern.matcher(query);
         while (params.find()) {
@@ -51,30 +50,4 @@ class GstUtils {
         return map;
     }
 
-//    public static void main(String[] args) {
-//        String q = "param1=true&param2=fdsjkjh&param3=false";
-//        Map<String, String> map = parseQueryString(q);
-//        System.out.println(q);
-//        System.out.println(map);
-//        System.out.println(map == Collections.EMPTY_MAP);
-//
-//        q = "param1=true&param2=fdsjkjh&param3=fa=lse&param4=am I here?";
-//        map = parseQueryString(q);
-//        System.out.println(q);
-//        System.out.println(map);
-//        System.out.println(map == Collections.EMPTY_MAP);
-//
-//        q = "blahblah";
-//        map = parseQueryString(q);
-//        System.out.println(q);
-//        System.out.println(map);
-//        System.out.println(map == Collections.EMPTY_MAP);
-//
-//        q = "";
-//        map = parseQueryString(q);
-//        System.out.println(q);
-//        System.out.println(map);
-//        System.out.println(map == Collections.EMPTY_MAP);
-//
-//    }
 }

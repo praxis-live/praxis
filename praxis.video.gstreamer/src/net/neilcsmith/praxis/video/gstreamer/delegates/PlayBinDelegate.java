@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,6 +23,8 @@ package net.neilcsmith.praxis.video.gstreamer.delegates;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.gstreamer.Bus;
 import org.gstreamer.Element;
 import org.gstreamer.Format;
@@ -31,46 +33,44 @@ import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
 import org.gstreamer.SeekFlags;
 import org.gstreamer.SeekType;
-import org.gstreamer.elements.PlayBin;
 import org.gstreamer.elements.PlayBin2;
-import org.gstreamer.elements.RGBDataSink;
-import org.gstreamer.elements.RGBDataSink.Listener;
 
 /**
  *
  * @author Neil C Smith
  */
-public class PlaybinDelegate extends AbstractGstDelegate {
+public class PlayBinDelegate extends AbstractGstDelegate {
 
     private URI loc;
-//    private PlayBin pipe;
     private PlayBin2 pipe;
 
-    protected PlaybinDelegate(URI loc) {
+    protected PlayBinDelegate(URI loc) {
         this.loc = loc;
     }
 
     @Override
     protected Pipeline buildPipeline(Element sink) throws Exception {
-//        pipe = new PlayBin("PlayBin", loc);
         pipe = new PlayBin2("PlayBin2", loc);
         pipe.setAudioSink(null);
-//        RGBDataSink sink = new RGBDataSink(("sink"), listener);
-//        sink.setPassDirectBuffer(true);
         pipe.setVideoSink(sink);
         pipe.getBus().connect(new Bus.SEGMENT_DONE() {
 
+            @Override
             public void segmentDone(GstObject arg0, Format arg1, long arg2) {
-                if (isLooping()) {
-                    State s = getState();
-                    if (s == State.Playing) {
+                State s = getState();
+                if (s == State.Playing) {
+                    if (isLooping()) {
                         pipe.seek(1.0, Format.TIME, SeekFlags.FLUSH | SeekFlags.SEGMENT,
                                 SeekType.SET, 0, SeekType.SET, -1);
+                    } else {
+                        try {
+                            stop();
+                        } catch (StateException ex) {
+                        }
                     }
                 }
             }
         });
-        setLooping(true);
         return pipe;
     }
 
@@ -85,36 +85,29 @@ public class PlaybinDelegate extends AbstractGstDelegate {
     }
 
     @Override
-    protected void doPlay() throws Exception {
-        Gst.getExecutor().execute(new Runnable() {
+    protected void doPlay() {
 
-            public void run() {
-                long position = pipe.queryPosition(TimeUnit.NANOSECONDS);
-                pipe.seek(1.0, Format.TIME, SeekFlags.FLUSH | SeekFlags.SEGMENT,
-                        SeekType.SET, position, SeekType.SET, -1);
-                pipe.play();
-            }
-        });
+        long position = pipe.queryPosition(TimeUnit.NANOSECONDS);
+        pipe.seek(1.0, Format.TIME, SeekFlags.FLUSH | SeekFlags.SEGMENT,
+                SeekType.SET, position, SeekType.SET, -1);
+        pipe.play();
+
     }
 
     @Override
-    protected void doPause() throws Exception {
-        Gst.getExecutor().execute(new Runnable() {
+    protected void doPause() {
 
-            public void run() {
-                if (!pipe.isPlaying()) {
-                    pipe.play();
-                    pipe.getState();
-                }
-                long position = pipe.queryPosition(TimeUnit.NANOSECONDS);
-                if (position < 0) {
-                    position = 100;
-                }
-                pipe.seek(1.0, Format.TIME, SeekFlags.FLUSH | SeekFlags.SEGMENT,
-                        SeekType.SET, position, SeekType.SET, position);
+        if (!pipe.isPlaying()) {
+            pipe.play();
+            pipe.getState();
+        }
+        long position = pipe.queryPosition(TimeUnit.NANOSECONDS);
+        if (position < 0) {
+            position = 100;
+        }
+        pipe.seek(1.0, Format.TIME, SeekFlags.FLUSH | SeekFlags.SEGMENT,
+                SeekType.SET, position, SeekType.SET, position);
 
-            }
-        });
     }
 
     @Override
@@ -128,15 +121,14 @@ public class PlaybinDelegate extends AbstractGstDelegate {
                             SeekType.SET, position, SeekType.SET, -1);
                 } else {
                     pipe.seek(1, Format.TIME, SeekFlags.FLUSH | SeekFlags.SEGMENT,
-                            SeekType.SET, position, SeekType.SET, position+1);
+                            SeekType.SET, position, SeekType.SET, position + 1);
                 }
 
             }
         });
     }
-    
-    public static PlaybinDelegate create(URI loc) {
-        return new PlaybinDelegate(loc);
+
+    public static PlayBinDelegate create(URI loc) {
+        return new PlayBinDelegate(loc);
     }
 }
-

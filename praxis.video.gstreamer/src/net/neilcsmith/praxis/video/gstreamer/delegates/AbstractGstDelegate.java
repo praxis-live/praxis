@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -58,19 +58,19 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
     private GStreamerSurface surface;
     private final Lock surfaceLock;
     private Pipeline pipe;
+    private BufferDataAppSink sink;
     private Rectangle srcRegion;
     private int srcWidth;
     private int srcHeight;
     private Rectangle destRegion;
     private int destWidth;
     private int destHeight;
-    private volatile boolean waitOnFrame;
-    private volatile boolean newFrameAvailable = true;
+//    private volatile boolean newFrameAvailable = true;
     private volatile boolean looping;
 
     protected AbstractGstDelegate() {
         Gst.init();
-        state = new AtomicReference<VideoDelegate.State>(State.New);
+        state = new AtomicReference<>(State.New);
         surfaceLock = new ReentrantLock();
     }
 
@@ -79,11 +79,12 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
         // this is where we call down to build pipeline
         if (state.compareAndSet(State.New, State.Ready)) {
             try {
-                BufferDataAppSink sink = new BufferDataAppSink("sink", new BufferListener());
+                sink = new BufferDataAppSink("sink", new BufferListener());
                 sink.setAutoDisposeBuffer(false);
                 pipe = buildPipeline(sink);
                 makeBusConnections(pipe.getBus());
-                pipe.setState(org.gstreamer.State.READY); // in gst thread?
+                pipe.setState(org.gstreamer.State.READY);
+                pipe.getState(); // in gst thread?
                 return State.Ready;
             } catch (Exception ex) {
                 error("Error building pipeline", ex);
@@ -106,20 +107,18 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
                 throw new StateException("Illegal call to play when state is " + s);
             }
         } while (!state.compareAndSet(s, State.Playing));
-        try {
-            doPlay();
-        } catch (Exception ex) {
-            error("Error while attempting Play", ex);
-        }
-    }
-
-    protected void doPlay() throws Exception {
         Gst.getExecutor().execute(new Runnable() {
 
+            @Override
             public void run() {
-                pipe.play();
+                doPlay();
+
             }
         });
+    }
+
+    protected void doPlay() {
+        pipe.play();
     }
 
     @Override
@@ -134,21 +133,18 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
                 throw new StateException("Illegal call to pause when state is " + s);
             }
         } while (!state.compareAndSet(s, State.Paused));
-        try {
-            doPause();
-        } catch (Exception ex) {
-            error("Error while attempting Pause", ex);
-        }
-    }
-
-    protected void doPause() throws Exception {
         Gst.getExecutor().execute(new Runnable() {
 
+            @Override
             public void run() {
-                pipe.pause();
+                doPause();
 
             }
         });
+    }
+
+    protected void doPause() {
+        pipe.pause();
     }
 
     @Override
@@ -163,20 +159,18 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
                 throw new StateException("Illegal call to stop when state is " + s);
             }
         } while (!state.compareAndSet(s, State.Ready));
-        try {
-            doStop();
-        } catch (Exception ex) {
-            error("Error while attempting Stop", ex);
-        }
-    }
-
-    protected void doStop() throws Exception {
         Gst.getExecutor().execute(new Runnable() {
 
+            @Override
             public void run() {
-                pipe.stop();
+                doStop();
+
             }
         });
+    }
+
+    protected void doStop() {
+        pipe.stop();
     }
 
     @Override
@@ -188,14 +182,21 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
                 return;
             }
         } while (!state.compareAndSet(s, State.Disposed));
-        doDispose();
+        Gst.getExecutor().execute(new Runnable() {
+
+            @Override
+            public void run() {
+                doDispose();
+
+            }
+        });
     }
 
     protected void doDispose() {
+        sink.removeListener();
         pipe.setState(org.gstreamer.State.NULL);
+        pipe.getState();
         pipe.dispose();
-//        Gst.deinit();
-
     }
 
     protected void error(String message, Exception ex) {
@@ -218,21 +219,6 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
     }
 
     @Override
-    public boolean canWaitOnFrame() {
-        return true;
-    }
-
-    @Override
-    public void setWaitOnFrame(boolean wait) {
-        waitOnFrame = wait;
-    }
-
-    @Override
-    public boolean getWaitOnFrame() {
-        return waitOnFrame;
-    }
-
-    @Override
     public void setLooping(boolean loop) {
         if (loop) {
             if (isLoopable()) {
@@ -240,6 +226,8 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
             } else {
                 throw new UnsupportedOperationException();
             }
+        } else {
+            looping = false;
         }
     }
 
@@ -258,7 +246,7 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
         return pipe.queryPosition(TimeUnit.NANOSECONDS);
     }
 
-    public void process( Surface output) {
+    public void process(Surface output) {
         State s = state.get();
         if (s == State.Playing || s == State.Paused) {
             drawVideo(output);
@@ -267,34 +255,15 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
     }
 
     private void drawVideo(Surface output) {
-        if (waitOnFrame) {
-            while (state.get() == State.Playing && !newFrameAvailable) {
-                Thread.yield();
-            }
-        }
 
         surfaceLock.lock();
 
         try {
             if (surface != null && surface.buffer != null) {
                 checkRegions(output);
-//                output.process(new GraphicsOp(new GraphicsOp.Callback() {
-//                    public void draw(Graphics2D g2d, Image[] images) {
-//                        
-//                        int dx1 = destRegion.x;
-//                        int dy1 = destRegion.y;
-//                        int dx2 = dx1 + destRegion.width;
-//                        int dy2 = dy1 + destRegion.height;
-//                        int sx1 = srcRegion.x;
-//                        int sy1 = srcRegion.y;
-//                        int sx2 = sx1 + srcRegion.width;
-//                        int sy2 = sy1 + srcRegion.height;
-//                        g2d.drawImage(image, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
-//                    }
-//                }));
                 output.process(new ScaledBlit().setSourceRegion(srcRegion).setDestinationRegion(destRegion),
                         surface);
-                newFrameAvailable = false;
+//                newFrameAvailable = false;
             }
 
         } finally {
@@ -324,16 +293,6 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
         destRegion = null;
     }
 
-//    private BufferedImageSurface getImage(int width, int height) {
-//        if (image != null && image.getWidth() == width && image.getHeight() == height) {
-//            return image;
-//        }
-//
-//        image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-////        image.setAccelerationPriority(0.0f);
-//        return image;
-//    }
-
     private void makeBusConnections(Bus bus) {
         bus.connect(new Bus.ERROR() {
 
@@ -356,7 +315,7 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
             }
         });
     }
-    
+
     protected abstract Pipeline buildPipeline(Element sink) throws Exception;
 
     @Override
@@ -364,28 +323,7 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
         super.finalize();
         dispose();
     }
-//
-//    private class RGBListener implements RGBDataSink.Listener {
-//
-//        public void rgbFrame(boolean preroll, int width, int height, IntBuffer rgb) {
-//
-//            if (!surfaceLock.tryLock()) {
-//                return;
-//            }
-//
-//            try {
-//                image = getImage(width, height);
-//                int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-//                rgb.get(pixels, 0, width * height);
-//                newFrameAvailable = true;
-//            } finally {
-//                surfaceLock.unlock();
-//            }
-//
-//
-//        }
-//    }
-    
+
     private class BufferListener implements BufferDataAppSink.Listener {
 
         public void bufferFrame(int width, int height, Buffer buffer) {
@@ -407,17 +345,17 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
                 surfaceLock.unlock();
             }
         }
-        
+
     }
-    
+
     private static class GStreamerSurface extends Surface implements NativePixelData {
-        
+
         private static PixelData[] EMPTY = new PixelData[0];
-        
+
         private Buffer buffer;
         private int[] data;
         private int modCount;
-        
+
         private GStreamerSurface(int width, int height) {
             super(width, height, false);
         }
@@ -494,8 +432,7 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
         public Format getFormat() {
             return Format.INT_RGB;
         }
-        
+
     }
 
-    
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,57 +21,74 @@
  */
 package net.neilcsmith.praxis.video.gstreamer.components;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import net.neilcsmith.praxis.core.ExecutionContext;
-import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.core.info.ControlInfo;
+import java.net.URI;
+import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.CallArguments;
+import net.neilcsmith.praxis.core.Lookup;
+import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.interfaces.TaskService;
 import net.neilcsmith.praxis.core.types.PMap;
-import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
+import net.neilcsmith.praxis.core.types.PReference;
+import net.neilcsmith.praxis.core.types.PResource;
+import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
+import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
-import net.neilcsmith.praxis.video.gstreamer.components.VideoDelegate.StateException;
-import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
-import net.neilcsmith.praxis.video.pipes.impl.SingleOut;
-import net.neilcsmith.praxis.video.render.Surface;
+import net.neilcsmith.praxis.video.InvalidVideoResourceException;
 
 /**
  *
  * @author Neil C Smith
  */
-public class VideoPlayer extends AbstractExecutionContextComponent {
+public class VideoPlayer extends AbstractVideoComponent {
 
-    private enum TriggerState {
-
-        Play, Pause, Stop
-    }
-    private VideoDelegate video;
-    private Delegator delegator;
-    private VideoDelegateLoader loader;
+    private DelegateLoader loader;
+    private boolean loop = true;
 
     public VideoPlayer() {
-        delegator = new Delegator();
-        registerPort(Port.OUT, new DefaultVideoOutputPort(this, delegator));
-        loader = new VideoDelegateLoader(this, new VideoBinding(), false);
+        loader = new DelegateLoader();
         registerControl("video", loader);
-        NumberProperty position = NumberProperty.create(new PositionBinding(), 0, 1, 0,
-                PMap.create(ControlInfo.KEY_TRANSIENT, true));
+        NumberProperty position = NumberProperty.builder()
+                .binding(new PositionBinding())
+                .minimum(0)
+                .maximum(1)
+                .defaultValue(0)
+                .markTransient()
+                .build();
         registerControl("position", position);
         registerPort("position", position.createPort());
-        TriggerControl play = TriggerControl.create(new TriggerBinding(TriggerState.Play));
+        
+        BooleanProperty lp = BooleanProperty.create(new LoopBinding(), loop);
+        registerControl("loop", lp);
+        
+        createResizeModeControls();
+        
+        TriggerControl play = TriggerControl.create(createTriggerBinding(TriggerState.Play));
         registerControl("play", play);
         registerPort("play", play.createPort());
-        TriggerControl pause = TriggerControl.create(new TriggerBinding(TriggerState.Pause));
+        TriggerControl pause = TriggerControl.create(createTriggerBinding(TriggerState.Pause));
         registerControl("pause", pause);
         registerPort("pause", pause.createPort());
-        TriggerControl stop = TriggerControl.create(new TriggerBinding(TriggerState.Stop));
+        TriggerControl stop = TriggerControl.create(createTriggerBinding(TriggerState.Stop));
         registerControl("stop", stop);
         registerPort("stop", stop.createPort());
 
     }
 
+    @Override
+    void setDelegate(VideoDelegate delegate) {
+        super.setDelegate(delegate);
+        if (delegate != null && delegate.isLoopable()) {
+            delegate.setLooping(loop);
+        }
+    }
+    
+    
+
     private class PositionBinding implements NumberProperty.Binding {
 
+        @Override
         public void setBoundValue(long time, double value) {
             if (video != null && video.isSeekable()) {
                 long duration = video.getDuration();
@@ -82,6 +99,7 @@ public class VideoPlayer extends AbstractExecutionContextComponent {
             }
         }
 
+        @Override
         public double getBoundValue() {
             if (video == null) {
                 return 0;
@@ -98,80 +116,81 @@ public class VideoPlayer extends AbstractExecutionContextComponent {
         }
     }
 
-    private class TriggerBinding implements TriggerControl.Binding {
-
-        private TriggerState state;
-
-        private TriggerBinding(TriggerState state) {
-            this.state = state;
-        }
-
-        public void trigger(long time) {
-            if (video != null) {
-                try {
-                    switch (state) {
-                        case Play:
-                            video.play();
-                            break;
-                        case Pause:
-                            video.pause();
-                            break;
-                        case Stop:
-                            video.stop();
-                            break;
-                    }
-                } catch (StateException ex) {
-                    Logger.getLogger(VideoPlayer.class.getName()).log(Level.SEVERE, null, ex);
-                }
+    private class LoopBinding implements BooleanProperty.Binding {
+        
+        @Override
+        public void setBoundValue(long time, boolean value) {
+            loop = value;
+            if (video != null && video.isLoopable()) {
+                video.setLooping(loop);
             }
         }
-    }
-
-    private class VideoBinding implements VideoDelegateLoader.Listener {
-
-        public void setDelegate(VideoDelegate delegate) {
-            if (video != null) {
-                video.dispose();
-            }
-            video = delegate;
-        }
-
-        public void delegateLoaded(VideoDelegateLoader source, long time) {
-            setDelegate(source.getDelegate());
-        }
-
-        public void delegateError(VideoDelegateLoader source, long time) {
-        }
-    }
-
-    public void stateChanged(ExecutionContext source) {
-        if (source.getState() == ExecutionContext.State.IDLE) {
-            if (video != null) {
-                try {
-                    video.stop();
-                } catch (StateException ex) {
-                    // no op
-                }
-            }
-        } else if (source.getState() == ExecutionContext.State.TERMINATED) {
-            if (video != null) {
-                video.dispose();
-                video = null;
-
-            }
-        }
-    }
-
-    private class Delegator extends SingleOut {
 
         @Override
-        protected void process(Surface surface, boolean rendering) {
-            if (rendering) {
-                surface.clear();
-                if (video != null) {
-                    video.process(surface);
-                }
+        public boolean getBoundValue() {
+            return loop;
+        }
+        
+    }
+    
+    class DelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
+
+        DelegateLoader() {
+            super(ArgumentInfo.create(PResource.class,
+                    PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true)),
+                    VideoDelegate.class, PString.EMPTY);
+        }
+
+        @Override
+        protected TaskService.Task createTask(CallArguments keys) throws Exception {
+            Argument key;
+            if (keys.getSize() < 1 || (key = keys.get(0)).isEmpty()) {
+                return null;
+            } else {
+                return new LoadTask(getLookup(), PResource.coerce(key));
             }
         }
+
+        @Override
+        protected void valueChanged(long time) {
+            setDelegate(getValue());
+        }
+
+        @Override
+        protected void taskError(long time) {
+
+        }
+
+    }
+
+    private class LoadTask implements TaskService.Task {
+
+        private final Lookup lookup;
+        private final PResource videoSource;
+
+        private LoadTask(Lookup lookup, PResource videoSource) {
+            this.lookup = lookup;
+            this.videoSource = videoSource;
+        }
+
+        public Argument execute() throws Exception {
+            URI uri = videoSource.value();
+            VideoDelegate delegate = VideoDelegateFactory.getInstance().createPlayBinDelegate(uri);
+            if (delegate == null) {
+                throw new InvalidVideoResourceException();
+            }
+            try {
+                VideoDelegate.State state = delegate.initialize();
+                if (state == VideoDelegate.State.Ready) {
+                    return PReference.wrap(delegate);
+                }
+            } catch (Exception ex) {
+                delegate.dispose();
+                throw new InvalidVideoResourceException(ex);
+            }
+            delegate.dispose();
+            throw new InvalidVideoResourceException();
+        }
+
     }
 }
