@@ -116,11 +116,14 @@
 /praxis.video.pgl/build/
 /dist/
 /praxis.code/build/
+/praxis.code/nbproject/private/
 /praxis.video.code/build/
+/praxis.video.code/nbproject/private/
 /praxis.video.pgl.custom/build/
 /praxis.video.pgl.code/build/
 /praxis.video.pgl.code/nbproject/private/
 /praxis.hub.net/build/
+/praxis.hub.net/nbproject/private/
 /praxis.core.components/build/
 /praxis.core.components/nbproject/private/
 /praxis.core.factory/build/
