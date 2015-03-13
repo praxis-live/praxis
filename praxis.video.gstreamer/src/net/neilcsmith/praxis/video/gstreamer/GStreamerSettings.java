@@ -35,7 +35,7 @@ public class GStreamerSettings {
     static {
         String os = System.getProperty("os.name", "");
         if (os.contains("Windows")) {
-            DEFAULT_CAPTURE_PREFIX = "ksvideosrc device=index=";
+            DEFAULT_CAPTURE_PREFIX = "ksvideosrc device-index=";
         } else if (os.contains("Mac") || os.contains("Darwin")) {
             DEFAULT_CAPTURE_PREFIX = "qtkitvideosrc device-index=";
         } else {
