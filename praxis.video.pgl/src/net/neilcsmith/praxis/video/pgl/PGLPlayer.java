@@ -198,6 +198,7 @@ public class PGLPlayer implements Player {
                     if (fsem) {
                         gd.setFullScreenWindow(frame);
                     } else {
+                        frame.pack();
                         frame.setVisible(true);
                         frame.setExtendedState(Frame.MAXIMIZED_BOTH);
                     }
