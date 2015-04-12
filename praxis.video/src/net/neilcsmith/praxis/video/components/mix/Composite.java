@@ -186,7 +186,7 @@ public class Composite extends AbstractComponent {
         protected Surface validateInput(Surface input, Surface output, int index) {
             if (forceAlpha && index == 1) {
                 if (input == null || 
-                        !output.checkCompatible(output, true, false) ||
+                        !output.checkCompatible(input, true, false) ||
                         !input.hasAlpha()) {
                     input = output.createSurface(output.getWidth(), output.getHeight(), true);
                 }
