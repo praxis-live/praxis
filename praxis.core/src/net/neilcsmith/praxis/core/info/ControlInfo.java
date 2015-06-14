@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -99,7 +99,7 @@ public class ControlInfo extends Argument {
             default:
                 return PArray.valueOf(
                         PString.valueOf(type),
-                        PArray.valueOf(inputs),
+                        PArray.valueOf(outputs),
                         PArray.valueOf(defaults),
                         properties)
                         .toString();
@@ -193,7 +193,7 @@ public class ControlInfo extends Argument {
     }
 
     public static ControlInfo createReadOnlyPropertyInfo(ArgumentInfo[] arguments, PMap properties) {
-        return create(new ArgumentInfo[0], arguments, null, Type.ReadOnlyProperty, properties);
+        return create(EMPTY_INFO, arguments, null, Type.ReadOnlyProperty, properties);
     }
 
     private static ControlInfo create(ArgumentInfo[] inputs,
@@ -202,13 +202,13 @@ public class ControlInfo extends Argument {
             Type type,
             PMap properties) {
 
-        ArgumentInfo[] ins = inputs.clone();
+        ArgumentInfo[] ins = inputs.length == 0 ? EMPTY_INFO : inputs.clone();
         ArgumentInfo[] outs;
         if (outputs == inputs) {
             // property - make same as inputs
             outs = ins;
         } else {
-            outs = outputs.clone();
+            outs = outputs.length == 0 ? EMPTY_INFO : outputs.clone();
         }
         if (defaults != null) {
             defaults = defaults.clone();
@@ -284,12 +284,14 @@ public class ControlInfo extends Argument {
     }
     
     private static ControlInfo parseProperty(String string, Type type, PArray array) throws Exception {
-        // array(1) is inputs / outputs
+        // array(1) is outputs
         PArray args = PArray.coerce(array.get(1));
-        ArgumentInfo[] inputs = new ArgumentInfo[args.getSize()];
-        for (int i=0; i<inputs.length; i++) {
-            inputs[i] = ArgumentInfo.coerce(args.get(i));
+        ArgumentInfo[] outputs = new ArgumentInfo[args.getSize()];
+        for (int i=0; i<outputs.length; i++) {
+            outputs[i] = ArgumentInfo.coerce(args.get(i));
         }
+        ArgumentInfo[] inputs = type == Type.ReadOnlyProperty ?
+                EMPTY_INFO : outputs;
         // array(2) is defaults
         args = PArray.coerce(array.get(2));
         Argument[] defs = new Argument[args.getSize()];
@@ -303,7 +305,7 @@ public class ControlInfo extends Argument {
         } else {
             properties = PMap.EMPTY;
         }
-        return new ControlInfo(inputs, inputs, defs, type, properties, string);
+        return new ControlInfo(inputs, outputs, defs, type, properties, string);
     }
 
 }

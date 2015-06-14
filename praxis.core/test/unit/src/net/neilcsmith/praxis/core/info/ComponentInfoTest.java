@@ -54,6 +54,7 @@ public class ComponentInfoTest {
         Map<String, ControlInfo> controls = new LinkedHashMap<>();
         controls.put("p1", ControlInfo.createPropertyInfo(new ArgumentInfo[]{PNumber.info(0, 1)}, new Argument[]{PNumber.ONE}, PMap.create(ControlInfo.KEY_TRANSIENT, true)));
         controls.put("p1", ControlInfo.createPropertyInfo(new ArgumentInfo[]{ArgumentInfo.create(PString.class, PMap.create("template", "public void draw(){"))}, new Argument[]{PString.EMPTY}, PMap.EMPTY));
+        controls.put("ro1", ControlInfo.createReadOnlyPropertyInfo(new ArgumentInfo[]{PNumber.info(0, 1)}, PMap.create(ControlInfo.KEY_TRANSIENT, true)));
         controls.put("t1", ControlInfo.createActionInfo(PMap.create("key", "value")));
         
         Map<String, PortInfo> ports = new LinkedHashMap<>();
@@ -82,7 +83,10 @@ public class ComponentInfoTest {
         System.out.println(info2);
         System.out.println(info.getControlInfo("p1"));
         System.out.println(info2.getControlInfo("p1"));
+        System.out.println(info.getControlInfo("ro1"));
+        System.out.println(info2.getControlInfo("ro1"));
         assertTrue(Argument.equivalent(Argument.class, info.getControlInfo("p1").getOutputsInfo()[0], info2.getControlInfo("p1").getOutputsInfo()[0]));
+        assertTrue(Argument.equivalent(Argument.class, info.getControlInfo("ro1").getOutputsInfo()[0], info2.getControlInfo("ro1").getOutputsInfo()[0]));
         assertTrue(Argument.equivalent(Argument.class, info, info2));
     }
 
