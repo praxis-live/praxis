@@ -30,17 +30,14 @@ import org.jaudiolibs.pipes.impl.OpHolder;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class Gain extends OpHolder<GainOp> implements Resettable {
+public final class Gain extends OpHolder<GainOp> implements Resettable {
 
     private final GainOp op;
     
     public Gain() {
-        this(new GainOp());
-    }
-    
-    private Gain(GainOp op) {
-        super(op);
-        this.op = op;
+        op = new GainOp();
+        reset();
+        setOp(op);
     }
     
     public Gain level(double level) {
