@@ -30,7 +30,7 @@ import org.jaudiolibs.pipes.impl.SingleInOut;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class OpGen extends SingleInOut implements Resettable {
+public final class OpGen extends SingleInOut implements Resettable {
     
     private final static Function PASSTHROUGH = new Function() {
 
@@ -40,11 +40,11 @@ public class OpGen extends SingleInOut implements Resettable {
         }
     };
 
-    private double[] scratch;
+//    private double[] scratch;
     private Function fn;
     
     public OpGen() {
-        this.fn = PASSTHROUGH;
+        reset();
     }
     
     
