@@ -32,7 +32,7 @@ import org.jaudiolibs.pipes.impl.OpHolder;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class LFO extends OpHolder implements Resettable {
+public final class LFO extends OpHolder<AudioOp> implements Resettable {
 
 
     private final static float DEFAULT_FREQUENCY = 1;
@@ -41,12 +41,9 @@ public class LFO extends OpHolder implements Resettable {
     private final Op op;
 
     public LFO() {
-        this(new Op());
-    }
-
-    private LFO(Op op) {
-        super(op);
-        this.op = op;
+        op = new Op();
+        reset();
+        setOp(op);
     }
 
     public LFO frequency(double frequency) {

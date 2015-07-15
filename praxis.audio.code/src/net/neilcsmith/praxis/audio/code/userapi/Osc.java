@@ -32,7 +32,7 @@ import org.jaudiolibs.pipes.impl.OpHolder;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class Osc extends OpHolder implements Resettable {
+public final class Osc extends OpHolder<AudioOp> implements Resettable {
 
 
     private final static float DEFAULT_FREQUENCY = 440;
@@ -40,12 +40,9 @@ public class Osc extends OpHolder implements Resettable {
     private final Op op;
 
     public Osc() {
-        this(new Op());
-    }
-
-    private Osc(Op op) {
-        super(op);
-        this.op = op;
+        op = new Op();
+        reset();
+        setOp(op);
     }
 
     public Osc frequency(double frequency) {
@@ -144,14 +141,14 @@ public class Osc extends OpHolder implements Resettable {
         @Override
         public void processReplace(int buffersize, float[][] outputs, float[][] inputs) {
             float[] out = outputs[0];
-            if (gain != 0 || oldGain != 0) {
-                float g = oldGain;
-                float delta = (gain - g) / buffersize;
+            float g1 = oldGain;
+            float g2 = freq > 1 ? gain : 0;
+            if (g1 != 0 || g2 != 0) {
+                float delta = (g2 - g1) / buffersize;
                 for (int i = 0; i < buffersize; i++) {
-                    out[i] = g * nextSample();
-                    g += delta;
-                }
-                oldGain = gain;
+                    out[i] = g1 * nextSample();
+                    g1 += delta;
+                } 
             } else {
                 Arrays.fill(out, 0);
                 phase += (phaseIncrement * buffersize);
@@ -159,25 +156,27 @@ public class Osc extends OpHolder implements Resettable {
                     phase -= TWOPI;
                 }
             }
+            oldGain = g2;
         }
 
         @Override
         public void processAdd(int buffersize, float[][] outputs, float[][] inputs) {
             float[] out = outputs[0];
-            if (gain != 0 || oldGain != 0) {
-                float g = oldGain;
-                float delta = (gain - g) / buffersize;
+            float g1 = oldGain;
+            float g2 = freq > 1 ? gain : 0;
+            if (g1 != 0 || g2 != 0) {
+                float delta = (g2 - g1) / buffersize;
                 for (int i = 0; i < buffersize; i++) {
-                    out[i] += g * nextSample();
-                    g += delta;
-                }
-                oldGain = gain;
+                    out[i] += g1 * nextSample();
+                    g1 += delta;
+                } 
             } else {
                 phase += (phaseIncrement * buffersize);
                 while (phase >= TWOPI) {
                     phase -= TWOPI;
                 }
             }
+            oldGain = g2;
         }
 
         private void updateIncrement() {
