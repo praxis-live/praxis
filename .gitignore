@@ -135,3 +135,6 @@
 /praxis.video.gstreamer-win/release/modules/lib/windows64/
 /praxis.core.code/build/
 /praxis.core.code/nbproject/private/
+/praxis.audio.code/build/
+/praxis.audio.factory/build/
+/praxis.audio.factory/nbproject/private/
