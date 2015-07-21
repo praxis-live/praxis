@@ -424,7 +424,6 @@ public class DefaultAudioRoot extends AbstractRoot {
 
         public void nextBuffer(BufferRateSource source) {
             try {
-//                nextControlFrame(source.getTime());
                 update(source.getTime(), true);
             } catch (IllegalRootStateException ex) {
                 server.shutdown();
@@ -436,7 +435,7 @@ public class DefaultAudioRoot extends AbstractRoot {
             if (Math.round(srate) != sampleRate.value) {
                 sampleRate.value = Math.round(srate);
             }
-            period = (long) ((context.getMaxBufferSize()
+            period = (long) ((blockSize.value
                     / srate) * 1000000000);
         }
 
@@ -487,6 +486,16 @@ public class DefaultAudioRoot extends AbstractRoot {
                     }
                 }
             }
+        }
+
+        @Override
+        public double getSampleRate() {
+            return sampleRate.value;
+        }
+
+        @Override
+        public int getBlockSize() {
+            return blockSize.value;
         }
     }
 
