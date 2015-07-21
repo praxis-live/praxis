@@ -82,4 +82,22 @@ public class AudioCodeDelegate extends DefaultCodeDelegate {
         return new Tee();
     }
     
+    public final double noteToFrequency(String note) {
+        int midi = noteToMidi(note);
+        if (midi < 0) {
+            return 0;
+        } else {
+            return midiToFrequency(midi);
+        }
+    }
+    
+    public final int noteToMidi(String note) {
+        return NoteUtils.noteToMidi(note);
+    }
+    
+    public final double midiToFrequency(int midi) {
+        return NoteUtils.midiToFrequency(midi);
+    }
+    
+    
 }
