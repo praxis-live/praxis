@@ -22,6 +22,7 @@
  */
 package net.neilcsmith.praxis.audio.code;
 
+import net.neilcsmith.praxis.audio.AudioContext;
 import net.neilcsmith.praxis.code.CodeComponent;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.core.ExecutionContext;
@@ -42,6 +43,7 @@ public class AudioCodeContext<D extends AudioCodeDelegate> extends CodeContext<D
     private final AudioOutPort.Descriptor[] outs;
 
     private ExecutionContext execCtxt;
+    private AudioContext audioCtxt;
 
     public AudioCodeContext(AudioCodeConnector<D> connector) {
         super(connector);
@@ -64,6 +66,7 @@ public class AudioCodeContext<D extends AudioCodeDelegate> extends CodeContext<D
     @Override
     protected void hierarchyChanged() {
         super.hierarchyChanged();
+        audioCtxt = getLookup().get(AudioContext.class);
         ExecutionContext ctxt = getLookup().get(ExecutionContext.class);
         if (execCtxt != ctxt) {
             if (execCtxt != null) {
@@ -87,8 +90,16 @@ public class AudioCodeContext<D extends AudioCodeDelegate> extends CodeContext<D
     private void setupDelegate() {
         setupPorts();
         setupUGens();
+        AudioCodeDelegate delegate = getDelegate();
+        if (audioCtxt != null) {
+            delegate.sampleRate = audioCtxt.getSampleRate();
+            delegate.blockSize = audioCtxt.getBlockSize();
+        } else {
+            delegate.sampleRate = 48000;
+            delegate.blockSize = 64;
+        }
         try {
-            getDelegate().setup();
+            delegate.setup();
         } catch (Exception e) {
             getLog().log(LogLevel.ERROR, e, "Exception thrown during setup()");
         }

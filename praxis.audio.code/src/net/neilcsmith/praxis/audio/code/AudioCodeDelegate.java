@@ -34,6 +34,9 @@ import org.jaudiolibs.pipes.Pipe;
  */
 public class AudioCodeDelegate extends DefaultCodeDelegate {
 
+    public double sampleRate;
+    public int blockSize;
+    
     public void setup() {
     }
 
