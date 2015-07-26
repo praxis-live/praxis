@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -339,10 +339,19 @@ public class PropertyControl extends Property implements Control {
 
         public static Descriptor create(CodeConnector<?> connector,
                 P ann, Field field) {
+            Binding binding = findBinding(connector, field);
+            if (binding == null) {
+                return null;
+            }
+            return create(connector, ann.value(), field, binding);
+        }
+        
+        
+
+        private static Descriptor create(CodeConnector<?> connector, int index,
+                Field field, Binding binding) {
             field.setAccessible(true);
             String id = connector.findID(field);
-            int index = ann.value();
-            Binding binding = findBinding(connector, field);
             Method onChange = null;
             Method onError = null;
             OnChange onChangeAnn = field.getAnnotation(OnChange.class);
@@ -390,7 +399,7 @@ public class PropertyControl extends Property implements Control {
                 binding = BooleanBinding.create(connector, field);
             }
 
-            if (binding == null) {
+            if (binding == null && Property.class.isAssignableFrom(type)) {
                 Type typeAnn = field.getAnnotation(Type.class);
                 if (typeAnn != null) {
                     binding = new DefaultBinding(
