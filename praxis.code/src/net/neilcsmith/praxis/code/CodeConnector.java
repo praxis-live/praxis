@@ -219,10 +219,12 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     }
 
     protected void analyseField(Field field) {
-//        LOG.log(Level.FINE, "Analysing field : {0}", field);
 
         P prop = field.getAnnotation(P.class);
         if (prop != null && analysePropertyField(prop, field)) {
+            return;
+        }
+        if (prop != null && analyseCustomPropertyField(prop, field)) {
             return;
         }
         T trig = field.getAnnotation(T.class);
@@ -300,6 +302,23 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         } else {
             return false;
         }
+    }
+    
+    private boolean analyseCustomPropertyField(P ann, Field field) {
+        TypeConverter<?> converter = TypeConverter.find(field.getType());
+        if (converter == null) {
+            return false;
+        }
+        TypeConverterProperty.Descriptor<?> tcpd =
+                TypeConverterProperty.Descriptor.create(this, ann, field, converter);
+        if (tcpd != null) {
+            addControl(tcpd);
+//            if (shouldAddPort(field)) {
+//                addPort(tcpd.createPortDescriptor());
+//            }
+            return true;
+        }
+        return false;
     }
 
     private boolean analyseTriggerMethod(T ann, Method method) {
