@@ -56,7 +56,7 @@ public class InfoProperty implements Control {
         private final InfoProperty control;
 
         public Descriptor(int index) {
-            super(ComponentInterface.INFO, Category.Property, index);
+            super(ComponentInterface.INFO, Category.Internal, index);
             control = new InfoProperty();
         }
 

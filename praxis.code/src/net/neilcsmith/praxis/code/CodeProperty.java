@@ -142,7 +142,7 @@ class CodeProperty<D extends CodeDelegate>
         private CodeProperty<?> control;
 
         public Descriptor(CodeFactory<D> factory, int index) {
-            super("code", Category.Property, index);
+            super("code", Category.Internal, index);
             this.factory = factory;
             this.info = createInfo(factory);
         }
