@@ -36,6 +36,7 @@ import net.neilcsmith.praxis.code.userapi.AuxIn;
 import net.neilcsmith.praxis.code.userapi.AuxOut;
 import net.neilcsmith.praxis.code.userapi.ID;
 import net.neilcsmith.praxis.code.userapi.In;
+import net.neilcsmith.praxis.code.userapi.Inject;
 import net.neilcsmith.praxis.code.userapi.Out;
 import net.neilcsmith.praxis.code.userapi.P;
 import net.neilcsmith.praxis.code.userapi.Port;
@@ -75,6 +76,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     private Map<String, ControlDescriptor> extControls;
     private Map<String, PortDescriptor> extPorts;
     private ComponentInfo info;
+    private int syntheticIdx = Integer.MIN_VALUE;
 
     public CodeConnector(CodeFactory.Task<D> task, D delegate) {
         this.factory = task.getFactory();
@@ -167,7 +169,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     }
     
     private boolean excludeFromInfo(String id, ControlDescriptor desc) {
-        return id.startsWith("_");
+        return desc.getInfo() == null || id.startsWith("_");
     }
     
     private boolean excludeFromInfo(String id, PortDescriptor desc) {
@@ -237,6 +239,10 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         }
         AuxOut aux = field.getAnnotation(AuxOut.class);
         if (aux != null && analyseAuxOutputField(aux, field)) {
+            return;
+        }
+        Inject inject = field.getAnnotation(Inject.class);
+        if (inject != null && analyseInjectField(inject, field)) {
             return;
         }
     }
@@ -320,6 +326,17 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         }
         return false;
     }
+    
+    private boolean analyseInjectField(Inject ann, Field field) {
+        PropertyControl.Descriptor pdsc
+                = PropertyControl.Descriptor.create(this, ann, field);
+        if (pdsc != null) {
+            addControl(pdsc);
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     private boolean analyseTriggerMethod(T ann, Method method) {
         TriggerControl.Descriptor tdsc
@@ -395,4 +412,8 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         return true;
     }
 
+    protected int getSyntheticIndex() {
+        return syntheticIdx++;
+    }
+    
 }

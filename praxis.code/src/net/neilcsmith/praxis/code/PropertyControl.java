@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.code.userapi.Inject;
 import net.neilcsmith.praxis.code.userapi.OnChange;
 import net.neilcsmith.praxis.code.userapi.OnError;
 import net.neilcsmith.praxis.code.userapi.P;
@@ -58,9 +59,10 @@ public class PropertyControl extends Property implements Control {
     private final ControlInfo info;
     private final Binding binding;
     private final MethodInvoker invoker;
+    private final boolean readOnly;
 
     private CodeContext<?> context;
-
+    
     private boolean latestSet;
     private long latest;
 
@@ -70,6 +72,8 @@ public class PropertyControl extends Property implements Control {
             Method onError) {
         this.info = info;
         this.binding = binding;
+        this.readOnly = info == null ||
+                info.getType() == ControlInfo.Type.ReadOnlyProperty;
         if (onChange != null || onError != null) {
             this.invoker = new MethodInvoker(onChange, onError);
         } else {
@@ -133,7 +137,7 @@ public class PropertyControl extends Property implements Control {
             CallArguments args = call.getArgs();
             int argCount = args.getSize();
             long time = call.getTimecode();
-            if (argCount > 0) {
+            if (argCount > 0 && !readOnly) {
                 if (isLatest(time)) {
                     finishAnimating();
                     try {
@@ -310,6 +314,12 @@ public class PropertyControl extends Property implements Control {
             control = new PropertyControl(info, binding, onChange, onError);
             this.propertyField = field;
         }
+        
+        private Descriptor(String id, int index, Binding binding, Field field) {
+            super(id, Category.Synthetic, index);
+            control = new PropertyControl(null, binding, null, null);
+            propertyField = field;
+        }
 
         @Override
         public ControlInfo getInfo() {
@@ -347,7 +357,7 @@ public class PropertyControl extends Property implements Control {
         }
         
         
-
+        
         private static Descriptor create(CodeConnector<?> connector, int index,
                 Field field, Binding binding) {
             field.setAccessible(true);
@@ -381,6 +391,22 @@ public class PropertyControl extends Property implements Control {
             }
             return new Descriptor(id, index, info, binding, propertyField, onChange, onError);
         }
+        
+        static Descriptor create(CodeConnector<?> connector, Inject ann, Field field) {
+            Binding binding = findBinding(connector, field);
+            if (binding == null) {
+                return null;
+            }
+            field.setAccessible(true);
+            String id = connector.findID(field);
+            int index = connector.getSyntheticIndex();
+            Field propertyField = null;
+            if (Property.class.isAssignableFrom(field.getType())) {
+                propertyField = field;
+            }
+            return new Descriptor(id, index, binding, propertyField);
+        }
+
 
         private static Binding findBinding(CodeConnector<?> connector, Field field) {
             Class<?> type = field.getType();
