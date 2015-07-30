@@ -31,7 +31,7 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
  */
 public abstract class ControlDescriptor {
     
-    public static enum Category {Property, Action}
+    public static enum Category {Internal, Synthetic, Property, Action}
     
     private final String id;
     private final Category category;

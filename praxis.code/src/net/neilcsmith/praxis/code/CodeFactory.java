@@ -130,8 +130,8 @@ public abstract class CodeFactory<D extends CodeDelegate> {
             return cls.newInstance();
         }
 
+        @SuppressWarnings("unchecked")
         protected D createDefaultDelegate() throws Exception {
-            @SuppressWarnings("unchecked")
             Class<D> cls = (Class<D>) classCache.get(factory.cacheKey);
             if (cls == null) {
                 cls = compile(factory.template);

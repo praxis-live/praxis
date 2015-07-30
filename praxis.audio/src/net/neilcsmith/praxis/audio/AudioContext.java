@@ -39,6 +39,10 @@ public abstract class AudioContext {
             throws ClientRegistrationException;
 
     public abstract void unregisterAudioOutputClient(OutputClient client);
+    
+    public abstract double getSampleRate();
+    
+    public abstract int getBlockSize();
 
     public static abstract class Client {
         

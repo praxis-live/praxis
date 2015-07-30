@@ -59,9 +59,11 @@ class CodeProperty<D extends CodeDelegate>
     }
 
     @Override
-    protected final Task createTask(CallArguments keys) throws Exception {
+    @SuppressWarnings("unchecked")
+    protected final Task<D> createTask(CallArguments keys) throws Exception {
         String code = keys.get(0).toString();
-        return new Task(factory, code, context.getLogLevel());
+        return new Task<>(factory, code, context.getLogLevel(),
+                (Class<D>) context.getDelegate().getClass());
     }
 
     @Override
@@ -85,16 +87,21 @@ class CodeProperty<D extends CodeDelegate>
         return info;
     }
 
-    private static class Task implements TaskService.Task {
+    private static class Task<D extends CodeDelegate> implements TaskService.Task {
 
-        private final CodeFactory<?> factory;
+        private final CodeFactory<D> factory;
         private final String code;
         private final LogLevel logLevel;
+        private final Class<D> previous;
 
-        private Task(CodeFactory<?> factory, String code, LogLevel logLevel) {
+        private Task(CodeFactory<D> factory,
+                String code,
+                LogLevel logLevel,
+                Class<D> previous) {
             this.factory = factory;
             this.code = code;
             this.logLevel = logLevel;
+            this.previous = previous;
         }
 
         @Override
@@ -107,6 +114,7 @@ class CodeProperty<D extends CodeDelegate>
             } else {
                 ctxt = factory.task()
                         .attachLogging(log)
+                        .attachPrevious(previous)
                         .createCodeContext(src);
             }
             return PReference.wrap(new Result(ctxt, log));
@@ -134,7 +142,7 @@ class CodeProperty<D extends CodeDelegate>
         private CodeProperty<?> control;
 
         public Descriptor(CodeFactory<D> factory, int index) {
-            super("code", Category.Property, index);
+            super("code", Category.Internal, index);
             this.factory = factory;
             this.info = createInfo(factory);
         }

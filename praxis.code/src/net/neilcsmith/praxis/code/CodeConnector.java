@@ -32,13 +32,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
-import static net.neilcsmith.praxis.code.PortDescriptor.Category.AuxIn;
 import net.neilcsmith.praxis.code.userapi.AuxIn;
 import net.neilcsmith.praxis.code.userapi.AuxOut;
 import net.neilcsmith.praxis.code.userapi.ID;
 import net.neilcsmith.praxis.code.userapi.In;
+import net.neilcsmith.praxis.code.userapi.Inject;
 import net.neilcsmith.praxis.code.userapi.Out;
-import net.neilcsmith.praxis.code.userapi.Output;
 import net.neilcsmith.praxis.code.userapi.P;
 import net.neilcsmith.praxis.code.userapi.Port;
 import net.neilcsmith.praxis.code.userapi.ReadOnly;
@@ -77,6 +76,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     private Map<String, ControlDescriptor> extControls;
     private Map<String, PortDescriptor> extPorts;
     private ComponentInfo info;
+    private int syntheticIdx = Integer.MIN_VALUE;
 
     public CodeConnector(CodeFactory.Task<D> task, D delegate) {
         this.factory = task.getFactory();
@@ -169,7 +169,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     }
     
     private boolean excludeFromInfo(String id, ControlDescriptor desc) {
-        return id.startsWith("_");
+        return desc.getInfo() == null || id.startsWith("_");
     }
     
     private boolean excludeFromInfo(String id, PortDescriptor desc) {
@@ -221,10 +221,12 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     }
 
     protected void analyseField(Field field) {
-//        LOG.log(Level.FINE, "Analysing field : {0}", field);
 
         P prop = field.getAnnotation(P.class);
         if (prop != null && analysePropertyField(prop, field)) {
+            return;
+        }
+        if (prop != null && analyseCustomPropertyField(prop, field)) {
             return;
         }
         T trig = field.getAnnotation(T.class);
@@ -237,6 +239,10 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         }
         AuxOut aux = field.getAnnotation(AuxOut.class);
         if (aux != null && analyseAuxOutputField(aux, field)) {
+            return;
+        }
+        Inject inject = field.getAnnotation(Inject.class);
+        if (inject != null && analyseInjectField(inject, field)) {
             return;
         }
     }
@@ -298,6 +304,34 @@ public abstract class CodeConnector<D extends CodeDelegate> {
             if (shouldAddPort(field)) {
                 addPort(pdsc.createPortDescriptor());
             }
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    private boolean analyseCustomPropertyField(P ann, Field field) {
+        TypeConverter<?> converter = TypeConverter.find(field.getType());
+        if (converter == null) {
+            return false;
+        }
+        TypeConverterProperty.Descriptor<?> tcpd =
+                TypeConverterProperty.Descriptor.create(this, ann, field, converter);
+        if (tcpd != null) {
+            addControl(tcpd);
+//            if (shouldAddPort(field)) {
+//                addPort(tcpd.createPortDescriptor());
+//            }
+            return true;
+        }
+        return false;
+    }
+    
+    private boolean analyseInjectField(Inject ann, Field field) {
+        PropertyControl.Descriptor pdsc
+                = PropertyControl.Descriptor.create(this, ann, field);
+        if (pdsc != null) {
+            addControl(pdsc);
             return true;
         } else {
             return false;
@@ -378,4 +412,8 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         return true;
     }
 
+    protected int getSyntheticIndex() {
+        return syntheticIdx++;
+    }
+    
 }
