@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -38,37 +38,25 @@ public abstract class Property {
 
     private final static long TO_NANO = 1000000000;
 
-    private final static Interpolator LINEAR = LinearInterpolator.getInstance();
-    private final static Interpolator EASE_IN = new SplineInterpolator(0.42, 0, 1, 1);
-    private final static Interpolator EASE_OUT = new SplineInterpolator(0, 0, 0.58, 1);
-    private final static Interpolator EASE_IN_OUT = new SplineInterpolator(0.42, 0, 0.58, 1);
-    private final static Interpolator EASE = new SplineInterpolator(0.25, 0.1, 0.25, 1);
-    
     private final Listener listener;
 
     private CodeContext<?> context;
-    private boolean animating;
-    private double toValue;
-    private long duration;
-    private double fromValue;
-    private long fromTime;
-    private Interpolator interpolator;
+    private Animator animator;
 
     protected Property() {
         this.listener = new Listener();
-        interpolator = LINEAR;
     }
-    
+
     protected void attach(CodeContext<?> context, Property previous) {
         this.context = context;
-        if (previous != null && previous.animating) {
-            animating = true;
-            fromValue = previous.fromValue;
-            toValue = previous.toValue;
-            duration = previous.duration;
-            fromTime = previous.fromTime;
-            interpolator = previous.interpolator;
-            context.addClockListener(listener);
+        if (previous != null && previous.animator != null) {
+            animator = previous.animator;
+            previous.animator = null;
+            animator.attach(this);
+            if (animator.isAnimating()) {
+                previous.stopClock();
+                this.startClock();
+            }
         }
     }
 
@@ -79,7 +67,7 @@ public abstract class Property {
     protected abstract Argument getImpl();
 
     protected abstract double getImpl(double def);
-    
+
     public Argument get() {
         return getImpl();
     }
@@ -99,11 +87,11 @@ public abstract class Property {
     public int getInt(int def) {
         return (int) Math.round(getDouble(def));
     }
-    
+
     public boolean getBoolean() {
         return getBoolean(false);
     }
-    
+
     public boolean getBoolean(boolean def) {
         try {
             return PBoolean.coerce(get()).value();
@@ -111,7 +99,7 @@ public abstract class Property {
             return def;
         }
     }
-    
+
     public Property set(Argument arg) {
         if (arg == null) {
             throw new NullPointerException();
@@ -135,117 +123,225 @@ public abstract class Property {
         return this;
     }
 
-    public Property to(double to) {
-        startAnimating();
-        fromValue = getDouble(0);
-        fromTime = context.getTime();
-        try {
-            setImpl(fromTime, fromValue);
-        } catch (Exception ex) {
-            finishAnimating();
+    protected void finishAnimating() {
+        if (animator != null) {
+            animator.stop();
         }
-        toValue = to;
-        return this;
     }
 
-    public Property in(double time) {
-        startAnimating();
-        duration = (long) (time * TO_NANO);
-        if (duration < 0) {
-            duration = 0;
+    public Animator animator() {
+        if (animator == null) {
+            animator = new Animator(this);
         }
+        return animator;
+    }
+
+    public Property.Animator to(double... to) {
+        return animator().to(to);
+    }
+
+    @Deprecated
+    public Property in(double time) {
+        animator().in(time);
         return this;
     }
 
     public boolean isAnimating() {
-        return animating;
+        return animator != null && animator.isAnimating();
     }
 
+    @Deprecated
     public Property linear() {
-        interpolator = LINEAR;
+        animator().easing(Easing.linear);
         return this;
     }
 
+    @Deprecated
     public Property ease() {
-        interpolator = EASE;
+        animator().easing(Easing.ease);
         return this;
     }
 
+    @Deprecated
     public Property easeIn() {
-        interpolator = EASE_IN;
+        animator().easing(Easing.easeIn);
         return this;
     }
 
+    @Deprecated
     public Property easeOut() {
-        interpolator = EASE_OUT;
+        animator().easing(Easing.easeOut);
         return this;
     }
 
+    @Deprecated
     public Property easeInOut() {
-        interpolator = EASE_IN_OUT;
+        animator().easing(Easing.easeInOut);
         return this;
     }
 
-    private void tick() {
-        if (!animating) {
-            LOG.warning("Tick called when not animating");
-            return;
-        }
-        try {
-            long currentTime = context.getTime();
-            double proportion;
-            if (duration < 1) {
-                proportion = 1;
-            } else {
-                proportion = (currentTime - fromTime) / (double) duration;
-            }
-            if (proportion >= 1) {
-                finishAnimating();
-//            dblValue = toValue;
-                setImpl(fromTime, toValue);
-            } else if (proportion > 0) {
-                double d = interpolator.interpolate(proportion);
-                d = (d * (toValue - fromValue)) + fromValue;
-                setImpl(fromTime, d);
-            } else {
-                setImpl(fromTime, fromValue);
-            }
-        } catch (Exception exception) {
-            finishAnimating();
-        }
-
-    }
-
+    @Deprecated
     protected void startAnimating() {
-        if (!animating) {
-            animating = true;
-            context.addClockListener(listener);
-            duration = 0;
-            toValue = getDouble(0);
-        }
+        assert false;
     }
 
-    protected void finishAnimating() {
-        if (animating) {
-            animating = false;
-            context.removeClockListener(listener);
+    private void startClock() {
+        context.addClockListener(listener);
+    }
 
-        }
-
+    private void stopClock() {
+        context.removeClockListener(listener);
     }
 
     private class Listener implements CodeContext.ClockListener {
 
         @Override
         public void tick() {
-            Property.this.tick();
+            if (animator == null || !animator.animating) {
+                assert false;
+                LOG.warning("Tick called when not animating");
+                return;
+            }
+            animator.tick();
+        }
+    }
+
+    public static class Animator {
+
+        private final static long[] DEFAULT_IN = new long[]{0};
+        private final static Easing[] DEFAULT_EASING = new Easing[]{Easing.linear};
+
+        private Property property;
+        int index;
+        private double[] to;
+        private long[] in;
+        private Easing[] easing;
+
+        private double fromValue;
+        private long fromTime;
+        private boolean animating;
+
+        private Animator(Property p) {
+            this.property = p;
+            in = DEFAULT_IN;
+            easing = DEFAULT_EASING;
+        }
+
+        private void attach(Property p) {
+            this.property = p;
+        }
+
+        public double to() {
+            return to[index];
+        }
+
+        public Animator to(double... to) {
+            if (to.length < 1) {
+                throw new IllegalArgumentException();
+            }
+            this.to = to;
+            index = 0;
+            in = DEFAULT_IN;
+            easing = DEFAULT_EASING;
+            fromValue = property.getDouble();
+            fromTime = property.context.getTime();
+            if (!animating) {
+                property.startClock();
+                animating = true;
+            }
+            return this;
+        }
+
+        public Animator in(double... in) {
+            if (in.length < 1) {
+                this.in = DEFAULT_IN;
+            } else {
+                this.in = new long[in.length];
+                for (int i = 0; i < in.length; i++) {
+                    this.in[i] = (long) (in[i] * TO_NANO);
+                }
+            }
+            return this;
+        }
+
+        public Animator easing(Easing... easing) {
+            if (easing.length < 1) {
+                this.easing = DEFAULT_EASING;
+            } else {
+                this.easing = easing;
+            }
+            return this;
+        }
+
+        public Animator linear() {
+            return easing(Easing.linear);
+        }
+
+        public Animator ease() {
+            return easing(Easing.ease);
+        }
+
+        public Animator easeIn() {
+            return easing(Easing.easeIn);
+        }
+
+        public Animator easeOut() {
+            return easing(Easing.easeOut);
+        }
+
+        public Animator easeInOut() {
+            return easing(Easing.easeInOut);
+        }
+
+        public Animator stop() {
+            index = 0;
+            animating = false;
+            property.stopClock();
+            return this;
+        }
+
+        public boolean isAnimating() {
+            return animating;
+        }
+
+        private void tick() {
+            if (!animating) {
+                assert false;
+                return;
+            }
+            try {
+                long currentTime = property.context.getTime();
+                double toValue = to[index];
+                long duration = in[index % in.length];
+                double proportion;
+                if (duration < 1) {
+                    proportion = 1;
+                } else {
+                    proportion = (currentTime - fromTime) / (double) duration;
+                }
+                if (proportion >= 1) {
+                    index++;
+                    if (index >= to.length) {
+                        stop();
+                    } else {
+                        fromValue = toValue;
+                        fromTime += duration;
+                    }
+                    property.setImpl(fromTime, toValue);
+                } else if (proportion > 0) {
+                    Easing ease = easing[index % easing.length];
+                    double d = ease.calculate(proportion);
+                    d = (d * (toValue - fromValue)) + fromValue;
+                    property.setImpl(fromTime, d);
+                } else {
+//                    p.setImpl(fromTime, fromValue); ???
+                }
+            } catch (Exception exception) {
+                stop();
+            }
+
         }
 
     }
-
-
-
-
-
 
 }
