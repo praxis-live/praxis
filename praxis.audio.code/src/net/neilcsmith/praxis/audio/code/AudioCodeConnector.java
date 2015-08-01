@@ -27,11 +27,14 @@ import java.util.ArrayList;
 import java.util.List;
 import net.neilcsmith.praxis.audio.code.userapi.AudioIn;
 import net.neilcsmith.praxis.audio.code.userapi.AudioOut;
+import net.neilcsmith.praxis.audio.code.userapi.Table;
 import net.neilcsmith.praxis.audio.code.userapi.UGen;
 import net.neilcsmith.praxis.code.CodeConnector;
 import net.neilcsmith.praxis.code.CodeFactory;
+import net.neilcsmith.praxis.code.ResourceProperty;
 import net.neilcsmith.praxis.code.userapi.In;
 import net.neilcsmith.praxis.code.userapi.Out;
+import net.neilcsmith.praxis.code.userapi.P;
 import org.jaudiolibs.pipes.Pipe;
 
 /**
@@ -90,6 +93,21 @@ public class AudioCodeConnector<D extends AudioCodeDelegate> extends CodeConnect
             if (ugd != null) {
                 ugens.add(ugd);
                 return;
+            }
+        }
+        
+        if (Table.class.isAssignableFrom(field.getType())) {
+            P p = field.getAnnotation(P.class);
+            if (p != null) {
+                ResourceProperty.Descriptor<Table> ipd =
+                        ResourceProperty.Descriptor.create(this, p, field, TableLoader.getDefault());
+                if (ipd != null) {
+                    addControl(ipd);
+                    if (shouldAddPort(field)) {
+                        addPort(ipd.createPortDescriptor());
+                    }
+                    return;
+                }
             }
         }
         
