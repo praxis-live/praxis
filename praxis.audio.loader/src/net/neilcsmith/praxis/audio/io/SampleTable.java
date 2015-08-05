@@ -47,6 +47,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public abstract class SampleTable {
 
     private float sampleRate;
