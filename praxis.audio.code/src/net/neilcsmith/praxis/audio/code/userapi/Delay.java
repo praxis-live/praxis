@@ -32,10 +32,10 @@ import org.jaudiolibs.pipes.impl.OpHolder;
  */
 public final class Delay extends OpHolder<VariableDelayOp> implements Resettable {
 
-    private final VariableDelayOp op;
+    private final OpImpl op;
     
     public Delay() {
-        op = new VariableDelayOp(2);
+        op = new OpImpl(2);
         reset();
         setOp(op);
     }
@@ -58,13 +58,22 @@ public final class Delay extends OpHolder<VariableDelayOp> implements Resettable
         return op.getFeedback();
     }
     
-    public Delay gain(double amt) {
+    public Delay level(double amt) {
         op.setGain((float) Utils.constrain(amt, 0, 1));
         return this;
     }
     
-    public double gain() {
+    public double level() {
         return op.getGain();
+    }
+    
+    public Delay passthrough(boolean passthrough) {
+        op.passthrough = passthrough;
+        return this;
+    }
+    
+    public boolean passthrough() {
+        return op.passthrough;
     }
     
     public double maxDelay() {
@@ -76,6 +85,29 @@ public final class Delay extends OpHolder<VariableDelayOp> implements Resettable
         op.setDelay(0);
         op.setGain(1);
         op.setFeedback(0);
+        op.passthrough = false;
+    }
+    
+    private static class OpImpl extends VariableDelayOp {
+        
+        private boolean passthrough;
+        
+        private OpImpl(float maxDelay) {
+            super(maxDelay);
+        }
+
+        @Override
+        public void processReplace(int buffersize, float[][] outputs, float[][] inputs) {
+            if (passthrough) {
+                super.processAdd(buffersize, outputs, inputs);
+            } else {
+                super.processReplace(buffersize, outputs, inputs);
+            }
+        }
+        
+        
+        
+        
     }
     
 }
