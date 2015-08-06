@@ -45,7 +45,7 @@ import java.util.ArrayList;
  *
  * @author Chet
  */
-final class SplineEasing extends Easing {
+final class SplineEasing implements Easing {
 
     // Note: (x0,y0) and (x1,y1) are implicitly (0, 0) and (1,1) respectively
     private double x1, y1, x2, y2;
