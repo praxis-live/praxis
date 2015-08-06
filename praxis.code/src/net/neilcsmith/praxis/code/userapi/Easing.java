@@ -26,7 +26,7 @@ package net.neilcsmith.praxis.code.userapi;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public abstract class Easing {
+public interface Easing {
     
     public final static Easing linear = new LinearEasing();
     public final static Easing easeIn = new SplineEasing(0.42, 0, 1, 1);
@@ -40,7 +40,7 @@ public abstract class Easing {
     public abstract double calculate(double fraction);
     
     
-    static final class LinearEasing extends Easing {
+    static final class LinearEasing implements Easing {
 
         @Override
         public double calculate(double fraction) {
