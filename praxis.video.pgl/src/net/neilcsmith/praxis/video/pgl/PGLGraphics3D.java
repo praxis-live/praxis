@@ -40,6 +40,7 @@ public class PGLGraphics3D extends PGraphics3D {
 
     PGLGraphics3D(PGLContext context, boolean primary, int w, int h) {
         this.context = context;
+        setParent(context.parent());
         setPrimary(primary);
         setSize(w, h);
     }
@@ -62,9 +63,14 @@ public class PGLGraphics3D extends PGraphics3D {
         IntBuffer buf = context.getScratchBuffer(len);
         buf.put(pixels, 0, len);
         buf.rewind();
-        context.writePixelsARGB(buf, pixelTexture, hasAlpha);
+                context.writePixelsARGB(buf, pixelTexture);
         int curBlend = blendMode;
-        blendMode(REPLACE);
+        if (hasAlpha) {
+            blendMode(REPLACE);
+        } else {
+            background(0.f);
+            blendMode(ADD);
+        }
         copy(pixelImage, 0, 0, width, height, 0, height, width, -height);
         blendMode(curBlend);
     }

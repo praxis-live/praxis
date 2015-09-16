@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,10 +21,18 @@
  */
 package net.neilcsmith.praxis.video.pgl;
 
+import com.jogamp.nativewindow.ScalableSurface;
+import com.jogamp.newt.opengl.GLWindow;
+import java.awt.Rectangle;
 import java.nio.IntBuffer;
+import java.util.Collections;
+import processing.core.PApplet;
+import processing.core.PConstants;
+import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.opengl.PGL;
 import processing.opengl.PGraphics2D;
+import processing.opengl.PSurfaceJOGL;
 
 /**
  *
@@ -40,6 +48,7 @@ public class PGLGraphics extends PGraphics2D {
 
     PGLGraphics(PGLContext context, boolean primary, int w, int h) {
         this.context = context;
+        setParent(context.parent());
         setPrimary(primary);
         setSize(w, h);
     }
@@ -47,7 +56,7 @@ public class PGLGraphics extends PGraphics2D {
     public PGLContext getContext() {
         return context;
     }
-    
+
     void writePixelsARGB(int[] pixels, boolean hasAlpha) {
         if (drawing) {
             flush();
@@ -62,9 +71,14 @@ public class PGLGraphics extends PGraphics2D {
         IntBuffer buf = context.getScratchBuffer(len);
         buf.put(pixels, 0, len);
         buf.rewind();
-        context.writePixelsARGB(buf, pixelTexture, hasAlpha);
+        context.writePixelsARGB(buf, pixelTexture);
         int curBlend = blendMode;
-        blendMode(REPLACE);
+        if (hasAlpha) {
+            blendMode(REPLACE);
+        } else {
+            background(0.f);
+            blendMode(ADD);
+        }
         copy(pixelImage, 0, 0, width, height, 0, height, width, -height);
         blendMode(curBlend);
     }
@@ -206,24 +220,12 @@ public class PGLGraphics extends PGraphics2D {
     }
 
     void endOffscreen() {
-//        PGraphics current = getCurrentPG();
-//        if (current == null) {
-//            assert current != null || primarySurface;
-//            return;
-//        }
-//        PGraphics primary = getPrimaryPG();
-//        if (current != primary) {
-//            current.endDraw();
-//        }
         if (context.current != getPrimaryPG()) {
             context.current.endDraw();
             context.current = getPrimaryPG();
         }
     }
 
-//    protected PGraphics getCurrent() {
-//        return ((PGLGraphics)getPrimaryPG()).getCurrentPG();
-//    }
     @Override
     protected void colorCalc(float gray, float alpha) {
         if (gray > colorModeX) {
@@ -284,12 +286,12 @@ public class PGLGraphics extends PGraphics2D {
         }
 
         calcA = (a == colorModeA) ? 1 : a / colorModeA;
-        
+
         switch (colorMode) {
             case RGB:
                 calcR = x / colorModeX;
                 calcG = y / colorModeY;
-                calcB = z / colorModeZ;         
+                calcB = z / colorModeZ;
                 break;
 
             case HSB:
@@ -342,13 +344,13 @@ public class PGLGraphics extends PGraphics2D {
                 }
                 break;
         }
-        
+
         if (a != colorModeA) {
             calcR *= calcA;
             calcG *= calcA;
             calcB *= calcA;
         }
-        
+
         calcRi = (int) (255 * calcR);
         calcGi = (int) (255 * calcG);
         calcBi = (int) (255 * calcB);
@@ -356,6 +358,100 @@ public class PGLGraphics extends PGraphics2D {
         calcColor = (calcAi << 24) | (calcRi << 16) | (calcGi << 8) | calcBi;
         calcAlpha = (calcAi != 255);
     }
-   
-    
+
+    @Override
+    public processing.core.PSurface createSurface() {
+        return new PSurface(this);
+    }
+
+    private static class PSurface extends PSurfaceJOGL {
+
+        public PSurface(PGraphics graphics) {
+            super(graphics);
+        }
+
+        protected void initWindow() {
+            window = GLWindow.create(screen, pgl.getCaps());
+            if (displayDevice == null) {
+                displayDevice = window.getMainMonitor();
+            }
+
+            int displayNum = sketch.sketchDisplay();
+            if (displayNum > 0) {  // if -1, use the default device
+                if (displayNum <= monitors.size()) {
+                    displayDevice = monitors.get(displayNum - 1);
+                } else {
+                    System.err.format("Display %d does not exist, "
+                            + "using the default display instead.%n", displayNum);
+                    for (int i = 0; i < monitors.size(); i++) {
+                        System.err.format("Display %d is %s%n", i + 1, monitors.get(i));
+                    }
+                }
+            }
+
+            boolean spanDisplays = sketch.sketchDisplay() == PConstants.SPAN;
+            screenRect = spanDisplays
+                    ? new Rectangle(0, 0, screen.getWidth(), screen.getHeight())
+                    : new Rectangle(0, 0,
+                            displayDevice.getViewportInWindowUnits().getWidth(),
+                            displayDevice.getViewportInWindowUnits().getHeight());
+
+            // Set the displayWidth/Height variables inside PApplet, so that they're
+            // usable and can even be returned by the sketchWidth()/Height() methods.
+            sketch.displayWidth = screenRect.width;
+            sketch.displayHeight = screenRect.height;
+
+            sketchWidth = sketch.sketchWidth();
+            sketchHeight = sketch.sketchHeight();
+
+            boolean fullScreen = sketch.sketchFullScreen();
+            // Removing the section below because sometimes people want to do the
+            // full screen size in a window, and it also breaks insideSettings().
+            // With 3.x, fullScreen() is so easy, that it's just better that way.
+            // https://github.com/processing/processing/issues/3545
+    /*
+             // Sketch has already requested to be the same as the screen's
+             // width and height, so let's roll with full screen mode.
+             if (screenRect.width == sketchWidth &&
+             screenRect.height == sketchHeight) {
+             fullScreen = true;
+             sketch.fullScreen();
+             }
+             */
+
+            if (fullScreen || spanDisplays) {
+                sketchWidth = screenRect.width;
+                sketchHeight = screenRect.height;
+            }
+
+            float[] reqSurfacePixelScale;
+            if (graphics.is2X()) {
+                // Retina
+                reqSurfacePixelScale = new float[]{ScalableSurface.AUTOMAX_PIXELSCALE,
+                    ScalableSurface.AUTOMAX_PIXELSCALE};
+            } else {
+                // Non-retina
+                reqSurfacePixelScale = new float[]{ScalableSurface.IDENTITY_PIXELSCALE,
+                    ScalableSurface.IDENTITY_PIXELSCALE};
+            }
+            window.setSurfaceScale(reqSurfacePixelScale);
+            window.setSize(sketchWidth, sketchHeight);
+//    window.setResizable(false);
+            setSize(sketchWidth, sketchHeight);
+            sketchX = displayDevice.getViewportInWindowUnits().getX();
+            sketchY = displayDevice.getViewportInWindowUnits().getY();
+            if (fullScreen) {
+                PApplet.hideMenuBar();
+//                window.setTopLevelPosition(sketchX, sketchY);
+//      placedWindow = true;
+                if (spanDisplays) {
+                    window.setFullscreen(monitors);
+                } else {
+                    window.setFullscreen(Collections.singletonList(displayDevice));
+                }
+            }
+        }
+
+    }
+
 }
