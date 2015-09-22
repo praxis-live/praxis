@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package net.neilcsmith.praxis.video.gstreamer.components;
+package net.neilcsmith.praxis.video.gst1.components;
 
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
@@ -33,10 +33,11 @@ import net.neilcsmith.praxis.video.VideoSettings;
 public class GStreamerFactoryProvider implements ComponentFactoryProvider {
 
     private final static boolean ACTIVE_LIB
-            = "gstreamer-0.10".equals(VideoSettings.getMediaLib());
+            = "gstreamer-1.x".equals(VideoSettings.getMediaLib());
 
     private final static ComponentFactory factory = new Factory();
 
+    @Override
     public ComponentFactory getFactory() {
         return factory;
     }

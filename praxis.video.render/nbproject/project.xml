@@ -6,19 +6,11 @@
             <code-name-base>net.neilcsmith.praxis.video.render</code-name-base>
             <suite-component/>
             <module-dependencies/>
-            <friend-packages>
-                <friend>net.neilcsmith.praxis.video</friend>
-                <friend>net.neilcsmith.praxis.video.code</friend>
-                <friend>net.neilcsmith.praxis.video.gstreamer</friend>
-                <friend>net.neilcsmith.praxis.video.java</friend>
-                <friend>net.neilcsmith.praxis.video.opengl</friend>
-                <friend>net.neilcsmith.praxis.video.pgl</friend>
-                <friend>net.neilcsmith.praxis.video.pgl.code</friend>
-                <friend>net.neilcsmith.praxis.video.pipes</friend>
+            <public-packages>
                 <package>net.neilcsmith.praxis.video.render</package>
                 <package>net.neilcsmith.praxis.video.render.ops</package>
                 <package>net.neilcsmith.praxis.video.render.utils</package>
-            </friend-packages>
+            </public-packages>
         </data>
     </configuration>
 </project>
