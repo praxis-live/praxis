@@ -62,7 +62,8 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
     private final Lock surfaceLock;
     private Pipeline pipe;
     private AppSink sink;
-    private SinkListener sinkListener;
+    private NewSampleListener newSampleListener;
+    private NewPrerollListener newPrerollListener;
     private Rectangle srcRegion;
     private int srcWidth;
     private int srcHeight;
@@ -85,8 +86,10 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
             try {
                 sink = new AppSink("sink");
                 sink.set("emit-signals", true);
-                sinkListener = new SinkListener();
-                sink.connect(sinkListener);
+                newSampleListener = new NewSampleListener();
+                newPrerollListener = new NewPrerollListener();
+                sink.connect(newSampleListener);
+                sink.connect(newPrerollListener);
                 if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
                     sink.setCaps(Caps.fromString("video/x-raw, format=BGRx"));
                 } else {
@@ -204,7 +207,8 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
     }
 
     protected void doDispose() {
-        sink.disconnect(sinkListener);
+        sink.disconnect(newSampleListener);
+        sink.disconnect(newPrerollListener);
         sink.dispose();
         pipe.setState(org.freedesktop.gstreamer.State.NULL);
         pipe.getState();
@@ -335,18 +339,41 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
 
     protected abstract Pipeline buildPipeline(Element sink) throws Exception;
 
-//    @Override
-//    protected void finalize() throws Throwable {
-//        super.finalize();
-//        dispose();
-//    }
-
-    private class SinkListener implements AppSink.NEW_SAMPLE {
+    private class NewSampleListener implements AppSink.NEW_SAMPLE {
 
         @Override
         public void newBuffer(AppSink sink) {
             surfaceLock.lock();
             Sample sample = sink.pullSample();
+            Structure capsStruct = sample.getCaps().getStructure(0);
+            int width = capsStruct.getInteger("width");
+            int height = capsStruct.getInteger("height");
+            try {
+                if (surface == null || surface.getWidth() != width || surface.getHeight() != height) {
+                    if (surface != null && surface.sample != null) {
+                        surface.sample.dispose();
+                    }
+                    surface = new GStreamerSurface(width, height);
+                } else {
+                    if (surface.sample != null) {
+                        surface.sample.dispose();
+                    }
+                }
+                surface.sample = sample;
+                surface.modCount++;
+            } finally {
+                surfaceLock.unlock();
+            }
+        }
+
+    }
+    
+    private class NewPrerollListener implements AppSink.NEW_PREROLL {
+
+        @Override
+        public void newPreroll(AppSink sink) {
+            surfaceLock.lock();
+            Sample sample = sink.pullPreroll();
             Structure capsStruct = sample.getCaps().getStructure(0);
             int width = capsStruct.getInteger("width");
             int height = capsStruct.getInteger("height");

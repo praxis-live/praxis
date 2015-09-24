@@ -23,11 +23,9 @@ package net.neilcsmith.praxis.video.gst1.components;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
-import org.freedesktop.gstreamer.Bus;
 import org.freedesktop.gstreamer.Element;
 import org.freedesktop.gstreamer.Format;
 import org.freedesktop.gstreamer.Gst;
-import org.freedesktop.gstreamer.GstObject;
 import org.freedesktop.gstreamer.Pipeline;
 import org.freedesktop.gstreamer.SeekFlags;
 import org.freedesktop.gstreamer.SeekType;
@@ -49,7 +47,10 @@ public class PlayBinDelegate extends AbstractGstDelegate {
     @Override
     protected Pipeline buildPipeline(Element sink) throws Exception {
         pipe = new PlayBin("PlayBin", loc);
-        pipe.setAudioSink(null);
+//        pipe.setAudioSink(null);
+        int flags = (int) pipe.get("flags");
+        flags &= ~(1 << 1); // cancel out audio flag
+        pipe.set("flags", flags);
         pipe.setVideoSink(sink);
         return pipe;
     }
@@ -74,11 +75,10 @@ public class PlayBinDelegate extends AbstractGstDelegate {
                     pipe.seek(1, Format.TIME, SeekFlags.FLUSH | SeekFlags.KEY_UNIT,
                             SeekType.SET, position, SeekType.NONE, -1);
                 } else if (s == State.Paused) {
-                    pipe.play();
                     pipe.seek(1, Format.TIME, SeekFlags.FLUSH | SeekFlags.KEY_UNIT,
                             SeekType.SET, position, SeekType.NONE, -1);
-                    pipe.pause();
                 }
+                pipe.getState(10, TimeUnit.MILLISECONDS);
             }
         });
     }
