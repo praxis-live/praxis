@@ -21,18 +21,23 @@
  */
 package net.neilcsmith.praxis.video.pgl;
 
-import com.jogamp.nativewindow.ScalableSurface;
-import com.jogamp.newt.opengl.GLWindow;
-import java.awt.Rectangle;
+import com.jogamp.newt.event.KeyListener;
+import com.jogamp.newt.event.MouseListener;
+import com.jogamp.newt.event.WindowListener;
+import com.jogamp.opengl.util.FPSAnimator;
+import java.lang.reflect.Method;
 import java.nio.IntBuffer;
-import java.util.Collections;
-import processing.core.PApplet;
-import processing.core.PConstants;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import processing.core.PGraphics;
 import processing.core.PImage;
+import processing.opengl.FrameBuffer;
 import processing.opengl.PGL;
 import processing.opengl.PGraphics2D;
+import processing.opengl.PGraphicsOpenGL;
+import processing.opengl.PShader;
 import processing.opengl.PSurfaceJOGL;
+import processing.opengl.VertexBuffer;
 
 /**
  *
@@ -359,6 +364,101 @@ public class PGLGraphics extends PGraphics2D {
         calcAlpha = (calcAi != 255);
     }
 
+    private static Method vbDisposeMethod;
+    private static Method fbDisposeMethod;
+    private static Method shaderDisposeMethod;
+
+    static {
+        try {
+            vbDisposeMethod = VertexBuffer.class.getDeclaredMethod("dispose");
+            vbDisposeMethod.setAccessible(true);
+            fbDisposeMethod = FrameBuffer.class.getDeclaredMethod("dispose");
+            fbDisposeMethod.setAccessible(true);
+            shaderDisposeMethod = PShader.class.getDeclaredMethod("dispose");
+            shaderDisposeMethod.setAccessible(true);
+        } catch (Exception ex) {
+        }
+    }
+
+    @Override
+    protected PGL createPGL(PGraphicsOpenGL pg) {
+        return new PGLJOGL(pg);
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        disposeVertexBuffer(bufPolyVertex);
+        disposeVertexBuffer(bufPolyColor);
+        disposeVertexBuffer(bufPolyNormal);
+        disposeVertexBuffer(bufPolyTexcoord);
+        disposeVertexBuffer(bufPolyAmbient);
+        disposeVertexBuffer(bufPolySpecular);
+        disposeVertexBuffer(bufPolyEmissive);
+        disposeVertexBuffer(bufPolyShininess);
+        disposeVertexBuffer(bufPolyIndex);
+        disposeVertexBuffer(bufLineVertex);
+        disposeVertexBuffer(bufLineColor);
+        disposeVertexBuffer(bufLineAttrib);
+        disposeVertexBuffer(bufLineIndex);
+        disposeVertexBuffer(bufPointVertex);
+        disposeVertexBuffer(bufPointColor);
+        disposeVertexBuffer(bufPointAttrib);
+        disposeVertexBuffer(bufPointIndex);
+
+        if (pixelTexture != null) {
+            pixelTexture.dispose();
+        }
+
+        if (primaryGraphics) {
+            disposeFrameBuffer(drawFramebuffer);
+            disposeFrameBuffer(readFramebuffer);
+        }
+
+    }
+
+    @Override
+    protected void deleteDefaultShaders() {
+        disposeShader(defColorShader);
+        disposeShader(defTextureShader);
+        disposeShader(defLightShader);
+        disposeShader(defTexlightShader);
+        disposeShader(defLineShader);
+        disposeShader(defPointShader);
+        disposeShader(maskShader);
+        super.deleteDefaultShaders();
+    }
+    
+    private void disposeShader(PShader shader) {
+        if (shader != null) {
+            try {
+                shaderDisposeMethod.invoke(shader);
+            } catch (Exception ex) {
+                Logger.getLogger(PGLGraphics.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    private void disposeVertexBuffer(VertexBuffer vb) {
+        if (vb != null) {
+            try {
+                vbDisposeMethod.invoke(vb);
+            } catch (Exception ex) {
+                Logger.getLogger(PGLGraphics.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    private void disposeFrameBuffer(FrameBuffer fb) {
+        if (fb != null) {
+            try {
+                fbDisposeMethod.invoke(fb);
+            } catch (Exception ex) {
+                Logger.getLogger(PGLGraphics.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
     @Override
     public processing.core.PSurface createSurface() {
         return new PSurface(this);
@@ -370,88 +470,41 @@ public class PGLGraphics extends PGraphics2D {
             super(graphics);
         }
 
-        protected void initWindow() {
-            window = GLWindow.create(screen, pgl.getCaps());
-            if (displayDevice == null) {
-                displayDevice = window.getMainMonitor();
-            }
-
-            int displayNum = sketch.sketchDisplay();
-            if (displayNum > 0) {  // if -1, use the default device
-                if (displayNum <= monitors.size()) {
-                    displayDevice = monitors.get(displayNum - 1);
-                } else {
-                    System.err.format("Display %d does not exist, "
-                            + "using the default display instead.%n", displayNum);
-                    for (int i = 0; i < monitors.size(); i++) {
-                        System.err.format("Display %d is %s%n", i + 1, monitors.get(i));
-                    }
-                }
-            }
-
-            boolean spanDisplays = sketch.sketchDisplay() == PConstants.SPAN;
-            screenRect = spanDisplays
-                    ? new Rectangle(0, 0, screen.getWidth(), screen.getHeight())
-                    : new Rectangle(0, 0,
-                            displayDevice.getViewportInWindowUnits().getWidth(),
-                            displayDevice.getViewportInWindowUnits().getHeight());
-
-            // Set the displayWidth/Height variables inside PApplet, so that they're
-            // usable and can even be returned by the sketchWidth()/Height() methods.
-            sketch.displayWidth = screenRect.width;
-            sketch.displayHeight = screenRect.height;
-
-            sketchWidth = sketch.sketchWidth();
-            sketchHeight = sketch.sketchHeight();
-
-            boolean fullScreen = sketch.sketchFullScreen();
-            // Removing the section below because sometimes people want to do the
-            // full screen size in a window, and it also breaks insideSettings().
-            // With 3.x, fullScreen() is so easy, that it's just better that way.
-            // https://github.com/processing/processing/issues/3545
-    /*
-             // Sketch has already requested to be the same as the screen's
-             // width and height, so let's roll with full screen mode.
-             if (screenRect.width == sketchWidth &&
-             screenRect.height == sketchHeight) {
-             fullScreen = true;
-             sketch.fullScreen();
-             }
-             */
-
-            if (fullScreen || spanDisplays) {
-                sketchWidth = screenRect.width;
-                sketchHeight = screenRect.height;
-            }
-
-            float[] reqSurfacePixelScale;
-            if (graphics.is2X()) {
-                // Retina
-                reqSurfacePixelScale = new float[]{ScalableSurface.AUTOMAX_PIXELSCALE,
-                    ScalableSurface.AUTOMAX_PIXELSCALE};
-            } else {
-                // Non-retina
-                reqSurfacePixelScale = new float[]{ScalableSurface.IDENTITY_PIXELSCALE,
-                    ScalableSurface.IDENTITY_PIXELSCALE};
-            }
-            window.setSurfaceScale(reqSurfacePixelScale);
-            window.setSize(sketchWidth, sketchHeight);
-//    window.setResizable(false);
-            setSize(sketchWidth, sketchHeight);
-            sketchX = displayDevice.getViewportInWindowUnits().getX();
-            sketchY = displayDevice.getViewportInWindowUnits().getY();
-            if (fullScreen) {
-                PApplet.hideMenuBar();
-//                window.setTopLevelPosition(sketchX, sketchY);
-//      placedWindow = true;
-                if (spanDisplays) {
-                    window.setFullscreen(monitors);
-                } else {
-                    window.setFullscreen(Collections.singletonList(displayDevice));
-                }
-            }
+        @Override
+        protected void initAnimator() {
+            animator = new FPSAnimator(window, 60);
+//            animator.setUncaughtExceptionHandler(new GLAnimatorControl.UncaughtExceptionHandler() {
+//
+//                @Override
+//                public void uncaughtException(GLAnimatorControl glac, GLAutoDrawable glad, Throwable thrwbl) {
+//                    assert false;
+//                }
+//            });
         }
 
+        @Override
+        public boolean stopThread() {
+            boolean stopped = super.stopThread();
+            if (stopped) {
+                if (window != null) {
+                    for (MouseListener l : window.getMouseListeners()) {
+                        window.removeMouseListener(l);
+                    }
+                    for (KeyListener l : window.getKeyListeners()) {
+                        window.removeKeyListener(l);
+                    }
+                    for (WindowListener l : window.getWindowListeners()) {
+                        window.removeWindowListener(l);
+                    }
+                    window.removeGLEventListener(window.getGLEventListener(0));
+//                    window.destroy();
+//
+//                    window = null;
+
+                }
+            }
+            return stopped;
+        }
     }
 
 }

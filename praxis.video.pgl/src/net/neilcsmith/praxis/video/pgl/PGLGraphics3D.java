@@ -21,10 +21,23 @@
  */
 package net.neilcsmith.praxis.video.pgl;
 
+import com.jogamp.newt.event.KeyListener;
+import com.jogamp.newt.event.MouseListener;
+import com.jogamp.newt.event.WindowListener;
+import com.jogamp.opengl.util.FPSAnimator;
+import java.lang.reflect.Method;
 import java.nio.IntBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import processing.core.PGraphics;
 import processing.core.PImage;
+import processing.opengl.FrameBuffer;
 import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
+import processing.opengl.PGraphicsOpenGL;
+import processing.opengl.PShader;
+import processing.opengl.PSurfaceJOGL;
+import processing.opengl.VertexBuffer;
 
 /**
  *
@@ -44,12 +57,12 @@ public class PGLGraphics3D extends PGraphics3D {
         setPrimary(primary);
         setSize(w, h);
     }
-    
+
     public PGLContext getContext() {
         return context;
     }
 
-    void writePixelsARGB(int[] pixels, boolean hasAlpha) {
+   void writePixelsARGB(int[] pixels, boolean hasAlpha) {
         if (drawing) {
             flush();
         }
@@ -63,7 +76,7 @@ public class PGLGraphics3D extends PGraphics3D {
         IntBuffer buf = context.getScratchBuffer(len);
         buf.put(pixels, 0, len);
         buf.rewind();
-                context.writePixelsARGB(buf, pixelTexture);
+        context.writePixelsARGB(buf, pixelTexture);
         int curBlend = blendMode;
         if (hasAlpha) {
             blendMode(REPLACE);
@@ -212,24 +225,12 @@ public class PGLGraphics3D extends PGraphics3D {
     }
 
     void endOffscreen() {
-//        PGraphics current = getCurrentPG();
-//        if (current == null) {
-//            assert current != null || primarySurface;
-//            return;
-//        }
-//        PGraphics primary = getPrimaryPG();
-//        if (current != primary) {
-//            current.endDraw();
-//        }
         if (context.current != getPrimaryPG()) {
             context.current.endDraw();
             context.current = getPrimaryPG();
         }
     }
 
-//    protected PGraphics getCurrent() {
-//        return ((PGLGraphics)getPrimaryPG()).getCurrentPG();
-//    }
     @Override
     protected void colorCalc(float gray, float alpha) {
         if (gray > colorModeX) {
@@ -290,12 +291,12 @@ public class PGLGraphics3D extends PGraphics3D {
         }
 
         calcA = (a == colorModeA) ? 1 : a / colorModeA;
-        
+
         switch (colorMode) {
             case RGB:
                 calcR = x / colorModeX;
                 calcG = y / colorModeY;
-                calcB = z / colorModeZ;         
+                calcB = z / colorModeZ;
                 break;
 
             case HSB:
@@ -348,19 +349,162 @@ public class PGLGraphics3D extends PGraphics3D {
                 }
                 break;
         }
-        
+
         if (a != colorModeA) {
             calcR *= calcA;
             calcG *= calcA;
             calcB *= calcA;
         }
-        
+
         calcRi = (int) (255 * calcR);
         calcGi = (int) (255 * calcG);
         calcBi = (int) (255 * calcB);
         calcAi = (int) (255 * calcA);
         calcColor = (calcAi << 24) | (calcRi << 16) | (calcGi << 8) | calcBi;
         calcAlpha = (calcAi != 255);
+    }
+
+    private static Method vbDisposeMethod;
+    private static Method fbDisposeMethod;
+    private static Method shaderDisposeMethod;
+
+    static {
+        try {
+            vbDisposeMethod = VertexBuffer.class.getDeclaredMethod("dispose");
+            vbDisposeMethod.setAccessible(true);
+            fbDisposeMethod = FrameBuffer.class.getDeclaredMethod("dispose");
+            fbDisposeMethod.setAccessible(true);
+            shaderDisposeMethod = PShader.class.getDeclaredMethod("dispose");
+            shaderDisposeMethod.setAccessible(true);
+        } catch (Exception ex) {
+        }
+    }
+
+    @Override
+    protected PGL createPGL(PGraphicsOpenGL pg) {
+        return new PGLJOGL(pg);
+    }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        disposeVertexBuffer(bufPolyVertex);
+        disposeVertexBuffer(bufPolyColor);
+        disposeVertexBuffer(bufPolyNormal);
+        disposeVertexBuffer(bufPolyTexcoord);
+        disposeVertexBuffer(bufPolyAmbient);
+        disposeVertexBuffer(bufPolySpecular);
+        disposeVertexBuffer(bufPolyEmissive);
+        disposeVertexBuffer(bufPolyShininess);
+        disposeVertexBuffer(bufPolyIndex);
+        disposeVertexBuffer(bufLineVertex);
+        disposeVertexBuffer(bufLineColor);
+        disposeVertexBuffer(bufLineAttrib);
+        disposeVertexBuffer(bufLineIndex);
+        disposeVertexBuffer(bufPointVertex);
+        disposeVertexBuffer(bufPointColor);
+        disposeVertexBuffer(bufPointAttrib);
+        disposeVertexBuffer(bufPointIndex);
+
+        if (pixelTexture != null) {
+            pixelTexture.dispose();
+        }
+
+        if (primaryGraphics) {
+            disposeFrameBuffer(drawFramebuffer);
+            disposeFrameBuffer(readFramebuffer);
+        }
+
+    }
+
+    @Override
+    protected void deleteDefaultShaders() {
+        disposeShader(defColorShader);
+        disposeShader(defTextureShader);
+        disposeShader(defLightShader);
+        disposeShader(defTexlightShader);
+        disposeShader(defLineShader);
+        disposeShader(defPointShader);
+        disposeShader(maskShader);
+        super.deleteDefaultShaders();
+    }
+    
+    private void disposeShader(PShader shader) {
+        if (shader != null) {
+            try {
+                shaderDisposeMethod.invoke(shader);
+            } catch (Exception ex) {
+                Logger.getLogger(PGLGraphics.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    private void disposeVertexBuffer(VertexBuffer vb) {
+        if (vb != null) {
+            try {
+                vbDisposeMethod.invoke(vb);
+            } catch (Exception ex) {
+                Logger.getLogger(PGLGraphics.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    private void disposeFrameBuffer(FrameBuffer fb) {
+        if (fb != null) {
+            try {
+                fbDisposeMethod.invoke(fb);
+            } catch (Exception ex) {
+                Logger.getLogger(PGLGraphics.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    @Override
+    public processing.core.PSurface createSurface() {
+        return new PSurface(this);
+    }
+
+    private static class PSurface extends PSurfaceJOGL {
+
+        public PSurface(PGraphics graphics) {
+            super(graphics);
+        }
+
+        @Override
+        protected void initAnimator() {
+            animator = new FPSAnimator(window, 60);
+//            animator.setUncaughtExceptionHandler(new GLAnimatorControl.UncaughtExceptionHandler() {
+//
+//                @Override
+//                public void uncaughtException(GLAnimatorControl glac, GLAutoDrawable glad, Throwable thrwbl) {
+//                    assert false;
+//                }
+//            });
+        }
+
+        @Override
+        public boolean stopThread() {
+            boolean stopped = super.stopThread();
+            if (stopped) {
+                if (window != null) {
+                    for (MouseListener l : window.getMouseListeners()) {
+                        window.removeMouseListener(l);
+                    }
+                    for (KeyListener l : window.getKeyListeners()) {
+                        window.removeKeyListener(l);
+                    }
+                    for (WindowListener l : window.getWindowListeners()) {
+                        window.removeWindowListener(l);
+                    }
+                    window.removeGLEventListener(window.getGLEventListener(0));
+//                    window.destroy();
+//
+//                    window = null;
+
+                }
+            }
+            return stopped;
+        }
     }
 
 }

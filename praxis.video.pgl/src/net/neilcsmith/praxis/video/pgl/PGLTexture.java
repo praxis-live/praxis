@@ -19,6 +19,11 @@ class PGLTexture extends Texture {
     protected boolean contextIsOutdated() {
         return super.contextIsOutdated();
     }
+
+    @Override
+    protected void dispose() {
+        super.dispose();
+    }
     
     
     
