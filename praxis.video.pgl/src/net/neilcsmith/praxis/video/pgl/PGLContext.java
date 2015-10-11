@@ -53,21 +53,28 @@ public final class PGLContext {
     private final static Logger LOG = Logger.getLogger(PGLContext.class.getName());
 
     private final PApplet applet;
+    private final int width;
+    private final int height;
     private final int cacheMax = 8;
     private final List<PGLGraphics> cache;
     private final List<AlienImageReference> aliens;
     private final WeakHashMap<PGLSurface, Boolean> surfaces;
     private final ReadPixelsOp readOp;
-
+    private final PImage CLEAR_RGB;
+    private final PImage CLEAR_ARGB;
     PGraphics current; //@TODO use primary().getCurrent?
     private IntBuffer scratchBuffer;
 
-    PGLContext(PApplet applet) {
+    PGLContext(PApplet applet, int width, int height) {
         this.applet = applet;
+        this.width = width;
+        this.height = height;
         cache = new ArrayList<>(cacheMax);
         aliens = new ArrayList<>(cacheMax);
         surfaces = new WeakHashMap<>();
         readOp = new ReadPixelsOp();
+        CLEAR_RGB = new PImage(width, height, PImage.RGB);
+        CLEAR_ARGB = new PImage(width, height, PImage.ARGB);
     }
 
     public PImage asImage(Surface surface) {
@@ -76,6 +83,15 @@ public final class PGLContext {
             if (img != null) {
                 return img;
             }
+            if (surface.isClear() &&
+                    surface.getWidth() == width &&
+                    surface.getHeight() == height) {
+                // common occurence - clear surface at frame width / height
+                return surface.hasAlpha() ?
+                        CLEAR_ARGB :
+                        CLEAR_RGB;
+            }
+            // fall through for data in pixels or custom dimensions
         }
         return asAlienImage(surface);
     }
@@ -188,8 +204,7 @@ public final class PGLContext {
             PGLTexture tex = createAlienTexture(alien.getWidth(),
                     alien.getHeight(),
                     alien.hasAlpha());
-            readOp.setup(tex);
-            alien.process(readOp);
+            readOp.readToTexture(tex, alien);
             ref = new AlienImageReference();
             ref.image = wrapAlienTexture(tex);
             ref.alien = new WeakReference<>(alien);
@@ -204,8 +219,7 @@ public final class PGLContext {
                         alien.hasAlpha());
                 ref.image = wrapAlienTexture(tex);
             }
-            readOp.setup(tex);
-            alien.process(readOp);
+            readOp.readToTexture(tex, alien);
             ref.modCount = alien.getModCount();
         } else {
             LOG.fine("Existing alien texture in sync");
@@ -258,8 +272,10 @@ public final class PGLContext {
 
         private Texture texture;
 
-        private void setup(Texture texture) {
+        private void readToTexture(Texture texture, Surface alien) {
             this.texture = texture;
+            alien.process(this);
+            this.texture = null;
         }
 
         @Override

@@ -193,7 +193,7 @@ public class PGLPlayer implements Player {
         private PGLSurface pglSurface;
 
         private Applet() {
-            context = new PGLContext(this);
+            context = new PGLContext(this, surfaceWidth, surfaceHeight);
         }
 
         @Override
