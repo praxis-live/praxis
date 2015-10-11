@@ -69,6 +69,7 @@ public final class PGLSurface extends Surface {
         } else {
             fallback.process(op, inputs);
         }
+        clear = false;
     }
 
     public PGLGraphics getGraphics() {
