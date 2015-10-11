@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.video.gstreamer.components;
 import java.net.URI;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
+import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.interfaces.TaskService;
@@ -33,6 +34,7 @@ import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
 import net.neilcsmith.praxis.impl.BooleanProperty;
+import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import net.neilcsmith.praxis.video.InvalidVideoResourceException;
@@ -43,6 +45,9 @@ import net.neilcsmith.praxis.video.InvalidVideoResourceException;
  */
 public class VideoPlayer extends AbstractVideoComponent {
 
+    private final ControlPort.Output readyPort;
+    private final ControlPort.Output errorPort;
+    
     private DelegateLoader loader;
     private boolean loop = true;
 
@@ -74,6 +79,11 @@ public class VideoPlayer extends AbstractVideoComponent {
         registerControl("stop", stop);
         registerPort("stop", stop.createPort());
 
+        readyPort = new DefaultControlOutputPort();
+        registerPort("ready", readyPort);
+        errorPort = new DefaultControlOutputPort();
+        registerPort("error", errorPort);
+        
     }
 
     @Override
@@ -154,11 +164,16 @@ public class VideoPlayer extends AbstractVideoComponent {
         @Override
         protected void valueChanged(long time) {
             setDelegate(getValue());
+            if (rootActive) {
+                readyPort.send(time);
+            }
         }
 
         @Override
         protected void taskError(long time) {
-
+            if (rootActive) {
+                errorPort.send(time);
+            }
         }
 
     }

@@ -50,6 +50,7 @@ class AbstractVideoComponent extends AbstractExecutionContextComponent {
         Play, Pause, Stop
     }
 
+    boolean rootActive;
     VideoDelegate video;
     private Delegator container;
     private int srcWidth;
@@ -68,19 +69,27 @@ class AbstractVideoComponent extends AbstractExecutionContextComponent {
 
     @Override
     public void stateChanged(ExecutionContext source) {
-        if (source.getState() == ExecutionContext.State.IDLE) {
-            if (video != null) {
-                try {
-                    video.stop();
-                } catch (StateException ex) {
-                    // no op
+        switch (source.getState()) {
+            case ACTIVE:
+                rootActive = true;
+                break;
+            case IDLE:
+                rootActive = false;
+                if (video != null) {
+                    try {
+                        video.stop();
+                    } catch (StateException ex) {
+                        // no op
+                    }
                 }
-            }
-        } else if (source.getState() == ExecutionContext.State.TERMINATED) {
-            if (video != null) {
-                video.dispose();
-                video = null;
-            }
+                break;
+            case TERMINATED:
+                rootActive = false;
+                if (video != null) {
+                    video.dispose();
+                    video = null;
+                }
+                break;
         }
     }
 
