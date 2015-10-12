@@ -49,6 +49,8 @@ public class AudioComponents implements ComponentFactoryProvider {
             
             // custom
             add(data(new AudioCodeFactory("audio:custom")));
+            
+            add("audio:clock", "resources/audio_clock.pxj");
         }
         
         private void add(String type, String sourceFile) {
