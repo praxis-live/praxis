@@ -387,6 +387,7 @@ public class PGLGraphics extends PGraphics2D {
 
     @Override
     public void dispose() {
+        ((PGLJOGL)pgl).disposing = true;
         super.dispose();
         disposeVertexBuffer(bufPolyVertex);
         disposeVertexBuffer(bufPolyColor);

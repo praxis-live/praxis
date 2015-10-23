@@ -15,8 +15,17 @@ import processing.opengl.PJOGL;
  */
 class PGLJOGL extends PJOGL {
 
+    boolean disposing;
+    
     public PGLJOGL(PGraphicsOpenGL pg) {
         super(pg);
+    }
+
+    @Override
+    protected void swapBuffers() {
+        if (!disposing) {
+            super.swapBuffers();
+        }
     }
 
     @Override
