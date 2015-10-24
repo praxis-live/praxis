@@ -61,12 +61,12 @@ public class TFComponents implements ComponentFactoryProvider {
             add("tinkerforge:temperature", "resources/temperature.pxj");
             add("tinkerforge:temperature-ir", "resources/temperature_ir.pxj");
                       
-            addComponent(data(new TFCodeFactory("tinkerforge:custom")));
+            add(data(new TFCodeFactory("tinkerforge:custom")));
 
         }
 
         private void add(String type, String sourceFile) {
-            addComponent(data(new TFCodeFactory(type, source(sourceFile))));
+            add(data(new TFCodeFactory(type, source(sourceFile))));
         }
         
     }
