@@ -254,9 +254,9 @@ public final class PGLContext {
         for (PGLSurface surface : surfaces.keySet()) {
             surface.clear();
         }
-        for (PGLGraphics graphics : cache) {
-            graphics.dispose();
-        }
+//        for (PGLGraphics graphics : cache) {
+//            graphics.dispose();
+//        }
         cache.clear();
         aliens.clear();
     }

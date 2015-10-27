@@ -270,7 +270,6 @@ public class PGLPlayer implements Player {
             context.dispose();
             sink.disconnect();
             super.dispose();
-            surface.setVisible(false);
         }
 
         @Override

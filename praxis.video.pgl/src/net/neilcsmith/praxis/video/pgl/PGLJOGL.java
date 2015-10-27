@@ -22,13 +22,6 @@ class PGLJOGL extends PJOGL {
     }
 
     @Override
-    protected void swapBuffers() {
-        if (!disposing) {
-            super.swapBuffers();
-        }
-    }
-
-    @Override
     public void dispose() {
         super.dispose();
         sketch = null;
@@ -50,10 +43,11 @@ class PGLJOGL extends PJOGL {
                         Field pglField = ref.getClass().getDeclaredField("pgl");
                         pglField.setAccessible(true);
                         if (pglField.get(ref) == this) {
-                            Method disposeMethod = 
-                                    ref.getClass().getDeclaredMethod("dispose");
-                            disposeMethod.setAccessible(true);
-                            disposeMethod.invoke(ref);
+                            pglField.set(ref, null);
+//                            Method disposeMethod = 
+//                                    ref.getClass().getDeclaredMethod("dispose");
+//                            disposeMethod.setAccessible(true);
+//                            disposeMethod.invoke(ref);             
                         }
                     }
                 }

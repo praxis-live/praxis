@@ -21,23 +21,11 @@
  */
 package net.neilcsmith.praxis.video.pgl;
 
-import com.jogamp.newt.event.KeyListener;
-import com.jogamp.newt.event.MouseListener;
-import com.jogamp.newt.event.WindowListener;
-import com.jogamp.opengl.util.FPSAnimator;
-import java.lang.reflect.Method;
 import java.nio.IntBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import processing.core.PGraphics;
 import processing.core.PImage;
-import processing.opengl.FrameBuffer;
 import processing.opengl.PGL;
 import processing.opengl.PGraphics2D;
 import processing.opengl.PGraphicsOpenGL;
-import processing.opengl.PShader;
-import processing.opengl.PSurfaceJOGL;
-import processing.opengl.VertexBuffer;
 
 /**
  *
@@ -364,22 +352,6 @@ public class PGLGraphics extends PGraphics2D {
         calcAlpha = (calcAi != 255);
     }
 
-    private static Method vbDisposeMethod;
-    private static Method fbDisposeMethod;
-    private static Method shaderDisposeMethod;
-
-    static {
-        try {
-            vbDisposeMethod = VertexBuffer.class.getDeclaredMethod("dispose");
-            vbDisposeMethod.setAccessible(true);
-            fbDisposeMethod = FrameBuffer.class.getDeclaredMethod("dispose");
-            fbDisposeMethod.setAccessible(true);
-            shaderDisposeMethod = PShader.class.getDeclaredMethod("dispose");
-            shaderDisposeMethod.setAccessible(true);
-        } catch (Exception ex) {
-        }
-    }
-
     @Override
     protected PGL createPGL(PGraphicsOpenGL pg) {
         return new PGLJOGL(pg);
@@ -387,125 +359,18 @@ public class PGLGraphics extends PGraphics2D {
 
     @Override
     public void dispose() {
-        ((PGLJOGL)pgl).disposing = true;
-        super.dispose();
-        disposeVertexBuffer(bufPolyVertex);
-        disposeVertexBuffer(bufPolyColor);
-        disposeVertexBuffer(bufPolyNormal);
-        disposeVertexBuffer(bufPolyTexcoord);
-        disposeVertexBuffer(bufPolyAmbient);
-        disposeVertexBuffer(bufPolySpecular);
-        disposeVertexBuffer(bufPolyEmissive);
-        disposeVertexBuffer(bufPolyShininess);
-        disposeVertexBuffer(bufPolyIndex);
-        disposeVertexBuffer(bufLineVertex);
-        disposeVertexBuffer(bufLineColor);
-        disposeVertexBuffer(bufLineAttrib);
-        disposeVertexBuffer(bufLineIndex);
-        disposeVertexBuffer(bufPointVertex);
-        disposeVertexBuffer(bufPointColor);
-        disposeVertexBuffer(bufPointAttrib);
-        disposeVertexBuffer(bufPointIndex);
-
+        
         if (pixelTexture != null) {
             pixelTexture.dispose();
         }
+        
+        super.dispose();
 
-        if (primaryGraphics) {
-            disposeFrameBuffer(drawFramebuffer);
-            disposeFrameBuffer(readFramebuffer);
-        }
-
-    }
-
-    @Override
-    protected void deleteDefaultShaders() {
-        disposeShader(defColorShader);
-        disposeShader(defTextureShader);
-        disposeShader(defLightShader);
-        disposeShader(defTexlightShader);
-        disposeShader(defLineShader);
-        disposeShader(defPointShader);
-        disposeShader(maskShader);
-        super.deleteDefaultShaders();
-    }
-    
-    private void disposeShader(PShader shader) {
-        if (shader != null) {
-            try {
-                shaderDisposeMethod.invoke(shader);
-            } catch (Exception ex) {
-                Logger.getLogger(PGLGraphics.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-
-    private void disposeVertexBuffer(VertexBuffer vb) {
-        if (vb != null) {
-            try {
-                vbDisposeMethod.invoke(vb);
-            } catch (Exception ex) {
-                Logger.getLogger(PGLGraphics.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-
-    private void disposeFrameBuffer(FrameBuffer fb) {
-        if (fb != null) {
-            try {
-                fbDisposeMethod.invoke(fb);
-            } catch (Exception ex) {
-                Logger.getLogger(PGLGraphics.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
     }
 
     @Override
     public processing.core.PSurface createSurface() {
-        return new PSurface(this);
-    }
-
-    private static class PSurface extends PSurfaceJOGL {
-
-        public PSurface(PGraphics graphics) {
-            super(graphics);
-        }
-
-        @Override
-        protected void initAnimator() {
-            animator = new FPSAnimator(window, 60);
-//            animator.setUncaughtExceptionHandler(new GLAnimatorControl.UncaughtExceptionHandler() {
-//
-//                @Override
-//                public void uncaughtException(GLAnimatorControl glac, GLAutoDrawable glad, Throwable thrwbl) {
-//                    assert false;
-//                }
-//            });
-        }
-
-        @Override
-        public boolean stopThread() {
-            boolean stopped = super.stopThread();
-            if (stopped) {
-                if (window != null) {
-                    for (MouseListener l : window.getMouseListeners()) {
-                        window.removeMouseListener(l);
-                    }
-                    for (KeyListener l : window.getKeyListeners()) {
-                        window.removeKeyListener(l);
-                    }
-                    for (WindowListener l : window.getWindowListeners()) {
-                        window.removeWindowListener(l);
-                    }
-                    window.removeGLEventListener(window.getGLEventListener(0));
-//                    window.destroy();
-//
-//                    window = null;
-
-                }
-            }
-            return stopped;
-        }
+        return new PGLGraphicsPSurface(this);
     }
 
 }
