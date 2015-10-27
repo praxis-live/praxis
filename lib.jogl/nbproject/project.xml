@@ -41,6 +41,7 @@
                 <package>com.jogamp.newt.event</package>
                 <package>com.jogamp.newt.event.awt</package>
                 <package>com.jogamp.newt.opengl</package>
+                <package>com.jogamp.newt.opengl.util</package>
                 <package>com.jogamp.newt.opengl.util.stereo</package>
                 <package>com.jogamp.newt.swt</package>
                 <package>com.jogamp.newt.util</package>
@@ -73,6 +74,7 @@
                 <package>jogamp.common.jvm</package>
                 <package>jogamp.common.os</package>
                 <package>jogamp.common.os.elf</package>
+                <package>jogamp.common.util</package>
                 <package>jogamp.common.util.locks</package>
                 <package>jogamp.graph.curve.opengl</package>
                 <package>jogamp.graph.curve.opengl.shader</package>

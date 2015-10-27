@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
 OpenIDE-Module: javax.media.opengl
 OpenIDE-Module-Localizing-Bundle: javax/media/opengl/Bundle.properties
-OpenIDE-Module-Specification-Version: 2.3.1
+OpenIDE-Module-Specification-Version: 2.3.2
 
