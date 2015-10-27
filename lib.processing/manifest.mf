@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
 OpenIDE-Module: processing.core
 OpenIDE-Module-Localizing-Bundle: processing/core/Bundle.properties
-OpenIDE-Module-Specification-Version: 3.0
+OpenIDE-Module-Specification-Version: 3.0.1
 
