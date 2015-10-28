@@ -67,9 +67,11 @@ public class CoreComponents implements ComponentFactoryProvider {
             add("core:math:threshold", "resources/math_threshold.pxj");
             
             // ROUTING
+            add("core:routing:every", "resources/routing_every.pxj");
             add("core:routing:gate", "resources/routing_gate.pxj");
-            add("core:routing:join", "resources/routing_join.pxj");
             add("core:routing:inhibitor", "resources/routing_inhibitor.pxj");
+            add("core:routing:join", "resources/routing_join.pxj");
+            add("core:routing:order", "resources/routing_order.pxj");
 
             // TIMING
             add("core:timing:animator", "resources/timing_animator.pxj");

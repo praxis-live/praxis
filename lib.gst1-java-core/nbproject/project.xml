@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.apisupport.project</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
+            <code-name-base>org.freedesktop.gstreamer</code-name-base>
+            <suite-component/>
+            <module-dependencies>
+                <dependency>
+                    <code-name-base>com.sun.jna</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>3.5.1</specification-version>
+                    </run-dependency>
+                </dependency>
+            </module-dependencies>
+            <public-packages>
+                <package>org.freedesktop.gstreamer</package>
+                <package>org.freedesktop.gstreamer.controller</package>
+                <package>org.freedesktop.gstreamer.elements</package>
+                <package>org.freedesktop.gstreamer.event</package>
+                <package>org.freedesktop.gstreamer.glib</package>
+                <package>org.freedesktop.gstreamer.interfaces</package>
+                <package>org.freedesktop.gstreamer.io</package>
+                <package>org.freedesktop.gstreamer.lowlevel</package>
+                <package>org.freedesktop.gstreamer.lowlevel.annotations</package>
+                <package>org.freedesktop.gstreamer.message</package>
+                <package>org.freedesktop.gstreamer.query</package>
+            </public-packages>
+            <class-path-extension>
+                <runtime-relative-path>ext/gst1-java-core-0.9-150920.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/gst1-java-core-0.9-150920.jar</binary-origin>
+            </class-path-extension>
+        </data>
+    </configuration>
+</project>

@@ -27,12 +27,12 @@
                 <package>com.jogamp.graph.curve.tess</package>
                 <package>com.jogamp.graph.font</package>
                 <package>com.jogamp.graph.geom</package>
-                <package>com.jogamp.graph.geom.opengl</package>
                 <package>com.jogamp.nativewindow</package>
                 <package>com.jogamp.nativewindow.awt</package>
                 <package>com.jogamp.nativewindow.egl</package>
                 <package>com.jogamp.nativewindow.macosx</package>
                 <package>com.jogamp.nativewindow.swt</package>
+                <package>com.jogamp.nativewindow.util</package>
                 <package>com.jogamp.nativewindow.windows</package>
                 <package>com.jogamp.nativewindow.x11</package>
                 <package>com.jogamp.newt</package>
@@ -41,10 +41,18 @@
                 <package>com.jogamp.newt.event</package>
                 <package>com.jogamp.newt.event.awt</package>
                 <package>com.jogamp.newt.opengl</package>
+                <package>com.jogamp.newt.opengl.util</package>
+                <package>com.jogamp.newt.opengl.util.stereo</package>
                 <package>com.jogamp.newt.swt</package>
                 <package>com.jogamp.newt.util</package>
                 <package>com.jogamp.newt.util.applet</package>
                 <package>com.jogamp.opengl</package>
+                <package>com.jogamp.opengl.awt</package>
+                <package>com.jogamp.opengl.egl</package>
+                <package>com.jogamp.opengl.fixedfunc</package>
+                <package>com.jogamp.opengl.glu</package>
+                <package>com.jogamp.opengl.glu.gl2</package>
+                <package>com.jogamp.opengl.glu.gl2es1</package>
                 <package>com.jogamp.opengl.math</package>
                 <package>com.jogamp.opengl.math.geom</package>
                 <package>com.jogamp.opengl.swt</package>
@@ -56,27 +64,21 @@
                 <package>com.jogamp.opengl.util.glsl.fixedfunc</package>
                 <package>com.jogamp.opengl.util.glsl.sdk</package>
                 <package>com.jogamp.opengl.util.packrect</package>
+                <package>com.jogamp.opengl.util.stereo</package>
+                <package>com.jogamp.opengl.util.stereo.generic</package>
                 <package>com.jogamp.opengl.util.texture</package>
                 <package>com.jogamp.opengl.util.texture.awt</package>
                 <package>com.jogamp.opengl.util.texture.spi</package>
                 <package>com.jogamp.opengl.util.texture.spi.awt</package>
-                <package>javax.media.nativewindow</package>
-                <package>javax.media.nativewindow.util</package>
-                <package>javax.media.opengl</package>
-                <package>javax.media.opengl.awt</package>
-                <package>javax.media.opengl.fixedfunc</package>
-                <package>javax.media.opengl.glu</package>
-                <package>javax.media.opengl.glu.gl2</package>
-                <package>javax.media.opengl.glu.gl2es1</package>
                 <package>jogamp.common</package>
                 <package>jogamp.common.jvm</package>
                 <package>jogamp.common.os</package>
                 <package>jogamp.common.os.elf</package>
+                <package>jogamp.common.util</package>
                 <package>jogamp.common.util.locks</package>
                 <package>jogamp.graph.curve.opengl</package>
                 <package>jogamp.graph.curve.opengl.shader</package>
                 <package>jogamp.graph.curve.tess</package>
-                <package>jogamp.graph.curve.text</package>
                 <package>jogamp.graph.font</package>
                 <package>jogamp.graph.font.typecast</package>
                 <package>jogamp.graph.font.typecast.ot</package>
@@ -85,6 +87,18 @@
                 <package>jogamp.graph.font.typecast.t2</package>
                 <package>jogamp.graph.font.typecast.tt.engine</package>
                 <package>jogamp.graph.geom.plane</package>
+                <package>jogamp.nativetag.common.linux.amd64</package>
+                <package>jogamp.nativetag.common.linux.armv6hf</package>
+                <package>jogamp.nativetag.common.linux.i586</package>
+                <package>jogamp.nativetag.common.macosx.universal</package>
+                <package>jogamp.nativetag.common.windows.amd64</package>
+                <package>jogamp.nativetag.common.windows.i586</package>
+                <package>jogamp.nativetag.opengl.linux.amd64</package>
+                <package>jogamp.nativetag.opengl.linux.armv6hf</package>
+                <package>jogamp.nativetag.opengl.linux.i586</package>
+                <package>jogamp.nativetag.opengl.macosx.universal</package>
+                <package>jogamp.nativetag.opengl.windows.amd64</package>
+                <package>jogamp.nativetag.opengl.windows.i586</package>
                 <package>jogamp.nativewindow</package>
                 <package>jogamp.nativewindow.awt</package>
                 <package>jogamp.nativewindow.jawt</package>
@@ -134,6 +148,7 @@
                 <package>jogamp.opengl.util.jpeg</package>
                 <package>jogamp.opengl.util.pngj</package>
                 <package>jogamp.opengl.util.pngj.chunks</package>
+                <package>jogamp.opengl.util.stereo</package>
                 <package>jogamp.opengl.windows.wgl</package>
                 <package>jogamp.opengl.windows.wgl.awt</package>
                 <package>jogamp.opengl.x11.glx</package>

@@ -25,6 +25,7 @@ import java.nio.IntBuffer;
 import processing.core.PImage;
 import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
+import processing.opengl.PGraphicsOpenGL;
 
 /**
  *
@@ -40,15 +41,16 @@ public class PGLGraphics3D extends PGraphics3D {
 
     PGLGraphics3D(PGLContext context, boolean primary, int w, int h) {
         this.context = context;
+        setParent(context.parent());
         setPrimary(primary);
         setSize(w, h);
     }
-    
+
     public PGLContext getContext() {
         return context;
     }
 
-    void writePixelsARGB(int[] pixels, boolean hasAlpha) {
+   void writePixelsARGB(int[] pixels, boolean hasAlpha) {
         if (drawing) {
             flush();
         }
@@ -62,9 +64,14 @@ public class PGLGraphics3D extends PGraphics3D {
         IntBuffer buf = context.getScratchBuffer(len);
         buf.put(pixels, 0, len);
         buf.rewind();
-        context.writePixelsARGB(buf, pixelTexture, hasAlpha);
+        context.writePixelsARGB(buf, pixelTexture);
         int curBlend = blendMode;
-        blendMode(REPLACE);
+        if (hasAlpha) {
+            blendMode(REPLACE);
+        } else {
+            background(0.f);
+            blendMode(ADD);
+        }
         copy(pixelImage, 0, 0, width, height, 0, height, width, -height);
         blendMode(curBlend);
     }
@@ -206,24 +213,12 @@ public class PGLGraphics3D extends PGraphics3D {
     }
 
     void endOffscreen() {
-//        PGraphics current = getCurrentPG();
-//        if (current == null) {
-//            assert current != null || primarySurface;
-//            return;
-//        }
-//        PGraphics primary = getPrimaryPG();
-//        if (current != primary) {
-//            current.endDraw();
-//        }
         if (context.current != getPrimaryPG()) {
             context.current.endDraw();
             context.current = getPrimaryPG();
         }
     }
 
-//    protected PGraphics getCurrent() {
-//        return ((PGLGraphics)getPrimaryPG()).getCurrentPG();
-//    }
     @Override
     protected void colorCalc(float gray, float alpha) {
         if (gray > colorModeX) {
@@ -284,12 +279,12 @@ public class PGLGraphics3D extends PGraphics3D {
         }
 
         calcA = (a == colorModeA) ? 1 : a / colorModeA;
-        
+
         switch (colorMode) {
             case RGB:
                 calcR = x / colorModeX;
                 calcG = y / colorModeY;
-                calcB = z / colorModeZ;         
+                calcB = z / colorModeZ;
                 break;
 
             case HSB:
@@ -342,19 +337,40 @@ public class PGLGraphics3D extends PGraphics3D {
                 }
                 break;
         }
-        
+
         if (a != colorModeA) {
             calcR *= calcA;
             calcG *= calcA;
             calcB *= calcA;
         }
-        
+
         calcRi = (int) (255 * calcR);
         calcGi = (int) (255 * calcG);
         calcBi = (int) (255 * calcB);
         calcAi = (int) (255 * calcA);
         calcColor = (calcAi << 24) | (calcRi << 16) | (calcGi << 8) | calcBi;
         calcAlpha = (calcAi != 255);
+    }
+
+    @Override
+    protected PGL createPGL(PGraphicsOpenGL pg) {
+        return new PGLJOGL(pg);
+    }
+
+    @Override
+    public void dispose() {
+        
+        if (pixelTexture != null) {
+            pixelTexture.dispose();
+        }
+        
+        super.dispose();
+
+    }
+
+    @Override
+    public processing.core.PSurface createSurface() {
+        return new PGLGraphicsPSurface(this);
     }
 
 }

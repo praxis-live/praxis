@@ -93,8 +93,9 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             }
             if (ctxt != null) {
                 ctxt.addStateListener(stateListener);
-                stateListener.stateChanged(ctxt);
+//                stateListener.stateChanged(ctxt);
             }
+            stateListener.stateChanged(ctxt);
             execCtxt = ctxt;
         }
     }

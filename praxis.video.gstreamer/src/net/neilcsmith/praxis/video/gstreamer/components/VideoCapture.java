@@ -25,42 +25,30 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
-import net.neilcsmith.praxis.core.ExecutionContext;
+import net.neilcsmith.praxis.core.ControlPort;
 import net.neilcsmith.praxis.core.Lookup;
-import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.interfaces.TaskService;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PMap;
-import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PReference;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
-import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
-import net.neilcsmith.praxis.impl.ArgumentProperty;
-import net.neilcsmith.praxis.impl.NumberProperty;
-import net.neilcsmith.praxis.impl.StringProperty;
+import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import net.neilcsmith.praxis.video.InvalidVideoResourceException;
-import net.neilcsmith.praxis.video.gstreamer.GStreamerSettings;
-import net.neilcsmith.praxis.video.gstreamer.components.VideoDelegate.StateException;
-import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
-import net.neilcsmith.praxis.video.pipes.impl.SingleOut;
-import net.neilcsmith.praxis.video.render.Surface;
-import net.neilcsmith.praxis.video.utils.ResizeMode;
+import net.neilcsmith.praxis.video.VideoSettings;
 
 /**
  *
  * @author Neil C Smith
  */
 public class VideoCapture extends AbstractVideoComponent {
-    
+
     private final static List<Argument> suggestedValues;
-    
+
     static {
         List<Argument> list = new ArrayList<>(4);
         list.add(PString.valueOf("1"));
@@ -69,34 +57,42 @@ public class VideoCapture extends AbstractVideoComponent {
         list.add(PString.valueOf("4"));
         suggestedValues = Collections.unmodifiableList(list);
     }
-    
+
+    private final ControlPort.Output readyPort;
+    private final ControlPort.Output errorPort;
+
     private DelegateLoader loader;
-    
+
     public VideoCapture() {
- 
+
         loader = new DelegateLoader();
         registerControl("device", loader);
-        
+
         createResizeModeControls();
         createSourceCapsControls();
-        
+
         TriggerControl play = TriggerControl.create(createTriggerBinding(TriggerState.Play));
         registerControl("play", play);
         registerPort("play", play.createPort());
         TriggerControl stop = TriggerControl.create(createTriggerBinding(TriggerState.Stop));
         registerControl("stop", stop);
         registerPort("stop", stop.createPort());
+
+        readyPort = new DefaultControlOutputPort();
+        registerPort("ready", readyPort);
+        errorPort = new DefaultControlOutputPort();
+        registerPort("error", errorPort);
+
     }
 
-    
     private class DelegateLoader extends AbstractAsyncProperty<VideoDelegate> {
-        
+
         DelegateLoader() {
             super(ArgumentInfo.create(PString.class, PMap.create(
                     ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.valueOf(suggestedValues))),
                     VideoDelegate.class, PString.EMPTY);
         }
-        
+
         @Override
         protected TaskService.Task createTask(CallArguments keys) throws Exception {
             Argument key;
@@ -106,24 +102,34 @@ public class VideoCapture extends AbstractVideoComponent {
                 return new LoadTask(getLookup(), key.toString());
             }
         }
-        
+
         @Override
         protected void valueChanged(long time) {
             setDelegate(getValue());
+            if (rootActive) {
+                readyPort.send(time);
+            }
         }
-        
+
+        @Override
+        protected void taskError(long time) {
+            if (rootActive) {
+                errorPort.send(time);
+            }
+        }
+
     }
-    
+
     private class LoadTask implements TaskService.Task {
-        
+
         private final Lookup lookup;
         private final String source;
-        
+
         private LoadTask(Lookup lookup, String source) {
             this.lookup = lookup;
             this.source = source;
         }
-        
+
         @Override
         public Argument execute() throws Exception {
             String dsc = source;
@@ -153,18 +159,18 @@ public class VideoCapture extends AbstractVideoComponent {
             delegate.dispose();
             throw new InvalidVideoResourceException();
         }
-        
+
         private String getDefaultDeviceDescription(String dev) {
             try {
                 String dsc
-                        = GStreamerSettings.getCaptureDevice(Integer.valueOf(dev));
+                        = VideoSettings.getCaptureDevice(Integer.valueOf(dev));
                 return dsc;
             } catch (Exception ex) {
                 return null;
             }
-            
+
         }
-        
+
         private VideoDelegate tryLegacyDelegateCreation(String src) {
             try {
                 URI uri = new URI(src);
@@ -174,11 +180,11 @@ public class VideoCapture extends AbstractVideoComponent {
                 return null;
             }
         }
-        
+
         private VideoDelegate createDelegateFromDescription(String desc) {
             return VideoDelegateFactory.getInstance().createCaptureDelegate(desc);
         }
-        
+
     }
-    
+
 }

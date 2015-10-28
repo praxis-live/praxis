@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 import net.neilcsmith.praxis.video.render.NativePixelData;
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.Surface;
@@ -42,31 +42,39 @@ import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.opengl.PGL;
 import processing.opengl.PGraphicsOpenGL;
-import processing.opengl.PJOGL;
 import processing.opengl.Texture;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public abstract class PGLContext {
+public final class PGLContext {
 
     private final static Logger LOG = Logger.getLogger(PGLContext.class.getName());
 
+    private final PApplet applet;
+    private final int width;
+    private final int height;
     private final int cacheMax = 8;
     private final List<PGLGraphics> cache;
     private final List<AlienImageReference> aliens;
     private final WeakHashMap<PGLSurface, Boolean> surfaces;
     private final ReadPixelsOp readOp;
-
+    private final PImage CLEAR_RGB;
+    private final PImage CLEAR_ARGB;
     PGraphics current; //@TODO use primary().getCurrent?
     private IntBuffer scratchBuffer;
 
-    protected PGLContext() {
+    PGLContext(PApplet applet, int width, int height) {
+        this.applet = applet;
+        this.width = width;
+        this.height = height;
         cache = new ArrayList<>(cacheMax);
         aliens = new ArrayList<>(cacheMax);
         surfaces = new WeakHashMap<>();
         readOp = new ReadPixelsOp();
+        CLEAR_RGB = new PImage(width, height, PImage.RGB);
+        CLEAR_ARGB = new PImage(width, height, PImage.ARGB);
     }
 
     public PImage asImage(Surface surface) {
@@ -75,16 +83,35 @@ public abstract class PGLContext {
             if (img != null) {
                 return img;
             }
+            if (surface.isClear() &&
+                    surface.getWidth() == width &&
+                    surface.getHeight() == height) {
+                // common occurence - clear surface at frame width / height
+                return surface.hasAlpha() ?
+                        CLEAR_ARGB :
+                        CLEAR_RGB;
+            }
+            // fall through for data in pixels or custom dimensions
         }
         return asAlienImage(surface);
     }
 
-    public abstract PGLGraphics createGraphics(int width, int height);
-    
-    public abstract PGLGraphics3D create3DGraphics(int width, int height);
+    public PGLGraphics createGraphics(int width, int height) {
+        return (PGLGraphics) applet.createGraphics(width, height, PGLGraphics.ID);
+    }
 
-    public abstract PGLGraphics primary();
-    
+    public PApplet parent() {
+        return applet;
+    }
+
+    public PGLGraphics primary() {
+        return (PGLGraphics) applet.g;
+    }
+
+    public PGLGraphics3D create3DGraphics(int width, int height) {
+        return (PGLGraphics3D) applet.createGraphics(width, height, PGLGraphics3D.ID);
+    }
+
     public PGLSurface createSurface(int width, int height, boolean alpha) {
         PGLSurface s = new PGLSurface(this, width, height, alpha);
         surfaces.put(s, Boolean.TRUE);
@@ -122,18 +149,14 @@ public abstract class PGLContext {
         cache.add(0, pgl);
     }
 
-    void writePixelsARGB(IntBuffer data, Texture tex, boolean hasAlpha) {
+    void writePixelsARGB(IntBuffer data, Texture tex) {
         PGL pgl = ((PGLGraphics) primary()).pgl;
-        GL2 gl2 = ((PJOGL) pgl).gl.getGL2();
         boolean enabledTex = false;
         if (!pgl.isEnabled(tex.glTarget)) {
             pgl.enable(tex.glTarget);
             enabledTex = true;
         }
         pgl.bindTexture(tex.glTarget, tex.glName);
-        if (!hasAlpha) {
-            gl2.glPixelTransferf(GL2.GL_ALPHA_BIAS, 1);
-        }
         pgl.texSubImage2D(tex.glTarget,
                 0,
                 0,
@@ -146,17 +169,12 @@ public abstract class PGLContext {
         if (tex.usingMipmaps() && PGraphicsOpenGL.autoMipmapGenSupported) {
             pgl.generateMipmap(tex.glTarget);
         }
-        if (!hasAlpha) {
-            gl2.glPixelTransferf(GL2.GL_ALPHA_BIAS, 0);
-        }
         pgl.bindTexture(tex.glTarget, 0);
         if (enabledTex) {
             pgl.disable(tex.glTarget);
         }
         tex.updateTexels();
     }
-
-    
 
     IntBuffer getScratchBuffer(int size) {
         if (scratchBuffer == null || scratchBuffer.capacity() < size) {
@@ -183,23 +201,25 @@ public abstract class PGLContext {
         }
         if (ref == null) {
             LOG.fine("Creating new alien image");
-            PGLTexture tex = createAlienTexture(alien.getWidth(), alien.getHeight());
-            readOp.setup(tex);
-            alien.process(readOp);
+            PGLTexture tex = createAlienTexture(alien.getWidth(),
+                    alien.getHeight(),
+                    alien.hasAlpha());
+            readOp.readToTexture(tex, alien);
             ref = new AlienImageReference();
             ref.image = wrapAlienTexture(tex);
-            ref.alien = new WeakReference<Surface>(alien);
+            ref.alien = new WeakReference<>(alien);
             ref.modCount = alien.getModCount();
         } else if (ref.modCount != alien.getModCount()) {
             LOG.fine("Updating existing alien texture");
             PGLTexture tex = (PGLTexture) primary().getCache(ref.image);
             if (tex.contextIsOutdated()) {
                 LOG.fine("Creating new alien texture - CONTEXT OUTDATED");
-                tex = createAlienTexture(alien.getWidth(), alien.getHeight());
+                tex = createAlienTexture(alien.getWidth(),
+                        alien.getHeight(),
+                        alien.hasAlpha());
                 ref.image = wrapAlienTexture(tex);
             }
-            readOp.setup(tex);
-            alien.process(readOp);
+            readOp.readToTexture(tex, alien);
             ref.modCount = alien.getModCount();
         } else {
             LOG.fine("Existing alien texture in sync");
@@ -208,9 +228,12 @@ public abstract class PGLContext {
         return ref.image;
     }
 
-    private PGLTexture createAlienTexture(int width, int height) {
+    private PGLTexture createAlienTexture(int width, int height, boolean alpha) {
         Texture.Parameters params = new Texture.Parameters();
         params.mipmaps = false;
+        if (!alpha) {
+            params.format = PConstants.RGB;
+        }
         PGLTexture texture = new PGLTexture(primary(), width, height, params);
 //        texture.invertedY(true);
 //        texture.colorBuffer(true);
@@ -222,7 +245,7 @@ public abstract class PGLContext {
         //img.parent = parent;
         img.width = tex.width;
         img.height = tex.height;
-        img.format = ARGB;
+        img.format = ARGB; // @TODO ???
         primary().setCache(img, tex);
         return img;
     }
@@ -231,9 +254,9 @@ public abstract class PGLContext {
         for (PGLSurface surface : surfaces.keySet()) {
             surface.clear();
         }
-        for (PGLGraphics graphics : cache) {
-            graphics.dispose();
-        }
+//        for (PGLGraphics graphics : cache) {
+//            graphics.dispose();
+//        }
         cache.clear();
         aliens.clear();
     }
@@ -249,8 +272,10 @@ public abstract class PGLContext {
 
         private Texture texture;
 
-        private void setup(Texture texture) {
+        private void readToTexture(Texture texture, Surface alien) {
             this.texture = texture;
+            alien.process(this);
+            this.texture = null;
         }
 
         @Override
@@ -259,9 +284,7 @@ public abstract class PGLContext {
             if (output instanceof NativePixelData && output.getScanline() == output.getWidth()) {
                 LOG.fine("PixelData is native");
                 NativePixelData nOut = (NativePixelData) output;
-                boolean alpha = nOut.getFormat() == NativePixelData.Format.INT_ARGB_PRE;
-//                context.getRenderer().syncPixelBufferToTexture(nOut.getNativeData().asIntBuffer(), texture, alpha, x, y, output.getWidth(), output.getHeight());
-                writePixelsARGB(nOut.getNativeData().asIntBuffer(), texture, alpha);
+                writePixelsARGB(nOut.getNativeData().asIntBuffer(), texture);
 
             } else {
                 int size = output.getWidth() * output.getHeight();
@@ -282,8 +305,7 @@ public abstract class PGLContext {
                     }
                 }
                 buffer.rewind();
-//                context.getRenderer().syncPixelBufferToTexture(buffer, texture, output.hasAlpha(), x, y, output.getWidth(), output.getHeight());
-                writePixelsARGB(buffer, texture, output.hasAlpha());
+                writePixelsARGB(buffer, texture);
             }
         }
     }

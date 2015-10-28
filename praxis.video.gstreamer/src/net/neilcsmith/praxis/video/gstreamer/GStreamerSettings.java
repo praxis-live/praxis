@@ -22,54 +22,47 @@
 package net.neilcsmith.praxis.video.gstreamer;
 
 import net.neilcsmith.praxis.settings.Settings;
+import net.neilcsmith.praxis.video.VideoSettings;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
+@Deprecated
 public class GStreamerSettings {
 
-    private final static String KEY_CAPTURE_PREFIX = "video.capture";
-    private final static String DEFAULT_CAPTURE_PREFIX;
+//    private final static String KEY_CAPTURE_PREFIX = "video.capture";
+//    private final static String DEFAULT_CAPTURE_PREFIX;
 
-    static {
-        String os = System.getProperty("os.name", "");
-        if (os.contains("Windows")) {
-            DEFAULT_CAPTURE_PREFIX = "ksvideosrc device-index=";
-        } else if (os.contains("Mac") || os.contains("Darwin")) {
-            DEFAULT_CAPTURE_PREFIX = "qtkitvideosrc device-index=";
-        } else {
-            DEFAULT_CAPTURE_PREFIX = "v4l2src device=/dev/video";
-        }
-
-    }
+//    static {
+//        String os = System.getProperty("os.name", "");
+//        if (os.contains("Windows")) {
+//            DEFAULT_CAPTURE_PREFIX = "ksvideosrc device-index=";
+//        } else if (os.contains("Mac") || os.contains("Darwin")) {
+//            DEFAULT_CAPTURE_PREFIX = "qtkitvideosrc device-index=";
+//        } else {
+//            DEFAULT_CAPTURE_PREFIX = "v4l2src device=/dev/video";
+//        }
+//
+//    }
 
     private GStreamerSettings() {
     }
     
     public static String getDefaultCaptureDevice(int idx) {
-        if (idx < 1) {
-            throw new IllegalArgumentException();
-        }
-        return DEFAULT_CAPTURE_PREFIX + (idx - 1);
+        return VideoSettings.getDefaultCaptureDevice(idx);
     }
 
     public static void resetCaptureDevice(int idx) {
-        setCaptureDevice(idx, null);
+        VideoSettings.resetCaptureDevice(idx);
     }
      
     public static String getCaptureDevice(int idx) {
-        if (idx < 1) {
-            throw new IllegalArgumentException();
-        }
-        return Settings.get(KEY_CAPTURE_PREFIX + idx, getDefaultCaptureDevice(idx));
+        return VideoSettings.getCaptureDevice(idx);
     }
 
     public static void setCaptureDevice(int idx, String device) {
-        if (idx < 1) {
-            throw new IllegalArgumentException();
-        }
-        Settings.put(KEY_CAPTURE_PREFIX + idx, device);
+        VideoSettings.setCaptureDevice(idx, device);
     }
 
 }

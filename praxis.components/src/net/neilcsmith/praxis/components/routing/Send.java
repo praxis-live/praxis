@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,51 +19,62 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.components.routing;
 
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Call;
+import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
+import net.neilcsmith.praxis.core.types.PError;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.impl.AbstractComponent;
 import net.neilcsmith.praxis.impl.ArgumentInputPort;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
+import net.neilcsmith.praxis.impl.BooleanProperty;
+import net.neilcsmith.praxis.logging.LogBuilder;
+import net.neilcsmith.praxis.logging.LogLevel;
+import net.neilcsmith.praxis.logging.LogService;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
- * 
+ *
  */
 public class Send extends AbstractComponent {
-    
-    private final static Logger LOG = Logger.getLogger(Send.class.getName());
+
+    private final LogControl LOG;
+    private final BooleanProperty logErrors;
 
     private ControlAddress destination;
 
     public Send() {
-        build();
-    }
-
-    private void build() {
         registerControl("address", ArgumentProperty.create(
                 ArgumentInfo.create(ControlAddress.class,
-                    PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true)),
+                        PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true)),
                 new AddressBinding(),
                 PString.EMPTY));
         registerPort(Port.IN, ArgumentInputPort.create(new InputBinding()));
-        registerControl("_log", new LogControl());
+        logErrors = BooleanProperty.create(true);
+        registerControl("log-errors", logErrors);
+        LOG = new LogControl();
+        registerControl("_log", LOG);
     }
-    
+
+    @Override
+    public void hierarchyChanged() {
+        LOG.logService = null;
+    }
+
     private class InputBinding implements ArgumentInputPort.Binding {
 
+        @Override
         public void receive(long time, Argument arg) {
             if (destination != null) {
                 PacketRouter router = getPacketRouter();
@@ -73,11 +84,12 @@ public class Send extends AbstractComponent {
                 }
             }
         }
-        
+
     }
-    
+
     private class AddressBinding implements ArgumentProperty.Binding {
 
+        @Override
         public void setBoundValue(long time, Argument value) throws Exception {
             if (value.isEmpty()) {
                 destination = null;
@@ -86,18 +98,65 @@ public class Send extends AbstractComponent {
             }
         }
 
+        @Override
         public Argument getBoundValue() {
             return destination == null ? PString.EMPTY : destination;
         }
-        
+
     }
-    
+
     private class LogControl implements Control {
 
+        private final LogBuilder logBuilder = new LogBuilder(LogLevel.ERROR);
+        private ControlAddress logService;
+        private long lastSend = System.nanoTime();
+
+        @Override
         public void call(Call call, PacketRouter router) throws Exception {
-            if (call.getType() != Call.Type.RETURN) {
-                LOG.warning(call.toString());
+            if (call.getType() == Call.Type.ERROR && logErrors.getValue()) {
+
+                if (logService == null) {
+                    initLog();
+                }
+
+                if (!logBuilder.isLoggable(LogLevel.WARNING)) {
+                    return;
+                }
+
+                CallArguments arrArgs = call.getArgs();
+                if (arrArgs.getSize() > 0) {
+                    Argument errArg = arrArgs.get(0);
+                    if (errArg instanceof PError) {
+                        logBuilder.log(LogLevel.WARNING, (PError) errArg);
+                    } else {
+                        logBuilder.log(LogLevel.WARNING, errArg.toString());
+                    }
+                } else {
+                    logBuilder.log(LogLevel.WARNING, "Error returned from " + call.getFromAddress());
+                }
+
+                long callTime = call.getTimecode();
+                if ((callTime - lastSend) > 500_000_000) {
+                    router.route(
+                            Call.createQuietCall(logService,
+                                    ControlAddress.create(getAddress(), "_log"),
+                                    call.getTimecode(),
+                                    logBuilder.toCallArguments()));
+
+                    logBuilder.clear();
+                    lastSend = callTime;
+                }
+
             }
+        }
+
+        private void initLog() throws ServiceUnavailableException {
+            LogLevel level = getLookup().get(LogLevel.class);
+            if (level != null) {
+                logBuilder.setLevel(level);
+            }
+            logService = ControlAddress.create(findService(LogService.class),
+                    LogService.LOG);
         }
 
         public ControlInfo getInfo() {
@@ -105,6 +164,5 @@ public class Send extends AbstractComponent {
         }
 
     }
-
 
 }

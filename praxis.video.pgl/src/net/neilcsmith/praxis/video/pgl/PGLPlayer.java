@@ -21,36 +21,22 @@
  */
 package net.neilcsmith.praxis.video.pgl;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Frame;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.GridBagLayout;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.image.BufferedImage;
+import com.jogamp.newt.opengl.GLWindow;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JFrame;
-import net.neilcsmith.praxis.video.ClientConfiguration;
 import net.neilcsmith.praxis.video.Player;
-import net.neilcsmith.praxis.video.PlayerConfiguration;
-import net.neilcsmith.praxis.video.PlayerFactory;
 import net.neilcsmith.praxis.video.QueueContext;
-import net.neilcsmith.praxis.video.VideoSettings;
 import net.neilcsmith.praxis.video.WindowHints;
 import net.neilcsmith.praxis.video.pipes.FrameRateListener;
-import net.neilcsmith.praxis.video.pipes.SinkIsFullException;
 import net.neilcsmith.praxis.video.pipes.VideoPipe;
-import net.neilcsmith.praxis.video.render.Surface;
+import processing.core.PApplet;
+import processing.core.PGraphics;
+import processing.core.PImage;
+import processing.core.PSurface;
+import processing.opengl.PJOGL;
 
 /**
  *
@@ -58,25 +44,21 @@ import net.neilcsmith.praxis.video.render.Surface;
  */
 public class PGLPlayer implements Player {
 
-    private final static Factory FACTORY = new Factory();
     private final static Logger LOG = Logger.getLogger(PGLPlayer.class.getName());
-    private int width, height; // dimensions of surface
-    private int outputWidth, outputHeight, outputRotation, outputDevice;
-    private double fps; // frames per second
-    private long period; // period per frame in nanosecs
-    private long time; // time of currently computing frame in relation to System.nanotime
-    private volatile boolean running = false; // flag to control animation
-    private Frame frame = null;
-    private PGLApplet applet = null;
-    private PGLOutputSink sink = null;
-    private List<FrameRateListener> listeners = new ArrayList<>();
-    private boolean rendering = false; // used by frame rate listeners
+    private final int surfaceWidth, surfaceHeight; // dimensions of surface
+    private final int outputWidth, outputHeight, outputRotation, outputDevice;
+    private final double fps; // frames per second
+    private final long frameNanos;
     private final WindowHints wHints;
-    private int frames;
-    private int skips;
-    private QueueContext queue;
+    private final QueueContext queue;
 
-    private PGLPlayer(int width,
+    private volatile boolean running = false; // flag to control animation
+    private volatile long time;
+    private List<FrameRateListener> listeners = new ArrayList<>();
+    private Applet applet = null;
+    private PGLOutputSink sink = null;
+
+    PGLPlayer(int width,
             int height,
             double fps,
             int outputWidth,
@@ -88,184 +70,54 @@ public class PGLPlayer implements Player {
         if (width <= 0 || height <= 0 || fps <= 0) {
             throw new IllegalArgumentException();
         }
-        this.width = width;
-        this.height = height;
+        this.surfaceWidth = width;
+        this.surfaceHeight = height;
         this.fps = fps;
-        sink = new PGLOutputSink();
+        frameNanos = (long) (1000000000.0 / fps);
         this.outputWidth = outputWidth;
         this.outputHeight = outputHeight;
         this.outputRotation = outputRotation;
         this.outputDevice = outputDevice;
         this.wHints = wHints;
         this.queue = queue;
+        sink = new PGLOutputSink();
     }
 
     @Override
     public void run() {
         LOG.info("Starting experimental PGL renderer.");
         running = true;
+        time = System.nanoTime();
         try {
             init();
         } catch (Exception ex) {
             LOG.log(Level.WARNING, "Unable to start OpenGL player", ex);
-            running = false;
-            dispose();
-            return;
         }
-        period = (long) (1000000000.0 / fps);
-
-        time = System.nanoTime();
-
-        long now = 0L;
-        long difference = 0L;
         while (running) {
-            frames++;
-            time += period;
-            now = System.nanoTime();
-            difference = now - time;
-            if (difference > 0) {
-                fireListeners();
-//                updateOnly();
-                if (LOG.isLoggable(Level.FINEST)) {
-                    LOG.log(Level.FINEST, "Frame skipped - Difference : {0}", (difference));
-                }
-                skips++;
-            } else {
-                fireListeners();
-                while (difference < -1000000L) {
-                    try {
-                        queue.process(1, TimeUnit.MILLISECONDS);
-//                        Thread.sleep(1);
-                    } catch (Exception ex) {
-                        LOG.log(Level.WARNING, "Queue exception", ex);
+            try {
+                if (System.nanoTime() < (time + frameNanos - 2_000_000)) {
+                    synchronized (applet) {
+                        queue.process(0, TimeUnit.MILLISECONDS);
                     }
-                    now = System.nanoTime();
-                    difference = now - time;
-                }
-                applet.requestDraw(time);
+                }// else {
+                    Thread.sleep(1);
+//                }
+            } catch (Exception ex) {
+                LOG.log(Level.WARNING, "Exception during run", ex);
             }
-
         }
-
-        dispose();
-
     }
 
     private void init() throws Exception {
-        EventQueue.invokeAndWait(new Runnable() {
-            @Override
-            public void run() {
-                Dimension dim;
-                if (outputRotation == 90 || outputRotation == 270) {
-                    dim = new Dimension(outputHeight, outputWidth);
-                } else {
-                    dim = new Dimension(outputWidth, outputHeight);
-                }
-                GraphicsDevice gd = findScreenDevice();
-                String title = wHints.getTitle();
-                if (title.isEmpty()) {
-                    title = "Praxis LIVE [GL]";
-                } else {
-                    title += " [GL]";
-                }
-                frame = new JFrame(title, gd.getDefaultConfiguration());
-                ((JFrame) frame).getContentPane().setBackground(Color.BLACK);
-                ((JFrame) frame).setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-                frame.addWindowListener(new WindowAdapter() {
-                    @Override
-                    public void windowClosing(WindowEvent e) {
-                        terminate();
-                    }
-                });
-                frame.setLayout(new GridBagLayout());
-                Cursor cursor = Toolkit.getDefaultToolkit().createCustomCursor(new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB), new Point(0, 0), "blank");
-                frame.setCursor(cursor);
-                applet = new PGLApplet(sink,
-                        width,
-                        height,
-                        dim.width,
-                        dim.height,
-                        outputRotation);
-                applet.setMinimumSize(dim);
-                applet.setPreferredSize(dim);
-                applet.setBackground(Color.BLACK);
-                applet.setIgnoreRepaint(true);
-                frame.add(applet);
-                if (wHints.isFullScreen()) {
-                    boolean fsem = VideoSettings.isFullScreenExclusive();
-                    frame.setUndecorated(true);
-                    frame.validate();
-                    if (fsem) {
-                        gd.setFullScreenWindow(frame);
-                    } else {
-                        frame.pack();
-                        frame.setVisible(true);
-                        frame.setExtendedState(Frame.MAXIMIZED_BOTH);
-                    }
-
-                } else {
-                    if (wHints.isUndecorated()) {
-                        frame.setUndecorated(true);
-                    }
-                    if (wHints.isAlwaysOnTop()) {
-                        frame.setAlwaysOnTop(true);
-                    }
-                    frame.pack();
-                    frame.setVisible(true);
-                }
-
-                applet.init();
-                applet.requestDraw(0);
-                LOG.log(Level.FINE, "Frame : {0}", frame.getBounds());
-                LOG.log(Level.FINE, "Canvas : {0}", applet.getBounds());
-
-            }
-        });
-
-    }
-
-    private GraphicsDevice findScreenDevice() {
-        GraphicsEnvironment gEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice gd = null;
-        if (outputDevice < 0) {
-            gd = gEnv.getDefaultScreenDevice();
+        applet = new Applet();
+        if (outputDevice > -1) {
+            PApplet.runSketch(new String[]{
+                "--display=" + (outputDevice + 1),
+                "PraxisLIVE"
+            }, applet);
         } else {
-            GraphicsDevice[] screens = gEnv.getScreenDevices();
-            if (outputDevice < screens.length) {
-                gd = screens[outputDevice];
-            } else {
-                gd = screens[0];
-            }
+            PApplet.runSketch(new String[]{"PraxisLIVE"}, applet);
         }
-        LOG.log(Level.FINE, "Searching for screen index : {0}", outputDevice);
-        LOG.log(Level.FINE, "Found Screen Device : {0}", gd);
-        return gd;
-    }
-
-    private void dispose() {
-        applet.dispose();
-
-        sink.disconnect();
-
-        disposeFrame();
-    }
-
-    private void disposeFrame() {
-        try {
-            EventQueue.invokeAndWait(new Runnable() {
-                @Override
-                public void run() {
-                    if (frame != null) {
-                        frame.setVisible(false);
-                        frame.dispose();
-                        frame = null;
-                    }
-                }
-            });
-        } catch (Exception ex) {
-        }
-//        surface = null;
-
     }
 
     private void fireListeners() {
@@ -305,7 +157,7 @@ public class PGLPlayer implements Player {
 
     @Override
     public void terminate() {
-        running = false;
+        applet.exit();
     }
 
     @Override
@@ -331,164 +183,100 @@ public class PGLPlayer implements Player {
 
     @Override
     public boolean isRendering() {
-        return rendering;
+        return applet.rendering;
     }
 
-    private class OutputSink extends VideoPipe {
+    private class Applet extends PApplet {
 
-        private VideoPipe source; // only allow one connection
-        private long time;
-        private boolean render;
+        private final PGLContext context;
+        private boolean rendering;
+        private PGLSurface pglSurface;
 
-        public void registerSource(VideoPipe source) {
-            if (this.source == null) {
-                this.source = source;
+        private Applet() {
+            context = new PGLContext(this, surfaceWidth, surfaceHeight);
+        }
+
+        @Override
+        protected PGraphics makeGraphics(int w, int h, String renderer, String path, boolean primary) {
+            if (PGLGraphics.ID.equals(renderer)) {
+                PGLGraphics pgl = new PGLGraphics(context, primary, w, h);
+//                pgl.setParent(this);
+                return pgl;
+            } else if (PGLGraphics3D.ID.equals(renderer)) {
+                PGLGraphics3D pgl3d = new PGLGraphics3D(context, primary, w, h);
+//                pgl3d.setParent(this);
+                return pgl3d;
             } else {
-                throw new SinkIsFullException();
+                throw new Error();
+//            return super.makeGraphics(w, h, renderer, path, primary);
             }
         }
 
-        public void unregisterSource(VideoPipe source) {
-            if (this.source == source) {
-                this.source = null;
-            }
-        }
-
-        public boolean isRenderRequired(VideoPipe source, long time) {
-            if (source == this.source && time == this.time) {
-                return render;
+        @Override
+        public void settings() {
+            PJOGL.profile = 3;
+            if (wHints.isFullScreen()) {
+                if (outputDevice > -1) {
+                    fullScreen(PGLGraphics.ID, outputDevice + 1);
+                } else {
+                    fullScreen(PGLGraphics.ID);
+                }
             } else {
-                return false;
+                size(outputWidth, outputHeight, PGLGraphics.ID);
             }
         }
 
-        private void process(Surface surface, long time, boolean render) {
-            this.render = render;
-            this.time = time;
-            if (this.source != null) {
-                callSource(source, surface, time);
+        @Override
+        protected PSurface initSurface() {
+            PSurface s = super.initSurface();
+            s.setTitle(wHints.getTitle());
+            GLWindow window = (GLWindow) surface.getNative();
+            window.setAlwaysOnTop(wHints.isAlwaysOnTop());
+            window.setUndecorated(wHints.isUndecorated());
+            return s;
+        }
+
+        @Override
+        public void setup() {
+            assert pglSurface == null;
+            if (pglSurface == null) {
+                pglSurface = context.createSurface(surfaceWidth, surfaceHeight, false);
+            }
+            noCursor();
+            frameRate((float) fps);
+        }
+
+        @Override
+        public synchronized void draw() {
+            time = System.nanoTime() + frameNanos;
+            fireListeners();
+            sink.process(pglSurface, time);
+            PImage img = context.asImage(pglSurface);
+            context.primary().endOffscreen();
+            clear();
+            translate(width / 2, height / 2);
+            rotate(radians(outputRotation));
+            if (outputRotation == 0 || outputRotation == 180) {
+                image(img, -outputWidth / 2, -outputHeight / 2,
+                        outputWidth, outputHeight);
             } else {
-                surface.clear();
+                image(img, -outputHeight / 2, -outputWidth / 2,
+                        outputHeight, outputWidth);
             }
         }
 
         @Override
-        public int getSourceCount() {
-            return source == null ? 0 : 1;
+        public synchronized void dispose() {
+            context.dispose();
+            sink.disconnect();
+            super.dispose();
         }
 
         @Override
-        public int getSourceCapacity() {
-            return 1;
+        public void exitActual() {
+            running = false;
         }
 
-        @Override
-        public VideoPipe getSource(int idx) {
-            if (idx == 0 && source != null) {
-                return source;
-            } else {
-                throw new IndexOutOfBoundsException();
-            }
-        }
-
-        @Override
-        public int getSinkCount() {
-            return 0;
-        }
-
-        @Override
-        public int getSinkCapacity() {
-            return 0;
-        }
-
-        @Override
-        public VideoPipe getSink(int idx) {
-            throw new IndexOutOfBoundsException();
-        }
-
-        @Override
-        protected void process(VideoPipe sink, Surface buffer, long time) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        protected void registerSink(VideoPipe sink) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        @Override
-        protected void unregisterSink(VideoPipe sink) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
     }
 
-    static PlayerFactory getFactory() {
-        return FACTORY;
-    }
-
-    private static class Factory implements PlayerFactory {
-
-        @Override
-        public Player createPlayer(PlayerConfiguration config, ClientConfiguration[] clients)
-                throws Exception {
-            if (clients.length != 1 || clients[0].getSourceCount() != 0 || clients[0].getSinkCount() != 1) {
-                throw new IllegalArgumentException("Invalid client configuration");
-            }
-
-            int width = config.getWidth();
-            int height = config.getHeight();
-            int outWidth = width;
-            int outHeight = height;
-            int rotation = 0;
-            int device = -1;
-            
-            ClientConfiguration.Dimension dim
-                    = clients[0].getLookup().get(ClientConfiguration.Dimension.class);
-            if (dim != null) {
-                outWidth = dim.getWidth();
-                outHeight = dim.getHeight();
-            }
-
-            ClientConfiguration.Rotation rot
-                    = clients[0].getLookup().get(ClientConfiguration.Rotation.class);
-            if (rot != null) {
-                rotation = rot.getAngle();
-            }
-            switch (rotation) {
-                case 0:
-                case 90:
-                case 180:
-                case 270:
-                    break;
-                default:
-                    LOG.warning("OpenGL pipeline doesn't currently support that rotation");
-                    rotation = 0;
-            }
-
-            ClientConfiguration.DeviceIndex dev
-                    = clients[0].getLookup().get(ClientConfiguration.DeviceIndex.class);
-            if (dev != null) {
-                device = dev.getValue();
-            }
-
-            WindowHints wHints = clients[0].getLookup().get(WindowHints.class);
-            if (wHints == null) {
-                wHints = new WindowHints();
-            }
-            
-            QueueContext queue = config.getLookup().get(QueueContext.class);
-
-            return new PGLPlayer(
-                    config.getWidth(),
-                    config.getHeight(),
-                    config.getFPS(),
-                    outWidth,
-                    outHeight,
-                    rotation,
-                    device,
-                    wHints,
-                    queue);
-
-        }
-    }
 }
