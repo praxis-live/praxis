@@ -35,6 +35,7 @@ import net.neilcsmith.praxis.video.pgl.PGLGraphics;
 import net.neilcsmith.praxis.video.pgl.PGLSurface;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PGraphics2D;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
+import net.neilcsmith.praxis.video.pipes.VideoPipe;
 import net.neilcsmith.praxis.video.pipes.impl.MultiInOut;
 import net.neilcsmith.praxis.video.render.Surface;
 
@@ -106,19 +107,33 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
 
     }
 
-    private class Processor extends MultiInOut {
+    private class Processor extends AbstractProcessPipe {
 
         private final PGraphics pg;
         private PGLImage[] images;
 
         private Processor(int inputs) {
-            super(inputs, 1);
+            super(inputs);
             images = new PGLImage[inputs];
             pg = new PGraphics();
         }
 
         @Override
-        protected void process(Surface[] in, Surface output, int index, boolean rendering) {
+        protected void update(long time) {
+            P2DCodeContext.this.update(time);
+        }
+
+        @Override
+        protected void callSources(Surface output, long time) {
+            validateImages(output);
+            int count = getSourceCount();
+            for (int i=0; i < count; i++) {
+                callSource(getSource(i), images[i].surface, time);
+            }
+        }
+        
+        @Override
+        protected void render(Surface output, long time) {
             PGLSurface pglOut = output instanceof PGLSurface ? (PGLSurface) output : null;
             output.clear();
 
@@ -128,19 +143,8 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
 
             P2DCodeDelegate del = getDelegate();
 
-            for (int i = 0; i < in.length; i++) {
-                PGLImage img = images[i];
-                processing.core.PImage inImg = ((PGLSurface) in[i]).getGraphics();
-                if (img == null || img.img != inImg) {
-                    img = new PGLImage(inImg);
-                    setImageField(del, inputs[i].getField(), img);
-                }
-            }
-
             pg.init(pglOut.getGraphics());
             del.setupGraphics(pg, output.getWidth(), output.getHeight());
-
-            update(execCtxt.getTime());
             pg.resetMatrix();
             if (setupRequired) {
                 try {
@@ -157,6 +161,23 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
             }
             pg.release();
             flush();
+        }
+        
+        private void validateImages(Surface output) {
+            P2DCodeDelegate del = getDelegate();
+            for (int i=0; i<images.length; i++) {
+                PGLImage img = images[i];
+                Surface s = img == null ? null : img.surface;
+                if (s == null || !output.checkCompatible(s, true, true)) {
+                    if (s != null) {
+                        s.release();
+                    }
+                    s = output.createSurface();
+                    img = new PGLImage(s);
+                    images[i] = img;
+                    setImageField(del, inputs[i].getField(), img);
+                }
+            }
         }
 
         private void setImageField(P2DCodeDelegate delegate, Field field, PImage image) {
@@ -176,26 +197,27 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
             pg.pushStyle();
             initGraphics(pg);
         }
-        
+
         private void release() {
             PGLGraphics g = super.releaseGraphics();
             g.popStyle();
+            g.resetShader();
         }
 
     }
 
     private static class PGLImage extends PImage {
 
-        private final processing.core.PImage img;
+        private final Surface surface;
 
-        private PGLImage(processing.core.PImage img) {
-            super(img.width, img.height);
-            this.img = img;
+        private PGLImage(Surface s) {
+            super(s.getWidth(), s.getHeight());
+            this.surface = s;
         }
 
         @Override
         protected processing.core.PImage unwrap(PGLContext context) {
-            return img;
+            return context.asImage(surface);
         }
 
     }
