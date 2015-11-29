@@ -36,6 +36,7 @@ import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
 import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.NumberProperty;
+import net.neilcsmith.praxis.impl.StringProperty;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import net.neilcsmith.praxis.video.InvalidVideoResourceException;
 
@@ -48,10 +49,17 @@ public class VideoPlayer extends AbstractVideoComponent {
     private final ControlPort.Output readyPort;
     private final ControlPort.Output errorPort;
     
-    private DelegateLoader loader;
+    private final StringProperty audioSink;
+    private final DelegateLoader loader;
     private boolean loop = true;
 
     public VideoPlayer() {
+        
+        audioSink = StringProperty.builder()
+                .suggestedValues(PlayBinDelegate.DEFAULT_AUDIO_SINK)
+                .build();
+        registerControl("audio-sink", audioSink);
+        
         loader = new DelegateLoader();
         registerControl("video", loader);
         NumberProperty position = NumberProperty.builder()
@@ -63,6 +71,14 @@ public class VideoPlayer extends AbstractVideoComponent {
                 .build();
         registerControl("position", position);
         registerPort("position", position.createPort());
+        
+        NumberProperty rate = NumberProperty.builder()
+                .binding(new RateBinding())
+                .defaultValue(1)
+                .markTransient()
+                .build();
+        registerControl("rate", rate);
+        registerPort("rate", rate.createPort());
         
         BooleanProperty lp = BooleanProperty.create(new LoopBinding(), loop);
         registerControl("loop", lp);
@@ -125,6 +141,26 @@ public class VideoPlayer extends AbstractVideoComponent {
             }
         }
     }
+    
+    private class RateBinding implements NumberProperty.Binding {
+
+        @Override
+        public void setBoundValue(long time, double value) {
+            if (video instanceof PlayBinDelegate) {
+                ((PlayBinDelegate) video).setRate(value);
+            }
+        }
+
+        @Override
+        public double getBoundValue() {
+            if (video instanceof PlayBinDelegate) {
+                return ((PlayBinDelegate) video).getRate();
+            } else {
+                return 1;
+            }
+        }
+        
+    }
 
     private class LoopBinding implements BooleanProperty.Binding {
         
@@ -157,7 +193,7 @@ public class VideoPlayer extends AbstractVideoComponent {
             if (keys.getSize() < 1 || (key = keys.get(0)).isEmpty()) {
                 return null;
             } else {
-                return new LoadTask(getLookup(), PResource.coerce(key));
+                return new LoadTask(getLookup(), PResource.coerce(key), audioSink.getValue());
             }
         }
 
@@ -182,15 +218,17 @@ public class VideoPlayer extends AbstractVideoComponent {
 
         private final Lookup lookup;
         private final PResource videoSource;
+        private final String audioSink;
 
-        private LoadTask(Lookup lookup, PResource videoSource) {
+        private LoadTask(Lookup lookup, PResource videoSource, String audioSink) {
             this.lookup = lookup;
             this.videoSource = videoSource;
+            this.audioSink = audioSink;
         }
 
         public Argument execute() throws Exception {
             URI uri = videoSource.value();
-            VideoDelegate delegate = VideoDelegateFactory.getInstance().createPlayBinDelegate(uri);
+            VideoDelegate delegate = new PlayBinDelegate(uri, audioSink);
             if (delegate == null) {
                 throw new InvalidVideoResourceException();
             }
