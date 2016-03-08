@@ -21,8 +21,6 @@
  */
 package net.neilcsmith.praxis.code;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.Call;
@@ -36,14 +34,13 @@ import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.interfaces.TaskService;
 import net.neilcsmith.praxis.core.types.PError;
 import net.neilcsmith.praxis.core.types.PReference;
+import net.neilcsmith.praxis.logging.LogLevel;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public abstract class AbstractAsyncProperty<V> implements Control {
-
-    private final static Logger LOG = Logger.getLogger(AbstractAsyncProperty.class.getName());
     
     private final Class<V> valueType;
     
@@ -135,8 +132,6 @@ public abstract class AbstractAsyncProperty<V> implements Control {
         } else if (portKeys != null) {
             keys = portKeys;
             portKeys = null;
-        } else {
-            LOG.warning("No keys able to be set");
         }
         valueChanged(call.getTimecode());
     }
@@ -169,9 +164,6 @@ public abstract class AbstractAsyncProperty<V> implements Control {
         if (call.getType() == Call.Type.INVOKE) {
             if (router == null) {
                 router = getLookup().get(PacketRouter.class);
-                if (router == null) {
-                    LOG.warning("No PacketRouter found in Lookup");
-                }
             }
             router.route(Call.createReturnCall(call, args));
         }
@@ -195,7 +187,7 @@ public abstract class AbstractAsyncProperty<V> implements Control {
                     activeCall = null;
                 }
             } catch (Exception ex) {
-                LOG.log(Level.WARNING, "Invalid signal sent to port", ex);
+                context.getLog().log(LogLevel.ERROR, ex, "Invalid signal sent to port");
             }
 
         }
@@ -261,7 +253,6 @@ public abstract class AbstractAsyncProperty<V> implements Control {
         if (router == null) {
             router = getLookup().get(PacketRouter.class);
             if (router == null) {
-                LOG.warning("Can't find a router");
                 throw new ServiceUnavailableException();
             }
         }

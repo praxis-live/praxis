@@ -24,8 +24,6 @@ package net.neilcsmith.praxis.code;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.userapi.Inject;
 import net.neilcsmith.praxis.code.userapi.OnChange;
 import net.neilcsmith.praxis.code.userapi.OnError;
@@ -47,6 +45,7 @@ import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.logging.LogLevel;
 
 /**
  *
@@ -54,15 +53,14 @@ import net.neilcsmith.praxis.core.types.PString;
  */
 public class PropertyControl extends Property implements Control {
 
-    private final static Logger LOG = Logger.getLogger(PropertyControl.class.getName());
-
     private final ControlInfo info;
     private final Binding binding;
-    private final MethodInvoker invoker;
+    private final Method onChange;
+    private final Method onError;
     private final boolean readOnly;
 
     private CodeContext<?> context;
-    
+
     private boolean latestSet;
     private long latest;
 
@@ -72,13 +70,10 @@ public class PropertyControl extends Property implements Control {
             Method onError) {
         this.info = info;
         this.binding = binding;
-        this.readOnly = info == null ||
-                info.getType() == ControlInfo.Type.ReadOnlyProperty;
-        if (onChange != null || onError != null) {
-            this.invoker = new MethodInvoker(onChange, onError);
-        } else {
-            this.invoker = null;
-        }
+        this.readOnly = info == null
+                || info.getType() == ControlInfo.Type.ReadOnlyProperty;
+        this.onChange = onChange;
+        this.onError = onError;
     }
 
     @Override
@@ -105,11 +100,15 @@ public class PropertyControl extends Property implements Control {
     }
 
     private void checkInvoke(long time, boolean error) {
-        if (invoker == null) {
-            return;
+        if (error) {
+            if (onError != null) {
+                context.invoke(time, onError);
+            }
+        } else {
+            if (onChange != null) {
+                context.invoke(time, onChange);
+            }
         }
-        invoker.lastError = error;
-        context.invoke(time, invoker);
     }
 
     private void attach(CodeContext<?> context, Control previous) {
@@ -175,39 +174,6 @@ public class PropertyControl extends Property implements Control {
             return (time - latest) >= 0;
         } else {
             return true;
-        }
-
-    }
-
-    private class MethodInvoker implements CodeContext.Invoker {
-
-        private final Method onChange, onError;
-        private boolean lastError;
-
-        private MethodInvoker(Method onChange, Method onError) {
-            this.onChange = onChange;
-            this.onError = onError;
-        }
-
-        @Override
-        public void invoke() {
-            if (lastError) {
-                if (onError != null) {
-                    try {
-                        onError.invoke(context.getDelegate());
-                    } catch (Exception ex) {
-                        Logger.getLogger(PropertyControl.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            } else {
-                if (onChange != null) {
-                    try {
-                        onChange.invoke(context.getDelegate());
-                    } catch (Exception ex) {
-                        Logger.getLogger(PropertyControl.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
         }
 
     }
@@ -314,7 +280,7 @@ public class PropertyControl extends Property implements Control {
             control = new PropertyControl(info, binding, onChange, onError);
             this.propertyField = field;
         }
-        
+
         private Descriptor(String id, int index, Binding binding, Field field) {
             super(id, Category.Synthetic, index);
             control = new PropertyControl(null, binding, null, null);
@@ -333,7 +299,7 @@ public class PropertyControl extends Property implements Control {
                 try {
                     propertyField.set(context.getDelegate(), control);
                 } catch (Exception ex) {
-                    LOG.log(Level.SEVERE, null, ex);
+                    context.getLog().log(LogLevel.ERROR, ex);
                 }
             }
         }
@@ -355,9 +321,7 @@ public class PropertyControl extends Property implements Control {
             }
             return create(connector, ann.value(), field, binding);
         }
-        
-        
-        
+
         private static Descriptor create(CodeConnector<?> connector, int index,
                 Field field, Binding binding) {
             field.setAccessible(true);
@@ -391,7 +355,7 @@ public class PropertyControl extends Property implements Control {
             }
             return new Descriptor(id, index, info, binding, propertyField, onChange, onError);
         }
-        
+
         static Descriptor create(CodeConnector<?> connector, Inject ann, Field field) {
             Binding binding = findBinding(connector, field);
             if (binding == null) {
@@ -406,7 +370,6 @@ public class PropertyControl extends Property implements Control {
             }
             return new Descriptor(id, index, binding, propertyField);
         }
-
 
         private static Binding findBinding(CodeConnector<?> connector, Field field) {
             Class<?> type = field.getType();

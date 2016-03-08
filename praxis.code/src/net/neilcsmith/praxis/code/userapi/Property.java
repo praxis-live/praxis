@@ -22,7 +22,6 @@
  */
 package net.neilcsmith.praxis.code.userapi;
 
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
@@ -33,8 +32,6 @@ import net.neilcsmith.praxis.core.types.PBoolean;
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public abstract class Property {
-
-    private final static Logger LOG = Logger.getLogger(Property.class.getName());
 
     private final static long TO_NANO = 1000000000;
 
@@ -199,7 +196,6 @@ public abstract class Property {
         public void tick() {
             if (animator == null || !animator.animating) {
                 assert false;
-                LOG.warning("Tick called when not animating");
                 return;
             }
             animator.tick();

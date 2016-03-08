@@ -22,22 +22,19 @@
 package net.neilcsmith.praxis.code;
 
 import java.lang.reflect.Field;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.userapi.AuxOut;
 import net.neilcsmith.praxis.code.userapi.Out;
 import net.neilcsmith.praxis.code.userapi.Output;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.info.PortInfo;
+import net.neilcsmith.praxis.logging.LogLevel;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
 class OutputImpl extends Output {
-
-    private final static Logger LOG = Logger.getLogger(OutputImpl.class.getName());
     
     private final CodeContext<?> context;
     private final ControlOutput port;
@@ -106,7 +103,7 @@ class OutputImpl extends Output {
                 field.setAccessible(true);
                 field.set(context.getDelegate(), new OutputImpl(context, port));
             } catch (Exception ex) {
-                LOG.log(Level.SEVERE, null, ex);
+                context.getLog().log(LogLevel.ERROR, ex);
             } 
         }
 

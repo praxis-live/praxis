@@ -21,6 +21,8 @@
  */
 package net.neilcsmith.praxis.code;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -49,8 +51,6 @@ import net.neilcsmith.praxis.util.ArrayUtils;
  */
 public abstract class CodeContext<D extends CodeDelegate> {
 
-    private final static Logger LOG = Logger.getLogger(CodeContext.class.getName());
-
     private final Map<String, ControlDescriptor> controls;
     private final Map<String, PortDescriptor> ports;
     private final ComponentInfo info;
@@ -74,18 +74,18 @@ public abstract class CodeContext<D extends CodeDelegate> {
             delegate = connector.getDelegate();
             log = new LogBuilder(LogLevel.ERROR);
         } catch (Exception e) {
-            LOG.log(Level.FINE, "", e);
+            Logger.getLogger(CodeContext.class.getName()).log(Level.FINE, "", e);
             throw e;
         }
     }
-    
+
     void setComponent(CodeComponent<D> cmp) {
         this.cmp = cmp;
         delegate.setContext(this);
     }
 
     protected void configure(CodeComponent<D> cmp, CodeContext<D> oldCtxt) {
-        
+
         configureControls(oldCtxt);
         configurePorts(oldCtxt);
 //        hierarchyChanged();
@@ -246,7 +246,34 @@ public abstract class CodeContext<D extends CodeDelegate> {
             flush();
         }
     }
-    
+
+    void invoke(long time, Method method, Object... params) {
+        if (isActive()) {
+            update(time);
+            try {
+                method.invoke(getDelegate(), params);
+            } catch (Exception ex) {
+                if (ex instanceof InvocationTargetException) {
+                    Throwable t = ex.getCause();
+                    ex = t instanceof Exception ? (Exception) t : ex;
+                }
+                StringBuilder sb = new StringBuilder("Exception thrown from ");
+                sb.append(method.getName());
+                sb.append('(');
+                Class<?>[] types = method.getParameterTypes();
+                for (int i = 0; i < types.length; i++) {
+                    sb.append(types[i].getSimpleName());
+                    if (i < (types.length - 1)) {
+                        sb.append(',');
+                    }
+                }
+                sb.append(')');
+                log.log(LogLevel.ERROR, ex, sb.toString());
+            }
+            flush();
+        }
+    }
+
     protected void flush() {
         if (!log.isEmpty()) {
             log(log.toCallArguments());
@@ -257,7 +284,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
     public LogBuilder getLog() {
         return log;
     }
-    
+
     protected LogLevel getLogLevel() {
         return log.getLevel();
     }
@@ -268,7 +295,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
         }
         log(log.toCallArguments());
     }
-    
+
     private void log(CallArguments args) {
         PacketRouter router = cmp.getPacketRouter();
         ControlAddress to = cmp.getLogToAddress();
