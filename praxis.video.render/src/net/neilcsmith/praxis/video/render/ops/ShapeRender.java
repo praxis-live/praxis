@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -155,7 +155,7 @@ public class ShapeRender implements SurfaceOp {
         if (intersection.isEmpty()) {
             return;
         }
-        TempData tmp = TempData.create(intersection.width, intersection.height, output.hasAlpha());
+        TempData tmp = TempData.create(intersection.width, intersection.height, true);
         BufferedImage bi = ImageUtils.toImage(tmp);
         Graphics2D g2d = bi.createGraphics();
         g2d.translate(tx, ty);
