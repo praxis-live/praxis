@@ -25,7 +25,6 @@ package net.neilcsmith.praxis.video.code;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeConnector;
 import net.neilcsmith.praxis.code.CodeFactory;
 import net.neilcsmith.praxis.code.ResourceProperty;
@@ -40,9 +39,7 @@ import net.neilcsmith.praxis.video.code.userapi.PImage;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public class VideoCodeConnector<T extends VideoCodeDelegate> extends CodeConnector<T> {
-    
-    private final static Logger LOG = Logger.getLogger(VideoCodeConnector.class.getName());
-    
+
 //    public final static String SETUP = "setup";
 //    public final static String DRAW = "draw";
     
