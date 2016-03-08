@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,23 +21,10 @@
  */
 package net.neilcsmith.praxis.video.pgl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.Port;
-import net.neilcsmith.praxis.core.info.ArgumentInfo;
-import net.neilcsmith.praxis.core.interfaces.TaskService;
-import net.neilcsmith.praxis.core.types.PMap;
-import net.neilcsmith.praxis.core.types.PReference;
-import net.neilcsmith.praxis.core.types.PString;
-import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
 import net.neilcsmith.praxis.impl.AbstractExecutionContextComponent;
 import net.neilcsmith.praxis.impl.BooleanProperty;
 import net.neilcsmith.praxis.impl.NumberProperty;
@@ -228,114 +215,10 @@ public class PGLFilter extends AbstractExecutionContextComponent {
         }
     }
 
-//    private class ShaderProperty extends AbstractAsyncProperty<ShaderResult> {
-//
-//        private final boolean vertex;
-//
-//        private ShaderProperty(boolean vertex) {
-//            super(ArgumentInfo.create(
-//                    PString.class, PMap.create(
-//                            PString.KEY_MIME_TYPE, vertex ? "text/x-glsl-vert" : "text/x-glsl-frag",
-//                            ArgumentInfo.KEY_TEMPLATE, vertex ? DEFAULT_VERTEX_SHADER : DEFAULT_FRAGMENT_SHADER)),
-//                    ShaderResult.class, PString.EMPTY);
-//            this.vertex = vertex;
-//        }
-//
-//        @Override
-//        protected TaskService.Task createTask(CallArguments keys) throws Exception {
-//            return new ShaderLoader(keys.get(0).toString(), vertex);
-//        }
-//
-//        @Override
-//        protected void valueChanged(long time) {
-//            ShaderResult r = getValue();
-//            String[] shaderCode = r == null ? null : r.shader;
-//            if (vertex) {
-//                vertexCode = shaderCode;
-//            } else {
-//                fragmentCode = shaderCode;
-//            }
-//            dirty = true;
-//        }
-//
-//    }
-//    private class ShaderLoader implements TaskService.Task {
-//
-//        private final boolean vertex;
-//        private final String source;
-//
-//        private ShaderLoader(String source, boolean vertex) {
-//            this.source = source;
-//            this.vertex = vertex;
-//        }
-//
-//        @Override
-//        public Argument execute() throws Exception {
-//            return PReference.wrap(new ShaderResult(iterateSource()));
-//        }
-//
-//        private String[] iterateSource() {
-//            try {
-//                BufferedReader reader = new BufferedReader(new StringReader(source));
-//                List<String> lines = new ArrayList<String>();
-//                String line;
-//                while ((line = reader.readLine()) != null) {
-//                    if (vertex) {
-//                        line = convertVertexLine(line);
-//                    } else {
-//                        line = convertFragmentLine(line);
-//                    }
-//                    lines.add(line);
-//                }
-//                return lines.toArray(new String[lines.size()]);
-//            } catch (IOException ex) {
-//                // it's a String!
-//                Logger.getLogger(PGLFilter.class.getName()).log(Level.SEVERE, null, ex);
-//                return null;
-//            }
-//
-//        }
-//
-//        private String convertVertexLine(String line) {
-//            
-//        }
-//
-//        private String convertFragmentLine(String line) {
-//            LOG.fine("Input : " + line);
-//            
-//            LOG.fine("Output : " + line);
-//            return line;
-//        }
-//
-//    }
-//    private class ShaderResult {
-//
-//        private final String[] shader;
-//
-//        private ShaderResult(String[] shader) {
-//            this.shader = shader;
-//        }
-//    }
-
-    private class ShaderProgram extends PShader {
-
-        private ShaderProgram(PGLContext context, String vertex, String fragment) {
-            super(context.primary().parent);
-            setVertexShader(new String[]{vertex});
-            setFragmentShader(new String[]{fragment});
-            setType(TEXTURE);
-        }
-
-        @Override
-        protected void dispose() {
-            super.dispose();
-        }
-
-    }
 
     private class GLDelegate extends MultiInOut {
 
-        private ShaderProgram shader;
+        private PGLShader shader;
 
         private GLDelegate() {
             super(1, 1);
@@ -368,15 +251,6 @@ public class PGLFilter extends AbstractExecutionContextComponent {
                     try {
                         for (int i = 0; i < uniformIDs.length; i++) {
                             String id = uniformIDs[i];
-//                    if (id == null) {
-//                        continue;
-//                    }
-//                    if (first && !shader.hasUniform(id)) {
-//                        LOG.log(Level.FINEST, "Removing uniform : {0}", id);
-//                        uniformIDs[i] = null;
-//                        continue;
-//                    }
-//                    shader.setUniformf(id, (float) uniforms[i]);
                             shader.set(id, (float) uniforms[i]);
                         }
 
@@ -404,7 +278,7 @@ public class PGLFilter extends AbstractExecutionContextComponent {
             } else {
                 String vert = vertex.isEmpty() ? DEFAULT_VERTEX_SHADER : vertex;
                 String frag = fragment.isEmpty() ? DEFAULT_FRAGMENT_SHADER : fragment;
-                shader = new ShaderProgram(context, vert, frag);
+                shader = new PGLShader(context, vert, frag);
                 LOG.log(Level.FINEST, "Compiled shader :\n{0}", frag);
 
                 for (int i = 0; i < uniformIDs.length; i++) {

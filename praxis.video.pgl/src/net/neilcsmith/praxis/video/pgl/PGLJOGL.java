@@ -32,6 +32,14 @@ class PGLJOGL extends PJOGL {
         }
     }
     
+    String[] preprocessFragmentSource(String[] fragment) {
+        return preprocessFragmentSource(fragment, getGLSLVersion());
+    }
+    
+    String[] preprocessVertexSource(String[] vertex) {
+        return preprocessVertexSource(vertex, getGLSLVersion());
+    }
+    
     private void disposeResources() {
         try {
             for (Class<?> cls : PGraphicsOpenGL.class.getDeclaredClasses()) {
