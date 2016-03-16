@@ -29,8 +29,8 @@
                 <package>org.freedesktop.gstreamer.query</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/gst1-java-core-0.9-150920.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/gst1-java-core-0.9-150920.jar</binary-origin>
+                <runtime-relative-path>ext/gst1-java-core-0.9-160303.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/gst1-java-core-0.9-160303.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

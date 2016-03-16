@@ -2,5 +2,5 @@ Manifest-Version: 1.0
 AutoUpdate-Show-In-Client: true
 OpenIDE-Module: org.freedesktop.gstreamer
 OpenIDE-Module-Localizing-Bundle: org/freedesktop/gstreamer/Bundle.properties
-OpenIDE-Module-Specification-Version: 0.9.150920
+OpenIDE-Module-Specification-Version: 0.9.160303
 
