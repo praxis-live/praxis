@@ -23,6 +23,7 @@ package net.neilcsmith.praxis.video.gst1.components;
 
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
+import org.freedesktop.gstreamer.Bin;
 import org.freedesktop.gstreamer.Element;
 import org.freedesktop.gstreamer.Format;
 import org.freedesktop.gstreamer.Gst;
@@ -37,21 +38,34 @@ import org.freedesktop.gstreamer.elements.PlayBin;
  */
 public class PlayBinDelegate extends AbstractGstDelegate {
 
-    private URI loc;
-    private PlayBin pipe;
+    final static String DEFAULT_AUDIO_SINK = "autoaudiosink";
 
-    protected PlayBinDelegate(URI loc) {
+    private final URI loc;
+    private final String audioSink;
+
+    private PlayBin pipe;
+    private volatile double rate;
+
+    protected PlayBinDelegate(URI loc, String audioSink) {
         this.loc = loc;
+        this.audioSink = audioSink.trim();
+        this.rate = 1;
     }
 
     @Override
     protected Pipeline buildPipeline(Element sink) throws Exception {
         pipe = new PlayBin("PlayBin", loc);
-//        pipe.setAudioSink(null);
-        int flags = (int) pipe.get("flags");
-        flags &= ~(1 << 1); // cancel out audio flag
-        pipe.set("flags", flags);
         pipe.setVideoSink(sink);
+        if (!DEFAULT_AUDIO_SINK.equals(audioSink)) {
+            if (audioSink.isEmpty()) {
+                int flags = (int) pipe.get("flags");
+                flags &= ~(1 << 1); // cancel out audio flag
+                pipe.set("flags", flags);
+            } else {
+                pipe.setAudioSink(Bin.launch(audioSink, true));
+            }
+        }
+
         return pipe;
     }
 
@@ -70,20 +84,68 @@ public class PlayBinDelegate extends AbstractGstDelegate {
         Gst.getExecutor().execute(new Runnable() {
 
             public void run() {
-                State s = getState();
-                if (s == State.Playing) {
-                    pipe.seek(1, Format.TIME, SeekFlags.FLUSH | SeekFlags.KEY_UNIT,
-                            SeekType.SET, position, SeekType.NONE, -1);
-                } else if (s == State.Paused) {
-                    pipe.seek(1, Format.TIME, SeekFlags.FLUSH | SeekFlags.KEY_UNIT,
-                            SeekType.SET, position, SeekType.NONE, -1);
-                }
-                pipe.getState(10, TimeUnit.MILLISECONDS);
+                doSeek(false, position);
             }
         });
     }
 
+    public void setRate(double rate) {
+        this.rate = rate;
+        Gst.getExecutor().execute(new Runnable() {
+
+            @Override
+            public void run() {
+                doSeek(false, -1);
+            }
+        });
+    }
+
+    public double getRate() {
+        return rate;
+    }
+
+    @Override
+    protected void doStop() {
+        super.doStop();
+        this.rate = 1;
+    }
+    
+    
+
+    @Override
+    protected void doEOS() {
+        doSeek(true, -1);
+    }
+
+    private void doSeek(boolean eos, long position) {
+        State s = getState();
+        if (s == State.Playing || s == State.Paused) {
+            double rate = this.rate;
+            if (rate == 0.0) {
+                rate = 0.0000001;
+            }
+            long duration = pipe.queryDuration(TimeUnit.NANOSECONDS);
+            if (eos) {
+                if (rate > 0) {
+                    position = 0;
+                } else {
+                    position = duration;
+                }
+            } else if (position < 0) {
+                position = pipe.queryPosition(TimeUnit.NANOSECONDS);
+            }
+
+            if (rate > 0) {
+                pipe.seek(rate, Format.TIME, SeekFlags.FLUSH | SeekFlags.ACCURATE, SeekType.SET, position, SeekType.SET, duration);
+            } else {
+                pipe.seek(rate, Format.TIME, SeekFlags.FLUSH | SeekFlags.ACCURATE, SeekType.SET, 0, SeekType.SET, position);
+            }
+        }
+        pipe.getState(10, TimeUnit.MILLISECONDS);
+    }
+
+    @Deprecated
     public static PlayBinDelegate create(URI loc) {
-        return new PlayBinDelegate(loc);
+        return new PlayBinDelegate(loc, "");
     }
 }

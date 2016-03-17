@@ -23,8 +23,6 @@
 package net.neilcsmith.praxis.code;
 
 import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.userapi.AuxIn;
 import net.neilcsmith.praxis.code.userapi.In;
 import net.neilcsmith.praxis.core.Argument;
@@ -38,51 +36,40 @@ import net.neilcsmith.praxis.core.types.PNumber;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 abstract class MethodInput {
-    
+
     private final Method method;
     private CodeContext<?> context;
-    
+
     private MethodInput(Method method) {
         this.method = method;
     }
 
     private void attach(CodeContext<?> context) {
-        this.context = context; 
+        this.context = context;
     }
-    
-    abstract void receive(long time, double value);
-    
-    abstract void receive(long time, Argument value);
-    
-    void invoke(long time, final Object value) {
-        context.invoke(time, new CodeContext.Invoker() {
 
-                @Override
-                public void invoke() {
-                    try {
-                        method.invoke(context.getDelegate(), value);
-                    } catch (Exception ex) {
-                        Logger.getLogger(MethodInput.class.getName()).log(Level.SEVERE, null, ex); // ??
-                    }
-                }
-            });
+    abstract void receive(long time, double value);
+
+    abstract void receive(long time, Argument value);
+
+    void invoke(long time, final Object value) {
+        context.invoke(time, method, value);
     }
-    
+
 //    static boolean isSuppportedType(Class<?> type) {
 //        return type == double.class ||
 //                type == String.class;
 //    }
-    
     static Descriptor createDescriptor(CodeConnector<?> connector,
             In ann, Method method) {
         return createDescriptor(connector, PortDescriptor.Category.In, ann.value(), method);
     }
-    
+
     static Descriptor createDescriptor(CodeConnector<?> connector,
             AuxIn ann, Method method) {
         return createDescriptor(connector, PortDescriptor.Category.AuxIn, ann.value(), method);
     }
-    
+
     private static Descriptor createDescriptor(CodeConnector<?> connector,
             PortDescriptor.Category category, int index, Method method) {
         method.setAccessible(true);
@@ -106,31 +93,30 @@ abstract class MethodInput {
         String id = connector.findID(method);
         return new Descriptor(id, category, index, input);
     }
-    
-    
+
     static class Descriptor extends PortDescriptor implements ControlInput.Link {
 
         private final MethodInput input;
-        
+
         private ControlInput port;
-        
+
         private Descriptor(String id, Category category, int index, MethodInput input) {
             super(id, category, index);
             this.input = input;
         }
-        
+
         @Override
         public void attach(CodeContext<?> context, Port previous) {
-             if (previous instanceof ControlInput) {
-                 port = (ControlInput) previous;
-                 port.setLink(this);
-             } else {
-                 if (previous != null) {
-                     previous.disconnectAll();
-                 }
-                 port = new ControlInput(this);
-             }
-             input.attach(context);
+            if (previous instanceof ControlInput) {
+                port = (ControlInput) previous;
+                port.setLink(this);
+            } else {
+                if (previous != null) {
+                    previous.disconnectAll();
+                }
+                port = new ControlInput(this);
+            }
+            input.attach(context);
         }
 
         @Override
@@ -153,11 +139,11 @@ abstract class MethodInput {
         public void receive(long time, Argument value) {
             input.receive(time, value);
         }
-        
+
     }
-    
+
     private static class DoubleInput extends MethodInput {
-        
+
         private DoubleInput(Method method) {
             super(method);
         }
@@ -175,11 +161,11 @@ abstract class MethodInput {
                 invoke(time, 0.0);
             }
         }
-        
+
     }
-    
+
     private static class IntInput extends MethodInput {
-        
+
         private IntInput(Method method) {
             super(method);
         }
@@ -197,7 +183,7 @@ abstract class MethodInput {
                 invoke(time, 0.0);
             }
         }
-        
+
     }
 
     private static class StringInput extends MethodInput {
@@ -215,15 +201,15 @@ abstract class MethodInput {
         public void receive(long time, Argument value) {
             invoke(time, value.toString());
         }
-        
+
     }
-    
+
     private static class ArgumentInput extends MethodInput {
 
         private ArgumentInput(Method method) {
             super(method);
         }
-        
+
         @Override
         void receive(long time, double value) {
             invoke(time, PNumber.valueOf(value));
@@ -233,7 +219,7 @@ abstract class MethodInput {
         void receive(long time, Argument value) {
             invoke(time, value);
         }
-        
+
     }
 
 }

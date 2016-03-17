@@ -324,17 +324,21 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
         bus.connect(new Bus.EOS() {
 
             public void endOfStream(GstObject arg0) {
-                try {
-                    if (isLooping()) {
-                        pipe.seek(0, TimeUnit.NANOSECONDS);
-                    } else {
-                        stop();
-                    }
-                } catch (Exception ex) {
-                    error("", ex);
-                }
+                doEOS();
             }
         });
+    }
+
+    protected void doEOS() {
+        try {
+            if (isLooping()) {
+                pipe.seek(0, TimeUnit.NANOSECONDS);
+            } else {
+                stop();
+            }
+        } catch (Exception ex) {
+            error("", ex);
+        }
     }
 
     protected abstract Pipeline buildPipeline(Element sink) throws Exception;
@@ -367,7 +371,7 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
         }
 
     }
-    
+
     private class NewPrerollListener implements AppSink.NEW_PREROLL {
 
         @Override
@@ -478,8 +482,6 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
         public Format getFormat() {
             return Format.INT_RGB;
         }
-
-        
 
     }
 

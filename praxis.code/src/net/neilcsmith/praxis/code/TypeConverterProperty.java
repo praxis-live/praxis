@@ -22,7 +22,6 @@
 package net.neilcsmith.praxis.code;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import net.neilcsmith.praxis.code.userapi.OnChange;
 import net.neilcsmith.praxis.code.userapi.OnError;
@@ -50,7 +49,7 @@ class TypeConverterProperty<T> extends AbstractAsyncProperty<T> {
 
     private final TypeConverter<T> converter;
     private final ControlInfo info;
-    
+
     private Field field;
     private Method onChange;
     private Method onError;
@@ -60,7 +59,7 @@ class TypeConverterProperty<T> extends AbstractAsyncProperty<T> {
         super(PString.EMPTY, converter.getType(), null);
         this.converter = converter;
         this.info = info;
-        
+
     }
 
     private void attach(CodeContext<?> context,
@@ -86,7 +85,7 @@ class TypeConverterProperty<T> extends AbstractAsyncProperty<T> {
     public ControlInfo getInfo() {
         return info;
     }
-    
+
     @Override
     protected void valueChanged(long time) {
         try {
@@ -95,34 +94,14 @@ class TypeConverterProperty<T> extends AbstractAsyncProperty<T> {
             context.getLog().log(LogLevel.ERROR, ex);
         }
         if (onChange != null) {
-            context.invoke(time, new CodeContext.Invoker() {
-
-                @Override
-                public void invoke() {
-                    try {
-                        onChange.invoke(context.getDelegate());
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                        context.getLog().log(LogLevel.ERROR, ex);
-                    }
-                }
-            });
+            context.invoke(time, onChange);
         }
     }
 
     @Override
     protected void taskError(long time, PError error) {
         if (onError != null) {
-            context.invoke(time, new CodeContext.Invoker() {
-
-                @Override
-                public void invoke() {
-                    try {
-                        onError.invoke(context.getDelegate());
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                        context.getLog().log(LogLevel.ERROR, ex);
-                    }
-                }
-            });
+            context.invoke(time, onError);
         }
     }
 
@@ -166,8 +145,8 @@ class TypeConverterProperty<T> extends AbstractAsyncProperty<T> {
             this.onChange = onChange;
             this.onError = onError;
             info = ControlInfo.createPropertyInfo(
-                new ArgumentInfo[]{converter.getInfo()},
-                new Argument[]{PString.EMPTY}, PMap.EMPTY);
+                    new ArgumentInfo[]{converter.getInfo()},
+                    new Argument[]{PString.EMPTY}, PMap.EMPTY);
         }
 
         @Override

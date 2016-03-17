@@ -1,4 +1,24 @@
-
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright 2016 Neil C Smith.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 3 only, as
+ * published by the Free Software Foundation.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 3 for more details.
+ *
+ * You should have received a copy of the GNU General Public License version 3
+ * along with this work; if not, see http://www.gnu.org/licenses/
+ * 
+ *
+ * Please visit http://neilcsmith.net if you need additional information or
+ * have any questions.
+ */
 
 package net.neilcsmith.praxis.video.pgl;
 
@@ -8,17 +28,17 @@ import processing.opengl.PShader;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-class PGLShader extends PShader {
+public class PGLShader extends PShader {
 
-    PGLShader(PGLContext context, String vertex, String fragment) {
+    public PGLShader(PGLContext context, String vertex, String fragment) {
         super(context.primary().parent);
-        setVertexShader(new String[]{vertex});
-        setFragmentShader(new String[]{fragment});
-        setType(TEXTURE);
+        setVertexShader(context.getPGL().preprocessVertexSource(new String[]{vertex}));
+        setFragmentShader(context.getPGL().preprocessFragmentSource(new String[]{fragment}));
+        setType(POLY);
     }
 
     @Override
-    protected void dispose() {
+    public void dispose() {
         super.dispose();
     }
     

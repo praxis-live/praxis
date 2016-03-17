@@ -20,7 +20,7 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.video.code;
+package net.neilcsmith.praxis.video.pgl.code;
 
 import java.util.ArrayList;
 import java.util.List;

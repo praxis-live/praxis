@@ -24,7 +24,6 @@ package net.neilcsmith.praxis.code;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Objects;
@@ -58,7 +57,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
             new ArgumentInfo[]{PResource.info(true)},
             new Argument[]{PString.EMPTY},
             PMap.EMPTY);
-    
+
     private final Loader<V> loader;
     private Field field;
     private Method onChange;
@@ -107,37 +106,17 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
             context.getLog().log(LogLevel.ERROR, ex);
         }
         if (onChange != null) {
-            context.invoke(time, new CodeContext.Invoker() {
-
-                @Override
-                public void invoke() {
-                    try {
-                        onChange.invoke(context.getDelegate());
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                        context.getLog().log(LogLevel.ERROR, ex);
-                    }
-                }
-            });
+            context.invoke(time, onChange);
         }
     }
 
     @Override
     protected void taskError(long time, PError error) {
         if (onError != null) {
-            context.invoke(time, new CodeContext.Invoker() {
-
-                @Override
-                public void invoke() {
-                    try {
-                        onError.invoke(context.getDelegate());
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                        context.getLog().log(LogLevel.ERROR, ex);
-                    }
-                }
-            });
+            context.invoke(time, onError);
         }
     }
-    
+
     private static class Task implements TaskService.Task {
 
         private final PResource resource;
@@ -162,21 +141,21 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
         }
 
     }
-    
+
     public static abstract class Loader<V> {
-        
+
         private final Class<V> type;
-        
+
         protected Loader(Class<V> type) {
             this.type = Objects.requireNonNull(type);
         }
-        
+
         public final Class<V> getType() {
             return type;
         }
-        
+
         public abstract V load(URI uri) throws IOException;
-        
+
     }
 
     public static class Descriptor<V> extends ControlDescriptor {
@@ -184,9 +163,9 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
         private final Loader<V> loader;
         private final Field field;
         private final Method onChange, onError;
-        
+
         private ResourceProperty<V> control;
-        
+
         private Descriptor(
                 String id,
                 int index,
@@ -210,8 +189,8 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
         @Override
         @SuppressWarnings("unchecked")
         public void attach(CodeContext<?> context, Control previous) {
-            if (previous instanceof ResourceProperty && 
-                    ((ResourceProperty) previous).loader.getType() == loader.getType()) {
+            if (previous instanceof ResourceProperty
+                    && ((ResourceProperty) previous).loader.getType() == loader.getType()) {
                 control = (ResourceProperty<V>) previous;
             } else {
                 control = new ResourceProperty<>(loader);
@@ -227,7 +206,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
         public PortDescriptor createPortDescriptor() {
             return new PortDescImpl(getID(), getIndex(), this);
         }
-        
+
         public static <V> Descriptor<V> create(CodeConnector<?> connector, P ann,
                 Field field, Loader<V> loader) {
             if (!field.getType().isAssignableFrom(loader.getType())) {
@@ -261,7 +240,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
         }
 
     }
-    
+
     private static class PortDescImpl extends PortDescriptor implements ControlInput.Link {
 
         private final Descriptor<?> dsc;

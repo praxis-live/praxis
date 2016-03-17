@@ -23,13 +23,10 @@
 package net.neilcsmith.praxis.video.pgl.code;
 
 import java.lang.reflect.Field;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeConnector;
 import net.neilcsmith.praxis.code.CodeFactory;
 import net.neilcsmith.praxis.code.ResourceProperty;
 import net.neilcsmith.praxis.code.userapi.In;
-import net.neilcsmith.praxis.code.userapi.Out;
-import net.neilcsmith.praxis.code.userapi.Output;
 import net.neilcsmith.praxis.code.userapi.P;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
@@ -40,8 +37,6 @@ import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public class P3DCodeConnector extends CodeConnector<P3DCodeDelegate> {
-    
-    private final static Logger LOG = Logger.getLogger(P3DCodeConnector.class.getName());
     
     public final static String SETUP = "setup";
     public final static String DRAW = "draw";
@@ -87,11 +82,6 @@ public class P3DCodeConnector extends CodeConnector<P3DCodeDelegate> {
                     return;
                 }
             }
-            
-        }
-        if (Output.class.isAssignableFrom(field.getType())) {
-            LOG.warning("Output fields not currently supported in video components");
-            return;
         }
         super.analyseField(field);
     }

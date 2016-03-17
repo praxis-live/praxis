@@ -118,6 +118,10 @@ public final class PGLContext {
         return s;
     }
 
+    PGLJOGL getPGL() {
+        return (PGLJOGL) primary().pgl;
+    }
+    
     PGLGraphics acquireGraphics(int width, int height) {
         PGLGraphics pgl = null;
         for (int i = 0; i < cache.size(); i++) {

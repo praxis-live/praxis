@@ -7,6 +7,7 @@ import net.neilcsmith.praxis.video.pgl.code.userapi.Constants;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PFont;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PGraphics2D;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
+import net.neilcsmith.praxis.video.pgl.code.userapi.PShader;
 
 
 public class P2DCodeDelegate extends DefaultCodeDelegate {
@@ -25,6 +26,14 @@ public class P2DCodeDelegate extends DefaultCodeDelegate {
     public void setup() {}
     
     public void draw() {}
+    
+    // extension delegate methods
+
+    public PShader createShader(String vertShader, String fragShader) {
+        return pg.createShader(vertShader, fragShader);
+    }
+    
+    
     
     // delegate methods
     public void beginShape() {
@@ -435,6 +444,16 @@ public class P2DCodeDelegate extends DefaultCodeDelegate {
         pg.background(image);
     }
     
-    
+    public void shader(PShader shader) {
+        pg.shader(shader);
+    }
+
+    public void resetShader() {
+        pg.resetShader();
+    }
+
+    public void filter(PShader shader) {
+        pg.filter(shader);
+    }
     
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2015 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -125,6 +125,11 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
         }
 
         @Override
+        protected void update(long time) {
+            VideoCodeContext.this.update(time);
+        }
+
+        @Override
         protected void callSources(Surface output, long time) {
             validateImages(output);
             int count = getSourceCount();
@@ -135,7 +140,6 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
 
         @Override
         protected void render(Surface output, long time) {
-            update(time);
             output.clear();
             if (pg == null || pg.surface != output) {
                 pg = new SurfacePGraphics(output);

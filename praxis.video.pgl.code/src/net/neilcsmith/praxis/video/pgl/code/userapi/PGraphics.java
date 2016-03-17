@@ -22,6 +22,7 @@
 package net.neilcsmith.praxis.video.pgl.code.userapi;
 
 import net.neilcsmith.praxis.video.pgl.PGLContext;
+import net.neilcsmith.praxis.video.pgl.PGLShader;
 
 /**
  *
@@ -36,17 +37,7 @@ abstract class PGraphics /*extends PImage*/ {
     // EXTENSION METHODS
     
     public PShader createShader(String vertShader, String fragShader) {
-        return new PShader(context, new ShaderProgram(context, vertShader, fragShader));
-    }
-    
-    private class ShaderProgram extends processing.opengl.PShader {
-
-        private ShaderProgram(PGLContext context, String vertex, String fragment) {
-            super(context.primary().parent);
-            setVertexShader(new String[]{vertex});
-            setFragmentShader(new String[]{fragment});
-            setType(TEXTURE);
-        }
+        return new PShader(context, new PGLShader(context, vertShader, fragShader));
     }
     
     // PROCESSING API BELOW

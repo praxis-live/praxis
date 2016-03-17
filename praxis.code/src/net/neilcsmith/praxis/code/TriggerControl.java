@@ -23,10 +23,7 @@
 package net.neilcsmith.praxis.code;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.userapi.T;
 import net.neilcsmith.praxis.code.userapi.Trigger;
 import net.neilcsmith.praxis.core.Argument;
@@ -38,6 +35,7 @@ import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.core.types.PMap;
+import net.neilcsmith.praxis.logging.LogLevel;
 
 /**
  *
@@ -45,7 +43,6 @@ import net.neilcsmith.praxis.core.types.PMap;
  */
 public class TriggerControl extends Trigger implements Control {
 
-    private final static Logger LOG = Logger.getLogger(TriggerControl.class.getName());
     private final static ControlInfo INFO = ControlInfo.createActionInfo(PMap.EMPTY);
 
     private final Binding binding;
@@ -76,7 +73,7 @@ public class TriggerControl extends Trigger implements Control {
     private void trigger(long time) throws Exception {
         binding.trigger(time);
     }
-    
+
     private void attach(CodeContext<?> context, Control previous) {
         binding.attach(context);
         if (previous instanceof TriggerControl) {
@@ -134,12 +131,12 @@ public class TriggerControl extends Trigger implements Control {
         }
 
     }
-    
+
     private static class BooleanBinding extends Binding {
-        
+
         private final Field field;
         private CodeDelegate delegate;
-        
+
         private BooleanBinding(Field field) {
             this.field = field;
         }
@@ -164,7 +161,7 @@ public class TriggerControl extends Trigger implements Control {
                 return val;
             } catch (Exception ex) {
                 return false;
-            }      
+            }
         }
 
         @Override
@@ -175,15 +172,15 @@ public class TriggerControl extends Trigger implements Control {
                 return false;
             }
         }
-        
+
     }
-    
-    private static class MethodBinding extends Binding implements CodeContext.Invoker {
+
+    private static class MethodBinding extends Binding {
 
         private final Method method;
         private CodeContext<?> context;
         private boolean triggered;
-        
+
         private MethodBinding(Method method) {
             this.method = method;
         }
@@ -192,11 +189,12 @@ public class TriggerControl extends Trigger implements Control {
         protected void attach(CodeContext<?> context) {
             this.context = context;
         }
- 
+
         @Override
         public void trigger(long time) throws Exception {
             triggered = true;
-            context.invoke(time, this);
+            context.invoke(time, method);
+            triggered = false;
         }
 
         @Override
@@ -209,16 +207,6 @@ public class TriggerControl extends Trigger implements Control {
             return triggered;
         }
 
-        @Override
-        public void invoke() {
-            try {
-                method.invoke(context.getDelegate());
-                triggered = false;
-            } catch (Exception ex) {
-                
-            }
-        }
-        
     }
 
     public static class Descriptor extends ControlDescriptor {
@@ -248,7 +236,7 @@ public class TriggerControl extends Trigger implements Control {
                 try {
                     triggerField.set(context.getDelegate(), control);
                 } catch (Exception ex) {
-                    LOG.log(Level.SEVERE, null, ex);
+                    context.getLog().log(LogLevel.ERROR, ex);
                 }
             }
         }
@@ -261,7 +249,7 @@ public class TriggerControl extends Trigger implements Control {
         public PortDescriptor createPortDescriptor() {
             return new PortDescImpl(getID(), getIndex(), control);
         }
-        
+
         public static Descriptor create(CodeConnector<?> connector,
                 T ann, Field field) {
             field.setAccessible(true);
@@ -276,8 +264,8 @@ public class TriggerControl extends Trigger implements Control {
                 return null;
             }
         }
-        
-        public static Descriptor create(CodeConnector<?> connector, 
+
+        public static Descriptor create(CodeConnector<?> connector,
                 T ann, Method method) {
             method.setAccessible(true);
             if (method.getParameterTypes().length > 0) {
@@ -287,8 +275,7 @@ public class TriggerControl extends Trigger implements Control {
             int index = ann.value();
             return new Descriptor(id, index, new MethodBinding(method));
         }
-        
-        
+
     }
 
     private static class PortDescImpl extends PortDescriptor implements ControlInput.Link {
@@ -331,7 +318,7 @@ public class TriggerControl extends Trigger implements Control {
             try {
                 control.trigger(time);
             } catch (Exception ex) {
-                
+
             }
         }
 
@@ -340,7 +327,7 @@ public class TriggerControl extends Trigger implements Control {
             try {
                 control.trigger(time);
             } catch (Exception ex) {
-                
+
             }
         }
 

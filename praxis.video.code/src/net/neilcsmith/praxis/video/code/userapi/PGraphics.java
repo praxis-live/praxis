@@ -37,9 +37,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Logger;
 import static net.neilcsmith.praxis.video.code.userapi.VideoConstants.*;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
@@ -56,8 +53,6 @@ import net.neilcsmith.praxis.video.render.ops.TransformBlit;
  */
 public abstract class PGraphics extends PImage {
 
-    private final static Logger LOG = Logger.getLogger(PGraphics.class.getName());
-    private final static Set<String> warned = new HashSet<String>();
     private final static double alphaOpaque = 0.999;
 //    private PImage image;
     private BlendMode blendMode = BlendMode.Normal;
@@ -83,13 +78,6 @@ public abstract class PGraphics extends PImage {
     }
 
     protected abstract Surface getSurface();
-    
-    private static void warn(String msg) {
-        if (!warned.contains(msg)) {
-            LOG.warning(msg);
-            warned.add(msg);
-        }
-    }
 
     public void beginDraw() {
         resetMatrix();
