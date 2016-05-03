@@ -23,6 +23,7 @@ package net.neilcsmith.praxis.video.pgl;
 
 import java.nio.IntBuffer;
 import processing.core.PImage;
+import processing.core.PStyle;
 import processing.opengl.PGL;
 import processing.opengl.PGraphics2D;
 import processing.opengl.PGraphicsOpenGL;
@@ -219,6 +220,15 @@ public class PGLGraphics extends PGraphics2D {
         }
     }
 
+    @Override
+    public void style(PStyle s) {
+        if (s == null) {
+            defaultSettings();
+        } else {
+            super.style(s);
+        }
+    }
+    
     @Override
     protected void colorCalc(float gray, float alpha) {
         if (gray > colorModeX) {

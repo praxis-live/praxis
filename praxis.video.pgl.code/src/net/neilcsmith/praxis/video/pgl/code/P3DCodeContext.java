@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -197,14 +197,43 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
 
     }
 
-    private static class PGraphics extends PGraphics3D {
+    private class PGraphics extends PGraphics3D {
 
+        private int matrixStackDepth;
+        
         private void init(PGLGraphics3D g) {
             initGraphics(g);
         }
 
         private void release() {
-            releaseGraphics();
+            PGLGraphics3D g = releaseGraphics();
+            if (matrixStackDepth != 0) {
+                getLog().log(LogLevel.ERROR, "Mismatched matrix push / pop");
+                while (matrixStackDepth > 0) {
+                    g.popMatrix();
+                    matrixStackDepth--;
+                }
+            }
+        }
+        
+        @Override
+        public void pushMatrix() {
+            if (matrixStackDepth == 32) {
+                getLog().log(LogLevel.ERROR, "Matrix stack full in popMatrix()");
+                return;
+            }
+            matrixStackDepth++;
+            super.pushMatrix();
+        }
+
+        @Override
+        public void popMatrix() {
+            if (matrixStackDepth == 0) {
+                getLog().log(LogLevel.ERROR, "Matrix stack empty in popMatrix()");
+                return;
+            }
+            matrixStackDepth--;
+            super.popMatrix();
         }
         
     }

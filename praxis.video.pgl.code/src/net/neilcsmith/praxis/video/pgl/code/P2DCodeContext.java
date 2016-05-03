@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -35,9 +35,8 @@ import net.neilcsmith.praxis.video.pgl.PGLGraphics;
 import net.neilcsmith.praxis.video.pgl.PGLSurface;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PGraphics2D;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
-import net.neilcsmith.praxis.video.pipes.VideoPipe;
-import net.neilcsmith.praxis.video.pipes.impl.MultiInOut;
 import net.neilcsmith.praxis.video.render.Surface;
+import processing.core.PStyle;
 
 /**
  *
@@ -143,9 +142,8 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
 
             P2DCodeDelegate del = getDelegate();
 
-            pg.init(pglOut.getGraphics());
+            pg.init(pglOut.getGraphics(), setupRequired);
             del.setupGraphics(pg, output.getWidth(), output.getHeight());
-            pg.resetMatrix();
             if (setupRequired) {
                 try {
                     del.setup();
@@ -190,18 +188,52 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
 
     }
 
-    private static class PGraphics extends PGraphics2D {
+    private class PGraphics extends PGraphics2D {
 
-        private void init(PGLGraphics pg) {
-            pg.beginDraw();
-            pg.pushStyle();
-            initGraphics(pg);
+        private int matrixStackDepth;
+        private PStyle styles;
+        
+        private void init(PGLGraphics pgl, boolean setupRequired) {
+            pgl.beginDraw();
+            pgl.resetMatrix();
+            pgl.pushStyle();
+            pgl.style(setupRequired ? null : styles);
+            initGraphics(pgl);
         }
 
         private void release() {
-            PGLGraphics g = super.releaseGraphics();
-            g.popStyle();
-            g.resetShader();
+            PGLGraphics pgl = releaseGraphics();
+            if (matrixStackDepth != 0) {
+                getLog().log(LogLevel.ERROR, "Mismatched matrix push / pop");
+                while (matrixStackDepth > 0) {
+                    pgl.popMatrix();
+                    matrixStackDepth--;
+                }
+            }
+            styles = pgl.getStyle(styles);
+            pgl.popStyle();
+            pgl.resetMatrix();
+            pgl.resetShader();
+        }
+
+        @Override
+        public void pushMatrix() {
+            if (matrixStackDepth == 32) {
+                getLog().log(LogLevel.ERROR, "Matrix stack full in popMatrix()");
+                return;
+            }
+            matrixStackDepth++;
+            super.pushMatrix();
+        }
+
+        @Override
+        public void popMatrix() {
+            if (matrixStackDepth == 0) {
+                getLog().log(LogLevel.ERROR, "Matrix stack empty in popMatrix()");
+                return;
+            }
+            matrixStackDepth--;
+            super.popMatrix();
         }
 
     }
