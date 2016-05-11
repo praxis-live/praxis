@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,8 +22,8 @@
 package net.neilcsmith.praxis.video.pgl.ops;
 
 import java.awt.BasicStroke;
-import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +32,6 @@ import net.neilcsmith.praxis.video.pgl.PGLSurface;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
 import net.neilcsmith.praxis.video.render.ops.BlendMode;
-import net.neilcsmith.praxis.video.render.ops.RectFill;
 import net.neilcsmith.praxis.video.render.ops.ShapeRender;
 import processing.core.PConstants;
 
@@ -53,11 +52,9 @@ public class PGLShapeRenderOp extends AbstractDrawOp {
 
     @Override
     public void process(SurfaceOp op, PGLSurface output, Bypass bypass, Surface... inputs) {
-//        if (inputs.length > 0) {
         if (process((ShapeRender) op, output)) {
             return;
         }
-//        }
         bypass.process(op, inputs);
     }
 
@@ -78,26 +75,30 @@ public class PGLShapeRenderOp extends AbstractDrawOp {
                 } else {
                     pg.noStroke();
                 }
-                PathIterator itr = shape.getPathIterator(null, 1);
-                drawShape(pg, itr);
+                PathIterator itr = shape.getPathIterator(op.getTransform(), 1);
+                drawShape(pg, itr, shape instanceof Line2D);
                 return true;
             }
         } catch (Exception ex) {
-            LOG.log(Level.FINE, "Error during rect blit", ex);
+            LOG.log(Level.WARNING, "Error during shape blit", ex);
         }
         return false;
     }
 
-    private void drawShape(PGLGraphics pg, PathIterator itr) {
+    private void drawShape(PGLGraphics pg, PathIterator itr, boolean line) {
         boolean inShape = false;
         while (!itr.isDone()) {
             int type = itr.currentSegment(coords);
             switch (type) {
                 case PathIterator.SEG_MOVETO:
                     if (inShape) {
-                        pg.endShape(PConstants.CLOSE);
+                        pg.endShape();
                     }
-                    pg.beginShape();
+                    if (line) {
+                        pg.beginShape(PConstants.LINES);
+                    } else {
+                        pg.beginShape();
+                    }
                     inShape = true;
                     pg.vertex(coords[0], coords[1]);
                     break;
@@ -117,7 +118,7 @@ public class PGLShapeRenderOp extends AbstractDrawOp {
         }
         if (inShape) {
             LOG.log(Level.FINE, "Shape not closed by PathIterator");
-            pg.endShape(PConstants.CLOSE);
+            pg.endShape();
         }
 
     }

@@ -28,6 +28,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.video.render.PixelData;
@@ -45,6 +46,7 @@ public class ShapeRender implements SurfaceOp {
     private final static double EPSILON = 0.997;
 
     private Shape shape;
+    private AffineTransform transform;
     private BasicStroke stroke;
     private BlendMode blendMode;
     private double opacity;
@@ -118,7 +120,14 @@ public class ShapeRender implements SurfaceOp {
         return this;
     }
     
+    public ShapeRender setTransform(AffineTransform transform) {
+        this.transform = transform;
+        return this;
+    }
     
+    public AffineTransform getTransform() {
+        return transform;
+    }
 
     @Override
     public void process(PixelData output, PixelData... inputs) {
@@ -139,11 +148,12 @@ public class ShapeRender implements SurfaceOp {
         if (opacity < EPSILON) {
             g2d.setComposite(AlphaComposite.SrcOver.derive((float) opacity));
         }
-        drawShape(g2d);
+        drawShape(g2d, transform == null ? shape : transform.createTransformedShape(shape));
     }
 
     private void processIndirect(PixelData output) {
-        Rectangle sRct = shape.getBounds();
+        Shape sh = transform == null ? shape : transform.createTransformedShape(shape);
+        Rectangle sRct = sh.getBounds();
         if (stroke != null) {
             int growth = Math.round(stroke.getLineWidth());// / 2);
             sRct.grow(growth, growth);
@@ -159,22 +169,22 @@ public class ShapeRender implements SurfaceOp {
         BufferedImage bi = ImageUtils.toImage(tmp);
         Graphics2D g2d = bi.createGraphics();
         g2d.translate(tx, ty);
-        drawShape(g2d);
+        drawShape(g2d, sh);
         SubPixels dst = SubPixels.create(output, intersection);
 //        blend.process(tmp, dst);
         BlendUtil.process(tmp, dst, blendMode, opacity);
         tmp.release();
     }
 
-    private void drawShape(Graphics2D g2d) {
+    private void drawShape(Graphics2D g2d, Shape sh) {
         if (fillColor != null) {
             g2d.setColor(fillColor);
-            g2d.fill(shape);
+            g2d.fill(sh);
         }
         if (stroke != null && strokeColor != null) {
             g2d.setStroke(stroke);
             g2d.setColor(strokeColor);
-            g2d.draw(shape);
+            g2d.draw(sh);
         }
     }
 
