@@ -26,8 +26,8 @@
                 <package>org.praxislive.compiler.tools.javac.util</package>
             </friend-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/praxis-compiler-javac7.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/praxis-compiler-javac7.jar</binary-origin>
+                <runtime-relative-path>ext/praxis-compiler-javac8.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/praxis-compiler-javac8.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>
