@@ -33,6 +33,7 @@ import net.neilcsmith.praxis.core.types.PMap;
  *
  * @author nsigma
  */
+@Deprecated
 public final class LinkPort<T> implements Port {
     
     public final static String ID = "link";

@@ -36,6 +36,7 @@ import net.neilcsmith.praxis.core.types.PReference;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public class TaskControl extends AbstractControl {
 
     private AbstractRoot root;

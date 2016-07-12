@@ -31,6 +31,7 @@ import net.neilcsmith.praxis.core.Lookup;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
+@Deprecated
 public class EmptyLookup implements Lookup {
 
     private final static EmptyResult EMPTY_RESULT = new EmptyResult<Object>();
