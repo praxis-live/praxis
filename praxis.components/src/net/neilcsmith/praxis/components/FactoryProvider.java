@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -56,7 +56,7 @@ public class FactoryProvider implements ComponentFactoryProvider {
 
             // CONTAINER
             addComponent("core:container", data(UserContainer.class));
-            addComponent("core:container:property", data(ContainerProperty.class));
+            addComponent("core:container:property", data(ContainerProperty.class).deprecated());
             addComponent("core:container:input", data(ContainerInput.class));
             addComponent("core:container:output", data(ContainerOutput.class));
             
