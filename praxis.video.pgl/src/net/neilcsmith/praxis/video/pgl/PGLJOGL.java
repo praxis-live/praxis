@@ -52,6 +52,7 @@ class PGLJOGL extends PJOGL {
                         pglField.setAccessible(true);
                         if (pglField.get(ref) == this) {
                             pglField.set(ref, null);
+                            refList.remove(ref);
 //                            Method disposeMethod = 
 //                                    ref.getClass().getDeclaredMethod("dispose");
 //                            disposeMethod.setAccessible(true);
