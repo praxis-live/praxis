@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -25,7 +25,6 @@ import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ComponentType;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PReference;
 
@@ -35,17 +34,13 @@ import net.neilcsmith.praxis.core.types.PReference;
  */
 public class ComponentFactoryService extends Service {
 
+    @Deprecated
     public final static ComponentFactoryService INSTANCE = new ComponentFactoryService();
     public final static String NEW_INSTANCE = "new-instance";
-    @Deprecated public final static String TYPES = "types";
     public final static ControlInfo NEW_INSTANCE_INFO =
             ControlInfo.createFunctionInfo(
             new ArgumentInfo[]{ComponentType.info()},
             new ArgumentInfo[]{PReference.info(Component.class)},
-            PMap.EMPTY);
-    @Deprecated public final static ControlInfo TYPES_INFO =
-            ControlInfo.createReadOnlyPropertyInfo(
-            new ArgumentInfo[]{PArray.info()},
             PMap.EMPTY);
 
     @Override
