@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2013 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,6 +21,9 @@
  */
 package net.neilcsmith.praxis.core;
 
+import net.neilcsmith.praxis.core.interfaces.ComponentFactoryService;
+import net.neilcsmith.praxis.core.interfaces.RootFactoryService;
+
 /**
  *
  * @author Neil C Smith
@@ -31,19 +34,32 @@ public interface ComponentFactory {
 
     public ComponentType[] getRootComponentTypes();
 
-    public Component createComponent(ComponentType type) throws ComponentInstantiationException;
-
-    public Root createRootComponent(ComponentType type) throws ComponentInstantiationException;
-
     public MetaData<? extends Component> getMetaData(ComponentType type);
 
     public MetaData<? extends Root> getRootMetaData(ComponentType type);
+    
+    public default Component createComponent(ComponentType type) throws ComponentInstantiationException {
+        throw new ComponentInstantiationException();
+    }
 
+    public default Root createRootComponent(ComponentType type) throws ComponentInstantiationException {
+        throw new ComponentInstantiationException();
+    }
+    
+    public default Class<? extends ComponentFactoryService> getFactoryService() {
+        return ComponentFactoryService.class;
+    }
+    
+    public default Class<? extends RootFactoryService> getRootFactoryService() {
+        return RootFactoryService.class;
+    }
+    
     public static abstract class MetaData<T> {
 
         @Deprecated
         public abstract Class<T> getComponentClass();
 
+        @Deprecated
         public boolean isTest() {
             return false;
         }
