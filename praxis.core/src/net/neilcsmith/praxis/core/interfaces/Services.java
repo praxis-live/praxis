@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,6 +21,10 @@
  */
 package net.neilcsmith.praxis.core.interfaces;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 
@@ -30,8 +34,30 @@ import net.neilcsmith.praxis.core.InterfaceDefinition;
  */
 public abstract class Services {
 
-   public abstract ComponentAddress findService(Class<? extends InterfaceDefinition> info) throws ServiceUnavailableException;
+    public Optional<ComponentAddress> locate(Class<? extends Service> service) {
+        try {
+            return Optional.of(findService(service));
+        } catch (ServiceUnavailableException ex) {
+            return Optional.empty();
+        }
+    }
+    
+    public List<ComponentAddress> locateAll(Class<? extends Service> service) {
+        try {
+            return Arrays.asList(findAllServices(service.newInstance()));
+        } catch (Exception ex) {
+            return Collections.emptyList();
+        }
+    }
 
-   public abstract ComponentAddress[] findAllServices(InterfaceDefinition info) throws ServiceUnavailableException;
+    @Deprecated
+    public ComponentAddress findService(Class<? extends InterfaceDefinition> info) throws ServiceUnavailableException {
+        throw new ServiceUnavailableException();
+    }
+
+    @Deprecated
+    public ComponentAddress[] findAllServices(InterfaceDefinition info) throws ServiceUnavailableException {
+        throw new ServiceUnavailableException();
+    }
 
 }
