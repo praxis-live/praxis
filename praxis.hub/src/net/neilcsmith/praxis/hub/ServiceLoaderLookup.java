@@ -30,6 +30,7 @@ import net.neilcsmith.praxis.core.Lookup;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public class ServiceLoaderLookup implements Lookup {
 
     public <T> T get(Class<T> type) {

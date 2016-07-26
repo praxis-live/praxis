@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -26,85 +26,47 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
-import net.neilcsmith.praxis.core.ComponentInstantiationException;
 import net.neilcsmith.praxis.core.ComponentType;
 import net.neilcsmith.praxis.core.Lookup;
-import net.neilcsmith.praxis.core.Root;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-class DefaultComponentFactory implements ComponentFactory {
+class ComponentRegistry {
 
     private final static Logger logger =
-            Logger.getLogger(DefaultComponentFactory.class.getName());
-    private Map<ComponentType, ComponentFactory> componentCache;
-    private Map<ComponentType, ComponentFactory> rootCache;
+            Logger.getLogger(ComponentRegistry.class.getName());
+    private final Map<ComponentType, ComponentFactory> componentCache;
+    private final Map<ComponentType, ComponentFactory> rootCache;
 
-    private DefaultComponentFactory(Map<ComponentType, ComponentFactory> componentCache,
+    private ComponentRegistry(Map<ComponentType, ComponentFactory> componentCache,
             Map<ComponentType, ComponentFactory> rootCache) {
         this.componentCache = componentCache;
         this.rootCache = rootCache;
     }
 
-    @Override
-    public ComponentType[] getComponentTypes() {
+    ComponentType[] getComponentTypes() {
         Set<ComponentType> keys = componentCache.keySet();
         return keys.toArray(new ComponentType[keys.size()]);
     }
 
-    @Override
-    public ComponentType[] getRootComponentTypes() {
+    ComponentType[] getRootComponentTypes() {
         Set<ComponentType> keys = rootCache.keySet();
         return keys.toArray(new ComponentType[keys.size()]);
     }
 
-    @Override
-    public MetaData<? extends Component> getMetaData(ComponentType type) {
-        ComponentFactory factory = componentCache.get(type);
-        if (factory != null) {
-            return factory.getMetaData(type);
-        } else {
-            throw new IllegalArgumentException();
-        }
+    ComponentFactory getComponentFactory(ComponentType type) {
+        return componentCache.get(type);
+    }
+    
+    ComponentFactory getRootComponentFactory(ComponentType type) {
+        return rootCache.get(type);
     }
 
-    @Override
-    public MetaData<? extends Root> getRootMetaData(ComponentType type) {
-        ComponentFactory factory = rootCache.get(type);
-        if (factory != null) {
-            return factory.getRootMetaData(type);
-        } else {
-            throw new IllegalArgumentException();
-        }
-    }
-
-    @Override
-    public Component createComponent(ComponentType type) throws ComponentInstantiationException {
-        ComponentFactory factory = componentCache.get(type);
-        if (factory != null) {
-            return factory.createComponent(type);
-        } else {
-            throw new IllegalArgumentException();
-        }
-    }
-
-    @Override
-    public Root createRootComponent(ComponentType type) throws ComponentInstantiationException {
-        ComponentFactory factory = rootCache.get(type);
-        if (factory != null) {
-            return factory.createRootComponent(type);
-        } else {
-            throw new IllegalArgumentException();
-        }
-    }
-
-
-    public static DefaultComponentFactory getInstance() {
+    static ComponentRegistry getInstance() {
         Map<ComponentType, ComponentFactory> componentCache =
                 new LinkedHashMap<>();
         Map<ComponentType, ComponentFactory> rootCache =
@@ -122,6 +84,6 @@ class DefaultComponentFactory implements ComponentFactory {
                 rootCache.put(type, factory);
             }
         }
-        return new DefaultComponentFactory(componentCache, rootCache);
+        return new ComponentRegistry(componentCache, rootCache);
     }
 }
