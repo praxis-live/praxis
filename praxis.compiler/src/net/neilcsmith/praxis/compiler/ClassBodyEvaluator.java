@@ -1,7 +1,8 @@
 
 /*
- * Janino - An embedded Java[TM] compiler
+ * Forked from Janino - An embedded Java[TM] compiler
  *
+ * Copyright (c) 2016 Neil C Smith
  * Copyright (c) 2001-2010, Arno Unkrig
  * All rights reserved.
  *
@@ -23,8 +24,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.praxislive.compiler;
+package net.neilcsmith.praxis.compiler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,86 +35,65 @@ import java.io.StringWriter;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.codehaus.commons.compiler.CompileException;
-import org.codehaus.commons.compiler.IClassBodyEvaluator;
-import org.praxislive.compiler.io.MultiReader;
-
-
 /**
  * To set up a {@link ClassBodyEvaluator} object, proceed as described for {@link
- * IClassBodyEvaluator}. Alternatively, a number of "convenience constructors" exist that execute
- * the described steps instantly.
+ * IClassBodyEvaluator}. Alternatively, a number of "convenience constructors"
+ * exist that execute the described steps instantly.
  * <p>
- * <b>Notice that this implementation of {@link IClassBodyEvaluator} is prone to "Java
- * injection", i.e. an application could get more than one class body compiled by passing a
- * bogus input document.</b>
+ * <b>Notice that this implementation of {@link IClassBodyEvaluator} is prone to
+ * "Java injection", i.e. an application could get more than one class body
+ * compiled by passing a bogus input document.</b>
  * <p>
- * <b>Also notice that the parsing of leading IMPORT declarations is heuristic and has certain
- * limitations; see {@link #parseImportDeclarations(Reader)}.</b>
+ * <b>Also notice that the parsing of leading IMPORT declarations is heuristic
+ * and has certain limitations; see
+ * {@link #parseImportDeclarations(Reader)}.</b>
  *
  * @see IClassBodyEvaluator
  */
-public
-class ClassBodyEvaluator extends SimpleCompiler implements IClassBodyEvaluator {
+class ClassBodyEvaluator extends SimpleCompiler {
 
-    private String[]   optionalDefaultImports;
-    private String     className = IClassBodyEvaluator.DEFAULT_CLASS_NAME;
-    private Class<?>   optionalExtendedType;
+    private String[] optionalDefaultImports;
+    private String className = ClassBodyCompiler.DEFAULT_CLASS_NAME;
+    private Class<?> optionalExtendedType;
     private Class<?>[] implementedTypes = new Class[0];
 
-    private Class<?> result;
-
-    @Override public void
-    setClassName(String className) {
+    public void setClassName(String className) {
         this.assertNotCooked();
         this.className = className;
     }
 
-    @Override public void
-    setDefaultImports(String[] optionalDefaultImports) {
+    public void setDefaultImports(String[] optionalDefaultImports) {
         this.assertNotCooked();
         this.optionalDefaultImports = optionalDefaultImports;
     }
 
-    @Override public void
-    setExtendedClass(@SuppressWarnings("rawtypes") Class optionalExtendedType) {
+    public void setExtendedClass(@SuppressWarnings("rawtypes") Class optionalExtendedType) {
         this.assertNotCooked();
         this.optionalExtendedType = optionalExtendedType;
     }
 
-    /** @deprecated */
-    @Deprecated @Override public void
-    setExtendedType(@SuppressWarnings("rawtypes") Class optionalExtendedClass) {
-        this.setExtendedClass(optionalExtendedClass);
-    }
-
-    @Override public void
-    setImplementedInterfaces(@SuppressWarnings("rawtypes") Class[] implementedTypes) {
+    public void setImplementedInterfaces(@SuppressWarnings("rawtypes") Class[] implementedTypes) {
         this.assertNotCooked();
         this.implementedTypes = implementedTypes;
     }
-
-    /** @deprecated */
-    @Deprecated @Override public void
-    setImplementedTypes(@SuppressWarnings("rawtypes") Class[] implementedInterfaces) {
-        this.setImplementedInterfaces(implementedInterfaces);
-    }
-
-    @Override public void
-    cook(String optionalFileName, Reader r) throws CompileException, IOException {
-        if (!r.markSupported()) r = new BufferedReader(r);
-        this.cook(optionalFileName, ClassBodyEvaluator.parseImportDeclarations(r), r);
+    
+    public void cook(Reader r) throws CompilationException, IOException {
+        if (!r.markSupported()) {
+            r = new BufferedReader(r);
+        }
+        this.cook(ClassBodyEvaluator.parseImportDeclarations(r), r);
     }
 
     /**
      * @param imports E.g. "java.io.*" or "static java.util.Arrays.asList"
      * @param r The class body to cook, without leading IMPORT declarations
      */
-    protected void
-    cook(String optionalFileName, String[] imports, Reader r) throws CompileException, IOException {
+    protected void cook(String[] imports, Reader r) throws CompilationException, IOException {
 
         // Wrap the class body in a compilation unit.
         {
@@ -128,11 +107,10 @@ class ClassBodyEvaluator extends SimpleCompiler implements IClassBodyEvaluator {
                 {
                     int idx = this.className.lastIndexOf('.');
                     if (idx == -1) {
-                        packageName     = "";
+                        packageName = "";
                         simpleClassName = this.className;
-                    } else
-                    {
-                        packageName     = this.className.substring(0, idx);
+                    } else {
+                        packageName = this.className.substring(0, idx);
                         simpleClassName = this.className.substring(idx + 1);
                     }
                 }
@@ -154,7 +132,9 @@ class ClassBodyEvaluator extends SimpleCompiler implements IClassBodyEvaluator {
                 }
 
                 // Print imports as declared in the document.
-                if (!r.markSupported()) r = new BufferedReader(r);
+                if (!r.markSupported()) {
+                    r = new BufferedReader(r);
+                }
                 for (String imporT : imports) {
                     pw.print("import ");
                     pw.print(imporT);
@@ -187,52 +167,55 @@ class ClassBodyEvaluator extends SimpleCompiler implements IClassBodyEvaluator {
                 pw.close();
             }
 
-            r = new MultiReader(new Reader[] {
+            r = new MultiReader(new Reader[]{
                 new StringReader(sw1.toString()),
                 r,
-                new StringReader(sw2.toString()),
-            });
+                new StringReader(sw2.toString()),});
         }
 
-        /** Compile the generated compilation unit. */
-        super.cook(optionalFileName, r);
+        /**
+         * Compile the generated compilation unit.
+         */
+        super.cook(r);
 
+    }
+
+    /**
+     * @return The {@link Class} created by the preceding call to
+     * {@link #cook(Reader)}
+     */
+    public Class<?> getClazz() {
         try {
-
-            // Load the "main" class through the ClassLoader that was created by
-            // "SimpleCompiler.cook()". More classes (e.g. member types will be loaded
-            // automatically by the JVM.
-            this.result = this.getClassLoader().loadClass(this.className);
-        } catch (ClassNotFoundException cnfe) {
-            throw new IOException(cnfe);
+            return getClassLoader().loadClass(className);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ClassBodyEvaluator.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
         }
     }
 
-    /** @return The {@link Class} created by the preceding call to {@link #cook(Reader)} */
-    @Override public Class<?>
-    getClazz() { return this.result; }
-
     /**
-     * Heuristically parse IMPORT declarations at the beginning of the character stream produced
-     * by the given {@link Reader}. After this method returns, all characters up to and including
-     * that last IMPORT declaration have been read from the {@link Reader}.
+     * Heuristically parse IMPORT declarations at the beginning of the character
+     * stream produced by the given {@link Reader}. After this method returns,
+     * all characters up to and including that last IMPORT declaration have been
+     * read from the {@link Reader}.
      * <p>
-     * This method does not handle comments and string literals correctly, i.e. if a pattern that
-     * looks like an IMPORT declaration appears within a comment or a string literal, it will be
-     * taken as an IMPORT declaration.
+     * This method does not handle comments and string literals correctly, i.e.
+     * if a pattern that looks like an IMPORT declaration appears within a
+     * comment or a string literal, it will be taken as an IMPORT declaration.
      *
-     * @param r A {@link Reader} that supports MARK, e.g. a {@link BufferedReader}
-     * @return  The parsed imports, e.g. {@code { "java.util.*", "static java.util.Map.Entry" }}
+     * @param r A {@link Reader} that supports MARK, e.g. a
+     * {@link BufferedReader}
+     * @return The parsed imports, e.g. {@code { "java.util.*", "static java.util.Map.Entry"
+     * }}
      */
-    protected static String[]
-    parseImportDeclarations(Reader r) throws IOException {
+    protected static String[] parseImportDeclarations(Reader r) throws IOException {
         final CharBuffer cb = CharBuffer.allocate(10000);
         r.mark(cb.limit());
         r.read(cb);
         cb.rewind();
 
-        List<String> imports         = new ArrayList<String>();
-        int          afterLastImport = 0;
+        List<String> imports = new ArrayList<String>();
+        int afterLastImport = 0;
         for (Matcher matcher = IMPORT_STATEMENT_PATTERN.matcher(cb); matcher.find();) {
             imports.add(matcher.group(1));
             afterLastImport = matcher.end();
@@ -242,27 +225,13 @@ class ClassBodyEvaluator extends SimpleCompiler implements IClassBodyEvaluator {
         return imports.toArray(new String[imports.size()]);
     }
     private static final Pattern IMPORT_STATEMENT_PATTERN = Pattern.compile(
-        "\\bimport\\s+"
-        + "("
-        + "(?:static\\s+)?"
-        + "[\\p{javaLowerCase}\\p{javaUpperCase}_\\$][\\p{javaLowerCase}\\p{javaUpperCase}\\d_\\$]*"
-        + "(?:\\.[\\p{javaLowerCase}\\p{javaUpperCase}_\\$][\\p{javaLowerCase}\\p{javaUpperCase}\\d_\\$]*)*"
-        + "(?:\\.\\*)?"
-        + ");"
+            "\\bimport\\s+"
+            + "("
+            + "(?:static\\s+)?"
+            + "[\\p{javaLowerCase}\\p{javaUpperCase}_\\$][\\p{javaLowerCase}\\p{javaUpperCase}\\d_\\$]*"
+            + "(?:\\.[\\p{javaLowerCase}\\p{javaUpperCase}_\\$][\\p{javaLowerCase}\\p{javaUpperCase}\\d_\\$]*)*"
+            + "(?:\\.\\*)?"
+            + ");"
     );
 
-    @Override public Object
-    createInstance(Reader reader) throws CompileException, IOException {
-        this.cook(reader);
-        try {
-            return this.getClazz().newInstance();
-        } catch (InstantiationException ie) {
-            throw new CompileException((
-                "Class is abstract, an interface, an array class, a primitive type, or void; "
-                + "or has no zero-parameter constructor"
-            ), null, ie);
-        } catch (IllegalAccessException iae) {
-            throw new CompileException("The class or its zero-parameter constructor is not accessible", null, iae);
-        }
-    }
 }

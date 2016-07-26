@@ -1,7 +1,8 @@
 
 /*
- * Janino - An embedded Java[TM] compiler
+ * Forked from Janino - An embedded Java[TM] compiler
  *
+ * Copyright (c) 2016 Neil C Smith
  * Copyright (c) 2001-2010, Arno Unkrig
  * All rights reserved.
  *
@@ -23,75 +24,92 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.praxislive.compiler.io;
+package net.neilcsmith.praxis.compiler;
 
 import java.io.*;
 import java.util.*;
 
 /**
- * Similar to {@link FilterReader}, but when the first delegate is at end-of-input, it continues
- * with reading from the next delegate.
+ * Similar to {@link FilterReader}, but when the first delegate is at
+ * end-of-input, it continues with reading from the next delegate.
  * <p>
  * This {@link Reader} does not support MARK.
  */
-public
 class MultiReader extends Reader {
+
     private static final Reader EMPTY_READER = new StringReader("");
 
-    private final List<Reader>     delegates;
+    private final List<Reader> delegates;
     private final Iterator<Reader> delegateIterator;
-    private Reader                 currentDelegate = EMPTY_READER;
+    private Reader currentDelegate = EMPTY_READER;
 
-    public
-    MultiReader(List<Reader> delegates) {
-        this.delegates        = delegates;
+    public MultiReader(List<Reader> delegates) {
+        this.delegates = delegates;
         this.delegateIterator = delegates.iterator();
     }
 
-    public
-    MultiReader(Reader[] delegates) { this(Arrays.asList(delegates)); }
+    public MultiReader(Reader[] delegates) {
+        this(Arrays.asList(delegates));
+    }
 
-    /** Closes all delegates. */
-    @Override public void
-    close() throws IOException { for (Reader delegate : this.delegates) delegate.close(); }
+    /**
+     * Closes all delegates.
+     */
+    @Override
+    public void close() throws IOException {
+        for (Reader delegate : this.delegates) {
+            delegate.close();
+        }
+    }
 
-    @Override public int
-    read() throws IOException {
+    @Override
+    public int read() throws IOException {
         for (;;) {
             int result = this.currentDelegate.read();
-            if (result != -1) return result;
-            if (!this.delegateIterator.hasNext()) return -1;
+            if (result != -1) {
+                return result;
+            }
+            if (!this.delegateIterator.hasNext()) {
+                return -1;
+            }
             this.currentDelegate = this.delegateIterator.next();
         }
     }
 
-    @Override public long
-    skip(long n) throws IOException {
+    @Override
+    public long skip(long n) throws IOException {
         long skipped = 0L;
         for (;;) {
             long result = this.currentDelegate.skip(n - skipped);
             if (result != -1L) {
                 skipped += result;
-                if (skipped == n) return skipped;
+                if (skipped == n) {
+                    return skipped;
+                }
                 continue;
             }
-            if (!this.delegateIterator.hasNext()) return skipped;
+            if (!this.delegateIterator.hasNext()) {
+                return skipped;
+            }
             this.currentDelegate = this.delegateIterator.next();
         }
     }
 
-    @Override public int
-    read(final char[] cbuf, final int off, final int len) throws IOException {
+    @Override
+    public int read(final char[] cbuf, final int off, final int len) throws IOException {
         int read = 0;
         for (;;) {
             long result = this.currentDelegate.read(cbuf, off + read, len - read);
             if (result != -1L) {
                 read += result;
-                if (read == len) return read;
+                if (read == len) {
+                    return read;
+                }
                 continue;
             }
-            if (!this.delegateIterator.hasNext()) return read == 0 ? -1 : read;
+            if (!this.delegateIterator.hasNext()) {
+                return read == 0 ? -1 : read;
+            }
             this.currentDelegate = this.delegateIterator.next();
         }
     }
