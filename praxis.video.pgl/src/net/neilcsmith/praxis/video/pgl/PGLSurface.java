@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -24,7 +24,6 @@ package net.neilcsmith.praxis.video.pgl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.video.pgl.ops.PGLOp;
-import net.neilcsmith.praxis.video.pgl.ops.PGLOpCache;
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
@@ -59,7 +58,7 @@ public final class PGLSurface extends Surface {
     @Override
     public void process(SurfaceOp op, Surface... inputs) {
         modCount++;
-        PGLOp glop = PGLOpCache.getInstance().find(op);
+        PGLOp glop = context.getOpCache().find(op);
         if (glop != null) {
             try {
                 glop.process(op, this, fallback, inputs);

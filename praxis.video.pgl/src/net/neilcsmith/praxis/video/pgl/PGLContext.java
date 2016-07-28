@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -31,6 +31,7 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.jogamp.opengl.GL2;
+import net.neilcsmith.praxis.video.pgl.ops.PGLOpCache;
 import net.neilcsmith.praxis.video.render.NativePixelData;
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.Surface;
@@ -56,6 +57,7 @@ public final class PGLContext {
     private final int width;
     private final int height;
     private final int cacheMax = 8;
+    private final PGLOpCache opCache;
     private final List<PGLGraphics> cache;
     private final List<AlienImageReference> aliens;
     private final WeakHashMap<PGLSurface, Boolean> surfaces;
@@ -75,6 +77,7 @@ public final class PGLContext {
         readOp = new ReadPixelsOp();
         CLEAR_RGB = new PImage(width, height, PImage.RGB);
         CLEAR_ARGB = new PImage(width, height, PImage.ARGB);
+        opCache = new PGLOpCache(this);
     }
 
     public PImage asImage(Surface surface) {
@@ -83,13 +86,13 @@ public final class PGLContext {
             if (img != null) {
                 return img;
             }
-            if (surface.isClear() &&
-                    surface.getWidth() == width &&
-                    surface.getHeight() == height) {
+            if (surface.isClear()
+                    && surface.getWidth() == width
+                    && surface.getHeight() == height) {
                 // common occurence - clear surface at frame width / height
-                return surface.hasAlpha() ?
-                        CLEAR_ARGB :
-                        CLEAR_RGB;
+                return surface.hasAlpha()
+                        ? CLEAR_ARGB
+                        : CLEAR_RGB;
             }
             // fall through for data in pixels or custom dimensions
         }
@@ -118,10 +121,14 @@ public final class PGLContext {
         return s;
     }
 
+    PGLOpCache getOpCache() {
+        return opCache;
+    }
+
     PGLJOGL getPGL() {
         return (PGLJOGL) primary().pgl;
     }
-    
+
     PGLGraphics acquireGraphics(int width, int height) {
         PGLGraphics pgl = null;
         for (int i = 0; i < cache.size(); i++) {
@@ -261,6 +268,7 @@ public final class PGLContext {
 //        for (PGLGraphics graphics : cache) {
 //            graphics.dispose();
 //        }
+        opCache.dispose();
         cache.clear();
         aliens.clear();
     }
