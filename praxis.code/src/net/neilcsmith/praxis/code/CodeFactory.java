@@ -21,21 +21,15 @@
  */
 package net.neilcsmith.praxis.code;
 
-import java.util.Objects;
 import net.neilcsmith.praxis.compiler.ClassBodyContext;
-import net.neilcsmith.praxis.compiler.MessageHandler;
 import net.neilcsmith.praxis.core.ComponentType;
 import net.neilcsmith.praxis.logging.LogBuilder;
-import net.neilcsmith.praxis.logging.LogLevel;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public abstract class CodeFactory<D extends CodeDelegate> {
-
-//    private final static ConcurrentMap<ClassCacheKey<? extends CodeDelegate>,
-//            Class<? extends CodeDelegate>> classCache = new ConcurrentHashMap<>();
 
     private final ComponentType type;
     private final ClassBodyContext<D> cbc;
@@ -149,64 +143,6 @@ public abstract class CodeFactory<D extends CodeDelegate> {
         }
 
         protected abstract CodeContext<D> createCodeContext(D delegate);
-
-    }
-
-    private static class LogMessageHandler implements MessageHandler {
-
-        private final LogBuilder log;
-
-        private LogMessageHandler(LogBuilder log) {
-            this.log = log;
-        }
-
-        @Override
-        public void handleError(String msg) {
-            log.log(LogLevel.ERROR, msg);
-        }
-
-        @Override
-        public void handleWarning(String msg) {
-            log.log(LogLevel.WARNING, msg);
-        }
-
-    }
-
-    private static class ClassCacheKey<D> {
-
-        private final ClassBodyContext<D> cbc;
-        private final String source;
-
-        private ClassCacheKey(ClassBodyContext<D> cbc, String source) {
-            this.cbc = cbc;
-            this.source = source;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 3;
-            hash = 37 * hash + Objects.hashCode(this.cbc);
-            hash = 37 * hash + Objects.hashCode(this.source);
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final ClassCacheKey<?> other = (ClassCacheKey<?>) obj;
-            if (!Objects.equals(this.cbc, other.cbc)) {
-                return false;
-            }
-            if (!Objects.equals(this.source, other.source)) {
-                return false;
-            }
-            return true;
-        }
 
     }
 
