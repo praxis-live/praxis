@@ -30,16 +30,21 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticListener;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileManager;
+import javax.tools.JavaFileObject;
 
-import javax.tools.*;
 import javax.tools.JavaFileObject.Kind;
-
-import org.praxislive.compiler.tools.javac.api.JavacTool;
+import javax.tools.SimpleJavaFileObject;
+import javax.tools.ToolProvider;
 
 class SimpleCompiler {
 
     private MessageHandler messageHandler;
     private Map<String, byte[]> classes;
+    private JavaCompiler compiler;
 
     public Map<String, byte[]> getCompiledClasses() {
         return classes;
@@ -56,7 +61,7 @@ class SimpleCompiler {
         // Create one Java source file in memory, which will be compiled later.
         final String code = new BufferedReader(r).lines().collect(Collectors.joining("\n"));
         JavaFileObject compilationUnit = new SimpleJavaFileObject(URI.create("simplecompiler"), Kind.SOURCE) {
-            
+
             @Override
             public boolean isNameCompatible(String simpleName, Kind kind) {
                 return true;
@@ -78,12 +83,14 @@ class SimpleCompiler {
             }
         };
 
-        JavaCompiler compiler = JavacTool.create();
         if (compiler == null) {
-            throw new CompilationException(
-                    "JDK Java compiler not available - probably you're running a JRE, not a JDK",
-                    null
-            );
+            compiler = ToolProvider.getSystemJavaCompiler();
+            if (compiler == null) {
+                throw new CompilationException(
+                        "JDK Java compiler not available - probably you're running a JRE, not a JDK",
+                        null
+                );
+            }
         }
 
         // Get the original FM, which reads class files through this JVM's BOOTCLASSPATH and
@@ -163,6 +170,10 @@ class SimpleCompiler {
 
     public void setMessageHandler(MessageHandler messageHandler) {
         this.messageHandler = messageHandler;
+    }
+
+    public void setCompiler(JavaCompiler compiler) {
+        this.compiler = compiler;
     }
 
     /**

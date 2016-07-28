@@ -23,11 +23,14 @@ package net.neilcsmith.praxis.code.services;
 
 import java.util.EnumSet;
 import java.util.Map;
+import javax.tools.JavaCompiler;
 import net.neilcsmith.praxis.code.CodeCompilerService;
 import net.neilcsmith.praxis.compiler.ClassBodyCompiler;
 import net.neilcsmith.praxis.compiler.ClassBodyContext;
+import net.neilcsmith.praxis.compiler.JavaCompilerProvider;
 import net.neilcsmith.praxis.compiler.MessageHandler;
 import net.neilcsmith.praxis.core.CallArguments;
+import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PBytes;
 import net.neilcsmith.praxis.core.types.PMap;
@@ -42,10 +45,18 @@ import net.neilcsmith.praxis.logging.LogLevel;
  */
 public class DefaultCompilerService extends AbstractRoot {
 
+    private final JavaCompiler compiler;
+
     public DefaultCompilerService() {
         super(EnumSet.noneOf(Caps.class));
         registerControl(CodeCompilerService.COMPILE, new CompileControl());
         registerInterface(CodeCompilerService.class);
+        JavaCompilerProvider compilerProvider = Lookup.SYSTEM.get(JavaCompilerProvider.class);
+        if (compilerProvider != null) {
+            compiler = compilerProvider.getJavaCompiler();
+        } else {
+            throw new RuntimeException("No compiler found");
+        }
     }
 
     private class CompileControl extends SimpleControl {
@@ -62,6 +73,7 @@ public class DefaultCompilerService extends AbstractRoot {
             LogBuilder log = new LogBuilder(LogLevel.WARNING);
             Map<String, byte[]> classFiles
                     = ClassBodyCompiler.create(cbc)
+                    .setCompiler(compiler)
                     .addMessageHandler(new LogMessageHandler(log))
                     .compile(code);
             PMap classes = convertClasses(classFiles);

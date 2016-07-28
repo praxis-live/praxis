@@ -23,6 +23,7 @@ package net.neilcsmith.praxis.compiler;
 
 import java.io.StringReader;
 import java.util.Map;
+import javax.tools.JavaCompiler;
 
 /**
  *
@@ -35,6 +36,7 @@ public class ClassBodyCompiler {
     private final ClassBodyContext<?> classBodyContext;
     
     private MessageHandler messageHandler;
+    private JavaCompiler compiler;
     
     private ClassBodyCompiler(ClassBodyContext<?> classBodyContext) {
         this.classBodyContext = classBodyContext;
@@ -45,9 +47,15 @@ public class ClassBodyCompiler {
         return this;
     }
     
+    public ClassBodyCompiler setCompiler(JavaCompiler compiler) {
+        this.compiler = compiler;
+        return this;
+    }
+    
     public Map<String, byte[]> compile(String code) throws CompilationException {
         try {
             ClassBodyEvaluator cbe = new ClassBodyEvaluator();
+            cbe.setCompiler(compiler);
             cbe.setExtendedClass(classBodyContext.getExtendedClass());
             cbe.setImplementedInterfaces(classBodyContext.getImplementedInterfaces());
             cbe.setDefaultImports(classBodyContext.getDefaultImports());
