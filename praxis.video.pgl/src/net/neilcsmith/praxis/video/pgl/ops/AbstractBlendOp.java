@@ -21,7 +21,6 @@
  */
 package net.neilcsmith.praxis.video.pgl.ops;
 
-import java.util.EnumSet;
 import net.neilcsmith.praxis.video.pgl.PGLGraphics;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
 import net.neilcsmith.praxis.video.render.ops.BlendMode;
@@ -32,31 +31,37 @@ import static net.neilcsmith.praxis.video.render.ops.BlendMode.*;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 abstract class AbstractBlendOp extends PGLOp {
-    
-    private final static EnumSet<BlendMode> supportedBlends = 
-            EnumSet.of(Normal, Add, Multiply);//, Mask);
 
     protected AbstractBlendOp(Class<? extends SurfaceOp> opClass) {
         super(opClass);
     }
 
-    boolean canProcess(BlendMode mode) {
-        return supportedBlends.contains(mode);
+    boolean canProcessDirect(BlendMode mode) {
+        switch (mode) {
+            case Normal:
+            case Add:
+            case Sub:
+            case Multiply:
+                return true;
+            default:
+                return false;
+        }
     }
+
     void setupBlending(PGLGraphics g, BlendMode mode) {
-                switch (mode) {
+        switch (mode) {
             case Normal:
                 g.blendMode(PGLGraphics.BLEND);
                 break;
             case Add:
                 g.blendMode(PGLGraphics.ADD);
                 break;
+            case Sub:
+                g.blendMode(PGLGraphics.SUBTRACT);
+                break;
             case Multiply:
                 g.blendMode(PGLGraphics.MULTIPLY);
                 break;
-//            case Mask:
-//                renderer.setBlendFunction(GL11.GL_ZERO, GL11.GL_SRC_COLOR);
-//                break;
             default:
                 throw new IllegalArgumentException();
         }

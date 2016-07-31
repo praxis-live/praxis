@@ -97,32 +97,40 @@ public class PGLGraphics extends PGraphics2D {
 
         pgl.enable(PGL.BLEND);
 
-        if (blendMode == REPLACE) {
-            if (blendEqSupported) {
-                pgl.blendEquation(PGL.FUNC_ADD);
-            }
-            pgl.blendFunc(PGL.ONE, PGL.ZERO);
-
-        } else if (blendMode == BLEND) {
-            if (blendEqSupported) {
-                pgl.blendEquation(PGL.FUNC_ADD);
-            }
-            pgl.blendFunc(PGL.ONE, PGL.ONE_MINUS_SRC_ALPHA);
-
-        } else if (blendMode == ADD) {
-            if (blendEqSupported) {
-                pgl.blendEquation(PGL.FUNC_ADD);
-            }
-            pgl.blendFunc(PGL.ONE, PGL.ONE);
-
-        } else if (blendMode == MULTIPLY) {
-            if (blendEqSupported) {
-                pgl.blendEquation(PGL.FUNC_ADD);
-            }
-            pgl.blendFunc(PGL.DST_COLOR, PGL.ONE_MINUS_SRC_ALPHA);
-
-        } else {
-            throw new IllegalArgumentException();
+        switch (blendMode) {
+            case REPLACE:
+                if (blendEqSupported) {
+                    pgl.blendEquation(PGL.FUNC_ADD);
+                }
+                pgl.blendFunc(PGL.ONE, PGL.ZERO);
+                break;
+            case BLEND:
+                if (blendEqSupported) {
+                    pgl.blendEquation(PGL.FUNC_ADD);
+                }
+                pgl.blendFunc(PGL.ONE, PGL.ONE_MINUS_SRC_ALPHA);
+                break;
+            case ADD:
+                if (blendEqSupported) {
+                    pgl.blendEquation(PGL.FUNC_ADD);
+                }
+                pgl.blendFunc(PGL.ONE, PGL.ONE);
+                break;
+            case SUBTRACT:
+                if (blendEqSupported) {
+                    pgl.blendEquationSeparate(PGL.FUNC_REVERSE_SUBTRACT,
+                            PGL.FUNC_ADD);
+                }
+                pgl.blendFunc(PGL.ONE, PGL.ONE);
+                break;
+            case MULTIPLY:
+                if (blendEqSupported) {
+                    pgl.blendEquation(PGL.FUNC_ADD);
+                }
+                pgl.blendFunc(PGL.DST_COLOR, PGL.ONE_MINUS_SRC_ALPHA);
+                break;
+            default:
+                throw new IllegalArgumentException();
         }
 
 ////<editor-fold defaultstate="collapsed" desc="comment">
@@ -228,7 +236,7 @@ public class PGLGraphics extends PGraphics2D {
             super.style(s);
         }
     }
-    
+
     @Override
     protected void colorCalc(float gray, float alpha) {
         if (gray > colorModeX) {
@@ -369,11 +377,11 @@ public class PGLGraphics extends PGraphics2D {
 
     @Override
     public void dispose() {
-        
+
         if (pixelTexture != null) {
             pixelTexture.dispose();
         }
-        
+
         super.dispose();
 
     }

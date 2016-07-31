@@ -66,7 +66,7 @@ public class PGLTransformBlitOp extends AbstractBlitOp {
     private boolean process(TransformBlit blit, PGLSurface dst, Surface src) {
         try {
             BlendMode mode = blit.getBlendMode();
-            if (canProcess(mode)) {
+            if (canProcessDirect(mode)) {
                 PGLGraphics g = dst.getGraphics();
                 PImage img = dst.getContext().asImage(src);
                 g.beginDraw();

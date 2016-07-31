@@ -43,7 +43,7 @@ public class PGLOpCache {
     public PGLOpCache(PGLContext context) {
         this.context = context;
         cache = new HashMap<>();
-        cache.put(Blit.class, new PGLBlitOp());
+        cache.put(Blit.class, new PGLBlitOp(context));
         cache.put(ScaledBlit.class, new PGLScaledBlitOp());
         cache.put(TransformBlit.class, new PGLTransformBlitOp());
         cache.put(RectFill.class, new PGLRectFillOp());

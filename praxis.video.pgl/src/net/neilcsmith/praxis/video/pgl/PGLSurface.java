@@ -225,6 +225,11 @@ public final class PGLSurface extends Surface {
     }
 
     @Override
+    public PGLSurface createSurface() {
+        return createSurface(width, height, alpha);
+    }
+
+    @Override
     public PGLSurface createSurface(int width, int height, boolean alpha) {
         return context.createSurface(width, height, alpha);
     }
