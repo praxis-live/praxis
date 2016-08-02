@@ -36,7 +36,6 @@ import net.neilcsmith.praxis.video.pgl.PGLGraphics3D;
 import net.neilcsmith.praxis.video.pgl.PGLSurface;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PGraphics3D;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
-import net.neilcsmith.praxis.video.pipes.impl.MultiInOut;
 import net.neilcsmith.praxis.video.render.Surface;
 import processing.core.PConstants;
 
@@ -110,7 +109,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
 
     }
 
-    private class Processor extends MultiInOut {
+    private class Processor extends AbstractProcessPipe {
 
         private final PGraphics pg;
         private PGLImage[] images;
@@ -118,13 +117,27 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         private PGLGraphics3D p3d;
 
         private Processor(int inputs) {
-            super(inputs, 1);
+            super(inputs);
             images = new PGLImage[inputs];
             pg = new PGraphics();
         }
 
         @Override
-        protected void process(Surface[] in, Surface output, int index, boolean rendering) {
+        protected void update(long time) {
+            P3DCodeContext.this.update(time);
+        }
+        
+        @Override
+        protected void callSources(Surface output, long time) {
+            validateImages(output);
+            int count = getSourceCount();
+            for (int i=0; i < count; i++) {
+                callSource(getSource(i), images[i].surface, time);
+            }
+        }
+        
+        @Override
+        protected void render(Surface output, long time) {
             PGLSurface pglOut = output instanceof PGLSurface ? (PGLSurface) output : null;
             output.clear();
 
@@ -133,16 +146,6 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             }
 
             P3DCodeDelegate del = getDelegate();
-
-            for (int i = 0; i < in.length; i++) {
-                PGLImage img = images[i];
-//                processing.core.PImage inImg = ((PGLSurface) in[i]).getGraphics();
-                processing.core.PImage inImg = pglOut.getContext().asImage(in[i]);
-                if (img == null || img.img != inImg) {
-                    img = new PGLImage(inImg);
-                    setImageField(del, inputs[i].getField(), img);
-                }
-            }
 
             PGLContext curCtxt = pglOut.getContext();
             if (curCtxt != context) {
@@ -173,10 +176,27 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             p3d.endDraw();
             PGLGraphics g = pglOut.getGraphics();
             g.beginDraw();
-            g.blendMode(PConstants.REPLACE);
+            g.blendMode(PConstants.BLEND);
             g.tint(255.0f);
             g.image(p3d, 0, 0);
             flush();
+        }
+        
+        private void validateImages(Surface output) {
+            P3DCodeDelegate del = getDelegate();
+            for (int i=0; i<images.length; i++) {
+                PGLImage img = images[i];
+                Surface s = img == null ? null : img.surface;
+                if (s == null || !output.checkCompatible(s, true, true)) {
+                    if (s != null) {
+                        s.release();
+                    }
+                    s = output.createSurface();
+                    img = new PGLImage(s);
+                    images[i] = img;
+                    setImageField(del, inputs[i].getField(), img);
+                }
+            }
         }
 
         private void setImageField(P3DCodeDelegate delegate, Field field, PImage image) {
@@ -203,6 +223,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         
         private void init(PGLGraphics3D g) {
             initGraphics(g);
+            g.pushMatrix();
         }
 
         private void release() {
@@ -214,11 +235,12 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
                     matrixStackDepth--;
                 }
             }
+            g.popMatrix();
         }
         
         @Override
         public void pushMatrix() {
-            if (matrixStackDepth == 32) {
+            if (matrixStackDepth == 31) {
                 getLog().log(LogLevel.ERROR, "Matrix stack full in popMatrix()");
                 return;
             }
@@ -240,16 +262,16 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
 
     private static class PGLImage extends PImage {
 
-        private final processing.core.PImage img;
+        private final Surface surface;
 
-        private PGLImage(processing.core.PImage img) {
-            super(img.width, img.height);
-            this.img = img;
+        private PGLImage(Surface s) {
+            super(s.getWidth(), s.getHeight());
+            this.surface = s;
         }
 
         @Override
         protected processing.core.PImage unwrap(PGLContext context) {
-            return img;
+            return context.asImage(surface);
         }
 
     }
