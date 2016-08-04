@@ -27,6 +27,7 @@ package net.neilcsmith.praxis.util.interpolation;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public class LinearInterpolator implements Interpolator {
 
     private final static LinearInterpolator instance = new LinearInterpolator();

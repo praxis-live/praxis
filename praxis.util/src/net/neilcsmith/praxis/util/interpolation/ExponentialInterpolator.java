@@ -27,6 +27,7 @@ package net.neilcsmith.praxis.util.interpolation;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public class ExponentialInterpolator implements Interpolator {
 
     private final static ExponentialInterpolator instance = new ExponentialInterpolator();

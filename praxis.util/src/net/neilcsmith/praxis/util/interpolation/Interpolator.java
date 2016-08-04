@@ -27,6 +27,7 @@ package net.neilcsmith.praxis.util.interpolation;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public interface Interpolator {
 
     public double interpolate(double value);
