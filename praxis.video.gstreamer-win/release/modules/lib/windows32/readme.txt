@@ -1,1 +1,0 @@
-GStreamer native libraries for Windows 32bit go here.
