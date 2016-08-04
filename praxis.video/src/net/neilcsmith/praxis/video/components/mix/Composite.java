@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -28,12 +28,11 @@ import net.neilcsmith.praxis.impl.NumberProperty;
 import net.neilcsmith.praxis.impl.StringProperty;
 import net.neilcsmith.praxis.video.impl.DefaultVideoInputPort;
 import net.neilcsmith.praxis.video.impl.DefaultVideoOutputPort;
-import net.neilcsmith.praxis.video.pipes.VideoPipe;
 import net.neilcsmith.praxis.video.pipes.impl.MultiInOut;
 import net.neilcsmith.praxis.video.pipes.impl.Placeholder;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
-import net.neilcsmith.praxis.video.render.ops.Blend;
+import net.neilcsmith.praxis.video.render.ops.BlendMode;
 import net.neilcsmith.praxis.video.render.ops.Blit;
 
 /**
@@ -65,9 +64,9 @@ public class Composite extends AbstractComponent {
         comp.addSource(dst);
         comp.addSource(src);
 
-        registerPort(Port.IN, new DefaultVideoInputPort(this, dst));
-        registerPort("src", new DefaultVideoInputPort(this, src));
-        registerPort(Port.OUT, new DefaultVideoOutputPort(this, comp));
+        registerPort(Port.IN, new DefaultVideoInputPort(dst));
+        registerPort("src", new DefaultVideoInputPort(src));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(comp));
 
         StringProperty mode = createModeControl();
         registerControl("mode", mode);
@@ -239,21 +238,21 @@ public class Composite extends AbstractComponent {
         private SurfaceOp createBlit(Mode mode, double mix) {
             switch (mode) {
                 case Normal:
-                    return Blit.op(Blend.NORMAL.opacity(mix));
+                    return new Blit().setBlendMode(BlendMode.Normal).setOpacity(mix);
                 case Add:
-                    return Blit.op(Blend.ADD.opacity(mix));
+                    return new Blit().setBlendMode(BlendMode.Add).setOpacity(mix);
                 case Sub:
-                    return Blit.op(Blend.SUB.opacity(mix));
+                    return new Blit().setBlendMode(BlendMode.Sub).setOpacity(mix);
                 case Difference:
-                    return Blit.op(Blend.DIFFERENCE.opacity(mix));
+                    return new Blit().setBlendMode(BlendMode.Difference).setOpacity(mix);
                 case Multiply:
-                    return Blit.op(Blend.MULTIPLY.opacity(mix));
+                    return new Blit().setBlendMode(BlendMode.Multiply).setOpacity(mix);
                 case Screen:
-                    return Blit.op(Blend.SCREEN.opacity(mix));
+                    return new Blit().setBlendMode(BlendMode.Screen).setOpacity(mix);
                 case BitXor:
-                    return Blit.op(Blend.BITXOR.opacity(mix));
+                    return new Blit().setBlendMode(BlendMode.BitXor).setOpacity(mix);
                 case Mask:
-                    return Blit.op(Blend.MASK.opacity(mix));
+                    return new Blit().setBlendMode(BlendMode.Mask).setOpacity(mix);
                 default:
                     throw new IllegalArgumentException();
             }

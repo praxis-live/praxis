@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -36,7 +36,6 @@ import net.neilcsmith.praxis.video.pipes.impl.SingleInOut;
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
-import net.neilcsmith.praxis.video.render.ops.Blend;
 import net.neilcsmith.praxis.video.render.ops.GraphicsOp;
 import net.neilcsmith.praxis.video.render.ops.RectFill;
 
@@ -63,8 +62,8 @@ public class BlobTracker extends AbstractClockComponent {
         imageBlobs = new ImageBlobs();
         debug = BooleanProperty.create(false);
         registerControl("debug", debug);
-        registerPort(Port.IN, new DefaultVideoInputPort(this, blobPipe));
-        registerPort(Port.OUT, new DefaultVideoOutputPort(this, blobPipe));
+        registerPort(Port.IN, new DefaultVideoInputPort(blobPipe));
+        registerPort(Port.OUT, new DefaultVideoOutputPort(blobPipe));
         x = new DefaultControlOutputPort();
         registerPort("x", x);
         y = new DefaultControlOutputPort();
@@ -103,18 +102,15 @@ public class BlobTracker extends AbstractClockComponent {
                 heightd = (double) b.dimy / surface.getHeight();
             }
             if (debug.getValue()) {
+                RectFill rect = new RectFill();
                 for (int i = 0; i < imageBlobs.trackedblobs.size(); i++) {
                     final ABlob b = imageBlobs.trackedblobs.get(i);
                     final int idx = i;
-                    if (idx == 0) {
 
-                        surface.process(RectFill.op(Color.MAGENTA, Blend.NORMAL.opacity(0.4),
-                                b.boxminx, b.boxminy, b.boxdimx, b.boxdimy));
-                    } else {
-                        surface.process(RectFill.op(Color.CYAN, Blend.NORMAL.opacity(0.4),
-                                b.boxminx, b.boxminy, b.boxdimx, b.boxdimy));
-                    }
-
+                    rect.setColor(idx == 0 ? Color.MAGENTA : Color.CYAN)
+                            .setOpacity(0.4)
+                            .setBounds(b.boxminx, b.boxminy, b.boxdimx, b.boxdimy);
+                    surface.process(rect);
                     surface.process(new GraphicsOp(new GraphicsOp.Callback() {
 
                         public void draw(Graphics2D g2d, Image[] images) {
@@ -128,7 +124,6 @@ public class BlobTracker extends AbstractClockComponent {
         public void process(PixelData output, PixelData... inputs) {
             imageBlobs.calc(output);
         }
-
 
     }
 }

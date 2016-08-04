@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -31,7 +31,7 @@ import net.neilcsmith.praxis.video.pipes.VideoPipe;
 import net.neilcsmith.praxis.video.pipes.impl.MultiInOut;
 import net.neilcsmith.praxis.video.pipes.impl.Placeholder;
 import net.neilcsmith.praxis.video.render.Surface;
-import net.neilcsmith.praxis.video.render.ops.Blend;
+import net.neilcsmith.praxis.video.render.ops.BlendMode;
 import net.neilcsmith.praxis.video.render.ops.Blit;
 
 /**
@@ -162,7 +162,7 @@ public class XFader extends AbstractComponent {
             } else if (mix == 1.0) {
                 output.clear();
             } else {
-                output.process(Blit.op(Blend.NORMAL.opacity(1 - mix)), input);
+                output.process(new Blit().setBlendMode(BlendMode.Normal).setOpacity(1 - mix), input);
             }
             input.release();
         }
@@ -192,13 +192,13 @@ public class XFader extends AbstractComponent {
 
         private void renderBlend(Surface input1, Surface input2, Surface output) {
             if (output.hasAlpha()) {
-                output.process(Blit.op(Blend.ADD.opacity(1 - mix)), input1);
-                output.process(Blit.op(Blend.ADD.opacity(mix)), input2);
+                output.process(new Blit().setBlendMode(BlendMode.Add).setOpacity(1 - mix), input1);
+                output.process(new Blit().setBlendMode(BlendMode.Add).setOpacity(mix), input2);
                 input1.release();
             } else {
                 output.copy(input1);
                 input1.release();
-                output.process(Blit.op(Blend.NORMAL.opacity(mix)), input2);
+                output.process(new Blit().setBlendMode(BlendMode.Normal).setOpacity(mix), input2);
             }
             input2.release();
         }
@@ -218,7 +218,7 @@ public class XFader extends AbstractComponent {
             }
             output.copy(dst);
             dst.release();
-            output.process(Blit.op(Blend.BITXOR.opacity(alpha)), src);
+            output.process(new Blit().setBlendMode(BlendMode.BitXor).setOpacity(alpha), src);
             src.release();
         }
         
@@ -237,7 +237,7 @@ public class XFader extends AbstractComponent {
             }
             output.copy(dst);
             dst.release();
-            output.process(Blit.op(Blend.ADD.opacity(alpha)), src);
+            output.process(new Blit().setBlendMode(BlendMode.Add).setOpacity(alpha), src);
             src.release();
         }
         
@@ -256,7 +256,7 @@ public class XFader extends AbstractComponent {
             }
             output.copy(dst);
             dst.release();
-            output.process(Blit.op(Blend.DIFFERENCE.opacity(alpha)), src);
+            output.process(new Blit().setBlendMode(BlendMode.Difference).setOpacity(alpha), src);
             src.release();
         }
 
