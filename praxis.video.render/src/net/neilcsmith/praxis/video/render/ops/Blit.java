@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -159,57 +159,5 @@ public final class Blit implements SurfaceOp {
     @Deprecated
     public static SurfaceOp op() {
         return new Blit();
-    }
-
-    @Deprecated
-    public static SurfaceOp op(BlendFunction blend) {
-        Blit blit = new Blit();
-        blit.setBlendMode(extractBlendMode(blend));
-        blit.setOpacity(((Blend) blend).getExtraAlpha());
-        return blit;
-    }
-
-    @Deprecated
-    public static SurfaceOp op(int x, int y) {
-        return new Blit().setX(x).setY(y);
-    }
-
-    @Deprecated
-    public static SurfaceOp op(BlendFunction blend, int x, int y) {
-        Blit blit = new Blit().setX(x).setY(y);
-        blit.setBlendMode(extractBlendMode(blend));
-        blit.setOpacity(((Blend) blend).getExtraAlpha());
-        return blit;
-    }
-
-    @Deprecated
-    public static SurfaceOp op(BlendFunction blend, Bounds srcRegion, int x, int y) {
-        return new Blit().setX(x).setY(y)
-                .setBlendMode(extractBlendMode(blend))
-                .setOpacity(((Blend)blend).getExtraAlpha())
-                .setSourceRegion(srcRegion.asRectangle());
-    }
-
-    static BlendMode extractBlendMode(BlendFunction blend) {
-        Blend.Type type = ((Blend) blend).getType();
-        switch (type) {
-            case Add:
-                return BlendMode.Add;
-            case BitXor:
-                return BlendMode.BitXor;
-            case Difference:
-                return BlendMode.Difference;
-            case Mask:
-                return BlendMode.Mask;
-            case Multiply:
-                return BlendMode.Multiply;
-            case Normal:
-                return BlendMode.Normal;
-            case Screen:
-                return BlendMode.Screen;
-            case Sub:
-                return BlendMode.Sub;
-        }
-        throw new UnsupportedOperationException("Can't convert blend function");
     }
 }

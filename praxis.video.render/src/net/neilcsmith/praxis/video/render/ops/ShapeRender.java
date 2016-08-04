@@ -30,7 +30,6 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
 import net.neilcsmith.praxis.video.render.utils.ImageUtils;
@@ -42,7 +41,6 @@ import net.neilcsmith.praxis.video.render.utils.ImageUtils;
  */
 public class ShapeRender implements SurfaceOp {
 
-    private final static Logger LOG = Logger.getLogger(ShapeRender.class.getName());
     private final static double EPSILON = 0.997;
 
     private Shape shape;
@@ -186,35 +184,6 @@ public class ShapeRender implements SurfaceOp {
             g2d.setColor(strokeColor);
             g2d.draw(sh);
         }
-    }
-
-    @Deprecated
-    public static SurfaceOp op(Shape shape, Color fillColor) {
-        return op(shape, fillColor, Blend.NORMAL);
-    }
-
-    @Deprecated
-    public static SurfaceOp op(Shape shape, Color fillColor, BlendFunction blend) {
-        return op(shape, fillColor, null, null, blend);
-    }
-
-    @Deprecated
-    public static SurfaceOp op(Shape shape, Color fillColor, BasicStroke stroke,
-            Color strokeColor) {
-        return op(shape, fillColor, stroke, strokeColor, Blend.NORMAL);
-    }
-
-    @Deprecated
-    public static SurfaceOp op(Shape shape, Color fillColor, BasicStroke stroke,
-            Color strokeColor, BlendFunction blend) {
-        ShapeRender op = new ShapeRender();
-        op.setBlendMode(Blit.extractBlendMode(blend));
-        op.setOpacity(((Blend)blend).getExtraAlpha());
-        op.setShape(shape);
-        op.setStroke(stroke);
-        op.setFillColor(fillColor);
-        op.setStrokeColor(strokeColor);
-        return op;
     }
 
 //    private static Shape copyShape(Shape shape) {
