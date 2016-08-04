@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -120,15 +120,6 @@ public class ControlInfo extends Argument {
         }
         if (obj instanceof ControlInfo) {
             ControlInfo o = (ControlInfo) obj;
-//            if (isProperty()) {
-//                return o.isProperty() && Arrays.equals(inputs, o.inputs)
-//                        && Arrays.equals(defaults, o.defaults)
-//                        && properties.equals(o.properties);
-//            } else {
-//                return !o.isProperty() && Arrays.equals(inputs, o.inputs)
-//                        && Arrays.equals(outputs, o.outputs)
-//                        && properties.equals(o.properties);
-//            }
             return type == o.type
                     && Arrays.equals(inputs, o.inputs)
                     && Arrays.equals(outputs, o.outputs)
