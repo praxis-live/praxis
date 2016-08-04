@@ -120,11 +120,6 @@ public class CodeComponent<D extends CodeDelegate> implements Component {
         return codeCtxt.getInfo();
     }
 
-    @Override
-    public InterfaceDefinition[] getInterfaces() {
-        return codeCtxt.getInterfaces();
-    }
-
     Lookup getLookup() {
         if (parent != null) {
             return parent.getLookup();
