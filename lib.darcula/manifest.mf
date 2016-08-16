@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+AutoUpdate-Show-In-Client: true
+OpenIDE-Module: com.bulenkov.darcula
+OpenIDE-Module-Localizing-Bundle: com/bulenkov/darcula/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0.0
+
