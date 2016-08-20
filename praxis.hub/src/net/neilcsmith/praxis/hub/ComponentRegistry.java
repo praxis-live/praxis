@@ -78,10 +78,10 @@ class ComponentRegistry {
             ComponentFactory factory = provider.getFactory();
             logger.log(Level.INFO, "Adding components from : {0}", factory.getClass());
             for (ComponentType type : factory.getComponentTypes()) {
-                componentCache.put(type, factory);
+                componentCache.putIfAbsent(type, factory);
             }
             for (ComponentType type : factory.getRootComponentTypes()) {
-                rootCache.put(type, factory);
+                rootCache.putIfAbsent(type, factory);
             }
         }
         return new ComponentRegistry(componentCache, rootCache);
