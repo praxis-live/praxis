@@ -27,6 +27,7 @@ import java.io.InputStream;
 //import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Optional;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
@@ -109,6 +110,14 @@ public final class PBytes extends Argument {
             return (PBytes) arg;
         } else {
             return valueOf(arg.toString());
+        }
+    }
+    
+    public static Optional<PBytes> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
         }
     }
 

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.CallArguments;
@@ -40,7 +41,7 @@ import net.neilcsmith.praxis.core.syntax.Tokenizer;
 public final class PArray extends Argument implements Iterable<Argument> {
 
     public final static PArray EMPTY = new PArray(new Argument[0], "");
-    private Argument[] data;
+    private final Argument[] data;
     private volatile String str;
 
     private PArray(Argument[] data, String str) {
@@ -66,20 +67,6 @@ public final class PArray extends Argument implements Iterable<Argument> {
             if (data.length > 0) {
                 StringBuilder sb = new StringBuilder();
                 for (Argument entry : data) {
-//                    if (sb.length() == 0) {
-//                        sb.append("{");
-//                    } else {
-//                        sb.append(" {");
-//                    }
-//
-//                        String s = String.valueOf(entry);
-////                        if (s.indexOf('{') > -1 || s.indexOf('}') > -1) {
-//                            s = s.replace("{", "\\{");
-//                            s = s.replace("}", "\\}");
-////                        }
-//                        sb.append(s);
-////                sb.append(String.valueOf(entry));
-//                    sb.append("}");
                     if (sb.length() > 0) {
                         sb.append(' ');
                     }
@@ -211,10 +198,6 @@ public final class PArray extends Argument implements Iterable<Argument> {
                         break;
                     case BRACED:
                         String s = t.getText();
-//                        if (s.indexOf('{') > -1 || s.indexOf('}') > -1) {
-//                            s = s.replace("\\{", "{");
-//                            s = s.replace("\\}", "}");
-//                        }
                         list.add(PString.valueOf(s));
                         break;
                     case EOL:
@@ -240,6 +223,14 @@ public final class PArray extends Argument implements Iterable<Argument> {
             return (PArray) arg;
         } else {
             return valueOf(arg.toString());
+        }
+    }
+    
+    public static Optional<PArray> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
         }
     }
 

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.core.types;
 
+import java.util.Optional;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
@@ -40,9 +41,10 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
 
     public final static int MAX_VALUE = Integer.MAX_VALUE;
     public final static int MIN_VALUE = Integer.MIN_VALUE;
-    private double value;
-    private boolean isInteger;
-    private String string;
+    
+    private final double value;
+    private final boolean isInteger;
+    private final String string;
 
     private PNumber(double value, String str) {
         this.value = value;
@@ -161,9 +163,16 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
         } else {
             return valueOf(arg.toString());
         }
-
     }
 
+    public static Optional<PNumber> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
+        }
+    }
+    
     public static ArgumentInfo info() {
         return ArgumentInfo.create(PNumber.class, null);
     }

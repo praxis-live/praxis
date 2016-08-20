@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,8 +21,22 @@
  */
 package net.neilcsmith.praxis.core;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
-import java.io.Serializable;
+import net.neilcsmith.praxis.core.info.ComponentInfo;
+import net.neilcsmith.praxis.core.info.ControlInfo;
+import net.neilcsmith.praxis.core.info.PortInfo;
+import net.neilcsmith.praxis.core.types.PArray;
+import net.neilcsmith.praxis.core.types.PBoolean;
+import net.neilcsmith.praxis.core.types.PBytes;
+import net.neilcsmith.praxis.core.types.PError;
+import net.neilcsmith.praxis.core.types.PMap;
+import net.neilcsmith.praxis.core.types.PNumber;
+import net.neilcsmith.praxis.core.types.PReference;
+import net.neilcsmith.praxis.core.types.PResource;
+import net.neilcsmith.praxis.core.types.PString;
 
 /**
  * The abstract base class of all arguments passed around in the Praxis environment,
@@ -38,7 +52,7 @@ import java.io.Serializable;
  *
  * @author Neil C Smith
  */
-public abstract class Argument /*implements Serializable*/ {
+public abstract class Argument {
 
 //    public final static String KEY_ALLOW_EMPTY = "allow-empty";
     
@@ -107,5 +121,45 @@ public abstract class Argument /*implements Serializable*/ {
         return arg1.isEquivalent(arg2) || arg2.isEquivalent(arg1);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T extends Argument> Optional<Converter<T>> findConverter(Class<T> type) {
+        return Optional.ofNullable((Converter<T>) converters.get(type));
+    }
+    
+    @FunctionalInterface
+    public static interface Converter<T extends Argument> {
+        
+        Optional<T> from(Argument arg);
+        
+    }
+    
+    private final static Map<Class<?>, Converter<?>> converters = 
+            new HashMap<>();
+    
+    private static <T extends Argument> void registerConverter(Class<T> type, Converter<T> converter) {
+        converters.put(type, converter);
+    }
+    
+    static {
+        registerConverter(PArray.class, PArray::from);
+        registerConverter(PBoolean.class, PBoolean::from);
+        registerConverter(PBytes.class, PBytes::from);
+        registerConverter(PError.class, PError::from);
+        registerConverter(PMap.class, PMap::from);
+        registerConverter(PNumber.class, PNumber::from);
+        registerConverter(PReference.class, PReference::from);
+        registerConverter(PResource.class, PResource::from);
+        registerConverter(PString.class, PString::from);
+        
+        registerConverter(ArgumentInfo.class, ArgumentInfo::from);
+        registerConverter(ComponentInfo.class, ComponentInfo::from);
+        registerConverter(ControlInfo.class, ControlInfo::from);
+        registerConverter(PortInfo.class, PortInfo::from);
+        
+        registerConverter(ComponentAddress.class, ComponentAddress::from);
+        registerConverter(ControlAddress.class, ControlAddress::from);
+        registerConverter(PortAddress.class, PortAddress::from);
+        
+    }
 
 }

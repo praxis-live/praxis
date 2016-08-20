@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,11 +21,9 @@
  */
 package net.neilcsmith.praxis.core;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
-import net.neilcsmith.praxis.core.types.PMap;
 
 /**
  *
@@ -36,9 +34,10 @@ public class PortAddress extends Argument {
     public static final String SEPERATOR = "!";
     private static final String SEP_REGEX = "\\!";
     private static final String ID_REGEX = "[_\\-\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*";
-    private ComponentAddress component;
-    private String portID;
-    private String addressString;
+    
+    private final ComponentAddress component;
+    private final String portID;
+    private final String addressString;
 
     private PortAddress(ComponentAddress component, String id, String address) {
         this.component = component;
@@ -116,6 +115,14 @@ public class PortAddress extends Argument {
             return (PortAddress) arg;
         } else {
             return valueOf(arg.toString());
+        }
+    }
+    
+    public static Optional<PortAddress> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
         }
     }
     

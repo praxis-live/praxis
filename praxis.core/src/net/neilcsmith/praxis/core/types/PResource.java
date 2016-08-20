@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.core.types;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
@@ -91,6 +92,14 @@ public class PResource extends Argument implements Comparable<PResource>{
             return (PResource) arg;
         } else {
             return valueOf(arg.toString());
+        }
+    }
+    
+    public static Optional<PResource> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
         }
     }
     

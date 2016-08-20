@@ -22,6 +22,7 @@
 package net.neilcsmith.praxis.core.info;
 
 import java.util.Arrays;
+import java.util.Optional;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.types.PArray;
@@ -222,6 +223,14 @@ public class ControlInfo extends Argument {
         }
     }
 
+    public static Optional<ControlInfo> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
+        }
+    }
+    
     private static ControlInfo valueOf(String string) throws ArgumentFormatException {
         try {
             PArray arr = PArray.valueOf(string);

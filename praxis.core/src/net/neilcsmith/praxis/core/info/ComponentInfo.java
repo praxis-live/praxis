@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.core.info;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -218,6 +219,14 @@ public class ComponentInfo extends Argument {
             return (ComponentInfo) arg;
         } else {
             return valueOf(arg.toString());
+        }
+    }
+    
+    public static Optional<ComponentInfo> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
         }
     }
 

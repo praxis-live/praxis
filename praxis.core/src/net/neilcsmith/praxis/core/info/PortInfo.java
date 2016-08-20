@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.core.info;
 
+import java.util.Optional;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.Port;
@@ -121,6 +122,14 @@ public final class PortInfo extends Argument {
             return (PortInfo) arg;
         } else {
             return valueOf(arg.toString());
+        }
+    }
+    
+    public static Optional<PortInfo> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
         }
     }
     
