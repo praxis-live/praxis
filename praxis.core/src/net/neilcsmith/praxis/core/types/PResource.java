@@ -24,19 +24,21 @@ package net.neilcsmith.praxis.core.types;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
+import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 
 /**
  *
  * @author Neil C Smith
  */
-public class PResource extends Argument implements Comparable<PResource>{
-    
-    
-    private URI uri;
+public final class PResource extends Argument implements Comparable<PResource>{
+
+    private final URI uri;
     
     private PResource(URI uri) {
         this.uri = uri;
@@ -119,6 +121,21 @@ public class PResource extends Argument implements Comparable<PResource>{
 
     public int compareTo(PResource o) {
         return uri.compareTo(o.uri);
+    }
+    
+    public List<URI> resolve(Lookup lookup) {
+        Resolver res = lookup.get(Resolver.class);
+        if (res != null) {
+            return res.resolve(this);
+        } else {
+            return Collections.singletonList(uri);
+        }
+    }
+    
+    public static interface Resolver {
+        
+        public List<URI> resolve(PResource resource);
+        
     }
 
 }
