@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,8 +23,11 @@ package net.neilcsmith.praxis.hub.net;
 
 import java.net.UnknownHostException;
 import java.util.List;
+import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.Root;
+import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.hub.Hub;
+import net.neilcsmith.praxis.impl.InstanceLookup;
 
 
 public class SlaveFactory extends Hub.CoreRootFactory {
@@ -33,6 +36,8 @@ public class SlaveFactory extends Hub.CoreRootFactory {
     
     private final int port;
     private final CIDRUtils clientValidator;
+    
+    private PResource.Resolver resourceResolver;
     
     public SlaveFactory(int port, String netMask) {
         if (port < 1 || port > 65535) {
@@ -53,7 +58,16 @@ public class SlaveFactory extends Hub.CoreRootFactory {
 
     @Override
     public Root createCoreRoot(Hub.Accessor accessor, List<Root> extensions) {
-        return new SlaveCoreRoot(accessor, extensions, port, clientValidator);
+        SlaveCoreRoot core = new SlaveCoreRoot(accessor, extensions, port, clientValidator);
+        resourceResolver = core.getResourceResolver();
+        return core;
     }
+
+    @Override
+    public Lookup extendLookup(Lookup lookup) {
+        return InstanceLookup.create(lookup, resourceResolver);
+    }
+    
+    
     
 }

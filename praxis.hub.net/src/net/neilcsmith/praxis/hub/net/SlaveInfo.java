@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,13 +23,18 @@
 package net.neilcsmith.praxis.hub.net;
 
 import java.net.SocketAddress;
+import java.util.Collections;
+import java.util.List;
 import net.neilcsmith.praxis.core.ComponentType;
+import net.neilcsmith.praxis.core.interfaces.Service;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public abstract class SlaveInfo {
+    
+    
     
     private final SocketAddress address;
     
@@ -45,5 +50,17 @@ public abstract class SlaveInfo {
     } 
     
     public abstract boolean matches( String rootID, ComponentType rootType);
+    
+    public List<Class<? extends Service>> getRemoteServices() {
+        return Collections.emptyList();
+    }
+    
+    public boolean getUseLocalResources() {
+        return true;
+    }
+    
+    public boolean getUseRemoteResources() {
+        return false;
+    }
     
 }

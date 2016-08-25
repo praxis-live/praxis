@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -28,7 +28,10 @@ import de.sciss.net.OSCServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -38,6 +41,8 @@ import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.interfaces.RootManagerService;
+import net.neilcsmith.praxis.core.types.PMap;
+import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.hub.DefaultCoreRoot;
 import net.neilcsmith.praxis.hub.Hub;
 
@@ -53,10 +58,13 @@ class SlaveCoreRoot extends DefaultCoreRoot {
     private final CIDRUtils clientValidator;
     private final PraxisPacketCodec codec;
     private final Dispatcher dispatcher;
+    private final ResourceResolver resourceResolver;
 
     private OSCServer server;
     private SocketAddress master;
     private long lastPurgeTime;
+    private URI remoteUserDir;
+    private URI remoteServer;
 
     SlaveCoreRoot(Hub.Accessor hubAccess,
             List<Root> exts, int port, CIDRUtils clientValidator) {
@@ -65,6 +73,7 @@ class SlaveCoreRoot extends DefaultCoreRoot {
         this.clientValidator = clientValidator;
         this.codec = new PraxisPacketCodec();
         this.dispatcher = new Dispatcher(codec);
+        this.resourceResolver = new ResourceResolver();
         lastPurgeTime = System.nanoTime();
     }
 
@@ -127,6 +136,10 @@ class SlaveCoreRoot extends DefaultCoreRoot {
         }
     }
 
+    PResource.Resolver getResourceResolver() {
+        return resourceResolver;
+    }
+
     private void tick(ExecutionContext source) {
         if ((source.getTime() - lastPurgeTime) > TimeUnit.SECONDS.toNanos(1)) {
 //            LOG.fine("Triggering dispatcher purge");
@@ -145,7 +158,7 @@ class SlaveCoreRoot extends DefaultCoreRoot {
         }
         switch (msg.getName()) {
             case "/HLO":
-                handleHLO(sender);
+                handleHLO(sender, msg);
                 break;
             case "/BYE":
                 master = null;
@@ -157,8 +170,8 @@ class SlaveCoreRoot extends DefaultCoreRoot {
         }
     }
 
-    private void handleHLO(SocketAddress sender) {
-        if (validate(sender)) {
+    private void handleHLO(SocketAddress sender, OSCMessage msg) {
+        if (validate(sender) && handleHLOParams(msg)) {
             master = sender;
             try {
                 server.send(new OSCMessage("/HLO", new Object[]{"OK"}), sender);
@@ -184,6 +197,23 @@ class SlaveCoreRoot extends DefaultCoreRoot {
             }
         }
         return false;
+    }
+
+    private boolean handleHLOParams(OSCMessage msg) {
+        if (msg.getArgCount() < 1) {
+            return true; // assume defaults???
+        }
+        try {
+            PMap params = PMap.valueOf(msg.getArg(0).toString());
+            String masterUserDir = params.getString(Utils.KEY_MASTER_USER_DIRECTORY, null);
+            if (masterUserDir != null) {
+                remoteUserDir = URI.create(masterUserDir);
+            }
+            return true;
+        } catch (Exception ex) {
+            Logger.getLogger(SlaveCoreRoot.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
     }
 
     private class Dispatcher extends OSCDispatcher {
@@ -214,6 +244,37 @@ class SlaveCoreRoot extends DefaultCoreRoot {
         @Override
         ControlAddress getRemoveRootAddress() {
             return ControlAddress.create(getAddress(), RootManagerService.REMOVE_ROOT);
+        }
+
+    }
+
+    private class ResourceResolver implements PResource.Resolver {
+
+        @Override
+        public List<URI> resolve(PResource resource) {
+            URI dir = remoteUserDir;
+            URI srv = remoteServer;
+            URI res = resource.value();
+            if (dir == null && srv == null) {
+                return Collections.singletonList(res);
+            }
+
+            if (!"file".equals(res.getScheme())) {
+                return Collections.singletonList(res);
+            }
+            
+            List<URI> uris = new ArrayList<>(2);
+            
+            if (dir != null) {
+                uris.add(Utils.getUserDirectory().resolve(dir.relativize(res)));
+            }
+            
+            if (srv != null) {
+                uris.add(srv.resolve(res.getPath()));
+            }
+            
+            return uris;
+            
         }
 
     }

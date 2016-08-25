@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -28,6 +28,7 @@ import de.sciss.net.OSCPacket;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -39,6 +40,9 @@ import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.interfaces.RootManagerService;
+import net.neilcsmith.praxis.core.interfaces.Service;
+import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
+import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 
 /**
@@ -53,15 +57,15 @@ class MasterClientRoot extends AbstractRoot {
 
     private final PraxisPacketCodec codec;
     private final Dispatcher dispatcher;
-    private final SocketAddress slaveAddress;
+    private final SlaveInfo slaveInfo;
 
     private OSCClient client;
     private long lastPurgeTime;
     private Watchdog watchdog;
 
-    MasterClientRoot(SocketAddress slaveAddress) {
+    MasterClientRoot(SlaveInfo slaveInfo) {
         super(EnumSet.noneOf(Caps.class));
-        this.slaveAddress = slaveAddress;
+        this.slaveInfo = slaveInfo;
         codec = new PraxisPacketCodec();
         dispatcher = new Dispatcher(codec);
         registerControl(RootManagerService.ADD_ROOT, new RootControl(true));
@@ -94,23 +98,19 @@ class MasterClientRoot extends AbstractRoot {
         clientDispose();
     }
 
-    
-    
     @Override
     protected void processCall(Call call) {
         if (getAddress().getRootID().equals(call.getRootID())) {
             super.processCall(call);
+        } else if (client != null) {
+            dispatcher.handleCall(call);
         } else {
+            connect();
             if (client != null) {
                 dispatcher.handleCall(call);
             } else {
-                connect();
-                if (client != null) {
-                    dispatcher.handleCall(call);
-                } else {
-                    getPacketRouter().route(Call.createErrorCall(call,
-                            CallArguments.EMPTY));
-                }
+                getPacketRouter().route(Call.createErrorCall(call,
+                        CallArguments.EMPTY));
             }
         }
     }
@@ -147,7 +147,7 @@ class MasterClientRoot extends AbstractRoot {
             // connect to slave
             client = OSCClient.newUsing(codec, OSCClient.TCP);
             client.setBufferSize(65536);
-            client.setTarget(slaveAddress);
+            client.setTarget(slaveInfo.getAddress());
             watchdog = new Watchdog(client);
             watchdog.start();
 //            client.connect();
@@ -157,18 +157,38 @@ class MasterClientRoot extends AbstractRoot {
             CountDownLatch hloLatch = new CountDownLatch(1);
             client.addOSCListener(new Receiver(hloLatch));
             client.start();
-            client.send(new OSCMessage(HLO));
+            client.send(new OSCMessage(HLO, new Object[]{buildHLOParams().toString()}));
             if (hloLatch.await(10, TimeUnit.SECONDS)) {
                 LOG.fine("/HLO received OK");
             } else {
                 LOG.severe("Unable to connect to slave");
                 clientDispose();
             }
-            
+
         } catch (IOException | InterruptedException ex) {
             LOG.log(Level.SEVERE, "Unable to connect to slave", ex);
             clientDispose();
         }
+    }
+
+    private PMap buildHLOParams() {
+        PMap.Builder params = PMap.builder();
+        if (slaveInfo.getUseLocalResources()) {
+            params.put(Utils.KEY_MASTER_USER_DIRECTORY, Utils.getUserDirectory().toString());
+        }
+        List<Class<? extends Service>> remoteServices = slaveInfo.getRemoteServices();
+        if (!remoteServices.isEmpty()) {
+            PMap.Builder srvs = PMap.builder(remoteServices.size());
+            for (Class<? extends Service> service : remoteServices) {
+                try {
+                    srvs.put(service.getName(), findService(service));
+                } catch (ServiceUnavailableException ex) {
+                    Logger.getLogger(MasterClientRoot.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            params.put(Utils.KEY_REMOTE_SERVICES, srvs.build());
+        }
+        return params.build();
     }
 
     private void clientDispose() {
