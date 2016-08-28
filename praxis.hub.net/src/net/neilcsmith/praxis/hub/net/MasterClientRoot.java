@@ -82,6 +82,7 @@ class MasterClientRoot extends AbstractRoot {
                 MasterClientRoot.this.tick(source);
             }
         });
+        dispatcher.remoteSysPrefix = getAddress().toString() + "/_remote";
     }
 
     @Override
@@ -100,7 +101,8 @@ class MasterClientRoot extends AbstractRoot {
 
     @Override
     protected void processCall(Call call) {
-        if (getAddress().getRootID().equals(call.getRootID())) {
+        if (call.getToAddress().getComponentAddress().getDepth() == 1 &&
+                getAddress().getRootID().equals(call.getRootID())) {
             super.processCall(call);
         } else if (client != null) {
             dispatcher.handleCall(call);
@@ -204,6 +206,8 @@ class MasterClientRoot extends AbstractRoot {
     }
 
     private class Dispatcher extends OSCDispatcher {
+        
+        private String remoteSysPrefix;
 
         private Dispatcher(PraxisPacketCodec codec) {
             super(codec);
@@ -218,6 +222,14 @@ class MasterClientRoot extends AbstractRoot {
         void send(Call call) {
             getPacketRouter().route(call);
         }
+
+        @Override
+        String getRemoteSysPrefix() {
+            assert remoteSysPrefix != null;
+            return remoteSysPrefix;
+        }
+        
+        
 
     }
 

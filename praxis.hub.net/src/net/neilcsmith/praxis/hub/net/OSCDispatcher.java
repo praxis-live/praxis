@@ -54,7 +54,7 @@ abstract class OSCDispatcher {
     final static String DEL = "/DEL";
     
     final static String SYS_PREFIX = "/_sys";
-    final static String REMOTE_SYS_PREFIX = "/_remote";
+//    final static String REMOTE_SYS_PREFIX = "/_remote";
 
     private final PraxisPacketCodec codec;
     private final Map<Integer, SentCallInfo> sentCalls;
@@ -104,7 +104,7 @@ abstract class OSCDispatcher {
         ControlAddress to = ControlAddress.valueOf(msg.getArg(1).toString());
         String fromString = msg.getArg(2).toString();
         if (fromString.startsWith(SYS_PREFIX)) {
-            fromString = REMOTE_SYS_PREFIX + fromString;
+            fromString = getRemoteSysPrefix() + fromString;
         }
         ControlAddress from = ControlAddress.valueOf(fromString);
         CallArguments args = extractCallArguments(msg, 3);
@@ -140,7 +140,7 @@ abstract class OSCDispatcher {
         ControlAddress to = getAddRootAddress();
         String fromString = msg.getArg(1).toString();
         if (fromString.startsWith(SYS_PREFIX)) {
-            fromString = REMOTE_SYS_PREFIX + fromString;
+            fromString = getRemoteSysPrefix() + fromString;
         }
         ControlAddress from = ControlAddress.valueOf(fromString);
         PString rootID = PString.valueOf(msg.getArg(2));
@@ -155,7 +155,7 @@ abstract class OSCDispatcher {
         ControlAddress to = getRemoveRootAddress();
         String fromString = msg.getArg(1).toString();
         if (fromString.startsWith(SYS_PREFIX)) {
-            fromString = REMOTE_SYS_PREFIX + fromString;
+            fromString = getRemoteSysPrefix() + fromString;
         }
         ControlAddress from = ControlAddress.valueOf(fromString);
         PString rootID = PString.valueOf(msg.getArg(2));
@@ -203,8 +203,8 @@ abstract class OSCDispatcher {
         Object[] oscArgs = new Object[callArgs.getSize() + 3];
         oscArgs[0] = call.getMatchID();
         String to = call.getToAddress().toString();
-        if (to.startsWith(REMOTE_SYS_PREFIX)) {
-            to = to.substring(REMOTE_SYS_PREFIX.length());
+        if (to.startsWith(getRemoteSysPrefix())) {
+            to = to.substring(getRemoteSysPrefix().length());
         }
         oscArgs[1] = to;
         oscArgs[2] = call.getFromAddress().toString();
@@ -276,6 +276,8 @@ abstract class OSCDispatcher {
     abstract void send(OSCPacket packet);
 
     abstract void send(Call call);
+    
+    abstract String getRemoteSysPrefix();
 
     int extractID(OSCMessage msg) throws Exception {
         Object o = msg.getArg(0);

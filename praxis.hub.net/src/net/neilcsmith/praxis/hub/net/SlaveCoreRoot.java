@@ -37,10 +37,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Call;
+import net.neilcsmith.praxis.core.ComponentAddress;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.core.Root;
 import net.neilcsmith.praxis.core.interfaces.RootManagerService;
+import net.neilcsmith.praxis.core.interfaces.Service;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.hub.DefaultCoreRoot;
@@ -53,7 +55,8 @@ import net.neilcsmith.praxis.hub.Hub;
 class SlaveCoreRoot extends DefaultCoreRoot {
 
     private final static Logger LOG = Logger.getLogger(SlaveCoreRoot.class.getName());
-
+    private final String MASTER_SYS_PREFIX = "/_remote";
+    
     private final int port;
     private final CIDRUtils clientValidator;
     private final PraxisPacketCodec codec;
@@ -209,6 +212,19 @@ class SlaveCoreRoot extends DefaultCoreRoot {
             if (masterUserDir != null) {
                 remoteUserDir = URI.create(masterUserDir);
             }
+            
+            PMap services = PMap.valueOf(params.getString(Utils.KEY_REMOTE_SERVICES, ""));
+            if (!services.isEmpty()) {
+                for (String serviceName : services.getKeys()) {
+                    Class<? extends Service> service = (Class<? extends Service>)
+                            Class.forName(serviceName, true,
+                            Thread.currentThread().getContextClassLoader());
+                    ComponentAddress serviceAddress = ComponentAddress.create(
+                            MASTER_SYS_PREFIX + services.getString(serviceName, null));
+                    getHubAccessor().registerService(service, serviceAddress);
+                }
+            }
+            
             return true;
         } catch (Exception ex) {
             Logger.getLogger(SlaveCoreRoot.class.getName()).log(Level.SEVERE, null, ex);
@@ -234,6 +250,11 @@ class SlaveCoreRoot extends DefaultCoreRoot {
         @Override
         void send(Call call) {
             getPacketRouter().route(call);
+        }
+
+        @Override
+        String getRemoteSysPrefix() {
+            return MASTER_SYS_PREFIX;
         }
 
         @Override
