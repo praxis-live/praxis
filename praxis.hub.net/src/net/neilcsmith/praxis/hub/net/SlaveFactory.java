@@ -35,11 +35,21 @@ public class SlaveFactory extends Hub.CoreRootFactory {
     public final static int DEFAULT_PORT = 13178;
     
     private final int port;
+    private final boolean loopBack;
     private final CIDRUtils clientValidator;
     
     private PResource.Resolver resourceResolver;
     
+    @Deprecated
     public SlaveFactory(int port, String netMask) {
+        this(port, netMask == null, netMask);
+    }
+    
+    public SlaveFactory(int port, boolean loopBack) {
+        this(port, loopBack, null);
+    }
+    
+    public SlaveFactory(int port, boolean loopBack, String netMask) {
         if (port < 1 || port > 65535) {
             throw new IllegalArgumentException("Port out of range");
         }
@@ -54,11 +64,12 @@ public class SlaveFactory extends Hub.CoreRootFactory {
         }
                 
         this.port = port;
+        this.loopBack = loopBack;
     }
 
     @Override
     public Root createCoreRoot(Hub.Accessor accessor, List<Root> extensions) {
-        SlaveCoreRoot core = new SlaveCoreRoot(accessor, extensions, port, clientValidator);
+        SlaveCoreRoot core = new SlaveCoreRoot(accessor, extensions, port, loopBack, clientValidator);
         resourceResolver = core.getResourceResolver();
         return core;
     }

@@ -58,6 +58,7 @@ class SlaveCoreRoot extends DefaultCoreRoot {
     private final String MASTER_SYS_PREFIX = "/_remote";
     
     private final int port;
+    private final boolean loopBack;
     private final CIDRUtils clientValidator;
     private final PraxisPacketCodec codec;
     private final Dispatcher dispatcher;
@@ -70,9 +71,13 @@ class SlaveCoreRoot extends DefaultCoreRoot {
     private URI remoteServer;
 
     SlaveCoreRoot(Hub.Accessor hubAccess,
-            List<Root> exts, int port, CIDRUtils clientValidator) {
+            List<Root> exts,
+            int port,
+            boolean loopBack,
+            CIDRUtils clientValidator) {
         super(hubAccess, exts);
         this.port = port;
+        this.loopBack = loopBack;
         this.clientValidator = clientValidator;
         this.codec = new PraxisPacketCodec();
         this.dispatcher = new Dispatcher(codec);
@@ -83,7 +88,7 @@ class SlaveCoreRoot extends DefaultCoreRoot {
     @Override
     protected void activating() {
         try {
-            server = OSCServer.newUsing(codec, OSCServer.TCP, port, clientValidator == null);
+            server = OSCServer.newUsing(codec, OSCServer.TCP, port, loopBack);
             server.setBufferSize(65536);
             server.addOSCListener(new OSCListener() {
 
