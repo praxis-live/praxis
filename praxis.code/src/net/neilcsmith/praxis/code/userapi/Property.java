@@ -22,10 +22,17 @@
  */
 package net.neilcsmith.praxis.code.userapi;
 
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.Function;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.types.PBoolean;
+import net.neilcsmith.praxis.core.types.PNumber;
+import net.neilcsmith.praxis.util.ArrayUtils;
 
 /**
  *
@@ -39,9 +46,11 @@ public abstract class Property {
 
     private CodeContext<?> context;
     private Animator animator;
+    private Link[] links;
 
     protected Property() {
         this.listener = new Listener();
+        this.links = new Link[0];
     }
 
     protected void attach(CodeContext<?> context, Property previous) {
@@ -120,10 +129,20 @@ public abstract class Property {
         return this;
     }
 
-    protected void finishAnimating() {
-        if (animator != null) {
-            animator.stop();
-        }
+    public Property linkTo(DoubleConsumer consumer) {
+        DoubleLink link = new DoubleLink(consumer);
+        link.update(getDouble());
+        links = ArrayUtils.add(links, link);
+        return this;
+    }
+
+    public <T extends Argument> Property linkTo(
+            Function<Argument, Optional<T>> converter,
+            Consumer<T> consumer) {
+        ArgumentLink<T> link = new ArgumentLink<T>(converter, consumer);
+        link.update(get());
+        links = ArrayUtils.add(links, link);
+        return this;
     }
 
     public Animator animator() {
@@ -141,6 +160,24 @@ public abstract class Property {
         return animator != null && animator.isAnimating();
     }
 
+    protected void finishAnimating() {
+        if (animator != null) {
+            animator.stop();
+        }
+    }
+
+    protected void updateLinks(double value) {
+        for (Link link : links) {
+            link.update(value);
+        }
+    }
+    
+    protected void updateLinks(Argument value) {
+        for (Link link : links) {
+            link.update(value);
+        }
+    }
+    
     private void startClock() {
         context.addClockListener(listener);
     }
@@ -159,6 +196,58 @@ public abstract class Property {
             }
             animator.tick();
         }
+    }
+
+    private static interface Link {
+
+        void update(double value);
+
+        void update(Argument value);
+
+    }
+
+    private static class DoubleLink implements Link {
+
+        private final DoubleConsumer consumer;
+
+        private DoubleLink(DoubleConsumer consumer) {
+            this.consumer = consumer;
+        }
+
+        @Override
+        public void update(double value) {
+            consumer.accept(value);
+        }
+
+        @Override
+        public void update(Argument value) {
+            PNumber.from(value).ifPresent((pn) -> consumer.accept(pn.value()));
+        }
+
+    }
+
+    private static class ArgumentLink<T extends Argument> implements Link {
+
+        private final Function<Argument, Optional<T>> converter;
+        private final Consumer<T> consumer;
+
+        private ArgumentLink(
+                Function<Argument, Optional<T>> converter,
+                Consumer<T> consumer) {
+            this.converter = Objects.requireNonNull(converter);
+            this.consumer = Objects.requireNonNull(consumer);
+        }
+
+        @Override
+        public void update(double value) {
+            update(PNumber.valueOf(value));
+        }
+
+        @Override
+        public void update(Argument value) {
+            converter.apply(value).ifPresent(consumer);
+        }
+
     }
 
     public static class Animator {

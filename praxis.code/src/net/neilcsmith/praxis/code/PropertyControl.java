@@ -90,13 +90,14 @@ public class PropertyControl extends Property implements Control {
     protected void setImpl(long time, Argument arg) throws Exception {
         binding.set(time, arg);
         setLatest(time);
+        updateLinks(arg);
     }
 
     @Override
     protected void setImpl(long time, double value) throws Exception {
         binding.set(time, value);
         setLatest(time);
-
+        updateLinks(value);
     }
 
     private void checkInvoke(long time, boolean error) {
