@@ -31,17 +31,18 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
  * @author Neil C Smith
  */
 public final class PNumber extends Argument implements Comparable<PNumber> {
-    
+
     public final static PNumber ONE = PNumber.valueOf(1);
     public final static PNumber ZERO = PNumber.valueOf(0);
 
     public final static String KEY_MINIMUM = "minimum";
     public final static String KEY_MAXIMUM = "maximum";
     public final static String KEY_IS_INTEGER = "is-integer";
+    public final static String KEY_SKEW = "skew";
 
     public final static int MAX_VALUE = Integer.MAX_VALUE;
     public final static int MIN_VALUE = Integer.MIN_VALUE;
-    
+
     private final double value;
     private final boolean isInteger;
     private final String string;
@@ -110,7 +111,7 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
     public boolean isEmpty() {
         return false;
     }
-    
+
     public int compareTo(PNumber o) {
         return Double.compare(value, o.value);
     }
@@ -122,7 +123,7 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
     public static PNumber valueOf(double val) {
         return valueOf(val, null);
     }
-    
+
     private static PNumber valueOf(double val, String str) {
         if (val > MAX_VALUE) {
             val = MAX_VALUE;
@@ -153,7 +154,7 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
             throw new ArgumentFormatException(ex);
         }
     }
-        
+
     public static PNumber coerce(
             Argument arg) throws ArgumentFormatException {
         if (arg instanceof PNumber) {
@@ -172,29 +173,37 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
             return Optional.empty();
         }
     }
-    
+
     public static ArgumentInfo info() {
         return ArgumentInfo.create(PNumber.class, null);
     }
 
-    public static ArgumentInfo info(
-            double min, double max) {
-        PMap map = PMap.create(KEY_MINIMUM, min,
+    public static ArgumentInfo info(double min, double max) {
+        PMap map = PMap.create(
+                KEY_MINIMUM, min,
                 KEY_MAXIMUM, max);
+        return ArgumentInfo.create(PNumber.class, map);
+    }
+
+    public static ArgumentInfo info(double min, double max, double skew) {
+        if (skew < 0.01) {
+            skew = 0.01;
+        }
+        PMap map = PMap.create(
+                KEY_MINIMUM, min,
+                KEY_MAXIMUM, max,
+                KEY_SKEW, skew);
         return ArgumentInfo.create(PNumber.class, map);
     }
 
     public static ArgumentInfo integerInfo() {
         return ArgumentInfo.create(PNumber.class, PMap.create(KEY_IS_INTEGER, true));
     }
-    
-    public static ArgumentInfo integerInfo(
-            int min, int max) {
+
+    public static ArgumentInfo integerInfo(int min, int max) {
         PMap map = PMap.create(KEY_MINIMUM, min,
                 KEY_MAXIMUM, max, KEY_IS_INTEGER, true);
         return ArgumentInfo.create(PNumber.class, map);
     }
-
-    
 
 }
