@@ -6,7 +6,11 @@
             <code-name-base>fi.iki.elonen</code-name-base>
             <suite-component/>
             <module-dependencies/>
-            <public-packages/>
+            <friend-packages>
+                <friend>net.neilcsmith.praxis.hub.net</friend>
+                <package>fi.iki.elonen</package>
+                <package>fi.iki.elonen.util</package>
+            </friend-packages>
         </data>
     </configuration>
 </project>
