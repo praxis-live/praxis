@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -137,49 +137,8 @@ public abstract class Property {
         return animator().to(to);
     }
 
-    @Deprecated
-    public Property in(double time) {
-        animator().in(time);
-        return this;
-    }
-
     public boolean isAnimating() {
         return animator != null && animator.isAnimating();
-    }
-
-    @Deprecated
-    public Property linear() {
-        animator().easing(Easing.linear);
-        return this;
-    }
-
-    @Deprecated
-    public Property ease() {
-        animator().easing(Easing.ease);
-        return this;
-    }
-
-    @Deprecated
-    public Property easeIn() {
-        animator().easing(Easing.easeIn);
-        return this;
-    }
-
-    @Deprecated
-    public Property easeOut() {
-        animator().easing(Easing.easeOut);
-        return this;
-    }
-
-    @Deprecated
-    public Property easeInOut() {
-        animator().easing(Easing.easeInOut);
-        return this;
-    }
-
-    @Deprecated
-    protected void startAnimating() {
-        assert false;
     }
 
     private void startClock() {
