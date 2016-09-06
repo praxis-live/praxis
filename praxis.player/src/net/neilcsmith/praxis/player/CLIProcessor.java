@@ -90,6 +90,7 @@ public class CLIProcessor extends OptionProcessor {
 
     private void processSlave(Env env, Map<Option, String[]> options) throws CommandException {
         int port = SlaveFactory.DEFAULT_PORT;
+        boolean loopBack = true;
         String netMask = null;
         if (options.containsKey(PORT)) {
             try {
@@ -100,12 +101,16 @@ public class CLIProcessor extends OptionProcessor {
         }
         if (options.containsKey(NETWORK)) {
             netMask = options.get(NETWORK)[0];
+            if ("all".equalsIgnoreCase(netMask)) {
+                netMask = null;
+            }
+            loopBack = false;
         }
         
         while (true) {
             SlaveFactory sf = null;
             try {
-                sf = new SlaveFactory(port, netMask);
+                sf = new SlaveFactory(port, loopBack, netMask);
             } catch (Exception e) {
                 throw new CommandException(1, e.getMessage());
             }
