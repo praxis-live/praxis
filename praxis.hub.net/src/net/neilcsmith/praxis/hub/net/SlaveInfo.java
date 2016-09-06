@@ -22,6 +22,7 @@
 
 package net.neilcsmith.praxis.hub.net;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.List;
@@ -47,7 +48,14 @@ public abstract class SlaveInfo {
     
     public final SocketAddress getAddress() {
         return address;
-    } 
+    }
+    
+    public boolean isLocal() {
+        if (address instanceof InetSocketAddress) {
+            return ((InetSocketAddress) address).getAddress().isLoopbackAddress();
+        }
+        return false;
+    }
     
     public abstract boolean matches( String rootID, ComponentType rootType);
     

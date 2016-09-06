@@ -58,14 +58,16 @@ class MasterClientRoot extends AbstractRoot {
     private final PraxisPacketCodec codec;
     private final Dispatcher dispatcher;
     private final SlaveInfo slaveInfo;
+    private final FileServer.Info fileServerInfo;
 
     private OSCClient client;
     private long lastPurgeTime;
     private Watchdog watchdog;
-
-    MasterClientRoot(SlaveInfo slaveInfo) {
+    
+    MasterClientRoot(SlaveInfo slaveInfo, FileServer.Info fileServerInfo) {
         super(EnumSet.noneOf(Caps.class));
         this.slaveInfo = slaveInfo;
+        this.fileServerInfo = fileServerInfo;
         codec = new PraxisPacketCodec();
         dispatcher = new Dispatcher(codec);
         registerControl(RootManagerService.ADD_ROOT, new RootControl(true));
@@ -175,8 +177,8 @@ class MasterClientRoot extends AbstractRoot {
 
     private PMap buildHLOParams() {
         PMap.Builder params = PMap.builder();
-        if (slaveInfo.getUseLocalResources()) {
-            params.put(Utils.KEY_MASTER_USER_DIRECTORY, Utils.getUserDirectory().toString());
+        if (!slaveInfo.isLocal() && slaveInfo.getUseLocalResources()) {
+            params.put(Utils.KEY_MASTER_USER_DIRECTORY, Utils.getUserDirectory().toURI().toString());
         }
         List<Class<? extends Service>> remoteServices = slaveInfo.getRemoteServices();
         if (!remoteServices.isEmpty()) {
@@ -189,6 +191,9 @@ class MasterClientRoot extends AbstractRoot {
                 }
             }
             params.put(Utils.KEY_REMOTE_SERVICES, srvs.build());
+        }
+        if (!slaveInfo.isLocal() && slaveInfo.getUseRemoteResources() && fileServerInfo != null) {
+            params.put(Utils.KEY_FILE_SERVER_PORT, fileServerInfo.getPort());
         }
         return params.build();
     }

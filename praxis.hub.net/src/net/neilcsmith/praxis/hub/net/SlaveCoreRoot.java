@@ -68,7 +68,7 @@ class SlaveCoreRoot extends DefaultCoreRoot {
     private SocketAddress master;
     private long lastPurgeTime;
     private URI remoteUserDir;
-    private URI remoteServer;
+    private URI remoteFileServer;
 
     SlaveCoreRoot(Hub.Accessor hubAccess,
             List<Root> exts,
@@ -179,7 +179,7 @@ class SlaveCoreRoot extends DefaultCoreRoot {
     }
 
     private void handleHLO(SocketAddress sender, OSCMessage msg) {
-        if (validate(sender) && handleHLOParams(msg)) {
+        if (validate(sender) && handleHLOParams((InetSocketAddress) sender, msg)) {
             master = sender;
             try {
                 server.send(new OSCMessage("/HLO", new Object[]{"OK"}), sender);
@@ -207,7 +207,7 @@ class SlaveCoreRoot extends DefaultCoreRoot {
         return false;
     }
 
-    private boolean handleHLOParams(OSCMessage msg) {
+    private boolean handleHLOParams(InetSocketAddress sender, OSCMessage msg) {
         if (msg.getArgCount() < 1) {
             return true; // assume defaults???
         }
@@ -228,6 +228,11 @@ class SlaveCoreRoot extends DefaultCoreRoot {
                             MASTER_SYS_PREFIX + services.getString(serviceName, null));
                     getHubAccessor().registerService(service, serviceAddress);
                 }
+            }
+            
+            int fileServerPort = params.getInt(Utils.KEY_FILE_SERVER_PORT, 0);
+            if (fileServerPort > 0) {
+                remoteFileServer = URI.create("http://" + sender.getAddress().getHostAddress() + ":" + fileServerPort);
             }
             
             return true;
@@ -279,7 +284,7 @@ class SlaveCoreRoot extends DefaultCoreRoot {
         @Override
         public List<URI> resolve(PResource resource) {
             URI dir = remoteUserDir;
-            URI srv = remoteServer;
+            URI srv = remoteFileServer;
             URI res = resource.value();
             if (dir == null && srv == null) {
                 return Collections.singletonList(res);
@@ -292,11 +297,11 @@ class SlaveCoreRoot extends DefaultCoreRoot {
             List<URI> uris = new ArrayList<>(2);
             
             if (dir != null) {
-                uris.add(Utils.getUserDirectory().resolve(dir.relativize(res)));
+                uris.add(Utils.getUserDirectory().toURI().resolve(dir.relativize(res)));
             }
             
             if (srv != null) {
-                uris.add(srv.resolve(res.getPath()));
+                uris.add(srv.resolve(res.getRawPath()));
             }
             
             return uris;
