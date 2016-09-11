@@ -128,7 +128,7 @@ public final class CodeComponent<D extends CodeDelegate> implements Component {
 
     void install(CodeContext<D> cc) {
         cc.setComponent(this);
-        cc.configure(this, codeCtxt);
+        cc.handleConfigure(this, codeCtxt);
         if (codeCtxt != null) {
             codeCtxt.handleDispose();
         }

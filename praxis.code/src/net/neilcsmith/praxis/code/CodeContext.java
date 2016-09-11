@@ -94,11 +94,13 @@ public abstract class CodeContext<D extends CodeDelegate> {
         delegate.setContext(this);
     }
 
-    protected void configure(CodeComponent<D> cmp, CodeContext<D> oldCtxt) {
-
+    void handleConfigure(CodeComponent<D> cmp, CodeContext<D> oldCtxt) {
         configureControls(oldCtxt);
         configurePorts(oldCtxt);
-
+        configure(cmp, oldCtxt);
+    }
+    
+    protected void configure(CodeComponent<D> cmp, CodeContext<D> oldCtxt) {
     }
 
     private void configureControls(CodeContext<D> oldCtxt) {
@@ -133,7 +135,15 @@ public abstract class CodeContext<D extends CodeDelegate> {
     }
 
     final void handleHierarchyChanged() {
-        ExecutionContext ctxt = getLookup().get(ExecutionContext.class);
+        hierarchyChanged();
+        
+        LogLevel level = getLookup().get(LogLevel.class);
+        if (level == null) {
+            level = LogLevel.ERROR;
+        }
+        log.setLevel(level);
+        
+        ExecutionContext ctxt = cmp == null ? null : cmp.getExecutionContext();
         if (execCtxt != ctxt) {
             if (execCtxt != null) {
                 execCtxt.removeStateListener(driver);
@@ -148,13 +158,6 @@ public abstract class CodeContext<D extends CodeDelegate> {
                 handleStateChanged(ctxt);
             }
         }
-
-        LogLevel level = getLookup().get(LogLevel.class);
-        if (level == null) {
-            level = LogLevel.ERROR;
-        }
-        log.setLevel(level);
-        hierarchyChanged();
     }
 
     protected void hierarchyChanged() {
@@ -162,19 +165,28 @@ public abstract class CodeContext<D extends CodeDelegate> {
 
     final void handleStateChanged(ExecutionContext source) {
         reset();
-        stateChanged(source);
+        update(source.getTime());
+        if (source.getState() == ExecutionContext.State.ACTIVE) {
+            starting(source);
+        } else {
+            stopping(source);
+        }
+        flush();
     }
 
-    protected void stateChanged(ExecutionContext state) {
+    protected void starting(ExecutionContext source) {
+    }
+    
+    protected void stopping(ExecutionContext source) {
     }
 
     final void handleTick(ExecutionContext source) {
-        update(time);
+        update(source.getTime());
         tick(source);
         flush();
     }
 
-    protected void tick(ExecutionContext tick) {
+    protected void tick(ExecutionContext source) {
     }
     
     protected final void reset() {
@@ -278,7 +290,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
     protected ExecutionContext getExecutionContext() {
         return cmp == null ? null : cmp.getExecutionContext();
     }
-
+    
     protected boolean isActive() {
         ExecutionContext ctxt = getExecutionContext();
         return ctxt == null ? false : ctxt.getState() == ExecutionContext.State.ACTIVE;
