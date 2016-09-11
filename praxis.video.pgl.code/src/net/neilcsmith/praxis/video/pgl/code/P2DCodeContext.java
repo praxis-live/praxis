@@ -44,18 +44,14 @@ import processing.core.PStyle;
  */
 public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
 
-    private final StateListener stateListener;
-
     private final PGLVideoOutputPort.Descriptor output;
     private final PGLVideoInputPort.Descriptor[] inputs;
     private final Processor processor;
 
-    private ExecutionContext execCtxt;
     private boolean setupRequired;
 
     public P2DCodeContext(P2DCodeConnector connector) {
-        super(connector);
-        stateListener = new StateListener();
+        super(connector, false);
         setupRequired = true;
         output = connector.extractOutput();
 
@@ -74,7 +70,6 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
 
     @Override
     protected void configure(CodeComponent<P2DCodeDelegate> cmp, CodeContext<P2DCodeDelegate> oldCtxt) {
-        super.configure(cmp, oldCtxt);
         output.getPort().getPipe().addSource(processor);
         for (PGLVideoInputPort.Descriptor vidp : inputs) {
             processor.addSource(vidp.getPort().getPipe());
@@ -82,28 +77,8 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
     }
 
     @Override
-    protected void hierarchyChanged() {
-        super.hierarchyChanged();
-        ExecutionContext ctxt = getLookup().get(ExecutionContext.class);
-        if (execCtxt != ctxt) {
-            if (execCtxt != null) {
-                execCtxt.removeStateListener(stateListener);
-            }
-            if (ctxt != null) {
-                ctxt.addStateListener(stateListener);
-                stateListener.stateChanged(ctxt);
-            }
-            execCtxt = ctxt;
-        }
-    }
-
-    private class StateListener implements ExecutionContext.StateListener {
-
-        @Override
-        public void stateChanged(ExecutionContext source) {
-            setupRequired = true;
-        }
-
+    protected void starting(ExecutionContext source) {
+        setupRequired = true;
     }
 
     private class Processor extends AbstractProcessPipe {
@@ -145,6 +120,7 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
             pg.init(pglOut.getGraphics(), setupRequired);
             del.setupGraphics(pg, output.getWidth(), output.getHeight());
             if (setupRequired) {
+                reset();
                 try {
                     del.setup();
                 } catch (Exception ex) {

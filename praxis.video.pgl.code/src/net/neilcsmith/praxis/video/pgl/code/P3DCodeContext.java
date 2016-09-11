@@ -45,18 +45,14 @@ import processing.core.PConstants;
  */
 public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
 
-    private final StateListener stateListener;
-
     private final PGLVideoOutputPort.Descriptor output;
     private final PGLVideoInputPort.Descriptor[] inputs;
     private final Processor processor;
 
-    private ExecutionContext execCtxt;
     private boolean setupRequired;
 
     public P3DCodeContext(P3DCodeConnector connector) {
-        super(connector);
-        stateListener = new StateListener();
+        super(connector, false);
         setupRequired = true;
         output = connector.extractOutput();
 
@@ -83,31 +79,17 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
     }
 
     @Override
-    protected void hierarchyChanged() {
-        super.hierarchyChanged();
-        ExecutionContext ctxt = getLookup().get(ExecutionContext.class);
-        if (execCtxt != ctxt) {
-            if (execCtxt != null) {
-                execCtxt.removeStateListener(stateListener);
-            }
-            if (ctxt != null) {
-                ctxt.addStateListener(stateListener);
-//                stateListener.stateChanged(ctxt);
-            }
-            stateListener.stateChanged(ctxt);
-            execCtxt = ctxt;
-        }
+    public void starting(ExecutionContext source) {
+        setupRequired = true;
+        processor.dispose3D();
     }
 
-    private class StateListener implements ExecutionContext.StateListener {
-
-        @Override
-        public void stateChanged(ExecutionContext source) {
-            setupRequired = true;
-            processor.dispose3D();
-        }
-
+    @Override
+    protected void stopping(ExecutionContext source) {
+        processor.dispose3D();
     }
+    
+    
 
     private class Processor extends AbstractProcessPipe {
 
@@ -126,16 +108,16 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         protected void update(long time) {
             P3DCodeContext.this.update(time);
         }
-        
+
         @Override
         protected void callSources(Surface output, long time) {
             validateImages(output);
             int count = getSourceCount();
-            for (int i=0; i < count; i++) {
+            for (int i = 0; i < count; i++) {
                 callSource(getSource(i), images[i].surface, time);
             }
         }
-        
+
         @Override
         protected void render(Surface output, long time) {
             PGLSurface pglOut = output instanceof PGLSurface ? (PGLSurface) output : null;
@@ -157,9 +139,9 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             p3d.clear();
             pg.init(p3d);
             del.setupGraphics(pg, output.getWidth(), output.getHeight());
-            update(execCtxt.getTime());
 //            pg.resetMatrix();
             if (setupRequired) {
+                reset();
                 try {
                     del.setup();
                 } catch (Exception ex) {
@@ -181,10 +163,10 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             g.image(p3d, 0, 0);
             flush();
         }
-        
+
         private void validateImages(Surface output) {
             P3DCodeDelegate del = getDelegate();
-            for (int i=0; i<images.length; i++) {
+            for (int i = 0; i < images.length; i++) {
                 PGLImage img = images[i];
                 Surface s = img == null ? null : img.surface;
                 if (s == null || !output.checkCompatible(s, true, true)) {
@@ -206,7 +188,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
                 getLog().log(LogLevel.ERROR, ex);
             }
         }
-        
+
         private void dispose3D() {
             if (p3d != null) {
 //                p3d.dispose();
@@ -220,7 +202,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
     private class PGraphics extends PGraphics3D {
 
         private int matrixStackDepth;
-        
+
         private void init(PGLGraphics3D g) {
             initGraphics(g);
             g.pushMatrix();
@@ -237,7 +219,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             }
             g.popMatrix();
         }
-        
+
         @Override
         public void pushMatrix() {
             if (matrixStackDepth == 31) {
@@ -257,7 +239,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             matrixStackDepth--;
             super.popMatrix();
         }
-        
+
     }
 
     private static class PGLImage extends PImage {
