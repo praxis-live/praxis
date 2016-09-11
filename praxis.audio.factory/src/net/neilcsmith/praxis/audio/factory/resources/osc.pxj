@@ -1,0 +1,21 @@
+    @Out(1) AudioOut out;
+    
+    @UGen Osc osc;
+    @UGen Gain gain;
+    
+    @P(1) @Type.String(allowed = {"Sine", "Square", "Saw"}, def = "Sine")
+    Property waveform;
+    
+    @P(2) @Type.Number(min=20, max=3600, def=440, skew=2)
+    Property frequency;
+    
+    @P(3) @Type.Number(min=0, max=1, def=1, skew=4)
+    Property level;
+    
+    @Override
+    public void setup() {
+        waveform.linkAs(arg -> Waveform.valueOf(arg.toString()), osc::waveform);
+        frequency.link(osc::frequency);
+        level.link(gain::level);
+        link(osc, gain, out);
+    }

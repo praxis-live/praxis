@@ -1,0 +1,29 @@
+    @In(1) AudioIn in1;
+    @In(2) AudioIn in2;
+    @Out(1) AudioOut out1;
+    @Out(2) AudioOut out2;
+    
+    @UGen Freeverb r;
+    
+    @P(1) @Type.Number(min=0, max=1, def=0.5)
+    Property roomSize;
+    @P(2) @Type.Number(min=0, max=1, def=0.5)
+    Property damp;
+    @P(3) @Type.Number(min=0, max=1, def=0.5)
+    Property width;
+    @P(4) @Type.Number(min=0, max=1)
+    Property wet;
+    @P(5) @Type.Number(min=0, max=1, def=0.5)
+    Property dry;
+    
+    @Override
+    public void setup() {
+        roomSize.link(r::roomSize);
+        damp.link(r::damp);
+        width.link(r::width);
+        wet.link(r::wet);
+        dry.link(r::dry);
+        link(in1, r, out1);
+        link(in2, r, out2);
+    }
+

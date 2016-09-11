@@ -1,0 +1,21 @@
+    @In(1) AudioIn in1;
+    @In(2) AudioIn in2;
+    @Out(1) AudioOut out1;
+    @Out(2) AudioOut out2;
+    
+    @UGen Delay dl1, dl2;
+    
+    @P(1) @Type.Number(min=0, max=2)
+    Property time;
+    @P(2) @Type.Number(min=0, max=1)
+    Property feedback;
+    
+    @Override
+    public void setup() {
+        dl1.passthrough(true);
+        dl2.passthrough(true);
+        time.link(dl1::time, dl2::time);
+        feedback.link(dl1::feedback, dl2::feedback);
+        link(in1, dl1, out1);
+        link(in2, dl2, out2);
+    }

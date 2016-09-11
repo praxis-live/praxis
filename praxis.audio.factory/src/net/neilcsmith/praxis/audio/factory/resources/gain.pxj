@@ -1,0 +1,13 @@
+    @In(1) AudioIn in;
+    @Out(1) AudioOut out;
+    
+    @UGen Gain gain;
+    
+    @P(1) @Type.Number(min=0, max=2, skew=4)
+            Property level;
+    
+    @Override
+    public void setup() {
+        level.link(gain::level);
+        link(in, gain, out);
+    }
