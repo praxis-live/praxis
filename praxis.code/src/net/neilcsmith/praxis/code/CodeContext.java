@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -57,12 +57,22 @@ public abstract class CodeContext<D extends CodeDelegate> {
 
     private final D delegate;
     private final LogBuilder log;
+    private final Driver driver;
+    private final boolean requireClock;
 
+    private ExecutionContext execCtxt;
     private CodeComponent<D> cmp;
     private long time;
     private ClockListener[] clockListeners;
 
-    public CodeContext(CodeConnector<D> connector) {
+    @Deprecated
+    public CodeContext(CodeConnector<D> conenctor) {
+        this(conenctor, false);
+    }
+
+    protected CodeContext(CodeConnector<D> connector, boolean requireClock) {
+        this.requireClock = requireClock;
+        this.driver = new Driver();
         clockListeners = new ClockListener[0];
         time = System.nanoTime() - 10 * 1000_000_000;
         // @TODO what is maximum allowed amount a root can be behind system time?
@@ -88,7 +98,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
 
         configureControls(oldCtxt);
         configurePorts(oldCtxt);
-//        hierarchyChanged();
+
     }
 
     private void configureControls(CodeContext<D> oldCtxt) {
@@ -98,6 +108,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
             ControlDescriptor oldCD = oldControls.remove(entry.getKey());
             if (oldCD != null) {
                 entry.getValue().attach(this, oldCD.getControl());
+//                oldCD.dispose();
             } else {
                 entry.getValue().attach(this, null);
             }
@@ -111,6 +122,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
             PortDescriptor oldPD = oldPorts.remove(entry.getKey());
             if (oldPD != null) {
                 entry.getValue().attach(this, oldPD.getPort());
+//                oldPD.dispose();
             } else {
                 entry.getValue().attach(this, null);
             }
@@ -120,19 +132,65 @@ public abstract class CodeContext<D extends CodeDelegate> {
         }
     }
 
-    protected void hierarchyChanged() {
+    final void handleHierarchyChanged() {
+        ExecutionContext ctxt = getLookup().get(ExecutionContext.class);
+        if (execCtxt != ctxt) {
+            if (execCtxt != null) {
+                execCtxt.removeStateListener(driver);
+                execCtxt.removeClockListener(driver);
+            }
+            execCtxt = ctxt;
+            if (ctxt != null) {
+                ctxt.addStateListener(driver);
+                if (requireClock) {
+                    ctxt.addClockListener(driver);
+                }
+                handleStateChanged(ctxt);
+            }
+        }
+
         LogLevel level = getLookup().get(LogLevel.class);
         if (level == null) {
             level = LogLevel.ERROR;
         }
         log.setLevel(level);
+        hierarchyChanged();
+    }
+
+    protected void hierarchyChanged() {
+    }
+
+    final void handleStateChanged(ExecutionContext source) {
+        reset();
+        stateChanged(source);
+    }
+
+    protected void stateChanged(ExecutionContext state) {
+    }
+
+    final void handleTick(ExecutionContext source) {
+        update(time);
+        tick(source);
+        flush();
+    }
+
+    protected void tick(ExecutionContext tick) {
+    }
+    
+    protected final void reset() {
+        controls.values().stream().forEach(ControlDescriptor::reset);
+        ports.values().stream().forEach(PortDescriptor::reset);
+    }
+
+    final void handleDispose() {
+        cmp = null;
+        handleHierarchyChanged();
+        controls.clear();
+        ports.clear();
+        dispose();
     }
 
     protected void dispose() {
-        cmp = null;
-        hierarchyChanged();
-        controls.clear();
-        ports.clear();
     }
 
     public CodeComponent<D> getComponent() {
@@ -315,6 +373,21 @@ public abstract class CodeContext<D extends CodeDelegate> {
     public static interface Invoker {
 
         public void invoke();
+
+    }
+
+    private class Driver implements ExecutionContext.StateListener,
+            ExecutionContext.ClockListener {
+
+        @Override
+        public void stateChanged(ExecutionContext source) {
+            handleStateChanged(source);
+        }
+
+        @Override
+        public void tick(ExecutionContext source) {
+            handleTick(source);
+        }
 
     }
 

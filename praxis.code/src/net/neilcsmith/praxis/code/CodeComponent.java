@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -27,7 +27,6 @@ import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.Control;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.ExecutionContext;
-import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.Port;
@@ -35,7 +34,6 @@ import net.neilcsmith.praxis.core.VetoException;
 import net.neilcsmith.praxis.core.info.ComponentInfo;
 import net.neilcsmith.praxis.core.interfaces.ServiceUnavailableException;
 import net.neilcsmith.praxis.core.interfaces.Services;
-import net.neilcsmith.praxis.logging.LogBuilder;
 import net.neilcsmith.praxis.logging.LogLevel;
 import net.neilcsmith.praxis.logging.LogService;
 
@@ -43,7 +41,7 @@ import net.neilcsmith.praxis.logging.LogService;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class CodeComponent<D extends CodeDelegate> implements Component {
+public final class CodeComponent<D extends CodeDelegate> implements Component {
 
     private Container parent;
     private CodeContext<D> codeCtxt;
@@ -92,7 +90,7 @@ public class CodeComponent<D extends CodeDelegate> implements Component {
         execCtxt = null;
         router = null;
         logInfo = null;
-        codeCtxt.hierarchyChanged();
+        codeCtxt.handleHierarchyChanged();
     }
 
     @Override
@@ -132,10 +130,10 @@ public class CodeComponent<D extends CodeDelegate> implements Component {
         cc.setComponent(this);
         cc.configure(this, codeCtxt);
         if (codeCtxt != null) {
-            codeCtxt.dispose();
+            codeCtxt.handleDispose();
         }
         codeCtxt = cc;
-        codeCtxt.hierarchyChanged();
+        codeCtxt.handleHierarchyChanged();
     }
 
     ComponentAddress getAddress() {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -312,6 +312,16 @@ public class PropertyControl extends Property implements Control {
 
         public PortDescriptor createPortDescriptor() {
             return new PortDescImpl(getID(), getIndex(), control);
+        }
+
+        @Override
+        public void reset() {
+            control.clearLinks();
+        }
+
+        @Override
+        public void stopping() {
+            control.finishAnimating();
         }
 
         public static Descriptor create(CodeConnector<?> connector,

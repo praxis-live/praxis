@@ -23,7 +23,6 @@
 package net.neilcsmith.praxis.code.userapi;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.Function;
@@ -32,6 +31,7 @@ import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.core.types.PNumber;
+import net.neilcsmith.praxis.logging.LogLevel;
 import net.neilcsmith.praxis.util.ArrayUtils;
 
 /**
@@ -129,19 +129,48 @@ public abstract class Property {
         return this;
     }
 
-    public Property linkTo(DoubleConsumer consumer) {
+    public Property link(DoubleConsumer consumer) {
         DoubleLink link = new DoubleLink(consumer);
-        link.update(getDouble());
+        try {
+            link.update(getDouble());
+        } catch (Exception ex) {
+            context.getLog().log(LogLevel.ERROR, ex);
+        }
         links = ArrayUtils.add(links, link);
         return this;
     }
 
-    public <T extends Argument> Property linkTo(
-            Function<Argument, Optional<T>> converter,
+    public Property link(DoubleConsumer... consumers) {
+        for (DoubleConsumer consumer : consumers) {
+            link(consumer);
+        }
+        return this;
+    }
+
+    public <T> Property linkAs(
+            Function<Argument, T> converter,
             Consumer<T> consumer) {
-        ArgumentLink<T> link = new ArgumentLink<T>(converter, consumer);
-        link.update(get());
+        ArgumentLink<T> link = new ArgumentLink<>(converter, consumer);
+        try {
+            link.update(get());
+        } catch (Exception ex) {
+            context.getLog().log(LogLevel.ERROR, ex);
+        }
         links = ArrayUtils.add(links, link);
+        return this;
+    }
+
+    public <T> Property linkAs(
+            Function<Argument, T> converter,
+            Consumer<T> ... consumers) {
+        for (Consumer<T> consumer : consumers) {
+            linkAs(converter, consumer);
+        }
+        return this;
+    }
+    
+    public Property clearLinks() {
+        links = new Link[0];
         return this;
     }
 
@@ -171,13 +200,13 @@ public abstract class Property {
             link.update(value);
         }
     }
-    
+
     protected void updateLinks(Argument value) {
         for (Link link : links) {
             link.update(value);
         }
     }
-    
+
     private void startClock() {
         context.addClockListener(listener);
     }
@@ -206,7 +235,7 @@ public abstract class Property {
 
     }
 
-    private static class DoubleLink implements Link {
+    private class DoubleLink implements Link {
 
         private final DoubleConsumer consumer;
 
@@ -216,7 +245,11 @@ public abstract class Property {
 
         @Override
         public void update(double value) {
-            consumer.accept(value);
+            try {
+                consumer.accept(value);
+            } catch (Exception ex) {
+                context.getLog().log(LogLevel.ERROR, ex);
+            }
         }
 
         @Override
@@ -226,13 +259,13 @@ public abstract class Property {
 
     }
 
-    private static class ArgumentLink<T extends Argument> implements Link {
+    private class ArgumentLink<T> implements Link {
 
-        private final Function<Argument, Optional<T>> converter;
+        private final Function<Argument, T> converter;
         private final Consumer<T> consumer;
 
         private ArgumentLink(
-                Function<Argument, Optional<T>> converter,
+                Function<Argument, T> converter,
                 Consumer<T> consumer) {
             this.converter = Objects.requireNonNull(converter);
             this.consumer = Objects.requireNonNull(consumer);
@@ -245,7 +278,11 @@ public abstract class Property {
 
         @Override
         public void update(Argument value) {
-            converter.apply(value).ifPresent(consumer);
+            try {
+                consumer.accept(converter.apply(value));
+            } catch (Exception ex) {
+                context.getLog().log(LogLevel.ERROR, ex);
+            }
         }
 
     }
