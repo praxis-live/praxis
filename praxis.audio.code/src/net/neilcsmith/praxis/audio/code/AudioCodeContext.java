@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -35,20 +35,14 @@ import org.jaudiolibs.pipes.Pipe;
  */
 public class AudioCodeContext<D extends AudioCodeDelegate> extends CodeContext<D> {
 
-    private final Driver driver;
-    private final boolean hasUpdateMethod;
-
     private final UGenDescriptor[] ugens;
     private final AudioInPort.Descriptor[] ins;
     private final AudioOutPort.Descriptor[] outs;
 
-    private ExecutionContext execCtxt;
     private AudioContext audioCtxt;
 
     public AudioCodeContext(AudioCodeConnector<D> connector) {
-        super(connector);
-        driver = new Driver();
-        hasUpdateMethod = true;
+        super(connector, true);
         ugens = connector.extractUGens();
         ins = connector.extractIns();
         outs = connector.extractOuts();
@@ -65,26 +59,22 @@ public class AudioCodeContext<D extends AudioCodeDelegate> extends CodeContext<D
 
     @Override
     protected void hierarchyChanged() {
-        super.hierarchyChanged();
         audioCtxt = getLookup().get(AudioContext.class);
-        ExecutionContext ctxt = getLookup().get(ExecutionContext.class);
-        if (execCtxt != ctxt) {
-            if (execCtxt != null) {
-                execCtxt.removeStateListener(driver);
-                execCtxt.removeClockListener(driver);
-            }
-            execCtxt = ctxt;
-            if (ctxt != null) {
-                ctxt.addStateListener(driver);
-                if (hasUpdateMethod) {
-                    ctxt.addClockListener(driver);
-                }
-                if (ctxt.getState() == ExecutionContext.State.ACTIVE) {
-                    update(ctxt.getTime());
-                    setupDelegate();
-                }
-            }
-        }
+    }
+
+    @Override
+    protected void starting(ExecutionContext source) {
+        setupDelegate();
+    }
+
+    @Override
+    protected void stopping(ExecutionContext source) {
+        resetPorts();
+    }
+
+    @Override
+    protected void tick(ExecutionContext source) {
+        updateDelegate();
     }
 
     private void setupDelegate() {
@@ -139,30 +129,6 @@ public class AudioCodeContext<D extends AudioCodeDelegate> extends CodeContext<D
             AudioOutPort.AudioOutPipe pipe = aopd.getPort().getPipe();
             pipe.resetSwitch();
         }
-    }
-
-    private class Driver implements ExecutionContext.StateListener,
-            ExecutionContext.ClockListener {
-
-        @Override
-        public void stateChanged(ExecutionContext source) {
-            if (source.getState() == ExecutionContext.State.ACTIVE) {
-                update(source.getTime());
-                setupDelegate();
-            } else {
-                update(source.getTime());
-                resetPorts();
-            }
-            flush();
-        }
-
-        @Override
-        public void tick(ExecutionContext source) {
-            update(source.getTime());
-            updateDelegate();
-            flush();
-        }
-
     }
 
 }
