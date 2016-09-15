@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -38,7 +38,7 @@ import net.neilcsmith.praxis.impl.AbstractAsyncProperty;
 import net.neilcsmith.praxis.impl.DefaultControlOutputPort;
 import net.neilcsmith.praxis.impl.TriggerControl;
 import net.neilcsmith.praxis.video.InvalidVideoResourceException;
-import net.neilcsmith.praxis.video.VideoSettings;
+import net.neilcsmith.praxis.video.gst1.GStreamerSettings;
 
 /**
  *
@@ -158,7 +158,7 @@ public class VideoCapture extends AbstractVideoComponent {
         private String getDefaultDeviceDescription(String dev) {
             try {
                 String dsc
-                        = VideoSettings.getCaptureDevice(Integer.valueOf(dev));
+                        = GStreamerSettings.getCaptureDevice(Integer.valueOf(dev));
                 return dsc;
             } catch (Exception ex) {
                 return null;
@@ -167,7 +167,7 @@ public class VideoCapture extends AbstractVideoComponent {
         }
 
         private VideoDelegate createDelegateFromDescription(String desc) {
-            return VideoDelegateFactory.getInstance().createCaptureDelegate(desc);
+            return new BinDelegate(desc);
         }
 
     }
