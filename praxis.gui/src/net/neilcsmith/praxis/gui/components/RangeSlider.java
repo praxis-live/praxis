@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,8 +21,6 @@
  */
 package net.neilcsmith.praxis.gui.components;
 
-import net.neilcsmith.praxis.gui.impl.SingleBindingGuiComponent;
-import net.neilcsmith.praxis.gui.impl.BoundedRangeAdaptor;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import javax.swing.BorderFactory;
@@ -33,39 +31,54 @@ import javax.swing.JComponent;
 import javax.swing.border.Border;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
-import net.neilcsmith.praxis.gui.ControlBinding.Adaptor;
+import net.neilcsmith.praxis.gui.BindingContext;
+import net.neilcsmith.praxis.gui.impl.AbstractGuiComponent;
+import net.neilcsmith.praxis.gui.impl.BoundedValueAdaptor;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 
 /**
  *
  * @author Neil C Smith
  */
-class RangeSlider extends SingleBindingGuiComponent {
+class RangeSlider extends AbstractGuiComponent {
 
     private static Logger logger = Logger.getLogger(RangeSlider.class.getName());
+    
+    private final boolean vertical;
+    
+    private BindingContext bindingContext;
     private String labelText;
     private Box box;
     private JRangeSlider slider;
-    private BoundedRangeAdaptor adaptor;
-    private boolean vertical;
+    private BoundedValueAdaptor lowAdaptor;
+    private BoundedValueAdaptor highAdaptor;
+    private ControlAddress lowBinding;
+    private ControlAddress highBinding;
+    private ModelConverter converter;
+    
     private PNumber prefMin;
     private PNumber prefMax;
 
     public RangeSlider(boolean vertical) {
         labelText = "";
         this.vertical = vertical;
-//        registerControl("label", StringProperty.create( new LabelBinding(), labelText));
-//        registerControl("minimum", ArgumentProperty.create( new MinBinding(), PString.EMPTY));
-//        registerControl("maximum", ArgumentProperty.create( new MaxBinding(), PString.EMPTY));
     }
 
     @Override
     protected void initControls() {
         super.initControls();
+
+        ArgumentInfo bindingInfo = ArgumentInfo.create(ControlAddress.class, PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true));
+        registerControl("binding-low", ArgumentProperty.create(bindingInfo, new AddressBinding(false), PString.EMPTY));
+        registerControl("binding-high", ArgumentProperty.create(bindingInfo, new AddressBinding(true), PString.EMPTY));
+
         ArgumentInfo info = ArgumentInfo.create(Argument.class,
                 PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true, ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
         registerControl("minimum", ArgumentProperty.create(info, new MinBinding(), PString.EMPTY));
@@ -75,9 +88,34 @@ class RangeSlider extends SingleBindingGuiComponent {
     @Override
     protected JComponent createSwingComponent() {
         if (box == null) {
-            createComponentAndAdaptor();
+            createComponentAndAdaptors();
         }
         return box;
+    }
+    
+        @Override
+    public void hierarchyChanged() {
+        super.hierarchyChanged();
+        BindingContext ctxt = getLookup().get(BindingContext.class);
+        if (bindingContext != ctxt) {
+            if (bindingContext != null) {
+                if (lowBinding != null) {
+                    bindingContext.unbind(lowAdaptor);
+                }
+                if (highBinding != null) {
+                    bindingContext.unbind(highAdaptor);
+                }
+            }
+            if (ctxt != null) {
+                if (lowBinding != null) {
+                    ctxt.bind(lowBinding, lowAdaptor);
+                }
+                if (highBinding != null) {
+                    ctxt.bind(highBinding, highAdaptor);
+                }
+            }
+            bindingContext = ctxt;
+        }
     }
 
     @Override
@@ -91,34 +129,27 @@ class RangeSlider extends SingleBindingGuiComponent {
         updateBorders();
     }
 
-    @Override
-    protected Adaptor getBindingAdaptor() {
-        if (adaptor == null) {
-            createComponentAndAdaptor();
-        }
-        return adaptor;
-    }
-
-    private void createComponentAndAdaptor() {
-        BoundedRangeModel model = new DefaultBoundedRangeModel(0, 500, 0, 500);
-        slider = new JRangeSlider(model, vertical ? JRangeSlider.VERTICAL : JRangeSlider.HORIZONTAL,
+    private void createComponentAndAdaptors() {
+        BoundedRangeModel rangeModel = new DefaultBoundedRangeModel(0, 500, 0, 500);
+        slider = new JRangeSlider(rangeModel, vertical ? JRangeSlider.VERTICAL : JRangeSlider.HORIZONTAL,
                 JRangeSlider.LEFTRIGHT_TOPBOTTOM);
-        adaptor = new BoundedRangeAdaptor(model);
-        if (prefMin != null) {
-            adaptor.setPreferredMinimum(prefMin);
-        }
-        if (prefMax != null) {
-            adaptor.setPreferredMaximum(prefMax);
-        }
-
+        BoundedRangeModel lowModel = new DefaultBoundedRangeModel(0, 0, 0, 500);
+        BoundedRangeModel highModel = new DefaultBoundedRangeModel(500, 0, 0, 500);
+        lowAdaptor = new BoundedValueAdaptor(lowModel);
+        highAdaptor = new BoundedValueAdaptor(highModel);
+        
+        converter = new ModelConverter(rangeModel, lowModel, highModel);
+        
         slider.addAncestorListener(new AncestorListener() {
 
             public void ancestorAdded(AncestorEvent event) {
-                adaptor.setActive(true);
+                lowAdaptor.setActive(true);
+                highAdaptor.setActive(true);
             }
 
             public void ancestorRemoved(AncestorEvent event) {
-                adaptor.setActive(false);
+                lowAdaptor.setActive(false);
+                highAdaptor.setActive(false);
             }
 
             public void ancestorMoved(AncestorEvent event) {
@@ -132,14 +163,15 @@ class RangeSlider extends SingleBindingGuiComponent {
 
     }
 
-//    private void setBorders() {
-////        if (labelText.length() > 0) {
-//            box.setBorder(BorderFactory.createTitledBorder(
-//                    BorderFactory.createEtchedBorder(), labelText));
-////        } else {
-////            box.setBorder(BorderFactory.createEtchedBorder());
-////        }
-//    }
+    private void updateAdaptors() {
+        if (lowAdaptor != null && highAdaptor != null) {
+            lowAdaptor.setPreferredMinimum(prefMin);
+            lowAdaptor.setPreferredMaximum(prefMax);
+            highAdaptor.setPreferredMinimum(prefMin);
+            highAdaptor.setPreferredMaximum(prefMax);
+        }
+    }
+
     private void updateBorders() {
         if (box != null) {
             Border etched = Utils.getBorder();
@@ -154,20 +186,6 @@ class RangeSlider extends SingleBindingGuiComponent {
 
     }
 
-//    private class LabelBinding implements StringProperty.Binding {
-//
-//        public void setBoundValue(long time, String value) {
-//            labelText = value;
-//            if (box != null) {
-//                setBorders();
-//                box.revalidate();
-//            }
-//        }
-//
-//        public String getBoundValue() {
-//            return labelText;
-//        }
-//    }
     private class MinBinding implements ArgumentProperty.Binding {
 
         public void setBoundValue(long time, Argument value) {
@@ -180,9 +198,7 @@ class RangeSlider extends SingleBindingGuiComponent {
                     prefMin = null;
                 }
             }
-            if (adaptor != null) {
-                adaptor.setPreferredMinimum(prefMin);
-            }
+            updateAdaptors();
         }
 
         public Argument getBoundValue() {
@@ -206,9 +222,7 @@ class RangeSlider extends SingleBindingGuiComponent {
                     prefMax = null;
                 }
             }
-            if (adaptor != null) {
-                adaptor.setPreferredMaximum(prefMax);
-            }
+            updateAdaptors();
         }
 
         public Argument getBoundValue() {
@@ -219,4 +233,93 @@ class RangeSlider extends SingleBindingGuiComponent {
             }
         }
     }
+    
+    private class AddressBinding implements ArgumentProperty.Binding {
+
+        final boolean high;
+        
+        AddressBinding(boolean high) {
+            this.high = high;
+        }
+        
+        @Override
+        public void setBoundValue(long time, Argument value) throws Exception {
+            if (lowAdaptor == null) {
+                createComponentAndAdaptors();
+            }
+            if (bindingContext != null) {
+                bindingContext.unbind(high ? highAdaptor : lowAdaptor);
+                if (value.isEmpty()) {
+                    if (high) {
+                        highBinding = null;
+                    } else {
+                        lowBinding = null;
+                    }
+                } else {
+                    if (high) {
+                        highBinding = ControlAddress.from(value).get();
+                        bindingContext.bind(highBinding, highAdaptor);
+                    } else {
+                        lowBinding = ControlAddress.from(value).get();
+                        bindingContext.bind(lowBinding, lowAdaptor);
+                    }
+                }
+                
+            }
+        }
+
+        @Override
+        public Argument getBoundValue() {
+            ControlAddress ret = high ? highBinding : lowBinding;
+            return ret == null ? PString.EMPTY : ret;
+        }
+        
+    }
+    
+    private class ModelConverter implements ChangeListener {
+        
+        private final BoundedRangeModel rangeModel;
+        private final BoundedRangeModel lowModel;
+        private final BoundedRangeModel highModel;
+        
+        private boolean updating;
+        
+        private ModelConverter(BoundedRangeModel rangeModel,
+                BoundedRangeModel lowModel,
+                BoundedRangeModel highModel) {
+            this.rangeModel = rangeModel;
+            this.lowModel = lowModel;
+            this.highModel = highModel;
+            rangeModel.addChangeListener(this);
+            lowModel.addChangeListener(this);
+            highModel.addChangeListener(this);
+        }
+
+        @Override
+        public void stateChanged(ChangeEvent e) {
+            if (updating) {
+                return;
+            }
+            updating = true;
+            
+            if (e.getSource() == rangeModel) {
+                lowModel.setValueIsAdjusting(rangeModel.getValueIsAdjusting());
+                highModel.setValueIsAdjusting(rangeModel.getValueIsAdjusting());
+                lowModel.setValue(rangeModel.getValue());
+                highModel.setValue(rangeModel.getValue() + rangeModel.getExtent());
+            } else {
+                int low = lowModel.getValue();
+                int high = highModel.getValue();
+                int ext = high - low;
+                ext = ext < 0 ? 0 : ext;
+                rangeModel.setRangeProperties(low, ext, 0, 500, false);
+            }
+            
+            updating = false;
+        }
+        
+        
+    }
+    
+    
 }
