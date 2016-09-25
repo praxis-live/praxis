@@ -14,7 +14,7 @@
     
     @Override
     public void setup() {
-        type.linkAs(arg -> IIRFilterOp.Type.valueOf(arg.toString()), type -> {
+        type.linkAs(arg -> IIRFilter.Type.valueOf(arg.toString()), type -> {
             f1.type(type);
             f2.type(type);
         });
