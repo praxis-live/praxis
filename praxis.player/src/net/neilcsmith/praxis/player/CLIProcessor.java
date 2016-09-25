@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -29,17 +29,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.UIManager;
 import net.neilcsmith.praxis.hub.Hub;
 import net.neilcsmith.praxis.hub.net.SlaveFactory;
-import net.neilcsmith.praxis.laf.PraxisLAFManager;
 import org.netbeans.api.sendopts.CommandException;
 import org.netbeans.spi.sendopts.Env;
 import org.netbeans.spi.sendopts.Option;
 import org.netbeans.spi.sendopts.OptionProcessor;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -70,9 +67,9 @@ public class CLIProcessor extends OptionProcessor {
     @Override
     protected void process(Env env, Map<Option, String[]> optionValues) throws CommandException {
 
-        // set up UI        
-        PraxisLAFManager.getInstance().installUI();
-        UIManager.put("ClassLoader", Lookup.getDefault().lookup(ClassLoader.class));
+//        // set up UI        
+//        PraxisLAFManager.getInstance().installUI();
+//        UIManager.put("ClassLoader", Lookup.getDefault().lookup(ClassLoader.class));
 
         if (LOG.isLoggable(Level.FINE)) {
             LOG.log(Level.FINE, "Current Directory : {0}", env.getCurrentDirectory());
@@ -87,7 +84,7 @@ public class CLIProcessor extends OptionProcessor {
         }
 
     }
-
+    
     private void processSlave(Env env, Map<Option, String[]> options) throws CommandException {
         int port = SlaveFactory.DEFAULT_PORT;
         boolean loopBack = true;
