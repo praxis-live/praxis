@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -32,13 +32,17 @@ import org.jaudiolibs.pipes.impl.OpHolder;
  */
 public final class IIRFilter extends OpHolder<IIRFilterOp> implements Resettable {
 
-    public final static IIRFilterOp.Type LP6 = IIRFilterOp.Type.LP6;
-    public final static IIRFilterOp.Type LP12 = IIRFilterOp.Type.LP12;
-    public final static IIRFilterOp.Type LP24 = IIRFilterOp.Type.LP24;
-    public final static IIRFilterOp.Type HP12 = IIRFilterOp.Type.HP12;
-    public final static IIRFilterOp.Type HP24 = IIRFilterOp.Type.HP24;
-    public final static IIRFilterOp.Type BP12 = IIRFilterOp.Type.BP12;
-    public final static IIRFilterOp.Type NP12 = IIRFilterOp.Type.NP12;
+    public enum Type {
+        LP6, LP12, LP24, HP12, HP24, BP12, NP12
+    }
+
+    public final static Type LP6 = Type.LP6;
+    public final static Type LP12 = Type.LP12;
+    public final static Type LP24 = Type.LP24;
+    public final static Type HP12 = Type.HP12;
+    public final static Type HP24 = Type.HP24;
+    public final static Type BP12 = Type.BP12;
+    public final static Type NP12 = Type.NP12;
 
     private final IIRFilterOp filter;
 
@@ -66,20 +70,58 @@ public final class IIRFilter extends OpHolder<IIRFilterOp> implements Resettable
         return filter.getResonance();
     }
 
-    public IIRFilter type(IIRFilterOp.Type type) {
-        filter.setFilterType(type);
+    public IIRFilter type(Type type) {
+        switch (type) {
+            case LP6:
+                filter.setFilterType(IIRFilterOp.Type.LP6);
+                break;
+            case LP12:
+                filter.setFilterType(IIRFilterOp.Type.LP12);
+                break;
+            case LP24:
+                filter.setFilterType(IIRFilterOp.Type.LP24);
+                break;
+            case HP12:
+                filter.setFilterType(IIRFilterOp.Type.HP12);
+                break;
+            case HP24:
+                filter.setFilterType(IIRFilterOp.Type.HP24);
+                break;
+            case BP12:
+                filter.setFilterType(IIRFilterOp.Type.BP12);
+                break;
+            case NP12:
+                filter.setFilterType(IIRFilterOp.Type.NP12);
+                break;
+        }
         return this;
     }
 
-    public IIRFilterOp.Type type() {
-        return filter.getFilterType();
+    public Type type() {
+        switch (filter.getFilterType()) {
+            case LP6:
+                return Type.LP6;
+            case LP12:
+                return Type.LP12;
+            case LP24:
+                return Type.LP24;
+            case HP12:
+                return Type.HP12;
+            case HP24:
+                return Type.HP24;
+            case BP12:
+                return Type.BP12;
+            case NP12:
+                return Type.NP12;
+        }
+        return LP6;
     }
 
     @Override
     public void reset() {
-        filter.setResonance(0);
-        filter.setFrequency(20000);
-        filter.setFilterType(LP6);
+        resonance(0);
+        frequency(20000);
+        type(LP6);
     }
 
 }
