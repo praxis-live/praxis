@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,14 +22,23 @@
  */
 package net.neilcsmith.praxis.gui.components;
 
+import java.awt.Color;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.AbstractButton;
+import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
+import javax.swing.plaf.basic.BasicButtonUI;
+import javax.swing.plaf.basic.BasicGraphicsUtils;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Control;
@@ -46,7 +55,6 @@ import net.neilcsmith.praxis.gui.impl.ActionAdaptor;
 import net.neilcsmith.praxis.gui.impl.SingleBindingGuiComponent;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.ArrayProperty;
-import net.neilcsmith.praxis.impl.StringProperty;
 
 /**
  *
@@ -111,6 +119,7 @@ public class Button extends SingleBindingGuiComponent {
 
     private void createComponentAndAdaptor() {
         button = new JButton(label);
+        button.setUI(new UI());
         adaptor = new ActionAdaptor();
         button.addActionListener(adaptor);
         adaptor.setCallArguments(values);
@@ -203,48 +212,54 @@ public class Button extends SingleBindingGuiComponent {
 
     }
 
-//    private class OnClickProperty extends AbstractProperty {
-//
-//        private final CallArguments unbound = CallArguments.create(PString.EMPTY);
-//        private CallArguments cache = unbound;
-//
-//        OnClickProperty(AbstractComponent component, ControlInfo info) {
-//            super(info);
-//        }
-//
-//        @Override
-//        protected void setArguments(long time, CallArguments args) throws Exception {
-//            Argument arg = args.get(0);
-//            if (arg.isEmpty()) {
-//                onClickAddress = null;
-//                onClickArgs = null;
-//                cache = unbound;
-//            } else {
-//                try {
-//                    onClickAddress = ControlAddress.coerce(arg);
-//                    int argCount = args.getSize();
-//                    if (argCount > 1) {
-//                        Argument[] clArgs = new Argument[argCount - 1];
-//                        for (int i = 0; i < clArgs.length; i++) {
-//                            clArgs[i] = args.get(i + 1);
-//                        }
-//                        onClickArgs = CallArguments.create(clArgs);
-//                    } else {
-//                        onClickArgs = CallArguments.EMPTY;
-//                    }
-//                    cache = args;
-//                } catch (Exception ex) {
-//                    onClickAddress = null;
-//                    onClickArgs = null;
-//                    cache = unbound;
-//                }
-//            }
-//            updateAdaptor();
-//        }
-//
-//        @Override
-//        protected CallArguments getArguments() {
-//            return cache;
-//        }
-//    }
+    private static class UI extends BasicButtonUI {
+
+        @Override
+        public void installUI(JComponent c) {
+            super.installUI(c);
+            AbstractButton b = (AbstractButton) c;
+            b.setRolloverEnabled(true);
+            b.setBorder(new EmptyBorder(8, 8, 8, 8));
+        }
+
+        @Override
+        public void paint(Graphics g, JComponent c) {
+            AbstractButton b = (AbstractButton) c;
+            g.setColor(b.hasFocus() || b.getModel().isRollover() ?
+                    Utils.mix(c.getBackground(), c.getForeground(), 0.8) :
+                    Utils.mix(c.getBackground(), c.getForeground(), 0.6));
+            g.drawRect(0, 0, c.getWidth() - 1, c.getHeight() - 1);
+            super.paint(g, c);
+        }
+
+        @Override
+        protected void paintButtonPressed(Graphics g, AbstractButton b) {
+            g.setColor(b.getForeground());
+            g.fillRect(0, 0, b.getWidth(), b.getHeight());
+        }
+
+        @Override
+        protected void paintText(Graphics g, AbstractButton b, Rectangle textRect, String text) {           
+            Color fg = b.getForeground();
+            ButtonModel model = b.getModel();
+            FontMetrics fm = g.getFontMetrics();
+            int mnemonicIndex = b.getDisplayedMnemonicIndex();
+            if (model.isPressed() || model.isSelected()) {
+                g.setColor(b.getBackground());
+            } else if (!model.isRollover()) {
+                g.setColor(Utils.mix(b.getBackground(), fg, 0.8));
+            }else {
+                g.setColor(b.getForeground());
+            }
+            BasicGraphicsUtils.drawStringUnderlineCharAt(g, text, mnemonicIndex,
+                    textRect.x + getTextShiftOffset(),
+                    textRect.y + fm.getAscent() + getTextShiftOffset());
+        }
+        
+        
+        
+        
+    }
+    
+    
 }

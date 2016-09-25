@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -89,9 +89,9 @@ public class XYController extends AbstractGuiComponent {
         registerControl("maximum-x", ArgumentProperty.create(info, new MaxBinding(xPrefs), PString.EMPTY));
         registerControl("maximum-y", ArgumentProperty.create(info, new MaxBinding(yPrefs), PString.EMPTY));
         
-        info = ArgumentInfo.create(PString.class, PMap.create(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
-        registerControl("scale-x", ArgumentProperty.create(info, new ScaleBinding(xPrefs), PString.EMPTY));
-        registerControl("scale-y", ArgumentProperty.create(info, new ScaleBinding(yPrefs), PString.EMPTY));
+//        info = ArgumentInfo.create(PString.class, PMap.create(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
+//        registerControl("scale-x", ArgumentProperty.create(info, new ScaleBinding(xPrefs), PString.EMPTY));
+//        registerControl("scale-y", ArgumentProperty.create(info, new ScaleBinding(yPrefs), PString.EMPTY));
     }
     
     
@@ -132,10 +132,10 @@ public class XYController extends AbstractGuiComponent {
         if (xAdaptor != null && yAdaptor != null) {
             xAdaptor.setPreferredMinimum(xPrefs.minimum);
             xAdaptor.setPreferredMaximum(xPrefs.maximum);
-            xAdaptor.setPreferredScale(xPrefs.scale);
+//            xAdaptor.setPreferredScale(xPrefs.scale);
             yAdaptor.setPreferredMinimum(yPrefs.minimum);
             yAdaptor.setPreferredMaximum(yPrefs.maximum);
-            yAdaptor.setPreferredScale(yPrefs.scale);
+//            yAdaptor.setPreferredScale(yPrefs.scale);
         }
     }
 

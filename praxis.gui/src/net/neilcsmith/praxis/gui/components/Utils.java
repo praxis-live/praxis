@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -40,6 +40,22 @@ class Utils {
     static Border getBorder() {
         return BorderFactory.createEtchedBorder(EtchedBorder.RAISED);
     }
+    
+    static Color mix(Color bg, Color fg, double mix) {
+        int amt = (int) Math.round(mix * 255);
+        amt = amt < 0 ? 0 : amt > 255 ? 255 : amt;
+        return new Color(
+                mix(bg.getRed(), fg.getRed(), amt),
+                mix(bg.getGreen(), fg.getGreen(), amt),
+                mix(bg.getBlue(), fg.getBlue(), amt)
+        );
+    }
+    
+    
+    private static int mix(int a, int b, int amt) {
+        return a + (((b - a) * amt) >> 8);
+    }
+    
     
     
     private static class DefaultBorder extends EtchedBorder {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,6 +21,10 @@
  */
 package net.neilcsmith.praxis.gui.components;
 
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
 import net.neilcsmith.praxis.gui.impl.SingleBindingGuiComponent;
 import net.neilcsmith.praxis.gui.impl.BoundedValueAdaptor;
 import java.util.logging.Logger;
@@ -29,10 +33,10 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.JSlider;
-import javax.swing.UIDefaults;
 import javax.swing.border.Border;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
+import javax.swing.plaf.basic.BasicSliderUI;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
@@ -75,8 +79,6 @@ class Slider extends SingleBindingGuiComponent {
         info = ArgumentInfo.create(PString.class, PMap.create(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
         registerControl("scale", ArgumentProperty.create(info, new ScaleBinding(), PString.EMPTY));
     }
-    
-    
 
     @Override
     protected JComponent createSwingComponent() {
@@ -96,10 +98,7 @@ class Slider extends SingleBindingGuiComponent {
 
     private void createComponentAndAdaptor() {
         slider = new JSlider(vertical ? JSlider.VERTICAL : JSlider.HORIZONTAL, 0, 500, 0);
-        slider.putClientProperty("JSlider.isFilled", Boolean.TRUE);
-        slider.putClientProperty("Nimbus.Overrides", new UIDefaults(new Object[]{
-            "Slider.thumbHeight", 24,
-            "Slider.thumbWidth", 24}));
+        slider.setUI(new UI(slider));
         adaptor = new BoundedValueAdaptor(slider.getModel());
         if (prefMin != null) {
             adaptor.setPreferredMinimum(prefMin);
@@ -139,11 +138,10 @@ class Slider extends SingleBindingGuiComponent {
                 box.setBorder(etched);
             } else {
                 box.setBorder(BorderFactory.createTitledBorder(
-                    etched, labelText));
+                        etched, labelText));
             }
             box.revalidate();
         }
-            
 
     }
 
@@ -157,10 +155,6 @@ class Slider extends SingleBindingGuiComponent {
         }
         updateBorders();
     }
-    
-    
-
-
 
 //    private class LabelBinding implements StringProperty.Binding {
 //
@@ -175,7 +169,6 @@ class Slider extends SingleBindingGuiComponent {
 //            return labelText;
 //        }
 //    }
-
     private class MinBinding implements ArgumentProperty.Binding {
 
         public void setBoundValue(long time, Argument value) {
@@ -235,12 +228,10 @@ class Slider extends SingleBindingGuiComponent {
         public void setBoundValue(long time, Argument value) {
             if (value.isEmpty()) {
                 prefScale = null;
+            } else if (value instanceof PString) {
+                prefScale = (PString) value;
             } else {
-                if (value instanceof PString) {
-                    prefScale = (PString) value;
-                } else {
-                    prefScale = PString.valueOf(value);
-                }
+                prefScale = PString.valueOf(value);
             }
             if (adaptor != null) {
                 adaptor.setPreferredScale(prefScale);
@@ -257,5 +248,145 @@ class Slider extends SingleBindingGuiComponent {
 
     }
 
+    private static class UI extends BasicSliderUI {
+
+        public UI(JSlider slider) {
+            super(slider);
+        }
+
+        @Override
+        protected Dimension getThumbSize() {
+            if (slider.getOrientation() == JSlider.VERTICAL) {
+                return new Dimension(36, 12);
+            } else {
+                return new Dimension(12, 36);
+            }
+        }
+
+        @Override
+        public void paintFocus(Graphics g) {
+            // do nothing
+        }
+
+        @Override
+        public void paintTrack(Graphics g) {
+            Rectangle r = trackRect;
+
+            g.setColor(slider.hasFocus()
+                    ? Utils.mix(slider.getBackground(), slider.getForeground(), 0.8)
+                    : Utils.mix(slider.getBackground(), slider.getForeground(), 0.6));
+
+            g.drawRect(r.x, r.y, r.width - 1, r.height - 1);
+        }
+
+        @Override
+        public void paintThumb(Graphics g) {
+            Rectangle r = thumbRect;
+            if (isDragging()) {
+                g.setColor(slider.getForeground());
+            } else {
+                g.setColor(Utils.mix(slider.getBackground(), slider.getForeground(), 0.8));
+            }
+            g.fillRect(r.x, r.y, r.width, r.height);
+        }
+
+        @Override
+        protected TrackListener createTrackListener(JSlider slider) {
+            return new TrackListener() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if (!slider.isEnabled()) {
+                        return;
+                    }
+                    calculateGeometry();
+
+                    currentMouseX = e.getX();
+                    currentMouseY = e.getY();
+
+                    if (slider.isRequestFocusEnabled()) {
+                        slider.requestFocus();
+                    }
+
+                    switch (slider.getOrientation()) {
+                        case JSlider.VERTICAL:
+                            offset = currentMouseY - thumbRect.y;
+                            break;
+                        case JSlider.HORIZONTAL:
+                            offset = currentMouseX - thumbRect.x;
+                            break;
+                    }
+                }
+
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    int thumbMiddle;
+
+                    if (!slider.isEnabled()) {
+                        return;
+                    }
+
+                    currentMouseX = e.getX();
+                    currentMouseY = e.getY();
+
+                    slider.setValueIsAdjusting(true);
+
+                    if (slider.getOrientation() == JSlider.VERTICAL) {
+                        int halfThumbHeight = thumbRect.height / 2;
+                        int thumbTop = e.getY() - offset;
+                        int trackTop = trackRect.y;
+                        int trackBottom = trackRect.y + (trackRect.height - 1);
+                        int vMax = yPositionForValue(slider.getMaximum()
+                                - slider.getExtent());
+
+                        if (drawInverted()) {
+                            trackBottom = vMax;
+                        } else {
+                            trackTop = vMax;
+                        }
+                        thumbTop = Math.max(thumbTop, trackTop - halfThumbHeight);
+                        thumbTop = Math.min(thumbTop, trackBottom - halfThumbHeight);
+
+                        setThumbLocation(thumbRect.x, thumbTop);
+
+                        thumbMiddle = thumbTop + halfThumbHeight;
+                        slider.setValue(valueForYPosition(thumbMiddle));
+                    } else {
+                        int halfThumbWidth = thumbRect.width / 2;
+                        int thumbLeft = e.getX() - offset;
+                        int trackLeft = trackRect.x;
+                        int trackRight = trackRect.x + (trackRect.width - 1);
+                        int hMax = xPositionForValue(slider.getMaximum()
+                                - slider.getExtent());
+
+                        if (drawInverted()) {
+                            trackLeft = hMax;
+                        } else {
+                            trackRight = hMax;
+                        }
+                        thumbLeft = Math.max(thumbLeft, trackLeft - halfThumbWidth);
+                        thumbLeft = Math.min(thumbLeft, trackRight - halfThumbWidth);
+
+                        setThumbLocation(thumbLeft, thumbRect.y);
+
+                        thumbMiddle = thumbLeft + halfThumbWidth;
+                        slider.setValue(valueForXPosition(thumbMiddle));
+
+                    }
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    if (!slider.isEnabled()) {
+                        return;
+                    }
+                    offset = 0;
+                    slider.setValueIsAdjusting(false);
+                    slider.repaint();
+                }
+
+            };
+        }
+
+    }
 
 }

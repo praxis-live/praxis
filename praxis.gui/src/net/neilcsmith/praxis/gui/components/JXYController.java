@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -57,12 +57,6 @@ class JXYController extends JComponent {
     private int mouseYOffset;
     private boolean draggingControl;
 
-    private Painter<JComponent> thumbPainter;
-    private Painter<JComponent> selectedThumbPainter;
-    private Color foreground;
-    private Color selectedForeground;
-    private Color background;
-
     /**
      * Creates a new instance of XYController
      */
@@ -82,33 +76,6 @@ class JXYController extends JComponent {
         ModelListener modelListener = new ModelListener();
         xRangeModel.addChangeListener(modelListener);
         yRangeModel.addChangeListener(modelListener);
-        updateUI();
-    }
-
-    @Override
-    public void updateUI() {
-        super.updateUI();
-        UIDefaults defs = UIManager.getDefaults();
-        Object val = defs.get("Slider:SliderThumb[Enabled].backgroundPainter");
-        if (val instanceof Painter) {
-            thumbPainter = (Painter<JComponent>) val;
-        }
-        val = defs.get("Slider:SliderThumb[Focused+Pressed].backgroundPainter");
-        if (val instanceof Painter) {
-            selectedThumbPainter = (Painter<JComponent>) val;
-        }
-        val = defs.get("controlShadow");
-        if (val instanceof Color) {
-            foreground = (Color) val;
-        }
-        val = defs.get("nimbusFocus");
-        if (val instanceof Color) {
-            selectedForeground = (Color) val;
-        }
-        val = defs.get("desktop");
-        if (val instanceof Color) {
-            background = (Color) val;
-        }
     }
 
     public BoundedRangeModel getXRangeModel() {
@@ -159,33 +126,28 @@ class JXYController extends JComponent {
         Graphics2D g2d = (Graphics2D) graphics;
         int width = getWidth();
         int height = getHeight();
-        if (background != null) {
-            g2d.setColor(background);
-            g2d.fillRect(0, 0, width, height);
-        }
-
-        Painter<JComponent> p;
+        
         if (draggingControl) {
-            g2d.setColor(selectedForeground == null ? getForeground().brighter() : selectedForeground);
-            p = selectedThumbPainter;
+            g2d.setColor(Utils.mix(getBackground(), getForeground(), 0.4));
         } else {
-            g2d.setColor(foreground == null ? getForeground() : foreground);
-            p = thumbPainter;
+            g2d.setColor(Utils.mix(getBackground(), getForeground(), 0.2));
         }
-
+        g2d.fillRect(controlXPos+2, controlYPos+2, controlWidth-2, controlWidth-2);
+        
+        if (draggingControl) {
+            g2d.setColor(getForeground());
+        } else {
+            g2d.setColor(Utils.mix(getBackground(), getForeground(), 0.8));
+        }
         int radius = controlWidth / 2;
         g2d.drawLine(controlXPos + radius, 0, controlXPos + radius, height);
         g2d.drawLine(0, controlYPos + radius, width, controlYPos + radius);
-
-        if (p != null) {
-            g2d.translate(controlXPos, controlYPos);
-            p.paint(g2d, this, controlWidth, controlWidth);
-            g2d.translate(-controlXPos, -controlYPos);
-        } else {
-            g2d.drawRect(controlXPos + 1, controlYPos + 1,
-                    controlWidth - 1, controlWidth - 1);
-        }
-
+        g2d.drawRect(controlXPos + 1, controlYPos + 1,
+                controlWidth - 1, controlWidth - 1);
+        
+        g2d.setColor(Utils.mix(getBackground(), getForeground(), 0.6));
+        g2d.drawRect(0, 0, width-1, height-1);
+        
     }
 
     protected int xPositionForModelValue() {
