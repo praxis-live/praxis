@@ -42,6 +42,7 @@ import net.neilcsmith.praxis.util.PMath;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public class BoundedRangeAdaptor extends ControlBinding.Adaptor implements ChangeListener {
 
     private final static double DEFAULT_MINIMUM = 0;
