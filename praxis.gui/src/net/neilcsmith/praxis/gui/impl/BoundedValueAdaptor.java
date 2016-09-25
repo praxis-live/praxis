@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,8 +22,6 @@
  */
 package net.neilcsmith.praxis.gui.impl;
 
-import net.neilcsmith.praxis.util.interpolation.Interpolator;
-import net.neilcsmith.praxis.util.interpolation.LinearInterpolator;
 import java.util.logging.Logger;
 import javax.swing.BoundedRangeModel;
 import javax.swing.event.ChangeEvent;
@@ -36,7 +34,6 @@ import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.gui.ControlBinding;
-import net.neilcsmith.praxis.util.interpolation.ExponentialInterpolator;
 import net.neilcsmith.praxis.util.PMath;
 
 /**
@@ -55,6 +52,7 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
     private double maximum;
     private PNumber prefMin;
     private PNumber prefMax;
+    private PNumber prefSkew;
     private PString prefScale;
     private double value;
     private Interpolator interpolator;
@@ -65,7 +63,7 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
         }
         this.model = model;
         model.addChangeListener(new ChangeHandler());
-        interpolator = LinearInterpolator.getInstance();
+        interpolator = new Interpolator(1);
         this.value = DEFAULT_MINIMUM;
         this.minimum = DEFAULT_MINIMUM;
         this.maximum = DEFAULT_MAXIMUM;
@@ -92,11 +90,21 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
         return prefMax;
     }
 
-    public void setPreferredScale(PString scale) {
-        prefScale = scale;
+    public void setPreferredSkew(PNumber skew) {
+        prefSkew = skew;
         updateScale();
     }
 
+    public PNumber getPreferredSkew() {
+        return prefSkew;
+    }
+
+    @Deprecated
+    public void setPreferredScale(PString scale) {
+        prefScale = scale;
+    }
+
+    @Deprecated
     public PString getInterpolator() {
         return prefScale;
     }
@@ -124,20 +132,18 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
     }
 
     private void updateScale() {
-        Argument intHint = prefScale;
-        if (intHint == null || intHint.isEmpty()) {
-            if (info != null) {
-                intHint = info.getProperties().get("scale-hint");
+        double skew = 1;
+        if (prefSkew != null) {
+            skew = prefSkew.value();
+        } else if (info != null) {
+            ArgumentInfo[] args = info.getOutputsInfo();
+            if (args.length > 0) {
+                skew = args[0].getProperties().getDouble(PNumber.KEY_SKEW, skew);
             }
-
         }
-        if (intHint == null) {
-            interpolator = LinearInterpolator.getInstance();
-        } else if (intHint.toString().equalsIgnoreCase("Exponential")) {
-            interpolator = ExponentialInterpolator.getInstance();
-        } else {
-            interpolator = LinearInterpolator.getInstance();
-        }
+        
+        skew = skew < 0.125 ? 0.125 : skew > 8 ? 8 : skew;
+        interpolator = new Interpolator(skew);
         updateModel();
     }
 
@@ -228,5 +234,37 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
         int val = (int) Math.round(ratio * (mMax - mMin));
         val += mMin;
         return val;
+
     }
+
+    private static class Interpolator {
+
+        private final double skew;
+
+        Interpolator(double skew) {
+            this.skew = skew;
+        }
+
+        double interpolate(double value) {
+            if (value <= 0) {
+                return 0;
+            } else if (value >= 1) {
+                return 1;
+            } else {
+                return Math.pow(value, skew);
+            }
+        }
+
+        double reverseInterpolate(double value) {
+            if (value <= 0) {
+                return 0;
+            } else if (value >= 1) {
+                return 1;
+            } else {
+                return Math.pow(value, 1.0 / skew);
+            }
+        }
+
+    }
+
 }
