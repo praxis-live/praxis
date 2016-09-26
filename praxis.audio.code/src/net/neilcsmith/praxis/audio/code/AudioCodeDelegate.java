@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,7 +23,10 @@
 package net.neilcsmith.praxis.audio.code;
 
 import net.neilcsmith.praxis.audio.code.userapi.Add;
+import net.neilcsmith.praxis.audio.code.userapi.Function;
 import net.neilcsmith.praxis.audio.code.userapi.Mod;
+import net.neilcsmith.praxis.audio.code.userapi.OpGen;
+import net.neilcsmith.praxis.audio.code.userapi.Table;
 import net.neilcsmith.praxis.audio.code.userapi.Tee;
 import net.neilcsmith.praxis.code.DefaultCodeDelegate;
 import org.jaudiolibs.pipes.Pipe;
@@ -82,6 +85,10 @@ public class AudioCodeDelegate extends DefaultCodeDelegate {
         return new Tee();
     }
     
+    public final OpGen fn(Function function) {
+        return new OpGen().function(function);
+    }
+    
     public final double noteToFrequency(String note) {
         int midi = noteToMidi(note);
         if (midi < 0) {
@@ -99,5 +106,8 @@ public class AudioCodeDelegate extends DefaultCodeDelegate {
         return NoteUtils.midiToFrequency(midi);
     }
     
+    public double tabread(Table table, double position) {
+        return table == null ? 0 : table.get(0, position * table.size());
+    }
     
 }
