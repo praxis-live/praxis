@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,6 +22,7 @@
  */
 package net.neilcsmith.praxis.audio.code.userapi;
 
+import net.neilcsmith.praxis.audio.code.Resettable;
 import org.jaudiolibs.pipes.Buffer;
 import org.jaudiolibs.pipes.impl.MultiInOut;
 
@@ -29,12 +30,19 @@ import org.jaudiolibs.pipes.impl.MultiInOut;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class Mod extends MultiInOut {
+public class Mod extends MultiInOut implements Resettable {
+
+    private Function function;
 
     public Mod() {
         super(32, 1);
     }
 
+    public Mod function(Function function) {
+        this.function = function;
+        return this;
+    }
+    
     @Override
     protected void writeOutput(Buffer[] inputs, Buffer output, int index) {
         if (inputs.length == 0) {
@@ -42,19 +50,45 @@ public class Mod extends MultiInOut {
             return;
         }
         float[] out = output.getData();
-        for (int i = 0; i < inputs.length; i++) {
-            float[] in = inputs[i].getData();
-            if (i == 0) {
-                for (int k = 0, z = output.getSize(); k < z; k++) {
-                    out[k] = in[k];
-                }
-            } else {
-                for (int k = 0, z = output.getSize(); k < z; k++) {
-                    out[k] *= in[k];
+        if (function == null) {
+            for (int i = 0; i < inputs.length; i++) {
+                float[] in = inputs[i].getData();
+                if (i == 0) {
+                    for (int k = 0, z = output.getSize(); k < z; k++) {
+                        out[k] = in[k];
+                    }
+                } else {
+                    for (int k = 0, z = output.getSize(); k < z; k++) {
+                        out[k] *= in[k];
+                    }
                 }
             }
-
+        } else {
+            for (int i = 0; i < inputs.length; i++) {
+                float[] in = inputs[i].getData();
+                if (i == 0) {
+                    for (int k = 0, z = output.getSize(); k < z; k++) {
+                        out[k] = in[k];
+                    }
+                } else {
+                    for (int k = 0, z = output.getSize(); k < z; k++) {
+                        out[k] = (float) function.process(in[k], out[k]);
+                    }
+                }
+            }
         }
+
+    }
+
+    @Override
+    public void reset() {
+        function = null;
+    }
+
+    public static interface Function {
+
+        public double process(double a, double b);
+
     }
 
 }

@@ -81,6 +81,18 @@ public class AudioCodeDelegate extends DefaultCodeDelegate {
         return mod;
     }
 
+    public final Mod modFn(Mod.Function function) {
+        Mod mod = new Mod();
+        mod.function(function);
+        return mod;
+    }
+    
+    public final Mod modFn(Pipe pipe, Mod.Function function) {
+        Mod mod = modFn(function);
+        mod.addSource(pipe);
+        return mod;
+    }
+    
     public final Tee tee() {
         return new Tee();
     }
