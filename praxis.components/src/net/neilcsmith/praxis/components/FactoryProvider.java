@@ -29,6 +29,7 @@ import net.neilcsmith.praxis.components.routing.Send;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
 import net.neilcsmith.praxis.impl.AbstractComponentFactory;
+import net.neilcsmith.praxis.meta.TypeRewriter;
 
 /**
  *
@@ -57,8 +58,12 @@ public class FactoryProvider implements ComponentFactoryProvider {
             // CONTAINER
             addComponent("core:container", data(UserContainer.class));
             addComponent("core:container:property", data(ContainerProperty.class).deprecated());
-            addComponent("core:container:input", data(ContainerInput.class));
-            addComponent("core:container:output", data(ContainerOutput.class));
+            addComponent("core:container:input", data(ContainerInput.class)
+                    .replacement("core:container:in").add(TypeRewriter.getIdentity()));
+            addComponent("core:container:output", data(ContainerOutput.class)
+                    .replacement("core:container:out").add(TypeRewriter.getIdentity()));
+            addComponent("core:container:in", data(ContainerInput.class));
+            addComponent("core:container:out", data(ContainerOutput.class));
             
         }
     }

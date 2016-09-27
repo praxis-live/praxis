@@ -81,8 +81,12 @@ public class AudioFactoryProvider implements ComponentFactoryProvider {
             addComponent("audio:sampling:player", data(StereoPlayer.class).deprecated()
                     .replacement("audio:player").add(TypeRewriter.getIdentity()));
             
-            addComponent("audio:container:input", data(AudioContainerInput.class));
-            addComponent("audio:container:output", data(AudioContainerOutput.class));
+            addComponent("audio:container:input", data(AudioContainerInput.class)
+                    .replacement("audio:container:in").add(TypeRewriter.getIdentity()));
+            addComponent("audio:container:output", data(AudioContainerOutput.class)
+                    .replacement("audio:container:out").add(TypeRewriter.getIdentity()));
+            addComponent("audio:container:in", data(AudioContainerInput.class));
+            addComponent("audio:container:out", data(AudioContainerOutput.class));
             
         }
     }

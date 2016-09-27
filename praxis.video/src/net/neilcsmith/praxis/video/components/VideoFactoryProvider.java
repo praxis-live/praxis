@@ -77,8 +77,13 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
             addComponent("video:test:save", data(ImageSave.class).test());
             
             /// CONTAINER
-            addComponent("video:container:input", data(VideoContainerInput.class));
-            addComponent("video:container:output", data(VideoContainerOutput.class));
+            addComponent("video:container:input", data(VideoContainerInput.class)
+                    .replacement("video:container:in").add(TypeRewriter.getIdentity()));
+            addComponent("video:container:output", data(VideoContainerOutput.class)
+                    .replacement("video:container:out").add(TypeRewriter.getIdentity()));
+            
+            addComponent("video:container:in", data(VideoContainerInput.class));
+            addComponent("video:container:out", data(VideoContainerOutput.class));
 
         }
     }
