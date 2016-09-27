@@ -6,11 +6,8 @@
 
 package net.neilcsmith.praxis.core.types;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.stream.Collectors;
 import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.core.CallArguments;
-import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -66,14 +63,16 @@ public class PArrayTest {
         System.out.println(arrStr);
         PArray a1 = PArray.valueOf(arrStr);
         System.out.println("Array 1");
-        for (Argument a : a1) {
-            System.out.println(a);
-        }
+//        for (Argument a : a1) {
+//            System.out.println(a);
+//        }
+        a1.stream().forEach(System.out::println);
         System.out.println("Array 2");
         PArray a2 = PArray.coerce(a1.get(3));
-        for (Argument a : a2) {
-            System.out.println(a);
-        }
+//        for (Argument a : a2) {
+//            System.out.println(a);
+//        }
+        System.out.println(a2.stream().map(Argument::toString).collect(Collectors.joining(" | ")));
         assertEquals(2, a2.getSize());
     }
 

@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.CallArguments;
@@ -133,6 +134,10 @@ public final class PArray extends Argument implements Iterable<Argument> {
         return new Itr();
     }
 
+    public Stream<Argument> stream() {
+        return Stream.of(data);
+    }
+    
     private class Itr implements Iterator<Argument> {
 
         int cursor = 0;
