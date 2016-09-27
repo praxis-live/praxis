@@ -38,6 +38,8 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
  */
 public final class PBytes extends Argument {
     
+    public final static PBytes EMPTY = new PBytes(new byte[0], "");
+    
     private final byte[] bytes;
 
     private String str;
@@ -91,12 +93,35 @@ public final class PBytes extends Argument {
         }
         return false;
     }
+
+    @Override
+    public boolean isEquivalent(Argument arg) {
+         try {
+            if (arg == this) {
+                return true;
+            }
+            PBytes other = PBytes.coerce(arg);
+            return Arrays.equals(bytes, other.bytes);
+        } catch (ArgumentFormatException ex) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return bytes.length == 0;
+    }
+
+    
     
     public static PBytes valueOf(byte[] bytes) {
         return new PBytes(bytes.clone(), null);
     }
     
     public static PBytes valueOf(String str) throws ArgumentFormatException {
+        if (str.trim().isEmpty()) {
+            return PBytes.EMPTY;
+        }
         try {
             byte[] bytes = Base64.getMimeDecoder().decode(str);
             return new PBytes(bytes, str);
@@ -127,10 +152,10 @@ public final class PBytes extends Argument {
     
     public static class OutputStream extends ByteArrayOutputStream {
         
-        private OutputStream() {
+        public OutputStream() {
         }
         
-        private OutputStream(int size) {
+        public OutputStream(int size) {
             super(size);
         }
         
