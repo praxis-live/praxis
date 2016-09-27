@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -36,6 +36,7 @@ import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.logging.LogLevel;
 import org.jaudiolibs.pipes.Buffer;
+import org.jaudiolibs.pipes.Pipe;
 
 /**
  *
@@ -77,6 +78,16 @@ class AudioOutPort extends DefaultAudioOutputPort {
 
         private float last;
         private boolean switchAndRamp;
+        private CodeContext<?> context;
+
+        @Override
+        public void process(Pipe sink, Buffer buffer, long time) {
+            try {
+                super.process(sink, buffer, time);
+            } catch (Exception ex) {
+                context.getLog().log(LogLevel.ERROR, ex);
+            }
+        }
         
         @Override
         protected void process(Buffer buffer, boolean rendering) {
@@ -137,6 +148,7 @@ class AudioOutPort extends DefaultAudioOutputPort {
                 }
                 port = new AudioOutPort(new AudioOutPipe());
             }
+            port.out.context = context;
             try {
                 field.set(context.getDelegate(), port.out);
             } catch (Exception ex) {
