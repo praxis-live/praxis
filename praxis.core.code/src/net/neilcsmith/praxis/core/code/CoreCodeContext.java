@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,7 +22,6 @@
  */
 package net.neilcsmith.praxis.core.code;
 
-import java.util.logging.Logger;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.core.ExecutionContext;
 import net.neilcsmith.praxis.logging.LogLevel;
@@ -33,85 +32,44 @@ import net.neilcsmith.praxis.logging.LogLevel;
  */
 public class CoreCodeContext extends CodeContext<CoreCodeDelegate> {
 
-    private final static Logger LOG = Logger.getLogger(CoreCodeContext.class.getName());
-
-    private final Driver driver;
-    private final boolean hasUpdateMethod;
-
-    private ExecutionContext execCtxt;
-
     public CoreCodeContext(CoreCodeConnector connector) {
-        super(connector);
-        hasUpdateMethod = connector.hasUpdateMethod();
-        driver = new Driver();
+        super(connector, connector.hasUpdateMethod());
     }
 
     @Override
-    protected void hierarchyChanged() {
-        super.hierarchyChanged();
-        ExecutionContext ctxt = getLookup().get(ExecutionContext.class);
-        if (execCtxt != ctxt) {
-            if (execCtxt != null) {
-                execCtxt.removeStateListener(driver);
-                execCtxt.removeClockListener(driver);
-            }
-            execCtxt = ctxt;
-            if (ctxt != null) {
-                ctxt.addStateListener(driver);
-                if (hasUpdateMethod) {
-                    ctxt.addClockListener(driver);
-                }
-                if (ctxt.getState() == ExecutionContext.State.ACTIVE) {
-                    update(ctxt.getTime());
-                    try {
-                        getDelegate().setup();
-                    } catch (Exception e) {
-                        getLog().log(LogLevel.ERROR, e, "Exception thrown during setup()");
-                    }
-                }
+    protected void starting(ExecutionContext source, boolean fullStart) {
+        try {
+            getDelegate().setup();
+        } catch (Exception e) {
+            getLog().log(LogLevel.ERROR, e, "Exception thrown during setup()");
+        }
+        if (fullStart) {
+            try {
+                getDelegate().starting();
+            } catch (Exception e) {
+                getLog().log(LogLevel.ERROR, e, "Exception thrown during starting()");
             }
         }
     }
 
-    private class Driver implements ExecutionContext.StateListener,
-            ExecutionContext.ClockListener {
-
-        @Override
-        public void stateChanged(ExecutionContext source) {
-            if (source.getState() == ExecutionContext.State.ACTIVE) {
-                update(source.getTime());
-                try {
-                    getDelegate().setup();
-                } catch (Exception e) {
-                    getLog().log(LogLevel.ERROR, e, "Exception thrown during setup()");
-                }
-                try {
-                    getDelegate().starting();
-                } catch (Exception e) {
-                    getLog().log(LogLevel.ERROR, e, "Exception thrown during starting()");
-                }
-            } else {
-                update(source.getTime());
-                try {
-                    getDelegate().stopping();
-                } catch (Exception e) {
-                    getLog().log(LogLevel.ERROR, e, "Exception thrown during stopping()");
-                }
-            }
-            flush();
-        }
-
-        @Override
-        public void tick(ExecutionContext source) {
-            update(source.getTime());
+    @Override
+    protected void stopping(ExecutionContext source, boolean fullStop) {
+        if (fullStop) {
             try {
-                getDelegate().update();
+                getDelegate().stopping();
             } catch (Exception e) {
-                getLog().log(LogLevel.ERROR, e, "Exception thrown during update()");
+                getLog().log(LogLevel.ERROR, e, "Exception thrown during stopping()");
             }
-            flush();
         }
+    }
 
+    @Override
+    protected void tick(ExecutionContext source) {
+        try {
+            getDelegate().update();
+        } catch (Exception e) {
+            getLog().log(LogLevel.ERROR, e, "Exception thrown during update()");
+        }
     }
 
 }
