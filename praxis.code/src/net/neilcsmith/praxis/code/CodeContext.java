@@ -155,7 +155,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
                 if (requireClock) {
                     ctxt.addClockListener(driver);
                 }
-                handleStateChanged(ctxt);
+                handleStateChanged(ctxt, false);
             }
         }
     }
@@ -163,18 +163,26 @@ public abstract class CodeContext<D extends CodeDelegate> {
     protected void hierarchyChanged() {
     }
 
-    final void handleStateChanged(ExecutionContext source) {
+    final void handleStateChanged(ExecutionContext source, boolean full) {
         reset();
         update(source.getTime());
         if (source.getState() == ExecutionContext.State.ACTIVE) {
-            starting(source);
+            starting(source, full);
         } else {
-            stopping(source);
+            stopping(source, full);
         }
         flush();
     }
+    
+    protected void starting(ExecutionContext source, boolean fullStart) {
+        starting(source);
+    }
 
     protected void starting(ExecutionContext source) {
+    }
+    
+    protected void stopping(ExecutionContext source, boolean fullStop) {
+        stopping(source);
     }
     
     protected void stopping(ExecutionContext source) {
@@ -393,7 +401,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
 
         @Override
         public void stateChanged(ExecutionContext source) {
-            handleStateChanged(source);
+            handleStateChanged(source, true);
         }
 
         @Override
