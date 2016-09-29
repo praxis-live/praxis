@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -32,20 +32,19 @@ import javax.sound.midi.MidiMessage;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
+import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Transmitter;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
-import net.neilcsmith.praxis.core.InvalidAddressException;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.Packet;
 import net.neilcsmith.praxis.core.PacketRouter;
-import net.neilcsmith.praxis.core.RootHub;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.ArgumentProperty;
 import net.neilcsmith.praxis.impl.InstanceLookup;
-import net.neilcsmith.praxis.impl.RootState;
+import net.neilcsmith.praxis.impl.StringProperty;
 import net.neilcsmith.praxis.midi.MidiInputContext;
 
 /**
@@ -62,6 +61,7 @@ public class MidiRoot extends AbstractRoot {
     private Lookup lookup;
     private MidiContextReceiver receiver;
     private Lock midiLock;
+    private MidiMessage lastMessage;
 
     public MidiRoot() {
         buildControls();
@@ -73,6 +73,30 @@ public class MidiRoot extends AbstractRoot {
                 Argument.class, PMap.create(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
         device = ArgumentProperty.create(info);
         registerControl("device", device);
+        registerControl("last-message", StringProperty.builder()
+                .binding(new StringProperty.ReadBinding() {
+                    @Override
+                    public String getBoundValue() {
+                        if (lastMessage != null) {
+                            if (lastMessage instanceof ShortMessage) {
+                                ShortMessage sm = (ShortMessage) lastMessage;
+                                StringBuilder sb = new StringBuilder("Ch:")
+                                        .append(sm.getChannel() + 1)
+                                        .append(" Cmd:")
+                                        .append(sm.getCommand())
+                                        .append(" Data1:")
+                                        .append(sm.getData1())
+                                        .append(" Data2:")
+                                        .append(sm.getData2());
+                                return sb.toString();
+                            } else {
+                                return lastMessage.toString();
+                            }
+                        } else {
+                            return "";
+                        }
+                    }
+                }).build());
     }
 
     @Override
@@ -93,6 +117,7 @@ public class MidiRoot extends AbstractRoot {
     @Override
     protected void starting() {
         super.starting();
+        lastMessage = null;
         try {
             midiDevice = getDevice(device.getValue().toString());
             transmitter = midiDevice.getTransmitter();
@@ -112,14 +137,12 @@ public class MidiRoot extends AbstractRoot {
         super.stopping();
         closeDevice();
 
-
     }
 
     @Override
     protected void terminating() {
         super.terminating();
         closeDevice();
-
 
     }
 
@@ -179,7 +202,14 @@ public class MidiRoot extends AbstractRoot {
             invokeLater(new Runnable() {
                 public void run() {
 //                    if (getState() == RootState.ACTIVE_RUNNING) {
-                        dispatch(message, time);
+                    if (lastMessage instanceof ShortMessage) {
+                        if ( ((ShortMessage) message).getCommand() < 0xF0) {
+                            lastMessage = message;
+                        }
+                    } else {
+                        lastMessage = message;
+                    }
+                    dispatch(message, time);
 //                    } 
                 }
             });
