@@ -42,6 +42,12 @@ public class CoreCodeConnector extends CodeConnector<CoreCodeDelegate> {
         super(contextCreator, delegate);
     }
 
+    @Override
+    protected boolean requiresClock() {
+        return foundUpdate;
+    }
+
+    @Deprecated
     protected boolean hasUpdateMethod() {
         return foundUpdate;
     }

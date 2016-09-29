@@ -120,6 +120,10 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     protected ComponentInfo extractInfo() {
         return info;
     }
+    
+    protected boolean requiresClock() {
+        return false;
+    }
 
     private void buildExternalData() {
         extControls = buildExternalControlMap();

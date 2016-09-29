@@ -65,13 +65,11 @@ public abstract class CodeContext<D extends CodeDelegate> {
     private long time;
     private ClockListener[] clockListeners;
 
-    @Deprecated
-    public CodeContext(CodeConnector<D> conenctor) {
-        this(conenctor, false);
+    protected CodeContext(CodeConnector<D> connector) {
+        this(connector, false);
     }
 
     protected CodeContext(CodeConnector<D> connector, boolean requireClock) {
-        this.requireClock = requireClock;
         this.driver = new Driver();
         clockListeners = new ClockListener[0];
         time = System.nanoTime() - 10 * 1000_000_000;
@@ -83,6 +81,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
             info = connector.extractInfo();
             delegate = connector.getDelegate();
             log = new LogBuilder(LogLevel.ERROR);
+            this.requireClock = requireClock || connector.requiresClock();
         } catch (Exception e) {
             Logger.getLogger(CodeContext.class.getName()).log(Level.FINE, "", e);
             throw e;

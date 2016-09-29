@@ -33,7 +33,7 @@ import net.neilcsmith.praxis.logging.LogLevel;
 public class CoreCodeContext extends CodeContext<CoreCodeDelegate> {
 
     public CoreCodeContext(CoreCodeConnector connector) {
-        super(connector, connector.hasUpdateMethod());
+        super(connector);
     }
 
     @Override
