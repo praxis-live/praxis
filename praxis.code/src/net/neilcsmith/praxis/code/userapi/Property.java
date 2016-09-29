@@ -206,6 +206,10 @@ public abstract class Property {
             link.update(value);
         }
     }
+    
+    protected boolean hasLinks() {
+        return links.length > 0;
+    }
 
     private void startClock() {
         context.addClockListener(listener);
