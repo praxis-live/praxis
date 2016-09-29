@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2013 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -27,7 +27,6 @@ import de.sciss.net.OSCMessage;
 import de.sciss.net.OSCServer;
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +38,7 @@ import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.impl.InstanceLookup;
 import net.neilcsmith.praxis.impl.IntProperty;
 import net.neilcsmith.praxis.impl.RootState;
+import net.neilcsmith.praxis.impl.StringProperty;
 
 /**
  *
@@ -54,6 +54,7 @@ public class OSCRoot extends AbstractRoot {
     private int port = DEFAULT_PORT;
     private Lookup lookup;
     private OSCServer server;
+    private OSCMessage lastMessage;
 
     public OSCRoot() {
         context = new OSCContext();
@@ -68,6 +69,9 @@ public class OSCRoot extends AbstractRoot {
                 .defaultValue(port)
                 .binding(new PortBinding())
                 .build());
+        registerControl("last-message", StringProperty.builder()
+                .binding(new LastMessageBinding())
+                .build());
     }
 
     @Override
@@ -81,6 +85,7 @@ public class OSCRoot extends AbstractRoot {
     @Override
     protected void starting() {
         try {
+            lastMessage = null;
             server = OSCServer.newUsing(DEFAULT_PROTOCOL, port);
             server.addOSCListener(new OSCListenerImpl());
             server.start();
@@ -103,7 +108,7 @@ public class OSCRoot extends AbstractRoot {
     protected void terminating() {
         terminateServer();
     }
-    
+
     private void terminateServer() {
         if (server == null) {
             return;
@@ -134,6 +139,24 @@ public class OSCRoot extends AbstractRoot {
         }
     }
 
+    private class LastMessageBinding implements StringProperty.ReadBinding {
+
+        @Override
+        public String getBoundValue() {
+            if (lastMessage != null) {
+                StringBuilder sb = new StringBuilder(lastMessage.getName());
+                for (int i = 0; i < lastMessage.getArgCount(); i++) {
+                    sb.append(" ");
+                    sb.append(lastMessage.getArg(i));
+                }
+                return sb.toString();
+            } else {
+                return "";
+            }
+        }
+
+    }
+
     private class OSCListenerImpl implements OSCListener {
 
         @Override
@@ -159,6 +182,7 @@ public class OSCRoot extends AbstractRoot {
                 }
                 while (msg != null) {
                     LOG.log(Level.FINEST, "Handling message to {0}", msg.getName());
+                    lastMessage = msg;
                     context.dispatch(msg, time);
                     msg = messages.poll();
                 }
