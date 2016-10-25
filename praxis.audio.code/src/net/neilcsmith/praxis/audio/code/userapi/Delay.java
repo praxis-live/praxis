@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -85,7 +85,7 @@ public final class Delay extends OpHolder<VariableDelayOp> implements Resettable
         op.setDelay(0);
         op.setGain(1);
         op.setFeedback(0);
-        op.passthrough = false;
+        op.passthrough = true;
     }
     
     private static class OpImpl extends VariableDelayOp {
