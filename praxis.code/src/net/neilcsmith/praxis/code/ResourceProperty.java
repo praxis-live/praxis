@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,10 +22,12 @@
  */
 package net.neilcsmith.praxis.code;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.util.List;
 import java.util.Objects;
 import net.neilcsmith.praxis.code.userapi.OnChange;
 import net.neilcsmith.praxis.code.userapi.OnError;
@@ -131,13 +133,29 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
 
         @Override
         public Argument execute() throws Exception {
-            // will eventually need to use lookup to resolve URI of resource
-            Object ret = loader.load(resource.value());
-            if (ret instanceof Argument) {
-                return (Argument) ret;
-            } else {
-                return PReference.wrap(ret);
+            List<URI> uris = resource.resolve(lookup);
+            Exception caughtException = null;
+            for (URI uri : uris) {
+                try {
+                    if ("file".equals(uri.getScheme())) {
+                        if (!new File(uri).exists()) {
+                            continue;
+                        }
+                    }
+                    Object ret = loader.load(uri);
+                    if (ret instanceof Argument) {
+                        return (Argument) ret;
+                    } else {
+                        return PReference.wrap(ret);
+                    }
+                } catch (Exception exception) {
+                    caughtException = exception;
+                }
             }
+            if (caughtException == null) {
+                caughtException = new IOException("Unknown resource");
+            }
+            throw caughtException;
         }
 
     }

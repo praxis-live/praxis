@@ -1,6 +1,6 @@
 
     @P(1)
-    @Type.Integer(min = 1)
+    @Type.Integer(min = 1, def = 1)
     @Port(false)
     int count;
     @P(2)

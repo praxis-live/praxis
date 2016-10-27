@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2013 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -37,25 +37,26 @@ import net.neilcsmith.praxis.audio.components.test.Sine;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
 import net.neilcsmith.praxis.impl.AbstractComponentFactory;
+import net.neilcsmith.praxis.meta.TypeRewriter;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public class AudioFactoryProvider implements ComponentFactoryProvider {
-
+    
     private final static ComponentFactory factory = new Factory();
-
+    
     public ComponentFactory getFactory() {
         return factory;
     }
-
+    
     private static class Factory extends AbstractComponentFactory {
-
+        
         private Factory() {
             build();
         }
-
+        
         private void build() {
             //ROOT
             addRoot("root:audio", DefaultAudioRoot.class);
@@ -63,27 +64,29 @@ public class AudioFactoryProvider implements ComponentFactoryProvider {
             //COMPONENTS
             addComponent("audio:input", AudioInput.class);
             addComponent("audio:output", AudioOutput.class);
-            addComponent("audio:sine", Sine.class);
-            addComponent("audio:gain", Gain.class);
-            addComponent("audio:sampleplayer", SamplePlayer.class);
+            addComponent("audio:sine", data(Sine.class).deprecated()
+                    .replacement("audio:osc").add(TypeRewriter.getIdentity()));
+//            addComponent("audio:gain", Gain.class);
+            addComponent("audio:sampleplayer", data(SamplePlayer.class).deprecated());
             addComponent("audio:analysis:level", Level.class);
-            addComponent("audio:filter:comb", CombFilter.class);
-            addComponent("audio:filter:iir", IIRFilter.class);
-            addComponent("audio:delay:mono-delay", MonoDelay2s.class);
-            addComponent("audio:distortion:overdrive", SimpleOverdrive.class);
+            addComponent("audio:filter:comb", data(CombFilter.class).deprecated());
+            addComponent("audio:filter:iir", data(IIRFilter.class).deprecated());
+            addComponent("audio:delay:mono-delay", data(MonoDelay2s.class).deprecated());
+            addComponent("audio:distortion:overdrive", data(SimpleOverdrive.class).deprecated());
             addComponent("audio:mix:xfader", XFader.class);
-            addComponent("audio:modulation:chorus", MonoChorus.class);
-            addComponent("audio:modulation:lfo-delay", LFODelay.class);
-            addComponent("audio:reverb:freeverb", Freeverb.class);
+            addComponent("audio:modulation:chorus", data(MonoChorus.class).deprecated());
+            addComponent("audio:modulation:lfo-delay", data(LFODelay.class).deprecated());
+            addComponent("audio:reverb:freeverb", data(Freeverb.class).deprecated());
             addComponent("audio:sampling:looper", Looper.class);
-            addComponent("audio:sampling:player", data(StereoPlayer.class));
+            addComponent("audio:sampling:player", data(StereoPlayer.class).deprecated()
+                    .replacement("audio:player").add(TypeRewriter.getIdentity()));
             
-            addComponent("audio:container:input", data(AudioContainerInput.class));
-            addComponent("audio:container:output", data(AudioContainerOutput.class));
-            
-            // test
-            //addTestComponent("audio:test:analysis:level", Level.class, "audio:analysis:level");
-            addComponent("audio:test:analysis:level", data(Level.class).test().replacement("audio:analysis:level"));
+            addComponent("audio:container:input", data(AudioContainerInput.class)
+                    .replacement("audio:container:in").add(TypeRewriter.getIdentity()));
+            addComponent("audio:container:output", data(AudioContainerOutput.class)
+                    .replacement("audio:container:out").add(TypeRewriter.getIdentity()));
+            addComponent("audio:container:in", data(AudioContainerInput.class));
+            addComponent("audio:container:out", data(AudioContainerOutput.class));
             
         }
     }

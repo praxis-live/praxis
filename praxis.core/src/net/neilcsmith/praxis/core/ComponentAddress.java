@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,6 +23,7 @@ package net.neilcsmith.praxis.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
@@ -47,8 +48,8 @@ public final class ComponentAddress extends Argument {
     private static final Pattern idPattern = Pattern.compile(ID_REGEX);
     private static final Pattern addressPattern = Pattern.compile(ADDRESS_REGEX);
     
-    private String[] address;
-    private String addressString;
+    private final String[] address;
+    private final String addressString;
 
     private ComponentAddress(String[] address, String addressString) {
         this.address = address;
@@ -176,6 +177,14 @@ public final class ComponentAddress extends Argument {
             return (ComponentAddress) arg;
         } else {
             return valueOf(arg.toString());
+        }
+    }
+    
+    public static Optional<ComponentAddress> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
         }
     }
     

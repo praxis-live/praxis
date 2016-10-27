@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,7 +21,9 @@
  */
 package net.neilcsmith.praxis.gui.components;
 
+import com.bulenkov.darcula.DarculaLaf;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import net.neilcsmith.praxis.core.Lookup;
 import java.awt.LayoutManager;
 import java.awt.event.ContainerEvent;
@@ -38,6 +40,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.UIManager;
 import net.miginfocom.swing.MigLayout;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
@@ -59,6 +62,8 @@ import net.neilcsmith.praxis.impl.InstanceLookup;
 //            to DockableGuiRoot in praxis.live.pxr.gui
 public class DefaultGuiRoot extends AbstractSwingRoot {
 
+    private static boolean lafConfigured = false;
+    
     private JFrame frame;
     private JPanel container;
     private MigLayout layout;
@@ -74,6 +79,10 @@ public class DefaultGuiRoot extends AbstractSwingRoot {
 
     @Override
     protected void setup() {
+        if (!lafConfigured) {
+            setupLookAndFeel();
+            lafConfigured = true;
+        }
         frame = new JFrame();
         frame.setTitle("PRAXIS : " + getAddress());
 //        frame.setSize(150, 50);
@@ -95,6 +104,20 @@ public class DefaultGuiRoot extends AbstractSwingRoot {
         container.addContainerListener(new ChildrenListener());
         layoutListener = new LayoutChangeListener();        
         frame.getContentPane().add(new JScrollPane(container), "grow, push");
+    }
+    
+    private void setupLookAndFeel() {
+        try {
+            assert EventQueue.isDispatchThread();
+            UIManager.installLookAndFeel(
+                    new UIManager.LookAndFeelInfo(
+                            DarculaLaf.NAME,
+                            DarculaLaf.class.getName()));
+            UIManager.put("ClassLoader", Lookup.SYSTEM.get(ClassLoader.class));
+            UIManager.setLookAndFeel(new DarculaLaf());
+        } catch (Exception ex) {
+            Logger.getLogger(DefaultGuiRoot.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
         
     @Override

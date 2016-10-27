@@ -1,6 +1,7 @@
 package net.neilcsmith.praxis.gui.components;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -17,9 +18,6 @@ import java.util.Iterator;
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JComponent;
-import javax.swing.Painter;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -38,6 +36,7 @@ import javax.swing.event.ChangeListener;
  */
 class JRangeSlider extends JComponent
         implements MouseListener, MouseMotionListener, KeyListener {
+
     /*
      * NOTE: This is a modified version of the original class distributed by
      * Ben Bederson, Jesse Grosjean, and Jon Meyer as part of an HCIL Tech
@@ -53,15 +52,14 @@ class JRangeSlider extends JComponent
      * method has been introduced to allow subclasses to perform custom
      * rendering within the slider through.
      */
-
     final public static int VERTICAL = 0;
     final public static int HORIZONTAL = 1;
     final public static int LEFTRIGHT_TOPBOTTOM = 0;
     final public static int RIGHTLEFT_BOTTOMTOP = 1;
 
-    final public static int PREFERRED_BREADTH = 24;
+    final public static int PREFERRED_BREADTH = 36;
     final public static int PREFERRED_LENGTH = 200;
-    final protected static int ARROW_SZ = 24;
+    final protected static int ARROW_SZ = 12;
 
     protected BoundedRangeModel model;
     protected int orientation;
@@ -73,12 +71,6 @@ class JRangeSlider extends JComponent
     protected ArrayList listeners = new ArrayList();
     protected ChangeEvent changeEvent = null;
     protected ChangeListener lstnr;
-
-    private Painter<JComponent> handlePainter;
-    private Painter<JComponent> selectedHandlePainter;
-    private Painter<JComponent> trackPainter;
-    private Color thumbColor;
-    private Color selectedThumbColor;
 
     // ------------------------------------------------------------------------
     /**
@@ -127,8 +119,6 @@ class JRangeSlider extends JComponent
         this.orientation = orientation;
         this.direction = direction;
 
-        setForeground(Color.LIGHT_GRAY);
-
         this.lstnr = createListener();
         model.addChangeListener(lstnr);
 
@@ -136,34 +126,6 @@ class JRangeSlider extends JComponent
         addMouseMotionListener(this);
         addKeyListener(this);
 
-        updateUI();
-
-    }
-
-    @Override
-    public void updateUI() {
-        super.updateUI();
-        UIDefaults defs = UIManager.getDefaults();
-        Object val = defs.get("Slider:SliderThumb[Enabled].backgroundPainter");
-        if (val instanceof Painter) {
-            handlePainter = (Painter<JComponent>) val;
-        }
-        val = defs.get("Slider:SliderThumb[Focused+Pressed].backgroundPainter");
-        if (val instanceof Painter) {
-            selectedHandlePainter = (Painter<JComponent>) val;
-        }
-        val = defs.get("Slider:SliderTrack[Enabled].backgroundPainter");
-        if (val instanceof Painter) {
-            trackPainter = (Painter<JComponent>) val;
-        }
-        val = defs.get("nimbusSelectionBackground");
-        if (val instanceof Color) {
-            thumbColor = (Color) val;
-        }
-        val = defs.get("nimbusFocus");
-        if (val instanceof Color) {
-            selectedThumbColor = (Color) val;
-        }
     }
 
     /**
@@ -402,94 +364,41 @@ class JRangeSlider extends JComponent
                 paintThumb(g2, 0, max, width, min - max, pick == PICK_THUMB);
                 paintHandle(g2, 0, max - ARROW_SZ, width, ARROW_SZ, pick == PICK_RIGHT_OR_BOTTOM);
             }
+        } else if (direction == LEFTRIGHT_TOPBOTTOM) {
+            paintHandle(g2, min - ARROW_SZ, 0, ARROW_SZ, height, pick == PICK_LEFT_OR_TOP);
+            paintThumb(g2, min, 0, max - min, height, pick == PICK_THUMB);
+            paintHandle(g2, max, 0, ARROW_SZ, height, pick == PICK_RIGHT_OR_BOTTOM);
         } else {
-            if (direction == LEFTRIGHT_TOPBOTTOM) {
-                paintHandle(g2, min - ARROW_SZ, 0, ARROW_SZ, height, pick == PICK_LEFT_OR_TOP);
-                paintThumb(g2, min, 0, max - min, height, pick == PICK_THUMB);
-                paintHandle(g2, max, 0, ARROW_SZ, height, pick == PICK_RIGHT_OR_BOTTOM);
-            } else {
-                paintHandle(g2, min, 0, ARROW_SZ, height, pick == PICK_LEFT_OR_TOP);
-                paintThumb(g2, max, 0, min - max, height, pick == PICK_THUMB);
-                paintHandle(g2, max - ARROW_SZ, 0, ARROW_SZ, height, pick == PICK_RIGHT_OR_BOTTOM);
-            }
+            paintHandle(g2, min, 0, ARROW_SZ, height, pick == PICK_LEFT_OR_TOP);
+            paintThumb(g2, max, 0, min - max, height, pick == PICK_THUMB);
+            paintHandle(g2, max - ARROW_SZ, 0, ARROW_SZ, height, pick == PICK_RIGHT_OR_BOTTOM);
         }
     }
 
     private void paintTrack(Graphics2D g2, int x, int y, int w, int h) {
-        if (trackPainter != null) {
-            if (orientation == VERTICAL) {
-                int w2 = PREFERRED_BREADTH;
-                int x2 = (w - x) / 2;
-                x2 -= w2 / 2;
-                x2 += x;
-                x = x2;
-                w = w2;
-            } else {
-                int h2 = PREFERRED_BREADTH;
-                int y2 = (h - y) / 2;
-                y2 -= h2 / 2;
-                y2 += y;
-                y = y2;
-                h = h2;
-            }
-            g2.translate(x, y);
-            try {
-                trackPainter.paint(g2, this, w, h);
-            } catch (Exception e) {
-                trackPainter = null;
-            }
-            g2.translate(-x, -y);
-        } else {
-            g2.setColor(getForeground());
-            g2.drawRect(x, y, w, h);
-        }
+        g2.setColor(hasFocus()?
+                Utils.mix(getBackground(), getForeground(), 0.8) :
+                Utils.mix(getBackground(), getForeground(), 0.6));
+        g2.drawRect(x, y, w-1, h-1);
+
     }
 
     private void paintThumb(Graphics2D g2, int x, int y, int w, int h, boolean selected) {
         if (selected) {
-            g2.setColor(selectedThumbColor == null ? getForeground().darker() : selectedThumbColor);
+            g2.setColor(Utils.mix(getBackground(), getForeground(), 0.4));
         } else {
-            g2.setColor(thumbColor == null ? getForeground() : thumbColor);
+            g2.setColor(Utils.mix(getBackground(), getForeground(), 0.3));
         }
-        if (orientation == VERTICAL) {
-            int w2 = ARROW_SZ / 4;
-            int x2 = (w - x) / 2;
-            x2 -= w2 / 2;
-            x2 += x;
-            g2.fillRect(x2, y, w2, h);
-        } else {
-            int h2 = ARROW_SZ / 4;
-            int y2 = (h - y) / 2;
-            y2 -= h2 / 2;
-            y2 += y;
-            g2.fillRect(x, y2, w, h2);
-        }
+        g2.fillRect(x, y, w, h);
     }
 
     private void paintHandle(Graphics2D g2, int x, int y, int w, int h, boolean selected) {
-        if (handlePainter != null) {
-            Painter<JComponent> p = selected ? selectedHandlePainter : handlePainter;
-            if (p == null) {
-                p = handlePainter;
-            }
-            x += ((w - ARROW_SZ) / 2);
-            y += ((h - ARROW_SZ) / 2);
-            g2.translate(x, y);
-            try {
-                p.paint(g2, this, ARROW_SZ, ARROW_SZ);
-            } catch (Exception e) {
-                handlePainter = selectedHandlePainter = null;
-            }
-            g2.translate(-x, -y);
+        if (selected) {
+            g2.setColor(getForeground());
         } else {
-            if (selected) {
-                g2.setColor(getForeground().darker());
-            } else {
-                g2.setColor(getForeground());
-            }
-            g2.fillRect(x, y, w, h);
+            g2.setColor(Utils.mix(getBackground(), getForeground(), 0.8));
         }
-
+        g2.fillRect(x, y, w, h);
     }
 
     /**
@@ -507,12 +416,10 @@ class JRangeSlider extends JComponent
 
         if (direction == LEFTRIGHT_TOPBOTTOM) {
             return (int) (((xOrY - ARROW_SZ) / scale) + min + 0.5);
+        } else if (orientation == VERTICAL) {
+            return (int) ((sz.height - xOrY - ARROW_SZ) / scale + min + 0.5);
         } else {
-            if (orientation == VERTICAL) {
-                return (int) ((sz.height - xOrY - ARROW_SZ) / scale + min + 0.5);
-            } else {
-                return (int) ((sz.width - xOrY - ARROW_SZ) / scale + min + 0.5);
-            }
+            return (int) ((sz.width - xOrY - ARROW_SZ) / scale + min + 0.5);
         }
     }
 
@@ -533,12 +440,10 @@ class JRangeSlider extends JComponent
         // Otherwise, we have to invert the number by subtracting the value from the height
         if (direction == LEFTRIGHT_TOPBOTTOM) {
             return (int) (ARROW_SZ + ((xOrY - min) * scale) + 0.5);
+        } else if (orientation == VERTICAL) {
+            return (int) (sz.height - (xOrY - min) * scale - ARROW_SZ + 0.5);
         } else {
-            if (orientation == VERTICAL) {
-                return (int) (sz.height - (xOrY - min) * scale - ARROW_SZ + 0.5);
-            } else {
-                return (int) (sz.width - (xOrY - min) * scale - ARROW_SZ + 0.5);
-            }
+            return (int) (sz.width - (xOrY - min) * scale - ARROW_SZ + 0.5);
         }
     }
 
@@ -559,12 +464,10 @@ class JRangeSlider extends JComponent
         // Otherwise, we have to invert the number by subtracting the value from the height
         if (direction == LEFTRIGHT_TOPBOTTOM) {
             return ARROW_SZ + ((xOrY - min) * scale);
+        } else if (orientation == VERTICAL) {
+            return sz.height - (xOrY - min) * scale - ARROW_SZ;
         } else {
-            if (orientation == VERTICAL) {
-                return sz.height - (xOrY - min) * scale - ARROW_SZ;
-            } else {
-                return sz.width - (xOrY - min) * scale - ARROW_SZ;
-            }
+            return sz.width - (xOrY - min) * scale - ARROW_SZ;
         }
     }
 
@@ -585,21 +488,19 @@ class JRangeSlider extends JComponent
         int pick = PICK_NONE;
 
         if (direction == LEFTRIGHT_TOPBOTTOM) {
-            if ((xOrY > (min - ARROW_SZ)) && (xOrY < min)) {
+            if (xOrY < min) {
                 pick = PICK_LEFT_OR_TOP;
             } else if ((xOrY >= min) && (xOrY <= max)) {
                 pick = PICK_THUMB;
-            } else if ((xOrY > max) && (xOrY < (max + ARROW_SZ))) {
+            } else if ((xOrY > max)) {
                 pick = PICK_RIGHT_OR_BOTTOM;
             }
-        } else {
-            if ((xOrY > min) && (xOrY < (min + ARROW_SZ))) {
-                pick = PICK_LEFT_OR_TOP;
-            } else if ((xOrY <= min) && (xOrY >= max)) {
-                pick = PICK_THUMB;
-            } else if ((xOrY > (max - ARROW_SZ) && (xOrY < max))) {
-                pick = PICK_RIGHT_OR_BOTTOM;
-            }
+        } else if ((xOrY > min) && (xOrY < (min + ARROW_SZ))) {
+            pick = PICK_LEFT_OR_TOP;
+        } else if ((xOrY <= min) && (xOrY >= max)) {
+            pick = PICK_THUMB;
+        } else if ((xOrY > (max - ARROW_SZ) && (xOrY < max))) {
+            pick = PICK_RIGHT_OR_BOTTOM;
         }
 
         return pick;

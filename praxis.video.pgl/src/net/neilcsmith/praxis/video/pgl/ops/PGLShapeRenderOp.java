@@ -65,7 +65,7 @@ public class PGLShapeRenderOp extends AbstractDrawOp {
                 return true;
             }
             BlendMode mode = op.getBlendMode();
-            if (canProcess(mode)) {
+            if (canProcessDirect(mode)) {
                 PGLGraphics pg = dst.getGraphics();
                 pg.beginDraw();
                 configure(pg, mode, (float) op.getOpacity(), op.getFillColor(), op.getStrokeColor());

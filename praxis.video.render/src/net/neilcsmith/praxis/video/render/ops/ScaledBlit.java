@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2013 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -211,16 +211,4 @@ public class ScaledBlit implements SurfaceOp {
         tmp.release();
     }
 
-    public static SurfaceOp op(BlendFunction blend, Bounds srcBnds, Bounds dstBnds) {
-        ScaledBlit blit = new ScaledBlit();
-        blit.setBlendMode(Blit.extractBlendMode(blend));
-        blit.setOpacity(((Blend)blend).getExtraAlpha());
-        if (srcBnds != null) {
-            blit.setSourceRegion(srcBnds.asRectangle());
-        }
-        if (dstBnds != null) {
-            blit.setDestinationRegion(dstBnds.asRectangle());
-        }
-        return blit;
-    }
 }

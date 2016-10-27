@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -24,16 +24,12 @@ package net.neilcsmith.praxis.video.gst1.components;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentFactoryProvider;
 import net.neilcsmith.praxis.impl.AbstractComponentFactory;
-import net.neilcsmith.praxis.video.VideoSettings;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public class GStreamerFactoryProvider implements ComponentFactoryProvider {
-
-    private final static boolean ACTIVE_LIB
-            = "gstreamer-1.x".equals(VideoSettings.getMediaLib());
 
     private final static ComponentFactory factory = new Factory();
 
@@ -49,10 +45,8 @@ public class GStreamerFactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-            if (ACTIVE_LIB) {
-                addComponent("video:player", VideoPlayer.class);
-                addComponent("video:capture", VideoCapture.class);
-            }
+            addComponent("video:player", VideoPlayer.class);
+            addComponent("video:capture", VideoCapture.class);
         }
     }
 }

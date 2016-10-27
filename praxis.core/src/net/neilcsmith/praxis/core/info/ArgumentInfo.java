@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,8 +21,7 @@
  */
 package net.neilcsmith.praxis.core.info;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Optional;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.types.PArray;
@@ -174,6 +173,14 @@ public final class ArgumentInfo extends Argument {
             return (ArgumentInfo) arg;
         } else {
             return valueOf(arg.toString());
+        }
+    }
+    
+    public static Optional<ArgumentInfo> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
         }
     }
 

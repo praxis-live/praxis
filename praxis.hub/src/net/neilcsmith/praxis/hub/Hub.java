@@ -305,23 +305,34 @@ public final class Hub {
             extensions = new ArrayList<>();
             lookupContent = new ArrayList<>();
             coreRootFactory = DefaultCoreRoot.factory();
+            findDefaultExtensions();
         }
        
+        private void findDefaultExtensions() {
+            for (RootHub.ExtensionProvider provider :
+                    Lookup.SYSTEM.getAll(RootHub.ExtensionProvider.class)) {
+                extensions.addAll(provider.getExtensions());
+            }
+        }
+        
         public Builder setCoreRootFactory(CoreRootFactory coreRootFactory) {
             this.coreRootFactory = Objects.requireNonNull(coreRootFactory);
             return this;
         }
-               
+        
+        @Deprecated
         public Builder replaceComponentFactoryService(Root componentFactory) {
             this.componentFactory = componentFactory;
             return this;
         }
         
+        @Deprecated
         public Builder replaceScriptService(Root scriptService) {
             this.scriptService = scriptService;
             return this;
         }
         
+        @Deprecated
         public Builder replaceTaskService(Root taskService) {
             this.taskService = taskService;
             return this;

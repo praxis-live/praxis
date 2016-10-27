@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -35,17 +35,22 @@ import net.neilcsmith.praxis.core.types.PNumber;
  */
 abstract class NumberBinding extends PropertyControl.Binding {
 
+    final double def;
+    
     private final double min;
     private final double max;
-    final double def;
+    private final double skew;
     private final boolean ranged;
+    private final boolean skewed;
 
-    private NumberBinding(double min, double max, double def) {
+    private NumberBinding(double min, double max, double skew, double def) {
         this.min = min;
         this.max = max;
+        this.skew = skew;
         this.def = def;
-        ranged = (min != PNumber.MIN_VALUE
-                || max != PNumber.MAX_VALUE);
+        ranged = min > (PNumber.MIN_VALUE + 1)
+                || max < (PNumber.MAX_VALUE - 1);
+        skewed = Math.abs(skew - 1) > 0.0001;
     }
 
     @Override
@@ -72,7 +77,9 @@ abstract class NumberBinding extends PropertyControl.Binding {
 
     @Override
     public ArgumentInfo getArgumentInfo() {
-        if (ranged) {
+        if (ranged && skewed) {
+            return PNumber.info(min, max, skew);
+        } else if (ranged) {
             return PNumber.info(min, max);
         } else {
             return PNumber.info();
@@ -93,19 +100,24 @@ abstract class NumberBinding extends PropertyControl.Binding {
         double min = PNumber.MIN_VALUE;
         double max = PNumber.MAX_VALUE;
         double def = 0;
+        double skew = 1;
         Type.Number ann = field.getAnnotation(Type.Number.class);
         if (ann != null) {
             min = ann.min();
             max = ann.max();
             def = ann.def();
+            skew = ann.skew();
+            if (skew < 0.01) {
+                skew = 0.01;
+            }
         }
         Class<?> type = field.getType();
         if (type == double.class) { // || type == Double.class) {
-            return new DoubleField(field, min, max, def);
+            return new DoubleField(field, min, max, skew, def);
         } else if (type == float.class) {
-            return new FloatField(field, min, max, def);
+            return new FloatField(field, min, max, skew, def);
         } else if (Property.class.isAssignableFrom(type)) {
-            return new NoField(min, max, def);
+            return new NoField(min, max, skew, def);
         } else {
             return null;
         }
@@ -117,8 +129,8 @@ abstract class NumberBinding extends PropertyControl.Binding {
         private double value;
         private PNumber last = PNumber.ZERO;
 
-        public NoField(double min, double max, double def) {
-            super(min, max, def);
+        public NoField(double min, double max, double skew, double def) {
+            super(min, max, skew, def);
             value = def;
         }
 
@@ -154,8 +166,8 @@ abstract class NumberBinding extends PropertyControl.Binding {
         private CodeDelegate delegate;
         private PNumber last = PNumber.ZERO;
 
-        public DoubleField(Field field, double min, double max, double def) {
-            super(min, max, def);
+        public DoubleField(Field field, double min, double max, double skew, double def) {
+            super(min, max, skew, def);
             this.field = field;
         }
 
@@ -206,8 +218,8 @@ abstract class NumberBinding extends PropertyControl.Binding {
         private CodeDelegate delegate;
         private PNumber last = PNumber.ZERO;
 
-        public FloatField(Field field, double min, double max, double def) {
-            super(min, max, def);
+        public FloatField(Field field, double min, double max, double skew, double def) {
+            super(min, max, skew, def);
             this.field = field;
         }
 

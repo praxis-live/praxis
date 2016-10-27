@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -128,15 +128,5 @@ public class RectFill implements SurfaceOp {
         tmp.release();
     }
 
-    @Deprecated
-    public static SurfaceOp op(Color color, BlendFunction blend,
-            int x, int y, int width, int height) {
-        RectFill op = new RectFill();
-        op.setBlendMode(Blit.extractBlendMode(blend));
-        op.setOpacity(((Blend)blend).getExtraAlpha());
-        op.setColor(color);
-        op.setBounds(x, y, width, height);
-        return op;
-    }
 
 }

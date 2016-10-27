@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.core.types;
 
+import java.util.Optional;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
@@ -30,19 +31,21 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
  * @author Neil C Smith
  */
 public final class PNumber extends Argument implements Comparable<PNumber> {
-    
+
     public final static PNumber ONE = PNumber.valueOf(1);
     public final static PNumber ZERO = PNumber.valueOf(0);
 
     public final static String KEY_MINIMUM = "minimum";
     public final static String KEY_MAXIMUM = "maximum";
     public final static String KEY_IS_INTEGER = "is-integer";
+    public final static String KEY_SKEW = "skew";
 
     public final static int MAX_VALUE = Integer.MAX_VALUE;
     public final static int MIN_VALUE = Integer.MIN_VALUE;
-    private double value;
-    private boolean isInteger;
-    private String string;
+
+    private final double value;
+    private final boolean isInteger;
+    private final String string;
 
     private PNumber(double value, String str) {
         this.value = value;
@@ -108,7 +111,7 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
     public boolean isEmpty() {
         return false;
     }
-    
+
     public int compareTo(PNumber o) {
         return Double.compare(value, o.value);
     }
@@ -120,7 +123,7 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
     public static PNumber valueOf(double val) {
         return valueOf(val, null);
     }
-    
+
     private static PNumber valueOf(double val, String str) {
         if (val > MAX_VALUE) {
             val = MAX_VALUE;
@@ -151,7 +154,7 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
             throw new ArgumentFormatException(ex);
         }
     }
-        
+
     public static PNumber coerce(
             Argument arg) throws ArgumentFormatException {
         if (arg instanceof PNumber) {
@@ -161,31 +164,46 @@ public final class PNumber extends Argument implements Comparable<PNumber> {
         } else {
             return valueOf(arg.toString());
         }
+    }
 
+    public static Optional<PNumber> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
+        }
     }
 
     public static ArgumentInfo info() {
         return ArgumentInfo.create(PNumber.class, null);
     }
 
-    public static ArgumentInfo info(
-            double min, double max) {
-        PMap map = PMap.create(KEY_MINIMUM, min,
+    public static ArgumentInfo info(double min, double max) {
+        PMap map = PMap.create(
+                KEY_MINIMUM, min,
                 KEY_MAXIMUM, max);
+        return ArgumentInfo.create(PNumber.class, map);
+    }
+
+    public static ArgumentInfo info(double min, double max, double skew) {
+        if (skew < 0.01) {
+            skew = 0.01;
+        }
+        PMap map = PMap.create(
+                KEY_MINIMUM, min,
+                KEY_MAXIMUM, max,
+                KEY_SKEW, skew);
         return ArgumentInfo.create(PNumber.class, map);
     }
 
     public static ArgumentInfo integerInfo() {
         return ArgumentInfo.create(PNumber.class, PMap.create(KEY_IS_INTEGER, true));
     }
-    
-    public static ArgumentInfo integerInfo(
-            int min, int max) {
+
+    public static ArgumentInfo integerInfo(int min, int max) {
         PMap map = PMap.create(KEY_MINIMUM, min,
                 KEY_MAXIMUM, max, KEY_IS_INTEGER, true);
         return ArgumentInfo.create(PNumber.class, map);
     }
-
-    
 
 }

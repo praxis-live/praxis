@@ -52,7 +52,7 @@ public class BinDelegate extends AbstractGstDelegate {
     private int requestHeight;
     private int requestRate;
 
-    private BinDelegate(String binDescription) {
+    public BinDelegate(String binDescription) {
         this.binDescription = binDescription;
     }
 
@@ -128,7 +128,7 @@ public class BinDelegate extends AbstractGstDelegate {
     }
     
     
-
+    @Deprecated
     public static BinDelegate create(String binDescription) {
         return new BinDelegate(binDescription);
     }

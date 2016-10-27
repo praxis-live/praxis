@@ -30,7 +30,7 @@ import net.neilcsmith.praxis.core.types.PNumber;
  *
  * @author Neil C Smith
  */
-// @TODO refactor into PNumber
+@Deprecated
 public class PMath {
 
     private PMath() {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,6 +23,7 @@ package net.neilcsmith.praxis.core.types;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 
@@ -266,6 +267,14 @@ public class PMap extends Argument {
             return (PMap) arg;
         } else {
             return valueOf(arg.toString());
+        }
+    }
+    
+    public static Optional<PMap> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
         }
     }
 

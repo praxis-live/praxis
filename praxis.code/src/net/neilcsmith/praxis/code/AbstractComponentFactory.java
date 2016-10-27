@@ -32,6 +32,7 @@ import net.neilcsmith.praxis.core.ComponentInstantiationException;
 import net.neilcsmith.praxis.core.ComponentType;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.Root;
+import net.neilcsmith.praxis.core.interfaces.ComponentFactoryService;
 import net.neilcsmith.praxis.impl.InstanceLookup;
 
 /**
@@ -58,24 +59,6 @@ public class AbstractComponentFactory implements ComponentFactory {
     }
 
     @Override
-    public Component createComponent(ComponentType type) throws ComponentInstantiationException {
-        MetaData data = componentMap.get(type);
-        if (data == null) {
-            throw new IllegalArgumentException();
-        }
-        try {
-            return data.getCodeFactory().createComponent();
-        } catch (Exception ex) {
-            throw new ComponentInstantiationException(ex);
-        }
-    }
-
-    @Override
-    public Root createRootComponent(ComponentType type) throws ComponentInstantiationException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public ComponentFactory.MetaData<? extends Component> getMetaData(ComponentType type) {
         return componentMap.get(type);
     }
@@ -85,11 +68,11 @@ public class AbstractComponentFactory implements ComponentFactory {
         return null;
     }
 
-    @Deprecated
-    protected void addComponent(Data info) {
-        add(info);
+    @Override
+    public Class<? extends ComponentFactoryService> getFactoryService() {
+        return CodeComponentFactoryService.class;
     }
-    
+
     protected void add(Data info) {
         componentMap.put(info.factory.getComponentType(), info.toMetaData());
     }
@@ -146,7 +129,7 @@ public class AbstractComponentFactory implements ComponentFactory {
 
         @Override
         public Lookup getLookup() {
-            return lookup == null ? super.getLookup() : lookup;
+            return lookup;
         }
 
         private CodeFactory<?> getCodeFactory() {
@@ -158,13 +141,15 @@ public class AbstractComponentFactory implements ComponentFactory {
     public static class Data {
 
         private final CodeFactory<?> factory;
+        private final List<Object> lookupList;
         private boolean test;
         private boolean deprecated;
         private ComponentType replacement;
-        private List<Object> lookupList;
 
         private Data(CodeFactory<?> factory) {
             this.factory = factory;
+            lookupList = new ArrayList<>();
+            lookupList.add(factory);
         }
 
         public Data test() {
@@ -182,18 +167,15 @@ public class AbstractComponentFactory implements ComponentFactory {
             deprecated = true;
             return this;
         }
-        
+
         public Data add(Object obj) {
-            if (lookupList == null) {
-                lookupList = new ArrayList<>();
-            }
             lookupList.add(obj);
             return this;
         }
 
         private MetaData toMetaData() {
-            return new MetaData(factory, test, deprecated, replacement, 
-            lookupList == null ? null : InstanceLookup.create(lookupList.toArray()));
+            return new MetaData(factory, test, deprecated, replacement,
+                    InstanceLookup.create(lookupList.toArray()));
         }
     }
 }

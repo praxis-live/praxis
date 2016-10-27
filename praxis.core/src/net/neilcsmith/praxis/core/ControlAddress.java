@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.core;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -32,9 +33,10 @@ public class ControlAddress extends Argument {
     public static final String SEPARATOR = ".";
     private static final String SEP_REGEX = "\\.";
     private static final String ID_REGEX = "[_\\-\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*";
-    private ComponentAddress component;
-    private String controlID;
-    private String addressString;
+    
+    private final ComponentAddress component;
+    private final String controlID;
+    private final String addressString;
 
     private ControlAddress(ComponentAddress component, String id, String address) {
         this.component = component;
@@ -113,6 +115,14 @@ public class ControlAddress extends Argument {
             return (ControlAddress) arg;
         } else {
             return valueOf(arg.toString());
+        }
+    }
+    
+    public static Optional<ControlAddress> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
         }
     }
     

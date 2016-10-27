@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.PacketRouter;
+import net.neilcsmith.praxis.core.types.PError;
 
 /**
  *
@@ -126,9 +127,9 @@ public abstract class AbstractAsyncControl extends AbstractControl {
                         throw new IllegalStateException();
                 }
             } catch (Exception ex) {
-                LOG.log(Level.WARNING, "Exception thrown processing call", ex);
+                LOG.log(Level.FINE, "Exception thrown processing call", ex);
                 callQueue.poll();
-                router.route(Call.createErrorCall(call, CallArguments.EMPTY));
+                router.route(Call.createErrorCall(call, PError.create(ex)));
             }
         }
 

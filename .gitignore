@@ -145,3 +145,10 @@
 /lib.gst1-java-core/build/
 /lib.gst1-java-core/nbproject/private/
 /praxis.video.gst1/nbproject/private/
+/praxis.code.services/build/
+/praxis.code.services/nbproject/private/
+/lib.darcula/build/
+/lib.nanohttpd/build/
+/praxis.data/build/
+/praxis.data/nbproject/private/
+/lib.jna.platform/build/

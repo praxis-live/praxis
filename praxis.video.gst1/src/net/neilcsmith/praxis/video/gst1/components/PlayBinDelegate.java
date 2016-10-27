@@ -46,7 +46,7 @@ public class PlayBinDelegate extends AbstractGstDelegate {
     private PlayBin pipe;
     private volatile double rate;
 
-    protected PlayBinDelegate(URI loc, String audioSink) {
+    public PlayBinDelegate(URI loc, String audioSink) {
         this.loc = loc;
         this.audioSink = audioSink.trim();
         this.rate = 1;
@@ -144,8 +144,4 @@ public class PlayBinDelegate extends AbstractGstDelegate {
         pipe.getState(10, TimeUnit.MILLISECONDS);
     }
 
-    @Deprecated
-    public static PlayBinDelegate create(URI loc) {
-        return new PlayBinDelegate(loc, "");
-    }
 }

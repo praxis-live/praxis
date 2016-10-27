@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,10 +22,17 @@
  */
 package net.neilcsmith.praxis.code.userapi;
 
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
+import java.util.function.Function;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.types.PBoolean;
+import net.neilcsmith.praxis.core.types.PNumber;
+import net.neilcsmith.praxis.logging.LogLevel;
+import net.neilcsmith.praxis.util.ArrayUtils;
 
 /**
  *
@@ -39,9 +46,11 @@ public abstract class Property {
 
     private CodeContext<?> context;
     private Animator animator;
+    private Link[] links;
 
     protected Property() {
         this.listener = new Listener();
+        this.links = new Link[0];
     }
 
     protected void attach(CodeContext<?> context, Property previous) {
@@ -120,10 +129,49 @@ public abstract class Property {
         return this;
     }
 
-    protected void finishAnimating() {
-        if (animator != null) {
-            animator.stop();
+    public Property link(DoubleConsumer consumer) {
+        DoubleLink link = new DoubleLink(consumer);
+        try {
+            link.update(getDouble());
+        } catch (Exception ex) {
+            context.getLog().log(LogLevel.ERROR, ex);
         }
+        links = ArrayUtils.add(links, link);
+        return this;
+    }
+
+    public Property link(DoubleConsumer... consumers) {
+        for (DoubleConsumer consumer : consumers) {
+            link(consumer);
+        }
+        return this;
+    }
+
+    public <T> Property linkAs(
+            Function<Argument, T> converter,
+            Consumer<T> consumer) {
+        ArgumentLink<T> link = new ArgumentLink<>(converter, consumer);
+        try {
+            link.update(get());
+        } catch (Exception ex) {
+            context.getLog().log(LogLevel.ERROR, ex);
+        }
+        links = ArrayUtils.add(links, link);
+        return this;
+    }
+
+    public <T> Property linkAs(
+            Function<Argument, T> converter,
+            Consumer<T> ... consumers) {
+        for (Consumer<T> consumer : consumers) {
+            linkAs(converter, consumer);
+        }
+        return this;
+    }
+    
+    public Property clearLinks() {
+        links = new Link[0];
+        return this;
     }
 
     public Animator animator() {
@@ -137,49 +185,30 @@ public abstract class Property {
         return animator().to(to);
     }
 
-    @Deprecated
-    public Property in(double time) {
-        animator().in(time);
-        return this;
-    }
-
     public boolean isAnimating() {
         return animator != null && animator.isAnimating();
     }
 
-    @Deprecated
-    public Property linear() {
-        animator().easing(Easing.linear);
-        return this;
+    protected void finishAnimating() {
+        if (animator != null) {
+            animator.stop();
+        }
     }
 
-    @Deprecated
-    public Property ease() {
-        animator().easing(Easing.ease);
-        return this;
+    protected void updateLinks(double value) {
+        for (Link link : links) {
+            link.update(value);
+        }
     }
 
-    @Deprecated
-    public Property easeIn() {
-        animator().easing(Easing.easeIn);
-        return this;
+    protected void updateLinks(Argument value) {
+        for (Link link : links) {
+            link.update(value);
+        }
     }
-
-    @Deprecated
-    public Property easeOut() {
-        animator().easing(Easing.easeOut);
-        return this;
-    }
-
-    @Deprecated
-    public Property easeInOut() {
-        animator().easing(Easing.easeInOut);
-        return this;
-    }
-
-    @Deprecated
-    protected void startAnimating() {
-        assert false;
+    
+    protected boolean hasLinks() {
+        return links.length > 0;
     }
 
     private void startClock() {
@@ -200,6 +229,66 @@ public abstract class Property {
             }
             animator.tick();
         }
+    }
+
+    private static interface Link {
+
+        void update(double value);
+
+        void update(Argument value);
+
+    }
+
+    private class DoubleLink implements Link {
+
+        private final DoubleConsumer consumer;
+
+        private DoubleLink(DoubleConsumer consumer) {
+            this.consumer = consumer;
+        }
+
+        @Override
+        public void update(double value) {
+            try {
+                consumer.accept(value);
+            } catch (Exception ex) {
+                context.getLog().log(LogLevel.ERROR, ex);
+            }
+        }
+
+        @Override
+        public void update(Argument value) {
+            PNumber.from(value).ifPresent((pn) -> consumer.accept(pn.value()));
+        }
+
+    }
+
+    private class ArgumentLink<T> implements Link {
+
+        private final Function<Argument, T> converter;
+        private final Consumer<T> consumer;
+
+        private ArgumentLink(
+                Function<Argument, T> converter,
+                Consumer<T> consumer) {
+            this.converter = Objects.requireNonNull(converter);
+            this.consumer = Objects.requireNonNull(consumer);
+        }
+
+        @Override
+        public void update(double value) {
+            update(PNumber.valueOf(value));
+        }
+
+        @Override
+        public void update(Argument value) {
+            try {
+                consumer.accept(converter.apply(value));
+            } catch (Exception ex) {
+                context.getLog().log(LogLevel.ERROR, ex);
+            }
+        }
+
     }
 
     public static class Animator {

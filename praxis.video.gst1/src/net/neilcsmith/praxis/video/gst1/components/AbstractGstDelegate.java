@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -74,7 +74,7 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
     private volatile boolean looping;
 
     protected AbstractGstDelegate() {
-        Gst.init();
+        GStreamerLibrary.getInstance().init();
         state = new AtomicReference<>(State.New);
         surfaceLock = new ReentrantLock();
     }

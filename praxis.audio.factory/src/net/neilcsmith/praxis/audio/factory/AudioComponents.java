@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -51,6 +51,18 @@ public class AudioComponents implements ComponentFactoryProvider {
             add(data(new AudioCodeFactory("audio:custom")));
             
             add("audio:clock", "resources/audio_clock.pxj");
+            add("audio:gain", "resources/gain.pxj");
+            add("audio:osc", "resources/osc.pxj");
+            add("audio:player", "resources/player.pxj");
+            
+            add("audio:fx:chorus", "resources/chorus.pxj");
+            add("audio:fx:comb-filter", "resources/comb_filter.pxj");
+            add("audio:fx:delay", "resources/delay.pxj");
+            add("audio:fx:filter", "resources/filter.pxj");
+            add("audio:fx:lfo-delay", "resources/lfo_delay.pxj");
+            add("audio:fx:overdrive", "resources/overdrive.pxj");
+            add("audio:fx:reverb", "resources/reverb.pxj");
+            
         }
         
         private void add(String type, String sourceFile) {

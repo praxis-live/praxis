@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,11 +23,14 @@ package net.neilcsmith.praxis.code;
 
 import net.neilcsmith.praxis.compiler.ClassBodyContext;
 import net.neilcsmith.praxis.core.Argument;
+import net.neilcsmith.praxis.core.ArgumentFormatException;
+import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Control;
+import net.neilcsmith.praxis.core.ControlAddress;
+import net.neilcsmith.praxis.core.PacketRouter;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.info.ControlInfo;
-import net.neilcsmith.praxis.core.interfaces.TaskService;
 import net.neilcsmith.praxis.core.types.PError;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PReference;
@@ -35,103 +38,141 @@ import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.logging.LogBuilder;
 import net.neilcsmith.praxis.logging.LogLevel;
 
-
 class CodeProperty<D extends CodeDelegate>
-        extends AbstractAsyncProperty<CodeProperty.Result> {
-    
+        implements Control {
+
     public final static String MIME_TYPE = "text/x-praxis-java";
 
     private final CodeFactory<D> factory;
     private final ControlInfo info;
     private CodeContext<D> context;
+    private Call activeCall;
+    private Call taskCall;
+    private CallArguments keys;
+    private boolean latestSet;
+    private long latest;
+    private ControlAddress contextFactory;
 
     private CodeProperty(CodeFactory<D> factory, ControlInfo info) {
-        super(PString.EMPTY, Result.class, null);
         this.factory = factory;
         this.info = info;
     }
 
-    @Override
     @SuppressWarnings("unchecked")
     protected void attach(CodeContext<?> context) {
-        super.attach(context);
         this.context = (CodeContext<D>) context;
+        contextFactory = null;
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    protected final Task<D> createTask(CallArguments keys) throws Exception {
-        String code = keys.get(0).toString();
-        return new Task<>(factory, code, context.getLogLevel(),
-                (Class<D>) context.getDelegate().getClass());
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected void valueChanged(long time) {
-        Result r = getValue();
-        if (r != null) {
-            context.flush();
-            context.getComponent().install((CodeContext<D>) r.context);
+    public void call(Call call, PacketRouter router) throws Exception {
+        switch (call.getType()) {
+            case INVOKE:
+            case INVOKE_QUIET:
+                processInvoke(call, router);
+                break;
+            case RETURN:
+                processReturn(call, router);
+                break;
+            case ERROR:
+                processError(call, router);
+                break;
+            default:
+                throw new IllegalArgumentException();
         }
     }
 
-    @Override
-    protected void taskError(long time, PError error) {
-        context.getLog().log(LogLevel.ERROR, error);
+    private void processInvoke(Call call, PacketRouter router) {
+        CallArguments args = call.getArgs();
+        long time = call.getTimecode();
+        if (args.getSize() > 0 && isLatest(time)) {
+            try {
+                String code = args.get(0).toString();
+                CodeContextFactoryService.Task task
+                        = new CodeContextFactoryService.Task(
+                                factory,
+                                code,
+                                context.getLogLevel(),
+                                context.getDelegate().getClass());
+                if (contextFactory == null) {
+                    contextFactory = ControlAddress.create(
+                            context.findService(CodeContextFactoryService.class),
+                            CodeContextFactoryService.NEW_CONTEXT);
+                }
+                taskCall = Call.createCall(contextFactory, context.getAddress(this), time, PReference.wrap(task));
+                router.route(taskCall);
+                // managed to start task ok
+                setLatest(time);
+                if (activeCall != null) {
+                    router.route(Call.createReturnCall(activeCall, activeCall.getArgs()));
+                }
+                activeCall = call;
+            } catch (Exception ex) {
+                router.route(Call.createErrorCall(call, PError.create(ex)));
+            }
+        } else {
+            router.route(Call.createReturnCall(call, keys));
+        }
+    }
+
+    private void processReturn(Call call, PacketRouter router) {
+        try {
+            if (taskCall == null || taskCall.getMatchID() != call.getMatchID()) {
+                //LOG.warning("Unexpected Call received\n" + call.toString());
+                return;
+            }
+            taskCall = null;
+            CodeContextFactoryService.Result result
+                    = (CodeContextFactoryService.Result) ((PReference) call.getArgs().get(0)).getReference();
+            keys = activeCall.getArgs();
+            router.route(Call.createReturnCall(activeCall, keys));
+            activeCall = null;
+            context.flush();
+            context.getComponent().install((CodeContext<D>) result.getContext());
+            LogBuilder log = result.getLog();
+            context.log(log);
+        } catch (Exception ex) {
+            router.route(Call.createErrorCall(activeCall, PError.create(ex)));
+        }
+    }
+
+    private void processError(Call call, PacketRouter router) throws Exception {
+        if (taskCall == null || taskCall.getMatchID() != call.getMatchID()) {
+            //LOG.warning("Unexpected Call received\n" + call.toString());
+            return;
+        }
+        router.route(Call.createErrorCall(activeCall, call.getArgs()));
+        activeCall = null;
+        CallArguments args = call.getArgs();
+        PError err;
+        if (args.getSize() > 0) {
+            try {
+                err = PError.coerce(args.get(0));
+            } catch (ArgumentFormatException ex) {
+                err = PError.create(ex, args.get(0).toString());
+            }
+        } else {
+            err = PError.create("");
+        }
+        context.getLog().log(LogLevel.ERROR, err);
         context.flush();
     }
- 
+
+    private void setLatest(long time) {
+        latestSet = true;
+        latest = time;
+    }
+
+    private boolean isLatest(long time) {
+        if (latestSet) {
+            return (time - latest) >= 0;
+        } else {
+            return true;
+        }
+    }
+
     @Override
     public ControlInfo getInfo() {
         return info;
-    }
-
-    private static class Task<D extends CodeDelegate> implements TaskService.Task {
-
-        private final CodeFactory<D> factory;
-        private final String code;
-        private final LogLevel logLevel;
-        private final Class<D> previous;
-
-        private Task(CodeFactory<D> factory,
-                String code,
-                LogLevel logLevel,
-                Class<D> previous) {
-            this.factory = factory;
-            this.code = code;
-            this.logLevel = logLevel;
-            this.previous = previous;
-        }
-
-        @Override
-        public final Argument execute() throws Exception {
-            String src = code.trim();
-            CodeContext<?> ctxt;
-            LogBuilder log = new LogBuilder(logLevel);
-            if (src.isEmpty()) {
-                ctxt = factory.task().createDefaultCodeContext();
-            } else {
-                ctxt = factory.task()
-                        .attachLogging(log)
-                        .attachPrevious(previous)
-                        .createCodeContext(src);
-            }
-            return PReference.wrap(new Result(ctxt, log));
-        }
-
-    }
-
-    static class Result {
-
-        private final CodeContext<?> context;
-        private final LogBuilder log;
-
-        private Result(CodeContext<?> context, LogBuilder log) {
-            this.context = context;
-            this.log = log;
-        }
-
     }
 
     static class Descriptor<D extends CodeDelegate>

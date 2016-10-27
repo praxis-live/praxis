@@ -1,0 +1,25 @@
+    @In(1) AudioIn in1;
+    @In(2) AudioIn in2;
+    @Out(1) AudioOut out1;
+    @Out(2) AudioOut out2;
+    
+    @UGen IIRFilter f1, f2;
+    
+    @P(1) @Type.String(allowed = {"LP6", "LP12", "HP12", "BP12", "NP12", "LP24", "HP24"})
+    Property type;
+    @P(2) @Type.Number(min=20, max=20000, def=20000, skew=2)
+    Property frequency;
+    @P(3) @Type.Number(min=0, max=30, skew=2)
+    Property resonance;
+    
+    @Override
+    public void setup() {
+        type.linkAs(arg -> IIRFilter.Type.valueOf(arg.toString()), type -> {
+            f1.type(type);
+            f2.type(type);
+        });
+        frequency.link(f1::frequency, f2::frequency);
+        resonance.link(f1::resonance, f2::resonance);
+        link(in1, f1, out1);
+        link(in2, f2, out2);
+    }

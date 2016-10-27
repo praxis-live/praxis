@@ -26,6 +26,7 @@ package net.neilcsmith.praxis.util;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
+@Deprecated
 public class Normalizer {
 
     private final static double MIN_VALUE = Double.MIN_NORMAL;

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -91,6 +91,16 @@ class AbstractVideoComponent extends AbstractExecutionContextComponent {
                 }
                 break;
         }
+    }
+
+    @Override
+    public void hierarchyChanged() {
+        rootActive = false;
+        if (video != null) {
+            video.dispose();
+            video = null;
+        }
+        super.hierarchyChanged();
     }
 
     void createResizeModeControls() {
@@ -252,12 +262,10 @@ class AbstractVideoComponent extends AbstractExecutionContextComponent {
                             resizeMode.getHorizontalAlignment(),
                             value);
                 }
-            } else {
-                if (value != resizeMode.getHorizontalAlignment()) {
-                    resizeMode = new ResizeMode(resizeMode.getType(),
-                            value,
-                            resizeMode.getVerticalAlignment());
-                }
+            } else if (value != resizeMode.getHorizontalAlignment()) {
+                resizeMode = new ResizeMode(resizeMode.getType(),
+                        value,
+                        resizeMode.getVerticalAlignment());
             }
             if (cur != resizeMode && video != null) {
                 video.setResizeMode(resizeMode);

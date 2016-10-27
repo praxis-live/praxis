@@ -1,3 +1,24 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright 2016 Neil C Smith.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 3 only, as
+ * published by the Free Software Foundation.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 3 for more details.
+ *
+ * You should have received a copy of the GNU General Public License version 3
+ * along with this work; if not, see http://www.gnu.org/licenses/
+ * 
+ *
+ * Please visit http://neilcsmith.net if you need additional information or
+ * have any questions.
+ */
 package net.neilcsmith.praxis.hub.net;
 
 import de.sciss.net.OSCBundle;
@@ -16,7 +37,6 @@ import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ComponentType;
 import net.neilcsmith.praxis.core.ControlAddress;
-import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
 
 /**
@@ -32,6 +52,9 @@ abstract class OSCDispatcher {
     final static String ERR = "/ERR";
     final static String ADD = "/ADD";
     final static String DEL = "/DEL";
+    
+    final static String SYS_PREFIX = "/_sys";
+//    final static String REMOTE_SYS_PREFIX = "/_remote";
 
     private final PraxisPacketCodec codec;
     private final Map<Integer, SentCallInfo> sentCalls;
@@ -79,7 +102,11 @@ abstract class OSCDispatcher {
     void handleSND(OSCMessage msg, long time) throws Exception {
         int id = extractID(msg);
         ControlAddress to = ControlAddress.valueOf(msg.getArg(1).toString());
-        ControlAddress from = ControlAddress.valueOf(msg.getArg(2).toString());
+        String fromString = msg.getArg(2).toString();
+        if (fromString.startsWith(SYS_PREFIX)) {
+            fromString = getRemoteSysPrefix() + fromString;
+        }
+        ControlAddress from = ControlAddress.valueOf(fromString);
         CallArguments args = extractCallArguments(msg, 3);
         Call call = Call.createCall(to, from, time, args);
         send(call);
@@ -111,7 +138,11 @@ abstract class OSCDispatcher {
     void handleADD(OSCMessage msg, long time) throws Exception {
         int id = extractID(msg);
         ControlAddress to = getAddRootAddress();
-        ControlAddress from = ControlAddress.valueOf(msg.getArg(1).toString());
+        String fromString = msg.getArg(1).toString();
+        if (fromString.startsWith(SYS_PREFIX)) {
+            fromString = getRemoteSysPrefix() + fromString;
+        }
+        ControlAddress from = ControlAddress.valueOf(fromString);
         PString rootID = PString.valueOf(msg.getArg(2));
         ComponentType rootType = ComponentType.valueOf(msg.getArg(3).toString());     
         Call call = Call.createCall(to, from, time, CallArguments.create(rootID, rootType));
@@ -122,7 +153,11 @@ abstract class OSCDispatcher {
     void handleDEL(OSCMessage msg, long time) throws Exception {
         int id = extractID(msg);
         ControlAddress to = getRemoveRootAddress();
-        ControlAddress from = ControlAddress.valueOf(msg.getArg(1).toString());
+        String fromString = msg.getArg(1).toString();
+        if (fromString.startsWith(SYS_PREFIX)) {
+            fromString = getRemoteSysPrefix() + fromString;
+        }
+        ControlAddress from = ControlAddress.valueOf(fromString);
         PString rootID = PString.valueOf(msg.getArg(2));
         Call call = Call.createCall(to, from, time, rootID);
         send(call);
@@ -167,7 +202,11 @@ abstract class OSCDispatcher {
         CallArguments callArgs = call.getArgs();
         Object[] oscArgs = new Object[callArgs.getSize() + 3];
         oscArgs[0] = call.getMatchID();
-        oscArgs[1] = call.getToAddress().toString();
+        String to = call.getToAddress().toString();
+        if (to.startsWith(getRemoteSysPrefix())) {
+            to = to.substring(getRemoteSysPrefix().length());
+        }
+        oscArgs[1] = to;
         oscArgs[2] = call.getFromAddress().toString();
         for (int i=3, k=0; i<oscArgs.length; i++, k++) {
             oscArgs[i] = codec.toOSCObject(callArgs.get(k));
@@ -237,6 +276,8 @@ abstract class OSCDispatcher {
     abstract void send(OSCPacket packet);
 
     abstract void send(Call call);
+    
+    abstract String getRemoteSysPrefix();
 
     int extractID(OSCMessage msg) throws Exception {
         Object o = msg.getArg(0);

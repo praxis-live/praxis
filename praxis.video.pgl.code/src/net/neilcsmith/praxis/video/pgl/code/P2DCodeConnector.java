@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -25,7 +25,9 @@ package net.neilcsmith.praxis.video.pgl.code;
 import java.lang.reflect.Field;
 import net.neilcsmith.praxis.code.CodeConnector;
 import net.neilcsmith.praxis.code.CodeFactory;
+import net.neilcsmith.praxis.code.ResourceProperty;
 import net.neilcsmith.praxis.code.userapi.In;
+import net.neilcsmith.praxis.code.userapi.P;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
 
@@ -66,6 +68,19 @@ public class P2DCodeConnector extends CodeConnector<P2DCodeDelegate> {
                 field.setAccessible(true);
                 addPort(new PGLVideoInputPort.Descriptor(findID(field), ann.value(), field));
                 return;
+            }
+            
+            P p = field.getAnnotation(P.class);
+            if (p != null) {
+                ResourceProperty.Descriptor<PImage> ipd =
+                        ResourceProperty.Descriptor.create(this, p, field, ImageLoader.getDefault());
+                if (ipd != null) {
+                    addControl(ipd);
+                    if (shouldAddPort(field)) {
+                        addPort(ipd.createPortDescriptor());
+                    }
+                    return;
+                }
             }
         }
         super.analyseField(field);

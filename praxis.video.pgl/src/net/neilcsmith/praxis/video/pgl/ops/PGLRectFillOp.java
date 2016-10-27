@@ -59,7 +59,7 @@ public class PGLRectFillOp extends AbstractDrawOp {
     private boolean process(RectFill op, PGLSurface dst) {
         try {
             BlendMode mode = op.getBlendMode();
-            if (canProcess(mode)) {
+            if (canProcessDirect(mode)) {
                 PGLGraphics pg = dst.getGraphics();
                 pg.beginDraw();
                 configure(pg, mode, (float) op.getOpacity(), op.getColor());

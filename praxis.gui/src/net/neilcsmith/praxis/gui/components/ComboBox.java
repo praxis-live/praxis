@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,6 +22,10 @@
  */
 package net.neilcsmith.praxis.gui.components;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -29,6 +33,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import net.neilcsmith.praxis.core.Argument;
@@ -90,6 +96,8 @@ public class ComboBox extends SingleBindingGuiComponent {
     private void createComponentAndAdaptor() {
         model = new DefaultComboBoxModel();
         combo = new JComboBox(model);
+        combo.setBorder(new ComboBorder());
+        combo.putClientProperty("JComboBox.isTableCellEditor", true);
         adaptor = new Adaptor();
         adaptor.setSyncRate(ControlBinding.SyncRate.Medium);
         combo.addActionListener(adaptor);
@@ -230,6 +238,30 @@ public class ComboBox extends SingleBindingGuiComponent {
         }
     }
 
+    private class ComboBorder implements Border {
+
+        @Override
+        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+            if (c.hasFocus()) {
+                g.setColor(Utils.mix(c.getBackground(), c.getForeground(), 0.8));
+            } else {
+                g.setColor(Utils.mix(c.getBackground(), c.getForeground(), 0.6));
+            }
+            g.drawRect(x, y, width - 1, height - 1);
+        }
+
+        @Override
+        public Insets getBorderInsets(Component c) {
+            return new Insets(4, 4, 4, 4);
+        }
+
+        @Override
+        public boolean isBorderOpaque() {
+            return false;
+        }
+        
+    }
+    
     private class ValuesBinding implements ArrayProperty.Binding {
 
         public void setBoundValue(long time, PArray value) {

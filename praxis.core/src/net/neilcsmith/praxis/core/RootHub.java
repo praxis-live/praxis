@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,9 +19,9 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.core;
 
+import java.util.List;
 
 /**
  *
@@ -30,7 +30,12 @@ package net.neilcsmith.praxis.core;
 public interface RootHub {
 
     public void dispatch(Packet packet) throws InvalidAddressException;
-    
+
     public Lookup getLookup();
-    
+
+    public static interface ExtensionProvider {
+        
+        public List<Root> getExtensions();
+        
+    }
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,7 +21,9 @@
  */
 package net.neilcsmith.praxis.video.gst1.components;
 
+import java.io.File;
 import java.net.URI;
+import java.util.List;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.ControlPort;
@@ -227,8 +229,22 @@ public class VideoPlayer extends AbstractVideoComponent {
         }
 
         public Argument execute() throws Exception {
-            URI uri = videoSource.value();
-            VideoDelegate delegate = new PlayBinDelegate(uri, audioSink);
+            List<URI> uris = videoSource.resolve(lookup);
+            URI video = null;
+            for (URI uri : uris) {
+                if ("file".equals(uri.getScheme())) {
+                    try {
+                        File file = new File(uri);
+                        if (file.exists()) {
+                            video = uri;
+                        }
+                    } catch (Exception ex) {}
+                } else {
+                    video = uri;
+                }
+            }
+            video = video == null ? videoSource.value() : video;
+            VideoDelegate delegate = new PlayBinDelegate(video, audioSink);
             if (delegate == null) {
                 throw new InvalidVideoResourceException();
             }

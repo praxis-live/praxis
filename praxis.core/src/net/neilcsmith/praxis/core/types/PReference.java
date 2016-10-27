@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,6 +22,7 @@
 
 package net.neilcsmith.praxis.core.types;
 
+import java.util.Optional;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
@@ -91,6 +92,14 @@ public class PReference extends Argument {
             return (PReference) arg;
         }
         throw new ArgumentFormatException();
+    }
+    
+    public static Optional<PReference> from(Argument arg) {
+        if (arg instanceof PReference) {
+            return Optional.of((PReference) arg);
+        } else {
+            return Optional.empty();
+        }
     }
     
     public static ArgumentInfo info() {

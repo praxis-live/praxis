@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: org.codehaus.commons.compiler
-OpenIDE-Module-Localizing-Bundle: org/codehaus/commons/compiler/Bundle.properties
-OpenIDE-Module-Specification-Version: 2.7.4
-

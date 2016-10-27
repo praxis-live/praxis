@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -34,6 +34,7 @@ import net.neilcsmith.praxis.core.types.PReference;
  */
 public class RootFactoryService extends Service {
 
+    @Deprecated
     public final static RootFactoryService INSTANCE = new RootFactoryService();
     public final static String NEW_ROOT_INSTANCE = "new-root-instance";
     public final static ControlInfo NEW_ROOT_INSTANCE_INFO =

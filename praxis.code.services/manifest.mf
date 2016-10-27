@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+AutoUpdate-Show-In-Client: true
+OpenIDE-Module: net.neilcsmith.praxis.code.services
+OpenIDE-Module-Localizing-Bundle: net/neilcsmith/praxis/code/services/Bundle.properties
+OpenIDE-Module-Recommends: net.neilcsmith.praxis.compiler.JavaCompilerProvider
+OpenIDE-Module-Specification-Version: 1.0
+

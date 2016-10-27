@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -40,19 +40,15 @@ import net.neilcsmith.praxis.video.render.Surface;
  */
 public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D> {
 
-    private final StateListener stateListener;
-
     private final VideoOutputPort.Descriptor output;
     private final VideoInputPort.Descriptor[] inputs;
     private final OffScreenGraphicsInfo[] offscreen;
     private final Processor processor;
 
-    private ExecutionContext execCtxt;
     private boolean setupRequired;
 
     public VideoCodeContext(VideoCodeConnector<D> connector) {
-        super(connector);
-        stateListener = new StateListener();
+        super(connector, false);
         setupRequired = true;
         output = connector.extractOutput();
 
@@ -74,7 +70,6 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
 
     @Override
     protected void configure(CodeComponent<D> cmp, CodeContext<D> oldCtxt) {
-        super.configure(cmp, oldCtxt);
         output.getPort().getPipe().addSource(processor);
         for (VideoInputPort.Descriptor vidp : inputs) {
             processor.addSource(vidp.getPort().getPipe());
@@ -90,29 +85,10 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
     }
 
     @Override
-    protected void hierarchyChanged() {
-        super.hierarchyChanged();
-        ExecutionContext ctxt = getLookup().get(ExecutionContext.class);
-        if (execCtxt != ctxt) {
-            if (execCtxt != null) {
-                execCtxt.removeStateListener(stateListener);
-            }
-            if (ctxt != null) {
-                ctxt.addStateListener(stateListener);
-                stateListener.stateChanged(ctxt);
-            }
-            execCtxt = ctxt;
-        }
+    protected void starting(ExecutionContext state) {
+        setupRequired = true;
     }
-
-    private class StateListener implements ExecutionContext.StateListener {
-
-        @Override
-        public void stateChanged(ExecutionContext source) {
-            setupRequired = true;
-        }
-
-    }
+    
 
     private class Processor extends AbstractProcessPipe {
         
@@ -190,6 +166,7 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
         }
         
         private void invokeSetup(VideoCodeDelegate delegate) {
+            reset();
             try {
                 delegate.setup();
             } catch (Exception ex) {

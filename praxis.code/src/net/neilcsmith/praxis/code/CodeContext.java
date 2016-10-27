@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -57,12 +57,20 @@ public abstract class CodeContext<D extends CodeDelegate> {
 
     private final D delegate;
     private final LogBuilder log;
+    private final Driver driver;
+    private final boolean requireClock;
 
+    private ExecutionContext execCtxt;
     private CodeComponent<D> cmp;
     private long time;
     private ClockListener[] clockListeners;
 
-    public CodeContext(CodeConnector<D> connector) {
+    protected CodeContext(CodeConnector<D> connector) {
+        this(connector, false);
+    }
+
+    protected CodeContext(CodeConnector<D> connector, boolean requireClock) {
+        this.driver = new Driver();
         clockListeners = new ClockListener[0];
         time = System.nanoTime() - 10 * 1000_000_000;
         // @TODO what is maximum allowed amount a root can be behind system time?
@@ -73,6 +81,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
             info = connector.extractInfo();
             delegate = connector.getDelegate();
             log = new LogBuilder(LogLevel.ERROR);
+            this.requireClock = requireClock || connector.requiresClock();
         } catch (Exception e) {
             Logger.getLogger(CodeContext.class.getName()).log(Level.FINE, "", e);
             throw e;
@@ -84,11 +93,13 @@ public abstract class CodeContext<D extends CodeDelegate> {
         delegate.setContext(this);
     }
 
-    protected void configure(CodeComponent<D> cmp, CodeContext<D> oldCtxt) {
-
+    void handleConfigure(CodeComponent<D> cmp, CodeContext<D> oldCtxt) {
         configureControls(oldCtxt);
         configurePorts(oldCtxt);
-//        hierarchyChanged();
+        configure(cmp, oldCtxt);
+    }
+    
+    protected void configure(CodeComponent<D> cmp, CodeContext<D> oldCtxt) {
     }
 
     private void configureControls(CodeContext<D> oldCtxt) {
@@ -98,6 +109,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
             ControlDescriptor oldCD = oldControls.remove(entry.getKey());
             if (oldCD != null) {
                 entry.getValue().attach(this, oldCD.getControl());
+//                oldCD.dispose();
             } else {
                 entry.getValue().attach(this, null);
             }
@@ -111,6 +123,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
             PortDescriptor oldPD = oldPorts.remove(entry.getKey());
             if (oldPD != null) {
                 entry.getValue().attach(this, oldPD.getPort());
+//                oldPD.dispose();
             } else {
                 entry.getValue().attach(this, null);
             }
@@ -120,19 +133,83 @@ public abstract class CodeContext<D extends CodeDelegate> {
         }
     }
 
-    protected void hierarchyChanged() {
+    final void handleHierarchyChanged() {
+        hierarchyChanged();
+        
         LogLevel level = getLookup().get(LogLevel.class);
         if (level == null) {
             level = LogLevel.ERROR;
         }
         log.setLevel(level);
+        
+        ExecutionContext ctxt = cmp == null ? null : cmp.getExecutionContext();
+        if (execCtxt != ctxt) {
+            if (execCtxt != null) {
+                execCtxt.removeStateListener(driver);
+                execCtxt.removeClockListener(driver);
+            }
+            execCtxt = ctxt;
+            if (ctxt != null) {
+                ctxt.addStateListener(driver);
+                if (requireClock) {
+                    ctxt.addClockListener(driver);
+                }
+                handleStateChanged(ctxt, false);
+            }
+        }
+    }
+
+    protected void hierarchyChanged() {
+    }
+
+    final void handleStateChanged(ExecutionContext source, boolean full) {
+        reset();
+        update(source.getTime());
+        if (source.getState() == ExecutionContext.State.ACTIVE) {
+            starting(source, full);
+        } else {
+            stopping(source, full);
+        }
+        flush();
+    }
+    
+    protected void starting(ExecutionContext source, boolean fullStart) {
+        starting(source);
+    }
+
+    protected void starting(ExecutionContext source) {
+    }
+    
+    protected void stopping(ExecutionContext source, boolean fullStop) {
+        stopping(source);
+    }
+    
+    protected void stopping(ExecutionContext source) {
+    }
+
+    final void handleTick(ExecutionContext source) {
+        update(source.getTime());
+        tick(source);
+        flush();
+    }
+
+    protected void tick(ExecutionContext source) {
+    }
+    
+    protected final void reset() {
+        controls.values().stream().forEach(ControlDescriptor::reset);
+        ports.values().stream().forEach(PortDescriptor::reset);
+    }
+
+    final void handleDispose() {
+        cmp = null;
+        handleHierarchyChanged();
+        controls.clear();
+        ports.clear();
+        dispose();
     }
 
     protected void dispose() {
-        cmp = null;
-        hierarchyChanged();
-        controls.clear();
-        ports.clear();
     }
 
     public CodeComponent<D> getComponent() {
@@ -220,7 +297,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
     protected ExecutionContext getExecutionContext() {
         return cmp == null ? null : cmp.getExecutionContext();
     }
-
+    
     protected boolean isActive() {
         ExecutionContext ctxt = getExecutionContext();
         return ctxt == null ? false : ctxt.getState() == ExecutionContext.State.ACTIVE;
@@ -315,6 +392,21 @@ public abstract class CodeContext<D extends CodeDelegate> {
     public static interface Invoker {
 
         public void invoke();
+
+    }
+
+    private class Driver implements ExecutionContext.StateListener,
+            ExecutionContext.ClockListener {
+
+        @Override
+        public void stateChanged(ExecutionContext source) {
+            handleStateChanged(source, true);
+        }
+
+        @Override
+        public void tick(ExecutionContext source) {
+            handleTick(source);
+        }
 
     }
 

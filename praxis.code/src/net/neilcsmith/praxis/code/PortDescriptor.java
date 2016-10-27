@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,7 +19,6 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.code;
 
 import net.neilcsmith.praxis.core.Port;
@@ -30,36 +29,46 @@ import net.neilcsmith.praxis.core.info.PortInfo;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public abstract class PortDescriptor {
-    
-    public static enum Category { In, Out, Property, Action, AuxIn, AuxOut }
-    
+
+    public static enum Category {
+        In, Out, Property, Action, AuxIn, AuxOut
+    }
+
     private final String id;
     private final Category category;
     private final int index;
-    
+
     protected PortDescriptor(String id, Category category, int index) {
         this.id = id;
         this.category = category;
         this.index = index;
     }
-    
+
     public final String getID() {
         return id;
     }
-    
+
     public Category getCategory() {
         return category;
     }
-    
+
     public int getIndex() {
         return index;
     }
-    
+
     public abstract void attach(CodeContext<?> context, Port previous);
-    
+
     public abstract Port getPort();
-    
+
     public abstract PortInfo getInfo();
-    
-    
+
+    public void reset() {
+    }
+
+    public void stopping() {
+    }
+
+//    public void dispose() {
+//    }
+
 }

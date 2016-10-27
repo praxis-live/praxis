@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,6 +22,7 @@
 package net.neilcsmith.praxis.core.types;
 
 import java.util.Objects;
+import java.util.Optional;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 
@@ -123,6 +124,14 @@ public final class PError extends Argument {
             }
         }
         return valueOf(arg.toString());
+    }
+    
+    public static Optional<PError> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
+        }
     }
 
     public static PError create(Exception ex) {

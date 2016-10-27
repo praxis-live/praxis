@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,18 +21,15 @@
  */
 package net.neilcsmith.praxis.core.info;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
-import net.neilcsmith.praxis.core.Component;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
 import net.neilcsmith.praxis.core.PortAddress;
@@ -70,24 +67,6 @@ public class ComponentInfo extends Argument {
         this.ports = ports;
         this.properties = properties;
         this.string = string;
-    }
-
-    @Deprecated
-    public Class<? extends Component> getType() {
-        return Component.class;
-    }
-
-    @Deprecated
-    public InterfaceDefinition[] getInterfaces() {
-        List<InterfaceDefinition> ids = new ArrayList<>();
-        for (Class<? extends InterfaceDefinition> idClass : interfaces) {
-            try {
-                ids.add(idClass.newInstance());
-            } catch (Exception ex) {
-                Logger.getLogger(ComponentInfo.class.getName()).log(Level.WARNING, null, ex);
-            }
-        }
-        return ids.toArray(new InterfaceDefinition[ids.size()]);
     }
 
     public boolean hasInterface(Class<? extends InterfaceDefinition> type) {
@@ -196,34 +175,6 @@ public class ComponentInfo extends Argument {
         return hash;
     }
 
-    @Deprecated
-    public static ComponentInfo create(
-            Class<? extends Component> type,
-            Set<InterfaceDefinition> interfaces,
-            Map<String, ControlInfo> controls,
-            Map<String, PortInfo> ports,
-            PMap properties) {
-        return create(interfaces, controls, ports, properties);
-    }
-
-    @Deprecated
-    public static ComponentInfo create(
-            Set<InterfaceDefinition> interfaces,
-            Map<String, ControlInfo> controls,
-            Map<String, PortInfo> ports,
-            PMap properties) {
-        Set<Class<? extends InterfaceDefinition>> ids;
-        if (interfaces.isEmpty()) {
-            ids = Collections.emptySet();
-        } else {
-            ids = new LinkedHashSet<>();
-            for (InterfaceDefinition id : interfaces) {
-                ids.add(id.getClass());
-            }
-        }
-        return create(controls, ports, ids, properties);
-    }
-
     public static ComponentInfo create(
             Map<String, ControlInfo> controls,
             Map<String, PortInfo> ports,
@@ -268,6 +219,14 @@ public class ComponentInfo extends Argument {
             return (ComponentInfo) arg;
         } else {
             return valueOf(arg.toString());
+        }
+    }
+    
+    public static Optional<ComponentInfo> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
         }
     }
 

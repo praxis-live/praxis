@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -90,13 +90,20 @@ public class PropertyControl extends Property implements Control {
     protected void setImpl(long time, Argument arg) throws Exception {
         binding.set(time, arg);
         setLatest(time);
+        if (hasLinks()) {
+            updateLinks(arg);
+            context.flush();
+        }
     }
 
     @Override
     protected void setImpl(long time, double value) throws Exception {
         binding.set(time, value);
         setLatest(time);
-
+        if (hasLinks()) {
+            updateLinks(value);
+            context.flush();
+        }
     }
 
     private void checkInvoke(long time, boolean error) {
@@ -313,6 +320,16 @@ public class PropertyControl extends Property implements Control {
             return new PortDescImpl(getID(), getIndex(), control);
         }
 
+        @Override
+        public void reset() {
+            control.clearLinks();
+        }
+
+        @Override
+        public void stopping() {
+            control.finishAnimating();
+        }
+
         public static Descriptor create(CodeConnector<?> connector,
                 P ann, Field field) {
             Binding binding = findBinding(connector, field);
@@ -386,6 +403,8 @@ public class PropertyControl extends Property implements Control {
             } else if (field.isAnnotationPresent(Type.Boolean.class)
                     || BooleanBinding.isBindableFieldType(type)) {
                 binding = BooleanBinding.create(connector, field);
+            } else if (BytesBinding.isBindableFieldType(type)) {
+                binding = BytesBinding.create(connector, field);
             }
 
             if (binding == null && Property.class.isAssignableFrom(type)) {

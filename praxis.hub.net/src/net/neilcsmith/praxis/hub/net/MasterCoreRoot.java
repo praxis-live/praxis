@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,13 +21,12 @@
  */
 package net.neilcsmith.praxis.hub.net;
 
-import java.net.SocketAddress;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.neilcsmith.praxis.core.Call;
@@ -59,9 +58,11 @@ class MasterCoreRoot extends DefaultCoreRoot {
     private final static String SLAVE_PREFIX = Hub.SYS_PREFIX + "net_";
 
     private final Map<String, String> remotes;
-    private SlaveInfo[] slaves;
+    private final SlaveInfo[] slaves;
+    
     private ComponentAddress[] slaveClients;
-
+    private FileServer fileServer;
+    
     MasterCoreRoot(Hub.Accessor hubAccess,
             List<Root> exts,
             List<? extends SlaveInfo> slaves) {
@@ -80,20 +81,52 @@ class MasterCoreRoot extends DefaultCoreRoot {
     }
 
     @Override
-    protected void installExtensions() {
-        super.installExtensions();
+    protected void activating() {
+        super.activating();
+        FileServer.Info fileServerInfo = activateFileServer();
         slaveClients = new ComponentAddress[slaves.length];
         for (int i = 0; i < slaves.length; i++) {
             String id = SLAVE_PREFIX + (i + 1);
-            SocketAddress slaveNetAddress = slaves[i].getAddress();
             try {
-                installRoot(id, "netex", new MasterClientRoot(slaveNetAddress));
+                installRoot(id, "netex", new MasterClientRoot(slaves[i], fileServerInfo));
             } catch (InvalidAddressException | IllegalRootStateException ex) {
                 Logger.getLogger(MasterCoreRoot.class.getName()).log(Level.SEVERE, null, ex);
 //                throw new RuntimeException(ex);
             }
             slaveClients[i] = ComponentAddress.create("/" + id);
         }
+    }
+
+    @Override
+    protected void terminating() {
+        super.terminating(); 
+        if (fileServer != null) {
+            fileServer.stop();
+            fileServer = null;
+        }
+    }
+
+    private FileServer.Info activateFileServer() {
+        boolean reqServer = false;
+        for (SlaveInfo slave : slaves) {
+            if (!slave.isLocal() && slave.getUseRemoteResources()) {
+                reqServer = true;
+                break;
+            }
+        }
+        
+        if (reqServer) {
+            try {
+                fileServer = new FileServer(Utils.getFileServerPort(), Utils.getUserDirectory());
+                fileServer.start();
+                return fileServer.getInfo();
+            } catch (IOException ex) {
+                Logger.getLogger(MasterCoreRoot.class.getName()).log(Level.SEVERE, null, ex);
+                fileServer = null;
+            }
+        }
+        
+        return null;
     }
 
     private class AddRootControl extends AbstractAsyncControl {

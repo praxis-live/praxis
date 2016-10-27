@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,6 +22,7 @@
 package net.neilcsmith.praxis.core.info;
 
 import java.util.Arrays;
+import java.util.Optional;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.types.PArray;
@@ -120,15 +121,6 @@ public class ControlInfo extends Argument {
         }
         if (obj instanceof ControlInfo) {
             ControlInfo o = (ControlInfo) obj;
-//            if (isProperty()) {
-//                return o.isProperty() && Arrays.equals(inputs, o.inputs)
-//                        && Arrays.equals(defaults, o.defaults)
-//                        && properties.equals(o.properties);
-//            } else {
-//                return !o.isProperty() && Arrays.equals(inputs, o.inputs)
-//                        && Arrays.equals(outputs, o.outputs)
-//                        && properties.equals(o.properties);
-//            }
             return type == o.type
                     && Arrays.equals(inputs, o.inputs)
                     && Arrays.equals(outputs, o.outputs)
@@ -231,6 +223,14 @@ public class ControlInfo extends Argument {
         }
     }
 
+    public static Optional<ControlInfo> from(Argument arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ArgumentFormatException ex) {
+            return Optional.empty();
+        }
+    }
+    
     private static ControlInfo valueOf(String string) throws ArgumentFormatException {
         try {
             PArray arr = PArray.valueOf(string);

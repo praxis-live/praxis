@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2016 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -40,10 +40,10 @@ public class DefaultCodeDelegate extends CodeDelegate {
         "static net.neilcsmith.praxis.code.userapi.Constants.*"
     };
 
-    private final Random rnd;
+    protected final Random RND;
 
     public DefaultCodeDelegate() {
-        rnd = new Random();
+        RND = new Random();
     }
 
     public final void log(LogLevel level, String msg) {
@@ -97,7 +97,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
     }
 
     public final double random(double max) {
-        return rnd.nextDouble() * max;
+        return RND.nextDouble() * max;
     }
 
     public final double random(double min, double max) {
@@ -105,6 +105,18 @@ public class DefaultCodeDelegate extends CodeDelegate {
             return min;
         }
         return random(max - min) + min;
+    }
+    
+    public final double randomOf(double ... values) {
+        return values[RND.nextInt(values.length)];
+    }
+    
+    public final int randomOf(int ... values) {
+        return values[RND.nextInt(values.length)];
+    }
+
+    public final String randomOf(String ... values) {
+        return values[RND.nextInt(values.length)]; 
     }
 
     public final double abs(double n) {
