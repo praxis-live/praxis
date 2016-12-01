@@ -43,6 +43,7 @@ import org.freedesktop.gstreamer.Buffer;
 import org.freedesktop.gstreamer.Bus;
 import org.freedesktop.gstreamer.Caps;
 import org.freedesktop.gstreamer.Element;
+import org.freedesktop.gstreamer.FlowReturn;
 import org.freedesktop.gstreamer.Gst;
 import org.freedesktop.gstreamer.GstObject;
 import org.freedesktop.gstreamer.Pipeline;
@@ -346,7 +347,7 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
     private class NewSampleListener implements AppSink.NEW_SAMPLE {
 
         @Override
-        public void newBuffer(AppSink sink) {
+        public FlowReturn newSample(AppSink sink) {
             surfaceLock.lock();
             Sample sample = sink.pullSample();
             Structure capsStruct = sample.getCaps().getStructure(0);
@@ -368,6 +369,7 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
             } finally {
                 surfaceLock.unlock();
             }
+            return FlowReturn.OK;
         }
 
     }
@@ -375,7 +377,7 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
     private class NewPrerollListener implements AppSink.NEW_PREROLL {
 
         @Override
-        public void newPreroll(AppSink sink) {
+        public FlowReturn newPreroll(AppSink sink) {
             surfaceLock.lock();
             Sample sample = sink.pullPreroll();
             Structure capsStruct = sample.getCaps().getStructure(0);
@@ -397,6 +399,7 @@ public abstract class AbstractGstDelegate extends VideoDelegate {
             } finally {
                 surfaceLock.unlock();
             }
+            return FlowReturn.OK;
         }
 
     }
