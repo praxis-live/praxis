@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -63,11 +63,12 @@ public class PGLGraphics extends PGraphics2D {
             pixelTexture.invertedY(true);
             pixelImage = wrapTexture(pixelTexture);
         }
-        int len = width * height;
-        IntBuffer buf = context.getScratchBuffer(len);
-        buf.put(pixels, 0, len);
-        buf.rewind();
-        context.writePixelsARGB(buf, pixelTexture);
+        //        int len = width * height;
+        //        IntBuffer buf = context.getScratchBuffer(len);
+        //        buf.put(pixels, 0, len);
+        //        buf.rewind();
+        //        context.writePixelsARGB(buf, pixelTexture);
+        context.writePixels(pixels, texture);
         int curBlend = blendMode;
         if (hasAlpha) {
             blendMode(REPLACE);
@@ -158,7 +159,7 @@ public class PGLGraphics extends PGraphics2D {
         inText = false;
         blendMode(savedBlendMode);
     }
-    
+
     @Override
     public void beginDraw() {
         if (drawing) {

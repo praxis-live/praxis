@@ -32,6 +32,7 @@ import net.neilcsmith.praxis.video.WindowHints;
  *
  * @author nsigma
  */
+@Deprecated
 public class PGLPlayerFactoryProvider implements PlayerFactory.Provider {
     
     private final static String LIBRARY_NAME = "OpenGL";
@@ -107,7 +108,8 @@ public class PGLPlayerFactoryProvider implements PlayerFactory.Provider {
                     rotation,
                     device,
                     wHints,
-                    queue);
+                    queue,
+                    PGLProfile.GL3);
 
         }
     }

@@ -36,6 +36,7 @@ import net.neilcsmith.praxis.video.render.NativePixelData;
 import net.neilcsmith.praxis.video.render.PixelData;
 import net.neilcsmith.praxis.video.render.Surface;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
+import net.neilcsmith.praxis.video.render.utils.PixelArrayCache;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import static processing.core.PConstants.ARGB;
@@ -54,6 +55,7 @@ public final class PGLContext {
     private final static Logger LOG = Logger.getLogger(PGLContext.class.getName());
 
     private final PApplet applet;
+    private final PGLProfile profile;
     private final int width;
     private final int height;
     private final int cacheMax = 8;
@@ -67,8 +69,9 @@ public final class PGLContext {
     PGraphics current; //@TODO use primary().getCurrent?
     private IntBuffer scratchBuffer;
 
-    PGLContext(PApplet applet, int width, int height) {
+    PGLContext(PApplet applet, PGLProfile profile, int width, int height) {
         this.applet = applet;
+        this.profile = profile;
         this.width = width;
         this.height = height;
         cache = new ArrayList<>(cacheMax);
@@ -160,7 +163,26 @@ public final class PGLContext {
         cache.add(0, pgl);
     }
 
-    void writePixelsARGB(IntBuffer data, Texture tex) {
+    void writePixels(int[] data, Texture tex) {
+        int size = tex.width * tex.height;
+        IntBuffer buffer = getScratchBuffer(size);
+        if (profile != PGLProfile.GLES2) {
+            buffer.put(data, 0, size);
+            buffer.rewind();
+            writePixelsARGB(buffer, tex);
+        } else {
+            for (int i = 0; i < size; i++) {
+                int color = data[i];
+                int rb = color & 0x00FF00FF;
+                data[i] = (color & 0xFF00FF00) | (rb << 16) | (rb >> 16);
+            }
+            buffer.put(data, 0, size);
+            buffer.rewind();
+            writePixelsRGBA(buffer, tex);
+        }
+    }
+
+    private void writePixelsARGB(IntBuffer data, Texture tex) {
         PGL pgl = ((PGLGraphics) primary()).pgl;
         boolean enabledTex = false;
         if (!pgl.isEnabled(tex.glTarget)) {
@@ -176,6 +198,33 @@ public final class PGLContext {
                 tex.height,
                 GL2.GL_BGRA,
                 GL2.GL_UNSIGNED_INT_8_8_8_8_REV,
+                data);
+        if (tex.usingMipmaps() && PGraphicsOpenGL.autoMipmapGenSupported) {
+            pgl.generateMipmap(tex.glTarget);
+        }
+        pgl.bindTexture(tex.glTarget, 0);
+        if (enabledTex) {
+            pgl.disable(tex.glTarget);
+        }
+        tex.updateTexels();
+    }
+
+    private void writePixelsRGBA(IntBuffer data, Texture tex) {
+        PGL pgl = ((PGLGraphics) primary()).pgl;
+        boolean enabledTex = false;
+        if (!pgl.isEnabled(tex.glTarget)) {
+            pgl.enable(tex.glTarget);
+            enabledTex = true;
+        }
+        pgl.bindTexture(tex.glTarget, tex.glName);
+        pgl.texSubImage2D(tex.glTarget,
+                0,
+                0,
+                0,
+                tex.width,
+                tex.height,
+                PGL.RGBA,
+                PGL.UNSIGNED_BYTE,
                 data);
         if (tex.usingMipmaps() && PGraphicsOpenGL.autoMipmapGenSupported) {
             pgl.generateMipmap(tex.glTarget);
@@ -296,28 +345,29 @@ public final class PGLContext {
             if (output instanceof NativePixelData && output.getScanline() == output.getWidth()) {
                 LOG.fine("PixelData is native");
                 NativePixelData nOut = (NativePixelData) output;
-                writePixelsARGB(nOut.getNativeData().asIntBuffer(), texture);
+                if (profile != PGLProfile.GLES2) {
+                    writePixelsARGB(nOut.getNativeData().asIntBuffer(), texture);
+                } else {
+                    writePixels(output.getData(), texture);
+                }
 
+            } else if (output.getScanline() == output.getWidth() && output.getOffset() == 0) {
+                writePixels(output.getData(), texture);
             } else {
                 int size = output.getWidth() * output.getHeight();
-                LOG.fine("Size of pixel data = " + size);
-                IntBuffer buffer = getScratchBuffer(size);
-                LOG.fine("Size of buffer = " + buffer.capacity());
-                if (output.getScanline() == output.getWidth()) {
-                    buffer.put(output.getData(), output.getOffset(), size);
-                } else {
-                    int i = output.getOffset();
-                    int w = output.getWidth();
-                    int h = output.getHeight();
-                    int sl = output.getScanline();
-                    int[] data = output.getData();
-                    for (int v = 0; v < h; v++) {
-                        buffer.put(data, i, w);
-                        i += sl;
-                    }
+                int[] pixels = PixelArrayCache.acquire(size, false);
+                IntBuffer buffer = IntBuffer.wrap(pixels);
+                int i = output.getOffset();
+                int w = output.getWidth();
+                int h = output.getHeight();
+                int sl = output.getScanline();
+                int[] data = output.getData();
+                for (int v = 0; v < h; v++) {
+                    buffer.put(data, i, w);
+                    i += sl;
                 }
-                buffer.rewind();
-                writePixelsARGB(buffer, texture);
+                writePixels(data, texture);
+                PixelArrayCache.release(pixels);
             }
         }
     }
