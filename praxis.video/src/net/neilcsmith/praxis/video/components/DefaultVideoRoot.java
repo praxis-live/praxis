@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,6 +21,8 @@
  */
 package net.neilcsmith.praxis.video.components;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,11 +49,16 @@ import net.neilcsmith.praxis.video.pipes.FrameRateSource;
  * @author Neil C Smith
  */
 public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener {
-    
-    // @TODO build list from player search
+
     private final static String SOFTWARE = "Software";
-    private final static String OPENGL = "OpenGL";
-    
+    private final static List<String> RENDERERS = new ArrayList<>();
+    static {
+        RENDERERS.add(SOFTWARE);
+        for (PlayerFactory.Provider renderer : Lookup.SYSTEM.getAll(PlayerFactory.Provider.class)) {
+            RENDERERS.add(renderer.getLibraryName());
+        }
+    }
+
     private final static Logger LOG = Logger.getLogger(DefaultVideoRoot.class.getName());
 
     private final static int WIDTH_DEFAULT = 640;
@@ -72,8 +79,8 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     }
 
     private void buildControls() {
-        renderer = StringProperty.builder().defaultValue(SOFTWARE).allowedValues(SOFTWARE, OPENGL).build();
-        
+        renderer = StringProperty.builder().defaultValue(SOFTWARE).allowedValues(RENDERERS.toArray(new String[0])).build();
+
         registerControl("renderer", renderer);
         registerControl("width", IntProperty.create(new WidthBinding(), 1, 16384, width));
         registerControl("height", IntProperty.create(new HeightBinding(), 1, 16384, height));
@@ -159,7 +166,6 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     protected void stopping() {
         player.terminate();
         interrupt();
-
 
     }
 
