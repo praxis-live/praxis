@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -32,10 +32,10 @@ import net.neilcsmith.praxis.impl.AbstractComponentFactory;
 public class PGLComponentFactoryProvider implements ComponentFactoryProvider {
 
 
-    private static Factory instance = new Factory();
+    private static final Factory INSTANCE = new Factory();
 
     public ComponentFactory getFactory() {
-        return instance;
+        return INSTANCE;
     }
 
     private static class Factory extends AbstractComponentFactory {
@@ -46,8 +46,9 @@ public class PGLComponentFactoryProvider implements ComponentFactoryProvider {
 
         private void build() {      
 
-            addComponent("video:opengl:filter", data(PGLFilter.GLFilter.class).deprecated());
             addComponent("video:gl:filter", data(PGLFilter.class));
+            addComponent("video:gl:receive", data(PGLReceiver.class));
+            addComponent("video:gl:send", data(PGLSender.class));
         }
 
     }
