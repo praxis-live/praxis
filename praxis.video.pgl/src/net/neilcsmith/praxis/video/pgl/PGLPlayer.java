@@ -33,6 +33,7 @@ import net.neilcsmith.praxis.video.WindowHints;
 import net.neilcsmith.praxis.video.pipes.FrameRateListener;
 import net.neilcsmith.praxis.video.pipes.VideoPipe;
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PSurface;
@@ -202,11 +203,11 @@ public class PGLPlayer implements Player {
 
         @Override
         protected PGraphics makeGraphics(int w, int h, String renderer, String path, boolean primary) {
-            if (PGLGraphics.ID.equals(renderer)) {
+            if (PGLGraphics.ID.equals(renderer) || P2D.equals(renderer)) {
                 PGLGraphics pgl = new PGLGraphics(context, primary, w, h);
 //                pgl.setParent(this);
                 return pgl;
-            } else if (PGLGraphics3D.ID.equals(renderer)) {
+            } else if (PGLGraphics3D.ID.equals(renderer) || P3D.equals(renderer)) {
                 PGLGraphics3D pgl3d = new PGLGraphics3D(context, primary, w, h);
 //                pgl3d.setParent(this);
                 return pgl3d;
