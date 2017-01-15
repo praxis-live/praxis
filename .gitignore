@@ -152,3 +152,6 @@
 /praxis.data/build/
 /praxis.data/nbproject/private/
 /lib.jna.platform/build/
+/lib.syphon/build/
+/praxis.video.pgl.syphon/build/
+/praxis.video.pgl.syphon/nbproject/private/
