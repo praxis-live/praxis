@@ -15,15 +15,12 @@
                     </run-dependency>
                 </dependency>
             </module-dependencies>
-            <friend-packages>
-                <friend>net.neilcsmith.praxis.code</friend>
-                <friend>net.neilcsmith.praxis.video.pgl</friend>
-                <friend>net.neilcsmith.praxis.video.pgl.code</friend>
+            <public-packages>
                 <package>processing.core</package>
                 <package>processing.data</package>
                 <package>processing.event</package>
                 <package>processing.opengl</package>
-            </friend-packages>
+            </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/core.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/core.jar</binary-origin>
