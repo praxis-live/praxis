@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -315,11 +315,11 @@ abstract class PGraphics /*extends PImage*/ {
     }
 
     public void textFont(PFont font) {
-        g.textFont(font.unwrap());
+        g.textFont(font.unwrap(context));
     }
 
     public void textFont(PFont font, double size) {
-        g.textFont(font.unwrap(), (float)size);
+        g.textFont(font.unwrap(context, (float) size));
     }
 
     public void textLeading(double leading) {
