@@ -31,6 +31,9 @@ import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.jogamp.opengl.GL2;
+import java.awt.Font;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import net.neilcsmith.praxis.video.pgl.ops.PGLOpCache;
 import net.neilcsmith.praxis.video.render.NativePixelData;
 import net.neilcsmith.praxis.video.render.PixelData;
@@ -40,6 +43,7 @@ import net.neilcsmith.praxis.video.render.utils.PixelArrayCache;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import static processing.core.PConstants.ARGB;
+import processing.core.PFont;
 import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.opengl.PGL;
@@ -60,6 +64,7 @@ public final class PGLContext {
     private final int height;
     private final int cacheMax = 8;
     private final PGLOpCache opCache;
+    private final FontCache fontCache;
     private final List<PGLGraphics> cache;
     private final List<AlienImageReference> aliens;
     private final WeakHashMap<PGLSurface, Boolean> surfaces;
@@ -81,6 +86,7 @@ public final class PGLContext {
         CLEAR_RGB = new PImage(width, height, PImage.RGB);
         CLEAR_ARGB = new PImage(width, height, PImage.ARGB);
         opCache = new PGLOpCache(this);
+        fontCache = new FontCache();
     }
 
     public PImage asImage(Surface surface) {
@@ -122,6 +128,10 @@ public final class PGLContext {
         PGLSurface s = new PGLSurface(this, width, height, alpha);
         surfaces.put(s, Boolean.TRUE);
         return s;
+    }
+    
+    public PFont asPFont(Font font) {
+        return fontCache.computeIfAbsent(font, f -> new PFont(f, true));
     }
 
     PGLOpCache getOpCache() {
@@ -327,6 +337,19 @@ public final class PGLContext {
         private WeakReference<Surface> alien;
         private int modCount;
         private PImage image;
+    }
+    
+    private static class FontCache extends LinkedHashMap<Font, PFont> {
+        
+        private FontCache() {
+            super(8, 0.75f, true);
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Entry<Font, PFont> eldest) {
+            return size() > 8;
+        }
+        
     }
 
     private class ReadPixelsOp implements SurfaceOp {
