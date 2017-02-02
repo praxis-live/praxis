@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -32,6 +32,7 @@ import net.neilcsmith.praxis.code.userapi.In;
 import net.neilcsmith.praxis.code.userapi.P;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.video.code.userapi.OffScreen;
+import net.neilcsmith.praxis.video.code.userapi.PFont;
 import net.neilcsmith.praxis.video.code.userapi.PImage;
 
 /**
@@ -84,6 +85,21 @@ public class VideoCodeConnector<T extends VideoCodeDelegate> extends CodeConnect
                     addControl(ipd);
                     if (shouldAddPort(field)) {
                         addPort(ipd.createPortDescriptor());
+                    }
+                    return;
+                }
+            }
+        }
+        
+        if (PFont.class.isAssignableFrom(field.getType())) {
+            P p = field.getAnnotation(P.class);
+            if (p != null) {
+                ResourceProperty.Descriptor<PFont> fpd =
+                        ResourceProperty.Descriptor.create(this, p, field, FontLoader.getDefault());
+                if (fpd != null) {
+                    addControl(fpd);
+                    if (shouldAddPort(field)) {
+                        addPort(fpd.createPortDescriptor());
                     }
                     return;
                 }
