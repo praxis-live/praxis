@@ -24,6 +24,7 @@ package net.neilcsmith.praxis.video.render.ops;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import net.neilcsmith.praxis.video.render.PixelData;
@@ -35,14 +36,14 @@ import net.neilcsmith.praxis.video.render.utils.ImageUtils;
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public class TextRender implements SurfaceOp {
-    
+
     private String text;
     private Font font;
     private Color color;
     private double x;
     private double y;
     private AffineTransform transform;
-    
+
     public TextRender() {
         text = "";
         color = Color.WHITE;
@@ -78,7 +79,7 @@ public class TextRender implements SurfaceOp {
     public TextRender setColor(Color color) {
         if (color == null) {
             color = Color.WHITE;
-        } 
+        }
         this.color = color;
         return this;
     }
@@ -100,17 +101,16 @@ public class TextRender implements SurfaceOp {
         this.y = y;
         return this;
     }
-    
+
     public AffineTransform getTransform() {
         return transform;
     }
-    
+
     public TextRender setTransform(AffineTransform transform) {
         this.transform = transform;
         return this;
     }
-    
-    
+
     @Override
     public void process(PixelData output, PixelData... inputs) {
         if (text == null || text.isEmpty() || font == null) {
@@ -118,13 +118,15 @@ public class TextRender implements SurfaceOp {
         }
         BufferedImage im = ImageUtils.toImage(output);
         Graphics2D g = im.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         if (transform != null) {
             g.setTransform(transform);
         }
         g.setColor(color);
         g.setFont(font);
         g.drawString(text, (float) x, (float) y);
-        
+
     }
-    
+
 }
