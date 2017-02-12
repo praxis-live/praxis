@@ -28,7 +28,7 @@ import net.neilcsmith.praxis.video.pgl.code.userapi.PFont;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PGraphics3D;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PShader;
-
+import net.neilcsmith.praxis.video.pgl.code.userapi.PShape;
 
 public class P3DCodeDelegate extends DefaultCodeDelegate {
 
@@ -43,18 +43,17 @@ public class P3DCodeDelegate extends DefaultCodeDelegate {
         this.height = height;
     }
 
-    public void setup() {}
-    
-    public void draw() {}
-    
-    // extension delegate methods
+    public void setup() {
+    }
 
+    public void draw() {
+    }
+
+    // extension delegate methods
     public PShader createShader(String vertShader, String fragShader) {
         return pg.createShader(vertShader, fragShader);
     }
-    
-    
-    
+
     // delegate methods
     public void beginCamera() {
         pg.beginCamera();
@@ -308,6 +307,14 @@ public class P3DCodeDelegate extends DefaultCodeDelegate {
         pg.endShape(mode);
     }
 
+    public PShape createShape() {
+        return pg.createShape();
+    }
+    
+    public PShape createShape(Constants.ShapeType type) {
+        return pg.createShape(type);
+    }
+
     public void clip(double a, double b, double c, double d) {
         pg.clip(a, b, c, d);
     }
@@ -438,6 +445,18 @@ public class P3DCodeDelegate extends DefaultCodeDelegate {
 
     public void image(PImage img, double a, double b, double c, double d, int u1, int v1, int u2, int v2) {
         pg.image(img, a, b, c, d, u1, v1, u2, v2);
+    }
+
+    public void shape(PShape shape) {
+        pg.shape(shape);
+    }
+
+    public void shape(PShape shape, double x, double y) {
+        pg.shape(shape, x, y);
+    }
+
+    public void shape(PShape shape, double a, double b, double c, double d) {
+        pg.shape(shape, a, b, c, d);
     }
 
     public double textAscent() {
@@ -683,8 +702,5 @@ public class P3DCodeDelegate extends DefaultCodeDelegate {
     public void filter(PShader shader) {
         pg.filter(shader);
     }
-    
-    
-    
-    
+
 }

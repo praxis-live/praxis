@@ -88,9 +88,14 @@ abstract class PGraphics /*extends PImage*/ {
         g.endShape(mode.unwrap());
     }
 
-//    public PShape createShape() {
-//        return g.createShape();
-//    }
+    public PShape createShape() {
+        return new PShape(g.createShape(), context);
+    }
+    
+    public PShape createShape(Constants.ShapeType type) {
+        return new PShape(g.createShape(type.unwrap()), context);
+    }
+    
 //
 //    public PShape createShape(PShape source) {
 //        return g.createShape(source);
@@ -286,17 +291,17 @@ abstract class PGraphics /*extends PImage*/ {
 //        g.shapeMode(mode);
 //    }
 //
-//    public void shape(PShape shape) {
-//        g.shape(shape);
-//    }
-//
-//    public void shape(PShape shape, double x, double y) {
-//        g.shape(shape, (float)x, (float)y);
-//    }
-//
-//    public void shape(PShape shape, double a, double b, double c, double d) {
-//        g.shape(shape, (float)a, (float)b, (float)c, (float)d);
-//    }
+    public void shape(PShape shape) {
+        g.shape(shape.unwrap(context));
+    }
+
+    public void shape(PShape shape, double x, double y) {
+        g.shape(shape.unwrap(context), (float)x, (float)y);
+    }
+
+    public void shape(PShape shape, double a, double b, double c, double d) {
+        g.shape(shape.unwrap(context), (float)a, (float)b, (float)c, (float)d);
+    }
 
 //    public void textAlign(int alignX) {
 //        g.textAlign(alignX);
