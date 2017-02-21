@@ -31,6 +31,7 @@ import net.neilcsmith.praxis.code.userapi.P;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PFont;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
+import net.neilcsmith.praxis.video.pgl.code.userapi.PShape;
 
 /**
  *
@@ -90,6 +91,18 @@ public class P3DCodeConnector extends CodeConnector<P3DCodeDelegate> {
                     addControl(fpd);
                     if (shouldAddPort(field)) {
                         addPort(fpd.createPortDescriptor());
+                    }
+                    return;
+                }
+            }
+            
+            if (PShape.class.isAssignableFrom(field.getType())) {
+                ResourceProperty.Descriptor<PShape> spd
+                        = ResourceProperty.Descriptor.create(this, p, field, ShapeLoader.getDefault());
+                if (spd != null) {
+                    addControl(spd);
+                    if (shouldAddPort(field)) {
+                        addPort(spd.createPortDescriptor());
                     }
                     return;
                 }

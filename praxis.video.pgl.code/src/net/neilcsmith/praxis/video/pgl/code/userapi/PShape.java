@@ -42,13 +42,21 @@ public class PShape {
     private final processing.core.PShape shape;
     private final PGLContext context;
     
+    protected PShape(processing.core.PShape shape) {
+        this(shape, null);
+    }
+    
     PShape(processing.core.PShape shape, PGLContext context) {
         this.shape = shape;
         this.context = context;
     }
     
     processing.core.PShape unwrap(PGLContext context) {
-        return shape;
+        if (this.context != null && this.context == context) {
+            return shape;
+        } else {
+            return context.asPGLShape(shape);
+        }
     }
     
 //    public PShape /* void */ setFamily(int family) {
