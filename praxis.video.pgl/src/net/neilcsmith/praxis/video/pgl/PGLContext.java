@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -46,8 +46,10 @@ import static processing.core.PConstants.ARGB;
 import processing.core.PFont;
 import processing.core.PGraphics;
 import processing.core.PImage;
+import processing.core.PShape;
 import processing.opengl.PGL;
 import processing.opengl.PGraphicsOpenGL;
+import processing.opengl.PShapeOpenGL;
 import processing.opengl.Texture;
 
 /**
@@ -68,6 +70,7 @@ public final class PGLContext {
     private final List<PGLGraphics> cache;
     private final List<AlienImageReference> aliens;
     private final WeakHashMap<PGLSurface, Boolean> surfaces;
+    private final WeakHashMap<PShape, PShapeOpenGL> shapes;
     private final ReadPixelsOp readOp;
     private final PImage CLEAR_RGB;
     private final PImage CLEAR_ARGB;
@@ -82,6 +85,7 @@ public final class PGLContext {
         cache = new ArrayList<>(cacheMax);
         aliens = new ArrayList<>(cacheMax);
         surfaces = new WeakHashMap<>();
+        shapes = new WeakHashMap<>();
         readOp = new ReadPixelsOp();
         CLEAR_RGB = new PImage(width, height, PImage.RGB);
         CLEAR_ARGB = new PImage(width, height, PImage.ARGB);
@@ -132,6 +136,12 @@ public final class PGLContext {
     
     public PFont asPFont(Font font) {
         return fontCache.computeIfAbsent(font, f -> new PFont(f, true));
+    }
+    
+    public PShapeOpenGL asPGLShape(PShape shape) {
+        return shapes.computeIfAbsent(shape, s -> {
+            return PShapeOpenGL.createShape(primary(), s);
+        });
     }
 
     PGLOpCache getOpCache() {
