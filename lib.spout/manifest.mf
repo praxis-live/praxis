@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+AutoUpdate-Show-In-Client: true
+OpenIDE-Module: spout
+OpenIDE-Module-Localizing-Bundle: spout/Bundle.properties
+OpenIDE-Module-Specification-Version: 2.0.6.0
+
