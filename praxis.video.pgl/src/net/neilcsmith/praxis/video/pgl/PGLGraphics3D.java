@@ -21,7 +21,6 @@
  */
 package net.neilcsmith.praxis.video.pgl;
 
-import java.nio.IntBuffer;
 import processing.core.PImage;
 import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
@@ -67,7 +66,7 @@ public class PGLGraphics3D extends PGraphics3D {
 //        buf.put(pixels, 0, len);
 //        buf.rewind();
 //        context.writePixelsARGB(buf, pixelTexture);
-        context.writePixels(pixels, texture);
+        context.writePixels(pixels, hasAlpha, pixelTexture);
         int curBlend = blendMode;
         if (hasAlpha) {
             blendMode(REPLACE);

@@ -133,11 +133,11 @@ public final class PGLContext {
         surfaces.put(s, Boolean.TRUE);
         return s;
     }
-    
+
     public PFont asPFont(Font font) {
         return fontCache.computeIfAbsent(font, f -> new PFont(f, true));
     }
-    
+
     public PShapeOpenGL asPGLShape(PShape shape) {
         return shapes.computeIfAbsent(shape, s -> {
             return PShapeOpenGL.createShape(primary(), s);
@@ -183,7 +183,7 @@ public final class PGLContext {
         cache.add(0, pgl);
     }
 
-    void writePixels(int[] data, Texture tex) {
+    void writePixels(int[] data, boolean alpha, Texture tex) {
         int size = tex.width * tex.height;
         IntBuffer buffer = getScratchBuffer(size);
         if (profile != PGLProfile.GLES2) {
@@ -191,10 +191,18 @@ public final class PGLContext {
             buffer.rewind();
             writePixelsARGB(buffer, tex);
         } else {
-            for (int i = 0; i < size; i++) {
-                int color = data[i];
-                int rb = color & 0x00FF00FF;
-                data[i] = (color & 0xFF00FF00) | (rb << 16) | (rb >> 16);
+            if (alpha) {
+                for (int i = 0; i < size; i++) {
+                    int color = data[i];
+                    int rb = color & 0x00FF00FF;
+                    data[i] = (color & 0xFF00FF00) | (rb << 16) | (rb >> 16);
+                }
+            } else {
+                for (int i = 0; i < size; i++) {
+                    int color = data[i];
+                    int rb = color & 0x00FF00FF;
+                    data[i] = 0xFF000000 | (color & 0x0000FF00) | (rb << 16) | (rb >> 16);
+                }
             }
             buffer.put(data, 0, size);
             buffer.rewind();
@@ -311,7 +319,7 @@ public final class PGLContext {
     private PGLTexture createAlienTexture(int width, int height, boolean alpha) {
         Texture.Parameters params = new Texture.Parameters();
         params.mipmaps = false;
-        if (!alpha) {
+        if (!alpha && profile != PGLProfile.GLES2) {
             params.format = PConstants.RGB;
         }
         PGLTexture texture = new PGLTexture(primary(), width, height, params);
@@ -348,9 +356,9 @@ public final class PGLContext {
         private int modCount;
         private PImage image;
     }
-    
+
     private static class FontCache extends LinkedHashMap<Font, PFont> {
-        
+
         private FontCache() {
             super(8, 0.75f, true);
         }
@@ -359,7 +367,7 @@ public final class PGLContext {
         protected boolean removeEldestEntry(Entry<Font, PFont> eldest) {
             return size() > 8;
         }
-        
+
     }
 
     private class ReadPixelsOp implements SurfaceOp {
@@ -381,11 +389,11 @@ public final class PGLContext {
                 if (profile != PGLProfile.GLES2) {
                     writePixelsARGB(nOut.getNativeData().asIntBuffer(), texture);
                 } else {
-                    writePixels(output.getData(), texture);
+                    writePixels(output.getData(), output.hasAlpha(), texture);
                 }
 
             } else if (output.getScanline() == output.getWidth() && output.getOffset() == 0) {
-                writePixels(output.getData(), texture);
+                writePixels(output.getData(), output.hasAlpha(), texture);
             } else {
                 int size = output.getWidth() * output.getHeight();
                 int[] pixels = PixelArrayCache.acquire(size, false);
@@ -399,7 +407,7 @@ public final class PGLContext {
                     buffer.put(data, i, w);
                     i += sl;
                 }
-                writePixels(data, texture);
+                writePixels(pixels, output.hasAlpha(), texture);
                 PixelArrayCache.release(pixels);
             }
         }
