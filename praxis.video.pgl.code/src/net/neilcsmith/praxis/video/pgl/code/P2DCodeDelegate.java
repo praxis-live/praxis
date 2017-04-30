@@ -1,5 +1,3 @@
-
-
 package net.neilcsmith.praxis.video.pgl.code;
 
 import net.neilcsmith.praxis.code.DefaultCodeDelegate;
@@ -8,13 +6,13 @@ import net.neilcsmith.praxis.video.pgl.code.userapi.PFont;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PGraphics2D;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PShader;
-
+import net.neilcsmith.praxis.video.pgl.code.userapi.PShape;
 
 public class P2DCodeDelegate extends DefaultCodeDelegate {
-    
+
     public int width;
     public int height;
-    
+
     PGraphics2D pg;
 
     void setupGraphics(PGraphics2D pg, int width, int height) {
@@ -22,19 +20,18 @@ public class P2DCodeDelegate extends DefaultCodeDelegate {
         this.width = width;
         this.height = height;
     }
-    
-    public void setup() {}
-    
-    public void draw() {}
-    
-    // extension delegate methods
 
+    public void setup() {
+    }
+
+    public void draw() {
+    }
+
+    // extension delegate methods
     public PShader createShader(String vertShader, String fragShader) {
         return pg.createShader(vertShader, fragShader);
     }
-    
-    
-    
+
     // delegate methods
     public void beginShape() {
         pg.beginShape();
@@ -78,6 +75,14 @@ public class P2DCodeDelegate extends DefaultCodeDelegate {
 
     public void endShape(Constants.ShapeEndMode mode) {
         pg.endShape(mode);
+    }
+
+    public PShape createShape() {
+        return pg.createShape();
+    }
+    
+    public PShape createShape(Constants.ShapeType type) {
+        return pg.createShape(type);
     }
 
     public void clip(double a, double b, double c, double d) {
@@ -212,6 +217,18 @@ public class P2DCodeDelegate extends DefaultCodeDelegate {
         pg.image(img, a, b, c, d, u1, v1, u2, v2);
     }
 
+    public void shape(PShape shape) {
+        pg.shape(shape);
+    }
+
+    public void shape(PShape shape, double x, double y) {
+        pg.shape(shape, x, y);
+    }
+
+    public void shape(PShape shape, double a, double b, double c, double d) {
+        pg.shape(shape, a, b, c, d);
+    }
+    
     public double textAscent() {
         return pg.textAscent();
     }
@@ -443,7 +460,7 @@ public class P2DCodeDelegate extends DefaultCodeDelegate {
     public void background(PImage image) {
         pg.background(image);
     }
-    
+
     public void shader(PShader shader) {
         pg.shader(shader);
     }
@@ -455,5 +472,5 @@ public class P2DCodeDelegate extends DefaultCodeDelegate {
     public void filter(PShader shader) {
         pg.filter(shader);
     }
-    
+
 }

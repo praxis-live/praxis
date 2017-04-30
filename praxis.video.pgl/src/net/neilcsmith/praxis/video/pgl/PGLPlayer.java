@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -33,10 +33,12 @@ import net.neilcsmith.praxis.video.WindowHints;
 import net.neilcsmith.praxis.video.pipes.FrameRateListener;
 import net.neilcsmith.praxis.video.pipes.VideoPipe;
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PSurface;
 import processing.opengl.PJOGL;
+import processing.opengl.PSurfaceJOGL;
 
 /**
  *
@@ -51,6 +53,7 @@ public class PGLPlayer implements Player {
     private final long frameNanos;
     private final WindowHints wHints;
     private final QueueContext queue;
+    private final PGLProfile profile;
 
     private volatile boolean running = false; // flag to control animation
     private volatile long time;
@@ -66,7 +69,8 @@ public class PGLPlayer implements Player {
             int outputRotation,
             int outputDevice,
             WindowHints wHints,
-            QueueContext queue) {
+            QueueContext queue,
+            PGLProfile profile) {
         if (width <= 0 || height <= 0 || fps <= 0) {
             throw new IllegalArgumentException();
         }
@@ -80,6 +84,7 @@ public class PGLPlayer implements Player {
         this.outputDevice = outputDevice;
         this.wHints = wHints;
         this.queue = queue;
+        this.profile = profile;
         sink = new PGLOutputSink();
     }
 
@@ -193,16 +198,16 @@ public class PGLPlayer implements Player {
         private PGLSurface pglSurface;
 
         private Applet() {
-            context = new PGLContext(this, surfaceWidth, surfaceHeight);
+            context = new PGLContext(this, profile, surfaceWidth, surfaceHeight);
         }
 
         @Override
         protected PGraphics makeGraphics(int w, int h, String renderer, String path, boolean primary) {
-            if (PGLGraphics.ID.equals(renderer)) {
+            if (PGLGraphics.ID.equals(renderer) || P2D.equals(renderer)) {
                 PGLGraphics pgl = new PGLGraphics(context, primary, w, h);
 //                pgl.setParent(this);
                 return pgl;
-            } else if (PGLGraphics3D.ID.equals(renderer)) {
+            } else if (PGLGraphics3D.ID.equals(renderer) || P3D.equals(renderer)) {
                 PGLGraphics3D pgl3d = new PGLGraphics3D(context, primary, w, h);
 //                pgl3d.setParent(this);
                 return pgl3d;
@@ -214,7 +219,20 @@ public class PGLPlayer implements Player {
 
         @Override
         public void settings() {
-            PJOGL.profile = 3;
+            switch (profile) {
+                case GL2:
+                    PJOGL.profile = 1;
+                    break;
+                case GL3:
+                    PJOGL.profile = 3;
+                    break;
+                case GL4:
+                    PJOGL.profile = 4;
+                    break;
+                case GLES2:
+                    PJOGL.profile = 2;
+                    break;
+            }
             if (wHints.isFullScreen()) {
                 if (outputDevice > -1) {
                     fullScreen(PGLGraphics.ID, outputDevice + 1);
@@ -228,6 +246,7 @@ public class PGLPlayer implements Player {
 
         @Override
         protected PSurface initSurface() {
+            PSurfaceJOGL.profile = null;
             PSurface s = super.initSurface();
             s.setTitle(wHints.getTitle());
             GLWindow window = (GLWindow) surface.getNative();

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -31,6 +31,7 @@
 package net.neilcsmith.praxis.video.code;
 
 import net.neilcsmith.praxis.code.DefaultCodeDelegate;
+import net.neilcsmith.praxis.video.code.userapi.PFont;
 import net.neilcsmith.praxis.video.code.userapi.PGraphics;
 import net.neilcsmith.praxis.video.code.userapi.PImage;
 import net.neilcsmith.praxis.video.render.SurfaceOp;
@@ -228,6 +229,18 @@ public class VideoCodeDelegate extends DefaultCodeDelegate {
 
     public void strokeWeight(double weight) {
         pg.strokeWeight(weight);
+    }
+
+    public void text(String text, double x, double y) {
+        pg.text(text, x, y);
+    }
+
+    public void textFont(PFont font) {
+        pg.textFont(font);
+    }
+
+    public void textFont(PFont font, double size) {
+        pg.textFont(font, size);
     }
 
     public void translate(double x, double y) {

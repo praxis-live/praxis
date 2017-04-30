@@ -1,1 +1,5 @@
-net.neilcsmith.praxis.video.pgl.PGLPlayerFactoryProvider
+net.neilcsmith.praxis.video.pgl.PGLPlayerFactory$Default
+net.neilcsmith.praxis.video.pgl.PGLPlayerFactory$GLES2
+net.neilcsmith.praxis.video.pgl.PGLPlayerFactory$GL2
+net.neilcsmith.praxis.video.pgl.PGLPlayerFactory$GL3
+net.neilcsmith.praxis.video.pgl.PGLPlayerFactory$GL4

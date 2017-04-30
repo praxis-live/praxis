@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,7 +21,6 @@
  */
 package net.neilcsmith.praxis.video.pgl;
 
-import java.nio.IntBuffer;
 import processing.core.PImage;
 import processing.core.PStyle;
 import processing.opengl.PGL;
@@ -39,6 +38,8 @@ public class PGLGraphics extends PGraphics2D {
     private final PGLContext context;
     private PGLTexture pixelTexture;
     private PImage pixelImage;
+    private boolean inText;
+    private boolean lastInText;
 
     PGLGraphics(PGLContext context, boolean primary, int w, int h) {
         this.context = context;
@@ -61,11 +62,12 @@ public class PGLGraphics extends PGraphics2D {
             pixelTexture.invertedY(true);
             pixelImage = wrapTexture(pixelTexture);
         }
-        int len = width * height;
-        IntBuffer buf = context.getScratchBuffer(len);
-        buf.put(pixels, 0, len);
-        buf.rewind();
-        context.writePixelsARGB(buf, pixelTexture);
+        //        int len = width * height;
+        //        IntBuffer buf = context.getScratchBuffer(len);
+        //        buf.put(pixels, 0, len);
+        //        buf.rewind();
+        //        context.writePixelsARGB(buf, pixelTexture);
+        context.writePixels(pixels, hasAlpha, pixelTexture);
         int curBlend = blendMode;
         if (hasAlpha) {
             blendMode(REPLACE);
@@ -91,111 +93,70 @@ public class PGLGraphics extends PGraphics2D {
 
     @Override
     protected void blendModeImpl() {
-        if (blendMode != lastBlendMode) {
+        if (blendMode != lastBlendMode
+                || inText != lastInText) {
             flush();
         }
 
         pgl.enable(PGL.BLEND);
 
-        switch (blendMode) {
-            case REPLACE:
+        if (inText) {
+            if (blendMode == BLEND) {
                 if (blendEqSupported) {
                     pgl.blendEquation(PGL.FUNC_ADD);
                 }
-                pgl.blendFunc(PGL.ONE, PGL.ZERO);
-                break;
-            case BLEND:
-                if (blendEqSupported) {
-                    pgl.blendEquation(PGL.FUNC_ADD);
-                }
-                pgl.blendFunc(PGL.ONE, PGL.ONE_MINUS_SRC_ALPHA);
-                break;
-            case ADD:
-                if (blendEqSupported) {
-                    pgl.blendEquation(PGL.FUNC_ADD);
-                }
-                pgl.blendFunc(PGL.ONE, PGL.ONE);
-                break;
-            case SUBTRACT:
-                if (blendEqSupported) {
-                    pgl.blendEquationSeparate(PGL.FUNC_REVERSE_SUBTRACT,
-                            PGL.FUNC_ADD);
-                }
-                pgl.blendFunc(PGL.ONE, PGL.ONE);
-                break;
-            case MULTIPLY:
-                if (blendEqSupported) {
-                    pgl.blendEquation(PGL.FUNC_ADD);
-                }
-                pgl.blendFunc(PGL.DST_COLOR, PGL.ONE_MINUS_SRC_ALPHA);
-                break;
-            default:
-                throw new IllegalArgumentException();
+                pgl.blendFunc(PGL.SRC_ALPHA, PGL.ONE_MINUS_SRC_ALPHA);
+            }
+        } else {
+
+            switch (blendMode) {
+                case REPLACE:
+                    if (blendEqSupported) {
+                        pgl.blendEquation(PGL.FUNC_ADD);
+                    }
+                    pgl.blendFunc(PGL.ONE, PGL.ZERO);
+                    break;
+                case BLEND:
+                    if (blendEqSupported) {
+                        pgl.blendEquation(PGL.FUNC_ADD);
+                    }
+                    pgl.blendFunc(PGL.ONE, PGL.ONE_MINUS_SRC_ALPHA);
+                    break;
+                case ADD:
+                    if (blendEqSupported) {
+                        pgl.blendEquation(PGL.FUNC_ADD);
+                    }
+                    pgl.blendFunc(PGL.ONE, PGL.ONE);
+                    break;
+                case SUBTRACT:
+                    if (blendEqSupported) {
+                        pgl.blendEquationSeparate(PGL.FUNC_REVERSE_SUBTRACT,
+                                PGL.FUNC_ADD);
+                    }
+                    pgl.blendFunc(PGL.ONE, PGL.ONE);
+                    break;
+                case MULTIPLY:
+                    if (blendEqSupported) {
+                        pgl.blendEquation(PGL.FUNC_ADD);
+                    }
+                    pgl.blendFunc(PGL.DST_COLOR, PGL.ONE_MINUS_SRC_ALPHA);
+                    break;
+                default:
+                    throw new IllegalArgumentException();
+            }
         }
 
-////<editor-fold defaultstate="collapsed" desc="comment">
-//            if (blendMode == SUBTRACT) {
-//            if (blendEqSupported) {
-//                pgl.blendEquation(PGL.FUNC_REVERSE_SUBTRACT);
-//                pgl.blendFunc(PGL.ONE, PGL.SRC_ALPHA);
-//            } else {
-//                throw new IllegalArgumentException();
-//            }
-//
-//        } else if (blendMode == LIGHTEST) {
-//            if (blendEqSupported) {
-//                pgl.blendEquation(PGL.FUNC_MAX);
-//                pgl.blendFunc(PGL.SRC_ALPHA, PGL.DST_ALPHA);
-//            } else {
-//                PGraphics.showWarning(BLEND_DRIVER_ERROR, "LIGHTEST");
-//            }
-//
-//        } else if (blendMode == DARKEST) {
-//            if (blendEqSupported) {
-//                pgl.blendEquation(PGL.FUNC_MIN);
-//                pgl.blendFunc(PGL.SRC_ALPHA, PGL.DST_ALPHA);
-//            } else {
-//                PGraphics.showWarning(BLEND_DRIVER_ERROR, "DARKEST");
-//            }
-//
-//        } else if (blendMode == EXCLUSION) {
-//            if (blendEqSupported) {
-//                pgl.blendEquation(PGL.FUNC_ADD);
-//            }
-//            pgl.blendFunc(PGL.ONE_MINUS_DST_COLOR, PGL.ONE_MINUS_SRC_COLOR);
-//
-//        } else if (blendMode == MULTIPLY) {
-//            if (blendEqSupported) {
-//                pgl.blendEquation(PGL.FUNC_ADD);
-//            }
-//            pgl.blendFunc(PGL.DST_COLOR, PGL.SRC_COLOR);
-//
-//        } else if (blendMode == SCREEN) {
-//            if (blendEqSupported) {
-//                pgl.blendEquation(PGL.FUNC_ADD);
-//            }
-//            pgl.blendFunc(PGL.ONE_MINUS_DST_COLOR, PGL.ONE);
-//
-//        } else if (blendMode == DIFFERENCE) {
-//            PGraphics.showWarning(BLEND_RENDERER_ERROR, "DIFFERENCE");
-//
-//        } else if (blendMode == OVERLAY) {
-//            PGraphics.showWarning(BLEND_RENDERER_ERROR, "OVERLAY");
-//
-//        } else if (blendMode == HARD_LIGHT) {
-//            PGraphics.showWarning(BLEND_RENDERER_ERROR, "HARD_LIGHT");
-//
-//        } else if (blendMode == SOFT_LIGHT) {
-//            PGraphics.showWarning(BLEND_RENDERER_ERROR, "SOFT_LIGHT");
-//
-//        } else if (blendMode == DODGE) {
-//            PGraphics.showWarning(BLEND_RENDERER_ERROR, "DODGE");
-//
-//        } else if (blendMode == BURN) {
-//            PGraphics.showWarning(BLEND_RENDERER_ERROR, "BURN");
-//        }
-//</editor-fold>
         lastBlendMode = blendMode;
+        lastInText = inText;
+    }
+
+    @Override
+    protected void textLineImpl(char[] buffer, int start, int stop, float x, float y) {
+        int savedBlendMode = blendMode;
+        inText = true;
+        super.textLineImpl(buffer, start, stop, x, y);
+        inText = false;
+        blendMode(savedBlendMode);
     }
 
     @Override

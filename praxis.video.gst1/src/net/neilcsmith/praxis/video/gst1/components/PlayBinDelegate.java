@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -109,12 +109,18 @@ public class PlayBinDelegate extends AbstractGstDelegate {
         super.doStop();
         this.rate = 1;
     }
-    
-    
 
     @Override
     protected void doEOS() {
-        doSeek(true, -1);
+        try {
+            if (isLooping()) {
+                doSeek(true, -1);
+            } else {
+                stop();
+            }
+        } catch (Exception ex) {
+            error("", ex);
+        }
     }
 
     private void doSeek(boolean eos, long position) {

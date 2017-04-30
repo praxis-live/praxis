@@ -69,6 +69,10 @@ public class Constants {
     public final static ShapeEndMode OPEN = ShapeEndMode.Open;
     public final static ShapeEndMode CLOSE = ShapeEndMode.Close;
     
+    public final static ShapeType GROUP = ShapeType.Group;
+    public final static ShapeType PATH = ShapeType.Path;
+    public final static ShapeType GEOMETRY = ShapeType.Geometry;
+    
     public final static String DEFAULT_VERTEX_SHADER = 
             ShaderConstants.DEFAULT_VERTEX_SHADER;
     public final static String DEFAULT_FRAGMENT_SHADER = 
@@ -181,5 +185,20 @@ public class Constants {
         }
     }
     
+    public static enum ShapeType {
+        Group(PConstants.GROUP),
+        Path(processing.core.PShape.PATH),
+        Geometry(processing.core.PShape.GEOMETRY);
+        
+        private final int value;
+        
+        private ShapeType(int value) {
+            this.value = value;
+        }
+        
+        public int unwrap() {
+            return value;
+        }
+    }
     
 }

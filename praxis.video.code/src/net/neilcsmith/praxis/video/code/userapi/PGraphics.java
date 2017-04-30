@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -31,6 +31,7 @@ package net.neilcsmith.praxis.video.code.userapi;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
@@ -45,6 +46,7 @@ import net.neilcsmith.praxis.video.render.ops.Blit;
 import net.neilcsmith.praxis.video.render.ops.RectFill;
 import net.neilcsmith.praxis.video.render.ops.ScaledBlit;
 import net.neilcsmith.praxis.video.render.ops.ShapeRender;
+import net.neilcsmith.praxis.video.render.ops.TextRender;
 import net.neilcsmith.praxis.video.render.ops.TransformBlit;
 
 /**
@@ -62,11 +64,13 @@ public abstract class PGraphics extends PImage {
     private BasicStroke stroke = new BasicStroke(1);
     private PShape shape;
     private AffineTransform transform;
+    private Font font;
     private final Blit blit;
     private final ScaledBlit scaledBlit;
     private final TransformBlit transformBlit;
     private final RectFill rectFill;
     private final ShapeRender shapeRender;
+    private final TextRender textRender;
 
     protected PGraphics(int width, int height) {
         super(width, height);
@@ -75,6 +79,7 @@ public abstract class PGraphics extends PImage {
         this.transformBlit = new TransformBlit();
         this.rectFill = new RectFill();
         this.shapeRender = new ShapeRender();
+        this.textRender = new TextRender();
     }
 
     protected abstract Surface getSurface();
@@ -392,6 +397,18 @@ public abstract class PGraphics extends PImage {
         }
         stroke = new BasicStroke((float) weight);
     }
+    
+    public void text(String text, double x, double y) {
+        renderText(text, x, y);
+    }
+    
+    public void textFont(PFont font) {
+        textFont(font, 12);
+    }
+    
+    public void textFont(PFont font, double size) {
+        this.font = font.getFont().deriveFont((float) size);
+    }
 
     public void translate(double x, double y) {
         if (transform == null) {
@@ -433,6 +450,22 @@ public abstract class PGraphics extends PImage {
         getSurface().process(shapeRender);
 
     }
+    
+    private void renderText(String text, double x, double y) {
+        if (fillColor == null || font == null) {
+            return;
+        }
+        
+        textRender.setFont(font)
+                .setColor(fillColor)
+                .setTransform(transform)
+                .setX(x)
+                .setY(y)
+                .setText(text);
+        getSurface().process(textRender);
+        
+    }
+    
 
     private void polygon(final int[] xPoints, final int[] yPoints, final int nPoints) {
         renderShape(new Polygon(xPoints, yPoints, nPoints));

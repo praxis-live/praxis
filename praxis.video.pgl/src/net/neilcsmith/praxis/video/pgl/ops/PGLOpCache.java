@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -29,6 +29,7 @@ import net.neilcsmith.praxis.video.render.ops.Blit;
 import net.neilcsmith.praxis.video.render.ops.RectFill;
 import net.neilcsmith.praxis.video.render.ops.ScaledBlit;
 import net.neilcsmith.praxis.video.render.ops.ShapeRender;
+import net.neilcsmith.praxis.video.render.ops.TextRender;
 import net.neilcsmith.praxis.video.render.ops.TransformBlit;
 
 /**
@@ -48,6 +49,7 @@ public class PGLOpCache {
         cache.put(TransformBlit.class, new PGLTransformBlitOp());
         cache.put(RectFill.class, new PGLRectFillOp());
         cache.put(ShapeRender.class, new PGLShapeRenderOp());
+        cache.put(TextRender.class, new PGLTextRenderOp());
     }
         
     public PGLOp find(SurfaceOp op) {
