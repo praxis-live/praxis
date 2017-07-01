@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -61,6 +61,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
     private final boolean requireClock;
 
     private ExecutionContext execCtxt;
+    private ExecutionContext.State execState = ExecutionContext.State.NEW;
     private CodeComponent<D> cmp;
     private long time;
     private ClockListener[] clockListeners;
@@ -163,9 +164,13 @@ public abstract class CodeContext<D extends CodeDelegate> {
     }
 
     final void handleStateChanged(ExecutionContext source, boolean full) {
+        if (execState == source.getState()) {
+            return;
+        }
         reset();
         update(source.getTime());
-        if (source.getState() == ExecutionContext.State.ACTIVE) {
+        execState = source.getState();
+        if (execState == ExecutionContext.State.ACTIVE) {
             starting(source, full);
         } else {
             stopping(source, full);
@@ -298,9 +303,23 @@ public abstract class CodeContext<D extends CodeDelegate> {
         return cmp == null ? null : cmp.getExecutionContext();
     }
     
+    @Deprecated
     protected boolean isActive() {
         ExecutionContext ctxt = getExecutionContext();
         return ctxt == null ? false : ctxt.getState() == ExecutionContext.State.ACTIVE;
+    }
+    
+    protected boolean checkActive() {
+        if (execState == ExecutionContext.State.ACTIVE) {
+            return true;
+        }
+        if (execCtxt != null) {
+            if (execCtxt.getState() == ExecutionContext.State.ACTIVE) {
+                handleStateChanged(execCtxt, true);
+                return execState == ExecutionContext.State.ACTIVE;
+            }
+        }
+        return false;
     }
 
     protected void update(long time) {
@@ -313,7 +332,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
     }
 
     public void invoke(long time, Invoker invoker) {
-        if (isActive()) {
+        if (checkActive()) {
             update(time);
             try {
                 invoker.invoke();
@@ -325,7 +344,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
     }
 
     void invoke(long time, Method method, Object... params) {
-        if (isActive()) {
+        if (checkActive()) {
             update(time);
             try {
                 method.invoke(getDelegate(), params);
