@@ -167,7 +167,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
         if (execState == source.getState()) {
             return;
         }
-        reset();
+        reset(full);
         update(source.getTime());
         execState = source.getState();
         if (execState == ExecutionContext.State.ACTIVE) {
@@ -201,10 +201,16 @@ public abstract class CodeContext<D extends CodeDelegate> {
     protected void tick(ExecutionContext source) {
     }
     
+    @Deprecated
     protected final void reset() {
-        controls.values().stream().forEach(ControlDescriptor::reset);
-        ports.values().stream().forEach(PortDescriptor::reset);
+        reset(false);
     }
+    
+    protected final void reset(boolean full) {
+        controls.values().stream().forEach(cd -> cd.reset(full));
+        ports.values().stream().forEach(pd -> pd.reset(full));
+    }
+    
 
     final void handleDispose() {
         cmp = null;

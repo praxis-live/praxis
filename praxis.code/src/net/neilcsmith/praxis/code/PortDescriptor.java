@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -62,8 +62,15 @@ public abstract class PortDescriptor {
 
     public abstract PortInfo getInfo();
 
+    @SuppressWarnings("deprecated")
+    public void reset(boolean full) {
+        reset();
+    }
+    
+    @Deprecated
     public void reset() {
     }
+    
 
     public void stopping() {
     }

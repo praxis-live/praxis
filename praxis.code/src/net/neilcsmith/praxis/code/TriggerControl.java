@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -46,6 +46,7 @@ public class TriggerControl extends Trigger implements Control {
     private final static ControlInfo INFO = ControlInfo.createActionInfo(PMap.EMPTY);
 
     private final Binding binding;
+    private CodeContext<?> context;
 
     TriggerControl(Binding binding) {
         binding = binding == null ? new DefaultBinding() : binding;
@@ -70,11 +71,19 @@ public class TriggerControl extends Trigger implements Control {
         return INFO;
     }
 
-    private void trigger(long time) throws Exception {
-        binding.trigger(time);
+    protected void trigger(long time) {
+        if (context.checkActive()) {
+            try {
+                binding.trigger(time);
+            } catch (Exception ex) {
+                context.getLog().log(LogLevel.ERROR, ex);
+            }
+            super.trigger(time);
+        }
     }
 
     private void attach(CodeContext<?> context, Control previous) {
+        this.context = context;
         binding.attach(context);
         if (previous instanceof TriggerControl) {
             try {
@@ -82,8 +91,10 @@ public class TriggerControl extends Trigger implements Control {
                 if (val) {
                     binding.trigger(context.getTime());
                 }
-            } catch (Exception exception) {
+            } catch (Exception ex) {
+                context.getLog().log(LogLevel.ERROR, ex);
             }
+            super.attach(context, (TriggerControl) previous);
         }
     }
 
@@ -241,6 +252,15 @@ public class TriggerControl extends Trigger implements Control {
             }
         }
 
+        @Override
+        public void reset(boolean full) {
+            control.clearLinks();
+            control.maxIndex(Integer.MAX_VALUE);
+            if (full) {
+                control.index(0);
+            }
+        }
+        
         @Override
         public Control getControl() {
             return control;
