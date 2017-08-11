@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,6 +21,8 @@
  */
 package net.neilcsmith.praxis.video.pgl;
 
+import com.jogamp.common.util.IOUtil;
+import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.event.MouseListener;
 import com.jogamp.newt.event.WindowListener;
@@ -57,6 +59,17 @@ class PGLGraphicsPSurface extends PSurfaceJOGL {
         if (!sketch.sketchFullScreen()) {
             window.setResizable(true);
         }
+    }
+
+    @Override
+    protected void initIcons() {
+        String[] files = new String[] {
+            "icons/praxislive16.png",
+            "icons/praxislive32.png",
+            "icons/praxislive48.png",
+            "icons/praxislive128.png",
+        };
+        NewtFactory.setWindowIcons(new IOUtil.ClassResources(files, this.getClass().getClassLoader(), this.getClass()));
     }
 
     
