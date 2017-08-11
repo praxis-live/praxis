@@ -331,8 +331,8 @@ public final class PGLContext {
     private PImage wrapAlienTexture(Texture tex) {
         PImage img = new PImage();
         //img.parent = parent;
-        img.width = tex.width;
-        img.height = tex.height;
+        img.width = img.pixelWidth = tex.width;
+        img.height = img.pixelHeight = tex.height;
         img.format = ARGB; // @TODO ???
         primary().setCache(img, tex);
         return img;
