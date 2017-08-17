@@ -141,6 +141,10 @@ public abstract class Property {
         }
         return this;
     }
+    
+    public Linkable.Double values() {
+        return new DoubleLink();
+    }
 
     public <T> Property linkAs(
             Function<Argument, T> converter,
@@ -157,6 +161,10 @@ public abstract class Property {
             linkAs(converter, consumer);
         }
         return this;
+    }
+    
+    public <T> Linkable<T> valuesAs(Function<Argument, T> converter) {
+        return new ArgumentLink().map(converter);
     }
     
     public Property clearLinks() {
