@@ -33,7 +33,6 @@ import net.neilcsmith.praxis.video.WindowHints;
 import net.neilcsmith.praxis.video.pipes.FrameRateListener;
 import net.neilcsmith.praxis.video.pipes.VideoPipe;
 import processing.core.PApplet;
-import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.core.PSurface;
@@ -105,7 +104,7 @@ public class PGLPlayer implements Player {
                         queue.process(0, TimeUnit.MILLISECONDS);
                     }
                 }// else {
-                    Thread.sleep(1);
+                Thread.sleep(1);
 //                }
             } catch (Exception ex) {
                 LOG.log(Level.WARNING, "Exception during run", ex);
@@ -240,7 +239,11 @@ public class PGLPlayer implements Player {
                     fullScreen(PGLGraphics.ID);
                 }
             } else {
-                size(outputWidth, outputHeight, PGLGraphics.ID);
+                if (outputRotation == 0 || outputRotation == 180) {
+                    size(outputWidth, outputHeight, PGLGraphics.ID);
+                } else {
+                    size(outputHeight, outputWidth, PGLGraphics.ID);
+                }
             }
         }
 
@@ -275,13 +278,8 @@ public class PGLPlayer implements Player {
             clear();
             translate(width / 2, height / 2);
             rotate(radians(outputRotation));
-            if (outputRotation == 0 || outputRotation == 180) {
-                image(img, -outputWidth / 2, -outputHeight / 2,
-                        outputWidth, outputHeight);
-            } else {
-                image(img, -outputHeight / 2, -outputWidth / 2,
-                        outputHeight, outputWidth);
-            }
+            image(img, -outputWidth / 2, -outputHeight / 2,
+                    outputWidth, outputHeight);
         }
 
         @Override

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -46,11 +46,11 @@ public abstract class Property {
 
     private CodeContext<?> context;
     private Animator animator;
-    private Link[] links;
+    private BaseLink[] links;
 
     protected Property() {
         this.listener = new Listener();
-        this.links = new Link[0];
+        this.links = new BaseLink[0];
     }
 
     protected void attach(CodeContext<?> context, Property previous) {
@@ -130,13 +130,8 @@ public abstract class Property {
     }
 
     public Property link(DoubleConsumer consumer) {
-        DoubleLink link = new DoubleLink(consumer);
-        try {
-            link.update(getDouble());
-        } catch (Exception ex) {
-            context.getLog().log(LogLevel.ERROR, ex);
-        }
-        links = ArrayUtils.add(links, link);
+        DoubleLink dl = new DoubleLink();
+        dl.link(consumer);
         return this;
     }
 
@@ -146,17 +141,16 @@ public abstract class Property {
         }
         return this;
     }
+    
+    public Linkable.Double values() {
+        return new DoubleLink();
+    }
 
     public <T> Property linkAs(
             Function<Argument, T> converter,
             Consumer<T> consumer) {
-        ArgumentLink<T> link = new ArgumentLink<>(converter, consumer);
-        try {
-            link.update(get());
-        } catch (Exception ex) {
-            context.getLog().log(LogLevel.ERROR, ex);
-        }
-        links = ArrayUtils.add(links, link);
+        ArgumentLink al = new ArgumentLink();
+        al.map(converter).link(consumer);
         return this;
     }
 
@@ -169,8 +163,12 @@ public abstract class Property {
         return this;
     }
     
+    public <T> Linkable<T> valuesAs(Function<Argument, T> converter) {
+        return new ArgumentLink().map(converter);
+    }
+    
     public Property clearLinks() {
-        links = new Link[0];
+        links = new BaseLink[0];
         return this;
     }
 
@@ -196,13 +194,13 @@ public abstract class Property {
     }
 
     protected void updateLinks(double value) {
-        for (Link link : links) {
+        for (BaseLink link : links) {
             link.update(value);
         }
     }
 
     protected void updateLinks(Argument value) {
-        for (Link link : links) {
+        for (BaseLink link : links) {
             link.update(value);
         }
     }
@@ -231,7 +229,7 @@ public abstract class Property {
         }
     }
 
-    private static interface Link {
+    private static interface BaseLink {
 
         void update(double value);
 
@@ -239,14 +237,20 @@ public abstract class Property {
 
     }
 
-    private class DoubleLink implements Link {
+    private class DoubleLink implements BaseLink, Linkable.Double {
 
-        private final DoubleConsumer consumer;
+        private DoubleConsumer consumer;
 
-        private DoubleLink(DoubleConsumer consumer) {
-            this.consumer = consumer;
+        @Override
+        public void link(DoubleConsumer consumer) {
+            if (this.consumer != null) {
+                throw new IllegalStateException("Cannot link multiple consumers in one chain");
+            }
+            this.consumer = Objects.requireNonNull(consumer);
+            update(getDouble());
+            links = ArrayUtils.add(links, this);
         }
-
+        
         @Override
         public void update(double value) {
             try {
@@ -263,18 +267,20 @@ public abstract class Property {
 
     }
 
-    private class ArgumentLink<T> implements Link {
+    private class ArgumentLink implements BaseLink, Linkable<Argument> {
 
-        private final Function<Argument, T> converter;
-        private final Consumer<T> consumer;
+        private Consumer<Argument> consumer;
 
-        private ArgumentLink(
-                Function<Argument, T> converter,
-                Consumer<T> consumer) {
-            this.converter = Objects.requireNonNull(converter);
+        @Override
+        public void link(Consumer<Argument> consumer) {
+            if (this.consumer != null) {
+                throw new IllegalStateException("Cannot link multiple consumers in one chain");
+            }
             this.consumer = Objects.requireNonNull(consumer);
+            update(get());
+            links = ArrayUtils.add(links, this);
         }
-
+        
         @Override
         public void update(double value) {
             update(PNumber.valueOf(value));
@@ -283,7 +289,7 @@ public abstract class Property {
         @Override
         public void update(Argument value) {
             try {
-                consumer.accept(converter.apply(value));
+                consumer.accept(value);
             } catch (Exception ex) {
                 context.getLog().log(LogLevel.ERROR, ex);
             }
