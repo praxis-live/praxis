@@ -27,6 +27,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 //import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -41,6 +44,8 @@ import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -126,6 +131,27 @@ public final class PBytes extends Argument {
     @Override
     public boolean isEmpty() {
         return bytes.length == 0;
+    }
+    
+    /**
+     * Extract serialized object from data. Will throw an exception if this PBytes
+     * doesn't contain a valid object of the correct type.
+     * @param <T>
+     * @param type class of expected object
+     * @return deserialized object
+     * @throws IOException
+     */
+    public <T extends Serializable> T deserialize(Class<T> type) throws IOException {
+        ObjectInputStream ois = new ObjectInputStream(asInputStream());
+        try {
+            Object obj = ois.readObject();
+            if (type.isInstance(obj)) {
+                return type.cast(obj);
+            }
+            throw new IOException("PBytes contains a different class");
+        } catch (ClassNotFoundException ex) {
+            throw new IOException(ex);
+        }
     }
 
     /**
@@ -237,6 +263,21 @@ public final class PBytes extends Argument {
         } catch (Exception ex) {
             throw new IllegalArgumentException(ex);
         }
+    }
+    
+    /**
+     * Create a PBytes of the serialized form of the provided object.
+     * @param obj
+     * @return PBytes of serialized data
+     * @throws IOException
+     */
+    public static PBytes serialize(Serializable obj) throws IOException {
+        OutputStream os = new OutputStream();
+        try (ObjectOutputStream oos = new ObjectOutputStream(os)) {
+            oos.writeObject(obj);
+            oos.flush();
+        }
+        return os.toBytes();
     }
 
     public static PBytes coerce(Argument arg) throws ArgumentFormatException {

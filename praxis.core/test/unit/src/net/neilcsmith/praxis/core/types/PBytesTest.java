@@ -307,4 +307,32 @@ public class PBytesTest {
     public void testInfo() {
     }
 
+    /**
+     * Test of deserialize method, of class PBytes.
+     */
+    @Test
+    public void testDeserialize() throws IOException {
+        int[] ints = new int[]{1,2,3,4,5};
+        PBytes bytes = PBytes.serialize(ints);
+        System.out.println("Serialized size : " + bytes.getSize());
+        System.out.println("Base64 : " + bytes.toString());
+        int[] out = bytes.deserialize(int[].class);
+        assertArrayEquals(ints, out);
+        try {
+            double[] dbles = bytes.deserialize(double[].class);
+            fail("Deserialization to double[] should fail");
+        } catch (Exception e) {
+            System.out.println("Expected exception : " + e);
+        }
+    }
+
+    /**
+     * Test of valueOf method, of class PBytes.
+     */
+    @Test
+    public void testValueOf_List() {
+    }
+
+
+
 }
