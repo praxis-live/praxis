@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -26,11 +26,16 @@ import java.util.Random;
 import net.neilcsmith.praxis.code.userapi.Constants;
 import net.neilcsmith.praxis.code.userapi.Property;
 import net.neilcsmith.praxis.core.Control;
+import net.neilcsmith.praxis.core.types.PArray;
+import net.neilcsmith.praxis.core.types.PBoolean;
+import net.neilcsmith.praxis.core.types.PNumber;
+import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.core.types.Value;
 import net.neilcsmith.praxis.logging.LogLevel;
 import processing.core.PApplet;
 
 public class DefaultCodeDelegate extends CodeDelegate {
-    
+
     final static String[] IMPORTS = {
         "java.util.*",
         "net.neilcsmith.praxis.core.Argument",
@@ -49,52 +54,137 @@ public class DefaultCodeDelegate extends CodeDelegate {
     public final void log(LogLevel level, String msg) {
         getContext().getLog().log(level, msg);
     }
-    
+
     public final void log(LogLevel level, Exception ex) {
         getContext().getLog().log(level, ex);
     }
-    
+
     public final void log(LogLevel level, Exception ex, String msg) {
         getContext().getLog().log(level, ex, msg);
     }
-    
+
     public final void log(LogLevel level, Class<? extends Exception> type, String msg) {
         getContext().getLog().log(level, type, msg);
     }
-    
+
     public final boolean isLoggable(LogLevel level) {
         return getContext().getLogLevel().isLoggable(level);
     }
-    
+
     public final long time() {
         return getContext().getTime();
     }
 
+    @Deprecated
     public final double d(Property p) {
         return p.getDouble();
     }
 
+    public final double D(Property p) {
+        return p.getDouble();
+    }
+
+    public final double D(Value v) {
+        if (v instanceof PNumber) {
+            return ((PNumber) v).value();
+        } else {
+            return PNumber.from(v).orElse(PNumber.ZERO).value();
+        }
+    }
+    
+    public final double D(String s) {
+        return D(PString.valueOf(s));
+    }
+
+    @Deprecated
     public final float f(Property p) {
         return (float) p.getDouble();
     }
 
+    @Deprecated
     public final int i(Property p) {
         return p.getInt();
     }
 
+    public final int I(Property p) {
+        return p.getInt();
+    }
+    
+    public final int I(Value v) {
+        if (v instanceof PNumber) {
+            return ((PNumber) v).toIntValue();
+        } else {
+            return PNumber.from(v).orElse(PNumber.ZERO).toIntValue();
+        }
+    }
+    
+    public final int I(String s) {
+        return I(PString.valueOf(s));
+    }
+    
+    public final boolean B(Property p) {
+        return p.getBoolean();
+    }
+    
+    public final boolean B(Value v) {
+        if (v instanceof PBoolean) {
+            return ((PBoolean) v).value();
+        } else {
+            return PBoolean.from(v).orElse(PBoolean.FALSE).value();
+        }
+    }
+    
+    public final boolean B(String s) {
+        return B(PString.valueOf(s));
+    }
+
+    @Deprecated
     public final String s(Property p) {
         return p.get().toString();
     }
 
+    public final String S(Property p) {
+        return p.get().toString();
+    }
+    
+    public final String S(Value v) {
+        return v.toString();
+    }
+
+    public final PArray ARRAY(Property p) {
+        return PArray.from(p.get()).orElse(PArray.EMPTY);
+    }
+    
+    public final PArray ARRAY(Value v) {
+        return PArray.from(v).orElse(PArray.EMPTY);
+    }
+    
+    public final PArray ARRAY(String s) {
+        return ARRAY(PString.valueOf(s));
+    }
+    
+    @Deprecated
     public final Property p(String id) {
         Control c = getContext().getControl(id);
-//        return c instanceof Property ? (Property) c : null;
         if (c instanceof Property) {
             return (Property) c;
         } else {
             return null;
         }
     }
+
+    public final Property P(String id) {
+        Control c = getContext().getControl(id);
+        if (c instanceof Property) {
+            return (Property) c;
+        } else {
+            return null;
+        }
+    }
+    
+    
+    
+    
 
     public final double random(double max) {
         return RND.nextDouble() * max;
@@ -106,17 +196,17 @@ public class DefaultCodeDelegate extends CodeDelegate {
         }
         return random(max - min) + min;
     }
-    
+
     public final double randomOf(double ... values) {
         return values[RND.nextInt(values.length)];
     }
-    
+
     public final int randomOf(int ... values) {
         return values[RND.nextInt(values.length)];
     }
 
     public final String randomOf(String ... values) {
-        return values[RND.nextInt(values.length)]; 
+        return values[RND.nextInt(values.length)];
     }
 
     public final double abs(double n) {
