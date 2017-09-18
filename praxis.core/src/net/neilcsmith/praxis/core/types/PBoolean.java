@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -31,7 +31,7 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
  *
  * @author Neil C Smith
  */
-public final class PBoolean extends Argument {
+public final class PBoolean extends Value {
     
     public static final PBoolean TRUE = new PBoolean(true);
     public static final PBoolean FALSE = new PBoolean(false);

@@ -44,8 +44,6 @@ import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -58,7 +56,7 @@ import net.neilcsmith.praxis.core.DataObject;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public final class PBytes extends Argument {
+public final class PBytes extends Value {
 
     public final static PBytes EMPTY = new PBytes(new byte[0], "");
 

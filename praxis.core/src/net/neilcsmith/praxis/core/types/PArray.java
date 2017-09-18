@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.ArgumentFormatException;
@@ -39,22 +40,22 @@ import net.neilcsmith.praxis.core.syntax.Tokenizer;
  *
  * @author Neil C Smith
  */
-public final class PArray extends Argument implements Iterable<Argument> {
+public final class PArray extends Value implements Iterable<Value> {
 
-    public final static PArray EMPTY = new PArray(new Argument[0], "");
-    private final Argument[] data;
+    public final static PArray EMPTY = new PArray(new Value[0], "");
+    private final Value[] data;
     private volatile String str;
 
-    private PArray(Argument[] data, String str) {
+    private PArray(Value[] data, String str) {
         this.data = data;
         this.str = str;
     }
 
-    public Argument get(int index) {
+    public Value get(int index) {
         return data[index];
     }
 
-    public Argument[] getAll() {
+    public Value[] getAll() {
         return data.clone();
     }
 
@@ -130,15 +131,15 @@ public final class PArray extends Argument implements Iterable<Argument> {
         return false;
     }
 
-    public Iterator<Argument> iterator() {
+    public Iterator<Value> iterator() {
         return new Itr();
     }
 
-    public Stream<Argument> stream() {
+    public Stream<Value> stream() {
         return Stream.of(data);
     }
-    
-    private class Itr implements Iterator<Argument> {
+
+    private class Itr implements Iterator<Value> {
 
         int cursor = 0;
 
@@ -146,8 +147,8 @@ public final class PArray extends Argument implements Iterable<Argument> {
             return cursor < data.length;
         }
 
-        public Argument next() {
-            Argument arg = data[cursor];
+        public Value next() {
+            Value arg = data[cursor];
             cursor++;
             return arg;
         }
@@ -158,22 +159,37 @@ public final class PArray extends Argument implements Iterable<Argument> {
     }
 
     public static PArray valueOf(Collection<? extends Argument> collection) {
-//        return valueOf(collection.toArray(new Argument[collection.size()]));
-        if (collection.contains(null)) {
-            throw new NullPointerException();
-        }
-        return new PArray(collection.toArray(new Argument[collection.size()]), null);
-
+        Value[] values = collection.stream()
+                .map(arg -> arg instanceof Value ? (Value) arg : PString.valueOf(arg))
+                .toArray(Value[]::new);
+        return new PArray(values, null);
     }
 
+    @Deprecated
     public static PArray valueOf(Argument... args) {
         int size = args.length;
         if (size == 0) {
             return PArray.EMPTY;
         }
-        Argument[] copy = new Argument[size];
+        Value[] copy = new Value[size];
         for (int i = 0; i < size; i++) {
             Argument arg = args[i];
+            if (arg == null) {
+                throw new NullPointerException();
+            }
+            copy[i] = arg instanceof Value ? (Value) arg : PString.valueOf(arg);
+        }
+        return new PArray(copy, null);
+    }
+
+    public static PArray valueOf(Value... args) {
+        int size = args.length;
+        if (size == 0) {
+            return PArray.EMPTY;
+        }
+        Value[] copy = new Value[size];
+        for (int i = 0; i < size; i++) {
+            Value arg = args[i];
             if (arg == null) {
                 throw new NullPointerException();
             }
@@ -182,8 +198,9 @@ public final class PArray extends Argument implements Iterable<Argument> {
         return new PArray(copy, null);
     }
 
+    @Deprecated
     public static PArray valueOf(CallArguments args) {
-        return new PArray(args.getAll(), null);
+        return valueOf(args.getAll());
     }
 
     public static PArray valueOf(String str) throws ArgumentFormatException {
@@ -215,7 +232,7 @@ public final class PArray extends Argument implements Iterable<Argument> {
             if (size == 0) {
                 return PArray.EMPTY;
             } else {
-                return new PArray(list.toArray(new Argument[size]), str);
+                return new PArray(list.toArray(new Value[size]), str);
             }
         } catch (Exception ex) {
             throw new ArgumentFormatException(ex);
@@ -230,7 +247,7 @@ public final class PArray extends Argument implements Iterable<Argument> {
             return valueOf(arg.toString());
         }
     }
-    
+
     public static Optional<PArray> from(Argument arg) {
         try {
             return Optional.of(coerce(arg));
@@ -238,8 +255,22 @@ public final class PArray extends Argument implements Iterable<Argument> {
             return Optional.empty();
         }
     }
-
+    
     public static ArgumentInfo info() {
         return ArgumentInfo.create(PArray.class, null);
     }
+
+    public static <T extends Argument> Collector<T, ?, PArray> collector() {
+
+        return Collector.<T, List<T>, PArray>of(
+                ArrayList::new,
+                List::add,
+                (list1, list2) -> {
+                    list1.addAll(list2);
+                    return list1;
+                },
+                PArray::valueOf
+        );
+    }
+
 }

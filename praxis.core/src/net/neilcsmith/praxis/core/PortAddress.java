@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -24,12 +24,13 @@ package net.neilcsmith.praxis.core;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
+import net.neilcsmith.praxis.core.types.Value;
 
 /**
  *
  * @author Neil C Smith
  */
-public class PortAddress extends Argument {
+public class PortAddress extends Value {
 
     public static final String SEPERATOR = "!";
     private static final String SEP_REGEX = "\\!";

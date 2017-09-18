@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -30,7 +30,7 @@ import net.neilcsmith.praxis.core.info.ArgumentInfo;
  *
  * @author Neil C Smith
  */
-public final class PNumber extends Argument implements Comparable<PNumber> {
+public final class PNumber extends Value implements Comparable<PNumber> {
 
     public final static PNumber ONE = PNumber.valueOf(1);
     public final static PNumber ZERO = PNumber.valueOf(0);

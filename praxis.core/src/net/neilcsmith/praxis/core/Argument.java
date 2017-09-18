@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -39,16 +39,7 @@ import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.core.types.PString;
 
 /**
- * The abstract base class of all arguments passed around in the Praxis environment,
- * either in Calls or through ControlPorts.
- * 
- * All Argument subclasses should be immutable (PReference being the only exception),
- * and have an immutable string representation. Arguments should provide static methods
- * for creating from a string representation, and for creating an ArgumentInfo object.
- * Argument should also provide a static coerce(Argument arg) method that casts the 
- * supplied argument to the relevant type, or attempts to create from its string
- * representation.
- *
+ * Effectively deprecated - see Value.
  *
  * @author Neil C Smith
  */
@@ -111,22 +102,26 @@ public abstract class Argument {
      *
      * @return ArgumentInfo info
      */
+    @Deprecated
     public static ArgumentInfo info() {
         return ArgumentInfo.create(Argument.class, null);
     }
     
     // @TODO - FIX THIS. Need to make this do automatic coercion to class if provided?
+    @Deprecated
     public static final boolean equivalent(Class<? extends Argument> clazz,
             Argument arg1, Argument arg2) {
         return arg1.isEquivalent(arg2) || arg2.isEquivalent(arg1);
     }
 
     @SuppressWarnings("unchecked")
+    @Deprecated
     public static <T extends Argument> Optional<Converter<T>> findConverter(Class<T> type) {
         return Optional.ofNullable((Converter<T>) converters.get(type));
     }
     
     @FunctionalInterface
+    @Deprecated
     public static interface Converter<T extends Argument> {
         
         Optional<T> from(Argument arg);

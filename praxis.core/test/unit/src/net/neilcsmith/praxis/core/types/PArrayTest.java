@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package net.neilcsmith.praxis.core.types;
 
@@ -74,6 +69,32 @@ public class PArrayTest {
 //        }
         System.out.println(a2.stream().map(Argument::toString).collect(Collectors.joining(" | ")));
         assertEquals(2, a2.getSize());
+    }
+    
+    @Test
+    public void testCollector() throws Exception {
+        PArray arr1 = PArray.valueOf("a3 104 {some string} c#5");
+        PArray arr2 = arr1.stream().collect(PArray.collector());
+        
+        System.out.println(arr1);
+        System.out.println(arr2);
+        
+        assertEquals(arr1.getSize(), arr2.getSize());
+        
+        assertTrue(arr1.isEquivalent(arr2));
+        
+        PArray arr4 = PArray.valueOf("A3 104 C#5");
+        PArray arr3 = arr1.stream()
+                .map(Object::toString)
+                .filter(s -> !s.contains(" "))
+                .map(String::toUpperCase)
+                .map(PString::valueOf)
+                .collect(PArray.collector());
+        
+        System.out.println(arr3);
+        
+        assertTrue(arr3.isEquivalent(arr4));
+        
     }
 
     
