@@ -140,7 +140,12 @@ public final class PGLContext {
 
     public PShapeOpenGL asPGLShape(PShape shape) {
         return shapes.computeIfAbsent(shape, s -> {
-            return PShapeOpenGL.createShape(primary(), s);
+            PGLGraphics pg = primary();
+            int prevTextureMode = pg.textureMode;
+            pg.textureMode = PConstants.NORMAL;
+            PShapeOpenGL glShape = PShapeOpenGL.createShape(primary(), s);
+            pg.textureMode = prevTextureMode;
+            return glShape;
         });
     }
 
