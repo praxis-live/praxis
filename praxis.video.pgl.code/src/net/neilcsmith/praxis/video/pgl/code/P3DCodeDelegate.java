@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -313,6 +313,10 @@ public class P3DCodeDelegate extends DefaultCodeDelegate {
     
     public PShape createShape(Constants.ShapeType type) {
         return pg.createShape(type);
+    }
+    
+    public PShape createShape(PShape source) {
+        return pg.createShape(source);
     }
 
     public void clip(double a, double b, double c, double d) {

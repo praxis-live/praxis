@@ -22,7 +22,10 @@
 package net.neilcsmith.praxis.video.pgl.code.userapi;
 
 import net.neilcsmith.praxis.video.pgl.PGLContext;
+import net.neilcsmith.praxis.video.pgl.PGLGraphics;
 import net.neilcsmith.praxis.video.pgl.PGLShader;
+import processing.core.PConstants;
+import processing.opengl.PShapeOpenGL;
 
 /**
  *
@@ -95,11 +98,15 @@ abstract class PGraphics /*extends PImage*/ {
     public PShape createShape(Constants.ShapeType type) {
         return new PShape(g.createShape(type.unwrap()), context);
     }
-    
-//
-//    public PShape createShape(PShape source) {
-//        return g.createShape(source);
-//    }
+
+    public PShape createShape(PShape source) {
+        PGLGraphics pg = context.primary();
+        int prevTextureMode = pg.textureMode;
+        pg.textureMode = PConstants.NORMAL;
+        PShapeOpenGL glShape = PShapeOpenGL.createShape(pg, source.unwrap(context));
+        pg.textureMode = prevTextureMode;
+        return new PShape(glShape, context);
+    }
 //
 //    public PShape createShape(int type) {
 //        return g.createShape(type);
