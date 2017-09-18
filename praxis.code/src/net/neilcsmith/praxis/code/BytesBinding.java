@@ -71,12 +71,13 @@ abstract class BytesBinding extends PropertyControl.Binding {
     }
 
     static boolean isBindableFieldType(Class<?> type) {
-        return type == List.class || Serializable.class.isAssignableFrom(type);
+        return type == PBytes.class || type == List.class || Serializable.class.isAssignableFrom(type);
     }
 
     static BytesBinding create(CodeConnector<?> connector, Field field) {
-
-       if (isSerializableList(field.getGenericType())) {
+       if (field.getType() == PBytes.class) {
+           return new PBytesField(field);
+       }else if (isSerializableList(field.getGenericType())) {
            return new ListField(field);
        } else if (isSerializableType(field.getGenericType())) {
            return new SerializableField(field);
@@ -117,6 +118,40 @@ abstract class BytesBinding extends PropertyControl.Binding {
         return false;
     }
     
+    private static class PBytesField extends BytesBinding {
+        
+        private final Field field;
+        private CodeDelegate delegate;
+        
+        private PBytesField(Field field) {
+            this.field = field;
+        }
+
+        @Override
+        protected void attach(CodeContext<?> context) {
+            this.delegate = context.getDelegate();
+            try {
+                set(PBytes.EMPTY);
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+
+        @Override
+        void set(PBytes value) throws Exception {
+            field.set(delegate, value);
+        }
+
+        @Override
+        public Argument get() {
+            try {
+                return (PBytes) field.get(delegate);
+            } catch (Exception ex) {
+                return PBytes.EMPTY;
+            }
+        }
+        
+    }
 
     private static class SerializableField extends BytesBinding {
 
