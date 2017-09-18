@@ -31,7 +31,7 @@ import net.neilcsmith.praxis.core.info.PortInfo;
 public abstract class PortDescriptor {
 
     public static enum Category {
-        In, Out, Property, Action, AuxIn, AuxOut
+        In, Action, Out, Property, AuxIn, AuxOut
     }
 
     private final String id;
