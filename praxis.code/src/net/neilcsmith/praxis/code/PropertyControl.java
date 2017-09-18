@@ -120,9 +120,9 @@ public class PropertyControl extends Property implements Control {
 
     private void attach(CodeContext<?> context, Control previous) {
         this.context = context;
-        binding.attach(context);
         if (previous instanceof PropertyControl) {
             PropertyControl pc = (PropertyControl) previous;
+            binding.attach(context, pc.binding);
             latest = pc.latest;
             latestSet = pc.latestSet;
             try {
@@ -132,6 +132,7 @@ public class PropertyControl extends Property implements Control {
             }
             super.attach(context, (Property) previous);
         } else {
+            binding.attach(context, null);
             super.attach(context, null);
         }
     }
@@ -188,6 +189,14 @@ public class PropertyControl extends Property implements Control {
     public static abstract class Binding {
 
         protected void attach(CodeContext<?> context) {
+            // no op hook
+        }
+        
+        protected void attach(CodeContext<?> context, Binding previous) {
+            attach(context);
+        }
+        
+        protected void reset(boolean full) {
             // no op hook
         }
 
@@ -403,6 +412,8 @@ public class PropertyControl extends Property implements Control {
             } else if (field.isAnnotationPresent(Type.Boolean.class)
                     || BooleanBinding.isBindableFieldType(type)) {
                 binding = BooleanBinding.create(connector, field);
+            } else if (ArrayBinding.isBindableFieldType(type)) {
+                binding = ArrayBinding.create(connector, field);
             } else if (BytesBinding.isBindableFieldType(type)) {
                 binding = BytesBinding.create(connector, field);
             }
