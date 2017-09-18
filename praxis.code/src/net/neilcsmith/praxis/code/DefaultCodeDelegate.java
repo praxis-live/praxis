@@ -75,16 +75,11 @@ public class DefaultCodeDelegate extends CodeDelegate {
         return getContext().getTime();
     }
 
-    @Deprecated
     public final double d(Property p) {
         return p.getDouble();
     }
 
-    public final double D(Property p) {
-        return p.getDouble();
-    }
-
-    public final double D(Value v) {
+    public final double d(Value v) {
         if (v instanceof PNumber) {
             return ((PNumber) v).value();
         } else {
@@ -92,8 +87,8 @@ public class DefaultCodeDelegate extends CodeDelegate {
         }
     }
     
-    public final double D(String s) {
-        return D(PString.valueOf(s));
+    public final double d(String s) {
+        return d(PString.valueOf(s));
     }
 
     @Deprecated
@@ -101,16 +96,11 @@ public class DefaultCodeDelegate extends CodeDelegate {
         return (float) p.getDouble();
     }
 
-    @Deprecated
     public final int i(Property p) {
         return p.getInt();
     }
 
-    public final int I(Property p) {
-        return p.getInt();
-    }
-    
-    public final int I(Value v) {
+    public final int i(Value v) {
         if (v instanceof PNumber) {
             return ((PNumber) v).toIntValue();
         } else {
@@ -118,15 +108,15 @@ public class DefaultCodeDelegate extends CodeDelegate {
         }
     }
     
-    public final int I(String s) {
-        return I(PString.valueOf(s));
+    public final int i(String s) {
+        return i(PString.valueOf(s));
     }
     
-    public final boolean B(Property p) {
+    public final boolean b(Property p) {
         return p.getBoolean();
     }
     
-    public final boolean B(Value v) {
+    public final boolean b(Value v) {
         if (v instanceof PBoolean) {
             return ((PBoolean) v).value();
         } else {
@@ -134,36 +124,30 @@ public class DefaultCodeDelegate extends CodeDelegate {
         }
     }
     
-    public final boolean B(String s) {
-        return B(PString.valueOf(s));
+    public final boolean b(String s) {
+        return b(PString.valueOf(s));
     }
 
-    @Deprecated
     public final String s(Property p) {
         return p.get().toString();
     }
-
-    public final String S(Property p) {
-        return p.get().toString();
-    }
     
-    public final String S(Value v) {
+    public final String s(Value v) {
         return v.toString();
     }
 
-    public final PArray ARRAY(Property p) {
+    public final PArray array(Property p) {
         return PArray.from(p.get()).orElse(PArray.EMPTY);
     }
     
-    public final PArray ARRAY(Value v) {
+    public final PArray array(Value v) {
         return PArray.from(v).orElse(PArray.EMPTY);
     }
     
-    public final PArray ARRAY(String s) {
-        return ARRAY(PString.valueOf(s));
+    public final PArray array(String s) {
+        return array(PString.valueOf(s));
     }
     
-    @Deprecated
     public final Property p(String id) {
         Control c = getContext().getControl(id);
         if (c instanceof Property) {
@@ -173,18 +157,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
         }
     }
 
-    public final Property P(String id) {
-        Control c = getContext().getControl(id);
-        if (c instanceof Property) {
-            return (Property) c;
-        } else {
-            return null;
-        }
-    }
-    
-    
-    
-    
+
 
     public final double random(double max) {
         return RND.nextDouble() * max;
