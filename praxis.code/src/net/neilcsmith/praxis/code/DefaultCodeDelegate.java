@@ -725,7 +725,19 @@ public class DefaultCodeDelegate extends CodeDelegate {
     public final String[] append(String[] array, String value) {
         return PApplet.append(array, value);
     }
-
+    
+    public final PArray append(PArray array, Value value) {
+        return PArray.append(array, value);
+    }
+    
+    public final PArray append(PArray array, String value) {
+        return PArray.append(array, PString.valueOf(value));
+    }
+    
+    public final PArray append(PArray array, double value) {
+        return PArray.append(array, PNumber.valueOf(value));
+    }
+    
     public final Object append(Object array, Object value) {
         return PApplet.append(array, value);
     }
@@ -829,6 +841,18 @@ public class DefaultCodeDelegate extends CodeDelegate {
     public final String[] splice(String[] list, String[] value, int index) {
         return PApplet.splice(list, value, index);
     }
+    
+    public final PArray splice(PArray array, Value value, int index) {
+        return PArray.insert(array, index, value);
+    }
+    
+    public final PArray splice(PArray array, String value, int index) {
+        return PArray.insert(array, index, PString.valueOf(value));
+    }
+    
+    public final PArray splice(PArray array, double value, int index) {
+        return PArray.insert(array, index, PNumber.valueOf(value));
+    }
 
     public final Object splice(Object list, Object value, int index) {
         return PApplet.splice(list, value, index);
@@ -892,6 +916,14 @@ public class DefaultCodeDelegate extends CodeDelegate {
         return PApplet.subset(list, start, count);
     }
 
+    public final PArray subset(PArray array, int start) {
+        return subset(array, start, array.getSize() - start);
+    }
+    
+    public final PArray subset(PArray array, int start, int count) {
+        return PArray.subset(array, start, count);
+    }
+    
     public final Object subset(Object list, int start) {
         return PApplet.subset(list, start);
     }
@@ -929,6 +961,10 @@ public class DefaultCodeDelegate extends CodeDelegate {
 
     public final String[] concat(String[] a, String[] b) {
         return PApplet.concat(a, b);
+    }
+    
+    public final PArray concat(PArray a, PArray b) {
+        return PArray.concat(a, b);
     }
 
     public final Object concat(Object a, Object b) {
