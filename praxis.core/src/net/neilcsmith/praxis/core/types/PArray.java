@@ -52,7 +52,13 @@ public final class PArray extends Value implements Iterable<Value> {
     }
 
     public Value get(int index) {
-        return data[index];
+        int count = data.length;
+        if (count > 0) {
+            index %= count;
+            return index < 0 ? data[index + count] : data[index];
+        } else {
+            return this;
+        }
     }
 
     public Value[] getAll() {
@@ -96,7 +102,7 @@ public final class PArray extends Value implements Iterable<Value> {
     }
 
     @Override
-    public boolean isEquivalent(Argument arg) {
+    public boolean equivalent(Value arg) {
         try {
             if (arg == this) {
                 return true;
@@ -255,7 +261,7 @@ public final class PArray extends Value implements Iterable<Value> {
             return Optional.empty();
         }
     }
-    
+
     public static ArgumentInfo info() {
         return ArgumentInfo.create(PArray.class, null);
     }
@@ -271,6 +277,35 @@ public final class PArray extends Value implements Iterable<Value> {
                 },
                 PArray::valueOf
         );
+    }
+
+    public static PArray concat(PArray a, PArray b) {
+        Value[] values = new Value[a.data.length + b.data.length];
+        System.arraycopy(a.data, 0, values, 0, a.data.length);
+        System.arraycopy(b.data, 0, values, a.data.length, b.data.length);
+        return new PArray(values, null);
+    }
+
+    public static PArray subset(PArray array, int start, int count) {
+        Value[] values = new Value[count];
+        System.arraycopy(array.data, start, values, 0, count);
+        return new PArray(values, null);
+    }
+
+    public static PArray insert(PArray array, int index, Value value) {
+        Value[] values = new Value[array.data.length + 1];
+        System.arraycopy(array.data, 0, values, 0, index);
+        values[index] = value;
+        System.arraycopy(array.data, index, values, index + 1,
+                array.data.length - index);
+        return new PArray(values, null);
+    }
+    
+    public static PArray append(PArray array, Value value) {
+        Value[] values = new Value[array.data.length + 1];
+        System.arraycopy(array.data, 0, values, 0, array.data.length);
+        values[values.length - 1] = value;
+        return new PArray(values, null);
     }
 
 }
