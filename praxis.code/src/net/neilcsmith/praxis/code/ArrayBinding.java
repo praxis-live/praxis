@@ -23,7 +23,7 @@
 package net.neilcsmith.praxis.code;
 
 import java.lang.reflect.Field;
-import net.neilcsmith.praxis.code.userapi.Cycle;
+//import net.neilcsmith.praxis.code.userapi.Cycle;
 import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.types.PArray;
@@ -60,13 +60,14 @@ abstract class ArrayBinding extends PropertyControl.Binding {
     }
 
     static boolean isBindableFieldType(Class<?> type) {
-        return type == PArray.class || type == Cycle.class;
+        return type == PArray.class;// || type == Cycle.class;
     }
 
     static ArrayBinding create(CodeConnector<?> connector, Field field) {
-        if (field.getType() == Cycle.class) {
-            return new CycleField(field);
-        } else if (field.getType() == PArray.class) {
+//        if (field.getType() == Cycle.class) {
+//            return new CycleField(field);
+//        } else
+        if (field.getType() == PArray.class) {
             return new PArrayField(field);
         } else {
             return null;
@@ -74,42 +75,42 @@ abstract class ArrayBinding extends PropertyControl.Binding {
        
     }
     
-    private static class CycleField extends ArrayBinding {
-
-        private final Field field;
-        private CodeDelegate delegate;
-        private Cycle cycle;
-        
-        private CycleField(Field field) {
-            this.field = field;
-        }
-
-        @Override
-        protected void attach(CodeContext<?> context, PropertyControl.Binding previous) {
-            this.delegate = context.getDelegate();
-            if (previous instanceof CycleField) {
-                cycle = ((CycleField) previous).cycle;
-            } else {
-                cycle = new Cycle(){};
-            }
-            try {
-                field.set(delegate, cycle);
-            } catch (Exception ex) {
-                context.getLog().log(LogLevel.ERROR, ex);
-            }
-        }
-
-        @Override
-        void set(PArray value) throws Exception {
-            cycle.values(value);
-        }
-
-        @Override
-        public Argument get() {
-            return cycle.values();
-        }
-        
-    }
+//    private static class CycleField extends ArrayBinding {
+//
+//        private final Field field;
+//        private CodeDelegate delegate;
+//        private Cycle cycle;
+//        
+//        private CycleField(Field field) {
+//            this.field = field;
+//        }
+//
+//        @Override
+//        protected void attach(CodeContext<?> context, PropertyControl.Binding previous) {
+//            this.delegate = context.getDelegate();
+//            if (previous instanceof CycleField) {
+//                cycle = ((CycleField) previous).cycle;
+//            } else {
+//                cycle = new Cycle(){};
+//            }
+//            try {
+//                field.set(delegate, cycle);
+//            } catch (Exception ex) {
+//                context.getLog().log(LogLevel.ERROR, ex);
+//            }
+//        }
+//
+//        @Override
+//        void set(PArray value) throws Exception {
+//            cycle.values(value);
+//        }
+//
+//        @Override
+//        public Argument get() {
+//            return cycle.values();
+//        }
+//        
+//    }
     
     private static class PArrayField extends ArrayBinding {
         
