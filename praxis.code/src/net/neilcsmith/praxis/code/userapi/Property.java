@@ -141,7 +141,7 @@ public abstract class Property {
         }
         return this;
     }
-    
+
     public Linkable.Double values() {
         return new DoubleLink();
     }
@@ -156,17 +156,17 @@ public abstract class Property {
 
     public <T> Property linkAs(
             Function<Argument, T> converter,
-            Consumer<T> ... consumers) {
+            Consumer<T>... consumers) {
         for (Consumer<T> consumer : consumers) {
             linkAs(converter, consumer);
         }
         return this;
     }
-    
+
     public <T> Linkable<T> valuesAs(Function<Argument, T> converter) {
         return new ArgumentLink().map(converter);
     }
-    
+
     public Property clearLinks() {
         links = new BaseLink[0];
         return this;
@@ -204,9 +204,16 @@ public abstract class Property {
             link.update(value);
         }
     }
-    
+
     protected boolean hasLinks() {
         return links.length > 0;
+    }
+
+    protected void reset(boolean full) {
+        clearLinks();
+        if (animator != null) {
+            animator.onDoneConsumer = null;
+        }
     }
 
     private void startClock() {
@@ -250,7 +257,7 @@ public abstract class Property {
             update(getDouble());
             links = ArrayUtils.add(links, this);
         }
-        
+
         @Override
         public void update(double value) {
             try {
@@ -280,7 +287,7 @@ public abstract class Property {
             update(get());
             links = ArrayUtils.add(links, this);
         }
-        
+
         @Override
         public void update(double value) {
             update(PNumber.valueOf(value));
@@ -311,6 +318,9 @@ public abstract class Property {
         private double fromValue;
         private long fromTime;
         private boolean animating;
+
+        private Consumer<Property> onDoneConsumer;
+        private long overrun;
 
         private Animator(Property p) {
             this.property = p;
@@ -351,6 +361,7 @@ public abstract class Property {
                 for (int i = 0; i < in.length; i++) {
                     this.in[i] = (long) (in[i] * TO_NANO);
                 }
+                this.in[0] = Math.max(0, this.in[0] - overrun);
             }
             return this;
         }
@@ -395,6 +406,14 @@ public abstract class Property {
             return animating;
         }
 
+        public Animator whenDone(Consumer<Property> whenDoneConsumer) {
+            this.onDoneConsumer = whenDoneConsumer;
+            if (!animating) {
+                onDoneConsumer.accept(property);
+            }
+            return this;
+        }
+
         private void tick() {
             if (!animating) {
                 assert false;
@@ -413,7 +432,7 @@ public abstract class Property {
                 if (proportion >= 1) {
                     index++;
                     if (index >= to.length) {
-                        stop();
+                        finish(currentTime - (fromTime + duration));
                     } else {
                         fromValue = toValue;
                         fromTime += duration;
@@ -428,9 +447,22 @@ public abstract class Property {
 //                    p.setImpl(fromTime, fromValue); ???
                 }
             } catch (Exception exception) {
-                stop();
+                finish(0);
             }
 
+        }
+
+        private void finish(long overrun) {
+            index = 0;
+            animating = false;
+            this.overrun = overrun;
+            if (onDoneConsumer != null) {
+                onDoneConsumer.accept(property);
+            }
+            this.overrun = 0;
+            if (!animating) {
+                property.stopClock();
+            }
         }
 
     }

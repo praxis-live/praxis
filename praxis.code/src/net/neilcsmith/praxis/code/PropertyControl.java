@@ -331,7 +331,7 @@ public class PropertyControl extends Property implements Control {
 
         @Override
         public void reset(boolean full) {
-            control.clearLinks();
+            control.reset(full);
         }
 
         @Override
