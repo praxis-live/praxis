@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -138,7 +138,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             p3d.beginDraw();
             p3d.clear();
             pg.init(p3d);
-            del.setupGraphics(pg, output.getWidth(), output.getHeight());
+            del.configure(pglOut.getContext().parent(), pg, output.getWidth(), output.getHeight());
 //            pg.resetMatrix();
             if (setupRequired) {
                 reset();

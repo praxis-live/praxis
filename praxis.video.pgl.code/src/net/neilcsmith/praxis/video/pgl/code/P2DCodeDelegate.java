@@ -29,18 +29,31 @@ import net.neilcsmith.praxis.video.pgl.code.userapi.PGraphics2D;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PShader;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PShape;
+import processing.core.PApplet;
 
 public class P2DCodeDelegate extends DefaultCodeDelegate {
 
     public int width;
     public int height;
 
+    public int mouseX, mouseY, pmouseX, pmouseY, keyCode;
+    public char key;
+    public boolean keyPressed, mousePressed;
+    
     PGraphics2D pg;
 
-    void setupGraphics(PGraphics2D pg, int width, int height) {
+    void configure(PApplet parent, PGraphics2D pg, int width, int height) {
         this.pg = pg;
         this.width = width;
         this.height = height;
+        this.mouseX = parent.mouseX;
+        this.mouseY = parent.mouseY;
+        this.pmouseX = parent.pmouseX;
+        this.pmouseY = parent.pmouseY;
+        this.keyCode = parent.keyCode;
+        this.key = parent.key;
+        this.keyPressed = parent.keyPressed;
+        this.mousePressed = parent.mousePressed;
     }
 
     public void setup() {
