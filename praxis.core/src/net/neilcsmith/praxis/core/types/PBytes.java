@@ -114,7 +114,7 @@ public final class PBytes extends Value {
     }
 
     @Override
-    public boolean isEquivalent(Argument arg) {
+    public boolean equivalent(Value arg) {
         try {
             if (arg == this) {
                 return true;

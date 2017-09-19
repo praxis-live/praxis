@@ -81,7 +81,18 @@ public abstract class Value extends Argument {
         return (toString().length() == 0);
     }
 
-    public boolean isEquivalent(Value value) {
+    @Override
+    @Deprecated
+    @SuppressWarnings("Deprecation")
+    public final boolean isEquivalent(Argument arg) {
+        if (arg instanceof Value) {
+            return equivalent((Value) arg);
+        } else {
+            return super.isEquivalent(arg);
+        }
+    }
+    
+    public boolean equivalent(Value value) {
         return this == value || this.toString().equals(value.toString());
     }
 

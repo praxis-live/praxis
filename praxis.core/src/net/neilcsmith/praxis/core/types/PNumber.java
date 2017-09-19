@@ -98,7 +98,7 @@ public final class PNumber extends Value implements Comparable<PNumber> {
     }
 
     @Override
-    public boolean isEquivalent(Argument arg) {
+    public boolean equivalent(Value arg) {
         // @TODO should we allow small margin of error???
         try {
             return equals(PNumber.coerce(arg));

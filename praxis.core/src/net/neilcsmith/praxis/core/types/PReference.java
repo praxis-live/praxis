@@ -69,7 +69,7 @@ public class PReference extends Value {
     }
 
     @Override
-    public boolean isEquivalent(Argument arg) {
+    public boolean equivalent(Value arg) {
         return equals(arg);
     }
 

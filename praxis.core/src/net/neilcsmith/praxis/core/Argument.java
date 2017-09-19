@@ -90,7 +90,7 @@ public abstract class Argument {
         return (toString().length() == 0);
     }
 
-
+    @Deprecated
     public boolean isEquivalent(Argument arg) {
         return this == arg || this.toString().equals(arg.toString());
     }

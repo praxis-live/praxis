@@ -131,7 +131,7 @@ public class PMap extends Value {
     }
 
     @Override
-    public boolean isEquivalent(Argument arg) {
+    public boolean equivalent(Value arg) {
         if (arg == this) {
             return true;
         }

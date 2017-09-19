@@ -135,16 +135,16 @@ public class ComponentInfo extends Value {
     }
 
     @Override
-    public boolean isEquivalent(Argument arg) {
+    public boolean equivalent(Value arg) {
         try {
             if (this == arg) {
                 return true;
             }
             ComponentInfo other = ComponentInfo.coerce(arg);
             return interfaces.equals(other.interfaces)
-                    && controls.isEquivalent(other.controls)
-                    && ports.isEquivalent(other.ports)
-                    && properties.isEquivalent(other.properties);
+                    && controls.equivalent(other.controls)
+                    && ports.equivalent(other.ports)
+                    && properties.equivalent(other.properties);
         } catch (ArgumentFormatException ex) {
             return false;
         }

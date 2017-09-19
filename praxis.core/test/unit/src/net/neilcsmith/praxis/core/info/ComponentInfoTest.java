@@ -85,9 +85,13 @@ public class ComponentInfoTest {
         System.out.println(info2.getControlInfo("p1"));
         System.out.println(info.getControlInfo("ro1"));
         System.out.println(info2.getControlInfo("ro1"));
-        assertTrue(Argument.equivalent(Argument.class, info.getControlInfo("p1").getOutputsInfo()[0], info2.getControlInfo("p1").getOutputsInfo()[0]));
-        assertTrue(Argument.equivalent(Argument.class, info.getControlInfo("ro1").getOutputsInfo()[0], info2.getControlInfo("ro1").getOutputsInfo()[0]));
-        assertTrue(Argument.equivalent(Argument.class, info, info2));
+//        assertTrue(Argument.equivalent(Argument.class, info.getControlInfo("p1").getOutputsInfo()[0], info2.getControlInfo("p1").getOutputsInfo()[0]));
+//        assertTrue(Argument.equivalent(Argument.class, info.getControlInfo("ro1").getOutputsInfo()[0], info2.getControlInfo("ro1").getOutputsInfo()[0]));
+//        assertTrue(Argument.equivalent(Argument.class, info, info2));
+        assertTrue(info.equivalent(info2));
+        assertTrue(info.getControlInfo("p1").equivalent(info2.getControlInfo("p1")));
+        assertTrue(info.getControlInfo("ro1").getOutputsInfo()[0].equivalent(info2.getControlInfo("ro1").getOutputsInfo()[0]));
+        assertTrue(info.getPortInfo("in").equivalent(info2.getPortInfo("in")));
     }
 
    
