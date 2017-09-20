@@ -127,6 +127,15 @@ public class DefaultCodeDelegate extends CodeDelegate {
         return getContext().getTime();
     }
 
+     public final long millis() {
+        if (getContext().getExecutionContext().supportsStartTime()) {
+            return (time() - getContext().getExecutionContext().getStartTime()) /
+                    1_000_000;
+        } else {
+            return time() / 1_000_000;
+        }
+    }
+    
     public final double d(Property p) {
         return p.getDouble();
     }
