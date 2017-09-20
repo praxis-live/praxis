@@ -25,7 +25,11 @@ import java.util.Arrays;
 import java.util.Random;
 import net.neilcsmith.praxis.code.userapi.Constants;
 import net.neilcsmith.praxis.code.userapi.Property;
+import net.neilcsmith.praxis.core.Component;
+import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.Control;
+import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.core.types.PNumber;
@@ -71,6 +75,54 @@ public class DefaultCodeDelegate extends CodeDelegate {
         return getContext().getLogLevel().isLoggable(level);
     }
 
+    public final void transmit(String componentID, String portID, String value) {
+        this.transmit(componentID, portID, PString.valueOf(value));
+    }
+
+    public final void transmit(String componentID, String portID, Value value) {
+        ControlPort.Input port = findPort(componentID, portID);
+        if (port == null) {
+            log(LogLevel.ERROR, "Can't find an input port at " + componentID + "!" + portID);
+        } else {
+            try {
+                port.receive(time(), value);
+            } catch (Exception ex) {
+                log(LogLevel.ERROR, ex);
+            }
+        }
+    }
+
+    public final void transmit(String componentID, String portID, double value) {
+        ControlPort.Input port = findPort(componentID, portID);
+        if (port == null) {
+            log(LogLevel.ERROR, "Can't find an input port at " + componentID + "!" + portID);
+        } else {
+            try {
+                port.receive(time(), value);
+            } catch (Exception ex) {
+                log(LogLevel.ERROR, ex);
+            }
+        }
+    }
+
+    private ControlPort.Input findPort(String cmp, String port) {
+        Component thisCmp = getContext().getComponent();
+        Container parent = thisCmp.getParent();
+        if (parent == null) {
+            return null;
+        }
+        Component thatCmp = parent.getChild(cmp);
+        if (thatCmp == null) {
+            return null;
+        }
+        Port thatPort = thatCmp.getPort(port);
+        if (thatPort instanceof ControlPort.Input) {
+            return (ControlPort.Input) thatPort;
+        } else {
+            return null;
+        }
+    }
+
     public final long time() {
         return getContext().getTime();
     }
@@ -86,7 +138,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
             return PNumber.from(v).orElse(PNumber.ZERO).value();
         }
     }
-    
+
     public final double d(String s) {
         return d(PString.valueOf(s));
     }
@@ -107,15 +159,15 @@ public class DefaultCodeDelegate extends CodeDelegate {
             return PNumber.from(v).orElse(PNumber.ZERO).toIntValue();
         }
     }
-    
+
     public final int i(String s) {
         return i(PString.valueOf(s));
     }
-    
+
     public final boolean b(Property p) {
         return p.getBoolean();
     }
-    
+
     public final boolean b(Value v) {
         if (v instanceof PBoolean) {
             return ((PBoolean) v).value();
@@ -123,7 +175,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
             return PBoolean.from(v).orElse(PBoolean.FALSE).value();
         }
     }
-    
+
     public final boolean b(String s) {
         return b(PString.valueOf(s));
     }
@@ -131,7 +183,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
     public final String s(Property p) {
         return p.get().toString();
     }
-    
+
     public final String s(Value v) {
         return v.toString();
     }
@@ -139,15 +191,15 @@ public class DefaultCodeDelegate extends CodeDelegate {
     public final PArray array(Property p) {
         return PArray.from(p.get()).orElse(PArray.EMPTY);
     }
-    
+
     public final PArray array(Value v) {
         return PArray.from(v).orElse(PArray.EMPTY);
     }
-    
+
     public final PArray array(String s) {
         return array(PString.valueOf(s));
     }
-    
+
     public final Property p(String id) {
         Control c = getContext().getControl(id);
         if (c instanceof Property) {
@@ -156,8 +208,6 @@ public class DefaultCodeDelegate extends CodeDelegate {
             return null;
         }
     }
-
-
 
     public final double random(double max) {
         return RND.nextDouble() * max;
@@ -170,15 +220,15 @@ public class DefaultCodeDelegate extends CodeDelegate {
         return random(max - min) + min;
     }
 
-    public final double randomOf(double ... values) {
+    public final double randomOf(double... values) {
         return values[RND.nextInt(values.length)];
     }
 
-    public final int randomOf(int ... values) {
+    public final int randomOf(int... values) {
         return values[RND.nextInt(values.length)];
     }
 
-    public final String randomOf(String ... values) {
+    public final String randomOf(String... values) {
         return values[RND.nextInt(values.length)];
     }
 
@@ -725,19 +775,19 @@ public class DefaultCodeDelegate extends CodeDelegate {
     public final String[] append(String[] array, String value) {
         return PApplet.append(array, value);
     }
-    
+
     public final PArray append(PArray array, Value value) {
         return PArray.append(array, value);
     }
-    
+
     public final PArray append(PArray array, String value) {
         return PArray.append(array, PString.valueOf(value));
     }
-    
+
     public final PArray append(PArray array, double value) {
         return PArray.append(array, PNumber.valueOf(value));
     }
-    
+
     public final Object append(Object array, Object value) {
         return PApplet.append(array, value);
     }
@@ -841,15 +891,15 @@ public class DefaultCodeDelegate extends CodeDelegate {
     public final String[] splice(String[] list, String[] value, int index) {
         return PApplet.splice(list, value, index);
     }
-    
+
     public final PArray splice(PArray array, Value value, int index) {
         return PArray.insert(array, index, value);
     }
-    
+
     public final PArray splice(PArray array, String value, int index) {
         return PArray.insert(array, index, PString.valueOf(value));
     }
-    
+
     public final PArray splice(PArray array, double value, int index) {
         return PArray.insert(array, index, PNumber.valueOf(value));
     }
@@ -919,11 +969,11 @@ public class DefaultCodeDelegate extends CodeDelegate {
     public final PArray subset(PArray array, int start) {
         return subset(array, start, array.getSize() - start);
     }
-    
+
     public final PArray subset(PArray array, int start, int count) {
         return PArray.subset(array, start, count);
     }
-    
+
     public final Object subset(Object list, int start) {
         return PApplet.subset(list, start);
     }
@@ -962,7 +1012,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
     public final String[] concat(String[] a, String[] b) {
         return PApplet.concat(a, b);
     }
-    
+
     public final PArray concat(PArray a, PArray b) {
         return PArray.concat(a, b);
     }
