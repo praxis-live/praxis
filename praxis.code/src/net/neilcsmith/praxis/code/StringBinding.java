@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,8 +23,10 @@
 package net.neilcsmith.praxis.code;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 import net.neilcsmith.praxis.code.userapi.Type;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.types.PArray;
@@ -109,7 +111,7 @@ abstract class StringBinding extends PropertyControl.Binding {
     }
 
     static boolean isBindableFieldType(Class<?> type) {
-        return type == String.class;
+        return type == String.class || type.isEnum();
     }
 
     static StringBinding create(CodeConnector<?> connector, Field field) {
@@ -124,12 +126,21 @@ abstract class StringBinding extends PropertyControl.Binding {
             def = ann.def();
             template = ann.template();
         }
-        if (field.getType() == String.class) {
+        Class<?> type = field.getType();
+        if (type == String.class) {
             if (allowed != null && allowed.length > 0) {
                 return new StringField(field, allowed, def);
             } else {
                 return new StringField(field, mime, template, def);
             }
+        } else if (type.isEnum()) {
+            allowed = Stream.of(type.getEnumConstants())
+                    .map(Object::toString).toArray(String[]::new);
+            int defIdx = 0;
+            if (!def.isEmpty()) {
+                defIdx = Arrays.asList(allowed).indexOf(def);
+            }
+            return new EnumField(field, (Class<? extends Enum>) type, allowed, allowed[defIdx]);
         } else {
             if (allowed != null && allowed.length > 0) {
                 return new NoField(allowed, def);
@@ -192,6 +203,46 @@ abstract class StringBinding extends PropertyControl.Binding {
         @Override
         void set(PString value) throws Exception {
             field.set(delegate, value.toString());
+        }
+
+        @Override
+        public Value get() {
+            try {
+                return PString.valueOf(field.get(delegate));
+            } catch (Exception ex) {
+                return PString.EMPTY;
+            }
+        }
+        
+    }
+    private static class EnumField extends StringBinding {
+        
+        private final Field field;
+        private final Class<? extends Enum> type;
+        private CodeDelegate delegate;
+                
+        private EnumField(Field field,
+                Class<? extends Enum> type,
+                String[] allowed,
+                String def) {
+            super(allowed, def);
+            this.field = field;
+            this.type = type;
+        }
+
+        @Override
+        protected void attach(CodeContext<?> context) {
+            this.delegate = context.getDelegate();
+            try {
+                set(def);
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+
+        @Override
+        void set(PString value) throws Exception {
+            field.set(delegate, Enum.valueOf(type, value.toString()));
         }
 
         @Override
