@@ -25,9 +25,9 @@ package net.neilcsmith.praxis.code;
 import java.lang.reflect.Field;
 import net.neilcsmith.praxis.code.userapi.Property;
 import net.neilcsmith.praxis.code.userapi.Type;
-import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.types.PNumber;
+import net.neilcsmith.praxis.core.types.Value;
 
 /**
  *
@@ -54,7 +54,7 @@ abstract class NumberBinding extends PropertyControl.Binding {
     }
 
     @Override
-    public void set(long time, Argument value) throws Exception {
+    public void set(long time, Value value) throws Exception {
         PNumber n = PNumber.coerce(value);
         double d = n.value();
         if (d < min || d > max) {
@@ -87,7 +87,7 @@ abstract class NumberBinding extends PropertyControl.Binding {
     }
 
     @Override
-    public Argument getDefaultValue() {
+    public Value getDefaultValue() {
         return PNumber.valueOf(def);
     }
 
@@ -135,7 +135,7 @@ abstract class NumberBinding extends PropertyControl.Binding {
         }
 
         @Override
-        public Argument get() {
+        public Value get() {
             if (last.value() != value) {
                 last = PNumber.valueOf(value);
             }
@@ -202,7 +202,7 @@ abstract class NumberBinding extends PropertyControl.Binding {
         }
 
         @Override
-        public Argument get() {
+        public Value get() {
             double value = get(0);
             if (last.value() != value) {
                 last = PNumber.valueOf(value);
@@ -254,7 +254,7 @@ abstract class NumberBinding extends PropertyControl.Binding {
         }
 
         @Override
-        public Argument get() {
+        public Value get() {
             double value = get(0);
             if ((float)last.value() != value) {
                 last = PNumber.valueOf(value);

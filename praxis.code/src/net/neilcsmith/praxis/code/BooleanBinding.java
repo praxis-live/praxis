@@ -24,9 +24,9 @@ package net.neilcsmith.praxis.code;
 
 import java.lang.reflect.Field;
 import net.neilcsmith.praxis.code.userapi.Type;
-import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.types.PBoolean;
+import net.neilcsmith.praxis.core.types.Value;
 
 /**
  *
@@ -41,7 +41,7 @@ abstract class BooleanBinding extends PropertyControl.Binding {
     }
 
     @Override
-    public void set(long time, Argument value) throws Exception {
+    public void set(long time, Value value) throws Exception {
         set(PBoolean.coerce(value));
     }
 
@@ -58,7 +58,7 @@ abstract class BooleanBinding extends PropertyControl.Binding {
     }
 
     @Override
-    public Argument getDefaultValue() {
+    public Value getDefaultValue() {
         return def;
     }
 
@@ -94,7 +94,7 @@ abstract class BooleanBinding extends PropertyControl.Binding {
         }
 
         @Override
-        public Argument get() {
+        public Value get() {
             return value;
         }
 
@@ -126,7 +126,7 @@ abstract class BooleanBinding extends PropertyControl.Binding {
         }
 
         @Override
-        public Argument get() {
+        public Value get() {
             try {
                 return PBoolean.valueOf(field.getBoolean(delegate));
             } catch (Exception ex) {

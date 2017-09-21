@@ -23,14 +23,14 @@
 package net.neilcsmith.praxis.code.userapi;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import net.neilcsmith.praxis.code.CodeContext;
-import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.core.types.PNumber;
+import net.neilcsmith.praxis.core.types.Value;
 import net.neilcsmith.praxis.logging.LogLevel;
 import net.neilcsmith.praxis.util.ArrayUtils;
 
@@ -66,15 +66,15 @@ public abstract class Property {
         }
     }
 
-    protected abstract void setImpl(long time, Argument arg) throws Exception;
+    protected abstract void setImpl(long time, Value arg) throws Exception;
 
     protected abstract void setImpl(long time, double value) throws Exception;
 
-    protected abstract Argument getImpl();
+    protected abstract Value getImpl();
 
     protected abstract double getImpl(double def);
 
-    public Argument get() {
+    public Value get() {
         return getImpl();
     }
 
@@ -99,14 +99,10 @@ public abstract class Property {
     }
 
     public boolean getBoolean(boolean def) {
-        try {
-            return PBoolean.coerce(get()).value();
-        } catch (ArgumentFormatException ex) {
-            return def;
-        }
+        return PBoolean.from(get()).orElse(def ? PBoolean.TRUE : PBoolean.FALSE).value();
     }
 
-    public Property set(Argument arg) {
+    public Property set(Value arg) {
         if (arg == null) {
             throw new NullPointerException();
         }
@@ -147,15 +143,15 @@ public abstract class Property {
     }
 
     public <T> Property linkAs(
-            Function<Argument, T> converter,
+            Function<Value, T> converter,
             Consumer<T> consumer) {
-        ArgumentLink al = new ArgumentLink();
+        ValueLink al = new ValueLink();
         al.map(converter).link(consumer);
         return this;
     }
 
     public <T> Property linkAs(
-            Function<Argument, T> converter,
+            Function<Value, T> converter,
             Consumer<T>... consumers) {
         for (Consumer<T> consumer : consumers) {
             linkAs(converter, consumer);
@@ -163,9 +159,17 @@ public abstract class Property {
         return this;
     }
 
-    public <T> Linkable<T> valuesAs(Function<Argument, T> converter) {
-        return new ArgumentLink().map(converter);
+    public <T> Linkable<T> valuesAs(Function<Value, T> converter) {
+        return new ValueLink().map(converter);
     }
+    
+    public <T extends Value> Linkable<T> valuesAs(Class<T> type) {
+        Value.Type.Converter<T> converter = Value.Type.findConverter(type);
+        return new ValueLink()
+                .map(v -> converter.from(v))
+                .filter(Optional::isPresent)
+                .map(Optional::get);
+    } 
 
     public Property clearLinks() {
         links = new BaseLink[0];
@@ -199,7 +203,7 @@ public abstract class Property {
         }
     }
 
-    protected void updateLinks(Argument value) {
+    protected void updateLinks(Value value) {
         for (BaseLink link : links) {
             link.update(value);
         }
@@ -240,7 +244,7 @@ public abstract class Property {
 
         void update(double value);
 
-        void update(Argument value);
+        void update(Value value);
 
     }
 
@@ -268,18 +272,18 @@ public abstract class Property {
         }
 
         @Override
-        public void update(Argument value) {
+        public void update(Value value) {
             PNumber.from(value).ifPresent((pn) -> consumer.accept(pn.value()));
         }
 
     }
 
-    private class ArgumentLink implements BaseLink, Linkable<Argument> {
+    private class ValueLink implements BaseLink, Linkable<Value> {
 
-        private Consumer<Argument> consumer;
+        private Consumer<Value> consumer;
 
         @Override
-        public void link(Consumer<Argument> consumer) {
+        public void link(Consumer<Value> consumer) {
             if (this.consumer != null) {
                 throw new IllegalStateException("Cannot link multiple consumers in one chain");
             }
@@ -294,7 +298,7 @@ public abstract class Property {
         }
 
         @Override
-        public void update(Argument value) {
+        public void update(Value value) {
             try {
                 consumer.accept(value);
             } catch (Exception ex) {

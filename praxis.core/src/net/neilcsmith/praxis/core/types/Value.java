@@ -106,8 +106,12 @@ public abstract class Value extends Argument {
         }
 
         @SuppressWarnings("unchecked")
-        public static <T extends Value> Optional<Converter<T>> findConverter(Class<T> type) {
-            return Optional.ofNullable((Converter<T>) converters.get(type));
+        public static <T extends Value> Converter<T> findConverter(Class<T> type) {
+            Converter<T> converter = (Converter<T>) converters.get(type);
+            if (converter == null) {
+                throw new IllegalArgumentException("Unregistered Value type : " + type.getName());
+            }
+            return converter;
         }
 
         private final static Map<Class<?>, Converter<?>> converters
@@ -118,6 +122,9 @@ public abstract class Value extends Argument {
         }
 
         static {
+            
+            registerConverter(Value.class, v -> Optional.of(v));
+            
             registerConverter(PArray.class, PArray::from);
             registerConverter(PBoolean.class, PBoolean::from);
             registerConverter(PBytes.class, PBytes::from);

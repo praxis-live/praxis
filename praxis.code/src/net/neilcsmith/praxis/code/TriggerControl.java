@@ -73,6 +73,7 @@ public class TriggerControl extends Trigger implements Control {
 
     protected void trigger(long time) {
         if (context.checkActive()) {
+            context.update(time);
             try {
                 binding.trigger(time);
             } catch (Exception ex) {

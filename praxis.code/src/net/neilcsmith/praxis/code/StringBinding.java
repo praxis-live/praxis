@@ -26,12 +26,12 @@ import java.lang.reflect.Field;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import net.neilcsmith.praxis.code.userapi.Type;
-import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.core.types.Value;
 
 /**
  *
@@ -70,7 +70,7 @@ abstract class StringBinding extends PropertyControl.Binding {
     }
 
     @Override
-    public void set(long time, Argument value) throws Exception {
+    public void set(long time, Value value) throws Exception {
         PString pstr = PString.coerce(value);
         if (allowed == null || allowed.contains(pstr)) {
             set(pstr);
@@ -104,7 +104,7 @@ abstract class StringBinding extends PropertyControl.Binding {
     }
 
     @Override
-    public Argument getDefaultValue() {
+    public Value getDefaultValue() {
         return PString.valueOf(def);
     }
 
@@ -158,7 +158,7 @@ abstract class StringBinding extends PropertyControl.Binding {
         }
 
         @Override
-        public Argument get() {
+        public Value get() {
             return value;
         }
         
@@ -195,7 +195,7 @@ abstract class StringBinding extends PropertyControl.Binding {
         }
 
         @Override
-        public Argument get() {
+        public Value get() {
             try {
                 return PString.valueOf(field.get(delegate));
             } catch (Exception ex) {

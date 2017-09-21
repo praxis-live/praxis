@@ -33,7 +33,6 @@ import net.neilcsmith.praxis.code.userapi.ReadOnly;
 import net.neilcsmith.praxis.code.userapi.Transient;
 import net.neilcsmith.praxis.code.userapi.Type;
 import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.Control;
@@ -45,6 +44,7 @@ import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PNumber;
 import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.core.types.Value;
 import net.neilcsmith.praxis.logging.LogLevel;
 
 /**
@@ -77,7 +77,7 @@ public class PropertyControl extends Property implements Control {
     }
 
     @Override
-    protected Argument getImpl() {
+    protected Value getImpl() {
         return binding.get();
     }
 
@@ -87,7 +87,7 @@ public class PropertyControl extends Property implements Control {
     }
 
     @Override
-    protected void setImpl(long time, Argument arg) throws Exception {
+    protected void setImpl(long time, Value arg) throws Exception {
         binding.set(time, arg);
         setLatest(time);
         if (hasLinks()) {
@@ -148,7 +148,7 @@ public class PropertyControl extends Property implements Control {
                 if (isLatest(time)) {
                     finishAnimating();
                     try {
-                        setImpl(time, args.get(0));
+                        setImpl(time, (Value) args.get(0));
                         checkInvoke(time, false);
                     } catch (Exception ex) {
                         checkInvoke(time, true);
@@ -163,7 +163,7 @@ public class PropertyControl extends Property implements Control {
                 router.route(Call.createReturnCall(call, get()));
             }
         } else {
-//            throw new IllegalArgumentException();
+//            throw new IllegalValueException();
         }
     }
 
@@ -200,46 +200,42 @@ public class PropertyControl extends Property implements Control {
             // no op hook
         }
 
-        public abstract void set(long time, Argument value) throws Exception;
+        public abstract void set(long time, Value value) throws Exception;
 
         public abstract void set(long time, double value) throws Exception;
 
-        public abstract Argument get();
+        public abstract Value get();
 
         public double get(double def) {
-            try {
-                return PNumber.coerce(get()).value();
-            } catch (ArgumentFormatException ex) {
-                return def;
-            }
+            return PNumber.from(get()).orElse(PNumber.valueOf(def)).value();
         }
 
         public abstract ArgumentInfo getArgumentInfo();
 
-        public abstract Argument getDefaultValue();
+        public abstract Value getDefaultValue();
 
     }
 
     private static class DefaultBinding extends Binding {
 
         private final ArgumentInfo argInfo;
-        private final Argument def;
+        private final Value def;
 
-        private Argument argValue;
+        private Value argValue;
         private double dblValue;
 
         private DefaultBinding() {
-            this(Argument.info(), PString.EMPTY);
+            this(Value.info(), PString.EMPTY);
         }
 
-        private DefaultBinding(ArgumentInfo argInfo, Argument def) {
+        private DefaultBinding(ArgumentInfo argInfo, Value def) {
             this.argInfo = argInfo;
             this.def = def;
             this.argValue = def;
         }
 
         @Override
-        public void set(long time, Argument value) throws Exception {
+        public void set(long time, Value value) throws Exception {
             this.argValue = value;
         }
 
@@ -250,7 +246,7 @@ public class PropertyControl extends Property implements Control {
         }
 
         @Override
-        public Argument get() {
+        public Value get() {
             if (argValue == null) {
                 return PNumber.valueOf(dblValue);
             } else {
@@ -273,7 +269,7 @@ public class PropertyControl extends Property implements Control {
         }
 
         @Override
-        public Argument getDefaultValue() {
+        public Value getDefaultValue() {
             return def;
         }
 
@@ -374,7 +370,7 @@ public class PropertyControl extends Property implements Control {
             } else {
                 info = ControlInfo.createPropertyInfo(
                         new ArgumentInfo[]{binding.getArgumentInfo()},
-                        new Argument[]{binding.getDefaultValue()},
+                        new Value[]{binding.getDefaultValue()},
                         field.isAnnotationPresent(Transient.class)
                                 ? PMap.create(ControlInfo.KEY_TRANSIENT, true)
                                 : PMap.EMPTY);
@@ -496,7 +492,7 @@ public class PropertyControl extends Property implements Control {
         @Override
         public void receive(long time, Argument value) {
             try {
-                control.setImpl(time, value);
+                control.setImpl(time, (Value) value);
                 control.checkInvoke(time, false);
             } catch (Exception ex) {
                 control.checkInvoke(time, true);

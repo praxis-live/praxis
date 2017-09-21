@@ -31,10 +31,10 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.types.PBytes;
 import net.neilcsmith.praxis.core.types.PMap;
+import net.neilcsmith.praxis.core.types.Value;
 import net.neilcsmith.praxis.logging.LogLevel;
 
 /**
@@ -44,7 +44,7 @@ import net.neilcsmith.praxis.logging.LogLevel;
 abstract class BytesBinding extends PropertyControl.Binding {
 
     @Override
-    public void set(long time, Argument value) throws Exception {
+    public void set(long time, Value value) throws Exception {
         Optional<PBytes> bytes = PBytes.from(value);
         if (bytes.isPresent()) {
             set(bytes.get());
@@ -66,7 +66,7 @@ abstract class BytesBinding extends PropertyControl.Binding {
     }
 
     @Override
-    public Argument getDefaultValue() {
+    public Value getDefaultValue() {
         return PBytes.EMPTY;
     }
 
@@ -143,7 +143,7 @@ abstract class BytesBinding extends PropertyControl.Binding {
         }
 
         @Override
-        public Argument get() {
+        public Value get() {
             try {
                 return (PBytes) field.get(delegate);
             } catch (Exception ex) {
@@ -186,7 +186,7 @@ abstract class BytesBinding extends PropertyControl.Binding {
         }
 
         @Override
-        public Argument get() {
+        public Value get() {
             try {
                 PBytes.OutputStream bos = new PBytes.OutputStream();
                 ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -231,7 +231,7 @@ abstract class BytesBinding extends PropertyControl.Binding {
         }
 
         @Override
-        public Argument get() {
+        public Value get() {
             try {
                 List<?> list = (List<?>) field.get(delegate);
                 if (list.isEmpty()) {
