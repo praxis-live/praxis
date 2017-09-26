@@ -684,6 +684,14 @@ public class P3DCodeDelegate extends DefaultCodeDelegate {
         pg.fill(v1, v2, v3, alpha);
     }
 
+    public void colorMode(Constants.ColorMode mode) {
+        pg.colorMode(mode);
+    }
+
+    public void colorMode(Constants.ColorMode mode, double max) {
+        pg.colorMode(mode, max);
+    }
+    
     public void background(double gray) {
         pg.background(gray);
     }

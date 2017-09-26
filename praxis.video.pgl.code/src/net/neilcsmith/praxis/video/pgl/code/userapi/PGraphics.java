@@ -571,7 +571,13 @@ abstract class PGraphics /*extends PImage*/ {
         g.fill((float)v1, (float)v2, (float)v3, (float)alpha);
     }
 
-   
+    public void colorMode(Constants.ColorMode mode) {
+        g.colorMode(mode.unwrap());
+    }
+
+    public void colorMode(Constants.ColorMode mode, double max) {
+        g.colorMode(mode.unwrap(), (float) max);
+    }
 
     public void background(double gray) {
         g.background((float)gray);

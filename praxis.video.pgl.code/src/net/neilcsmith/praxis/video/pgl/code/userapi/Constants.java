@@ -73,6 +73,9 @@ public class Constants {
     public final static ShapeType PATH = ShapeType.Path;
     public final static ShapeType GEOMETRY = ShapeType.Geometry;
     
+    public final static ColorMode RGB = ColorMode.RGB;
+    public final static ColorMode HSB = ColorMode.HSB;
+    
     public final static String DEFAULT_VERTEX_SHADER = 
             ShaderConstants.DEFAULT_VERTEX_SHADER;
     public final static String DEFAULT_FRAGMENT_SHADER = 
@@ -193,6 +196,21 @@ public class Constants {
         private final int value;
         
         private ShapeType(int value) {
+            this.value = value;
+        }
+        
+        public int unwrap() {
+            return value;
+        }
+    }
+    
+    public static enum ColorMode {
+        RGB(PConstants.RGB),
+        HSB(PConstants.HSB);
+        
+        private final int value;
+        
+        private ColorMode(int value) {
             this.value = value;
         }
         
