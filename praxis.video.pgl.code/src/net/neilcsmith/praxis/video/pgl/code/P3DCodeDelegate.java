@@ -112,6 +112,10 @@ public class P3DCodeDelegate extends DefaultCodeDelegate {
         pg.frustum(left, right, bottom, top, near, far);
     }
 
+    public void hint(Constants.Hint hint) {
+        pg.hint(hint);
+    }
+    
     public double modelX(double x, double y, double z) {
         return pg.modelX(x, y, z);
     }
