@@ -1,4 +1,5 @@
 /*
+  Copyright (c) 2017 Neil C Smith  
 
   Derived from the Processing project - http://processing.org
 
@@ -22,7 +23,11 @@
  */
 package net.neilcsmith.praxis.code.userapi;
 
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.Serializable;
+import java.util.OptionalInt;
+import net.neilcsmith.praxis.core.DataObject;
 
 /**
  * ( begin auto-generated from PVector.xml )
@@ -65,7 +70,7 @@ import java.io.Serializable;
  *
  * @webref math
  */
-public class PVector implements Serializable {
+public class PVector implements Serializable, DataObject {
 
     /**
      * ( begin auto-generated from PVector_x.xml )
@@ -1066,6 +1071,27 @@ public class PVector implements Serializable {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void writeTo(DataOutput out) throws Exception {
+        out.writeDouble(x);
+        out.writeDouble(y);
+        out.writeDouble(z);
+    }
+
+    @Override
+    public void readFrom(DataInput in) throws Exception {
+        x = in.readDouble();
+        y = in.readDouble();
+        z = in.readDouble();
+    }
+
+    private final static OptionalInt SIZE = OptionalInt.of(3 * Double.BYTES);
+    
+    @Override
+    public OptionalInt size() {
+        return SIZE;
     }
 
 
