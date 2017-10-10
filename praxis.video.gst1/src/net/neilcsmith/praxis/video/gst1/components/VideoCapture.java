@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -49,7 +49,8 @@ public class VideoCapture extends AbstractVideoComponent {
     private final static List<Argument> suggestedValues;
 
     static {
-        List<Argument> list = new ArrayList<>(4);
+        List<Argument> list = new ArrayList<>(5);
+        list.add(PString.valueOf("autovideosrc"));
         list.add(PString.valueOf("1"));
         list.add(PString.valueOf("2"));
         list.add(PString.valueOf("3"));
