@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -30,7 +30,7 @@ import net.neilcsmith.praxis.core.ArgumentFormatException;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public final class PError extends Argument {
+public final class PError extends Value {
 
     private final static String ERROR_PREFIX = "ERR:";
 

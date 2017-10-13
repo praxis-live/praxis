@@ -19,8 +19,8 @@
                 <package>org.jaudiolibs.audioservers.javasound</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/audioservers-javasound-1.1.1.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/audioservers-javasound-1.1.1.jar</binary-origin>
+                <runtime-relative-path>ext/audioservers-javasound-1.2.0.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/audioservers-javasound-1.2.0.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

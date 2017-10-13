@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -28,6 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.types.PMap;
+import net.neilcsmith.praxis.core.types.Value;
 
 /**
  * Address of a Component
@@ -41,7 +42,7 @@ import net.neilcsmith.praxis.core.types.PMap;
  *
  * @author Neil C Smith
  */
-public final class ComponentAddress extends Argument {
+public final class ComponentAddress extends Value {
     
     private static final String ADDRESS_REGEX = "\\G/([_\\-\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*)";
     private static final String ID_REGEX = "[_\\-\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*";

@@ -264,7 +264,9 @@ public class PGLPlayer implements Player {
             if (pglSurface == null) {
                 pglSurface = context.createSurface(surfaceWidth, surfaceHeight, false);
             }
-            noCursor();
+            if (!wHints.isShowCursor()) {
+                noCursor();
+            }
             frameRate((float) fps);
         }
 

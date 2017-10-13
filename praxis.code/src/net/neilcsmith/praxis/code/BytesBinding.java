@@ -31,10 +31,10 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.info.ArgumentInfo;
 import net.neilcsmith.praxis.core.types.PBytes;
 import net.neilcsmith.praxis.core.types.PMap;
+import net.neilcsmith.praxis.core.types.Value;
 import net.neilcsmith.praxis.logging.LogLevel;
 
 /**
@@ -44,7 +44,7 @@ import net.neilcsmith.praxis.logging.LogLevel;
 abstract class BytesBinding extends PropertyControl.Binding {
 
     @Override
-    public void set(long time, Argument value) throws Exception {
+    public void set(long time, Value value) throws Exception {
         Optional<PBytes> bytes = PBytes.from(value);
         if (bytes.isPresent()) {
             set(bytes.get());
@@ -66,17 +66,18 @@ abstract class BytesBinding extends PropertyControl.Binding {
     }
 
     @Override
-    public Argument getDefaultValue() {
+    public Value getDefaultValue() {
         return PBytes.EMPTY;
     }
 
     static boolean isBindableFieldType(Class<?> type) {
-        return type == List.class || Serializable.class.isAssignableFrom(type);
+        return type == PBytes.class || type == List.class || Serializable.class.isAssignableFrom(type);
     }
 
     static BytesBinding create(CodeConnector<?> connector, Field field) {
-
-       if (isSerializableList(field.getGenericType())) {
+       if (field.getType() == PBytes.class) {
+           return new PBytesField(field);
+       }else if (isSerializableList(field.getGenericType())) {
            return new ListField(field);
        } else if (isSerializableType(field.getGenericType())) {
            return new SerializableField(field);
@@ -117,6 +118,40 @@ abstract class BytesBinding extends PropertyControl.Binding {
         return false;
     }
     
+    private static class PBytesField extends BytesBinding {
+        
+        private final Field field;
+        private CodeDelegate delegate;
+        
+        private PBytesField(Field field) {
+            this.field = field;
+        }
+
+        @Override
+        protected void attach(CodeContext<?> context) {
+            this.delegate = context.getDelegate();
+            try {
+                set(PBytes.EMPTY);
+            } catch (Exception ex) {
+                // ignore
+            }
+        }
+
+        @Override
+        void set(PBytes value) throws Exception {
+            field.set(delegate, value);
+        }
+
+        @Override
+        public Value get() {
+            try {
+                return (PBytes) field.get(delegate);
+            } catch (Exception ex) {
+                return PBytes.EMPTY;
+            }
+        }
+        
+    }
 
     private static class SerializableField extends BytesBinding {
 
@@ -151,7 +186,7 @@ abstract class BytesBinding extends PropertyControl.Binding {
         }
 
         @Override
-        public Argument get() {
+        public Value get() {
             try {
                 PBytes.OutputStream bos = new PBytes.OutputStream();
                 ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -196,7 +231,7 @@ abstract class BytesBinding extends PropertyControl.Binding {
         }
 
         @Override
-        public Argument get() {
+        public Value get() {
             try {
                 List<?> list = (List<?>) field.get(delegate);
                 if (list.isEmpty()) {

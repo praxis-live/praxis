@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -92,6 +92,7 @@ public class VideoOutput extends AbstractComponent {
                         PNumber.valueOf(180),
                         PNumber.valueOf(270))
                 .build();
+        
         registerControl("device", device);
         registerControl("width", width);
         registerControl("height", height);
@@ -103,6 +104,8 @@ public class VideoOutput extends AbstractComponent {
                 BooleanProperty.create(new AlwaysOnTopBinding(), false));
         registerControl("undecorated",
                 BooleanProperty.create(new UndecoratedBinding(), false));
+        registerControl("show-cursor",
+                BooleanProperty.create(new ShowCursorBinding(), false));
         
     }
 
@@ -187,6 +190,20 @@ public class VideoOutput extends AbstractComponent {
             return wHints.isUndecorated();
         }
 
+    }
+    
+    private class ShowCursorBinding implements BooleanProperty.Binding {
+
+        @Override
+        public void setBoundValue(long time, boolean value) {
+            wHints.setShowCursor(value);
+        }
+
+        @Override
+        public boolean getBoundValue() {
+            return wHints.isShowCursor();
+        }
+        
     }
 
     private class OutputClientImpl extends VideoContext.OutputClient {

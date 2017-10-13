@@ -27,6 +27,7 @@ import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.core.types.Value;
 
 /**
  * Info object for an Argument, usually used to define the valid input and
@@ -37,7 +38,7 @@ import net.neilcsmith.praxis.core.types.PString;
  *
  * @author Neil C Smith
  */
-public final class ArgumentInfo extends Argument {
+public final class ArgumentInfo extends Value {
 
     public final static String KEY_ALLOWED_VALUES = "allowed-values";
     public final static String KEY_SUGGESTED_VALUES = "suggested-values";

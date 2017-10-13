@@ -23,14 +23,14 @@
 package net.neilcsmith.praxis.code.userapi;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import net.neilcsmith.praxis.code.CodeContext;
-import net.neilcsmith.praxis.core.Argument;
-import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.core.types.PNumber;
+import net.neilcsmith.praxis.core.types.Value;
 import net.neilcsmith.praxis.logging.LogLevel;
 import net.neilcsmith.praxis.util.ArrayUtils;
 
@@ -66,15 +66,15 @@ public abstract class Property {
         }
     }
 
-    protected abstract void setImpl(long time, Argument arg) throws Exception;
+    protected abstract void setImpl(long time, Value arg) throws Exception;
 
     protected abstract void setImpl(long time, double value) throws Exception;
 
-    protected abstract Argument getImpl();
+    protected abstract Value getImpl();
 
     protected abstract double getImpl(double def);
 
-    public Argument get() {
+    public Value get() {
         return getImpl();
     }
 
@@ -99,14 +99,10 @@ public abstract class Property {
     }
 
     public boolean getBoolean(boolean def) {
-        try {
-            return PBoolean.coerce(get()).value();
-        } catch (ArgumentFormatException ex) {
-            return def;
-        }
+        return PBoolean.from(get()).orElse(def ? PBoolean.TRUE : PBoolean.FALSE).value();
     }
 
-    public Property set(Argument arg) {
+    public Property set(Value arg) {
         if (arg == null) {
             throw new NullPointerException();
         }
@@ -141,32 +137,40 @@ public abstract class Property {
         }
         return this;
     }
-    
+
     public Linkable.Double values() {
         return new DoubleLink();
     }
 
     public <T> Property linkAs(
-            Function<Argument, T> converter,
+            Function<Value, T> converter,
             Consumer<T> consumer) {
-        ArgumentLink al = new ArgumentLink();
+        ValueLink al = new ValueLink();
         al.map(converter).link(consumer);
         return this;
     }
 
     public <T> Property linkAs(
-            Function<Argument, T> converter,
-            Consumer<T> ... consumers) {
+            Function<Value, T> converter,
+            Consumer<T>... consumers) {
         for (Consumer<T> consumer : consumers) {
             linkAs(converter, consumer);
         }
         return this;
     }
-    
-    public <T> Linkable<T> valuesAs(Function<Argument, T> converter) {
-        return new ArgumentLink().map(converter);
+
+    public <T> Linkable<T> valuesAs(Function<Value, T> converter) {
+        return new ValueLink().map(converter);
     }
     
+    public <T extends Value> Linkable<T> valuesAs(Class<T> type) {
+        Value.Type.Converter<T> converter = Value.Type.findConverter(type);
+        return new ValueLink()
+                .map(v -> converter.from(v))
+                .filter(Optional::isPresent)
+                .map(Optional::get);
+    } 
+
     public Property clearLinks() {
         links = new BaseLink[0];
         return this;
@@ -199,14 +203,21 @@ public abstract class Property {
         }
     }
 
-    protected void updateLinks(Argument value) {
+    protected void updateLinks(Value value) {
         for (BaseLink link : links) {
             link.update(value);
         }
     }
-    
+
     protected boolean hasLinks() {
         return links.length > 0;
+    }
+
+    protected void reset(boolean full) {
+        clearLinks();
+        if (animator != null) {
+            animator.onDoneConsumer = null;
+        }
     }
 
     private void startClock() {
@@ -233,7 +244,7 @@ public abstract class Property {
 
         void update(double value);
 
-        void update(Argument value);
+        void update(Value value);
 
     }
 
@@ -250,7 +261,7 @@ public abstract class Property {
             update(getDouble());
             links = ArrayUtils.add(links, this);
         }
-        
+
         @Override
         public void update(double value) {
             try {
@@ -261,18 +272,18 @@ public abstract class Property {
         }
 
         @Override
-        public void update(Argument value) {
+        public void update(Value value) {
             PNumber.from(value).ifPresent((pn) -> consumer.accept(pn.value()));
         }
 
     }
 
-    private class ArgumentLink implements BaseLink, Linkable<Argument> {
+    private class ValueLink implements BaseLink, Linkable<Value> {
 
-        private Consumer<Argument> consumer;
+        private Consumer<Value> consumer;
 
         @Override
-        public void link(Consumer<Argument> consumer) {
+        public void link(Consumer<Value> consumer) {
             if (this.consumer != null) {
                 throw new IllegalStateException("Cannot link multiple consumers in one chain");
             }
@@ -280,14 +291,14 @@ public abstract class Property {
             update(get());
             links = ArrayUtils.add(links, this);
         }
-        
+
         @Override
         public void update(double value) {
             update(PNumber.valueOf(value));
         }
 
         @Override
-        public void update(Argument value) {
+        public void update(Value value) {
             try {
                 consumer.accept(value);
             } catch (Exception ex) {
@@ -311,6 +322,9 @@ public abstract class Property {
         private double fromValue;
         private long fromTime;
         private boolean animating;
+
+        private Consumer<Property> onDoneConsumer;
+        private long overrun;
 
         private Animator(Property p) {
             this.property = p;
@@ -351,6 +365,7 @@ public abstract class Property {
                 for (int i = 0; i < in.length; i++) {
                     this.in[i] = (long) (in[i] * TO_NANO);
                 }
+                this.in[0] = Math.max(0, this.in[0] - overrun);
             }
             return this;
         }
@@ -395,6 +410,14 @@ public abstract class Property {
             return animating;
         }
 
+        public Animator whenDone(Consumer<Property> whenDoneConsumer) {
+            this.onDoneConsumer = whenDoneConsumer;
+            if (!animating) {
+                onDoneConsumer.accept(property);
+            }
+            return this;
+        }
+
         private void tick() {
             if (!animating) {
                 assert false;
@@ -413,7 +436,7 @@ public abstract class Property {
                 if (proportion >= 1) {
                     index++;
                     if (index >= to.length) {
-                        stop();
+                        finish(currentTime - (fromTime + duration));
                     } else {
                         fromValue = toValue;
                         fromTime += duration;
@@ -428,9 +451,22 @@ public abstract class Property {
 //                    p.setImpl(fromTime, fromValue); ???
                 }
             } catch (Exception exception) {
-                stop();
+                finish(0);
             }
 
+        }
+
+        private void finish(long overrun) {
+            index = 0;
+            animating = false;
+            this.overrun = overrun;
+            if (onDoneConsumer != null) {
+                onDoneConsumer.accept(property);
+            }
+            this.overrun = 0;
+            if (!animating) {
+                property.stopClock();
+            }
         }
 
     }

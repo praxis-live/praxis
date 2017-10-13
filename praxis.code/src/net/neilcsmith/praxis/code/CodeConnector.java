@@ -237,6 +237,14 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         if (trig != null && analyseTriggerField(trig, field)) {
             return;
         }
+        In in = field.getAnnotation(In.class);
+        if (in != null && analyseInputField(in, field)) {
+            return;
+        }
+        AuxIn auxIn = field.getAnnotation(AuxIn.class);
+        if (auxIn != null && analyseAuxInputField(auxIn, field)) {
+            return;
+        }
         Out out = field.getAnnotation(Out.class);
         if (out != null && analyseOutputField(out, field)) {
             return;
@@ -263,6 +271,26 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         AuxIn aux = method.getAnnotation(AuxIn.class);
         if (aux != null && analyseAuxInputMethod(aux, method)) {
             return;
+        }
+    }
+    
+    private boolean analyseInputField(In ann, Field field) {
+        InputImpl.Descriptor odsc = InputImpl.createDescriptor(this, ann, field);
+        if (odsc != null) {
+            addPort(odsc);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean analyseAuxInputField(AuxIn ann, Field field) {
+        InputImpl.Descriptor odsc = InputImpl.createDescriptor(this, ann, field);
+        if (odsc != null) {
+            addPort(odsc);
+            return true;
+        } else {
+            return false;
         }
     }
 

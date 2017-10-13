@@ -23,12 +23,13 @@ package net.neilcsmith.praxis.core;
 
 import java.util.Optional;
 import java.util.regex.Pattern;
+import net.neilcsmith.praxis.core.types.Value;
 
 /**
  *
  * @author Neil C Smith
  */
-public class ControlAddress extends Argument {
+public class ControlAddress extends Value {
 
     public static final String SEPARATOR = ".";
     private static final String SEP_REGEX = "\\.";

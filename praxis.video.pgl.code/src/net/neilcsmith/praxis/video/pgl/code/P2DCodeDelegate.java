@@ -1,3 +1,25 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright 2017 Neil C Smith.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 3 only, as
+ * published by the Free Software Foundation.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 3 for more details.
+ *
+ * You should have received a copy of the GNU General Public License version 3
+ * along with this work; if not, see http://www.gnu.org/licenses/
+ *
+ *
+ * Please visit http://neilcsmith.net if you need additional information or
+ * have any questions.
+ *
+ */
 package net.neilcsmith.praxis.video.pgl.code;
 
 import net.neilcsmith.praxis.code.DefaultCodeDelegate;
@@ -7,18 +29,31 @@ import net.neilcsmith.praxis.video.pgl.code.userapi.PGraphics2D;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PShader;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PShape;
+import processing.core.PApplet;
 
 public class P2DCodeDelegate extends DefaultCodeDelegate {
 
     public int width;
     public int height;
 
+    public int mouseX, mouseY, pmouseX, pmouseY, keyCode;
+    public char key;
+    public boolean keyPressed, mousePressed;
+    
     PGraphics2D pg;
 
-    void setupGraphics(PGraphics2D pg, int width, int height) {
+    void configure(PApplet parent, PGraphics2D pg, int width, int height) {
         this.pg = pg;
         this.width = width;
         this.height = height;
+        this.mouseX = parent.mouseX;
+        this.mouseY = parent.mouseY;
+        this.pmouseX = parent.pmouseX;
+        this.pmouseY = parent.pmouseY;
+        this.keyCode = parent.keyCode;
+        this.key = parent.key;
+        this.keyPressed = parent.keyPressed;
+        this.mousePressed = parent.mousePressed;
     }
 
     public void setup() {
@@ -85,6 +120,10 @@ public class P2DCodeDelegate extends DefaultCodeDelegate {
         return pg.createShape(type);
     }
 
+    public PShape createShape(PShape source) {
+        return pg.createShape(source);
+    }
+    
     public void clip(double a, double b, double c, double d) {
         pg.clip(a, b, c, d);
     }
@@ -435,6 +474,14 @@ public class P2DCodeDelegate extends DefaultCodeDelegate {
 
     public void fill(double v1, double v2, double v3, double alpha) {
         pg.fill(v1, v2, v3, alpha);
+    }
+
+    public void colorMode(Constants.ColorMode mode) {
+        pg.colorMode(mode);
+    }
+
+    public void colorMode(Constants.ColorMode mode, double max) {
+        pg.colorMode(mode, max);
     }
 
     public void background(double gray) {

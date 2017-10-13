@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -25,12 +25,21 @@ import java.util.Arrays;
 import java.util.Random;
 import net.neilcsmith.praxis.code.userapi.Constants;
 import net.neilcsmith.praxis.code.userapi.Property;
+import net.neilcsmith.praxis.core.Component;
+import net.neilcsmith.praxis.core.Container;
 import net.neilcsmith.praxis.core.Control;
+import net.neilcsmith.praxis.core.ControlPort;
+import net.neilcsmith.praxis.core.Port;
+import net.neilcsmith.praxis.core.types.PArray;
+import net.neilcsmith.praxis.core.types.PBoolean;
+import net.neilcsmith.praxis.core.types.PNumber;
+import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.core.types.Value;
 import net.neilcsmith.praxis.logging.LogLevel;
 import processing.core.PApplet;
 
 public class DefaultCodeDelegate extends CodeDelegate {
-    
+
     final static String[] IMPORTS = {
         "java.util.*",
         "net.neilcsmith.praxis.core.Argument",
@@ -49,31 +58,101 @@ public class DefaultCodeDelegate extends CodeDelegate {
     public final void log(LogLevel level, String msg) {
         getContext().getLog().log(level, msg);
     }
-    
+
     public final void log(LogLevel level, Exception ex) {
         getContext().getLog().log(level, ex);
     }
-    
+
     public final void log(LogLevel level, Exception ex, String msg) {
         getContext().getLog().log(level, ex, msg);
     }
-    
+
     public final void log(LogLevel level, Class<? extends Exception> type, String msg) {
         getContext().getLog().log(level, type, msg);
     }
-    
+
     public final boolean isLoggable(LogLevel level) {
         return getContext().getLogLevel().isLoggable(level);
     }
-    
+
+    public final void transmit(String componentID, String portID, String value) {
+        this.transmit(componentID, portID, PString.valueOf(value));
+    }
+
+    public final void transmit(String componentID, String portID, Value value) {
+        ControlPort.Input port = findPort(componentID, portID);
+        if (port == null) {
+            log(LogLevel.ERROR, "Can't find an input port at " + componentID + "!" + portID);
+        } else {
+            try {
+                port.receive(time(), value);
+            } catch (Exception ex) {
+                log(LogLevel.ERROR, ex);
+            }
+        }
+    }
+
+    public final void transmit(String componentID, String portID, double value) {
+        ControlPort.Input port = findPort(componentID, portID);
+        if (port == null) {
+            log(LogLevel.ERROR, "Can't find an input port at " + componentID + "!" + portID);
+        } else {
+            try {
+                port.receive(time(), value);
+            } catch (Exception ex) {
+                log(LogLevel.ERROR, ex);
+            }
+        }
+    }
+
+    private ControlPort.Input findPort(String cmp, String port) {
+        Component thisCmp = getContext().getComponent();
+        Container parent = thisCmp.getParent();
+        if (parent == null) {
+            return null;
+        }
+        Component thatCmp = parent.getChild(cmp);
+        if (thatCmp == null) {
+            return null;
+        }
+        Port thatPort = thatCmp.getPort(port);
+        if (thatPort instanceof ControlPort.Input) {
+            return (ControlPort.Input) thatPort;
+        } else {
+            return null;
+        }
+    }
+
     public final long time() {
         return getContext().getTime();
     }
 
+     public final long millis() {
+        if (getContext().getExecutionContext().supportsStartTime()) {
+            return (time() - getContext().getExecutionContext().getStartTime()) /
+                    1_000_000;
+        } else {
+            return time() / 1_000_000;
+        }
+    }
+    
     public final double d(Property p) {
         return p.getDouble();
     }
 
+    public final double d(Value v) {
+        if (v instanceof PNumber) {
+            return ((PNumber) v).value();
+        } else {
+            return PNumber.from(v).orElse(PNumber.ZERO).value();
+        }
+    }
+
+    public final double d(String s) {
+        return d(PString.valueOf(s));
+    }
+
+    @Deprecated
     public final float f(Property p) {
         return (float) p.getDouble();
     }
@@ -82,13 +161,56 @@ public class DefaultCodeDelegate extends CodeDelegate {
         return p.getInt();
     }
 
+    public final int i(Value v) {
+        if (v instanceof PNumber) {
+            return ((PNumber) v).toIntValue();
+        } else {
+            return PNumber.from(v).orElse(PNumber.ZERO).toIntValue();
+        }
+    }
+
+    public final int i(String s) {
+        return i(PString.valueOf(s));
+    }
+
+    public final boolean b(Property p) {
+        return p.getBoolean();
+    }
+
+    public final boolean b(Value v) {
+        if (v instanceof PBoolean) {
+            return ((PBoolean) v).value();
+        } else {
+            return PBoolean.from(v).orElse(PBoolean.FALSE).value();
+        }
+    }
+
+    public final boolean b(String s) {
+        return b(PString.valueOf(s));
+    }
+
     public final String s(Property p) {
         return p.get().toString();
     }
 
+    public final String s(Value v) {
+        return v.toString();
+    }
+
+    public final PArray array(Property p) {
+        return PArray.from(p.get()).orElse(PArray.EMPTY);
+    }
+
+    public final PArray array(Value v) {
+        return PArray.from(v).orElse(PArray.EMPTY);
+    }
+
+    public final PArray array(String s) {
+        return array(PString.valueOf(s));
+    }
+
     public final Property p(String id) {
         Control c = getContext().getControl(id);
-//        return c instanceof Property ? (Property) c : null;
         if (c instanceof Property) {
             return (Property) c;
         } else {
@@ -106,17 +228,17 @@ public class DefaultCodeDelegate extends CodeDelegate {
         }
         return random(max - min) + min;
     }
-    
-    public final double randomOf(double ... values) {
-        return values[RND.nextInt(values.length)];
-    }
-    
-    public final int randomOf(int ... values) {
+
+    public final double randomOf(double... values) {
         return values[RND.nextInt(values.length)];
     }
 
-    public final String randomOf(String ... values) {
-        return values[RND.nextInt(values.length)]; 
+    public final int randomOf(int... values) {
+        return values[RND.nextInt(values.length)];
+    }
+
+    public final String randomOf(String... values) {
+        return values[RND.nextInt(values.length)];
     }
 
     public final double abs(double n) {
@@ -663,6 +785,18 @@ public class DefaultCodeDelegate extends CodeDelegate {
         return PApplet.append(array, value);
     }
 
+    public final PArray append(PArray array, Value value) {
+        return PArray.append(array, value);
+    }
+
+    public final PArray append(PArray array, String value) {
+        return PArray.append(array, PString.valueOf(value));
+    }
+
+    public final PArray append(PArray array, double value) {
+        return PArray.append(array, PNumber.valueOf(value));
+    }
+
     public final Object append(Object array, Object value) {
         return PApplet.append(array, value);
     }
@@ -767,6 +901,18 @@ public class DefaultCodeDelegate extends CodeDelegate {
         return PApplet.splice(list, value, index);
     }
 
+    public final PArray splice(PArray array, Value value, int index) {
+        return PArray.insert(array, index, value);
+    }
+
+    public final PArray splice(PArray array, String value, int index) {
+        return PArray.insert(array, index, PString.valueOf(value));
+    }
+
+    public final PArray splice(PArray array, double value, int index) {
+        return PArray.insert(array, index, PNumber.valueOf(value));
+    }
+
     public final Object splice(Object list, Object value, int index) {
         return PApplet.splice(list, value, index);
     }
@@ -829,6 +975,14 @@ public class DefaultCodeDelegate extends CodeDelegate {
         return PApplet.subset(list, start, count);
     }
 
+    public final PArray subset(PArray array, int start) {
+        return subset(array, start, array.getSize() - start);
+    }
+
+    public final PArray subset(PArray array, int start, int count) {
+        return PArray.subset(array, start, count);
+    }
+
     public final Object subset(Object list, int start) {
         return PApplet.subset(list, start);
     }
@@ -866,6 +1020,10 @@ public class DefaultCodeDelegate extends CodeDelegate {
 
     public final String[] concat(String[] a, String[] b) {
         return PApplet.concat(a, b);
+    }
+
+    public final PArray concat(PArray a, PArray b) {
+        return PArray.concat(a, b);
     }
 
     public final Object concat(Object a, Object b) {

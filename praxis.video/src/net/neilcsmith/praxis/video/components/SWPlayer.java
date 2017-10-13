@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2015 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -197,8 +197,10 @@ class SWPlayer implements Player {
                     }
                 });
                 frame.setLayout(new GridBagLayout());
-                Cursor cursor = Toolkit.getDefaultToolkit().createCustomCursor(new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB), new Point(0, 0), "blank");
-                frame.setCursor(cursor);
+                if (!wHints.isShowCursor()) {
+                    Cursor cursor = Toolkit.getDefaultToolkit().createCustomCursor(new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB), new Point(0, 0), "blank");
+                    frame.setCursor(cursor);
+                }
                 canvas = new Canvas();
                 canvas.setMinimumSize(dim);
                 canvas.setPreferredSize(dim);

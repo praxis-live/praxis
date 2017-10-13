@@ -1,12 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package net.neilcsmith.praxis.core.types;
 
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import net.neilcsmith.praxis.core.Argument;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -48,7 +44,25 @@ public class PArrayTest {
     public void testToString() {
 
     }
-
+    
+    /**
+     * Test of get method, of class PArray.
+     */
+    @Test
+    public void testGet() throws Exception {
+        PArray arr1 = PArray.valueOf("1 2 3 4");
+        assertEquals(arr1.get(3), arr1.get(-1));
+        PArray arr2 = IntStream.range(-10, 10)
+                .mapToObj(arr1::get)
+                .collect(PArray.collector());
+        System.out.println(arr2);
+        assertEquals(arr1.get(0).toString(), arr2.get(2).toString());
+        
+        PArray arr3 = PArray.valueOf("");
+        assertEquals(arr3.get(0).toString(), "");
+        
+        
+    }
   
     /**
      * Test of coerce method, of class PArray.
@@ -74,6 +88,32 @@ public class PArrayTest {
 //        }
         System.out.println(a2.stream().map(Argument::toString).collect(Collectors.joining(" | ")));
         assertEquals(2, a2.getSize());
+    }
+    
+    @Test
+    public void testCollector() throws Exception {
+        PArray arr1 = PArray.valueOf("a3 104 {some string} c#5");
+        PArray arr2 = arr1.stream().collect(PArray.collector());
+        
+        System.out.println(arr1);
+        System.out.println(arr2);
+        
+        assertEquals(arr1.getSize(), arr2.getSize());
+        
+        assertTrue(arr1.equivalent(arr2));
+        
+        PArray arr4 = PArray.valueOf("A3 104 C#5");
+        PArray arr3 = arr1.stream()
+                .map(Object::toString)
+                .filter(s -> !s.contains(" "))
+                .map(String::toUpperCase)
+                .map(PString::valueOf)
+                .collect(PArray.collector());
+        
+        System.out.println(arr3);
+        
+        assertTrue(arr3.equivalent(arr4));
+        
     }
 
     

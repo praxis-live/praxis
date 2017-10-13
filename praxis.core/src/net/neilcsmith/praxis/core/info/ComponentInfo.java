@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -36,12 +36,13 @@ import net.neilcsmith.praxis.core.PortAddress;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.core.types.Value;
 
 /**
  *
  * @author Neil C Smith
  */
-public class ComponentInfo extends Argument {
+public class ComponentInfo extends Value {
 
     public final static String KEY_DYNAMIC = "dynamic";
 
@@ -134,16 +135,16 @@ public class ComponentInfo extends Argument {
     }
 
     @Override
-    public boolean isEquivalent(Argument arg) {
+    public boolean equivalent(Value arg) {
         try {
             if (this == arg) {
                 return true;
             }
             ComponentInfo other = ComponentInfo.coerce(arg);
             return interfaces.equals(other.interfaces)
-                    && controls.isEquivalent(other.controls)
-                    && ports.isEquivalent(other.ports)
-                    && properties.isEquivalent(other.properties);
+                    && controls.equivalent(other.controls)
+                    && ports.equivalent(other.ports)
+                    && properties.equivalent(other.properties);
         } catch (ArgumentFormatException ex) {
             return false;
         }

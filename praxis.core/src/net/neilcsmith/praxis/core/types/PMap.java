@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -31,7 +31,7 @@ import net.neilcsmith.praxis.core.ArgumentFormatException;
  *
  * @author Neil C Smith
  */
-public class PMap extends Argument {
+public class PMap extends Value {
 
 //    public final static PMap EMPTY = new PMap(Collections.<String, Argument>emptyMap(), "");
     public final static PMap EMPTY = new PMap(PArray.EMPTY, "");
@@ -49,7 +49,7 @@ public class PMap extends Argument {
         this.string = string;
     }
 
-    public Argument get(String key) {
+    public Value get(String key) {
         int size = array.getSize();
         for (int i = 0; i < size; i += 2) {
             if (array.get(i).toString().equals(key)) {
@@ -60,7 +60,7 @@ public class PMap extends Argument {
     }
 
     public boolean getBoolean(String key, boolean def) {
-        Argument val = get(key);
+        Value val = get(key);
         if (val != null) {
             try {
                 return PBoolean.coerce(val).value();
@@ -72,7 +72,7 @@ public class PMap extends Argument {
     }
 
     public int getInt(String key, int def) {
-        Argument val = get(key);
+        Value val = get(key);
         if (val != null) {
             try {
                 return PNumber.coerce(val).toIntValue();
@@ -84,7 +84,7 @@ public class PMap extends Argument {
     }
 
     public double getDouble(String key, double def) {
-        Argument val = get(key);
+        Value val = get(key);
         if (val != null) {
             try {
                 return PNumber.coerce(val).value();
@@ -96,7 +96,7 @@ public class PMap extends Argument {
     }
 
     public String getString(String key, String def) {
-        Argument val = get(key);
+        Value val = get(key);
         if (val != null) {
             return val.toString();
         }
@@ -131,7 +131,7 @@ public class PMap extends Argument {
     }
 
     @Override
-    public boolean isEquivalent(Argument arg) {
+    public boolean equivalent(Value arg) {
         if (arg == this) {
             return true;
         }
@@ -176,9 +176,9 @@ public class PMap extends Argument {
         return false;
     }
 
-    private static Argument objToArg(Object obj) {
-        if (obj instanceof Argument) {
-            return (Argument) obj;
+    private static Value objToValue(Object obj) {
+        if (obj instanceof Value) {
+            return (Value) obj;
         }
         if (obj instanceof Boolean) {
             return ((Boolean) obj).booleanValue() ? PBoolean.TRUE : PBoolean.FALSE;
@@ -199,7 +199,7 @@ public class PMap extends Argument {
         if (key == null) {
             throw new NullPointerException();
         }
-        PArray array = PArray.valueOf(PString.valueOf(key), objToArg(value));
+        PArray array = PArray.valueOf(PString.valueOf(key), objToValue(value));
         return new PMap(array, null);
     }
 
@@ -212,8 +212,8 @@ public class PMap extends Argument {
             throw new IllegalArgumentException("Duplicate keys");
         }
         PArray array = PArray.valueOf(
-                PString.valueOf(key1), objToArg(value1),
-                PString.valueOf(key2), objToArg(value2));
+                PString.valueOf(key1), objToValue(value1),
+                PString.valueOf(key2), objToValue(value2));
         return new PMap(array, null);
     }
 
@@ -227,9 +227,9 @@ public class PMap extends Argument {
             throw new IllegalArgumentException("Duplicate keys");
         }
         PArray array = PArray.valueOf(
-                PString.valueOf(key1), objToArg(value1),
-                PString.valueOf(key2), objToArg(value2),
-                PString.valueOf(key3), objToArg(value3));
+                PString.valueOf(key1), objToValue(value1),
+                PString.valueOf(key2), objToValue(value2),
+                PString.valueOf(key3), objToValue(value3));
         return new PMap(array, null);
     }
 
@@ -288,21 +288,33 @@ public class PMap extends Argument {
 
     public static class Builder {
 
-        private List<Argument> storage;
+        private List<Value> storage;
 
         private Builder(int capacity) {
-            storage = new ArrayList<Argument>(capacity);
+            storage = new ArrayList<>(capacity);
         }
 
+        @Deprecated
         public Builder put(PString key, Argument value) {
+            put(key, value instanceof Value ? (Value) value : PString.valueOf(value));
+            return this;
+        }
+        
+        public Builder put(PString key, Value value) {
             if (key == null || value == null) {
                 throw new NullPointerException();
             }
             putImpl(key, value);
             return this;
         }
-
+        
+        @Deprecated
         public Builder put(String key, Argument value) {
+            put(PString.valueOf(key), value);
+            return this;
+        }
+        
+        public Builder put(String key, Value value) {
             put(PString.valueOf(key), value);
             return this;
         }
@@ -337,7 +349,7 @@ public class PMap extends Argument {
             return new PMap(array, str);
         }
 
-        private void putImpl(PString key, Argument value) {
+        private void putImpl(PString key, Value value) {
             int idx = indexOfKey(key);
             if (idx < 0) {
                 storage.add(key);

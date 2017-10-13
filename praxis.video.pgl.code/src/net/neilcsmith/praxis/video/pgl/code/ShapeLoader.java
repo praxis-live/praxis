@@ -53,6 +53,8 @@ class ShapeLoader extends ResourceProperty.Loader<PShape> {
         String path = uri.getPath();
         if (path.endsWith(".svg") || path.endsWith(".svgz")) {
             return loadSVG(uri);
+        } else if (path.endsWith(".obj")) {
+            return loadOBJ(uri);
         } else {
             throw new IOException("Unknown file type");
         }
@@ -71,6 +73,10 @@ class ShapeLoader extends ResourceProperty.Loader<PShape> {
                 throw new IOException(ex);
             }
         }
+    }
+    
+    private PShape loadOBJ(URI uri) {
+        return new PShapeImpl(new PShapeOBJ(uri));
     }
 
     static ShapeLoader getDefault() {

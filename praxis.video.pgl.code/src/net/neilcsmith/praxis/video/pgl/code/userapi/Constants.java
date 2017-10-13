@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -73,12 +73,18 @@ public class Constants {
     public final static ShapeType PATH = ShapeType.Path;
     public final static ShapeType GEOMETRY = ShapeType.Geometry;
     
+    public final static ColorMode RGB = ColorMode.RGB;
+    public final static ColorMode HSB = ColorMode.HSB;
+    
     public final static String DEFAULT_VERTEX_SHADER = 
             ShaderConstants.DEFAULT_VERTEX_SHADER;
     public final static String DEFAULT_FRAGMENT_SHADER = 
             ShaderConstants.DEFAULT_FRAGMENT_SHADER;
     public final static String GLSL_VERTEX_MIME = "text/x-glsl-vert";
     public final static String GLSL_FRAGMENT_MIME = "text/x-glsl-frag";
+    
+    public final static Hint ENABLE_DEPTH_TEST = Hint.ENABLE_DEPTH_TEST;
+    public final static Hint DISABLE_DEPTH_TEST = Hint.DISABLE_DEPTH_TEST;
 
     public static enum BlendMode {
 
@@ -199,6 +205,38 @@ public class Constants {
         public int unwrap() {
             return value;
         }
+    }
+    
+    public static enum ColorMode {
+        RGB(PConstants.RGB),
+        HSB(PConstants.HSB);
+        
+        private final int value;
+        
+        private ColorMode(int value) {
+            this.value = value;
+        }
+        
+        public int unwrap() {
+            return value;
+        }
+    }
+    
+    public static enum Hint {
+        
+        ENABLE_DEPTH_TEST(PConstants.ENABLE_DEPTH_TEST),
+        DISABLE_DEPTH_TEST(PConstants.DISABLE_DEPTH_TEST);
+        
+        private final int value;
+        
+        private Hint(int value) {
+            this.value = value;
+        }
+        
+        public int unwrap() {
+            return value;
+        }
+        
     }
     
 }
