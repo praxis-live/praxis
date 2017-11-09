@@ -2,7 +2,7 @@
 /*
  * Forked from Janino - An embedded Java[TM] compiler
  *
- * Copyright (c) 2016 Neil C Smith
+ * Copyright (c) 2017 Neil C Smith
  * Copyright (c) 2001-2010, Arno Unkrig
  * All rights reserved.
  *
@@ -45,6 +45,7 @@ class SimpleCompiler {
     private MessageHandler messageHandler;
     private Map<String, byte[]> classes;
     private JavaCompiler compiler;
+    private List<String> options;
 
     public Map<String, byte[]> getCompiledClasses() {
         return classes;
@@ -109,39 +110,39 @@ class SimpleCompiler {
                     fileManager, // fileManager
                     new DiagnosticListener<JavaFileObject>() { // diagnosticListener
 
-                @Override
-                public void report(Diagnostic<? extends JavaFileObject> diagnostic) {
+                        @Override
+                        public void report(Diagnostic<? extends JavaFileObject> diagnostic) {
 
-                    String message = "[" + diagnostic.getLineNumber() + ":" + diagnostic.getColumnNumber()
-                            + "] " + diagnostic.getMessage(null) + " (" + diagnostic.getCode() + ")";
+                            String message = "[" + diagnostic.getLineNumber() + ":" + diagnostic.getColumnNumber()
+                                    + "] " + diagnostic.getMessage(null) + " (" + diagnostic.getCode() + ")";
 
-                    try {
-                        switch (diagnostic.getKind()) {
-                            case ERROR:
-                                if (SimpleCompiler.this.messageHandler != null) {
-                                    messageHandler.handleError(message);
+                            try {
+                                switch (diagnostic.getKind()) {
+                                    case ERROR:
+                                        if (SimpleCompiler.this.messageHandler != null) {
+                                            messageHandler.handleError(message);
+                                        }
+                                        throw new CompilationException(message);
+                                    case MANDATORY_WARNING:
+                                    case WARNING:
+                                        if (messageHandler != null) {
+                                            messageHandler.handleWarning(message);
+                                        }
+                                        break;
+                                    case NOTE:
+                                    case OTHER:
+                                    default:
+                                        break;
+
                                 }
-                                throw new CompilationException(message);
-                            case MANDATORY_WARNING:
-                            case WARNING:
-                                if (messageHandler != null) {
-                                    messageHandler.handleWarning(message);
+                            } catch (CompilationException ce) {
+                                if (caughtCompilationException[0] == null) {
+                                    caughtCompilationException[0] = ce;
                                 }
-                                break;
-                            case NOTE:
-                            case OTHER:
-                            default:
-                                break;
-
+                            }
                         }
-                    } catch (CompilationException ce) {
-                        if (caughtCompilationException[0] == null) {
-                            caughtCompilationException[0] = ce;
-                        }
-                    }
-                }
-            },
-                    Arrays.asList(new String[]{"-Xlint:all"}), // options
+                    },
+                    options == null ? Arrays.asList(new String[]{"-Xlint:all"}) : options, // options
                     null, // classes
                     Collections.singleton(compilationUnit) // compilationUnits
             ).call()) {
@@ -174,6 +175,10 @@ class SimpleCompiler {
 
     public void setCompiler(JavaCompiler compiler) {
         this.compiler = compiler;
+    }
+    
+    public void setOptions(List<String> options) {
+        this.options = options;
     }
 
     /**
