@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.script.commands;
 
+import net.neilcsmith.praxis.script.impl.AbstractInlineCommand;
 import net.neilcsmith.praxis.script.impl.VariableImpl;
 import java.util.Map;
 import java.util.logging.Logger;
