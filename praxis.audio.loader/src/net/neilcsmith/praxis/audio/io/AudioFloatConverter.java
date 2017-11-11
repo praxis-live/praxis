@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -109,7 +109,7 @@ public abstract class AudioFloatConverter {
 			bytebuffer.position(0);
 			floatbuffer.position(0);
 			bytebuffer.put(in_buff, in_offset, in_len);
-//			floatbuffer.get(out_buff, out_offset, out_len);
+			floatbuffer.get(out_buff, out_offset, out_len);
 			return out_buff;
 		}
 
@@ -123,7 +123,7 @@ public abstract class AudioFloatConverter {
 			}
 			floatbuffer.position(0);
 			bytebuffer.position(0);
-//			floatbuffer.put(in_buff, in_offset, in_len);
+			floatbuffer.put(in_buff, in_offset, in_len);
 			bytebuffer.get(out_buff, out_offset, out_len);
 			return out_buff;
 		}
@@ -146,7 +146,7 @@ public abstract class AudioFloatConverter {
 			bytebuffer.position(0);
 			floatbuffer.position(0);
 			bytebuffer.put(in_buff, in_offset, in_len);
-//			floatbuffer.get(out_buff, out_offset, out_len);
+			floatbuffer.get(out_buff, out_offset, out_len);
 			return out_buff;
 		}
 
@@ -160,7 +160,7 @@ public abstract class AudioFloatConverter {
 			}
 			floatbuffer.position(0);
 			bytebuffer.position(0);
-//			floatbuffer.put(in_buff, in_offset, in_len);
+			floatbuffer.put(in_buff, in_offset, in_len);
 			bytebuffer.get(out_buff, out_offset, out_len);
 			return out_buff;
 		}
