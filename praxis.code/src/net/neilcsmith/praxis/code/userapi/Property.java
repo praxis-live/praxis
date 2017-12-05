@@ -199,13 +199,21 @@ public abstract class Property {
 
     protected void updateLinks(double value) {
         for (BaseLink link : links) {
-            link.update(value);
+            try {
+                link.update(value);
+            } catch (Exception ex) {
+                context.getLog().log(LogLevel.ERROR, ex);
+            }
         }
     }
 
     protected void updateLinks(Value value) {
         for (BaseLink link : links) {
-            link.update(value);
+            try {
+                link.update(value);
+            } catch (Exception ex) {
+                context.getLog().log(LogLevel.ERROR, ex);
+            }
         }
     }
 
@@ -461,7 +469,11 @@ public abstract class Property {
             animating = false;
             this.overrun = overrun;
             if (onDoneConsumer != null) {
-                onDoneConsumer.accept(property);
+                try {
+                    onDoneConsumer.accept(property);
+                } catch (Exception ex) {
+                    property.context.getLog().log(LogLevel.ERROR, ex);
+                }
             }
             this.overrun = 0;
             if (!animating) {
