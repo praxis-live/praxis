@@ -40,7 +40,7 @@ public interface Linkable<T> {
 
     public void link(Consumer<T> consumer);
 
-    public default <R> Linkable<R> map(Function<T, R> function) {
+    public default <R> Linkable<R> map(Function<? super T, ? extends R> function) {
         return new AbstractLinkable<T, R>(this) {
             @Override
             void process(T value, Consumer<R> sink) {
@@ -49,7 +49,7 @@ public interface Linkable<T> {
         };
     }
 
-    public default Linkable<T> filter(Predicate<T> predicate) {
+    public default Linkable<T> filter(Predicate<? super T> predicate) {
         return new AbstractLinkable<T, T>(this) {
             @Override
             void process(T value, Consumer<T> sink) {
