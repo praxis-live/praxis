@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -41,6 +41,7 @@ import net.neilcsmith.praxis.code.userapi.Out;
 import net.neilcsmith.praxis.code.userapi.P;
 import net.neilcsmith.praxis.code.userapi.Port;
 import net.neilcsmith.praxis.code.userapi.ReadOnly;
+import net.neilcsmith.praxis.code.userapi.Ref;
 import net.neilcsmith.praxis.code.userapi.T;
 import net.neilcsmith.praxis.core.ControlAddress;
 import net.neilcsmith.praxis.core.InterfaceDefinition;
@@ -72,9 +73,11 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     private final D delegate;
     private final Map<ControlDescriptor.Category, Map<Integer, ControlDescriptor>> controls;
     private final Map<PortDescriptor.Category, Map<Integer, PortDescriptor>> ports;
+    private final Map<String, RefDescriptor> refs;
 
     private Map<String, ControlDescriptor> extControls;
     private Map<String, PortDescriptor> extPorts;
+    private Map<String, RefDescriptor> extRefs;
     private ComponentInfo info;
     private int syntheticIdx = Integer.MIN_VALUE;
 
@@ -90,6 +93,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         for (PortDescriptor.Category cat : PortDescriptor.Category.values()) {
             ports.put(cat, new TreeMap<Integer, PortDescriptor>());
         }
+        refs = new TreeMap<>();
     }
 
     protected void process() {
@@ -116,6 +120,10 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     protected Map<String, PortDescriptor> extractPorts() {
         return extPorts;
     }
+    
+    /*protected*/ Map<String, RefDescriptor> extractRefs() {
+        return extRefs;
+    }
 
     protected ComponentInfo extractInfo() {
         return info;
@@ -128,6 +136,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     private void buildExternalData() {
         extControls = buildExternalControlMap();
         extPorts = buildExternalPortMap();
+        extRefs = buildExternalRefsMap();
         info = buildComponentInfo(extControls, extPorts);
     }
 
@@ -149,6 +158,14 @@ public abstract class CodeConnector<D extends CodeDelegate> {
             }
         }
         return map;
+    }
+    
+    private Map<String, RefDescriptor> buildExternalRefsMap() {
+        if (refs.isEmpty()) {
+            return Collections.EMPTY_MAP;
+        } else {
+            return new LinkedHashMap(refs);
+        }
     }
 
     protected ComponentInfo buildComponentInfo(Map<String, ControlDescriptor> controls,
@@ -360,6 +377,17 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     }
     
     private boolean analyseInjectField(Inject ann, Field field) {
+        
+        if (Ref.class.equals(field.getType())) {
+            RefDescriptor rdsc = RefDescriptor.create(this, field);
+            if (rdsc != null) {
+                refs.put(rdsc.getID(), rdsc);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
         PropertyControl.Descriptor pdsc
                 = PropertyControl.Descriptor.create(this, ann, field);
         if (pdsc != null) {
