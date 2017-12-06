@@ -159,11 +159,15 @@ public class FileCmds implements CommandInstaller {
 
         @Override
         public CallArguments process(Env context, Namespace namespace, CallArguments args) throws ExecutionException {
+            if (args.getSize() > 1) {
+                throw new ExecutionException();
+            }
             try {
                 List<Path> list;
-                if (args.getSize() == 2) {
+                /*if (args.getSize() == 2) {
                     list = listFiles(namespace, args.get(0).toString(), args.get(1).toString());
-                } else if (args.getSize() == 1) {
+                } else*/
+                if (args.getSize() == 1) {
                     list = listFiles(namespace, args.get(0).toString());
                 } else {
                     list = listFiles(namespace);
@@ -185,11 +189,15 @@ public class FileCmds implements CommandInstaller {
     private static class FileNamesCmd extends AbstractInlineCommand {
 
         public CallArguments process(Env env, Namespace namespace, CallArguments args) throws ExecutionException {
+            if (args.getSize() > 1) {
+                throw new ExecutionException();
+            }
             try {
                 List<Path> list;
-                if (args.getSize() == 2) {
+                /*if (args.getSize() == 2) {
                     list = listFiles(namespace, args.get(0).toString(), args.get(1).toString());
-                } else if (args.getSize() == 1) {
+                } else*/
+                if (args.getSize() == 1) {
                     list = listFiles(namespace, args.get(0).toString());
                 } else {
                     list = listFiles(namespace);
