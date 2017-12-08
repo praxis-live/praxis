@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -28,11 +28,21 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *
- * @author Neil C Smith <http://neilcsmith.net>
+ * Mark a field or method as a trigger (action). A control and port will be
+ * automatically created unless otherwise overridden. The @T annotation may be
+ * used on zero-parameter methods, and fields of type {@link Trigger} and boolean.
+ * NB. Note that boolean fields will be set to true when the trigger occurs and
+ * must be manually set back to false.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
 public @interface T {
+
+    /**
+     * Relative position compared to other @T elements. Values must be unique.
+     * They do not have to be contiguous.
+     *
+     * @return position
+     */
     int value();
 }

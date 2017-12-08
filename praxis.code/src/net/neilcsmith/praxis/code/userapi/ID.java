@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -26,10 +26,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- *
- * @author Neil C Smith <http://neilcsmith.net>
+ * Override the default ID for ports or controls. This is normally derived from
+ * the Java name for the field or method.
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ID {
+
+    /**
+     * Overriding ID. Must be valid syntax for control and port addresses.
+     * 
+     * @return ID
+     */
     String value();
 }

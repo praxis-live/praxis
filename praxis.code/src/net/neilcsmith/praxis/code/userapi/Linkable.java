@@ -33,13 +33,37 @@ import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
 
 /**
+ * Linkable is a lightweight form of reactive stream for listening to changing
+ * values from inputs, properties, animation, etc. Functions can be used to
+ * filter and map incoming values. Linkables must be {@link #link linked} to a
+ * Consumer to complete the pipeline or no values will be processed.
+ * <p>
+ * Only stateless operations are currently supported. Operations that require
+ * access to previous values (limit, sort, distinct, etc.) require combining
+ * with one of the other mechanisms (eg. {@link Inject} or {@link Ref}) for
+ * retaining state across code changes.
  *
- * @author Neil C Smith (http://neilcsmith.net)
+ * @param <T>
  */
 public interface Linkable<T> {
 
+    /**
+     * Link to a Consumer to process values. Setting a Consumer completes the
+     * pipeline. Only one Consumer may be set on a Linkable pipeline - to use
+     * multiple consumers, acquire a new Linkable from the original source.
+     *
+     * @param consumer function to process received values.
+     */
     public void link(Consumer<T> consumer);
 
+    /**
+     * Returns a Linkable that wraps this Linkable and transforms values using
+     * the provided mapping function.
+     *
+     * @param <R>
+     * @param function transform values
+     * @return
+     */
     public default <R> Linkable<R> map(Function<? super T, ? extends R> function) {
         return new AbstractLinkable<T, R>(this) {
             @Override
@@ -49,6 +73,13 @@ public interface Linkable<T> {
         };
     }
 
+    /**
+     * Returns a Linkable that wraps this Linkable and filters values using the
+     * provided predicate function.
+     *
+     * @param predicate
+     * @return
+     */
     public default Linkable<T> filter(Predicate<? super T> predicate) {
         return new AbstractLinkable<T, T>(this) {
             @Override
@@ -60,10 +91,28 @@ public interface Linkable<T> {
         };
     }
 
+    /**
+     * A double primitive specialisation of Linkable.
+     */
     public static interface Double {
 
+        /**
+         * Link to a Consumer to process values. Setting a Consumer completes
+         * the pipeline. Only one Consumer may be set on a Linkable pipeline -
+         * to use multiple consumers, acquire a new Linkable from the original
+         * source.
+         *
+         * @param consumer function to process received values.
+         */
         public void link(DoubleConsumer consumer);
 
+        /**
+         * Returns a Linkable.Double that wraps this Linkable.Double and transforms
+         * values using the provided mapping function.
+         *
+         * @param function transform values
+         * @return
+         */
         public default Linkable.Double map(DoubleUnaryOperator function) {
             return new AbstractLinkable.Double(this) {
                 @Override
@@ -73,6 +122,13 @@ public interface Linkable<T> {
             };
         }
 
+        /**
+         * Returns a Linkable.Double that wraps this Linkable.Double and filters 
+         * values using the provided predicate function.
+         *
+         * @param predicate
+         * @return
+         */
         public default Linkable.Double filter(DoublePredicate predicate) {
             return new AbstractLinkable.Double(this) {
                 @Override
@@ -85,11 +141,29 @@ public interface Linkable<T> {
         }
 
     }
-    
+
+    /**
+     * An int primitive specialisation of Linkable.
+     */
     public static interface Int {
 
+        /**
+         * Link to a Consumer to process values. Setting a Consumer completes
+         * the pipeline. Only one Consumer may be set on a Linkable pipeline -
+         * to use multiple consumers, acquire a new Linkable from the original
+         * source.
+         *
+         * @param consumer function to process received values.
+         */
         public void link(IntConsumer consumer);
 
+        /**
+         * Returns a Linkable.Int that wraps this Linkable.Int and transforms
+         * values using the provided mapping function.
+         *
+         * @param function transform values
+         * @return
+         */
         public default Linkable.Int map(IntUnaryOperator function) {
             return new AbstractLinkable.Int(this) {
                 @Override
@@ -99,6 +173,13 @@ public interface Linkable<T> {
             };
         }
 
+        /**
+         * Returns a Linkable.Int that wraps this Linkable.Int and filters 
+         * values using the provided predicate function.
+         *
+         * @param predicate
+         * @return
+         */
         public default Linkable.Int filter(IntPredicate predicate) {
             return new AbstractLinkable.Int(this) {
                 @Override

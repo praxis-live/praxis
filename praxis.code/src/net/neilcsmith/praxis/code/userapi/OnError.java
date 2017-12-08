@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,17 +19,27 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.code.userapi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- *
- * @author Neil C Smith <http://neilcsmith.net>
+ * Name a method to call when a property field (see {@link P @P}) has an error
+ * in response to an external port or control call. This should be set on the
+ * field, not the method to be called.
+ * <p>
+ * When used with a resource loading property, this method will be called if the
+ * designated resource fails to load for any reason. The value of the field will
+ * not be changed.
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OnError {
+
+    /**
+     * The name of a method to call.
+     *
+     * @return method name
+     */
     String value();
 }

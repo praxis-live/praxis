@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -27,8 +27,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *
- * @author Neil C Smith <http://neilcsmith.net>
+ * Mark a property field as transient. Its value will not be saved as part of the
+ * project or exported component. Its value will still be persisted between
+ * code iterations.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

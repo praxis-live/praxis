@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -28,8 +28,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *
- * @author Neil C Smith <http://neilcsmith.net>
+ * Annotate a field representing an output, such as {@link Output}. A port will be 
+ * created on the component. Outputs show after inputs.
+ * <p>
+ * The value gives the relative position compared to other @Out elements. 
+ * Values must be unique. They do not have to be contiguous.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD})
