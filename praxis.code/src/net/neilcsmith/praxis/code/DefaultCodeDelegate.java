@@ -22,6 +22,7 @@
 package net.neilcsmith.praxis.code;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Random;
 import net.neilcsmith.praxis.code.userapi.Constants;
 import net.neilcsmith.praxis.code.userapi.Property;
@@ -183,6 +184,16 @@ public class DefaultCodeDelegate extends CodeDelegate {
         } else {
             return null;
         }
+    }
+    
+    /**
+     * Search for an instance of the given type.
+     * @param <T>
+     * @param type class to search for
+     * @return Optional wrapping the result if found, or empty if not
+     */
+    public <T> Optional<T> find(Class<T> type) {
+        return Optional.ofNullable(getContext().getLookup().get(type));
     }
 
     /**
