@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2012 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,6 +22,7 @@
 
 package net.neilcsmith.praxis.video;
 
+import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.video.pipes.Bus;
 import net.neilcsmith.praxis.video.pipes.FrameRateSource;
 
@@ -32,5 +33,9 @@ import net.neilcsmith.praxis.video.pipes.FrameRateSource;
 public interface Player extends Runnable, FrameRateSource, Bus {
 
     public void terminate();
+    
+    public default Lookup getLookup() {
+        return Lookup.EMPTY;
+    }
     
 }
