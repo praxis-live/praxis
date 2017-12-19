@@ -27,6 +27,8 @@ import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.event.MouseListener;
 import com.jogamp.newt.event.WindowListener;
 import com.jogamp.newt.opengl.GLWindow;
+import com.jogamp.opengl.GLAnimatorControl;
+import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.util.FPSAnimator;
 import processing.core.PGraphics;
 import processing.opengl.PSurfaceJOGL;
@@ -44,13 +46,18 @@ class PGLGraphicsPSurface extends PSurfaceJOGL {
     @Override
     protected void initAnimator() {
         animator = new FPSAnimator(window, 60);
-//            animator.setUncaughtExceptionHandler(new GLAnimatorControl.UncaughtExceptionHandler() {
-//
-//                @Override
-//                public void uncaughtException(GLAnimatorControl glac, GLAutoDrawable glad, Throwable thrwbl) {
-//                    assert false;
-//                }
-//            });
+        animator.setUncaughtExceptionHandler(new GLAnimatorControl.UncaughtExceptionHandler() {
+
+            @Override
+            public synchronized void uncaughtException(GLAnimatorControl glac, GLAutoDrawable glad, Throwable thrwbl) {
+
+                stopThread();
+                graphics.parent.finished = true;
+                graphics.parent.dispose();
+                graphics.parent.exitActual();
+
+            }
+        });
     }
 
     @Override
@@ -72,34 +79,35 @@ class PGLGraphicsPSurface extends PSurfaceJOGL {
         NewtFactory.setWindowIcons(new IOUtil.ClassResources(files, this.getClass().getClassLoader(), this.getClass()));
     }
 
-    
-    
     @Override
     public boolean stopThread() {
         boolean stopped = super.stopThread();
-        if (stopped) {
-            if (window != null) {
-                final GLWindow win = window;
-                display.getEDTUtil().invoke(false, new Runnable() {
+//        if (stopped) {
+        if (window != null) {
+            final GLWindow win = window;
+            window = null;
+            display.getEDTUtil().invoke(false, new Runnable() {
 
-                    @Override
-                    public void run() {
-                        for (MouseListener l : win.getMouseListeners()) {
-                            win.removeMouseListener(l);
-                        }
-                        for (KeyListener l : win.getKeyListeners()) {
-                            win.removeKeyListener(l);
-                        }
-                        for (WindowListener l : win.getWindowListeners()) {
-                            win.removeWindowListener(l);
-                        }
-                        win.removeGLEventListener(win.getGLEventListener(0));
-                        win.destroy();
+                @Override
+                public void run() {
+                    for (MouseListener l : win.getMouseListeners()) {
+                        win.removeMouseListener(l);
                     }
-                });
+                    for (KeyListener l : win.getKeyListeners()) {
+                        win.removeKeyListener(l);
+                    }
+                    for (WindowListener l : win.getWindowListeners()) {
+                        win.removeWindowListener(l);
+                    }
+                    if (win.getGLEventListenerCount() > 0) {
+                        win.removeGLEventListener(win.getGLEventListener(0));
+                    }
+                    win.destroy();
+                }
+            });
 
-            }
         }
+//        }
         return stopped;
     }
 }

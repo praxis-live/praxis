@@ -96,6 +96,12 @@ public class PGLPlayer implements Player {
             init();
         } catch (Exception ex) {
             LOG.log(Level.WARNING, "Unable to start OpenGL player", ex);
+            running = false;
+            try {
+                applet.dispose();
+            } catch (Exception ex2) {
+                LOG.log(Level.FINE, "Unable to dispose PApplet", ex2);
+            }
         }
         while (running) {
             try {
@@ -161,7 +167,9 @@ public class PGLPlayer implements Player {
 
     @Override
     public void terminate() {
-        applet.exit();
+        if (running) {
+            applet.exit();
+        }
     }
 
     @Override
@@ -286,8 +294,8 @@ public class PGLPlayer implements Player {
 
         @Override
         public synchronized void dispose() {
-            context.dispose();
             sink.disconnect();
+            context.dispose();
             super.dispose();
         }
 
