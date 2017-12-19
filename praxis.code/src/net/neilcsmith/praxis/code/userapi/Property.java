@@ -29,8 +29,10 @@ import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.code.DefaultCodeDelegate;
+import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.core.types.PNumber;
+import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.core.types.Value;
 import net.neilcsmith.praxis.logging.LogLevel;
 import net.neilcsmith.praxis.util.ArrayUtils;
@@ -149,20 +151,26 @@ public abstract class Property {
     /**
      * Set the current value. Also stops any active animation.
      *
-     * @param arg Value subclass to set
+     * @param value Value subclass to set
      * @return this
      */
-    public Property set(Value arg) {
-        if (arg == null) {
+    public Property set(Value value) {
+        if (value == null) {
             throw new NullPointerException();
         }
         finishAnimating();
         try {
-            setImpl(context.getTime(), arg);
+            setImpl(context.getTime(), value);
         } catch (Exception ex) {
             // no op?
         }
         return this;
+    }
+    
+    @Deprecated
+    public Property set(Argument value) {
+        Value v = value instanceof Value ? (Value) value : PString.valueOf(value);
+        return set(v);
     }
 
     /**
