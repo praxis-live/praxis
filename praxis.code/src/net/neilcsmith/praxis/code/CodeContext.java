@@ -226,6 +226,8 @@ public abstract class CodeContext<D extends CodeDelegate> {
     final void handleDispose() {
         cmp = null;
         handleHierarchyChanged();
+        refs.values().forEach(RefDescriptor::dispose);
+        refs.clear();
         controls.clear();
         ports.clear();
         dispose();

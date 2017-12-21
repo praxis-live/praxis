@@ -35,6 +35,7 @@ class RefDescriptor {
     
     private final String id;
     private final Field refField;
+    private CodeContext<?> context;
     
     RefImpl<?> ref;
 
@@ -45,6 +46,7 @@ class RefDescriptor {
     }
     
     void attach(CodeContext<?> context, RefDescriptor previous) {
+        this.context = context;
         if (previous != null) {
             if (refField.getGenericType().equals(previous.refField.getGenericType())) {
                 ref = previous.ref;
@@ -69,10 +71,9 @@ class RefDescriptor {
     }
     
     void reset(boolean full) {
-        if (ref != null) {
-            if (full) {
-                ref.dispose();
-            }
+        if (full) {
+            dispose();
+        } else if (ref != null) {
             ref.reset();
         }
     }
@@ -93,7 +94,7 @@ class RefDescriptor {
         }
     }
     
-    private static class RefImpl<T> extends Ref<T> {
+    private class RefImpl<T> extends Ref<T> {
 
         @Override
         protected void reset() {
@@ -103,6 +104,11 @@ class RefDescriptor {
         @Override
         protected void dispose() {
             super.dispose();
+        }
+
+        @Override
+        protected void log(Exception ex) {
+            context.getLog().log(LogLevel.ERROR, ex);
         }
         
         

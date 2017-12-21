@@ -38,7 +38,7 @@ import java.util.function.Supplier;
  * @author Neil C Smith - http://www.neilcsmith.net
  * @param <T>
  */
-public class Ref<T> {
+public abstract class Ref<T> {
 
     private T value;
     private boolean inited;
@@ -101,7 +101,8 @@ public class Ref<T> {
     /**
      * Transform the value using the supplied function. Either an existing or new
      * value may be returned. If a new value is returned, the value will be replaced
-     * and any {@link #onDispose(java.util.function.Consumer) onDispose} handler called.
+     * and any {@link #onReset(java.util.function.Consumer) onReset} and 
+     * {@link #onDispose(java.util.function.Consumer) onDispose} handlers called.
      * 
      * @param function
      * @return this
@@ -158,17 +159,25 @@ public class Ref<T> {
     protected void dispose() {
         disposeValue();
         value = null;
+        onResetHandler = null;
+        onDisposeHandler = null;
         inited = false;
     }
     
     protected void reset() {
         if (value != null && onResetHandler != null) {
-            onResetHandler.accept(value);
+            try {
+                onResetHandler.accept(value);
+            } catch (Exception ex) {
+                log(ex);
+            }
         }
         onResetHandler = null;
         onDisposeHandler = null;
         inited = false;
     }
+    
+    protected abstract void log(Exception ex);
 
     private void checkInit() {
         if (!inited) {
@@ -177,13 +186,24 @@ public class Ref<T> {
     }
     
     private void disposeValue() {
+        if (value != null && onResetHandler != null) {
+            try {
+                onResetHandler.accept(value);
+            } catch (Exception ex) {
+                log(ex);
+            }
+        }
         if (value != null && onDisposeHandler != null) {
-            onDisposeHandler.accept(value);
+            try {
+                onDisposeHandler.accept(value);
+            } catch (Exception ex) {
+                log(ex);
+            }
         } else if (value instanceof AutoCloseable) {
             try {
                 ((AutoCloseable) value).close();
             } catch (Exception ex) {
-                // do what exactly?
+                log(ex);
             }
         }
     }
