@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.script.commands;
 
+import net.neilcsmith.praxis.script.impl.AbstractSingleCallFrame;
 import java.util.Map;
 import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.CallArguments;

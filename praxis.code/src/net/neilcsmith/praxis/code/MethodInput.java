@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -30,6 +30,8 @@ import net.neilcsmith.praxis.core.ArgumentFormatException;
 import net.neilcsmith.praxis.core.Port;
 import net.neilcsmith.praxis.core.info.PortInfo;
 import net.neilcsmith.praxis.core.types.PNumber;
+import net.neilcsmith.praxis.core.types.PString;
+import net.neilcsmith.praxis.core.types.Value;
 
 /**
  *
@@ -83,8 +85,8 @@ abstract class MethodInput {
                 input = new IntInput(method);
             } else if (type == String.class) {
                 input = new StringInput(method);
-            } else if (type == Argument.class) {
-                input = new ArgumentInput(method);
+            } else if (type == Value.class || type == Argument.class) {
+                input = new ValueInput(method);
             }
         }
         if (input == null) {
@@ -204,9 +206,9 @@ abstract class MethodInput {
 
     }
 
-    private static class ArgumentInput extends MethodInput {
+    private static class ValueInput extends MethodInput {
 
-        private ArgumentInput(Method method) {
+        private ValueInput(Method method) {
             super(method);
         }
 
@@ -217,7 +219,8 @@ abstract class MethodInput {
 
         @Override
         void receive(long time, Argument value) {
-            invoke(time, value);
+            Value v = value instanceof Value ? (Value) value : PString.valueOf(value);
+            invoke(time, v);
         }
 
     }

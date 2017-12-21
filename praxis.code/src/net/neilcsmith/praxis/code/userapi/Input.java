@@ -33,8 +33,7 @@ import net.neilcsmith.praxis.logging.LogLevel;
 import net.neilcsmith.praxis.util.ArrayUtils;
 
 /**
- *
- * @author Neil C Smith (http://neilcsmith.net)
+ * A field type providing a control input port. Use with @In or @AuxIn.
  */
 public abstract class Input {
 
@@ -49,14 +48,36 @@ public abstract class Input {
         this.context = context;
     }
 
+    /**
+     * Return a {@link Linkable.Double} for reacting on inputs. None numeric
+     * inputs will be ignored.
+     * 
+     * @return Linkable.Double of input
+     */
     public Linkable.Double values() {
         return new DoubleLink();
     }
 
+    /**
+     * Return a {@link Linkable} of inputs transformed by the provided converter
+     * from Value to the required type.
+     * 
+     * @param <T>
+     * @param converter convert Value to required type
+     * @return Linkable of input
+     */
     public <T> Linkable<T> valuesAs(Function<Value, T> converter) {
         return new ValueLink().map(converter);
     }
 
+    /**
+     * Return a {@link Linkable} of inputs as the provided Value subclass. If the
+     * input Value cannot be coerced to the requested type it will be ignored.
+     * 
+     * @param <T>
+     * @param type required Value subclass
+     * @return Linkable of input
+     */
     public <T extends Value> Linkable<T> valuesAs(Class<T> type) {
         Value.Type.Converter<T> converter = Value.Type.findConverter(type);
         return new ValueLink()
@@ -65,11 +86,21 @@ public abstract class Input {
                 .map(Optional::get);
     }
 
+    /**
+     * Clear all Linkables from this Input. All previously created Linkables will
+     * cease to receive input values.
+     * 
+     * @return this
+     */
     public Input clearLinks() {
         links = new BaseLink[0];
         return this;
     }
 
+    /**
+     *
+     * @param value
+     */
     protected void updateLinks(double value) {
         for (BaseLink link : links) {
             try {
@@ -80,6 +111,10 @@ public abstract class Input {
         }
     }
 
+    /**
+     *
+     * @param value
+     */
     protected void updateLinks(Value value) {
         for (BaseLink link : links) {
             try {
@@ -90,6 +125,10 @@ public abstract class Input {
         }
     }
 
+    /**
+     *
+     * @param full
+     */
     protected void reset(boolean full) {
         clearLinks();
     }

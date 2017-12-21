@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -35,6 +35,7 @@
  */
 package net.neilcsmith.praxis.audio.io;
 
+import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -46,43 +47,57 @@ import javax.sound.sampled.UnsupportedAudioFileException;
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public class AudioData {
-    
+
     public final float[] data;
     public final float sampleRate;
     public final int channels;
-    
+
     private AudioData(float[] data, float sampleRate, int channels) {
         this.data = data;
         this.sampleRate = sampleRate;
         this.channels = channels;
     }
-    
-    public static AudioData fromURL(URL source) throws Exception {
-        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(source);
-        AudioFormat format = audioInputStream.getFormat();
-        int channelCount = format.getChannels();
-        float sampleRate = format.getSampleRate();
-        if (channelCount < 1 || sampleRate < 1) {
-            throw new UnsupportedAudioFileException();
-        }
-        int byteDataSize = (int) audioInputStream.getFrameLength() * format.getFrameSize();
-        byte[] byteData = new byte[byteDataSize];
-        int totalBytesRead = 0;
-        int bytesRead;
-        int offset = 0;
-        int bytesToRead = 0;
-        do {
-            bytesToRead = audioInputStream.available();
-            bytesRead = audioInputStream.read(byteData, offset, bytesToRead);
-            offset += bytesRead;
-            totalBytesRead += bytesRead;
-        } while (totalBytesRead < byteDataSize);
-        audioInputStream.close();
-        float[] data = new float[byteDataSize / (format.getFrameSize() / channelCount)];
-        AudioFloatConverter conv = AudioFloatConverter.getConverter(format);
-        conv.toFloatArray(byteData, data);
 
-        return new AudioData(data, sampleRate, channelCount);
+    public static AudioData fromURL(URL source) throws Exception {
+        try (AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(source)) {
+            AudioFormat format = audioInputStream.getFormat();
+            int channelCount = format.getChannels();
+            float sampleRate = format.getSampleRate();
+            if (channelCount < 1 || sampleRate < 1) {
+                throw new UnsupportedAudioFileException();
+            }
+            int estSize = Math.max(4096, audioInputStream.available());
+            BAOS baos = new BAOS(estSize);
+            
+            int bytesRead;
+            byte[] data = new byte[4096];
+            while ((bytesRead = audioInputStream.read(data, 0, data.length)) > -1) {
+                baos.write(data, 0, bytesRead);
+            }
+            byte[] byteData = baos.toByteArray();
+            float[] floatData = new float[byteData.length / (format.getFrameSize() / channelCount)];
+            AudioFloatConverter conv = AudioFloatConverter.getConverter(format);
+            conv.toFloatArray(byteData, floatData);
+            return new AudioData(floatData, sampleRate, channelCount);
+        }
+
     }
-    
+
+    private static class BAOS extends ByteArrayOutputStream {
+
+        private BAOS(int size) {
+            super(size);
+        }
+        
+        @Override
+        public synchronized byte[] toByteArray() {
+            if (buf.length == count) {
+                return buf;
+            } else {
+                return super.toByteArray();
+            }
+        }
+
+    }
+
 }

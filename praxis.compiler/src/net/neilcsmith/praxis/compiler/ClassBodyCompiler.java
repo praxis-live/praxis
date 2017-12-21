@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,8 +21,13 @@
  */
 package net.neilcsmith.praxis.compiler;
 
+import java.io.File;
 import java.io.StringReader;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.tools.JavaCompiler;
 
 /**
@@ -32,26 +37,35 @@ import javax.tools.JavaCompiler;
 public class ClassBodyCompiler {
 
     public final static String DEFAULT_CLASS_NAME = "$";
-    
+
     private final ClassBodyContext<?> classBodyContext;
-    
+    private final Set<File> extClasspath;
+    private final String defClasspath;
+
     private MessageHandler messageHandler;
     private JavaCompiler compiler;
-    
+
     private ClassBodyCompiler(ClassBodyContext<?> classBodyContext) {
         this.classBodyContext = classBodyContext;
+        this.extClasspath = new LinkedHashSet<>();
+        this.defClasspath = System.getProperty("env.class.path", "");
     }
-    
+
     public ClassBodyCompiler addMessageHandler(MessageHandler messageHandler) {
         this.messageHandler = messageHandler;
         return this;
     }
-    
+
+    public ClassBodyCompiler extendClasspath(Set<File> libs) {
+        extClasspath.addAll(libs);
+        return this;
+    }
+
     public ClassBodyCompiler setCompiler(JavaCompiler compiler) {
         this.compiler = compiler;
         return this;
     }
-    
+
     public Map<String, byte[]> compile(String code) throws CompilationException {
         try {
             ClassBodyEvaluator cbe = new ClassBodyEvaluator();
@@ -62,12 +76,23 @@ public class ClassBodyCompiler {
             if (messageHandler != null) {
                 cbe.setMessageHandler(messageHandler);
             }
+            cbe.setOptions(Arrays.asList("-Xlint:all", "-classpath", buildClasspath()));
             cbe.cook(new StringReader(code));
             return cbe.getCompiledClasses();
         } catch (CompilationException ex) {
             throw new CompilationException(ex);
         } catch (Exception ex) {
             throw new CompilationException(ex);
+        }
+    }
+    private String buildClasspath() {
+        if (extClasspath.isEmpty()) {
+            return defClasspath;
+        } else {
+            return extClasspath.stream()
+                    .map(f -> f.getAbsolutePath())
+                    .collect(Collectors.joining(File.pathSeparator, 
+                            "", File.pathSeparator + defClasspath));
         }
     }
 

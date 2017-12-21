@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,19 +19,21 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package net.neilcsmith.praxis.code.userapi;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
 /**
- *
- * @author Neil C Smith <http://neilcsmith.net>
+ * Control automatic port creation for properties, triggers, etc.
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Port {
+
+    /**
+     * Whether or not to create a port.
+     *
+     * @return false to suppress port creation
+     */
     boolean value();
 }

@@ -22,6 +22,7 @@
 
 package net.neilcsmith.praxis.script.commands;
 
+import net.neilcsmith.praxis.script.impl.AbstractInlineCommand;
 import java.util.Map;
 import net.neilcsmith.praxis.core.CallArguments;
 import net.neilcsmith.praxis.core.types.PArray;

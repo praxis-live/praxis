@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.StreamSupport;
 import net.neilcsmith.praxis.core.IllegalRootStateException;
 import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.impl.AbstractRoot;
@@ -75,16 +76,13 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     private Lookup lookup;
 
     public DefaultVideoRoot() {
-        buildControls();
-    }
-
-    private void buildControls() {
         renderer = StringProperty.builder().defaultValue(SOFTWARE).allowedValues(RENDERERS.toArray(new String[0])).build();
 
         registerControl("renderer", renderer);
         registerControl("width", IntProperty.create(new WidthBinding(), 1, 16384, width));
         registerControl("height", IntProperty.create(new HeightBinding(), 1, 16384, height));
         registerControl("fps", NumberProperty.create(new FpsBinding(), 1, 256, fps));
+        
         ctxt = new VideoContextImpl();
     }
 
@@ -114,6 +112,9 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
             String lib = renderer.getValue();
             player = createPlayer(lib);
             player.addFrameRateListener(this);
+            lookup = InstanceLookup.create(lookup,
+                    StreamSupport.stream(player.getLookup().getAll(Object.class)
+                            .spliterator(), false).toArray());
             if (outputClient != null && outputClient.getOutputCount() > 0) {
                 player.getSink(0).addSource(outputClient.getOutputSource(0));
             }
@@ -164,6 +165,7 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
 
     @Override
     protected void stopping() {
+        lookup = null;
         player.terminate();
         interrupt();
 

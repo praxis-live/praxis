@@ -27,8 +27,7 @@ import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.types.PNumber;
 
 /**
- *
- * @author Neil C Smith <http://neilcsmith.net>
+ * Annotations for setting meta-data about fields.
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Type {

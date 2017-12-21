@@ -28,15 +28,19 @@ import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import net.neilcsmith.praxis.code.CodeContext;
+import net.neilcsmith.praxis.code.DefaultCodeDelegate;
+import net.neilcsmith.praxis.core.Argument;
 import net.neilcsmith.praxis.core.types.PBoolean;
 import net.neilcsmith.praxis.core.types.PNumber;
+import net.neilcsmith.praxis.core.types.PString;
 import net.neilcsmith.praxis.core.types.Value;
 import net.neilcsmith.praxis.logging.LogLevel;
 import net.neilcsmith.praxis.util.ArrayUtils;
 
 /**
- *
- * @author Neil C Smith (http://neilcsmith.net)
+ * A field type for properties (see {@link P @P}). The Property type also backs
+ * other none-resource-loading properties - use {@link DefaultCodeDelegate#p(java.lang.String)
+ * p(String id)} to access the backing Property.
  */
 public abstract class Property {
 
@@ -74,47 +78,107 @@ public abstract class Property {
 
     protected abstract double getImpl(double def);
 
+    /**
+     * Return the current value.
+     *
+     * @return value
+     */
     public Value get() {
         return getImpl();
     }
 
+    /**
+     * Return the current value as a double, or zero if the value isn't numeric.
+     *
+     * @see DefaultCodeDelegate#d(net.neilcsmith.praxis.code.userapi.Property)
+     * @return current value as double
+     */
     public double getDouble() {
         return getDouble(0);
     }
 
+    /**
+     * Return the current value as a double, or the provided default if the
+     * value isn't numeric.
+     *
+     * @return current value as double
+     */
     public double getDouble(double def) {
         return getImpl(def);
     }
 
+    /**
+     * Return the current value as an int, or zero if the value isn't numeric.
+     * Floating point values are rounded to the nearest int.
+     *
+     * @see DefaultCodeDelegate#i(net.neilcsmith.praxis.code.userapi.Property)
+     * @return current value as int
+     */
     public int getInt() {
         return (int) Math.round(getDouble());
     }
 
+    /**
+     * Return the current value as an int, or the provided default if the value
+     * isn't numeric. Floating point values are rounded to the nearest int.
+     *
+     * @return current value as int
+     */
     public int getInt(int def) {
         return (int) Math.round(getDouble(def));
     }
 
+    /**
+     * Return the current value as a boolean, or false if the value isn't a
+     * valid boolean.
+     *
+     * @return current value as boolean
+     */
     public boolean getBoolean() {
         return getBoolean(false);
     }
 
+    /**
+     * Return the current value as a boolean, or the provided default if the
+     * value isn't a valid boolean.
+     *
+     * @return current value as boolean
+     */
     public boolean getBoolean(boolean def) {
         return PBoolean.from(get()).orElse(def ? PBoolean.TRUE : PBoolean.FALSE).value();
     }
 
-    public Property set(Value arg) {
-        if (arg == null) {
+    /**
+     * Set the current value. Also stops any active animation.
+     *
+     * @param value Value subclass to set
+     * @return this
+     */
+    public Property set(Value value) {
+        if (value == null) {
             throw new NullPointerException();
         }
         finishAnimating();
         try {
-            setImpl(context.getTime(), arg);
+            setImpl(context.getTime(), value);
         } catch (Exception ex) {
             // no op?
         }
         return this;
     }
+    
+    @Deprecated
+    public Property set(Argument value) {
+        Value v = value instanceof Value ? (Value) value : PString.valueOf(value);
+        return set(v);
+    }
 
+    /**
+     * Set the current value. Also stops any active animation.
+     *
+     * @param value double value to set
+     * @return this
+     */
     public Property set(double value) {
         finishAnimating();
         try {
@@ -125,12 +189,21 @@ public abstract class Property {
         return this;
     }
 
+    /**
+     * Call the provided consumer with the double value whenever the value
+     * changes. This is a shorthand for {@code values().link(consumer);}. The
+     * double value will be as if calling {@link #getDouble()}.
+     *
+     * @param consumer double consumer
+     * @return this
+     */
     public Property link(DoubleConsumer consumer) {
         DoubleLink dl = new DoubleLink();
         dl.link(consumer);
         return this;
     }
 
+    @Deprecated
     public Property link(DoubleConsumer... consumers) {
         for (DoubleConsumer consumer : consumers) {
             link(consumer);
@@ -138,10 +211,26 @@ public abstract class Property {
         return this;
     }
 
+    /**
+     * Return a new {@link Linkable.Double} for observing changing values. The
+     * double value will be as if calling {@link #getDouble()}.
+     *
+     * @return Linkable.Double of values.
+     */
     public Linkable.Double values() {
         return new DoubleLink();
     }
 
+    /**
+     * Call the provided consumer when the value changes, transformed using the
+     * converter into the required type T. This is shorthand for
+     * {@code valuesAs(converter).link(consumer);}.
+     *
+     * @param <T> type
+     * @param converter convert Value into required type
+     * @param consumer
+     * @return this
+     */
     public <T> Property linkAs(
             Function<Value, T> converter,
             Consumer<T> consumer) {
@@ -150,6 +239,7 @@ public abstract class Property {
         return this;
     }
 
+    @Deprecated
     public <T> Property linkAs(
             Function<Value, T> converter,
             Consumer<T>... consumers) {
@@ -159,23 +249,51 @@ public abstract class Property {
         return this;
     }
 
+    /**
+     * Return a new {@link Linkable} for observing changing values. The value
+     * will be mapped to the required type using the passed in converter.
+     *
+     * @param <T> required type
+     * @param converter convert Value into required type
+     * @return Linkable of values
+     */
     public <T> Linkable<T> valuesAs(Function<Value, T> converter) {
         return new ValueLink().map(converter);
     }
-    
+
+    /**
+     * Return a new {@link Linkable} for observing changing values. The value
+     * will be mapped to the provided Value sub-type. If the value cannot be
+     * coerced into the required type no value will be received by the created
+     * Linkable.
+     *
+     * @param <T> required type
+     * @param converter convert Value into required type
+     * @return Linkable of values
+     */
     public <T extends Value> Linkable<T> valuesAs(Class<T> type) {
         Value.Type.Converter<T> converter = Value.Type.findConverter(type);
         return new ValueLink()
                 .map(v -> converter.from(v))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
-    } 
+    }
 
+    /**
+     * Clear all Linkables from the Property.
+     *
+     * @return this
+     */
     public Property clearLinks() {
         links = new BaseLink[0];
         return this;
     }
 
+    /**
+     * Return the Animator for the Property, creating it if necessary.
+     *
+     * @return property animator
+     */
     public Animator animator() {
         if (animator == null) {
             animator = new Animator(this);
@@ -183,10 +301,24 @@ public abstract class Property {
         return animator;
     }
 
+    /**
+     * Animate the property value to the provided values. This is a shorthand
+     * for calling {@code animator().to(...)}.
+     * <p>
+     * This method returns the animator so that you can chain calls, eg.
+     * {@code prop.to(1, 0).in(1, 0.25).easeInOut();}
+     *
+     * @return property animator
+     */
     public Property.Animator to(double... to) {
         return animator().to(to);
     }
 
+    /**
+     * Return whether the property is currently animating.
+     *
+     * @return property animator active
+     */
     public boolean isAnimating() {
         return animator != null && animator.isAnimating();
     }
@@ -199,13 +331,21 @@ public abstract class Property {
 
     protected void updateLinks(double value) {
         for (BaseLink link : links) {
-            link.update(value);
+            try {
+                link.update(value);
+            } catch (Exception ex) {
+                context.getLog().log(LogLevel.ERROR, ex);
+            }
         }
     }
 
     protected void updateLinks(Value value) {
         for (BaseLink link : links) {
-            link.update(value);
+            try {
+                link.update(value);
+            } catch (Exception ex) {
+                context.getLog().log(LogLevel.ERROR, ex);
+            }
         }
     }
 
@@ -308,6 +448,10 @@ public abstract class Property {
 
     }
 
+    /**
+     * Provides keyframe animation support for Property. Methods return this so
+     * that they can be chained - eg. {@code to(1, 0).in(1, 0.25).easeInOut()}
+     */
     public static class Animator {
 
         private final static long[] DEFAULT_IN = new long[]{0};
@@ -336,10 +480,18 @@ public abstract class Property {
             this.property = p;
         }
 
+        @Deprecated
         public double to() {
             return to[index];
         }
 
+        /**
+         * Set the target values for animation and start animation. The number
+         * of values provided to this method controls the number of keyframes.
+         *
+         * @param to target values
+         * @return this
+         */
         public Animator to(double... to) {
             if (to.length < 1) {
                 throw new IllegalArgumentException();
@@ -357,6 +509,17 @@ public abstract class Property {
             return this;
         }
 
+        /**
+         * Set the time in seconds for each keyframe. The number of provided
+         * values may be different than the number of keyframes passed to to().
+         * Values will be cycled through as needed.
+         * <p>
+         * eg. {@code to(100, 50, 250).in(1, 0.5)} is the same as
+         * {@code to(100, 50, 250).in(1, 0.5, 1)}
+         *
+         * @param in times in seconds
+         * @return this
+         */
         public Animator in(double... in) {
             if (in.length < 1) {
                 this.in = DEFAULT_IN;
@@ -370,6 +533,14 @@ public abstract class Property {
             return this;
         }
 
+        /**
+         * Set the easing mode for each keyframe. The number of provided values
+         * may be different than the number of keyframes passed to to(). Values
+         * will be cycled through as needed.
+         *
+         * @param easing easing mode to use
+         * @return this
+         */
         public Animator easing(Easing... easing) {
             if (easing.length < 1) {
                 this.easing = DEFAULT_EASING;
@@ -379,26 +550,61 @@ public abstract class Property {
             return this;
         }
 
+        /**
+         * Convenience method to use {@link Easing#linear} easing for all
+         * keyframes.
+         *
+         * @return this
+         */
         public Animator linear() {
             return easing(Easing.linear);
         }
 
+        /**
+         * Convenience method to use {@link Easing#ease} easing for all
+         * keyframes.
+         *
+         * @return this
+         */
         public Animator ease() {
             return easing(Easing.ease);
         }
 
+        /**
+         * Convenience method to use {@link Easing#easeIn} easing for all
+         * keyframes.
+         *
+         * @return this
+         */
         public Animator easeIn() {
             return easing(Easing.easeIn);
         }
 
+        /**
+         * Convenience method to use {@link Easing#easeOut} easing for all
+         * keyframes.
+         *
+         * @return this
+         */
         public Animator easeOut() {
             return easing(Easing.easeOut);
         }
 
+        /**
+         * Convenience method to use {@link Easing#easeInOut} easing for all
+         * keyframes.
+         *
+         * @return this
+         */
         public Animator easeInOut() {
             return easing(Easing.easeInOut);
         }
 
+        /**
+         * Stop animating. The current property value will be retained.
+         *
+         * @return this
+         */
         public Animator stop() {
             index = 0;
             animating = false;
@@ -406,10 +612,26 @@ public abstract class Property {
             return this;
         }
 
+        /**
+         * Whether an animation is currently active.
+         *
+         * @return animation active
+         */
         public boolean isAnimating() {
             return animating;
         }
 
+        /**
+         * Set a consumer to be called each time the Animator finishes animation.
+         * Also calls the consumer immediately if no animation is currently active.
+         * <p>
+         * Unlike restarting an animation by polling isAnimating(), an animation
+         * started inside this consumer will take into account any time overrun
+         * between the target and actual finish time of the completing animation.
+         * 
+         * @param whenDoneConsumer function to call
+         * @return this
+         */
         public Animator whenDone(Consumer<Property> whenDoneConsumer) {
             this.onDoneConsumer = whenDoneConsumer;
             if (!animating) {
@@ -461,7 +683,11 @@ public abstract class Property {
             animating = false;
             this.overrun = overrun;
             if (onDoneConsumer != null) {
-                onDoneConsumer.accept(property);
+                try {
+                    onDoneConsumer.accept(property);
+                } catch (Exception ex) {
+                    property.context.getLog().log(LogLevel.ERROR, ex);
+                }
             }
             this.overrun = 0;
             if (!animating) {

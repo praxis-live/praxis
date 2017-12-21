@@ -53,6 +53,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
 
     private final Map<String, ControlDescriptor> controls;
     private final Map<String, PortDescriptor> ports;
+    private final Map<String, RefDescriptor> refs;
     private final ComponentInfo info;
 
     private final D delegate;
@@ -79,6 +80,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
             connector.process();
             controls = connector.extractControls();
             ports = connector.extractPorts();
+            refs = connector.extractRefs();
             info = connector.extractInfo();
             delegate = connector.getDelegate();
             log = new LogBuilder(LogLevel.ERROR);
@@ -97,6 +99,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
     void handleConfigure(CodeComponent<D> cmp, CodeContext<D> oldCtxt) {
         configureControls(oldCtxt);
         configurePorts(oldCtxt);
+        configureRefs(oldCtxt);
         configure(cmp, oldCtxt);
     }
     
@@ -132,6 +135,13 @@ public abstract class CodeContext<D extends CodeDelegate> {
         for (PortDescriptor oldPD : oldPorts.values()) {
             oldPD.getPort().disconnectAll();
         }
+    }
+    
+    private void configureRefs(CodeContext<D> oldCtxt) {
+        Map<String, RefDescriptor> oldRefs = oldCtxt == null
+                ? Collections.EMPTY_MAP : oldCtxt.refs;
+        refs.forEach( (id, ref) -> ref.attach(this, oldRefs.remove(id)));
+        oldRefs.forEach( (id, ref) -> ref.dispose() );
     }
 
     final void handleHierarchyChanged() {
@@ -207,14 +217,17 @@ public abstract class CodeContext<D extends CodeDelegate> {
     }
     
     protected final void reset(boolean full) {
-        controls.values().stream().forEach(cd -> cd.reset(full));
-        ports.values().stream().forEach(pd -> pd.reset(full));
+        controls.values().forEach(cd -> cd.reset(full));
+        ports.values().forEach(pd -> pd.reset(full));
+        refs.values().forEach(rd -> rd.reset(full));
     }
     
 
     final void handleDispose() {
         cmp = null;
         handleHierarchyChanged();
+        refs.values().forEach(RefDescriptor::dispose);
+        refs.clear();
         controls.clear();
         ports.clear();
         dispose();

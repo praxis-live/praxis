@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.neilcsmith.praxis.core.Lookup;
+import net.neilcsmith.praxis.impl.InstanceLookup;
 import net.neilcsmith.praxis.video.Player;
 import net.neilcsmith.praxis.video.QueueContext;
 import net.neilcsmith.praxis.video.WindowHints;
@@ -59,6 +61,7 @@ public class PGLPlayer implements Player {
     private List<FrameRateListener> listeners = new ArrayList<>();
     private Applet applet = null;
     private PGLOutputSink sink = null;
+    private Lookup lookup;
 
     PGLPlayer(int width,
             int height,
@@ -84,9 +87,17 @@ public class PGLPlayer implements Player {
         this.wHints = wHints;
         this.queue = queue;
         this.profile = profile;
+        
+        applet = new Applet();
         sink = new PGLOutputSink();
+        lookup = InstanceLookup.create(applet);
     }
 
+    @Override
+    public Lookup getLookup() {
+        return lookup;
+    }
+    
     @Override
     public void run() {
         LOG.info("Starting experimental PGL renderer.");
@@ -96,6 +107,12 @@ public class PGLPlayer implements Player {
             init();
         } catch (Exception ex) {
             LOG.log(Level.WARNING, "Unable to start OpenGL player", ex);
+            running = false;
+            try {
+                applet.dispose();
+            } catch (Exception ex2) {
+                LOG.log(Level.FINE, "Unable to dispose PApplet", ex2);
+            }
         }
         while (running) {
             try {
@@ -113,7 +130,6 @@ public class PGLPlayer implements Player {
     }
 
     private void init() throws Exception {
-        applet = new Applet();
         if (outputDevice > -1) {
             PApplet.runSketch(new String[]{
                 "--display=" + (outputDevice + 1),
@@ -161,7 +177,9 @@ public class PGLPlayer implements Player {
 
     @Override
     public void terminate() {
-        applet.exit();
+        if (running) {
+            applet.exit();
+        }
     }
 
     @Override
@@ -286,14 +304,24 @@ public class PGLPlayer implements Player {
 
         @Override
         public synchronized void dispose() {
-            context.dispose();
             sink.disconnect();
+            context.dispose();
             super.dispose();
         }
 
         @Override
         public void exitActual() {
             running = false;
+        }
+
+        @Override
+        public void die(String what) {
+            throw new RuntimeException(what);
+        }
+
+        @Override
+        public void die(String what, Exception e) {
+            throw new RuntimeException(what, e);
         }
 
     }

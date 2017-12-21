@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -27,8 +27,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *
- * @author Neil C Smith <http://neilcsmith.net>
+ * Annotate a field to be injected - an injected field will be automatically
+ * created and persisted between code changes. Injected fields do not have ports
+ * or controls, and values are not saved to projects.
+ * <p>
+ * The @Inject annotation may be used on fields of type {@link Ref}, {@link Property},
+ * or any field type that can be backed by a Property - String, double, float, int, boolean,
+ * PArray, PBytes, any enum, any Serializable implementation, or a List of Serializable
+ * subclasses.
+ * 
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

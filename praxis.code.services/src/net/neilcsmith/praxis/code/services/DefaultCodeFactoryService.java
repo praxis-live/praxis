@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2016 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,9 +21,19 @@
  */
 package net.neilcsmith.praxis.code.services;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 import net.neilcsmith.praxis.code.CodeCompilerService;
 import net.neilcsmith.praxis.code.CodeComponent;
 import net.neilcsmith.praxis.code.CodeComponentFactoryService;
@@ -37,10 +47,12 @@ import net.neilcsmith.praxis.core.Call;
 import net.neilcsmith.praxis.core.ComponentFactory;
 import net.neilcsmith.praxis.core.ComponentType;
 import net.neilcsmith.praxis.core.ControlAddress;
+import net.neilcsmith.praxis.core.Lookup;
 import net.neilcsmith.praxis.core.info.ControlInfo;
 import net.neilcsmith.praxis.core.types.PArray;
 import net.neilcsmith.praxis.core.types.PMap;
 import net.neilcsmith.praxis.core.types.PReference;
+import net.neilcsmith.praxis.core.types.PResource;
 import net.neilcsmith.praxis.impl.AbstractAsyncControl;
 import net.neilcsmith.praxis.impl.AbstractRoot;
 import net.neilcsmith.praxis.logging.LogBuilder;
@@ -56,14 +68,23 @@ public class DefaultCodeFactoryService extends AbstractRoot {
             = new ConcurrentHashMap<>();
 
     private final ComponentRegistry registry;
+    private final Set<PResource> libs;
+    
+    private LibraryClassloader libClassloader;
 
     public DefaultCodeFactoryService() {
         super(EnumSet.noneOf(Caps.class));
         registry = ComponentRegistry.getInstance();
+        libs = new LinkedHashSet<>();
         registerControl(CodeComponentFactoryService.NEW_INSTANCE, new NewInstanceControl());
         registerControl(CodeContextFactoryService.NEW_CONTEXT, new NewContextControl());
         registerInterface(CodeComponentFactoryService.class);
         registerInterface(CodeContextFactoryService.class);
+    }
+
+    @Override
+    protected void activating() {
+        libClassloader = new LibraryClassloader(Thread.currentThread().getContextClassLoader());
     }
 
     private ControlAddress findCompilerService() throws Exception {
@@ -84,8 +105,32 @@ public class DefaultCodeFactoryService extends AbstractRoot {
     private Class<? extends CodeDelegate> extractCodeDelegateClass(Argument response) throws Exception {
         PMap data = PMap.coerce(response);
         PMap classes = PMap.coerce(data.get(CodeCompilerService.KEY_CLASSES));
-        ClassLoader classLoader = new PMapClassLoader(classes, Thread.currentThread().getContextClassLoader());
+        PArray.from(data.get(DefaultCompilerService.EXT_CLASSPATH)).ifPresent(this::processExtClasspath);
+        ClassLoader classLoader = new PMapClassLoader(classes, libClassloader);
         return (Class<? extends CodeDelegate>) classLoader.loadClass("$");
+    }
+    
+    private void processExtClasspath(PArray extCP) {
+        if (extCP.isEmpty()) {
+            return;
+        }
+        List<PResource> extLibs = extCP.stream()
+                .map(v -> PResource.from(v).orElseThrow(() -> new IllegalArgumentException()))
+                .collect(Collectors.toCollection(ArrayList::new));
+        
+        extLibs.removeAll(libs);
+        Lookup lkp = getLookup();
+        extLibs.forEach(res -> {
+            URI lib = res.resolve(lkp).stream()
+                    .filter(uri -> !"file".equals(uri.getScheme()) || new File(uri).exists())
+                    .findFirst().orElseThrow(() -> new IllegalArgumentException("Can't find library : " + res ));
+            try {
+                libClassloader.addURL(lib.toURL());
+            } catch (MalformedURLException ex) {
+                throw new IllegalArgumentException(ex);
+            }
+            libs.add(res);
+        });
     }
 
     private void extractCompilerLog(Argument response, LogBuilder logBuilder) throws Exception {
@@ -210,5 +255,19 @@ public class DefaultCodeFactoryService extends AbstractRoot {
         }
 
     }
+    
+    
+    private static class LibraryClassloader extends URLClassLoader {
+        
+        public LibraryClassloader(ClassLoader parent) {
+            super(new URL[0], parent);
+        }
+
+        @Override
+        protected void addURL(URL url) {
+            super.addURL(url);
+        }
+    }
+    
 
 }
