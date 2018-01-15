@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,8 +23,9 @@
 package net.neilcsmith.praxis.video.code;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import net.neilcsmith.praxis.code.CodeConnector;
 import net.neilcsmith.praxis.code.CodeFactory;
 import net.neilcsmith.praxis.code.ResourceProperty;
@@ -44,21 +45,22 @@ public class VideoCodeConnector<T extends VideoCodeDelegate> extends CodeConnect
 //    public final static String SETUP = "setup";
 //    public final static String DRAW = "draw";
     
+    private final Map<String, OffScreenGraphicsInfo> offscreen;
+    
     private VideoOutputPort.Descriptor output;
-    private List<OffScreenGraphicsInfo> offscreen;
 
     public VideoCodeConnector(CodeFactory.Task<T> contextCreator,
             T delegate) {
         super(contextCreator, delegate);
-        offscreen = new ArrayList<>();
+        offscreen = new LinkedHashMap<>();
     }
     
     VideoOutputPort.Descriptor extractOutput() {
         return output;
     }
 
-    OffScreenGraphicsInfo[] extractOffScreenInfo() {
-        return offscreen.toArray(new OffScreenGraphicsInfo[offscreen.size()]);
+    Map<String, OffScreenGraphicsInfo> extractOffScreenInfo() {
+        return offscreen.isEmpty() ? Collections.EMPTY_MAP : offscreen;
     }
     
     @Override
@@ -109,7 +111,7 @@ public class VideoCodeConnector<T extends VideoCodeDelegate> extends CodeConnect
         if (field.isAnnotationPresent(OffScreen.class)) {
             OffScreenGraphicsInfo osgi = OffScreenGraphicsInfo.create(field);
             if (osgi != null) {
-                offscreen.add(osgi);
+                offscreen.put(field.getName(), osgi);
                 return;
             }
         }
