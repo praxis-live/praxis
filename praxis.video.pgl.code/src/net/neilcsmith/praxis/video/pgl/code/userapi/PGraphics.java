@@ -21,6 +21,7 @@
  */
 package net.neilcsmith.praxis.video.pgl.code.userapi;
 
+import java.util.Optional;
 import net.neilcsmith.praxis.video.pgl.PGLContext;
 import net.neilcsmith.praxis.video.pgl.PGLGraphics;
 import net.neilcsmith.praxis.video.pgl.PGLShader;
@@ -57,6 +58,20 @@ abstract class PGraphics extends PImage {
         return context == this.context ? g : null;
     }
 
+    /**
+     * Search for an instance of the given type.
+     * @param <T>
+     * @param type class to search for
+     * @return Optional wrapping the result if found, or empty if not
+     */
+    public <T> Optional<T> find(Class<T> type) {
+        if (processing.core.PImage.class.isAssignableFrom(type)) {
+            return Optional.ofNullable(type.cast(g));
+        } else {
+            return Optional.empty();
+        }
+    }
+    
     // EXTENSION METHODS
     
     public PShader createShader(String vertShader, String fragShader) {
