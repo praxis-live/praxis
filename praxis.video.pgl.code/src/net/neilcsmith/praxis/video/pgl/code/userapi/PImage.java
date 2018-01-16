@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -39,8 +39,12 @@ import net.neilcsmith.praxis.video.pgl.PGLContext;
  */
 public abstract class PImage {
     
-    public final int width;
-    public final int height;
+    public /*final*/ int width;
+    public /*final*/ int height;
+    
+    PImage() {
+        
+    }
     
     public PImage(int width, int height) {
         this.width = width;

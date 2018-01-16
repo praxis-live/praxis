@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -31,12 +31,32 @@ import processing.opengl.PShapeOpenGL;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-abstract class PGraphics /*extends PImage*/ {
+abstract class PGraphics extends PImage {
     
     processing.core.PGraphics g;
     PGLContext context;
 
+    void init(processing.core.PGraphics g, PGLContext context) {
+        this.g = g;
+        this.context = context;
+        this.width = g.width;
+        this.height = g.height;
+    }
     
+    processing.core.PGraphics release() {
+        processing.core.PGraphics ret = g;
+        g = null;
+        context = null;
+        this.width = 0;
+        this.height = 0;
+        return ret;
+    }
+    
+    @Override
+    protected processing.core.PImage unwrap(PGLContext context) {
+        return context == this.context ? g : null;
+    }
+
     // EXTENSION METHODS
     
     public PShader createShader(String vertShader, String fragShader) {
@@ -44,6 +64,14 @@ abstract class PGraphics /*extends PImage*/ {
     }
     
     // PROCESSING API BELOW
+    
+    public void beginDraw() {
+        g.beginDraw();
+    }
+    
+    public void endDraw() {
+        g.endDraw();
+    }
     
     public void beginShape() {
         g.beginShape();

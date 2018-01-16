@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2014 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -31,15 +31,11 @@ public abstract class PGraphics2D extends PGraphics {
     
 
     protected final void initGraphics(PGLGraphics graphics) {
-        this.g = graphics;
-        this.context = graphics.getContext();
+        init(graphics, graphics.getContext());
     }
     
     protected final PGLGraphics releaseGraphics() {
-        PGLGraphics ret = (PGLGraphics) g;
-        this.g = null;
-        this.context = null;
-        return ret;
+        return (PGLGraphics) release();
     }
 
 }

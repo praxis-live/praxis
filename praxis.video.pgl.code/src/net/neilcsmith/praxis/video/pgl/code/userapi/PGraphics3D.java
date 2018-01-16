@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -28,18 +28,14 @@ import processing.core.PConstants;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class PGraphics3D extends PGraphics {
+public abstract class PGraphics3D extends PGraphics {
 
     protected void initGraphics(PGLGraphics3D graphics) {
-        this.g = graphics;
-        this.context = graphics.getContext();
+        super.init(graphics, graphics.getContext());
     }
 
     protected PGLGraphics3D releaseGraphics() {
-        PGLGraphics3D ret = (PGLGraphics3D) g;
-        this.g = null;
-        this.context = null;
-        return ret;
+        return (PGLGraphics3D) release();
     }
 
     // PROCESSING API BELOW
