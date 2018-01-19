@@ -1,7 +1,7 @@
 
     @P(1)
     @Type.Number(min = 10, max = 300, def = 120)
-    @Port(false)
+    @Config.Port(false)
     @OnChange("updatePulse")
     double bpm;
     @P(2)
