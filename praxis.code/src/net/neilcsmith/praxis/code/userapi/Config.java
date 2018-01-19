@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -25,16 +25,23 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Control automatic port creation for properties, triggers, etc.
+ *
+ * @author Neil C Smith - http://www.neilcsmith.net
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Deprecated
-public @interface Port {
+public abstract class Config {
 
     /**
-     * Whether or not to create a port.
-     *
-     * @return false to suppress port creation
+     * Control automatic port creation for properties, triggers, etc.
      */
-    boolean value();
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Port {
+
+        /**
+         * Whether or not to create a port.
+         *
+         * @return false to suppress port creation
+         */
+        boolean value();
+    }
+
 }
