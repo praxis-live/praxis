@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.neilcsmith.praxis.audio.code.userapi.AudioIn;
 import net.neilcsmith.praxis.audio.code.userapi.AudioOut;
+import net.neilcsmith.praxis.audio.code.userapi.AudioTable;
 import net.neilcsmith.praxis.audio.code.userapi.Table;
 import net.neilcsmith.praxis.audio.code.userapi.UGen;
 import net.neilcsmith.praxis.code.CodeConnector;
@@ -59,6 +60,7 @@ public class AudioCodeConnector<D extends AudioCodeDelegate> extends CodeConnect
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     protected void analyseField(Field field) {
         
         if (AudioIn.class.isAssignableFrom(field.getType())) {
@@ -99,7 +101,7 @@ public class AudioCodeConnector<D extends AudioCodeDelegate> extends CodeConnect
         if (Table.class.isAssignableFrom(field.getType())) {
             P p = field.getAnnotation(P.class);
             if (p != null) {
-                ResourceProperty.Descriptor<Table> ipd =
+                ResourceProperty.Descriptor<AudioTable> ipd =
                         ResourceProperty.Descriptor.create(this, p, field, TableLoader.getDefault());
                 if (ipd != null) {
                     addControl(ipd);
