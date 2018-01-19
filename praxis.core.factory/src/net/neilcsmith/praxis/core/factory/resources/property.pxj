@@ -1,5 +1,5 @@
 
-    @P(1) @Port(false) @OnChange("valueChanged")
+    @P(1) @Config.Port(false) @OnChange("valueChanged")
     Property value;
 
     @Out(1) Output out;

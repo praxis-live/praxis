@@ -3,13 +3,13 @@
     Property values;
     @P(2) @ReadOnly
     int index;
-    @P(3) @Type.Integer(min = 1, max = 1024, def = 1) @Port(false)
+    @P(3) @Type.Integer(min = 1, max = 1024, def = 1) @Config.Port(false)
     int minSkip;
-    @P(4) @Type.Integer(min = 1, max = 1024, def = 1) @Port(false)
+    @P(4) @Type.Integer(min = 1, max = 1024, def = 1) @Config.Port(false)
     int maxSkip;
-    @P(5) @Port(false)
+    @P(5) @Config.Port(false)
     boolean pingPong;
-    @P(6) @Port(false) @Type.Boolean(def = true)
+    @P(6) @Config.Port(false) @Type.Boolean(def = true)
     boolean resetOnChange;
     
     @T(2) boolean reset;
