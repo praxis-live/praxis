@@ -13,7 +13,7 @@
     @P(5) @OnChange("lightChanged")
     boolean backlight;
     
-    @P(6) @Type.String(allowed = {"Value", "Signal"}, def = "Value") @Port(false)
+    @P(6) @Type.String(allowed = {"Value", "Signal"}, def = "Value") @Config.Port(false)
     String button_mode;
     
     @AuxOut(1) Output button1;

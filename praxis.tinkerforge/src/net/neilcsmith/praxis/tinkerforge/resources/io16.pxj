@@ -1,31 +1,31 @@
 
     @TinkerForge BrickletIO16 io;
     
-    @P(-1) @Port(false) @Type.Boolean(def = true) boolean invertInput;
+    @P(-1) @Config.Port(false) @Type.Boolean(def = true) boolean invertInput;
     
     @Out(0) @ID("input-a0") Output a0;
-    @P(0) @Port(false) @Type.Boolean(def = true)
+    @P(0) @Config.Port(false) @Type.Boolean(def = true)
     @ID("pull-up-a0")@OnChange("refreshInputs") boolean pullUpA0;
     @Out(1) @ID("input-a1") Output a1;
-    @P(1) @Port(false) @Type.Boolean(def = true)
+    @P(1) @Config.Port(false) @Type.Boolean(def = true)
     @ID("pull-up-a1") @OnChange("refreshInputs") boolean pullUpA1;
     @Out(2) @ID("input-a2") Output a2;
-    @P(2) @Port(false) @Type.Boolean(def = true)
+    @P(2) @Config.Port(false) @Type.Boolean(def = true)
     @ID("pull-up-a2") @OnChange("refreshInputs") boolean pullUpA2;
     @Out(3) @ID("input-a3") Output a3;
-    @P(3) @Port(false) @Type.Boolean(def = true)
+    @P(3) @Config.Port(false) @Type.Boolean(def = true)
     @ID("pull-up-a3") @OnChange("refreshInputs") boolean pullUpA3;
     @Out(4) @ID("input-a4") Output a4;
-    @P(4) @Port(false) @Type.Boolean(def = true)
+    @P(4) @Config.Port(false) @Type.Boolean(def = true)
     @ID("pull-up-a4") @OnChange("refreshInputs") boolean pullUpA4;
     @Out(5) @ID("input-a5") Output a5;
-    @P(5) @Port(false) @Type.Boolean(def = true)
+    @P(5) @Config.Port(false) @Type.Boolean(def = true)
     @ID("pull-up-a5") @OnChange("refreshInputs") boolean pullUpA5;
     @Out(6) @ID("input-a6") Output a6;
-    @P(6) @Port(false) @Type.Boolean(def = true)
+    @P(6) @Config.Port(false) @Type.Boolean(def = true)
     @ID("pull-up-a6") @OnChange("refreshInputs") boolean pullUpA6;
     @Out(7) @ID("input-a7") Output a7;
-    @P(7) @Port(false) @Type.Boolean(def = true)
+    @P(7) @Config.Port(false) @Type.Boolean(def = true)
     @ID("pull-up-a7") @OnChange("refreshInputs") boolean pullUpA7;
     
     @P(10) @ID("output-b0") @OnChange("refreshOutputs") boolean b0;

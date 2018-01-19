@@ -4,7 +4,7 @@
     @TinkerForge BrickletBarometer device;
     
     @P(1) @OnChange("referenceChanged") @ID("reference-pressure")
-    @Port(false) @Type.Number(def = DEFAULT_REFERENCE_PRESSURE)
+    @Config.Port(false) @Type.Number(def = DEFAULT_REFERENCE_PRESSURE)
     double reference;
     @P(2) @ReadOnly
     double pressure;

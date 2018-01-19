@@ -16,31 +16,31 @@
     @P(7) @Type.Number(min = 0, max = 1, def = 0.5) @OnChange("positionChanged")
     double position_7;
     
-    @P(11) @Port(false) @OnChange("enabledChanged")
+    @P(11) @Config.Port(false) @OnChange("enabledChanged")
     boolean enabled_1;
-    @P(12) @Port(false) @OnChange("enabledChanged")
+    @P(12) @Config.Port(false) @OnChange("enabledChanged")
     boolean enabled_2;
-    @P(13) @Port(false) @OnChange("enabledChanged")
+    @P(13) @Config.Port(false) @OnChange("enabledChanged")
     boolean enabled_3;
-    @P(14) @Port(false) @OnChange("enabledChanged")
+    @P(14) @Config.Port(false) @OnChange("enabledChanged")
     boolean enabled_4;
-    @P(15) @Port(false) @OnChange("enabledChanged")
+    @P(15) @Config.Port(false) @OnChange("enabledChanged")
     boolean enabled_5;
-    @P(16) @Port(false) @OnChange("enabledChanged")
+    @P(16) @Config.Port(false) @OnChange("enabledChanged")
     boolean enabled_6;
-    @P(17) @Port(false) @OnChange("enabledChanged")
+    @P(17) @Config.Port(false) @OnChange("enabledChanged")
     boolean enabled_7;
     
-    @P(100) @Port(false) @OnChange("configChanged")
+    @P(100) @Config.Port(false) @OnChange("configChanged")
     @Type.Integer(min = 2000, max = 65535, def = 19500) 
     int period;
-    @P(101) @Port(false) @OnChange("configChanged")
+    @P(101) @Config.Port(false) @OnChange("configChanged")
     @Type.Integer(min = 1, max = 65535, def = 1000)
     int minPulseWidth;
-    @P(102) @Port(false) @OnChange("configChanged")
+    @P(102) @Config.Port(false) @OnChange("configChanged")
     @Type.Integer(min = 1, max = 65535, def = 2000)
     int maxPulseWidth;
-    @P(103) @Port(false) @OnChange("configChanged")
+    @P(103) @Config.Port(false) @OnChange("configChanged")
     @Type.Integer(min = 5000, max = 9000, def = 5000)
     int outputVoltage;
     
