@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import net.neilcsmith.praxis.code.CodeComponent;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.code.PortDescriptor;
@@ -268,6 +269,17 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
             return context.asImage(surface);
         }
 
+        @Override
+        public <T> Optional<T> find(Class<T> type) {
+            if (processing.core.PImage.class.isAssignableFrom(type) &&
+                    surface instanceof PGLSurface) {
+                PGLContext ctxt = ((PGLSurface) surface).getContext();
+                return Optional.of(type.cast(unwrap(ctxt)));
+            } else {
+                return super.find(type);
+            }
+        }
+        
     }
 
 }

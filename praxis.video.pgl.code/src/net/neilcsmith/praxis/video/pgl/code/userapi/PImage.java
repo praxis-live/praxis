@@ -30,6 +30,7 @@
 
 package net.neilcsmith.praxis.video.pgl.code.userapi;
 
+import java.util.Optional;
 import net.neilcsmith.praxis.video.pgl.PGLContext;
 
 
@@ -50,6 +51,17 @@ public abstract class PImage {
         this.width = width;
         this.height = height;
     }
+    
+    /**
+     * Search for an instance of the given type.
+     * @param <T>
+     * @param type class to search for
+     * @return Optional wrapping the result if found, or empty if not
+     */
+    public <T> Optional<T> find(Class<T> type) {
+        return Optional.empty();
+    }
+    
     
     protected abstract processing.core.PImage unwrap(PGLContext context);
     

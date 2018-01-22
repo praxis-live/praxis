@@ -64,11 +64,12 @@ abstract class PGraphics extends PImage {
      * @param type class to search for
      * @return Optional wrapping the result if found, or empty if not
      */
+    @Override
     public <T> Optional<T> find(Class<T> type) {
         if (processing.core.PImage.class.isAssignableFrom(type)) {
             return Optional.ofNullable(type.cast(g));
         } else {
-            return Optional.empty();
+            return super.find(type);
         }
     }
     
