@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -36,51 +36,57 @@ class OffScreenGraphicsInfo {
 
     private final int width;
     private final int height;
+    private final double scaleWidth;
+    private final double scaleHeight;
+    private final boolean persistent;
     private final OffScreen.Format format;
     private final Field field;
-    private final String id;
 
     private VideoCodeContext<?> context;
     private OffScreenGraphics graphics;
 
-    private OffScreenGraphicsInfo(Field field, int width, int height, OffScreen.Format format) {
+    private OffScreenGraphicsInfo(Field field,
+            int width,
+            int height,
+            double scaleWidth,
+            double scaleHeight,
+            boolean persistent,
+            OffScreen.Format format) {
         this.field = field;
         this.width = width;
         this.height = height;
+        this.scaleWidth = scaleWidth;
+        this.scaleHeight = scaleHeight;
+        this.persistent = persistent;
         this.format = format;
-        this.id = field.getName();
     }
 
-    void attach(VideoCodeContext context, OffScreenGraphicsInfo[] previous) {
+    void attach(VideoCodeContext context, OffScreenGraphicsInfo previous) {
         this.context = context;
         if (previous != null) {
-            for (OffScreenGraphicsInfo old : previous) {
-                if (old.id.equals(id)
-                        && old.graphics != null
+            if (persistent
+                    && previous.graphics != null /* will get validated later anyway?
                         && width == old.width
                         && height == old.height
-                        && format == old.format) {
-                    graphics = new OffScreenGraphics(old.graphics.surface);
-                    old.graphics = null;
-                    try {
-                        field.set(context.getDelegate(), graphics);
-                    } catch (IllegalArgumentException | IllegalAccessException ex) {
-                        context.getLog().log(LogLevel.ERROR, ex);
-                    }
-                    break;
+                        && format == old.format*/) {
+                graphics = new OffScreenGraphics(previous.graphics.surface);
+                previous.graphics = null;
+                try {
+                    field.set(context.getDelegate(), graphics);
+                } catch (IllegalArgumentException | IllegalAccessException ex) {
+                    context.getLog().log(LogLevel.ERROR, ex);
                 }
             }
+
         }
     }
 
     void validate(Surface output) {
         if (graphics == null
-                || !output.checkCompatible(graphics.surface,
-                        width == 0,
-                        format == OffScreen.Format.Default)) {
+                || !isValid(graphics, output)) {
             OffScreenGraphics old = graphics;
             graphics = createGraphics(output);
-            if (old != null) {
+            if (old != null && persistent) {
                 graphics.surface.copy(old.surface);
                 old.surface.release();
             }
@@ -92,20 +98,55 @@ class OffScreenGraphicsInfo {
         }
     }
 
-    private OffScreenGraphics createGraphics(Surface output) {
-        if (width == 0 && format == OffScreen.Format.Default) {
-            return new OffScreenGraphics(output.createSurface());
-        } else {
-            int w = width == 0 ? output.getWidth() : width;
-            int h = height == 0 ? output.getHeight() : height;
-            boolean alpha;
-            if (format == OffScreen.Format.Default) {
-                alpha = output.hasAlpha();
-            } else {
-                alpha = format == OffScreen.Format.ARGB;
-            }
-            return new OffScreenGraphics(output.createSurface(w, h, alpha));
+    void endFrame() {
+        if (!persistent) {
+            release();
         }
+    }
+
+    void release() {
+        if (graphics != null) {
+            graphics.surface.release();
+        }
+    }
+
+    private boolean isValid(OffScreenGraphics graphics, Surface output) {
+        if (graphics == null) {
+            return false;
+        }
+        Surface offscreenSurface = graphics.surface;
+        if (!output.checkCompatible(offscreenSurface, false, false)) {
+            return false;
+        }
+        return offscreenSurface.hasAlpha() == calculateAlpha(output)
+                && offscreenSurface.getWidth() == calculateWidth(output)
+                && offscreenSurface.getHeight() == calculateHeight(output);
+
+    }
+
+    private boolean calculateAlpha(Surface output) {
+        if (format == OffScreen.Format.Default) {
+            return output.hasAlpha();
+        } else {
+            return format == OffScreen.Format.ARGB;
+        }
+    }
+
+    private int calculateWidth(Surface output) {
+        int w = width < 1 ? output.getWidth() : width;
+        w *= scaleWidth;
+        return Math.max(w, 1);
+    }
+
+    private int calculateHeight(Surface output) {
+        int h = height < 1 ? output.getHeight() : height;
+        h *= scaleHeight;
+        return Math.max(h, 1);
+    }
+
+    private OffScreenGraphics createGraphics(Surface output) {
+        return new OffScreenGraphics(output.createSurface(
+                calculateWidth(output), calculateHeight(output), calculateAlpha(output)));
     }
 
     static OffScreenGraphicsInfo create(Field field) {
@@ -118,11 +159,20 @@ class OffScreenGraphicsInfo {
         int width = ann.width();
         int height = ann.height();
         OffScreen.Format format = ann.format();
-        if (width < 1 || height < 1) {
-            width = 0;
-            height = 0;
-        }
-        return new OffScreenGraphicsInfo(field, width, height, format);
+//        if (width < 1 || height < 1) {
+//            width = 0;
+//            height = 0;
+//        }
+        double scaleWidth = ann.scaleWidth();
+        double scaleHeight = ann.scaleHeight();
+        boolean persistent = ann.persistent();
+        return new OffScreenGraphicsInfo(field,
+                width,
+                height,
+                scaleWidth,
+                scaleHeight,
+                persistent,
+                format);
     }
 
     private static class OffScreenGraphics extends PGraphics {

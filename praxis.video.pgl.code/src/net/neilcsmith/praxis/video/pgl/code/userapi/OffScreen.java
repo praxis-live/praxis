@@ -20,7 +20,7 @@
  * have any questions.
  *
  */
-package net.neilcsmith.praxis.video.code.userapi;
+package net.neilcsmith.praxis.video.pgl.code.userapi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -73,19 +73,5 @@ public @interface OffScreen {
      */
     public boolean persistent() default true;
     
-    /**
-     * The pixel format of the buffer. The default value of {@link Format#Default}
-     * will match the output surface.
-     * 
-     * @return format (Default, RGB, ARGB)
-     */
-    public Format format() default Format.Default;
-    
-    /**
-     * Pixel format of the buffer.
-     */
-    public static enum Format {
-        Default, RGB, ARGB;
-    }
     
 }

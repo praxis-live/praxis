@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -34,6 +34,7 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 import net.neilcsmith.praxis.code.userapi.AuxIn;
 import net.neilcsmith.praxis.code.userapi.AuxOut;
+import net.neilcsmith.praxis.code.userapi.Config;
 import net.neilcsmith.praxis.code.userapi.ID;
 import net.neilcsmith.praxis.code.userapi.In;
 import net.neilcsmith.praxis.code.userapi.Inject;
@@ -464,6 +465,10 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     protected boolean shouldAddPort(AnnotatedElement element) {
         if (element.isAnnotationPresent(ReadOnly.class)) {
             return false;
+        }
+        Config.Port port = element.getAnnotation(Config.Port.class);
+        if (port != null) {
+            return port.value();
         }
         Port ann = element.getAnnotation(Port.class);
         if (ann != null) {

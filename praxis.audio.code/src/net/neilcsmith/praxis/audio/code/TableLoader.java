@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -24,7 +24,7 @@ package net.neilcsmith.praxis.audio.code;
 
 import java.io.IOException;
 import java.net.URI;
-import net.neilcsmith.praxis.audio.code.userapi.Table;
+import net.neilcsmith.praxis.audio.code.userapi.AudioTable;
 import net.neilcsmith.praxis.audio.io.AudioData;
 import net.neilcsmith.praxis.code.ResourceProperty;
 
@@ -32,19 +32,19 @@ import net.neilcsmith.praxis.code.ResourceProperty;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-class TableLoader extends ResourceProperty.Loader<Table> {
+class TableLoader extends ResourceProperty.Loader<AudioTable> {
 
     private final static TableLoader INSTANCE = new TableLoader();
     
     private TableLoader() {
-        super(Table.class);
+        super(AudioTable.class);
     }
     
     @Override
-    public Table load(URI uri) throws IOException {
+    public AudioTable load(URI uri) throws IOException {
         try {
             AudioData ad = AudioData.fromURL(uri.toURL());
-            return Table.wrap(ad.data, (int)(ad.sampleRate + 0.5f), ad.channels);
+            return AudioTable.wrap(ad.data, (int)(ad.sampleRate + 0.5f), ad.channels);
         } catch (Exception ex) {
             if (ex instanceof IOException) {
                 throw (IOException) ex;

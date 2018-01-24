@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,12 +23,17 @@
 package net.neilcsmith.praxis.video.pgl.code;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import net.neilcsmith.praxis.code.CodeConnector;
 import net.neilcsmith.praxis.code.CodeFactory;
 import net.neilcsmith.praxis.code.ResourceProperty;
 import net.neilcsmith.praxis.code.userapi.In;
 import net.neilcsmith.praxis.code.userapi.P;
 import net.neilcsmith.praxis.core.Port;
+import net.neilcsmith.praxis.logging.LogLevel;
+import net.neilcsmith.praxis.video.pgl.code.userapi.OffScreen;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PFont;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PImage;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PShape;
@@ -42,15 +47,22 @@ public class P3DCodeConnector extends CodeConnector<P3DCodeDelegate> {
     public final static String SETUP = "setup";
     public final static String DRAW = "draw";
 
+    private final Map<String, P3DOffScreenGraphicsInfo> offscreen;
+    
     private PGLVideoOutputPort.Descriptor output;
 
     public P3DCodeConnector(CodeFactory.Task<P3DCodeDelegate> creator,
             P3DCodeDelegate delegate) {
         super(creator, delegate);
+        offscreen = new LinkedHashMap<>();
     }
 
     PGLVideoOutputPort.Descriptor extractOutput() {
         return output;
+    }
+    
+    Map<String, P3DOffScreenGraphicsInfo> extractOffScreenInfo() {
+        return offscreen.isEmpty() ? Collections.EMPTY_MAP : offscreen;
     }
 
     @Override
@@ -106,6 +118,21 @@ public class P3DCodeConnector extends CodeConnector<P3DCodeDelegate> {
                     }
                     return;
                 }
+            }
+        }
+        
+        if (field.isAnnotationPresent(OffScreen.class)) {
+            P3DOffScreenGraphicsInfo osgi = P3DOffScreenGraphicsInfo.create(field);
+            if (osgi != null) {
+                offscreen.put(field.getName(), osgi);
+                return;
+            } else {
+                getLog().log(LogLevel.ERROR,
+                        "OffScreen graphics not supported for field "
+                        + field.getName()
+                        + " of type "
+                        + field.getType().getSimpleName()
+                );
             }
         }
 

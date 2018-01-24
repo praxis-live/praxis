@@ -5,7 +5,7 @@
     @UGen Player pl;
     
     @P(1) @OnChange("sampleChanged") @OnError("sampleError")
-    Table sample;
+    AudioTable sample;
     @P(2) @Type.Number(min=0, max=1) @Transient @OnChange("updatePosition")
     double position;
     @P(3) @Type.Number(min=0, max=1)

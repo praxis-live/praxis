@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -24,7 +24,10 @@ package net.neilcsmith.praxis.video.pgl.code;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import net.neilcsmith.praxis.code.CodeComponent;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.code.PortDescriptor;
@@ -46,6 +49,7 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
 
     private final PGLVideoOutputPort.Descriptor output;
     private final PGLVideoInputPort.Descriptor[] inputs;
+    private final Map<String, P2DOffScreenGraphicsInfo> offscreen;
     private final Processor processor;
 
     private boolean setupRequired;
@@ -65,6 +69,9 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
         }
 
         inputs = ins.toArray(new PGLVideoInputPort.Descriptor[ins.size()]);
+        
+        offscreen = connector.extractOffScreenInfo();
+        
         processor = new Processor(inputs.length);
     }
 
@@ -74,6 +81,14 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
         for (PGLVideoInputPort.Descriptor vidp : inputs) {
             processor.addSource(vidp.getPort().getPipe());
         }
+        configureOffScreen((P2DCodeContext) oldCtxt);
+    }
+    
+    private void configureOffScreen(P2DCodeContext oldCtxt) {
+        Map<String, P2DOffScreenGraphicsInfo> oldOffscreen = oldCtxt == null
+                ? Collections.EMPTY_MAP : oldCtxt.offscreen;
+        offscreen.forEach( (id, osgi) -> osgi.attach(this, oldOffscreen.remove(id)));
+        oldOffscreen.forEach( (id, osgi) -> osgi.release());
     }
 
     @Override
@@ -81,6 +96,21 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
         setupRequired = true;
     }
 
+    @Override
+    protected void stopping(ExecutionContext source, boolean fullStop) {
+        offscreen.forEach((id, osgi) -> osgi.release());
+    }
+
+    void beginOffscreen() {
+        processor.pg.pushMatrix();
+    }
+    
+    void endOffscreen() {
+        processor.pg.beginDraw();
+        processor.pg.popMatrix();
+    }
+    
+    
     private class Processor extends AbstractProcessPipe {
 
         private final PGraphics pg;
@@ -117,6 +147,8 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
 
             P2DCodeDelegate del = getDelegate();
             
+            validateOffscreen(pglOut);
+            
             pg.init(pglOut.getGraphics(), setupRequired);
             del.configure(pglOut.getContext().parent(), pg, output.getWidth(), output.getHeight());
             if (setupRequired) {
@@ -134,6 +166,7 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
                 getLog().log(LogLevel.ERROR, ex);
             }
             pg.release();
+            releaseOffscreen();
             flush();
         }
         
@@ -160,6 +193,14 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
             } catch (Exception ex) {
                 getLog().log(LogLevel.ERROR, ex);
             }
+        }
+        
+        private void validateOffscreen(PGLSurface output) {
+            offscreen.forEach((id, osgi) -> osgi.validate(output));
+        }
+        
+        private void releaseOffscreen() {
+            offscreen.forEach((id, osgi) -> osgi.endFrame());
         }
 
     }
@@ -228,6 +269,17 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
             return context.asImage(surface);
         }
 
+        @Override
+        public <T> Optional<T> find(Class<T> type) {
+            if (processing.core.PImage.class.isAssignableFrom(type) &&
+                    surface instanceof PGLSurface) {
+                PGLContext ctxt = ((PGLSurface) surface).getContext();
+                return Optional.of(type.cast(unwrap(ctxt)));
+            } else {
+                return super.find(type);
+            }
+        }
+        
     }
 
 }

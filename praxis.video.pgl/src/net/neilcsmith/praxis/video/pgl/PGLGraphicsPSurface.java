@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -52,10 +52,12 @@ class PGLGraphicsPSurface extends PSurfaceJOGL {
             public synchronized void uncaughtException(GLAnimatorControl glac, GLAutoDrawable glad, Throwable thrwbl) {
 
                 stopThread();
-                graphics.parent.finished = true;
-                graphics.parent.dispose();
-                graphics.parent.exitActual();
-
+                PGLPlayer.Applet applet = (PGLPlayer.Applet) graphics.parent;
+                applet.error = thrwbl;
+                applet.finished = true;
+                applet.dispose();
+                applet.exitActual();
+                
             }
         });
     }

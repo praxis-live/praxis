@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -31,7 +31,7 @@ import org.jaudiolibs.pipes.Buffer;
  */
 public final class Player extends MultiOut implements Resettable {
 
-    private Table table;
+    private AudioTable table;
     private double in;
     private double out;
     private double speed;
@@ -50,7 +50,12 @@ public final class Player extends MultiOut implements Resettable {
         reset();
     }
 
+    @Deprecated
     public Player table(Table table) {
+        return table((AudioTable) table);
+    }
+    
+    public Player table(AudioTable table) {
         if (table != this.table) {
             this.table = table;
             triggerSmoothing();
@@ -58,7 +63,7 @@ public final class Player extends MultiOut implements Resettable {
         return this;
     }
 
-    public Table table() {
+    public AudioTable table() {
         return table;
     }
 

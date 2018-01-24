@@ -28,6 +28,7 @@ import java.lang.annotation.RetentionPolicy;
  * Control automatic port creation for properties, triggers, etc.
  */
 @Retention(RetentionPolicy.RUNTIME)
+@Deprecated
 public @interface Port {
 
     /**

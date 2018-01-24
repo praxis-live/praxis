@@ -4,9 +4,9 @@
     
     @TinkerForge BrickletJoystick joystick;
     
-    @P(1) @Port(false) @OnChange("updatePosition")
+    @P(1) @Config.Port(false) @OnChange("updatePosition")
             boolean normalize;
-    @P(2) @Port(false) @Type.String(allowed = {VALUE, SIGNAL})
+    @P(2) @Config.Port(false) @Type.String(allowed = {VALUE, SIGNAL})
             String buttonMode;
     
     @P(3) @ReadOnly double x;

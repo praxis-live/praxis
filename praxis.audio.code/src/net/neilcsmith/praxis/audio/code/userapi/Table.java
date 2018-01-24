@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -26,14 +26,15 @@ package net.neilcsmith.praxis.audio.code.userapi;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public final class Table {
+@Deprecated
+public abstract class Table {
     
     private final float[] data;
     private final double sampleRate;
     private final int channels;
     private final int size;
     
-    private Table(float[] data, double sampleRate, int channels) {
+    Table(float[] data, double sampleRate, int channels) {
         this.data = data;
         this.sampleRate = sampleRate;
         this.channels= channels;
@@ -91,7 +92,7 @@ public final class Table {
     }
     
     public static Table wrap(float[] data, double sampleRate, int channels) {
-        return new Table(data, sampleRate, channels);
+        return AudioTable.wrap(data, sampleRate, channels);
     }
     
 }

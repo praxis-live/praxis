@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2016 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -24,7 +24,9 @@ package net.neilcsmith.praxis.video.code;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import net.neilcsmith.praxis.code.CodeComponent;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.code.PortDescriptor;
@@ -42,7 +44,7 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
 
     private final VideoOutputPort.Descriptor output;
     private final VideoInputPort.Descriptor[] inputs;
-    private final OffScreenGraphicsInfo[] offscreen;
+    private final Map<String, OffScreenGraphicsInfo> offscreen;
     private final Processor processor;
 
     private boolean setupRequired;
@@ -78,18 +80,27 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
     }
     
     private void configureOffScreen(VideoCodeContext<D> oldCtxt) {
-        OffScreenGraphicsInfo[] previous = oldCtxt == null ? null : oldCtxt.offscreen;
-        for (OffScreenGraphicsInfo info : offscreen) {
-            info.attach(this, previous);
-        }
+        Map<String, OffScreenGraphicsInfo> oldOffscreen = oldCtxt == null
+                ? Collections.EMPTY_MAP : oldCtxt.offscreen;
+        offscreen.forEach( (id, osgi) -> osgi.attach(this, oldOffscreen.remove(id)));
+        oldOffscreen.forEach( (id, osgi) -> osgi.release());
     }
 
     @Override
     protected void starting(ExecutionContext state) {
         setupRequired = true;
     }
-    
 
+    @Override
+    protected void stopping(ExecutionContext source, boolean fullStop) {
+        if (fullStop) {
+            offscreen.forEach((id, osgi) -> osgi.release());
+        }
+    }
+    
+    
+    
+    
     private class Processor extends AbstractProcessPipe {
         
         private SurfacePGraphics pg;
@@ -131,6 +142,7 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
             }
             invokeDraw(del);
             pg.endDraw();
+            endOffscreen();
             flush();
         }
         
@@ -160,9 +172,11 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
         }
         
         private void validateOffscreen(Surface output) {
-            for (OffScreenGraphicsInfo info : offscreen) {
-                info.validate(output);
-            }
+            offscreen.forEach((id, osgi) -> osgi.validate(output));
+        }
+        
+        private void endOffscreen() {
+            offscreen.forEach((id, osgi) -> osgi.endFrame());
         }
         
         private void invokeSetup(VideoCodeDelegate delegate) {

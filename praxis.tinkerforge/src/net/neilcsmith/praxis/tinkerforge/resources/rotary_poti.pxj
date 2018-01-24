@@ -1,7 +1,7 @@
 
     @TinkerForge BrickletRotaryPoti poti;
     
-    @P(1) @Port(false) @OnChange("updateValue")
+    @P(1) @Config.Port(false) @OnChange("updateValue")
     boolean normalize;
     @P(2) @ReadOnly
     double value;

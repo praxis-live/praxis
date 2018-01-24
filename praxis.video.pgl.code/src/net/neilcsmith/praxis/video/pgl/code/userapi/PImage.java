@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -30,6 +30,7 @@
 
 package net.neilcsmith.praxis.video.pgl.code.userapi;
 
+import java.util.Optional;
 import net.neilcsmith.praxis.video.pgl.PGLContext;
 
 
@@ -39,13 +40,28 @@ import net.neilcsmith.praxis.video.pgl.PGLContext;
  */
 public abstract class PImage {
     
-    public final int width;
-    public final int height;
+    public /*final*/ int width;
+    public /*final*/ int height;
+    
+    PImage() {
+        
+    }
     
     public PImage(int width, int height) {
         this.width = width;
         this.height = height;
     }
+    
+    /**
+     * Search for an instance of the given type.
+     * @param <T>
+     * @param type class to search for
+     * @return Optional wrapping the result if found, or empty if not
+     */
+    public <T> Optional<T> find(Class<T> type) {
+        return Optional.empty();
+    }
+    
     
     protected abstract processing.core.PImage unwrap(PGLContext context);
     

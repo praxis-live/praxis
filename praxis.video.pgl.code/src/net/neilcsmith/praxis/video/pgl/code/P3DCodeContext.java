@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -24,7 +24,10 @@ package net.neilcsmith.praxis.video.pgl.code;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import net.neilcsmith.praxis.code.CodeComponent;
 import net.neilcsmith.praxis.code.CodeContext;
 import net.neilcsmith.praxis.code.PortDescriptor;
@@ -47,6 +50,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
 
     private final PGLVideoOutputPort.Descriptor output;
     private final PGLVideoInputPort.Descriptor[] inputs;
+    private final Map<String, P3DOffScreenGraphicsInfo> offscreen;
     private final Processor processor;
 
     private boolean setupRequired;
@@ -66,6 +70,9 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         }
 
         inputs = ins.toArray(new PGLVideoInputPort.Descriptor[ins.size()]);
+        
+        offscreen = connector.extractOffScreenInfo();
+        
         processor = new Processor(inputs.length);
     }
 
@@ -76,6 +83,14 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         for (PGLVideoInputPort.Descriptor vidp : inputs) {
             processor.addSource(vidp.getPort().getPipe());
         }
+        configureOffScreen((P3DCodeContext) oldCtxt);
+    }
+    
+    private void configureOffScreen(P3DCodeContext oldCtxt) {
+        Map<String, P3DOffScreenGraphicsInfo> oldOffscreen = oldCtxt == null
+                ? Collections.EMPTY_MAP : oldCtxt.offscreen;
+        offscreen.forEach( (id, osgi) -> osgi.attach(this, oldOffscreen.remove(id)));
+        oldOffscreen.forEach( (id, osgi) -> osgi.release());
     }
 
     @Override
@@ -85,10 +100,19 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
     }
 
     @Override
-    protected void stopping(ExecutionContext source) {
+    protected void stopping(ExecutionContext source, boolean fullStop) {
         processor.dispose3D();
+        offscreen.forEach((id, osgi) -> osgi.release());
     }
     
+    void beginOffscreen() {
+        processor.pg.pushMatrix();
+    }
+    
+    void endOffscreen() {
+        processor.pg.beginDraw();
+        processor.pg.popMatrix();
+    }
     
 
     private class Processor extends AbstractProcessPipe {
@@ -101,7 +125,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         private Processor(int inputs) {
             super(inputs);
             images = new PGLImage[inputs];
-            pg = new PGraphics();
+            pg = new PGraphics(P3DCodeContext.this);
         }
 
         @Override
@@ -134,6 +158,8 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
                 context = curCtxt;
                 p3d = context.create3DGraphics(output.getWidth(), output.getHeight());
             }
+            
+            validateOffscreen(pglOut);
 
             p3d.beginDraw();
             p3d.clear();
@@ -161,6 +187,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             g.blendMode(PConstants.BLEND);
             g.tint(255.0f);
             g.image(p3d, 0, 0);
+            releaseOffscreen();
             flush();
         }
 
@@ -188,6 +215,14 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
                 getLog().log(LogLevel.ERROR, ex);
             }
         }
+        
+        private void validateOffscreen(PGLSurface output) {
+            offscreen.forEach((id, osgi) -> osgi.validate(output));
+        }
+        
+        private void releaseOffscreen() {
+            offscreen.forEach((id, osgi) -> osgi.endFrame());
+        }
 
         private void dispose3D() {
             if (p3d != null) {
@@ -199,19 +234,28 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
 
     }
 
-    private class PGraphics extends PGraphics3D {
+    static class PGraphics extends PGraphics3D {
 
+        private final P3DCodeContext context;
+
+        PGLGraphics3D pgl;
         private int matrixStackDepth;
 
-        private void init(PGLGraphics3D g) {
+        PGraphics(P3DCodeContext context) {
+            this.context = context;
+        }
+
+        void init(PGLGraphics3D g) {
+            pgl = g;
             initGraphics(g);
             g.pushMatrix();
         }
 
-        private void release() {
+        void release() {
+            pgl = null;
             PGLGraphics3D g = releaseGraphics();
             if (matrixStackDepth != 0) {
-                getLog().log(LogLevel.ERROR, "Mismatched matrix push / pop");
+                context.getLog().log(LogLevel.ERROR, "Mismatched matrix push / pop");
                 while (matrixStackDepth > 0) {
                     g.popMatrix();
                     matrixStackDepth--;
@@ -223,7 +267,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         @Override
         public void pushMatrix() {
             if (matrixStackDepth == 31) {
-                getLog().log(LogLevel.ERROR, "Matrix stack full in popMatrix()");
+                context.getLog().log(LogLevel.ERROR, "Matrix stack full in popMatrix()");
                 return;
             }
             matrixStackDepth++;
@@ -233,7 +277,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         @Override
         public void popMatrix() {
             if (matrixStackDepth == 0) {
-                getLog().log(LogLevel.ERROR, "Matrix stack empty in popMatrix()");
+                context.getLog().log(LogLevel.ERROR, "Matrix stack empty in popMatrix()");
                 return;
             }
             matrixStackDepth--;
@@ -254,6 +298,17 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         @Override
         protected processing.core.PImage unwrap(PGLContext context) {
             return context.asImage(surface);
+        }
+        
+        @Override
+        public <T> Optional<T> find(Class<T> type) {
+            if (processing.core.PImage.class.isAssignableFrom(type) &&
+                    surface instanceof PGLSurface) {
+                PGLContext ctxt = ((PGLSurface) surface).getContext();
+                return Optional.of(type.cast(unwrap(ctxt)));
+            } else {
+                return super.find(type);
+            }
         }
 
     }

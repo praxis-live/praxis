@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,6 +22,7 @@
  */
 package net.neilcsmith.praxis.video.pgl.code;
 
+import java.util.Optional;
 import net.neilcsmith.praxis.code.DefaultCodeDelegate;
 import net.neilcsmith.praxis.video.pgl.code.userapi.Constants;
 import net.neilcsmith.praxis.video.pgl.code.userapi.PFont;
@@ -60,6 +61,15 @@ public class P2DCodeDelegate extends DefaultCodeDelegate {
     }
 
     public void draw() {
+    }
+    
+    @Override
+    public <T> Optional<T> find(Class<T> type) {
+        if (processing.core.PImage.class.isAssignableFrom(type)) {
+            return pg == null ? Optional.empty() : pg.find(type);
+        } else {
+            return super.find(type);
+        }
     }
 
     // extension delegate methods
