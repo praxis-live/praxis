@@ -7,8 +7,8 @@
             <suite-component/>
             <module-dependencies/>
             <friend-packages>
-                <friend>net.neilcsmith.praxis.hub.net</friend>
-                <friend>net.neilcsmith.praxis.osc</friend>
+                <friend>org.praxislive.hub.net</friend>
+                <friend>org.praxislive.osc</friend>
                 <package>de.sciss.net</package>
             </friend-packages>
             <class-path-extension>

@@ -7,7 +7,7 @@
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.compiler</code-name-base>
+                    <code-name-base>org.praxislive.compiler</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -16,7 +16,7 @@
                 </dependency>
             </module-dependencies>
             <friend-packages>
-                <friend>net.neilcsmith.praxis.compiler</friend>
+                <friend>org.praxislive.compiler</friend>
                 <package>org.praxislive.compiler.source.tree</package>
                 <package>org.praxislive.compiler.source.util</package>
                 <package>org.praxislive.compiler.tools.javac</package>

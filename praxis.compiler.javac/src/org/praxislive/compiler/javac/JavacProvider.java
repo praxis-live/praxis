@@ -2,7 +2,7 @@
 package org.praxislive.compiler.javac;
 
 import javax.tools.JavaCompiler;
-import net.neilcsmith.praxis.compiler.JavaCompilerProvider;
+import org.praxislive.compiler.JavaCompilerProvider;
 import org.praxislive.compiler.tools.javac.api.JavacTool;
 
 /**

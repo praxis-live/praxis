@@ -7,7 +7,7 @@
             <suite-component/>
             <module-dependencies/>
             <friend-packages>
-                <friend>net.neilcsmith.praxis.video.pgl</friend>
+                <friend>org.praxislive.video.pgl</friend>
                 <friend>processing.core</friend>
                 <package>com.jogamp.common</package>
                 <package>com.jogamp.common.jvm</package>

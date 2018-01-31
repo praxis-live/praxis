@@ -7,7 +7,7 @@
             <suite-component/>
             <module-dependencies/>
             <friend-packages>
-                <friend>net.neilcsmith.praxis.tinkerforge</friend>
+                <friend>org.praxislive.tinkerforge</friend>
                 <package>com.tinkerforge</package>
             </friend-packages>
             <class-path-extension>

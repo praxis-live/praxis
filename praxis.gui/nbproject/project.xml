@@ -3,7 +3,7 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>net.neilcsmith.praxis.gui</code-name-base>
+            <code-name-base>org.praxislive.gui</code-name-base>
             <suite-component/>
             <module-dependencies>
                 <dependency>
@@ -23,7 +23,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.core</code-name-base>
+                    <code-name-base>org.praxislive.core</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -31,7 +31,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.impl</code-name-base>
+                    <code-name-base>org.praxislive.impl</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -39,7 +39,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.util</code-name-base>
+                    <code-name-base>org.praxislive.util</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -57,8 +57,8 @@
                 </test-type>
             </test-dependencies>
             <public-packages>
-                <package>net.neilcsmith.praxis.gui</package>
-                <package>net.neilcsmith.praxis.gui.impl</package>
+                <package>org.praxislive.gui</package>
+                <package>org.praxislive.gui.impl</package>
             </public-packages>
         </data>
     </configuration>

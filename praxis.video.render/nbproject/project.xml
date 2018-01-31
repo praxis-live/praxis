@@ -3,13 +3,13 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>net.neilcsmith.praxis.video.render</code-name-base>
+            <code-name-base>org.praxislive.video.render</code-name-base>
             <suite-component/>
             <module-dependencies/>
             <public-packages>
-                <package>net.neilcsmith.praxis.video.render</package>
-                <package>net.neilcsmith.praxis.video.render.ops</package>
-                <package>net.neilcsmith.praxis.video.render.utils</package>
+                <package>org.praxislive.video.render</package>
+                <package>org.praxislive.video.render.ops</package>
+                <package>org.praxislive.video.render.utils</package>
             </public-packages>
         </data>
     </configuration>

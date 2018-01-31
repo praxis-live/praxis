@@ -21,7 +21,7 @@
  */
 package org.praxislive.tracker;
 
-import net.neilcsmith.praxis.core.Argument;
+import org.praxislive.core.Argument;
 
 /**
  *
