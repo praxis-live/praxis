@@ -29,7 +29,7 @@ import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.interfaces.Services;
 import org.praxislive.core.types.PArray;
-import org.praxislive.core.types.Value;
+import org.praxislive.core.Value;
 import org.praxislive.script.Command;
 import org.praxislive.script.CommandInstaller;
 import org.praxislive.script.Env;

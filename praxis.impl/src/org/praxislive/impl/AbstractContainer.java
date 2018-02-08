@@ -41,7 +41,7 @@ import org.praxislive.core.Port;
 import org.praxislive.core.PortConnectionException;
 import org.praxislive.core.PortListener;
 import org.praxislive.core.VetoException;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ControlInfo;
 import org.praxislive.core.interfaces.ComponentFactoryService;
 import org.praxislive.core.interfaces.ContainerInterface;
 import org.praxislive.core.types.PArray;

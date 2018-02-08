@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -14,39 +14,46 @@
  *
  * You should have received a copy of the GNU General Public License version 3
  * along with this work; if not, see http://www.gnu.org/licenses/
- * 
+ *
  *
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.core;
+package org.praxislive.core.factory;
+
+import org.praxislive.code.GenerateTemplate;
+
+// default imports
+import java.util.*;
+import org.praxislive.core.Argument;
+import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.types.*;
+import org.praxislive.code.userapi.*;
+import org.praxislive.core.code.CoreCodeDelegate;
+import static org.praxislive.code.userapi.Constants.*;
 
 /**
  *
- * @author Neil C Smith (http://neilcsmith.net)
+ * @author Neil C Smith - http://www.neilcsmith.net
  */
-public abstract class InterfaceDefinition {
+@GenerateTemplate(CoreCustom.TEMPLATE_PATH)
+public class CoreCustom extends CoreCodeDelegate {
     
-    public abstract String[] getControls();
+    final static String TEMPLATE_PATH = "resources/custom.pxj";
 
-    public abstract ControlInfo getControlInfo(String control);
-
+    // PXJ-BEGIN:body
+    
     @Override
-    public final boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        return obj == null ? false : this.getClass().equals(obj.getClass());
+    public void setup() {
+
     }
 
+    
     @Override
-    public final int hashCode() {
-        return this.getClass().hashCode();
-    }
+    public void update() {
 
-    @Override
-    public final String toString() {
-        return this.getClass().getName();
     }
-
+    
+    // PXJ-END:body
+    
 }

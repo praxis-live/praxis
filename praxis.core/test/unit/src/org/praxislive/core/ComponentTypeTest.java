@@ -6,7 +6,6 @@
 package org.praxislive.core;
 
 import org.praxislive.core.ComponentType;
-import org.praxislive.core.info.ArgumentInfo;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

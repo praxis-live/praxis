@@ -22,6 +22,7 @@
 
 package org.praxislive.core.types;
 
+import org.praxislive.core.Value;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -30,7 +31,7 @@ import java.util.Optional;
 import org.praxislive.core.Argument;
 import org.praxislive.core.ArgumentFormatException;
 import org.praxislive.core.Lookup;
-import org.praxislive.core.info.ArgumentInfo;
+import org.praxislive.core.ArgumentInfo;
 
 /**
  *

@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 import org.praxislive.core.Argument;
 import org.praxislive.core.ArgumentFormatException;
 import org.praxislive.core.Lookup;
-import org.praxislive.core.info.ArgumentInfo;
+import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.types.PString;
 
 /**

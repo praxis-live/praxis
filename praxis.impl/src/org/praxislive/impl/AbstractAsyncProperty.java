@@ -30,8 +30,8 @@ import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.ControlPort;
 import org.praxislive.core.PacketRouter;
-import org.praxislive.core.info.ArgumentInfo;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ArgumentInfo;
+import org.praxislive.core.ControlInfo;
 import org.praxislive.core.interfaces.ServiceManager;
 import org.praxislive.core.interfaces.ServiceUnavailableException;
 import org.praxislive.core.interfaces.TaskService;
@@ -43,6 +43,7 @@ import org.praxislive.core.types.PReference;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
+@Deprecated
 public abstract class AbstractAsyncProperty<T> extends AbstractControl {
 
     private final static Logger LOG = Logger.getLogger(AbstractAsyncProperty.class.getName());

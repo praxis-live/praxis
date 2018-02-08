@@ -25,7 +25,7 @@ package org.praxislive.gui.impl;
 import org.praxislive.core.Argument;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.ArgumentFormatException;
-import org.praxislive.core.info.ArgumentInfo;
+import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;
 import org.praxislive.gui.ControlBinding;

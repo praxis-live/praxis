@@ -32,7 +32,7 @@ import org.praxislive.code.PortDescriptor;
 import org.praxislive.code.userapi.AuxOut;
 import org.praxislive.code.userapi.Out;
 import org.praxislive.core.Port;
-import org.praxislive.core.info.PortInfo;
+import org.praxislive.core.PortInfo;
 import org.praxislive.core.types.PMap;
 import org.praxislive.logging.LogLevel;
 import org.jaudiolibs.pipes.Buffer;

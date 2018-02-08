@@ -23,7 +23,7 @@
 package org.praxislive.code;
 
 import org.praxislive.core.Control;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ControlInfo;
 
 /**
  *

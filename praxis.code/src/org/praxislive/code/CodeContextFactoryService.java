@@ -21,8 +21,8 @@
  */
 package org.praxislive.code;
 
-import org.praxislive.core.info.ArgumentInfo;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ArgumentInfo;
+import org.praxislive.core.ControlInfo;
 import org.praxislive.core.interfaces.Service;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PReference;

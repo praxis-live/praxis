@@ -31,10 +31,10 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.praxislive.core.info.ArgumentInfo;
+import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.types.PBytes;
 import org.praxislive.core.types.PMap;
-import org.praxislive.core.types.Value;
+import org.praxislive.core.Value;
 import org.praxislive.logging.LogLevel;
 
 /**

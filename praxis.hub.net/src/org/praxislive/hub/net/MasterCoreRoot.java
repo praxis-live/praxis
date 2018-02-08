@@ -37,7 +37,7 @@ import org.praxislive.core.ControlAddress;
 import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.InvalidAddressException;
 import org.praxislive.core.Root;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ControlInfo;
 import org.praxislive.core.interfaces.RootFactoryService;
 import org.praxislive.core.interfaces.RootManagerService;
 import org.praxislive.core.types.PArray;

@@ -33,7 +33,7 @@ import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Root;
 import org.praxislive.core.RootHub;
 import org.praxislive.core.interfaces.ServiceUnavailableException;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ControlInfo;
 import org.praxislive.core.interfaces.ScriptService;
 import org.praxislive.core.interfaces.SystemManagerService;
 import org.praxislive.core.types.PReference;

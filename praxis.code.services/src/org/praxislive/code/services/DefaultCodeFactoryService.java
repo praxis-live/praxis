@@ -48,7 +48,7 @@ import org.praxislive.core.ComponentFactory;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.Lookup;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ControlInfo;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PReference;

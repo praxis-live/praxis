@@ -32,7 +32,7 @@ import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.Control;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.PacketRouter;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ControlInfo;
 import org.praxislive.core.types.PBoolean;
 import org.praxislive.core.types.PNumber;
 import org.praxislive.core.types.PString;

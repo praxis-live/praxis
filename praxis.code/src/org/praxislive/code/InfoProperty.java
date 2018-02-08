@@ -24,7 +24,7 @@ package org.praxislive.code;
 import org.praxislive.core.Call;
 import org.praxislive.core.Control;
 import org.praxislive.core.PacketRouter;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ControlInfo;
 import org.praxislive.core.interfaces.ComponentInterface;
 
 /**

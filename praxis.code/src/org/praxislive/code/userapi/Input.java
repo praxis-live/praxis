@@ -28,7 +28,7 @@ import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import org.praxislive.code.CodeContext;
 import org.praxislive.core.types.PNumber;
-import org.praxislive.core.types.Value;
+import org.praxislive.core.Value;
 import org.praxislive.logging.LogLevel;
 import org.praxislive.util.ArrayUtils;
 

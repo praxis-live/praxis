@@ -28,7 +28,7 @@ import org.praxislive.core.ComponentFactory;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.Root;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ControlInfo;
 import org.praxislive.core.interfaces.ComponentFactoryService;
 import org.praxislive.core.interfaces.RootFactoryService;
 import org.praxislive.core.types.PReference;

@@ -23,7 +23,7 @@ package org.praxislive.audio;
 
 import org.praxislive.core.Port;
 import org.praxislive.core.PortConnectionException;
-import org.praxislive.core.info.PortInfo;
+import org.praxislive.core.PortInfo;
 import org.praxislive.core.types.PMap;
 import org.jaudiolibs.pipes.Pipe;
 

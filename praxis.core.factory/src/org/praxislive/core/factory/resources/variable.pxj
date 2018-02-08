@@ -1,8 +1,0 @@
-
-    @P(1) Property value;
-
-    @Out(1) Output out;
-        
-    @T(1) void trigger() {
-        out.send(value.get());
-    }

@@ -26,7 +26,7 @@ import org.praxislive.audio.impl.DefaultAudioInputPort;
 import org.praxislive.audio.impl.DefaultAudioOutputPort;
 import org.praxislive.audio.io.SampleTable;
 import org.praxislive.core.Port;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ControlInfo;
 import org.praxislive.core.types.PMap;
 import org.praxislive.impl.AbstractComponent;
 import org.praxislive.impl.BooleanProperty;

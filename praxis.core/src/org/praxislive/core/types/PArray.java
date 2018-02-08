@@ -21,6 +21,7 @@
  */
 package org.praxislive.core.types;
 
+import org.praxislive.core.Value;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,7 +33,7 @@ import java.util.stream.Stream;
 import org.praxislive.core.Argument;
 import org.praxislive.core.ArgumentFormatException;
 import org.praxislive.core.CallArguments;
-import org.praxislive.core.info.ArgumentInfo;
+import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.syntax.Token;
 import org.praxislive.core.syntax.Tokenizer;
 

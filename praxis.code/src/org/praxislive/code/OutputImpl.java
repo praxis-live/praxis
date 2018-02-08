@@ -27,7 +27,7 @@ import org.praxislive.code.userapi.Out;
 import org.praxislive.code.userapi.Output;
 import org.praxislive.core.Argument;
 import org.praxislive.core.Port;
-import org.praxislive.core.info.PortInfo;
+import org.praxislive.core.PortInfo;
 import org.praxislive.logging.LogLevel;
 
 /**

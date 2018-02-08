@@ -26,9 +26,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.praxislive.core.info.ArgumentInfo;
 import org.praxislive.core.types.PMap;
-import org.praxislive.core.types.Value;
 
 /**
  * Address of a Component

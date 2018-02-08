@@ -25,8 +25,8 @@ package org.praxislive.impl;
 
 import org.praxislive.core.Argument;
 import org.praxislive.core.CallArguments;
-import org.praxislive.core.info.ArgumentInfo;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ArgumentInfo;
+import org.praxislive.core.ControlInfo;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PNumber;
 
@@ -34,6 +34,7 @@ import org.praxislive.core.types.PNumber;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public class FloatRangeProperty extends AbstractProperty {
 
     private double min;

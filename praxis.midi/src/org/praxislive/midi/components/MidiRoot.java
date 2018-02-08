@@ -39,7 +39,7 @@ import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.Packet;
 import org.praxislive.core.PacketRouter;
-import org.praxislive.core.info.ArgumentInfo;
+import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.types.PMap;
 import org.praxislive.impl.AbstractRoot;
 import org.praxislive.impl.ArgumentProperty;

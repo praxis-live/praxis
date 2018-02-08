@@ -38,13 +38,13 @@ import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Port;
-import org.praxislive.core.info.ArgumentInfo;
-import org.praxislive.core.info.ControlInfo;
-import org.praxislive.core.info.PortInfo;
+import org.praxislive.core.ArgumentInfo;
+import org.praxislive.core.ControlInfo;
+import org.praxislive.core.PortInfo;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PNumber;
 import org.praxislive.core.types.PString;
-import org.praxislive.core.types.Value;
+import org.praxislive.core.Value;
 import org.praxislive.logging.LogLevel;
 
 /**

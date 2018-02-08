@@ -31,7 +31,7 @@ import org.praxislive.core.ControlPort;
 import org.praxislive.core.Port;
 import org.praxislive.core.PortAddress;
 import org.praxislive.core.PortConnectionException;
-import org.praxislive.core.info.PortInfo;
+import org.praxislive.core.PortInfo;
 
 /**
  *

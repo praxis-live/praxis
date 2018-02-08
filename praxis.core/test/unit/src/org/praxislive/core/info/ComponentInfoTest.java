@@ -6,10 +6,10 @@
 
 package org.praxislive.core.info;
 
-import org.praxislive.core.info.ArgumentInfo;
-import org.praxislive.core.info.ControlInfo;
-import org.praxislive.core.info.ComponentInfo;
-import org.praxislive.core.info.PortInfo;
+import org.praxislive.core.ArgumentInfo;
+import org.praxislive.core.ControlInfo;
+import org.praxislive.core.ComponentInfo;
+import org.praxislive.core.PortInfo;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;

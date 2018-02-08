@@ -21,8 +21,8 @@
  */
 package org.praxislive.core.interfaces;
 
-import org.praxislive.core.info.ArgumentInfo;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ArgumentInfo;
+import org.praxislive.core.ControlInfo;
 import org.praxislive.core.types.PString;
 
 /**

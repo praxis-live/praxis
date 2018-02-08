@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.core.types;
+package org.praxislive.core;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,10 +28,19 @@ import org.praxislive.core.Argument;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.PortAddress;
-import org.praxislive.core.info.ArgumentInfo;
-import org.praxislive.core.info.ComponentInfo;
-import org.praxislive.core.info.ControlInfo;
-import org.praxislive.core.info.PortInfo;
+import org.praxislive.core.ArgumentInfo;
+import org.praxislive.core.ComponentInfo;
+import org.praxislive.core.ControlInfo;
+import org.praxislive.core.PortInfo;
+import org.praxislive.core.types.PArray;
+import org.praxislive.core.types.PBoolean;
+import org.praxislive.core.types.PBytes;
+import org.praxislive.core.types.PError;
+import org.praxislive.core.types.PMap;
+import org.praxislive.core.types.PNumber;
+import org.praxislive.core.types.PReference;
+import org.praxislive.core.types.PResource;
+import org.praxislive.core.types.PString;
 
 /**
  * Eventual replacement for Argument

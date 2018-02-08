@@ -24,7 +24,7 @@ package org.praxislive.gui;
 
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ControlAddress;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ControlInfo;
 
 /**
  *

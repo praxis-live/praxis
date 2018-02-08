@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.core.info;
+package org.praxislive.core;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -28,7 +28,6 @@ import org.praxislive.core.ArgumentFormatException;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;
-import org.praxislive.core.types.Value;
 
 /**
  *

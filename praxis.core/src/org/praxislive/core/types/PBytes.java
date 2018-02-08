@@ -21,6 +21,7 @@
  */
 package org.praxislive.core.types;
 
+import org.praxislive.core.Value;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -49,7 +50,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.praxislive.core.Argument;
 import org.praxislive.core.ArgumentFormatException;
-import org.praxislive.core.info.ArgumentInfo;
+import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.DataObject;
 
 /**

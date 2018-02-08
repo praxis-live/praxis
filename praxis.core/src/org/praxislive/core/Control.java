@@ -22,8 +22,6 @@
 
 package org.praxislive.core;
 
-import org.praxislive.core.info.ControlInfo;
-
 /**
  *
  * @author Neil C Smith

@@ -35,7 +35,7 @@ import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PBoolean;
 import org.praxislive.core.types.PNumber;
 import org.praxislive.core.types.PString;
-import org.praxislive.core.types.Value;
+import org.praxislive.core.Value;
 import org.praxislive.logging.LogLevel;
 import processing.core.PApplet;
 

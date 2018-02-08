@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 import javax.swing.ButtonModel;
 import org.praxislive.core.Argument;
 import org.praxislive.core.CallArguments;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ControlInfo;
 import org.praxislive.core.types.PString;
 import org.praxislive.gui.ControlBinding;
 

@@ -21,8 +21,6 @@
  */
 package org.praxislive.core;
 
-import org.praxislive.core.info.ComponentInfo;
-
 /**
  * Components are the main building blocks within Praxis. They may provide Controls
  * and Ports. Components expect to be used within a hierarchy, inside a Root

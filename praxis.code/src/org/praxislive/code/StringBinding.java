@@ -28,12 +28,12 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.praxislive.code.userapi.Type;
-import org.praxislive.core.info.ArgumentInfo;
+import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PNumber;
 import org.praxislive.core.types.PString;
-import org.praxislive.core.types.Value;
+import org.praxislive.core.Value;
 
 /**
  *

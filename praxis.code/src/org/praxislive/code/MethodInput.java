@@ -28,10 +28,10 @@ import org.praxislive.code.userapi.In;
 import org.praxislive.core.Argument;
 import org.praxislive.core.ArgumentFormatException;
 import org.praxislive.core.Port;
-import org.praxislive.core.info.PortInfo;
+import org.praxislive.core.PortInfo;
 import org.praxislive.core.types.PNumber;
 import org.praxislive.core.types.PString;
-import org.praxislive.core.types.Value;
+import org.praxislive.core.Value;
 
 /**
  *

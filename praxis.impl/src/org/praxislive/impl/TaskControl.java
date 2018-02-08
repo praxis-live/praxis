@@ -27,7 +27,7 @@ import org.praxislive.core.Argument;
 import org.praxislive.core.Call;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.PacketRouter;
-import org.praxislive.core.info.ControlInfo;
+import org.praxislive.core.ControlInfo;
 import org.praxislive.core.interfaces.ServiceUnavailableException;
 import org.praxislive.core.interfaces.TaskService;
 import org.praxislive.core.types.PReference;

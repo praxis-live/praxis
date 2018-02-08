@@ -23,7 +23,6 @@ package org.praxislive.core;
 
 import java.util.Optional;
 import java.util.regex.Pattern;
-import org.praxislive.core.types.Value;
 
 /**
  *

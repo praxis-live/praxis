@@ -22,7 +22,7 @@
 package org.praxislive.code;
 
 import org.praxislive.core.Port;
-import org.praxislive.core.info.PortInfo;
+import org.praxislive.core.PortInfo;
 
 /**
  *

@@ -23,7 +23,6 @@
 package org.praxislive.core;
 
 import java.util.regex.Pattern;
-import org.praxislive.core.info.ArgumentInfo;
 
 /**
  * @TODO Enforce String with regex

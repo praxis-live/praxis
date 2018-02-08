@@ -24,9 +24,9 @@ package org.praxislive.code;
 
 import java.lang.reflect.Field;
 import org.praxislive.code.userapi.Type;
-import org.praxislive.core.info.ArgumentInfo;
+import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.types.PBoolean;
-import org.praxislive.core.types.Value;
+import org.praxislive.core.Value;
 
 /**
  *

@@ -22,8 +22,6 @@
 
 package org.praxislive.core;
 
-import org.praxislive.core.info.PortInfo;
-
 /**
  *
  * @author Neil C Smith
