@@ -21,8 +21,8 @@
  */
 package org.praxislive.code;
 
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ComponentAddress;
@@ -54,7 +54,7 @@ public abstract class AbstractAsyncProperty<V> implements Control {
     private long latest;
 
     
-    protected AbstractAsyncProperty(Argument initialKey, Class<V> valueType, V value) {
+    protected AbstractAsyncProperty(Value initialKey, Class<V> valueType, V value) {
         this.valueType = valueType;
         this.keys = CallArguments.create(initialKey);
         this.value = value;
@@ -150,7 +150,7 @@ public abstract class AbstractAsyncProperty<V> implements Control {
         if (args.getSize() > 0) {
             try {
                 err = PError.coerce(args.get(0));
-            } catch (ArgumentFormatException ex) {
+            } catch (ValueFormatException ex) {
                 err = PError.create(ex, args.get(0).toString());
             }
         } else {
@@ -169,7 +169,7 @@ public abstract class AbstractAsyncProperty<V> implements Control {
         }
     }
 
-    protected void portInvoke(long time, Argument key) {
+    protected void portInvoke(long time, Value key) {
         if (isLatest(time)) {
             CallArguments pkeys = CallArguments.create(key);
             try {
@@ -194,7 +194,7 @@ public abstract class AbstractAsyncProperty<V> implements Control {
 
     }
 
-    private void castAndSetValue(Argument result) {
+    private void castAndSetValue(Value result) {
         if (valueType.isInstance(result)) {
             value = valueType.cast(result);
             return;

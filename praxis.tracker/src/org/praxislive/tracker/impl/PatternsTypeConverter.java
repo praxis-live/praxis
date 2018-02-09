@@ -23,8 +23,8 @@
 package org.praxislive.tracker.impl;
 
 import org.praxislive.code.TypeConverter;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;
@@ -41,13 +41,13 @@ class PatternsTypeConverter extends TypeConverter<Patterns> {
                     PMap.create(PString.KEY_MIME_TYPE, PatternSupport.MIME));
 
     @Override
-    public Argument toArgument(Patterns value) {
+    public Value toArgument(Patterns value) {
         assert false : "Not supported by non-realtime type converters yet";
         return PString.EMPTY;
     }
 
     @Override
-    public Patterns fromArgument(Argument value) throws ArgumentFormatException {
+    public Patterns fromArgument(Value value) throws ValueFormatException {
         return PatternParser.parse(value.toString());
     }
 

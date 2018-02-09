@@ -22,7 +22,7 @@
 
 package org.praxislive.impl;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
@@ -79,7 +79,7 @@ public class TriggerControl implements Control {
         }
 
         @Override
-        public void receive(long time, Argument value) {
+        public void receive(long time, Value value) {
             binding.trigger(time);
         }
         

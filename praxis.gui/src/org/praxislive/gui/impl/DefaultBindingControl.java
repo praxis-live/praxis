@@ -34,7 +34,7 @@ import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.ControlAddress;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.interfaces.ComponentInterface;
@@ -287,7 +287,7 @@ public class DefaultBindingControl extends AbstractControl {
                         isProperty = (type == ControlInfo.Type.Property)
                                 || (type == ControlInfo.Type.ReadOnlyProperty);
 
-                    } catch (ArgumentFormatException ex) {
+                    } catch (ValueFormatException ex) {
                         isProperty = false;
                         bindingInfo = null;
                         LOG.log(Level.WARNING, "" + call + "\n" + compInfo, ex);

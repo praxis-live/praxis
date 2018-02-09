@@ -22,14 +22,14 @@
 package org.praxislive.core;
 
 import java.util.Optional;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;
 
 /**
- * Info object for an Argument, usually used to define the valid input and
+ * Info object for an Value, usually used to define the valid input and
  * output arguments of a Control. As well as giving the type of the argument, an
  * ArgumentInfo can have an optional set of properties. This might be used for
  * defining the "minimum" and "maximum" values of a PNumber argument, for
@@ -50,13 +50,13 @@ public final class ArgumentInfo extends Value {
         Always, Optional, Variable
     }
 
-    private final Class<? extends Argument> type;
+    private final Class<? extends Value> type;
     private final Presence presence;
     private final PMap properties;
 
     private volatile String string;
 
-    private ArgumentInfo(Class<? extends Argument> type,
+    private ArgumentInfo(Class<? extends Value> type,
             Presence presence,
             PMap properties,
             String string) {
@@ -68,9 +68,9 @@ public final class ArgumentInfo extends Value {
 
     /**
      *
-     * @return String name of Argument subclass
+     * @return String name of Value subclass
      */
-    public Class<? extends Argument> getType() {
+    public Class<? extends Value> getType() {
         return type;
     }
 
@@ -103,7 +103,7 @@ public final class ArgumentInfo extends Value {
     }
 //
 //    @Override
-//    public boolean isEquivalent(Argument arg) {
+//    public boolean isEquivalent(Value arg) {
 //        return equals(arg);
 //    }
 
@@ -127,28 +127,28 @@ public final class ArgumentInfo extends Value {
     }
 
     /**
-     * Create an ArgumentInfo from the Argument class and optional PMap of
+     * Create an ArgumentInfo from the Value class and optional PMap of
      * additional properties.
      *
      * @param argClass
      * @param properties
      * @return ArgumentInfo
      */
-    public static ArgumentInfo create(Class<? extends Argument> argClass,
+    public static ArgumentInfo create(Class<? extends Value> argClass,
             PMap properties) {
         return create(argClass, Presence.Always, properties);
 
     }
 
     /**
-     * Create an ArgumentInfo from the Argument class and optional PMap of
+     * Create an ArgumentInfo from the Value class and optional PMap of
      * additional properties.
      *
      * @param argClass
      * @param properties
      * @return ArgumentInfo
      */
-    public static ArgumentInfo create(Class<? extends Argument> argClass,
+    public static ArgumentInfo create(Class<? extends Value> argClass,
             Presence presence, PMap properties) {
         if (argClass == null || presence == null) {
             throw new NullPointerException();
@@ -162,13 +162,13 @@ public final class ArgumentInfo extends Value {
     }
 
     /**
-     * Coerce the given Argument into an ArgumentInfo object.
+     * Coerce the given Value into an ArgumentInfo object.
      *
-     * @param arg Argument to be coerced.
+     * @param arg Value to be coerced.
      * @return ArgumentInfo
-     * @throws ArgumentFormatException if Argument cannot be coerced.
+     * @throws ValueFormatException if Value cannot be coerced.
      */
-    public static ArgumentInfo coerce(Argument arg) throws ArgumentFormatException {
+    public static ArgumentInfo coerce(Value arg) throws ValueFormatException {
         if (arg instanceof ArgumentInfo) {
             return (ArgumentInfo) arg;
         } else {
@@ -176,25 +176,25 @@ public final class ArgumentInfo extends Value {
         }
     }
     
-    public static Optional<ArgumentInfo> from(Argument arg) {
+    public static Optional<ArgumentInfo> from(Value arg) {
         try {
             return Optional.of(coerce(arg));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return Optional.empty();
         }
     }
 
-    private static ArgumentInfo valueOf(String string) throws ArgumentFormatException {
+    private static ArgumentInfo valueOf(String string) throws ValueFormatException {
         PArray arr = PArray.valueOf(string);
         try {
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            Class<? extends Argument> cls = (Class<? extends Argument>) cl.loadClass(arr.get(0).toString());
-//            Class<? extends Argument> cls = (Class<? extends Argument>) Class.forName(arr.get(0).toString());
+            Class<? extends Value> cls = (Class<? extends Value>) cl.loadClass(arr.get(0).toString());
+//            Class<? extends Value> cls = (Class<? extends Value>) Class.forName(arr.get(0).toString());
             Presence presence = Presence.valueOf(arr.get(1).toString());
             PMap properties = PMap.coerce(arr.get(2));
             return new ArgumentInfo(cls, presence, properties, string);
         } catch (Exception ex) {
-            throw new ArgumentFormatException(ex);
+            throw new ValueFormatException(ex);
         }
     }
 

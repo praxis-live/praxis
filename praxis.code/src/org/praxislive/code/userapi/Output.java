@@ -21,7 +21,7 @@
  */
 package org.praxislive.code.userapi;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.types.PBoolean;
 import org.praxislive.core.types.PString;
 
@@ -47,7 +47,7 @@ public abstract class Output {
      *
      * @param value
      */
-    public abstract void send(Argument value);
+    public abstract void send(Value value);
 
     /**
      * Send a float.

@@ -32,7 +32,7 @@ import java.util.List;
  */
 public abstract class CallArguments {
     
-//    public final static CallArguments EMPTY = new CallArguments(new Argument[0]);
+//    public final static CallArguments EMPTY = new CallArguments(new Value[0]);
     /**
      * EMPTY CallArguments, returns 0 for getSize().
      */
@@ -46,18 +46,18 @@ public abstract class CallArguments {
     public abstract int getSize();
 
     /**
-     * Get Argument. Index must be between 0 and count-1.
+     * Get Value. Index must be between 0 and count-1.
      *
-     * @param index int position in Argument array
-     * @return Argument
+     * @param index int position in Value array
+     * @return Value
      */
-    public abstract Argument get(int index);
+    public abstract Value get(int index);
 
-    public abstract Argument[] getAll();
+    public abstract Value[] getAll();
     
     private static class Empty extends CallArguments {
 
-        private final static Argument[] NONE = new Argument[0];
+        private final static Value[] NONE = new Value[0];
 
         @Override
         public int getSize() {
@@ -65,12 +65,12 @@ public abstract class CallArguments {
         }
 
         @Override
-        public Argument get(int index) {
+        public Value get(int index) {
             throw new IndexOutOfBoundsException();
         }
 
         @Override
-        public Argument[] getAll() {
+        public Value[] getAll() {
             return NONE;
         }
 
@@ -97,9 +97,9 @@ public abstract class CallArguments {
     
     private static class Single extends CallArguments {
         
-        private final Argument arg;
+        private final Value arg;
         
-        private Single(Argument arg) {
+        private Single(Value arg) {
             this.arg = arg;
         }
 
@@ -109,7 +109,7 @@ public abstract class CallArguments {
         }
 
         @Override
-        public Argument get(int index) {
+        public Value get(int index) {
             if (index == 0) {
                 return arg;
             }
@@ -117,8 +117,8 @@ public abstract class CallArguments {
         }
 
         @Override
-        public Argument[] getAll() {
-            return new Argument[] {arg};
+        public Value[] getAll() {
+            return new Value[] {arg};
         }
 
 
@@ -134,9 +134,9 @@ public abstract class CallArguments {
     
     private static class Multi extends CallArguments {
         
-        private final Argument[] args;
+        private final Value[] args;
         
-        private Multi(Argument[] args) {
+        private Multi(Value[] args) {
             this.args = args;
         }
 
@@ -146,19 +146,19 @@ public abstract class CallArguments {
         }
 
         @Override
-        public Argument get(int index) {
+        public Value get(int index) {
             return args[index];
         }
 
         @Override
-        public Argument[] getAll() {
+        public Value[] getAll() {
             return args.clone();
         }
 
         @Override
         public String toString() {
             StringBuilder str = new StringBuilder("{");
-            for (Argument arg : args) {
+            for (Value arg : args) {
                 str.append("{");
                 str.append(arg.toString());
                 str.append("}");
@@ -175,7 +175,7 @@ public abstract class CallArguments {
         
 
 
-//    private CallArguments(Argument[] args) {
+//    private CallArguments(Value[] args) {
 //        this.args = args;
 //    }
     
@@ -183,7 +183,7 @@ public abstract class CallArguments {
 //        return args.length;
 //    }
 //
-//    public Argument get(int index) {
+//    public Value get(int index) {
 //        return args[index];
 //    }
 
@@ -193,13 +193,13 @@ public abstract class CallArguments {
 //    }
     
     /**
-     * Create a CallArguments wrapping the given Argument. The CallArguments
+     * Create a CallArguments wrapping the given Value. The CallArguments
      * returned will be optimized for single Arguments.
      *
      * @param arg
      * @return CallArguments
      */
-    public static CallArguments create(Argument arg) {
+    public static CallArguments create(Value arg) {
         if (arg == null) {
             throw new NullPointerException();
         }
@@ -212,8 +212,8 @@ public abstract class CallArguments {
      * @param list
      * @return CallArguments
      */
-    public static CallArguments create(List<Argument> list) {
-        return create(list.toArray(new Argument[list.size()]));
+    public static CallArguments create(List<Value> list) {
+        return create(list.toArray(new Value[list.size()]));
         
 
     }
@@ -224,17 +224,17 @@ public abstract class CallArguments {
      * @param args
      * @return CallArguments
      */
-    public static CallArguments create(Argument ... args) {
+    public static CallArguments create(Value ... args) {
         if (args.length == 0) {
             return EMPTY;
         } else if (args.length == 1) {
-            Argument arg = args[0];
+            Value arg = args[0];
             if (arg == null) {
                 throw new NullPointerException();
             }
             return new Single(arg);
         } else {
-            for (Argument arg : args) {
+            for (Value arg : args) {
                 if (arg == null) {
                     throw new NullPointerException();
                 }
@@ -245,14 +245,14 @@ public abstract class CallArguments {
 
 
     
-//    public static CallArguments create(Argument[] args) {
+//    public static CallArguments create(Value[] args) {
 //        int size = args.length;
 //        if (size == 0) {
 //            return EMPTY;
 //        }
-//        Argument[] copy = new Argument[size];
+//        Value[] copy = new Value[size];
 //        for (int i=0; i < size; i++) {
-//            Argument arg = args[i];
+//            Value arg = args[i];
 //            if (arg == null) {
 //                throw new NullPointerException();
 //            }

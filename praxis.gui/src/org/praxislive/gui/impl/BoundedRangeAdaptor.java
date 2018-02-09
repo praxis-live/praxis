@@ -29,8 +29,8 @@ import java.util.logging.Logger;
 import javax.swing.BoundedRangeModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
@@ -122,13 +122,13 @@ public class BoundedRangeAdaptor extends ControlBinding.Adaptor implements Chang
         updateModel();
     }
 
-    private PNumber coerce(Argument arg) {
+    private PNumber coerce(Value arg) {
         if (arg == null) {
             return null;
         }
         try {
             return PNumber.coerce(arg);
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return null;
         }
     }
@@ -188,7 +188,7 @@ public class BoundedRangeAdaptor extends ControlBinding.Adaptor implements Chang
             int ext = model.getExtent();
             low = convertToDouble(val);
             high = convertToDouble(val + ext);
-            send(CallArguments.create(new Argument[]{
+            send(CallArguments.create(new Value[]{
                         PNumber.valueOf(low), PNumber.valueOf(high)
                     }));
         }

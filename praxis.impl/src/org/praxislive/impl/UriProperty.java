@@ -22,7 +22,7 @@
 package org.praxislive.impl;
 
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Component;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
@@ -46,7 +46,7 @@ public class UriProperty extends AbstractSingleArgProperty {
     }
 
     @Override
-    protected void set(long time, Argument value) throws Exception {
+    protected void set(long time, Value value) throws Exception {
         binding.setBoundValue(time, PResource.coerce(value));
     }
 
@@ -56,7 +56,7 @@ public class UriProperty extends AbstractSingleArgProperty {
     }
 
     @Override
-    protected Argument get() {
+    protected Value get() {
         return binding.getBoundValue();
     }
     
@@ -86,7 +86,7 @@ public class UriProperty extends AbstractSingleArgProperty {
 
         ArgumentInfo[] arguments = new ArgumentInfo[]{PResource.info()};
 
-        Argument[] defaults = new Argument[]{def};
+        Value[] defaults = new Value[]{def};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new UriProperty(binding, info);
     }

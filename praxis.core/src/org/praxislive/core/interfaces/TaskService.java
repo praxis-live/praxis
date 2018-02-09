@@ -21,7 +21,7 @@
  */
 package org.praxislive.core.interfaces;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.types.PMap;
@@ -38,7 +38,7 @@ public class TaskService extends Service {
     public final static ControlInfo SUBMIT_INFO =
             ControlInfo.createFunctionInfo(
             new ArgumentInfo[]{PReference.info(Task.class)},
-            new ArgumentInfo[]{Argument.info()},
+            new ArgumentInfo[]{Value.info()},
             PMap.EMPTY);
 
     @Override
@@ -58,9 +58,9 @@ public class TaskService extends Service {
 
         /**
          * Called to execute task.
-         * @return Argument (use PReference to wrap arbitrary Objects)
+         * @return Value (use PReference to wrap arbitrary Objects)
          * @throws java.lang.Exception
          */
-        public Argument execute() throws Exception;
+        public Value execute() throws Exception;
     }
 }

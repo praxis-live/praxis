@@ -21,7 +21,7 @@
  */
 package org.praxislive.impl;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.types.PArray;
@@ -50,7 +50,7 @@ public class IntProperty extends AbstractSingleArgProperty {
     }
 
     @Override
-    protected void set(long time, Argument value) throws Exception {
+    protected void set(long time, Value value) throws Exception {
         if (writer == null) {
             throw new UnsupportedOperationException("Read Only Property");
         }
@@ -77,7 +77,7 @@ public class IntProperty extends AbstractSingleArgProperty {
     }
 
     @Override
-    protected Argument get() {
+    protected Value get() {
         int val = reader.getBoundValue();
         if (lastValue != null) {
             int last = lastValue.toIntValue();
@@ -109,7 +109,7 @@ public class IntProperty extends AbstractSingleArgProperty {
 //            binding = new DefaultBinding(def);
 //        }
 //        ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.integerInfo(min, max)};
-//        Argument[] defaults = new Argument[]{PNumber.valueOf(def)};
+//        Value[] defaults = new Value[]{PNumber.valueOf(def)};
 //        ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
 //        return new IntProperty(binding, binding, min, max, info);
         Builder b = builder().minimum(min).maximum(max).defaultValue(def);

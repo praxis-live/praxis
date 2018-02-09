@@ -21,7 +21,7 @@
  */
 package org.praxislive.impl;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Component;
 import org.praxislive.core.types.PNumber;
 
@@ -48,7 +48,7 @@ public class ArgumentInputPort extends AbstractControlInputPort {
     }
 
     @Override
-    public void receive(long time, Argument value) {
+    public void receive(long time, Value value) {
         binding.receive(time, value);
     }
 
@@ -62,6 +62,6 @@ public class ArgumentInputPort extends AbstractControlInputPort {
 
     public static interface Binding {
 
-        public void receive(long time, Argument arg);
+        public void receive(long time, Value arg);
     }
 }

@@ -25,7 +25,7 @@ package org.praxislive.logging;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.types.PError;
 import org.praxislive.core.types.PString;
@@ -36,13 +36,13 @@ import org.praxislive.core.types.PString;
  */
 public final class LogBuilder {
 
-    private final List<Argument> log;
+    private final List<Value> log;
 
     private LogLevel level;
 
     public LogBuilder(LogLevel level) {
         this.level = Objects.requireNonNull(level);
-        this.log = new ArrayList<Argument>();
+        this.log = new ArrayList<Value>();
     }
 
     public void log(LogLevel level, String msg) {

@@ -22,7 +22,7 @@
 package org.praxislive.script.ast;
 
 import java.util.List;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.script.ExecutionException;
 import org.praxislive.script.Namespace;
 
@@ -39,17 +39,17 @@ public abstract class Node {
         return true;
     }
 
-    public void writeNextCommand(List<Argument> args) 
+    public void writeNextCommand(List<Value> args) 
             throws ExecutionException {
         throw new ExecutionException();
     }
 
-    public void postResponse(List<Argument> args)
+    public void postResponse(List<Value> args)
             throws ExecutionException {
         throw new ExecutionException();
     }
 
-    public abstract void writeResult(List<Argument> args)
+    public abstract void writeResult(List<Value> args)
             throws ExecutionException;
 
     public void reset() {

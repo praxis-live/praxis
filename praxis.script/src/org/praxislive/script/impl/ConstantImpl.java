@@ -23,7 +23,7 @@
 
 package org.praxislive.script.impl;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.script.Variable;
 
 /**
@@ -32,17 +32,17 @@ import org.praxislive.script.Variable;
  */
 public class ConstantImpl implements Variable {
 
-    Argument value;
+    Value value;
 
-    public ConstantImpl(Argument value) {
+    public ConstantImpl(Value value) {
         this.value = value;
     }
 
-    public void setValue(Argument value) {
+    public void setValue(Value value) {
         throw new UnsupportedOperationException();
     }
 
-    public Argument getValue() {
+    public Value getValue() {
         return value;
     }
 }

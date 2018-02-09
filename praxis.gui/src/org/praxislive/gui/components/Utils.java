@@ -26,6 +26,7 @@ import java.awt.Component;
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
+import org.praxislive.core.Value;
 
 /**
  *
@@ -51,6 +52,9 @@ class Utils {
         );
     }
     
+    static boolean equivalent(Value arg1, Value arg2) {
+        return arg1.equivalent(arg2) || arg2.equivalent(arg2);
+    }
     
     private static int mix(int a, int b, int amt) {
         return a + (((b - a) * amt) >> 8);

@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.Port;
@@ -250,13 +250,13 @@ public class VideoOutput extends AbstractComponent {
             return InstanceLookup.create(items.toArray());
         }
 
-        private Integer getInteger(Argument val) {
+        private Integer getInteger(Value val) {
             if (val.isEmpty()) {
                 return null;
             } else {
                 try {
                     return PNumber.coerce(val).toIntValue();
-                } catch (ArgumentFormatException ex) {
+                } catch (ValueFormatException ex) {
                     return null;
                 }
             }

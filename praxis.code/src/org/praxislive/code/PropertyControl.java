@@ -32,7 +32,7 @@ import org.praxislive.code.userapi.Property;
 import org.praxislive.code.userapi.ReadOnly;
 import org.praxislive.code.userapi.Transient;
 import org.praxislive.code.userapi.Type;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
@@ -490,7 +490,7 @@ public class PropertyControl extends Property implements Control {
         }
 
         @Override
-        public void receive(long time, Argument value) {
+        public void receive(long time, Value value) {
             try {
                 control.setImpl(time, (Value) value);
                 control.checkInvoke(time, false);

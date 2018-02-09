@@ -39,7 +39,7 @@ import org.praxislive.tracker.*;
         position %= p.getRowCount();
         int max = min(p.getColumnCount(), outs.length);
         for (int i = 0; i < max; i++) {
-            Argument arg = p.getValueAt(position, i);
+            Value arg = p.getValueAt(position, i);
             if (arg != null) {
                 outs[i].send(arg);
             }

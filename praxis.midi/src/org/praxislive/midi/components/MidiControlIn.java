@@ -25,7 +25,7 @@ package org.praxislive.midi.components;
 
 import java.util.logging.Logger;
 import javax.sound.midi.ShortMessage;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.Control;
@@ -159,7 +159,7 @@ public class MidiControlIn extends AbstractMidiInComponent {
 
     private class AddressBinding implements ArgumentProperty.Binding {
 
-        public void setBoundValue(long time, Argument value) throws Exception {
+        public void setBoundValue(long time, Value value) throws Exception {
             if (value.isEmpty()) {
                 binding = null;
             } else {
@@ -167,7 +167,7 @@ public class MidiControlIn extends AbstractMidiInComponent {
             }
         }
 
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             if (binding == null) {
                 return PString.EMPTY;
             } else {

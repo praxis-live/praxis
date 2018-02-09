@@ -24,7 +24,7 @@ package org.praxislive.code;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ControlPort;
 import org.praxislive.core.Port;
 import org.praxislive.core.PortConnectionException;
@@ -136,7 +136,7 @@ public class ControlOutput extends ControlPort.Output {
     }
 
     @Override
-    public void send(long time, Argument value) {
+    public void send(long time, Value value) {
         if (sending) {
             return;
         }

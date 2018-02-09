@@ -48,8 +48,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.DataObject;
 
@@ -122,7 +122,7 @@ public final class PBytes extends Value {
             }
             PBytes other = PBytes.coerce(arg);
             return Arrays.equals(bytes, other.bytes);
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return false;
         }
     }
@@ -230,7 +230,7 @@ public final class PBytes extends Value {
         return new PBytes(bytes.clone(), null);
     }
 
-    public static PBytes valueOf(String str) throws ArgumentFormatException {
+    public static PBytes valueOf(String str) throws ValueFormatException {
         if (str.trim().isEmpty()) {
             return PBytes.EMPTY;
         }
@@ -238,7 +238,7 @@ public final class PBytes extends Value {
             byte[] bytes = Base64.getMimeDecoder().decode(str);
             return new PBytes(bytes, str);
         } catch (Exception ex) {
-            throw new ArgumentFormatException(ex);
+            throw new ValueFormatException(ex);
         }
     }
     
@@ -279,7 +279,7 @@ public final class PBytes extends Value {
         return os.toBytes();
     }
 
-    public static PBytes coerce(Argument arg) throws ArgumentFormatException {
+    public static PBytes coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PBytes) {
             return (PBytes) arg;
         } else {
@@ -287,10 +287,10 @@ public final class PBytes extends Value {
         }
     }
 
-    public static Optional<PBytes> from(Argument arg) {
+    public static Optional<PBytes> from(Value arg) {
         try {
             return Optional.of(coerce(arg));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return Optional.empty();
         }
     }

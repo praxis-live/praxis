@@ -16,7 +16,7 @@
     }
 
     @In(1)
-    void in(Argument value) {
+    void in(Value value) {
         position %= count;
         if (position == 0) {
             out.send(value);

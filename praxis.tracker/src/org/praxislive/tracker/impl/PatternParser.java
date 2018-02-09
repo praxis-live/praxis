@@ -23,8 +23,8 @@ package org.praxislive.tracker.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.syntax.Token;
 import org.praxislive.core.syntax.Tokenizer;
 import org.praxislive.core.types.PNumber;
@@ -41,7 +41,7 @@ class PatternParser {
     private PatternParser() {
     }
 
-    static Patterns parse(String data) throws ArgumentFormatException {
+    static Patterns parse(String data) throws ValueFormatException {
         if (data.isEmpty()) {
             return Patterns.EMPTY;
         }
@@ -49,9 +49,9 @@ class PatternParser {
 
     }
     
-    private static Patterns parseImpl(String data) throws ArgumentFormatException {
+    private static Patterns parseImpl(String data) throws ValueFormatException {
         List<PatternImpl> patterns = new ArrayList<>();
-        List<Argument> table = new ArrayList<>();
+        List<Value> table = new ArrayList<>();
         int maxColumn = 0;
         int column = 0;
         Tokenizer tk = new Tokenizer(data);
@@ -62,7 +62,7 @@ class PatternParser {
                 case QUOTED:
                 case BRACED:
                     if (maxColumn > 0 && column >= maxColumn) {
-                        throw new ArgumentFormatException();
+                        throw new ValueFormatException();
                     }
                     table.add(type == Token.Type.PLAIN
                             ? getPlainArgument(t.getText())
@@ -87,7 +87,7 @@ class PatternParser {
                         int columns = maxColumn;
                         int size = table.size();
                         int rows = size / columns;
-                        patterns.add(new PatternImpl(table.toArray(new Argument[size]), rows, columns));
+                        patterns.add(new PatternImpl(table.toArray(new Value[size]), rows, columns));
                         column = 0;
                         maxColumn = 0;
                         table.clear();
@@ -97,7 +97,7 @@ class PatternParser {
                 case COMMENT:
                     break;
                 default:
-                    throw new ArgumentFormatException();
+                    throw new ValueFormatException();
             }
         }
         if (maxColumn > 0) {
@@ -105,7 +105,7 @@ class PatternParser {
             int columns = maxColumn;
             int size = table.size();
             int rows = size / columns;
-            patterns.add(new PatternImpl(table.toArray(new Argument[size]), rows, columns));
+            patterns.add(new PatternImpl(table.toArray(new Value[size]), rows, columns));
         }
 
         if (patterns.isEmpty()) {
@@ -115,7 +115,7 @@ class PatternParser {
         return new PatternsImpl(patterns.toArray(new Pattern[patterns.size()]));
     }
 
-    private static Argument getPlainArgument(String token) {
+    private static Value getPlainArgument(String token) {
         if (".".equals(token)) {
             return null;
         } else if (token.isEmpty()) {
@@ -123,14 +123,14 @@ class PatternParser {
         } else if ("0123456789-.".indexOf(token.charAt(0)) > -1) {
             try {
                 return PNumber.valueOf(token);
-            } catch (ArgumentFormatException ex) {
+            } catch (ValueFormatException ex) {
                 // fall through
             }
         }
         return PString.valueOf(token);
     }
 
-    private static Argument getQuotedArgument(String token) {
+    private static Value getQuotedArgument(String token) {
         if (token.isEmpty()) {
             return PString.EMPTY;
         } else {
@@ -142,11 +142,11 @@ class PatternParser {
 
     static class PatternImpl extends Pattern {
 
-        private final Argument[] values;
+        private final Value[] values;
         private final int rows;
         private final int columns;
 
-        private PatternImpl(Argument[] values, int rows, int columns) {
+        private PatternImpl(Value[] values, int rows, int columns) {
             assert values.length == rows * columns;
             this.values = values;
             this.rows = rows;
@@ -154,7 +154,7 @@ class PatternParser {
         }
 
         @Override
-        public Argument getValueAt(int row, int column) {
+        public Value getValueAt(int row, int column) {
             return values[(row * columns) + column];
         }
 

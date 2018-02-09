@@ -23,8 +23,8 @@ package org.praxislive.core;
 
 import java.util.Arrays;
 import java.util.Optional;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;
@@ -46,11 +46,11 @@ public class ControlInfo extends Value {
     };
 
     private final static ArgumentInfo[] EMPTY_INFO = new ArgumentInfo[0];
-    private final static Argument[] EMPTY_DEFAULTS = new Argument[0];
+    private final static Value[] EMPTY_DEFAULTS = new Value[0];
 
     private final ArgumentInfo[] inputs;
     private final ArgumentInfo[] outputs;
-    private final Argument[] defaults;
+    private final Value[] defaults;
     private final PMap properties;
     private final Type type;
 
@@ -58,7 +58,7 @@ public class ControlInfo extends Value {
 
     private ControlInfo(ArgumentInfo[] inputs,
             ArgumentInfo[] outputs,
-            Argument[] defaults,
+            Value[] defaults,
             Type type,
             PMap properties,
             String string
@@ -110,7 +110,7 @@ public class ControlInfo extends Value {
     }
 
 //    @Override
-//    public boolean isEquivalent(Argument arg) {
+//    public boolean isEquivalent(Value arg) {
 //        return equals(arg);
 //    }
  
@@ -154,7 +154,7 @@ public class ControlInfo extends Value {
         return properties;
     }
 
-    public Argument[] getDefaults() {
+    public Value[] getDefaults() {
         return defaults.clone();
     }
 
@@ -180,7 +180,7 @@ public class ControlInfo extends Value {
         return create(EMPTY_INFO, EMPTY_INFO, null, Type.Action, properties);
     }
 
-    public static ControlInfo createPropertyInfo(ArgumentInfo[] arguments, Argument[] defaults, PMap properties) {
+    public static ControlInfo createPropertyInfo(ArgumentInfo[] arguments, Value[] defaults, PMap properties) {
         return create(arguments, arguments, defaults, Type.Property, properties);
     }
 
@@ -190,7 +190,7 @@ public class ControlInfo extends Value {
 
     private static ControlInfo create(ArgumentInfo[] inputs,
             ArgumentInfo[] outputs,
-            Argument[] defaults,
+            Value[] defaults,
             Type type,
             PMap properties) {
 
@@ -215,7 +215,7 @@ public class ControlInfo extends Value {
 
     }
 
-    public static ControlInfo coerce(Argument arg) throws ArgumentFormatException {
+    public static ControlInfo coerce(Value arg) throws ValueFormatException {
         if (arg instanceof ControlInfo) {
             return (ControlInfo) arg;
         } else {
@@ -223,15 +223,15 @@ public class ControlInfo extends Value {
         }
     }
 
-    public static Optional<ControlInfo> from(Argument arg) {
+    public static Optional<ControlInfo> from(Value arg) {
         try {
             return Optional.of(coerce(arg));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return Optional.empty();
         }
     }
     
-    private static ControlInfo valueOf(String string) throws ArgumentFormatException {
+    private static ControlInfo valueOf(String string) throws ValueFormatException {
         try {
             PArray arr = PArray.valueOf(string);
             Type type = Type.valueOf(arr.get(0).toString());
@@ -244,7 +244,7 @@ public class ControlInfo extends Value {
                     return parseProperty(string, type, arr);
             }
         } catch (Exception ex) {
-            throw new ArgumentFormatException(ex);
+            throw new ValueFormatException(ex);
         }
         
     }
@@ -294,7 +294,7 @@ public class ControlInfo extends Value {
                 EMPTY_INFO : outputs;
         // array(2) is defaults
         args = PArray.coerce(array.get(2));
-        Argument[] defs = new Argument[args.getSize()];
+        Value[] defs = new Value[args.getSize()];
         for (int i=0; i<defs.length; i++) {
             defs[i] = PString.coerce(args.get(i));
         }

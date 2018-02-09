@@ -22,7 +22,7 @@
 package org.praxislive.impl;
 
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Component;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
@@ -50,7 +50,7 @@ public class ArrayProperty extends AbstractSingleArgProperty {
     }
 
     @Override
-    protected void set(long time, Argument value) throws Exception {
+    protected void set(long time, Value value) throws Exception {
         binding.setBoundValue(time, PArray.coerce(value));
     }
 
@@ -60,7 +60,7 @@ public class ArrayProperty extends AbstractSingleArgProperty {
     }
 
     @Override
-    protected Argument get() {
+    protected Value get() {
         return binding.getBoundValue();
     }
 
@@ -81,7 +81,7 @@ public class ArrayProperty extends AbstractSingleArgProperty {
         }
         ArgumentInfo[] arguments = new ArgumentInfo[]{PArray.info()};
 
-        Argument[] defaults = new Argument[]{def};
+        Value[] defaults = new Value[]{def};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
         return new ArrayProperty(binding, info);
     }

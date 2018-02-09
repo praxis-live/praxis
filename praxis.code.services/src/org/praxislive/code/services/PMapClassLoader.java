@@ -21,8 +21,8 @@
  */
 package org.praxislive.code.services;
 
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.types.PBytes;
 import org.praxislive.core.types.PMap;
 
@@ -41,7 +41,7 @@ class PMapClassLoader extends ClassLoader {
 
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
-        Argument dataArg = classes.get(name);
+        Value dataArg = classes.get(name);
         if (dataArg == null) {
             throw new ClassNotFoundException(name);
         }
@@ -50,7 +50,7 @@ class PMapClassLoader extends ClassLoader {
             byte[] bytes = new byte[data.getSize()];
             data.read(bytes);
             return defineClass(name, bytes, 0, bytes.length);
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             throw new ClassNotFoundException(name, ex);
         }
     }

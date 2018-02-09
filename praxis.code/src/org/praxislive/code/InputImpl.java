@@ -25,7 +25,7 @@ import java.lang.reflect.Field;
 import org.praxislive.code.userapi.AuxIn;
 import org.praxislive.code.userapi.In;
 import org.praxislive.code.userapi.Input;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Port;
 import org.praxislive.core.PortInfo;
 import org.praxislive.core.types.PString;
@@ -129,7 +129,7 @@ class InputImpl extends Input {
         }
 
         @Override
-        public void receive(long time, Argument value) {
+        public void receive(long time, Value value) {
             Value v = value instanceof Value ? (Value) value : PString.valueOf(value);
             input.update(time, v);
         }

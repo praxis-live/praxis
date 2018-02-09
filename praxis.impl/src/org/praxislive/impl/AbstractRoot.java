@@ -22,7 +22,7 @@
 package org.praxislive.impl;
 
 import org.praxislive.core.IllegalRootStateException;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.InvalidAddressException;
 import org.praxislive.core.CallArguments;
@@ -36,7 +36,7 @@ import org.praxislive.core.Lookup;
 import org.praxislive.core.Root;
 import org.praxislive.core.ExecutionContext;
 import org.praxislive.core.Container;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Control;
 import java.util.EnumSet;
@@ -108,7 +108,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         registerControl(StartableInterface.IS_RUNNING,
                 ArgumentProperty.createReadOnly(PBoolean.info(),
                         new ArgumentProperty.ReadBinding() {
-                            public Argument getBoundValue() {
+                            public Value getBoundValue() {
                                 if (state.get() == RootState.ACTIVE_RUNNING) {
                                     return PBoolean.TRUE;
                                 } else {
@@ -132,7 +132,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             }
             try {
                 this.address = ComponentAddress.valueOf("/" + ID);
-            } catch (ArgumentFormatException ArgumentFormatException) {
+            } catch (ValueFormatException ArgumentFormatException) {
                 throw new IllegalArgumentException(ArgumentFormatException);
             }
             this.ID = ID;

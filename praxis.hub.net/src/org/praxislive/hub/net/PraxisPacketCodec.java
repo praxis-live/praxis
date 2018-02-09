@@ -23,7 +23,7 @@
 package org.praxislive.hub.net;
 
 import de.sciss.net.OSCPacketCodec;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.types.PNumber;
 import org.praxislive.core.types.PString;
 
@@ -37,7 +37,7 @@ class PraxisPacketCodec extends OSCPacketCodec {
         super(MODE_FAT_V1);
     }
     
-    Argument toArgument(Object o) {
+    Value toArgument(Object o) {
         if (o instanceof Double) {
             return PNumber.valueOf((Double) o);
         } else if (o instanceof Integer) {
@@ -47,7 +47,7 @@ class PraxisPacketCodec extends OSCPacketCodec {
         }
     }
 
-    Object toOSCObject(Argument arg) {
+    Object toOSCObject(Value arg) {
         if (arg instanceof PNumber) {
             PNumber n = (PNumber) arg;
             if (n.isInteger()) {

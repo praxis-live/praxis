@@ -21,7 +21,7 @@
  */
 package org.praxislive.impl;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.types.PArray;
@@ -46,12 +46,12 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
     }
 
 
-    public Argument getValue() {
+    public Value getValue() {
         return get();
     }
 
     @Override
-    protected void set(long time, Argument value) throws Exception {
+    protected void set(long time, Value value) throws Exception {
         if (writer == null) {
             throw new UnsupportedOperationException("Read Only Property");
         } else {
@@ -65,29 +65,29 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
     }
 
     @Override
-    protected Argument get() {
+    protected Value get() {
         return reader.getBoundValue();
     }    
     
     public static ArgumentProperty create() {
-        return create(Argument.info(), null, PString.EMPTY);
+        return create(Value.info(), null, PString.EMPTY);
     }
     
     public static ArgumentProperty create(ArgumentInfo info) {
         return create(info, null, PString.EMPTY);
     }
 
-    public static ArgumentProperty create( Binding binding, Argument def) {
-        return create(Argument.info(), binding, def);
+    public static ArgumentProperty create( Binding binding, Value def) {
+        return create(Value.info(), binding, def);
         
     }
     
-    public static ArgumentProperty create(ArgumentInfo typeInfo, Binding binding, Argument def) {
+    public static ArgumentProperty create(ArgumentInfo typeInfo, Binding binding, Value def) {
         if (binding == null) {
             binding = new DefaultBinding(def);
         }
         ArgumentInfo[] arguments = new ArgumentInfo[]{typeInfo};
-        Argument[] defaults = new Argument[]{def};
+        Value[] defaults = new Value[]{def};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, null);
         return new ArgumentProperty(binding, binding, info);
     }
@@ -107,31 +107,31 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
     
     public static interface ReadBinding {
         
-        public Argument getBoundValue();
+        public Value getBoundValue();
         
     }
 
     public static interface Binding extends ReadBinding {
 
-        public void setBoundValue(long time, Argument value) throws Exception;
+        public void setBoundValue(long time, Value value) throws Exception;
      
     }
 
     private static class DefaultBinding implements Binding {
 
-        private Argument value;
+        private Value value;
 
-        private DefaultBinding(Argument value) {
+        private DefaultBinding(Value value) {
             this.value = value;
         }
 
         @Override
-        public void setBoundValue(long time, Argument value) {
+        public void setBoundValue(long time, Value value) {
             this.value = value;
         }
 
         @Override
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             return value;
         }
     }
@@ -139,7 +139,7 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
     
     public static class Builder extends AbstractSingleArgProperty.Builder<Builder> {
         
-        private Argument defaultValue;
+        private Value defaultValue;
         private Binding writeBinding;
         private ReadBinding readBinding;
         
@@ -147,11 +147,11 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
             
         }
 
-        public Builder type(Class<? extends Argument> typeClass) {
+        public Builder type(Class<? extends Value> typeClass) {
             return super.argumentType(typeClass);
         }
         
-        public Builder defaultValue(Argument def) {
+        public Builder defaultValue(Value def) {
             defaults(def);
             defaultValue = def;
             return this;
@@ -186,19 +186,19 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
             return this;
         }
 
-        public Builder suggestedValues(Argument ... values) {
+        public Builder suggestedValues(Value ... values) {
             putArgumentProperty(ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.valueOf(values));
             return this;
         }
         
-        public Builder template(Argument template) {
+        public Builder template(Value template) {
             putArgumentProperty(ArgumentInfo.KEY_TEMPLATE, template);
             return this;
         }
         
         
         public ArgumentProperty build() {
-            Argument def = defaultValue == null ? PString.EMPTY : defaultValue;
+            Value def = defaultValue == null ? PString.EMPTY : defaultValue;
             ReadBinding read = readBinding;
             Binding write = writeBinding;
             if (read == null) {

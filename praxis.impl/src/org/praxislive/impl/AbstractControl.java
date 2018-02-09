@@ -21,7 +21,7 @@
  */
 package org.praxislive.impl;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.InterfaceDefinition;
@@ -110,7 +110,7 @@ public abstract class AbstractControl implements AbstractComponent.ExtendedContr
         private ControlInfo.Type type;
         private ArgumentInfo[] inputs;
         private ArgumentInfo[] outputs;
-        private Argument[] defaults;
+        private Value[] defaults;
         private PMap.Builder controlProps;
         
         protected Builder() {
@@ -126,7 +126,7 @@ public abstract class AbstractControl implements AbstractComponent.ExtendedContr
         }
         
         @SuppressWarnings("unchecked")
-        protected B putControlProperty(String key, Argument value) {
+        protected B putControlProperty(String key, Value value) {
             if (controlProps == null) {
                 controlProps = PMap.builder();
             }
@@ -163,7 +163,7 @@ public abstract class AbstractControl implements AbstractComponent.ExtendedContr
         }
         
         @SuppressWarnings("unchecked")
-        protected B defaults(Argument ... defaults) {
+        protected B defaults(Value ... defaults) {
             this.defaults = defaults;
             return (B) this;
         }

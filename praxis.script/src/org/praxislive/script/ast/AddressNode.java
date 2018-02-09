@@ -23,7 +23,7 @@
 package org.praxislive.script.ast;
 
 import java.util.List;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.PortAddress;
@@ -61,14 +61,14 @@ public class AddressNode extends Node {
 
 
     @Override
-    public void writeResult(List<Argument> args) {
+    public void writeResult(List<Value> args) {
         if (namespace == null) {
             throw new IllegalStateException();
         }
         args.add(parseAddress());
     }
 
-    private Argument parseAddress() {
+    private Value parseAddress() {
         try {
             ComponentAddress ctxt = ComponentAddress.coerce(namespace.getVariable(Env.CONTEXT).getValue());
             if (address.charAt(1) == '/') {
@@ -81,7 +81,7 @@ public class AddressNode extends Node {
         }
     }
 
-    private Argument parseComplexAddress(ComponentAddress ctxt) throws Exception {
+    private Value parseComplexAddress(ComponentAddress ctxt) throws Exception {
         String full = ctxt.toString() + address.substring(1);
         if (full.lastIndexOf('.') > -1) {
             return ControlAddress.valueOf(full);

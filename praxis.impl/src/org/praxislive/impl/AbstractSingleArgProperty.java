@@ -21,7 +21,7 @@
  */
 package org.praxislive.impl;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ControlPort;
 import org.praxislive.core.ArgumentInfo;
@@ -51,11 +51,11 @@ public abstract class AbstractSingleArgProperty extends AbstractProperty {
         return CallArguments.create(get());
     }
 
-    protected abstract void set(long time, Argument value) throws Exception;
+    protected abstract void set(long time, Value value) throws Exception;
 
     protected abstract void set(long time, double value) throws Exception;
 
-    protected abstract Argument get();
+    protected abstract Value get();
 
     private class InputPort extends AbstractControlInputPort {
 
@@ -72,7 +72,7 @@ public abstract class AbstractSingleArgProperty extends AbstractProperty {
         }
 
         @Override
-        public void receive(long time, Argument value) {
+        public void receive(long time, Value value) {
             try {
                 if (isLatest(time)) {
                     set(time, value);
@@ -86,14 +86,14 @@ public abstract class AbstractSingleArgProperty extends AbstractProperty {
     
     public static abstract class Builder<B extends Builder<B>> extends AbstractProperty.Builder<B> {
         
-        private Class<? extends Argument> typeClass;
+        private Class<? extends Value> typeClass;
         private PMap.Builder argProps;
         
         protected Builder() {
-            this(Argument.class);
+            this(Value.class);
         }
         
-        protected Builder(Class<? extends Argument> typeClass) {
+        protected Builder(Class<? extends Value> typeClass) {
             if (typeClass == null) {
                 throw new NullPointerException();
             }
@@ -101,7 +101,7 @@ public abstract class AbstractSingleArgProperty extends AbstractProperty {
         }
        
         @SuppressWarnings("unchecked")
-        protected B putArgumentProperty(String key, Argument value) {
+        protected B putArgumentProperty(String key, Value value) {
             if (argProps == null) {
                 argProps = PMap.builder();
             }
@@ -110,7 +110,7 @@ public abstract class AbstractSingleArgProperty extends AbstractProperty {
         }
         
         @SuppressWarnings("unchecked")
-        protected B argumentType(Class<? extends Argument> typeClass) {
+        protected B argumentType(Class<? extends Value> typeClass) {
             if (typeClass == null) {
                 throw new NullPointerException();
             }

@@ -25,8 +25,8 @@ package org.praxislive.code;
 import java.lang.annotation.Annotation;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.types.PString;
@@ -37,9 +37,9 @@ import org.praxislive.core.types.PString;
  */
 public abstract class TypeConverter<T> {
     
-    public abstract Argument toArgument(T value);
+    public abstract Value toArgument(T value);
     
-    public abstract T fromArgument(Argument value) throws ArgumentFormatException;
+    public abstract T fromArgument(Value value) throws ValueFormatException;
     
     public abstract Class<T> getType();
     
@@ -51,7 +51,7 @@ public abstract class TypeConverter<T> {
         return false;
     }
     
-    public Argument getDefaultArgument() {
+    public Value getDefaultArgument() {
         return PString.EMPTY;
     }
     

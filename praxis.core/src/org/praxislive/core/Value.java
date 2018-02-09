@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -24,14 +24,6 @@ package org.praxislive.core;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ComponentAddress;
-import org.praxislive.core.ControlAddress;
-import org.praxislive.core.PortAddress;
-import org.praxislive.core.ArgumentInfo;
-import org.praxislive.core.ComponentInfo;
-import org.praxislive.core.ControlInfo;
-import org.praxislive.core.PortInfo;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PBoolean;
 import org.praxislive.core.types.PBytes;
@@ -43,11 +35,11 @@ import org.praxislive.core.types.PResource;
 import org.praxislive.core.types.PString;
 
 /**
- * Eventual replacement for Argument
+ * Eventual replacement for Value
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public abstract class Value extends Argument {
+public abstract class Value {
 
     /**
      * Values must override the default method to return a string representation
@@ -89,22 +81,23 @@ public abstract class Value extends Argument {
     public boolean isEmpty() {
         return (toString().length() == 0);
     }
-
-    @Override
-    @Deprecated
-    @SuppressWarnings("Deprecation")
-    public final boolean isEquivalent(Argument arg) {
-        if (arg instanceof Value) {
-            return equivalent((Value) arg);
-        } else {
-            return super.isEquivalent(arg);
-        }
-    }
     
     public boolean equivalent(Value value) {
         return this == value || this.toString().equals(value.toString());
     }
 
+    /**
+     * Use this method to return an ArgumentInfo argument that can be used to refer
+     * to ANY Argument subclass. Usually, you will want to get an ArgumentInfo object
+     * directly from a specific Argument subclass.
+     *
+     * @return ArgumentInfo info
+     */
+    @Deprecated
+    public static ArgumentInfo info() {
+        return ArgumentInfo.create(Value.class, null);
+    }
+    
     public static class Type {
 
         @FunctionalInterface

@@ -23,7 +23,7 @@
 
 package org.praxislive.impl;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
@@ -64,7 +64,7 @@ public class FloatRangeProperty extends AbstractProperty {
     }
 
 
-    private Argument[] holder = new Argument[2];
+    private Value[] holder = new Value[2];
     @Override
     protected CallArguments getArguments() {
         holder[0] = PNumber.valueOf(binding.getBoundLowValue());
@@ -88,7 +88,7 @@ public class FloatRangeProperty extends AbstractProperty {
         }
         ArgumentInfo inf = PNumber.info(min, max);
         ArgumentInfo[] arguments = new ArgumentInfo[]{inf, inf};
-        Argument[] defaults = new Argument[]{PNumber.valueOf(low), PNumber.valueOf(high)};
+        Value[] defaults = new Value[]{PNumber.valueOf(low), PNumber.valueOf(high)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new FloatRangeProperty(binding, min, max, info);
     }

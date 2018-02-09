@@ -23,7 +23,7 @@
 
 package org.praxislive.logging;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.interfaces.Service;
@@ -48,7 +48,7 @@ public class LogService extends Service {
                                 LogLevel.INFO.asPString(),
                                 LogLevel.DEBUG.asPString()
                         ))),
-                ArgumentInfo.create(Argument.class, ArgumentInfo.Presence.Variable, PMap.EMPTY)
+                ArgumentInfo.create(Value.class, ArgumentInfo.Presence.Variable, PMap.EMPTY)
             },
             new ArgumentInfo[0],
             PMap.EMPTY);

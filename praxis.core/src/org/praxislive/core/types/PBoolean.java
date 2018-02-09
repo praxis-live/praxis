@@ -24,8 +24,8 @@ package org.praxislive.core.types;
 
 import org.praxislive.core.Value;
 import java.util.Optional;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ArgumentInfo;
 
 /**
@@ -69,7 +69,7 @@ public final class PBoolean extends Value {
         return value ? TRUE : FALSE;
     }
     
-    public static PBoolean valueOf(String str) throws ArgumentFormatException {
+    public static PBoolean valueOf(String str) throws ValueFormatException {
         if (str.equals("true")) {
             return TRUE;
         } else if (str.equals("false")) {
@@ -79,7 +79,7 @@ public final class PBoolean extends Value {
         }
     }
        
-    public static PBoolean coerce(Argument arg) throws ArgumentFormatException {
+    public static PBoolean coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PBoolean) {
             return (PBoolean) arg;
         } else if (arg instanceof PNumber) {
@@ -89,10 +89,10 @@ public final class PBoolean extends Value {
         }
     }
     
-    public static Optional<PBoolean> from(Argument arg) {
+    public static Optional<PBoolean> from(Value arg) {
         try {
             return Optional.of(coerce(arg));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return Optional.empty();
         }
     }

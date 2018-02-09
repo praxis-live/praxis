@@ -14,7 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Component;
 import org.praxislive.core.ControlPort;
 import org.praxislive.core.InterfaceDefinition;
@@ -56,8 +56,8 @@ public class ComponentInfoTest {
         interfaces.add(StartableInterface.class);
         
         Map<String, ControlInfo> controls = new LinkedHashMap<>();
-        controls.put("p1", ControlInfo.createPropertyInfo(new ArgumentInfo[]{PNumber.info(0, 1)}, new Argument[]{PNumber.ONE}, PMap.create(ControlInfo.KEY_TRANSIENT, true)));
-        controls.put("p1", ControlInfo.createPropertyInfo(new ArgumentInfo[]{ArgumentInfo.create(PString.class, PMap.create("template", "public void draw(){"))}, new Argument[]{PString.EMPTY}, PMap.EMPTY));
+        controls.put("p1", ControlInfo.createPropertyInfo(new ArgumentInfo[]{PNumber.info(0, 1)}, new Value[]{PNumber.ONE}, PMap.create(ControlInfo.KEY_TRANSIENT, true)));
+        controls.put("p1", ControlInfo.createPropertyInfo(new ArgumentInfo[]{ArgumentInfo.create(PString.class, PMap.create("template", "public void draw(){"))}, new Value[]{PString.EMPTY}, PMap.EMPTY));
         controls.put("ro1", ControlInfo.createReadOnlyPropertyInfo(new ArgumentInfo[]{PNumber.info(0, 1)}, PMap.create(ControlInfo.KEY_TRANSIENT, true)));
         controls.put("t1", ControlInfo.createActionInfo(PMap.create("key", "value")));
         
@@ -89,9 +89,9 @@ public class ComponentInfoTest {
         System.out.println(info2.getControlInfo("p1"));
         System.out.println(info.getControlInfo("ro1"));
         System.out.println(info2.getControlInfo("ro1"));
-//        assertTrue(Argument.equivalent(Argument.class, info.getControlInfo("p1").getOutputsInfo()[0], info2.getControlInfo("p1").getOutputsInfo()[0]));
-//        assertTrue(Argument.equivalent(Argument.class, info.getControlInfo("ro1").getOutputsInfo()[0], info2.getControlInfo("ro1").getOutputsInfo()[0]));
-//        assertTrue(Argument.equivalent(Argument.class, info, info2));
+//        assertTrue(Value.equivalent(Value.class, info.getControlInfo("p1").getOutputsInfo()[0], info2.getControlInfo("p1").getOutputsInfo()[0]));
+//        assertTrue(Value.equivalent(Value.class, info.getControlInfo("ro1").getOutputsInfo()[0], info2.getControlInfo("ro1").getOutputsInfo()[0]));
+//        assertTrue(Value.equivalent(Value.class, info, info2));
         assertTrue(info.equivalent(info2));
         assertTrue(info.getControlInfo("p1").equivalent(info2.getControlInfo("p1")));
         assertTrue(info.getControlInfo("ro1").getOutputsInfo()[0].equivalent(info2.getControlInfo("ro1").getOutputsInfo()[0]));

@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Port;
 import org.praxislive.core.interfaces.ServiceUnavailableException;
 import org.praxislive.core.interfaces.TaskService;
@@ -155,7 +155,7 @@ public class ImageSave extends AbstractComponent {
             this.number = number;
         }
 
-        public Argument execute() throws Exception {
+        public Value execute() throws Exception {
             bis.save("png", new File(new URI(filename.toString() + number + ".png")));
             return PReference.wrap(bis);
         }
@@ -163,13 +163,13 @@ public class ImageSave extends AbstractComponent {
 
     private class SaveCallback implements TaskControl.Callback {
 
-        public void taskCompleted(long time, long id, Argument arg) {
+        public void taskCompleted(long time, long id, Value arg) {
             PReference ref = (PReference) arg;
             BufferedImageSurface bis = (BufferedImageSurface) ref.getReference();
             release(bis);
         }
 
-        public void taskError(long time, long id, Argument arg) {
+        public void taskError(long time, long id, Value arg) {
             logger.warning("Unable to save image");
         }
     }

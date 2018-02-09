@@ -24,7 +24,7 @@ package org.praxislive.video.gst1.components;
 import java.io.File;
 import java.net.URI;
 import java.util.List;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ControlPort;
 import org.praxislive.core.Lookup;
@@ -191,7 +191,7 @@ public class VideoPlayer extends AbstractVideoComponent {
 
         @Override
         protected TaskService.Task createTask(CallArguments keys) throws Exception {
-            Argument key;
+            Value key;
             if (keys.getSize() < 1 || (key = keys.get(0)).isEmpty()) {
                 return null;
             } else {
@@ -228,7 +228,7 @@ public class VideoPlayer extends AbstractVideoComponent {
             this.audioSink = audioSink;
         }
 
-        public Argument execute() throws Exception {
+        public Value execute() throws Exception {
             List<URI> uris = videoSource.resolve(lookup);
             URI video = null;
             for (URI uri : uris) {

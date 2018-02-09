@@ -22,8 +22,8 @@
 package org.praxislive.core;
 
 import java.util.Optional;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.Port;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
@@ -75,7 +75,7 @@ public final class PortInfo extends Value {
     }
 
 //    @Override
-//    public boolean isEquivalent(Argument arg) {
+//    public boolean isEquivalent(Value arg) {
 //        return equals(arg);
 //    }
 
@@ -111,13 +111,13 @@ public final class PortInfo extends Value {
     }
     
     /**
-     * Coerce the given Argument into an ArgumentInfo object.
+     * Coerce the given Value into an ArgumentInfo object.
      * 
-     * @param arg Argument to be coerced.
+     * @param arg Value to be coerced.
      * @return ArgumentInfo
-     * @throws ArgumentFormatException if Argument cannot be coerced.
+     * @throws ValueFormatException if Value cannot be coerced.
      */
-    public static PortInfo coerce(Argument arg) throws ArgumentFormatException {
+    public static PortInfo coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PortInfo) {
             return (PortInfo) arg;
         } else {
@@ -125,15 +125,15 @@ public final class PortInfo extends Value {
         }
     }
     
-    public static Optional<PortInfo> from(Argument arg) {
+    public static Optional<PortInfo> from(Value arg) {
         try {
             return Optional.of(coerce(arg));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return Optional.empty();
         }
     }
     
-    private static PortInfo valueOf(String string) throws ArgumentFormatException {
+    private static PortInfo valueOf(String string) throws ValueFormatException {
         PArray arr = PArray.valueOf(string);
         try {
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -142,7 +142,7 @@ public final class PortInfo extends Value {
             PMap properties = PMap.coerce(arr.get(2));
             return new PortInfo(cls, direction, properties, string);
         } catch (Exception ex) {
-            throw new ArgumentFormatException(ex);
+            throw new ValueFormatException(ex);
         }
     }
     

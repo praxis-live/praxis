@@ -61,7 +61,7 @@ public abstract class ControlPort implements Port {
 
         public abstract void receive(long time, double value);
 
-        public abstract void receive(long time, Argument value);
+        public abstract void receive(long time, Value value);
     }
 
     public static abstract class Output extends ControlPort {
@@ -76,7 +76,7 @@ public abstract class ControlPort implements Port {
 
         public abstract void send(long time, double value);
 
-        public abstract void send(long time, Argument value);
+        public abstract void send(long time, Value value);
 
         public final void send(long time) {
             send(time, BANG);

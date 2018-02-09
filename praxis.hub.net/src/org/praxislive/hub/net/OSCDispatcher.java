@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ComponentType;
@@ -295,7 +295,7 @@ abstract class OSCDispatcher {
         } else if (argCount == 1) {
             return CallArguments.create(codec.toArgument(msg.getArg(fromIndex)));
         } else {
-            Argument[] args = new Argument[argCount];
+            Value[] args = new Value[argCount];
             for (int i = 0; i < argCount; i++) {
                 args[i] = codec.toArgument(msg.getArg(i + fromIndex));
             }

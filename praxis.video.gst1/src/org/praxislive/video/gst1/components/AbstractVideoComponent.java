@@ -23,7 +23,7 @@ package org.praxislive.video.gst1.components;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ExecutionContext;
 import org.praxislive.core.Port;
 import org.praxislive.core.types.PNumber;
@@ -289,7 +289,7 @@ class AbstractVideoComponent extends AbstractExecutionContextComponent {
         }
 
         @Override
-        public void setBoundValue(long time, Argument value) throws Exception {
+        public void setBoundValue(long time, Value value) throws Exception {
             int val;
             if (value.isEmpty()) {
                 val = 0;
@@ -307,7 +307,7 @@ class AbstractVideoComponent extends AbstractExecutionContextComponent {
         }
 
         @Override
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             int val = height ? srcHeight : srcWidth;
             if (val <= 0) {
                 return PString.EMPTY;
@@ -321,7 +321,7 @@ class AbstractVideoComponent extends AbstractExecutionContextComponent {
     private class RateBinding implements ArgumentProperty.Binding {
 
         @Override
-        public void setBoundValue(long time, Argument value) throws Exception {
+        public void setBoundValue(long time, Value value) throws Exception {
             if (value.isEmpty()) {
                 srcFrameRate = 0;
             } else {
@@ -334,7 +334,7 @@ class AbstractVideoComponent extends AbstractExecutionContextComponent {
         }
 
         @Override
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             if (srcFrameRate < 0.5) {
                 return PString.EMPTY;
             } else {

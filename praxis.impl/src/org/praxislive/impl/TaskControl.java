@@ -23,7 +23,7 @@ package org.praxislive.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.PacketRouter;
@@ -101,7 +101,7 @@ public class TaskControl extends AbstractControl {
          * @param id
          * @param arg
          */
-        public void taskCompleted(long time, long id, Argument arg);
+        public void taskCompleted(long time, long id, Value arg);
 
         /**
          * Task threw an Exception.
@@ -109,6 +109,6 @@ public class TaskControl extends AbstractControl {
          * @param id
          * @param arg
          */
-        public void taskError(long time, long id, Argument arg);
+        public void taskError(long time, long id, Value arg);
     }
 }

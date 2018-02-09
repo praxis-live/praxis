@@ -26,8 +26,8 @@ import java.util.logging.Logger;
 import javax.swing.BoundedRangeModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
@@ -147,13 +147,13 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
         updateModel();
     }
 
-    private PNumber coerce(Argument arg) {
+    private PNumber coerce(Value arg) {
         if (arg == null) {
             return null;
         }
         try {
             return PNumber.coerce(arg);
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return null;
         }
     }

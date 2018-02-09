@@ -28,7 +28,7 @@ import java.awt.event.MouseEvent;
 import org.praxislive.gui.impl.SingleBindingGuiComponent;
 import org.praxislive.gui.impl.BoundedValueAdaptor;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JComponent;
@@ -72,7 +72,7 @@ class Slider extends SingleBindingGuiComponent {
     @Override
     protected void initControls() {
         super.initControls();
-        ArgumentInfo info = ArgumentInfo.create(Argument.class,
+        ArgumentInfo info = ArgumentInfo.create(Value.class,
                 PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true, ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
         registerControl("minimum", ArgumentProperty.create(info, new MinBinding(), PString.EMPTY));
         registerControl("maximum", ArgumentProperty.create(info, new MaxBinding(), PString.EMPTY));
@@ -171,7 +171,7 @@ class Slider extends SingleBindingGuiComponent {
 //    }
     private class MinBinding implements ArgumentProperty.Binding {
 
-        public void setBoundValue(long time, Argument value) {
+        public void setBoundValue(long time, Value value) {
             if (value.isEmpty()) {
                 prefMin = null;
             } else {
@@ -186,7 +186,7 @@ class Slider extends SingleBindingGuiComponent {
             }
         }
 
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             if (prefMin == null) {
                 return PString.EMPTY;
             } else {
@@ -198,7 +198,7 @@ class Slider extends SingleBindingGuiComponent {
 
     private class MaxBinding implements ArgumentProperty.Binding {
 
-        public void setBoundValue(long time, Argument value) {
+        public void setBoundValue(long time, Value value) {
             if (value.isEmpty()) {
                 prefMax = null;
             } else {
@@ -213,7 +213,7 @@ class Slider extends SingleBindingGuiComponent {
             }
         }
 
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             if (prefMax == null) {
                 return PString.EMPTY;
             } else {
@@ -225,7 +225,7 @@ class Slider extends SingleBindingGuiComponent {
 
     private class ScaleBinding implements ArgumentProperty.Binding {
 
-        public void setBoundValue(long time, Argument value) {
+        public void setBoundValue(long time, Value value) {
             if (value.isEmpty()) {
                 prefScale = null;
             } else if (value instanceof PString) {
@@ -238,7 +238,7 @@ class Slider extends SingleBindingGuiComponent {
             }
         }
 
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             if (prefScale == null) {
                 return PString.EMPTY;
             } else {

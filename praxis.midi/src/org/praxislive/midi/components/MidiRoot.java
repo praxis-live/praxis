@@ -34,7 +34,7 @@ import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Transmitter;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.Packet;
@@ -70,7 +70,7 @@ public class MidiRoot extends AbstractRoot {
 
     private void buildControls() {
         ArgumentInfo info = ArgumentInfo.create(
-                Argument.class, PMap.create(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
+                Value.class, PMap.create(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
         device = ArgumentProperty.create(info);
         registerControl("device", device);
         registerControl("last-message", StringProperty.builder()

@@ -25,7 +25,7 @@ import java.lang.reflect.Field;
 import org.praxislive.code.userapi.AuxOut;
 import org.praxislive.code.userapi.Out;
 import org.praxislive.code.userapi.Output;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Port;
 import org.praxislive.core.PortInfo;
 import org.praxislive.logging.LogLevel;
@@ -55,7 +55,7 @@ class OutputImpl extends Output {
     }
 
     @Override
-    public void send(Argument value) {
+    public void send(Value value) {
         port.send(context.getTime(), value);
     }
     

@@ -128,9 +128,9 @@ public final class ComponentAddress extends Value {
      *
      * @param addressString
      * @return ComponentAddress
-     * @throws org.praxislive.core.ArgumentFormatException
+     * @throws org.praxislive.core.ValueFormatException
      */
-    public static ComponentAddress valueOf(String addressString) throws ArgumentFormatException {
+    public static ComponentAddress valueOf(String addressString) throws ValueFormatException {
 
         String[] address = parseAddress(addressString);
 //        return new ComponentAddress(address, addressString);
@@ -141,7 +141,7 @@ public final class ComponentAddress extends Value {
     public static ComponentAddress create(String address) {
         try {
             return valueOf(address);
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             throw new IllegalArgumentException(ex);
         }
     }
@@ -159,7 +159,7 @@ public final class ComponentAddress extends Value {
     public static ComponentAddress create(ComponentAddress address, String id) {
         try {
             return valueOf(address.toString() + '/' + id);
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             throw new IllegalArgumentException(ex);
         }
         
@@ -169,9 +169,9 @@ public final class ComponentAddress extends Value {
      *
      * @param arg
      * @return
-     * @throws org.praxislive.core.ArgumentFormatException
+     * @throws org.praxislive.core.ValueFormatException
      */
-    public static ComponentAddress coerce(Argument arg) throws ArgumentFormatException {
+    public static ComponentAddress coerce(Value arg) throws ValueFormatException {
         if (arg instanceof ComponentAddress) {
             return (ComponentAddress) arg;
         } else {
@@ -179,10 +179,10 @@ public final class ComponentAddress extends Value {
         }
     }
     
-    public static Optional<ComponentAddress> from(Argument arg) {
+    public static Optional<ComponentAddress> from(Value arg) {
         try {
             return Optional.of(coerce(arg));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return Optional.empty();
         }
     }
@@ -198,7 +198,7 @@ public final class ComponentAddress extends Value {
 
 
     
-    private static String[] parseAddress(String addressString) throws ArgumentFormatException {
+    private static String[] parseAddress(String addressString) throws ValueFormatException {
         Matcher match = addressPattern.matcher(addressString);
         ArrayList<String> addressList = new ArrayList<String>();
         int end = 0;
@@ -208,7 +208,7 @@ public final class ComponentAddress extends Value {
             end = match.end();
         }
         if (addressList.size() < 1 || end < addressString.length()) {
-            throw new ArgumentFormatException();
+            throw new ValueFormatException();
         }
         return addressList.toArray(new String[addressList.size()]);
         
@@ -227,11 +227,11 @@ public final class ComponentAddress extends Value {
     
     
 // this is quicker by roughly factor of 3 but harder to maintain    
-//    private static String[] parseAddress(String addressString) throws ArgumentFormatException {
+//    private static String[] parseAddress(String addressString) throws ValueFormatException {
 //
 //        if (addressString.length() < 2 || addressString.charAt(0) != SEPERATOR) {
 //            //address has to be have at least a starting slash and one letter
-//            throw new ArgumentFormatException();
+//            throw new ValueFormatException();
 //        }
 //
 //        StringBuilder stringBuilder = new StringBuilder();
@@ -249,7 +249,7 @@ public final class ComponentAddress extends Value {
 //                    addressList.add(stringBuilder.toString());
 //                    stringBuilder.setLength(0);
 //                } else {
-//                    throw new ArgumentFormatException("Zero length id string found");
+//                    throw new ValueFormatException("Zero length id string found");
 //                }
 //            } else if (ch == '_') {
 //                stringBuilder.append(ch);
@@ -258,13 +258,13 @@ public final class ComponentAddress extends Value {
 //                    if (Character.isLetter(ch)) {
 //                        stringBuilder.append(ch);
 //                    } else {
-//                        throw new ArgumentFormatException("First character of id isn't valid");
+//                        throw new ValueFormatException("First character of id isn't valid");
 //                    }
 //                } else {
 //                    if (Character.isLetterOrDigit(ch)) {
 //                        stringBuilder.append(ch);
 //                    } else {
-//                        throw new ArgumentFormatException("Invalid character found in id");
+//                        throw new ValueFormatException("Invalid character found in id");
 //                    }
 //                }
 //            }

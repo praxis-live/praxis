@@ -25,7 +25,7 @@ package org.praxislive.osc.components;
 import de.sciss.net.OSCListener;
 import de.sciss.net.OSCMessage;
 import java.net.SocketAddress;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ComponentAddress;
@@ -125,7 +125,7 @@ public class OSCInput extends AbstractComponent {
         } else if (count == 1) {
             arguments = CallArguments.create(objectToArg(msg.getArg(0)));
         } else {
-            Argument[] args = new Argument[count];
+            Value[] args = new Value[count];
             for (int i=0; i<count; i++) {
                 args[i] = objectToArg(msg.getArg(i));
             }
@@ -134,7 +134,7 @@ public class OSCInput extends AbstractComponent {
         router.route(Call.createQuietCall(sendAddress, returnAddress, time, arguments));
     }
     
-    private Argument objectToArg(Object obj) {
+    private Value objectToArg(Object obj) {
        if (obj instanceof Boolean) {
             return ((Boolean) obj).booleanValue() ? PBoolean.TRUE : PBoolean.FALSE;
         }
@@ -153,7 +153,7 @@ public class OSCInput extends AbstractComponent {
     private class SendAddressBinding implements ArgumentProperty.Binding {
 
         @Override
-        public void setBoundValue(long time, Argument value) throws Exception {
+        public void setBoundValue(long time, Value value) throws Exception {
             ControlAddress send = value.isEmpty() ? null : ControlAddress.coerce(value);
             unregisterListener();
             sendAddress = send;
@@ -161,7 +161,7 @@ public class OSCInput extends AbstractComponent {
         }
 
         @Override
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             if (sendAddress == null) {
                 return PString.EMPTY;
             } else {

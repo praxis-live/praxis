@@ -42,7 +42,7 @@ import org.praxislive.code.CodeContextFactoryService;
 import org.praxislive.code.CodeDelegate;
 import org.praxislive.code.CodeFactory;
 import org.praxislive.compiler.ClassBodyContext;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.ComponentFactory;
 import org.praxislive.core.ComponentType;
@@ -102,7 +102,7 @@ public class DefaultCodeFactoryService extends AbstractRoot {
                 source);
     }
 
-    private Class<? extends CodeDelegate> extractCodeDelegateClass(Argument response) throws Exception {
+    private Class<? extends CodeDelegate> extractCodeDelegateClass(Value response) throws Exception {
         PMap data = PMap.coerce(response);
         PMap classes = PMap.coerce(data.get(CodeCompilerService.KEY_CLASSES));
         PArray.from(data.get(DefaultCompilerService.EXT_CLASSPATH)).ifPresent(this::processExtClasspath);
@@ -133,7 +133,7 @@ public class DefaultCodeFactoryService extends AbstractRoot {
         });
     }
 
-    private void extractCompilerLog(Argument response, LogBuilder logBuilder) throws Exception {
+    private void extractCompilerLog(Value response, LogBuilder logBuilder) throws Exception {
         PMap data = PMap.coerce(response);
         PArray log = PArray.coerce(data.get(CodeCompilerService.KEY_LOG));
         for (int i = 0; i < log.getSize(); i += 2) {

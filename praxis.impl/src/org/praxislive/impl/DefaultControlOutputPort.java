@@ -24,7 +24,7 @@ package org.praxislive.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Component;
 import org.praxislive.core.ControlPort;
 import org.praxislive.core.Port;
@@ -130,7 +130,7 @@ public class DefaultControlOutputPort extends ControlPort.Output {
         sending = false;
     }
 
-    public void send(long time, Argument value) {
+    public void send(long time, Value value) {
         if (sending) {
             return;
         }

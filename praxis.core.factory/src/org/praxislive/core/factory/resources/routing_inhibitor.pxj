@@ -11,7 +11,7 @@
         _timer.set(0);
     }
     
-    @In(1) void in(Argument arg) {
+    @In(1) void in(Value arg) {
         if (_timer.isAnimating() && d(_timer) < time) {
             return;
         }

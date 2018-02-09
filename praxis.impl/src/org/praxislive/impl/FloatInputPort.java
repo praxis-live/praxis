@@ -24,7 +24,7 @@ package org.praxislive.impl;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Component;
 import org.praxislive.core.types.PNumber;
 
@@ -47,7 +47,7 @@ public class FloatInputPort extends AbstractControlInputPort {
 //    }
 
     @Override
-    public void receive(long time, Argument value) {
+    public void receive(long time, Value value) {
         try {
             binding.receive(time, PNumber.coerce(value).value());
         } catch (Exception ex) {

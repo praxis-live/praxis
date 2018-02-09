@@ -22,8 +22,8 @@
 package org.praxislive.code;
 
 import org.praxislive.compiler.ClassBodyContext;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
@@ -147,7 +147,7 @@ class CodeProperty<D extends CodeDelegate>
         if (args.getSize() > 0) {
             try {
                 err = PError.coerce(args.get(0));
-            } catch (ArgumentFormatException ex) {
+            } catch (ValueFormatException ex) {
                 err = PError.create(ex, args.get(0).toString());
             }
         } else {
@@ -198,7 +198,7 @@ class CodeProperty<D extends CodeDelegate>
                                         ClassBodyContext.KEY, factory.getClassBodyContext().getClass().getName()
                                 ))
                     },
-                    new Argument[]{PString.EMPTY},
+                    new Value[]{PString.EMPTY},
                     PMap.EMPTY);
         }
 

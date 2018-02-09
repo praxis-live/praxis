@@ -74,11 +74,11 @@ public final class Call extends Packet {
      * @param toAddress ControlAddress of receiving Control.
      * @param fromAddress ControlAddress for response.
      * @param timeCode long time relative to System.nanoTime() when Control should be called.
-     * @param arg single Argument which will be automatically wrapped in a CallArguments object.
+     * @param arg single Value which will be automatically wrapped in a CallArguments object.
      * @return Call
      */
     public static  Call createCall(
-            ControlAddress toAddress, ControlAddress fromAddress, long timeCode, Argument arg
+            ControlAddress toAddress, ControlAddress fromAddress, long timeCode, Value arg
             ) {
 
         return createCall(toAddress, fromAddress, timeCode, CallArguments.create(arg), Type.INVOKE);
@@ -91,11 +91,11 @@ public final class Call extends Packet {
      * @param toAddress ControlAddress of receiving Control.
      * @param fromAddress ControlAddress for response.
      * @param timeCode long time relative to System.nanoTime() when Control should be called.
-     * @param arg single Argument which will be automatically wrapped in a CallArguments object.
+     * @param arg single Value which will be automatically wrapped in a CallArguments object.
      * @return Call
      */
     public static  Call createQuietCall(
-            ControlAddress toAddress, ControlAddress fromAddress, long timeCode, Argument arg) {
+            ControlAddress toAddress, ControlAddress fromAddress, long timeCode, Value arg) {
            return createCall(toAddress, fromAddress, timeCode, CallArguments.create(arg), Type.INVOKE_QUIET);
     }
 
@@ -149,12 +149,12 @@ public final class Call extends Packet {
      * be set from the given inward Call.
      *
      * @param inwardCall Call this is a response to.
-     * @param arg Argument, will automatically be wrapped in a CallArguments object.
+     * @param arg Value, will automatically be wrapped in a CallArguments object.
      * @return Call
      */
     public static Call createReturnCall(
             Call inwardCall,
-            Argument arg) {
+            Value arg) {
         return createResponseCall(inwardCall, CallArguments.create(arg), Type.RETURN);
     }
 
@@ -177,12 +177,12 @@ public final class Call extends Packet {
      * be set from the given inward Call.
      *
      * @param inwardCall Call this is a response to.
-     * @param arg Argument, will automatically be wrapped in a CallArguments object.
+     * @param arg Value, will automatically be wrapped in a CallArguments object.
      * @return Call
      */
     public static Call createErrorCall(
             Call inwardCall,
-            Argument arg) {
+            Value arg) {
         return createResponseCall(inwardCall, CallArguments.create(arg), Type.ERROR);
     }
 

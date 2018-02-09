@@ -37,8 +37,8 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
@@ -56,10 +56,10 @@ public class ComboBox extends SingleBindingGuiComponent {
 
     private final static Logger LOG = Logger.getLogger(ComboBox.class.getName());
     private PArray userValues = PArray.EMPTY;
-    private Argument current = PString.EMPTY;
+    private Value current = PString.EMPTY;
     private ArgumentInfo boundInfo;
-    private List<Argument> values;
-    private Argument temp;
+    private List<Value> values;
+    private Value temp;
     private Box container;
     private JComboBox combo;
     private DefaultComboBoxModel model;
@@ -68,7 +68,7 @@ public class ComboBox extends SingleBindingGuiComponent {
     private String labelText = "";
 
     public ComboBox() {
-        values = new ArrayList<Argument>();
+        values = new ArrayList<Value>();
     }
 
     @Override
@@ -142,9 +142,9 @@ public class ComboBox extends SingleBindingGuiComponent {
         }
     }
 
-    private void updateCurrent(Argument current) {
+    private void updateCurrent(Value current) {
         LOG.log(Level.FINEST, "Update current : {0}", current);
-        if (Argument.equivalent(Argument.class, this.current, current)) {
+        if (Utils.equivalent(this.current, current)) {
             LOG.finest("Current is equivalent, returning.");
             return;
         }
@@ -162,8 +162,8 @@ public class ComboBox extends SingleBindingGuiComponent {
         int idx = -1;
         for (int i = 0, count = model.getSize(); i < count; i++) {
             Object o = model.getElementAt(i);
-            if (o instanceof Argument
-                    && Argument.equivalent(Argument.class, current, (Argument) o)) {
+            if (o instanceof Value
+                    && Utils.equivalent(current, (Value) o)) {
                 idx = i;
                 LOG.log(Level.FINEST, "Found current in model at position : {0}", idx);
                 break;
@@ -186,7 +186,7 @@ public class ComboBox extends SingleBindingGuiComponent {
         isUpdating = true;
         model.removeAllElements();
         temp = null;
-        for (Argument value : values) {
+        for (Value value : values) {
             LOG.log(Level.FINEST, "Adding to model from values : {0}", value);
             model.addElement(value);
         }
@@ -198,7 +198,7 @@ public class ComboBox extends SingleBindingGuiComponent {
         boolean intersect = false;
         PArray infoValues = PArray.EMPTY;
         if (boundInfo != null) {
-            Argument p = boundInfo.getProperties().get(ArgumentInfo.KEY_ALLOWED_VALUES);
+            Value p = boundInfo.getProperties().get(ArgumentInfo.KEY_ALLOWED_VALUES);
             if (p == null) {
                 p = boundInfo.getProperties().get(ArgumentInfo.KEY_SUGGESTED_VALUES);
             } else {
@@ -208,7 +208,7 @@ public class ComboBox extends SingleBindingGuiComponent {
             if (p != null) {
                 try {
                     infoValues = PArray.coerce(p);
-                } catch (ArgumentFormatException ex) {/*
+                } catch (ValueFormatException ex) {/*
                      * fall through
                      */
 
@@ -216,15 +216,15 @@ public class ComboBox extends SingleBindingGuiComponent {
             }
         }
         if (userValues.isEmpty()) {
-            for (Argument value : infoValues) {
+            for (Value value : infoValues) {
                 LOG.log(Level.FINEST, "Adding to values : {0}", value);
                 values.add(value);
             }
         } else {
-            for (Argument value : userValues) {
+            for (Value value : userValues) {
                 if (intersect) {
-                    for (Argument allowed : infoValues) {
-                        if (Argument.equivalent(Argument.class, allowed, value)) {
+                    for (Value allowed : infoValues) {
+                        if (Utils.equivalent(allowed, value)) {
                             LOG.log(Level.FINEST, "Adding to values : {0}", value);
                             values.add(value);
                             break;
@@ -316,9 +316,9 @@ public class ComboBox extends SingleBindingGuiComponent {
                 return;
             }
             Object obj = combo.getSelectedItem();
-            Argument arg;
-            if (obj instanceof Argument) {
-                arg = (Argument) obj;
+            Value arg;
+            if (obj instanceof Value) {
+                arg = (Value) obj;
                 send(CallArguments.create(arg));
                 updateCurrent(current);
             } else if (obj != null) {

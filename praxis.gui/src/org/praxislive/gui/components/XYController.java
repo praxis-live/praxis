@@ -29,9 +29,9 @@ import javax.swing.Box;
 import javax.swing.JComponent;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ControlAddress;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PNumber;
@@ -82,7 +82,7 @@ public class XYController extends AbstractGuiComponent {
         registerControl("binding-x", ArgumentProperty.create(bindingInfo, new XAddressBinding(), PString.EMPTY));
         registerControl("binding-y", ArgumentProperty.create(bindingInfo, new YAddressBinding(), PString.EMPTY));
         
-        ArgumentInfo info = ArgumentInfo.create(Argument.class,
+        ArgumentInfo info = ArgumentInfo.create(Value.class,
                 PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true, ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
         registerControl("minimum-x", ArgumentProperty.create(info, new MinBinding(xPrefs), PString.EMPTY));
         registerControl("minimum-y", ArgumentProperty.create(info, new MinBinding(yPrefs), PString.EMPTY));
@@ -228,7 +228,7 @@ public class XYController extends AbstractGuiComponent {
 
     private class XAddressBinding implements ArgumentProperty.Binding {
 
-        public void setBoundValue(long time, Argument value) {
+        public void setBoundValue(long time, Value value) {
             if (xAdaptor == null) {
                 createComponentAndAdaptors();
             }
@@ -240,7 +240,7 @@ public class XYController extends AbstractGuiComponent {
                     try {
                         xBinding = ControlAddress.coerce(value);
                         bindingContext.bind(xBinding, xAdaptor);
-                    } catch (ArgumentFormatException ex) {
+                    } catch (ValueFormatException ex) {
                         logger.log(Level.WARNING, "Could not create binding-x", ex);
                         xBinding = null;
                     }
@@ -249,14 +249,14 @@ public class XYController extends AbstractGuiComponent {
 
         }
 
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             return xBinding == null ? PString.EMPTY : xBinding;
         }
     }
 
     private class YAddressBinding implements ArgumentProperty.Binding {
 
-        public void setBoundValue(long time, Argument value) {
+        public void setBoundValue(long time, Value value) {
             if (yAdaptor == null) {
                 createComponentAndAdaptors();
             }
@@ -268,7 +268,7 @@ public class XYController extends AbstractGuiComponent {
                     try {
                         yBinding = ControlAddress.coerce(value);
                         bindingContext.bind(yBinding, yAdaptor);
-                    } catch (ArgumentFormatException ex) {
+                    } catch (ValueFormatException ex) {
                         logger.log(Level.WARNING, "Could not create binding-y", ex);
                         yBinding = null;
                     }
@@ -276,7 +276,7 @@ public class XYController extends AbstractGuiComponent {
             }
         }
 
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             return yBinding == null ? PString.EMPTY : yBinding;
         }
     }
@@ -289,7 +289,7 @@ public class XYController extends AbstractGuiComponent {
             this.prefs = prefs;
         }
 
-        public void setBoundValue(long time, Argument value) {
+        public void setBoundValue(long time, Value value) {
             if (value.isEmpty()) {
                 prefs.minimum = null;
             } else {
@@ -302,8 +302,8 @@ public class XYController extends AbstractGuiComponent {
             updateAdaptors();
         }
 
-        public Argument getBoundValue() {
-            Argument arg = prefs.minimum;
+        public Value getBoundValue() {
+            Value arg = prefs.minimum;
             if (arg == null) {
                 return PString.EMPTY;
             } else {
@@ -320,7 +320,7 @@ public class XYController extends AbstractGuiComponent {
             this.prefs = prefs;
         }
 
-        public void setBoundValue(long time, Argument value) {
+        public void setBoundValue(long time, Value value) {
             if (value.isEmpty()) {
                 prefs.maximum = null;
             } else {
@@ -333,8 +333,8 @@ public class XYController extends AbstractGuiComponent {
             updateAdaptors();
         }
 
-        public Argument getBoundValue() {
-            Argument arg = prefs.maximum;
+        public Value getBoundValue() {
+            Value arg = prefs.maximum;
             if (arg == null) {
                 return PString.EMPTY;
             } else {
@@ -351,7 +351,7 @@ public class XYController extends AbstractGuiComponent {
             this.prefs = prefs;
         }
 
-        public void setBoundValue(long time, Argument value) {
+        public void setBoundValue(long time, Value value) {
             if (value.isEmpty()) {
                 prefs.scale = null;
             } else {
@@ -364,8 +364,8 @@ public class XYController extends AbstractGuiComponent {
             updateAdaptors();
         }
 
-        public Argument getBoundValue() {
-            Argument arg = prefs.scale;
+        public Value getBoundValue() {
+            Value arg = prefs.scale;
             if (arg == null) {
                 return PString.EMPTY;
             } else {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,38 +21,34 @@
  */
 package org.praxislive.core.types;
 
+import org.praxislive.core.Value;
+
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-class SyntaxUtils {
+class Utils {
 
-    private SyntaxUtils() {
+    private Utils() {
     }
 
-    public static String escape(String input) {
+    static String escape(String input) {
         String res = doPlain(input);
         if (res == null) {
             res = doQuoted(input);
         }
-//        if (res == null) {
-//            res = doBraced(input);
-//        }
         return res;
     }
 
-    public static String escapeQuoted(String input) {
+    static String escapeQuoted(String input) {
         String res = doQuoted(input);
-//        if (res == null) {
-//            res = doBraced(input);
-//        }
         return res;
     }
 
-//    public static String escapeBraced(String input) {
-//        return doBraced(input);
-//    }
-
+    static boolean equivalent(Value arg1, Value arg2) {
+        return arg1.equivalent(arg2) || arg2.equivalent(arg2);
+    }
+    
     private static String doPlain(String input) {
         int len = input.length();
         if (len == 0 || len > 128) {
@@ -75,10 +71,7 @@ class SyntaxUtils {
 
     private static String doQuoted(String input) {
         int len = input.length();
-//        if (len == 0 /*|| len > 128*/) {
-//            return "\"\"";
-//        }
-        if (len == 0 /*|| len > 128*/) {
+        if (len == 0) {
             return "\"\"";
         }
         StringBuilder sb = new StringBuilder(len * 2);
@@ -90,19 +83,9 @@ class SyntaxUtils {
                 case '}':
                 case '[':
                 case ']':
-//                case '\\':
                     sb.append('\\');
                     sb.append(c);
                     break;
-//                case '\t':
-//                    sb.append("\\t");
-//                    break;
-//                case '\n':
-//                    sb.append("\\n");
-//                    break;
-//                case '\r':
-//                    sb.append("\\r");
-//                    break;
                 case '\"':
                     sb.append("\\\"");
                     break;
@@ -117,21 +100,5 @@ class SyntaxUtils {
         return sb.toString();
     }
 
-//    private static String doBraced(String input) {
-//        StringBuilder sb = new StringBuilder();
-//        sb.append('{');
-//        for (int i = 0; i < input.length(); i++) {
-//            char c = input.charAt(i);
-//            switch (c) {
-//                case '{':
-//                case '}':
-////                case '\\': @TODO fix tokenizer to allow escaped slash?
-//                    sb.append('\\');
-//                default:
-//                    sb.append(c);
-//            }
-//        }
-//        sb.append('}');
-//        return sb.toString();
-//    }
+
 }

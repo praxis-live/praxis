@@ -21,7 +21,7 @@
  */
 package org.praxislive.tracker;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 
 /**
  *
@@ -31,7 +31,7 @@ public abstract class Pattern {
     
     public final static Pattern EMPTY = new Empty();
     
-    public abstract Argument getValueAt(int row, int column);
+    public abstract Value getValueAt(int row, int column);
     
     public abstract int getRowCount();
     
@@ -40,7 +40,7 @@ public abstract class Pattern {
     private static class Empty extends Pattern {
 
         @Override
-        public Argument getValueAt(int row, int column) {
+        public Value getValueAt(int row, int column) {
             return null;
         }
 

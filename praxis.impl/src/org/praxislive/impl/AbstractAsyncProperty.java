@@ -23,7 +23,7 @@ package org.praxislive.impl;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ComponentAddress;
@@ -58,12 +58,12 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
     private long latest;
     private ControlAddress taskSubmitAddress;
 
-    protected AbstractAsyncProperty(ArgumentInfo keyType, Class<T> valueType, Argument defaultKey) {
-        this(new ArgumentInfo[]{keyType}, valueType, new Argument[]{defaultKey}, null);
+    protected AbstractAsyncProperty(ArgumentInfo keyType, Class<T> valueType, Value defaultKey) {
+        this(new ArgumentInfo[]{keyType}, valueType, new Value[]{defaultKey}, null);
     }
 
     protected AbstractAsyncProperty(ArgumentInfo[] keyTypes,
-            Class<T> valueType, Argument[] defaultKeys, PMap properties) {
+            Class<T> valueType, Value[] defaultKeys, PMap properties) {
         if (valueType == null) {
             throw new NullPointerException();
         }
@@ -166,7 +166,7 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
         }
     }
 
-    private void portInvoke(long time, Argument key) {
+    private void portInvoke(long time, Value key) {
         if (isLatest(time)) {
             CallArguments pkeys = CallArguments.create(key);
             try {
@@ -191,7 +191,7 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
 
     }
 
-    private void castAndSetValue(Argument result) {
+    private void castAndSetValue(Value result) {
         if (valueType.isInstance(result)) {
             value = valueType.cast(result);
             return;
@@ -288,7 +288,7 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
         }
 
         @Override
-        public void receive(long time, Argument value) {
+        public void receive(long time, Value value) {
             portInvoke(time, value);
         }
     }

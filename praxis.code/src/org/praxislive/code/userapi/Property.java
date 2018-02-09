@@ -29,7 +29,7 @@ import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import org.praxislive.code.CodeContext;
 import org.praxislive.code.DefaultCodeDelegate;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.types.PBoolean;
 import org.praxislive.core.types.PNumber;
 import org.praxislive.core.types.PString;
@@ -167,11 +167,11 @@ public abstract class Property {
         return this;
     }
     
-    @Deprecated
-    public Property set(Argument value) {
-        Value v = value instanceof Value ? (Value) value : PString.valueOf(value);
-        return set(v);
-    }
+//    @Deprecated
+//    public Property set(Value value) {
+//        Value v = value instanceof Value ? (Value) value : PString.valueOf(value);
+//        return set(v);
+//    }
 
     /**
      * Set the current value. Also stops any active animation.

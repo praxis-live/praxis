@@ -23,7 +23,7 @@
 package org.praxislive.script.ast;
 
 import java.util.List;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.script.ExecutionException;
 import org.praxislive.script.Namespace;
 
@@ -78,7 +78,7 @@ public abstract class CompositeNode extends Node {
     protected abstract boolean isThisDone();
 
     @Override
-    public void writeNextCommand(List<Argument> args) 
+    public void writeNextCommand(List<Value> args) 
             throws ExecutionException {
         if (namespace == null) {
             throw new IllegalStateException();
@@ -90,12 +90,12 @@ public abstract class CompositeNode extends Node {
         }
     }
 
-    protected abstract void writeThisNextCommand(List<Argument> args)
+    protected abstract void writeThisNextCommand(List<Value> args)
             throws ExecutionException;
 
 
     @Override
-    public void postResponse(List<Argument> args) 
+    public void postResponse(List<Value> args) 
             throws ExecutionException {
         if (namespace == null) {
             throw new IllegalStateException();
@@ -107,7 +107,7 @@ public abstract class CompositeNode extends Node {
         }
     }
 
-    protected abstract void postThisResponse(List<Argument> args)
+    protected abstract void postThisResponse(List<Value> args)
             throws ExecutionException;
 
     @Override

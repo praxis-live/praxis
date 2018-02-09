@@ -25,8 +25,8 @@ package org.praxislive.code;
 import java.lang.reflect.Method;
 import org.praxislive.code.userapi.AuxIn;
 import org.praxislive.code.userapi.In;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.Port;
 import org.praxislive.core.PortInfo;
 import org.praxislive.core.types.PNumber;
@@ -52,7 +52,7 @@ abstract class MethodInput {
 
     abstract void receive(long time, double value);
 
-    abstract void receive(long time, Argument value);
+    abstract void receive(long time, Value value);
 
     void invoke(long time, final Object value) {
         context.invoke(time, method, value);
@@ -85,7 +85,7 @@ abstract class MethodInput {
                 input = new IntInput(method);
             } else if (type == String.class) {
                 input = new StringInput(method);
-            } else if (type == Value.class || type == Argument.class) {
+            } else if (type == Value.class || type == Value.class) {
                 input = new ValueInput(method);
             }
         }
@@ -138,7 +138,7 @@ abstract class MethodInput {
         }
 
         @Override
-        public void receive(long time, Argument value) {
+        public void receive(long time, Value value) {
             input.receive(time, value);
         }
 
@@ -156,10 +156,10 @@ abstract class MethodInput {
         }
 
         @Override
-        public void receive(long time, Argument value) {
+        public void receive(long time, Value value) {
             try {
                 invoke(time, PNumber.coerce(value).value());
-            } catch (ArgumentFormatException ex) {
+            } catch (ValueFormatException ex) {
                 invoke(time, 0.0);
             }
         }
@@ -178,10 +178,10 @@ abstract class MethodInput {
         }
 
         @Override
-        public void receive(long time, Argument value) {
+        public void receive(long time, Value value) {
             try {
                 invoke(time, PNumber.coerce(value).toIntValue());
-            } catch (ArgumentFormatException ex) {
+            } catch (ValueFormatException ex) {
                 invoke(time, 0.0);
             }
         }
@@ -200,7 +200,7 @@ abstract class MethodInput {
         }
 
         @Override
-        public void receive(long time, Argument value) {
+        public void receive(long time, Value value) {
             invoke(time, value.toString());
         }
 
@@ -218,7 +218,7 @@ abstract class MethodInput {
         }
 
         @Override
-        void receive(long time, Argument value) {
+        void receive(long time, Value value) {
             Value v = value instanceof Value ? (Value) value : PString.valueOf(value);
             invoke(time, v);
         }

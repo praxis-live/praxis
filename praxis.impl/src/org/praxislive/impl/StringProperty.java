@@ -24,7 +24,7 @@ package org.praxislive.impl;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.types.PArray;
@@ -54,7 +54,7 @@ public class StringProperty extends AbstractSingleArgProperty {
     }
 
     @Override
-    protected void set(long time, Argument value) throws Exception {
+    protected void set(long time, Value value) throws Exception {
         set(time, value.toString());
     }
 
@@ -74,7 +74,7 @@ public class StringProperty extends AbstractSingleArgProperty {
     }
 
     @Override
-    protected Argument get() {
+    protected Value get() {
         return PString.valueOf(reader.getBoundValue());
     }
     
@@ -126,7 +126,7 @@ public class StringProperty extends AbstractSingleArgProperty {
             allowedValues = new LinkedHashSet<String>(Arrays.asList(values));
             arguments = new ArgumentInfo[]{PString.info(values)};
         }
-        Argument[] defaults = new Argument[]{PString.valueOf(def)};
+        Value[] defaults = new Value[]{PString.valueOf(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new StringProperty(binding, binding, allowedValues, info);
     }

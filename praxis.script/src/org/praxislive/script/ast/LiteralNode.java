@@ -23,7 +23,7 @@
 package org.praxislive.script.ast;
 
 import java.util.List;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 
 /**
  *
@@ -31,9 +31,9 @@ import org.praxislive.core.Argument;
  */
 public class LiteralNode extends Node {
 
-    private Argument value;
+    private Value value;
 
-    public LiteralNode(Argument value) {
+    public LiteralNode(Value value) {
         if (value == null) {
             throw new NullPointerException();
         }
@@ -41,7 +41,7 @@ public class LiteralNode extends Node {
     }
 
     @Override
-    public void writeResult(List<Argument> args) {
+    public void writeResult(List<Value> args) {
         args.add(value);
     }
 

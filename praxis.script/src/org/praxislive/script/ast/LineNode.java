@@ -23,7 +23,7 @@ package org.praxislive.script.ast;
 
 import java.util.List;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.script.ExecutionException;
 
 /**
@@ -34,7 +34,7 @@ public class LineNode extends CompositeNode {
 
     private final static Logger log = Logger.getLogger(LineNode.class.getName());
 
-    private Argument[] result;
+    private Value[] result;
 
     public LineNode(List<Node> children) {
         super(children);
@@ -46,7 +46,7 @@ public class LineNode extends CompositeNode {
     }
 
     @Override
-    protected void writeThisNextCommand(List<Argument> args) 
+    protected void writeThisNextCommand(List<Value> args) 
             throws ExecutionException {
         if (result == null) {
             for (Node child : getChildren()) {
@@ -60,18 +60,18 @@ public class LineNode extends CompositeNode {
     }
 
     @Override
-    protected void postThisResponse(List<Argument> args) {
+    protected void postThisResponse(List<Value> args) {
         if (result == null) {
-            result = args.toArray(new Argument[args.size()]);
+            result = args.toArray(new Value[args.size()]);
         } else {
             throw new IllegalStateException();
         }
     }
 
     @Override
-    public void writeResult(List<Argument> args) {
+    public void writeResult(List<Value> args) {
         if (result != null) {
-            for (Argument arg : result) {
+            for (Value arg : result) {
                 args.add(arg);
             }
         } else {

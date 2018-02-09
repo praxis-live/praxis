@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.types.PString;
 import org.praxislive.impl.AbstractRoot;
@@ -243,7 +243,7 @@ public class TFRoot extends AbstractRoot {
         private PString cache;
 
         @Override
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             if (cache == null) {
                 StringBuilder builder = new StringBuilder();
                 for (String line : infoMap.values()) {

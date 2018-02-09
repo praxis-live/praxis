@@ -22,7 +22,7 @@
 package org.praxislive.impl;
 
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Component;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
@@ -50,7 +50,7 @@ public class BooleanProperty extends AbstractSingleArgProperty {
     }
 
     @Override
-    protected void set(long time, Argument value) throws Exception {
+    protected void set(long time, Value value) throws Exception {
         if (value instanceof PBoolean) {
             binding.setBoundValue(time, ( (PBoolean) value).value());
         } else if (value instanceof PNumber) {
@@ -76,7 +76,7 @@ public class BooleanProperty extends AbstractSingleArgProperty {
     }
 
     @Override
-    protected Argument get() {
+    protected Value get() {
         return PBoolean.valueOf(binding.getBoundValue());
     }
     
@@ -103,7 +103,7 @@ public class BooleanProperty extends AbstractSingleArgProperty {
             binding = new DefaultBinding(def);
         }
         ArgumentInfo[] arguments = new ArgumentInfo[]{PBoolean.info()};
-        Argument[] defaults = new Argument[]{PBoolean.valueOf(def)};
+        Value[] defaults = new Value[]{PBoolean.valueOf(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new BooleanProperty(binding, info);
     }
@@ -121,7 +121,7 @@ public class BooleanProperty extends AbstractSingleArgProperty {
             binding = new DefaultBinding(def);
         }
         ArgumentInfo[] arguments = new ArgumentInfo[]{PBoolean.info()};
-        Argument[] defaults = new Argument[]{PBoolean.valueOf(def)};
+        Value[] defaults = new Value[]{PBoolean.valueOf(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new BooleanProperty(binding, info);
     }

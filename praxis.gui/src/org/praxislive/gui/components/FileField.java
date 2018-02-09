@@ -35,8 +35,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JTextField;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.types.PResource;
 import org.praxislive.gui.ControlBinding;
@@ -177,7 +177,7 @@ public class FileField extends SingleBindingGuiComponent {
             }
             CallArguments args = binding.getArguments();
             if (args.getSize() > 0) {
-                Argument arg = args.get(0);
+                Value arg = args.get(0);
                 if (arg.isEmpty()) {
                     if (uri != null) {
                         uri = null;
@@ -191,7 +191,7 @@ public class FileField extends SingleBindingGuiComponent {
                             uri = u;
                             updateField();
                         }
-                    } catch (ArgumentFormatException ex) {
+                    } catch (ValueFormatException ex) {
                         u = null;
                         if (uri != null) {
                             uri = null;

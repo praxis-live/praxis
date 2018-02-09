@@ -25,8 +25,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ComponentAddress;
@@ -51,14 +51,14 @@ public class EvalStackFrame implements StackFrame {
     private State state;
     private Call pending;
     private CallArguments result;
-    private List<Argument> argList;
+    private List<Value> argList;
     private boolean doProcess;
 
     public EvalStackFrame(Namespace namespace, RootNode rootNode) {
         this.namespace = namespace;
         this.rootNode = rootNode;
         this.state = State.Incomplete;
-        this.argList = new LinkedList<Argument>();
+        this.argList = new LinkedList<Value>();
         rootNode.reset();
         rootNode.init(namespace);
         doProcess = true;
@@ -164,7 +164,7 @@ public class EvalStackFrame implements StackFrame {
         if (argList.size() < 1) {
             throw new ExecutionException();
         }
-        Argument cmdArg = argList.get(0);
+        Value cmdArg = argList.get(0);
         if (cmdArg instanceof ControlAddress) {
             routeCall(context, argList);
             return null;
@@ -194,7 +194,7 @@ public class EvalStackFrame implements StackFrame {
 
     }
 
-    private void routeCall(Env context, List<Argument> argList)
+    private void routeCall(Env context, List<Value> argList)
             throws ExecutionException {
         try {
             ControlAddress ad = ControlAddress.coerce(argList.get(0));
@@ -204,19 +204,19 @@ public class EvalStackFrame implements StackFrame {
             log.finest("Sending Call" + call);
             pending = call;
             context.getPacketRouter().route(call);
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             throw new ExecutionException(ex);
         }
     }
 
-//    private StackFrame tryDefault(Namespace namespace, List<Argument> argList)
+//    private StackFrame tryDefault(Namespace namespace, List<Value> argList)
 //            throws ExecutionException {
 //        CallArguments args = CallArguments.create(argList);
 //        return DefaultCommand.getInstance().createStackFrame(namespace, args);
 //
 //    }
 
-    private void argsToList(CallArguments args, List<Argument> list) {
+    private void argsToList(CallArguments args, List<Value> list) {
         for (int i = 0, count = args.getSize(); i < count; i++) {
             list.add(args.get(i));
         }

@@ -26,7 +26,7 @@
     void extractArray() {
         try {
             array = PArray.coerce(values.get());
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             log(ERROR, ex, "values isn't an array");
             array = PArray.EMPTY;
         }

@@ -46,7 +46,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import net.miginfocom.swing.MigLayout;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.types.PReference;
 import org.praxislive.texteditor.TextEditor;
@@ -179,7 +179,7 @@ public class Terminal extends JComponent {
             LOG.log(Level.FINE, "Unexpected Exception in Terminal", ex);
         }
         if (args.getSize() > 0) {
-                Argument err = args.get(0);
+                Value err = args.get(0);
                 if (err instanceof PReference) {
                     Object o = ((PReference) err).getReference();
                     if (o instanceof Throwable) {

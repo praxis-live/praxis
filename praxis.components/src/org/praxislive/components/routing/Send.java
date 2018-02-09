@@ -21,7 +21,7 @@
  */
 package org.praxislive.components.routing;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
@@ -75,7 +75,7 @@ public class Send extends AbstractComponent {
     private class InputBinding implements ArgumentInputPort.Binding {
 
         @Override
-        public void receive(long time, Argument arg) {
+        public void receive(long time, Value arg) {
             if (destination != null) {
                 PacketRouter router = getPacketRouter();
                 if (router != null) {
@@ -90,7 +90,7 @@ public class Send extends AbstractComponent {
     private class AddressBinding implements ArgumentProperty.Binding {
 
         @Override
-        public void setBoundValue(long time, Argument value) throws Exception {
+        public void setBoundValue(long time, Value value) throws Exception {
             if (value.isEmpty()) {
                 destination = null;
             } else {
@@ -99,7 +99,7 @@ public class Send extends AbstractComponent {
         }
 
         @Override
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             return destination == null ? PString.EMPTY : destination;
         }
 
@@ -125,7 +125,7 @@ public class Send extends AbstractComponent {
 
                 CallArguments arrArgs = call.getArgs();
                 if (arrArgs.getSize() > 0) {
-                    Argument errArg = arrArgs.get(0);
+                    Value errArg = arrArgs.get(0);
                     if (errArg instanceof PError) {
                         logBuilder.log(LogLevel.WARNING, (PError) errArg);
                     } else {

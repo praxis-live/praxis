@@ -79,8 +79,8 @@ public class Button extends SingleBindingGuiComponent {
 //        registerControl("on-click", onClick);
 //        registerControl("_on-click-log", new OnClickLog());
         // @TODO Fix ControlInfo here.
-//        onClickInfo = ControlInfo.createPropertyInfo(new ArgumentInfo[] {ControlAddress.info(), Argument.info()},
-//                new Argument[] {PString.EMPTY}, null);
+//        onClickInfo = ControlInfo.createPropertyInfo(new ArgumentInfo[] {ControlAddress.info(), Value.info()},
+//                new Value[] {PString.EMPTY}, null);
 //        registerControl("on-click", new OnClickProperty(this, onClickInfo));
     }
 

@@ -34,7 +34,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Call;
 import org.praxislive.core.Component;
@@ -56,7 +56,7 @@ class DefaultTaskService extends AbstractRoot {
     private final static Logger LOG = Logger.getLogger(DefaultTaskService.class.getName());
 
     private ExecutorService threadService;
-    private Map<Future<Argument>, Call> futures;
+    private Map<Future<Value>, Call> futures;
     private List<Future> completed;
 
     public DefaultTaskService() {
@@ -85,10 +85,10 @@ class DefaultTaskService extends AbstractRoot {
     
     @Override
     protected void processingControlFrame() {
-            for (Future<Argument> future : futures.keySet()) {
+            for (Future<Value> future : futures.keySet()) {
                 if (future.isDone()) {
                     try {
-                        Argument value = future.get();
+                        Value value = future.get();
                         Call call = futures.get(future);
                         call = Call.createReturnCall(call, value);
                         getPacketRouter().route(call);
@@ -131,16 +131,16 @@ class DefaultTaskService extends AbstractRoot {
         private void submitTask(Call call) throws Exception {
             CallArguments args = call.getArgs();
             if (args.getSize() == 1) {
-                Argument arg = args.get(0);
+                Value arg = args.get(0);
                 if (arg instanceof PReference) {
                     Object ref = ((PReference) arg).getReference();
                     if (ref instanceof Task) {
                         final Task task = (Task) ref;
-                        Future<Argument> future = threadService.submit(
-                                new Callable<Argument>() {
+                        Future<Value> future = threadService.submit(
+                                new Callable<Value>() {
 
                                     @Override
-                                    public Argument call() throws Exception {
+                                    public Value call() throws Exception {
                                         return task.execute();
                                     }
                                 });

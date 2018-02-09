@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,12 +21,11 @@
  */
 package org.praxislive.core.types;
 
-import org.praxislive.core.Value;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 
 /**
  *
@@ -34,14 +33,14 @@ import org.praxislive.core.ArgumentFormatException;
  */
 public class PMap extends Value {
 
-//    public final static PMap EMPTY = new PMap(Collections.<String, Argument>emptyMap(), "");
+//    public final static PMap EMPTY = new PMap(Collections.<String, Value>emptyMap(), "");
     public final static PMap EMPTY = new PMap(PArray.EMPTY, "");
     private final static int BUILDER_INIT_CAPACITY = 8;
-//    private Map<String, Argument> map;
+//    private Map<String, Value> map;
     private final PArray array;
     private final String string;
 
-//    private PMap(Map<String, Argument> map, String str) {
+//    private PMap(Map<String, Value> map, String str) {
 //        this.map = map;
 //        this.str = str;
 //    }
@@ -147,12 +146,12 @@ public class PMap extends Value {
                 if (!array.get(i).toString().equals(other.array.get(i).toString())) {
                     return false;
                 }
-                if (!Argument.equivalent(null, array.get(i+1), other.array.get(i+1))) {
+                if (!Utils.equivalent(array.get(i+1), other.array.get(i+1))) {
                     return false;
                 }
             }
             return true;
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return false;
         }
     }
@@ -234,14 +233,14 @@ public class PMap extends Value {
         return new PMap(array, null);
     }
 
-    public static PMap valueOf(String str) throws ArgumentFormatException {
+    public static PMap valueOf(String str) throws ValueFormatException {
         PArray arr = PArray.valueOf(str);
         if (arr.isEmpty()) {
             return PMap.EMPTY;
         }
         int size = arr.getSize();
         if (size % 2 != 0) {
-            throw new ArgumentFormatException("Uneven number of tokens passed to PMap.valueOf()");
+            throw new ValueFormatException("Uneven number of tokens passed to PMap.valueOf()");
         }
 //        switch (size) {
 //            case 2:
@@ -263,7 +262,7 @@ public class PMap extends Value {
         return builder.build(str);
     }
 
-    public static PMap coerce(Argument arg) throws ArgumentFormatException {
+    public static PMap coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PMap) {
             return (PMap) arg;
         } else {
@@ -271,10 +270,10 @@ public class PMap extends Value {
         }
     }
     
-    public static Optional<PMap> from(Argument arg) {
+    public static Optional<PMap> from(Value arg) {
         try {
             return Optional.of(coerce(arg));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return Optional.empty();
         }
     }
@@ -295,11 +294,11 @@ public class PMap extends Value {
             storage = new ArrayList<>(capacity);
         }
 
-        @Deprecated
-        public Builder put(PString key, Argument value) {
-            put(key, value instanceof Value ? (Value) value : PString.valueOf(value));
-            return this;
-        }
+//        @Deprecated
+//        public Builder put(PString key, Value value) {
+//            put(key, value instanceof Value ? (Value) value : PString.valueOf(value));
+//            return this;
+//        }
         
         public Builder put(PString key, Value value) {
             if (key == null || value == null) {
@@ -309,11 +308,11 @@ public class PMap extends Value {
             return this;
         }
         
-        @Deprecated
-        public Builder put(String key, Argument value) {
-            put(PString.valueOf(key), value);
-            return this;
-        }
+//        @Deprecated
+//        public Builder put(String key, Value value) {
+//            put(PString.valueOf(key), value);
+//            return this;
+//        }
         
         public Builder put(String key, Value value) {
             put(PString.valueOf(key), value);

@@ -8,7 +8,7 @@ package org.praxislive.script.ast;
 import org.praxislive.script.ast.AddressNode;
 import java.util.ArrayList;
 import java.util.List;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.script.Command;
 import org.praxislive.script.Namespace;
@@ -76,7 +76,7 @@ public class AddressNodeTest {
     @Test
     public void testWriteResult() {
         System.out.println("writeResult");
-        List<Argument> args = new ArrayList<Argument>();
+        List<Value> args = new ArrayList<Value>();
         Namespace ns = new NS();
         String[] ads = {"./to/here", "./to/here.control", "./to/here!port", ".control2"};
         for (String ad : ads) {
@@ -105,11 +105,11 @@ public class AddressNodeTest {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
-        public void setValue(Argument value) {
+        public void setValue(Value value) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
-        public Argument getValue() {
+        public Value getValue() {
             return ComponentAddress.create("/test/address");
         }
 

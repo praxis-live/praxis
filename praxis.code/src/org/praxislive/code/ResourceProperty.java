@@ -32,7 +32,7 @@ import java.util.Objects;
 import org.praxislive.code.userapi.OnChange;
 import org.praxislive.code.userapi.OnError;
 import org.praxislive.code.userapi.P;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
 import org.praxislive.core.Lookup;
@@ -57,7 +57,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
 
     private final static ControlInfo INFO = ControlInfo.createPropertyInfo(
             new ArgumentInfo[]{PResource.info(true)},
-            new Argument[]{PString.EMPTY},
+            new Value[]{PString.EMPTY},
             PMap.EMPTY);
 
     private final Loader<V> loader;
@@ -87,7 +87,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
 
     @Override
     protected TaskService.Task createTask(CallArguments keys) throws Exception {
-        Argument arg = keys.get(0);
+        Value arg = keys.get(0);
         if (arg.isEmpty()) {
             return null;
         }
@@ -132,7 +132,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
         }
 
         @Override
-        public Argument execute() throws Exception {
+        public Value execute() throws Exception {
             List<URI> uris = resource.resolve(lookup);
             Exception caughtException = null;
             for (URI uri : uris) {
@@ -143,8 +143,8 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
                         }
                     }
                     Object ret = loader.load(uri);
-                    if (ret instanceof Argument) {
-                        return (Argument) ret;
+                    if (ret instanceof Value) {
+                        return (Value) ret;
                     } else {
                         return PReference.wrap(ret);
                     }
@@ -300,7 +300,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
         }
 
         @Override
-        public void receive(long time, Argument value) {
+        public void receive(long time, Value value) {
             dsc.control.portInvoke(time, value);
         }
 

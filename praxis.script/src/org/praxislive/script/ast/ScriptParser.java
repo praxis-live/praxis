@@ -23,7 +23,7 @@ package org.praxislive.script.ast;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.PortAddress;
@@ -147,7 +147,7 @@ public class ScriptParser {
             } else {
                 return new LiteralNode(ComponentAddress.valueOf(text));
             }
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return new LiteralNode(PString.valueOf(text));
         }
     }

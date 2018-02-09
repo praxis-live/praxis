@@ -25,7 +25,7 @@ import org.praxislive.script.impl.AbstractInlineCommand;
 import org.praxislive.script.impl.VariableImpl;
 import java.util.Map;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.CallArguments;
 import org.praxislive.script.Command;
 import org.praxislive.script.CommandInstaller;
@@ -65,7 +65,7 @@ public class VariableCmds implements CommandInstaller {
                 throw new ExecutionException();
             }
             String varName = args.get(0).toString();
-            Argument val = args.get(1);
+            Value val = args.get(1);
             Variable var = namespace.getVariable(varName);
             if (var != null) {
                 var.setValue(val);

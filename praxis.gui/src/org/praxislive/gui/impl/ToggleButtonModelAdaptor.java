@@ -26,7 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Logger;
 import javax.swing.ButtonModel;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.types.PString;
@@ -40,8 +40,8 @@ public class ToggleButtonModelAdaptor extends ControlBinding.Adaptor {
 
     private static Logger logger = Logger.getLogger(ToggleButtonModelAdaptor.class.getName());
     private ButtonModel model;
-    private Argument onArg;
-    private Argument offArg;
+    private Value onArg;
+    private Value offArg;
     private boolean isProperty;
     private ControlInfo info;
     private boolean isUpdating;
@@ -57,7 +57,7 @@ public class ToggleButtonModelAdaptor extends ControlBinding.Adaptor {
         setSyncRate(ControlBinding.SyncRate.Low);
     }
 
-    public void setOnArgument(Argument onArg) {
+    public void setOnArgument(Value onArg) {
         if (onArg == null) {
             throw new NullPointerException();
         }
@@ -67,11 +67,11 @@ public class ToggleButtonModelAdaptor extends ControlBinding.Adaptor {
         }
     }
 
-    public Argument getOnArgument() {
+    public Value getOnArgument() {
         return onArg;
     }
 
-    public void setOffArgument(Argument offArg) {
+    public void setOffArgument(Value offArg) {
         if (offArg == null) {
             throw new NullPointerException();
         }
@@ -81,7 +81,7 @@ public class ToggleButtonModelAdaptor extends ControlBinding.Adaptor {
         }
     }
 
-    public Argument getOffArgument() {
+    public Value getOffArgument() {
         return offArg;
     }
 
@@ -113,11 +113,8 @@ public class ToggleButtonModelAdaptor extends ControlBinding.Adaptor {
         }
         CallArguments args = binding.getArguments();
         if (args.getSize() > 0) {
-            Argument arg = args.get(0);
-//            if (onArg.toString().equals(arg.toString())) {
-//                return true;
-//            }
-            return Argument.equivalent(null, arg, onArg);
+            Value arg = args.get(0);
+            return arg.equivalent(onArg) || onArg.equivalent(arg);
         }
         return false;
     }
@@ -128,7 +125,7 @@ public class ToggleButtonModelAdaptor extends ControlBinding.Adaptor {
             if (isUpdating) {
                 return;
             }
-            Argument arg = model.isSelected() ? onArg : offArg;
+            Value arg = model.isSelected() ? onArg : offArg;
             send(CallArguments.create(arg));
         }
     }

@@ -26,7 +26,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import org.praxislive.code.userapi.T;
 import org.praxislive.code.userapi.Trigger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
@@ -344,7 +344,7 @@ public class TriggerControl extends Trigger implements Control {
         }
 
         @Override
-        public void receive(long time, Argument value) {
+        public void receive(long time, Value value) {
             try {
                 control.trigger(time);
             } catch (Exception ex) {

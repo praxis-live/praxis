@@ -22,7 +22,7 @@
 
 package org.praxislive.script;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 
 /**
  *
@@ -30,8 +30,8 @@ import org.praxislive.core.Argument;
  */
 public interface Variable {
 
-    public abstract void setValue(Argument value);
+    public abstract void setValue(Value value);
 
-    public abstract Argument getValue();
+    public abstract Value getValue();
 
 }

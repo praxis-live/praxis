@@ -24,7 +24,7 @@ package org.praxislive.core.types;
 
 import org.praxislive.core.Value;
 import java.util.Optional;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ArgumentInfo;
 
 /**
@@ -70,7 +70,7 @@ public class PString extends Value implements Comparable<PString> {
         
     }
 
-    public static PString coerce(Argument arg) {
+    public static PString coerce(Value arg) {
         if (arg instanceof PString) {
             return (PString) arg;
         } else {
@@ -78,7 +78,7 @@ public class PString extends Value implements Comparable<PString> {
         }
     }
     
-    public static Optional<PString> from(Argument arg) {
+    public static Optional<PString> from(Value arg) {
         return Optional.of(coerce(arg));
     }
     

@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PResource;
@@ -84,7 +84,7 @@ public class FileCmds implements CommandInstaller {
         if (pwd != null) {
             try {
                 return PResource.coerce(pwd.getValue()).value();
-            } catch (ArgumentFormatException ex) {
+            } catch (ValueFormatException ex) {
                 Logger.getLogger(FileCmds.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

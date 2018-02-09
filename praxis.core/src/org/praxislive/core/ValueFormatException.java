@@ -24,42 +24,42 @@ package org.praxislive.core;
 
 /**
  * Exception thrown if a String is not a valid representation of the required
- * Argument subclass.
+ * Value subclass.
  *
  * @author Neil C Smith
  */
-public class ArgumentFormatException extends Exception {
+public class ValueFormatException extends Exception {
 
     /**
-     * Creates a new instance of <code>ArgumentFormatException</code> without detail message.
+     * Creates a new instance of <code>ValueFormatException</code> without detail message.
      */
-    public ArgumentFormatException() {
+    public ValueFormatException() {
     }
 
 
     /**
-     * Constructs an instance of <code>ArgumentFormatException</code> with the specified detail message.
+     * Constructs an instance of <code>ValueFormatException</code> with the specified detail message.
      * @param msg the detail message.
      */
-    public ArgumentFormatException(String msg) {
+    public ValueFormatException(String msg) {
         super(msg);
     }
 
     /**
-     * Constructs an instance of <code>ArgumentFormatException</code> with the specified cause.
+     * Constructs an instance of <code>ValueFormatException</code> with the specified cause.
      * @param cause the cause.
      */
-    public ArgumentFormatException(Throwable cause) {
+    public ValueFormatException(Throwable cause) {
         super(cause);
     }
 
     /**
-     * Constructs an instance of <code>ArgumentFormatException</code> with the specified detail message
+     * Constructs an instance of <code>ValueFormatException</code> with the specified detail message
      * and cause.
      * @param msg the detail message.
      * @param cause the cause.
      */
-    public ArgumentFormatException(String msg, Throwable cause) {
+    public ValueFormatException(String msg, Throwable cause) {
         super(msg, cause);
     }
 }

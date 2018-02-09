@@ -26,7 +26,7 @@ import java.lang.reflect.Method;
 import org.praxislive.code.userapi.OnChange;
 import org.praxislive.code.userapi.OnError;
 import org.praxislive.code.userapi.P;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
 import org.praxislive.core.Port;
@@ -108,15 +108,15 @@ class TypeConverterProperty<T> extends AbstractAsyncProperty<T> {
     private final static class Task implements TaskService.Task {
 
         private final TypeConverter converter;
-        private final Argument key;
+        private final Value key;
 
-        private Task(TypeConverter converter, Argument key) {
+        private Task(TypeConverter converter, Value key) {
             this.converter = converter;
             this.key = key;
         }
 
         @Override
-        public Argument execute() throws Exception {
+        public Value execute() throws Exception {
             return PReference.wrap(converter.fromArgument(key));
         }
 
@@ -146,7 +146,7 @@ class TypeConverterProperty<T> extends AbstractAsyncProperty<T> {
             this.onError = onError;
             info = ControlInfo.createPropertyInfo(
                     new ArgumentInfo[]{converter.getInfo()},
-                    new Argument[]{PString.EMPTY}, PMap.EMPTY);
+                    new Value[]{PString.EMPTY}, PMap.EMPTY);
         }
 
         @Override
@@ -250,7 +250,7 @@ class TypeConverterProperty<T> extends AbstractAsyncProperty<T> {
         }
 
         @Override
-        public void receive(long time, Argument value) {
+        public void receive(long time, Value value) {
             dsc.control.portInvoke(time, value);
         }
 

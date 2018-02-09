@@ -28,8 +28,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.InterfaceDefinition;
 import org.praxislive.core.PortAddress;
@@ -84,7 +84,7 @@ public class ComponentInfo extends Value {
     public ControlInfo getControlInfo(String control) {
         try {
             return ControlInfo.coerce(controls.get(control));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             Logger.getLogger(ComponentInfo.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
@@ -97,7 +97,7 @@ public class ComponentInfo extends Value {
     public PortInfo getPortInfo(String port) {
         try {
             return PortInfo.coerce(ports.get(port));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             Logger.getLogger(ComponentInfo.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
@@ -144,7 +144,7 @@ public class ComponentInfo extends Value {
                     && controls.equivalent(other.controls)
                     && ports.equivalent(other.ports)
                     && properties.equivalent(other.properties);
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return false;
         }
     }
@@ -214,7 +214,7 @@ public class ComponentInfo extends Value {
 
     }
 
-    public static ComponentInfo coerce(Argument arg) throws ArgumentFormatException {
+    public static ComponentInfo coerce(Value arg) throws ValueFormatException {
         if (arg instanceof ComponentInfo) {
             return (ComponentInfo) arg;
         } else {
@@ -222,10 +222,10 @@ public class ComponentInfo extends Value {
         }
     }
     
-    public static Optional<ComponentInfo> from(Argument arg) {
+    public static Optional<ComponentInfo> from(Value arg) {
         try {
             return Optional.of(coerce(arg));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return Optional.empty();
         }
     }
@@ -234,11 +234,11 @@ public class ComponentInfo extends Value {
         return ArgumentInfo.create(ComponentInfo.class, null);
     }
 
-    private static ComponentInfo valueOf(String string) throws ArgumentFormatException {
+    private static ComponentInfo valueOf(String string) throws ValueFormatException {
         try {
             PArray arr = PArray.valueOf(string);
             if (arr.getSize() < 4 || !INFO_PREFIX.equals(arr.get(0).toString())) {
-                throw new ArgumentFormatException();
+                throw new ValueFormatException();
             }
             // arr(1) is controls
             PArray ctrls = PArray.coerce(arr.get(1));
@@ -251,7 +251,7 @@ public class ComponentInfo extends Value {
                 for (int i = 0; i < len; i += 2) {
                     String id = ctrls.get(i).toString();
                     if (!ControlAddress.isValidID(id)) {
-                        throw new ArgumentFormatException("Invalid control ID " + id);
+                        throw new ValueFormatException("Invalid control ID " + id);
                     }
                     cBld.put(id, ControlInfo.coerce(ctrls.get(i + 1)));
                 }
@@ -269,7 +269,7 @@ public class ComponentInfo extends Value {
                 for (int i = 0; i < len; i += 2) {
                     String id = pts.get(i).toString();
                     if (!PortAddress.isValidID(id)) {
-                        throw new ArgumentFormatException("Invalid port ID: " + id);
+                        throw new ValueFormatException("Invalid port ID: " + id);
                     }
                     pBld.put(id, PortInfo.coerce(pts.get(i + 1)));
                 }
@@ -300,7 +300,7 @@ public class ComponentInfo extends Value {
 
             return new ComponentInfo(interfaces, controls, ports, properties, null);
         } catch (Exception ex) {
-            throw new ArgumentFormatException(ex);
+            throw new ValueFormatException(ex);
         }
     }
 }

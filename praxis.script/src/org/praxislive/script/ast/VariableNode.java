@@ -24,7 +24,7 @@ package org.praxislive.script.ast;
 
 import java.util.List;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.script.ExecutionException;
 import org.praxislive.script.Namespace;
 import org.praxislive.script.Variable;
@@ -61,7 +61,7 @@ public class VariableNode extends Node {
     }
 
     @Override
-    public void writeResult(List<Argument> args) throws ExecutionException {
+    public void writeResult(List<Value> args) throws ExecutionException {
         if (namespace == null) {
             throw new IllegalStateException();
         }

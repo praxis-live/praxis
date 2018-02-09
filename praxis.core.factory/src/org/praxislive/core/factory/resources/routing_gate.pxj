@@ -15,7 +15,7 @@
         updatePattern();
     }
 
-    @In(1) void in(Argument arg) {
+    @In(1) void in(Value arg) {
         if (checkSend()) {
             out.send(arg);
         } else {
@@ -60,7 +60,7 @@
             } else {
                 index %= pt.length;
             }
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             log(WARNING, "Invalid pattern");
             pt = new double[0];
             index = 0;

@@ -23,7 +23,7 @@ package org.praxislive.code.userapi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.types.PNumber;
 
 /**
@@ -32,7 +32,7 @@ import org.praxislive.core.types.PNumber;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Type {
 
-    Class<? extends Argument> cls() default Argument.class;
+    Class<? extends Value> cls() default Value.class;
 //    String[] properties() default {};
 
     @Retention(RetentionPolicy.RUNTIME)

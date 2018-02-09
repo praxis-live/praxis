@@ -34,7 +34,7 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.plaf.basic.BasicGraphicsUtils;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.types.PBoolean;
 import org.praxislive.gui.impl.SingleBindingGuiComponent;
 import org.praxislive.gui.ControlBinding.Adaptor;
@@ -48,8 +48,8 @@ import org.praxislive.impl.ArgumentProperty;
 public class ToggleButton extends SingleBindingGuiComponent {
 
     private JToggleButton button;
-    private Argument onArg;
-    private Argument offArg;
+    private Value onArg;
+    private Value offArg;
     private ToggleButtonModelAdaptor adaptor;
     private String label;
 
@@ -121,12 +121,12 @@ public class ToggleButton extends SingleBindingGuiComponent {
 
     private class OnBinding implements ArgumentProperty.Binding {
 
-        public void setBoundValue(long time, Argument value) {
+        public void setBoundValue(long time, Value value) {
             onArg = value;
             setAdaptorArguments();
         }
 
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             return onArg;
         }
 
@@ -134,12 +134,12 @@ public class ToggleButton extends SingleBindingGuiComponent {
 
     private class OffBinding implements ArgumentProperty.Binding {
 
-        public void setBoundValue(long time, Argument value) {
+        public void setBoundValue(long time, Value value) {
             offArg = value;
             setAdaptorArguments();
         }
 
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             return offArg;
         }
 

@@ -21,7 +21,7 @@
  */
 package org.praxislive.components.container;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.impl.AbstractControlInputPort;
 
 /**
@@ -42,7 +42,7 @@ class LinkedInputPort extends AbstractControlInputPort {
     }
 
     @Override
-    public void receive(long time, Argument value) {
+    public void receive(long time, Value value) {
         output.send(time, value);
     }
     

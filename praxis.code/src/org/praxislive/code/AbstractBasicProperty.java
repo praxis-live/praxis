@@ -21,7 +21,7 @@
  */
 package org.praxislive.code;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
@@ -60,9 +60,9 @@ public abstract class AbstractBasicProperty implements Control {
         }
     }
 
-    protected abstract void set(long time, Argument arg) throws Exception;
+    protected abstract void set(long time, Value arg) throws Exception;
 
-    protected abstract Argument get();
+    protected abstract Value get();
 
     private void setLatest(long time) {
         latestSet = true;

@@ -24,7 +24,7 @@ package org.praxislive.meta;
 
 import java.util.List;
 import java.util.Map;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 
 /**
  *
@@ -34,7 +34,7 @@ public abstract class TypeRewriter {
     
     private final static TypeRewriter IDENTTY = new IdentityConverter();
     
-    public abstract boolean rewriteProperties(Map<String, List<Argument>> properties);
+    public abstract boolean rewriteProperties(Map<String, List<Value>> properties);
     
     public abstract String rewritePortID(String id);
     
@@ -51,7 +51,7 @@ public abstract class TypeRewriter {
     private static class IdentityConverter extends TypeRewriter {
 
         @Override
-        public boolean rewriteProperties(Map<String, List<Argument>> properties) {
+        public boolean rewriteProperties(Map<String, List<Value>> properties) {
             return false;
         }
 

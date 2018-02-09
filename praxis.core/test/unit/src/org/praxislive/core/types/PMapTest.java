@@ -7,7 +7,7 @@
 package org.praxislive.core.types;
 
 import org.praxislive.core.types.PMap;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -51,7 +51,7 @@ public class PMapTest {
         String mStr = m.toString();
         System.out.println(mStr);
         PMap m2 = PMap.valueOf(mStr);
-        assertTrue(Argument.equivalent(Argument.class, m, m2));
+        assertTrue(Utils.equivalent(m, m2));
     }
 
 

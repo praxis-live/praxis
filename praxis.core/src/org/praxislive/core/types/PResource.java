@@ -28,8 +28,8 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.ArgumentInfo;
 
@@ -78,19 +78,19 @@ public final class PResource extends Value implements Comparable<PResource>{
         throw new IllegalArgumentException();
     }
     
-    public static PResource valueOf(String str) throws ArgumentFormatException {
+    public static PResource valueOf(String str) throws ValueFormatException {
         try {
             URI uri = new URI(str);
             if (uri.isAbsolute()) {
                 return new PResource(uri);
             }
-            throw new ArgumentFormatException();
+            throw new ValueFormatException();
         } catch (URISyntaxException ex) {
-            throw new ArgumentFormatException(ex);
+            throw new ValueFormatException(ex);
         }
     }
     
-    public static PResource coerce(Argument arg) throws ArgumentFormatException {
+    public static PResource coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PResource) {
             return (PResource) arg;
         } else {
@@ -98,10 +98,10 @@ public final class PResource extends Value implements Comparable<PResource>{
         }
     }
     
-    public static Optional<PResource> from(Argument arg) {
+    public static Optional<PResource> from(Value arg) {
         try {
             return Optional.of(coerce(arg));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return Optional.empty();
         }
     }

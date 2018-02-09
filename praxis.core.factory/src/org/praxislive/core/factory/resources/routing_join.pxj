@@ -9,7 +9,7 @@
         reset();
     }
 
-    @In(1) void in1(Argument arg) {
+    @In(1) void in1(Value arg) {
         if (latch2) {
             out.send(arg);
             reset();
@@ -18,7 +18,7 @@
         }
     }
     
-    @In(2) void in2(Argument arg) {
+    @In(2) void in2(Value arg) {
         if (latch1) {
             out.send(arg);
             reset();

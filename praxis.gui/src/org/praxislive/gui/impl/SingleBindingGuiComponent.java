@@ -22,9 +22,9 @@
  */
 package org.praxislive.gui.impl;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ControlAddress;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;
@@ -57,7 +57,7 @@ public abstract class SingleBindingGuiComponent extends AbstractGuiComponent {
     
     private class AddressBinding implements ArgumentProperty.Binding {
         
-        public void setBoundValue(long time, Argument value) {
+        public void setBoundValue(long time, Value value) {
             if (adaptor == null) {
                 adaptor = getBindingAdaptor();
             }
@@ -69,14 +69,14 @@ public abstract class SingleBindingGuiComponent extends AbstractGuiComponent {
                     try {
                         binding = ControlAddress.coerce(value);
                         bindingContext.bind(binding, adaptor);
-                    } catch (ArgumentFormatException ex) {
+                    } catch (ValueFormatException ex) {
                         binding = null;
                     }
                 }
             }
         }
         
-        public Argument getBoundValue() {
+        public Value getBoundValue() {
             return binding == null ? PString.EMPTY : binding;
         }
     }

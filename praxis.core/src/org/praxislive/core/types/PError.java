@@ -24,8 +24,8 @@ package org.praxislive.core.types;
 import org.praxislive.core.Value;
 import java.util.Objects;
 import java.util.Optional;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 
 /**
  *
@@ -69,7 +69,7 @@ public final class PError extends Value {
             sb.append(' ')
                     .append(type.getName())
                     .append(' ')
-                    .append(SyntaxUtils.escape(message));
+                    .append(Utils.escape(message));
             str = sb.toString();
             string = str;
         }
@@ -97,11 +97,11 @@ public final class PError extends Value {
         return false;
     }
 
-    static PError valueOf(String str) throws ArgumentFormatException {
+    static PError valueOf(String str) throws ValueFormatException {
         try {
             PArray arr = PArray.valueOf(str);
             if (arr.getSize() != 3 || !ERROR_PREFIX.equals(arr.get(0).toString())) {
-                throw new ArgumentFormatException();
+                throw new ValueFormatException();
             }
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             Class<? extends Exception> type
@@ -109,11 +109,11 @@ public final class PError extends Value {
             String msg = arr.get(2).toString();
             return new PError(type, msg, null, str);
         } catch (Exception ex) {
-            throw new ArgumentFormatException(ex);
+            throw new ValueFormatException(ex);
         }
     }
 
-    public static PError coerce(Argument arg) throws ArgumentFormatException {
+    public static PError coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PError) {
             return (PError) arg;
         } else if (arg instanceof PReference) {
@@ -121,16 +121,16 @@ public final class PError extends Value {
             if (o instanceof Exception) {
                 return create((Exception) o);
             } else {
-                throw new ArgumentFormatException();
+                throw new ValueFormatException();
             }
         }
         return valueOf(arg.toString());
     }
     
-    public static Optional<PError> from(Argument arg) {
+    public static Optional<PError> from(Value arg) {
         try {
             return Optional.of(coerce(arg));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return Optional.empty();
         }
     }

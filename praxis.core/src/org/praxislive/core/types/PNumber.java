@@ -23,8 +23,8 @@ package org.praxislive.core.types;
 
 import org.praxislive.core.Value;
 import java.util.Optional;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ArgumentInfo;
 
 /**
@@ -103,7 +103,7 @@ public final class PNumber extends Value implements Comparable<PNumber> {
         // @TODO should we allow small margin of error???
         try {
             return equals(PNumber.coerce(arg));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return false;
         }
     }
@@ -140,7 +140,7 @@ public final class PNumber extends Value implements Comparable<PNumber> {
         return new PNumber(val, null);
     }
 
-    public static PNumber valueOf(String str) throws ArgumentFormatException {
+    public static PNumber valueOf(String str) throws ValueFormatException {
         try {
             if (str.indexOf('.') > -1) {
                 return valueOf(Double.parseDouble(str), str);
@@ -152,12 +152,12 @@ public final class PNumber extends Value implements Comparable<PNumber> {
                 return new PNumber(Integer.parseInt(str), str);
             }
         } catch (Exception ex) {
-            throw new ArgumentFormatException(ex);
+            throw new ValueFormatException(ex);
         }
     }
 
     public static PNumber coerce(
-            Argument arg) throws ArgumentFormatException {
+            Value arg) throws ValueFormatException {
         if (arg instanceof PNumber) {
             return (PNumber) arg;
         } else if (arg instanceof PBoolean) {
@@ -167,10 +167,10 @@ public final class PNumber extends Value implements Comparable<PNumber> {
         }
     }
 
-    public static Optional<PNumber> from(Argument arg) {
+    public static Optional<PNumber> from(Value arg) {
         try {
             return Optional.of(coerce(arg));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return Optional.empty();
         }
     }

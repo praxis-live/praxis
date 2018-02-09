@@ -25,8 +25,8 @@ import org.praxislive.code.GenerateTemplate;
 
 // default imports
 import java.util.*;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.types.*;
 import org.praxislive.code.userapi.*;
 import org.praxislive.core.code.CoreCodeDelegate;

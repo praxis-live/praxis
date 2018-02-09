@@ -49,8 +49,8 @@ public class DefaultCodeDelegate extends CodeDelegate {
 
     final static String[] IMPORTS = {
         "java.util.*",
-        "org.praxislive.core.Argument",
-        "org.praxislive.core.ArgumentFormatException",
+        "org.praxislive.core.Value",
+        "org.praxislive.core.ValueFormatException",
         "org.praxislive.core.types.*",
         "org.praxislive.code.userapi.*",
         "static org.praxislive.code.userapi.Constants.*"

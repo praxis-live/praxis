@@ -24,7 +24,7 @@ package org.praxislive.video.gst1.components;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ControlPort;
 import org.praxislive.core.Lookup;
@@ -46,10 +46,10 @@ import org.praxislive.video.gst1.GStreamerSettings;
  */
 public class VideoCapture extends AbstractVideoComponent {
 
-    private final static List<Argument> suggestedValues;
+    private final static List<Value> suggestedValues;
 
     static {
-        List<Argument> list = new ArrayList<>(5);
+        List<Value> list = new ArrayList<>(5);
         list.add(PString.valueOf("autovideosrc"));
         list.add(PString.valueOf("1"));
         list.add(PString.valueOf("2"));
@@ -95,7 +95,7 @@ public class VideoCapture extends AbstractVideoComponent {
 
         @Override
         protected TaskService.Task createTask(CallArguments keys) throws Exception {
-            Argument key;
+            Value key;
             if (keys.getSize() < 1 || (key = keys.get(0)).isEmpty()) {
                 return null;
             } else {
@@ -131,7 +131,7 @@ public class VideoCapture extends AbstractVideoComponent {
         }
 
         @Override
-        public Argument execute() throws Exception {
+        public Value execute() throws Exception {
 
             String dsc = source;
             VideoDelegate delegate = null;

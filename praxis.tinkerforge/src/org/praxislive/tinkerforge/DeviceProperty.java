@@ -25,7 +25,7 @@ package org.praxislive.tinkerforge;
 import org.praxislive.code.AbstractBasicProperty;
 import org.praxislive.code.CodeContext;
 import org.praxislive.code.ControlDescriptor;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Control;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
@@ -42,19 +42,19 @@ class DeviceProperty extends AbstractBasicProperty {
             new ArgumentInfo[]{ArgumentInfo.create(PString.class,
                         PMap.create(ArgumentInfo.KEY_SUGGESTED_VALUES,
                                 TFCodeContext.AUTO))},
-            new Argument[]{PString.EMPTY},
+            new Value[]{PString.EMPTY},
             PMap.EMPTY
     );
 
     private TFCodeContext context;
     
     @Override
-    protected void set(long time, Argument arg) throws Exception {
+    protected void set(long time, Value arg) throws Exception {
         context.setUID(arg.toString());
     }
 
     @Override
-    protected Argument get() {
+    protected Value get() {
         return PString.valueOf(context.getUID());
     }
 

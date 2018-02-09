@@ -25,7 +25,7 @@ import org.praxislive.core.PortListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ControlPort;
 import org.praxislive.core.Port;
 import org.praxislive.core.PortConnectionException;
@@ -126,7 +126,7 @@ public class ControlInput extends ControlPort.Input {
     }
 
     @Override
-    public void receive(long time, Argument value) {
+    public void receive(long time, Value value) {
         link.receive(time, value);
     }
 
@@ -134,7 +134,7 @@ public class ControlInput extends ControlPort.Input {
 
         public void receive(long time, double value);
 
-        public void receive(long time, Argument value);
+        public void receive(long time, Value value);
 
     }
 

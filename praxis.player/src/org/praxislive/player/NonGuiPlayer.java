@@ -23,7 +23,7 @@ package org.praxislive.player;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ComponentAddress;
@@ -113,7 +113,7 @@ class NonGuiPlayer extends AbstractRoot {
                 activeCall = null;
                 CallArguments args = call.getArgs();
                 if (args.getSize() > 0) {
-                    Argument err = args.get(0);
+                    Value err = args.get(0);
                     if (err instanceof PReference) {
                         Object o = ((PReference) err).getReference();
                         if (o instanceof Throwable) {

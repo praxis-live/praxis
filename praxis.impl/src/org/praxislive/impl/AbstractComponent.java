@@ -27,7 +27,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.Component;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.Container;
@@ -89,7 +89,7 @@ public abstract class AbstractComponent implements Component {
         registerControl(ComponentInterface.INFO,
                 ArgumentProperty.createReadOnly(ComponentInfo.info(),
                 new ArgumentProperty.ReadBinding() {
-                    public Argument getBoundValue() {
+                    public Value getBoundValue() {
                         return getInfo();
                     }
                 }));

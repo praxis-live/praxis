@@ -21,7 +21,7 @@
  */
 package org.praxislive.impl;
 
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.types.PMap;
@@ -51,7 +51,7 @@ public class NumberProperty extends AbstractSingleArgProperty {
 
 
     @Override
-    protected void set(long time, Argument value) throws Exception {
+    protected void set(long time, Value value) throws Exception {
         if (writer == null) {
             throw new UnsupportedOperationException("Read Only Property");
         }
@@ -77,7 +77,7 @@ public class NumberProperty extends AbstractSingleArgProperty {
     }
 
     @Override
-    protected Argument get() {
+    protected Value get() {
         double val = reader.getBoundValue();
         if (lastValue != null) {
             double last = lastValue.value();
@@ -117,7 +117,7 @@ public class NumberProperty extends AbstractSingleArgProperty {
             binding = new DefaultBinding(def);
         }
         ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.info()};
-        Argument[] defaults = new Argument[]{PNumber.valueOf(def)};
+        Value[] defaults = new Value[]{PNumber.valueOf(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new NumberProperty(binding, binding, PNumber.MIN_VALUE, PNumber.MAX_VALUE, info);
     }
@@ -149,7 +149,7 @@ public class NumberProperty extends AbstractSingleArgProperty {
             binding = new DefaultBinding(def);
         }
         ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.info(min, max)};
-        Argument[] defaults = new Argument[]{PNumber.valueOf(def)};
+        Value[] defaults = new Value[]{PNumber.valueOf(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new NumberProperty(binding, binding, min, max, info);
     }

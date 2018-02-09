@@ -73,17 +73,17 @@ public class PortAddress extends Value {
     
     private static Pattern splitPoint = Pattern.compile(SEP_REGEX);
 
-    public static PortAddress valueOf(String address) throws ArgumentFormatException {
+    public static PortAddress valueOf(String address) throws ValueFormatException {
         String[] parts = splitPoint.split(address);
         if (parts.length != 2) {
-            throw new ArgumentFormatException();
+            throw new ValueFormatException();
         }
 //        String id = parts[1];
 //        if (!(isValidID(id))) {
-//            throw new ArgumentFormatException();
+//            throw new ValueFormatException();
 //        }
         if (!(isValidID(parts[1]))) {
-            throw new ArgumentFormatException();
+            throw new ValueFormatException();
         }
         String id = parts[1].intern();
         ComponentAddress comp = ComponentAddress.valueOf(parts[0]);
@@ -94,7 +94,7 @@ public class PortAddress extends Value {
     public static PortAddress create(String address) {
         try {
             return valueOf(address);
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             throw new IllegalArgumentException(ex);
         }
     }
@@ -109,7 +109,7 @@ public class PortAddress extends Value {
         return new PortAddress(component, id, address);
     }
     
-    public static PortAddress coerce(Argument arg) throws ArgumentFormatException {
+    public static PortAddress coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PortAddress) {
             return (PortAddress) arg;
         } else {
@@ -117,10 +117,10 @@ public class PortAddress extends Value {
         }
     }
     
-    public static Optional<PortAddress> from(Argument arg) {
+    public static Optional<PortAddress> from(Value arg) {
         try {
             return Optional.of(coerce(arg));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return Optional.empty();
         }
     }

@@ -22,7 +22,7 @@
 package org.praxislive.script.ast;
 
 import java.util.List;
-import org.praxislive.core.Argument;
+import org.praxislive.core.Value;
 import org.praxislive.script.ExecutionException;
 
 /**
@@ -41,17 +41,17 @@ public class SubcommandNode extends CompositeNode {
     }
 
     @Override
-    protected void writeThisNextCommand(List<Argument> args) {
+    protected void writeThisNextCommand(List<Value> args) {
         throw new IllegalStateException();
     }
 
     @Override
-    protected void postThisResponse(List<Argument> args) {
+    protected void postThisResponse(List<Value> args) {
         throw new IllegalStateException();
     }
 
     @Override
-    public void writeResult(List<Argument> args)
+    public void writeResult(List<Value> args)
             throws ExecutionException {
         Node[] children = getChildren();
         children[children.length - 1].writeResult(args);

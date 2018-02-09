@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  * @TODO Enforce String with regex
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ComponentType extends Argument {
+public class ComponentType extends Value {
     
     private final static String TYPE_REGEX =
             "([\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*\\:)+" + 
@@ -63,7 +63,7 @@ public class ComponentType extends Argument {
     public static ComponentType create(String str) {
         try {
             return valueOf(str);
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             throw new IllegalArgumentException(ex);
         }
     }
@@ -72,11 +72,11 @@ public class ComponentType extends Argument {
         return TYPE_PATTERN.matcher(str).matches();
     }
 
-    public static ComponentType valueOf(String str) throws ArgumentFormatException {
+    public static ComponentType valueOf(String str) throws ValueFormatException {
         if (isValidTypeString(str)) {
             return new ComponentType(str);
         }
-        throw new ArgumentFormatException("Invalid String representation of Type");
+        throw new ValueFormatException("Invalid String representation of Type");
     }
 
     public static ArgumentInfo info() {
@@ -84,7 +84,7 @@ public class ComponentType extends Argument {
     }
 
 
-    public static ComponentType coerce(Argument arg) throws ArgumentFormatException {
+    public static ComponentType coerce(Value arg) throws ValueFormatException {
         if (arg instanceof ComponentType) {
             return (ComponentType) arg;
         } else {

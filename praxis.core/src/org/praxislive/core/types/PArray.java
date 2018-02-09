@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,7 +21,6 @@
  */
 package org.praxislive.core.types;
 
-import org.praxislive.core.Value;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,8 +29,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
-import org.praxislive.core.Argument;
-import org.praxislive.core.ArgumentFormatException;
+import org.praxislive.core.Value;
+import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.syntax.Token;
@@ -75,7 +74,7 @@ public final class PArray extends Value implements Iterable<Value> {
         if (str == null) {
             if (data.length > 0) {
                 StringBuilder sb = new StringBuilder();
-                for (Argument entry : data) {
+                for (Value entry : data) {
                     if (sb.length() > 0) {
                         sb.append(' ');
                     }
@@ -84,7 +83,7 @@ public final class PArray extends Value implements Iterable<Value> {
                                 .append(entry.toString())
                                 .append('}');
                     } else {
-                        sb.append(SyntaxUtils.escape(String.valueOf(entry)));
+                        sb.append(Utils.escape(String.valueOf(entry)));
                     }
                 }
                 str = sb.toString();
@@ -114,12 +113,12 @@ public final class PArray extends Value implements Iterable<Value> {
                 return false;
             }
             for (int i = 0; i < size; i++) {
-                if (!Argument.equivalent(null, data[i], other.data[i])) {
+                if (!Utils.equivalent(data[i], other.data[i])) {
                     return false;
                 }
             }
             return true;
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return false;
         }
     }
@@ -165,29 +164,29 @@ public final class PArray extends Value implements Iterable<Value> {
         }
     }
 
-    public static PArray valueOf(Collection<? extends Argument> collection) {
+    public static PArray valueOf(Collection<? extends Value> collection) {
         Value[] values = collection.stream()
                 .map(arg -> arg instanceof Value ? (Value) arg : PString.valueOf(arg))
                 .toArray(Value[]::new);
         return new PArray(values, null);
     }
 
-    @Deprecated
-    public static PArray valueOf(Argument... args) {
-        int size = args.length;
-        if (size == 0) {
-            return PArray.EMPTY;
-        }
-        Value[] copy = new Value[size];
-        for (int i = 0; i < size; i++) {
-            Argument arg = args[i];
-            if (arg == null) {
-                throw new NullPointerException();
-            }
-            copy[i] = arg instanceof Value ? (Value) arg : PString.valueOf(arg);
-        }
-        return new PArray(copy, null);
-    }
+//    @Deprecated
+//    public static PArray valueOf(Value... args) {
+//        int size = args.length;
+//        if (size == 0) {
+//            return PArray.EMPTY;
+//        }
+//        Value[] copy = new Value[size];
+//        for (int i = 0; i < size; i++) {
+//            Value arg = args[i];
+//            if (arg == null) {
+//                throw new NullPointerException();
+//            }
+//            copy[i] = arg instanceof Value ? (Value) arg : PString.valueOf(arg);
+//        }
+//        return new PArray(copy, null);
+//    }
 
     public static PArray valueOf(Value... args) {
         int size = args.length;
@@ -210,7 +209,7 @@ public final class PArray extends Value implements Iterable<Value> {
         return valueOf(args.getAll());
     }
 
-    public static PArray valueOf(String str) throws ArgumentFormatException {
+    public static PArray valueOf(String str) throws ValueFormatException {
         if (str.length() == 0) {
             return PArray.EMPTY;
         }
@@ -232,7 +231,7 @@ public final class PArray extends Value implements Iterable<Value> {
                     case EOL:
                         break tokenize;
                     default:
-                        throw new ArgumentFormatException();
+                        throw new ValueFormatException();
                 }
             }
             int size = list.size();
@@ -242,12 +241,12 @@ public final class PArray extends Value implements Iterable<Value> {
                 return new PArray(list.toArray(new Value[size]), str);
             }
         } catch (Exception ex) {
-            throw new ArgumentFormatException(ex);
+            throw new ValueFormatException(ex);
         }
 
     }
 
-    public static PArray coerce(Argument arg) throws ArgumentFormatException {
+    public static PArray coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PArray) {
             return (PArray) arg;
         } else {
@@ -255,10 +254,10 @@ public final class PArray extends Value implements Iterable<Value> {
         }
     }
 
-    public static Optional<PArray> from(Argument arg) {
+    public static Optional<PArray> from(Value arg) {
         try {
             return Optional.of(coerce(arg));
-        } catch (ArgumentFormatException ex) {
+        } catch (ValueFormatException ex) {
             return Optional.empty();
         }
     }
@@ -267,7 +266,7 @@ public final class PArray extends Value implements Iterable<Value> {
         return ArgumentInfo.create(PArray.class, null);
     }
 
-    public static <T extends Argument> Collector<T, ?, PArray> collector() {
+    public static <T extends Value> Collector<T, ?, PArray> collector() {
 
         return Collector.<T, List<T>, PArray>of(
                 ArrayList::new,
