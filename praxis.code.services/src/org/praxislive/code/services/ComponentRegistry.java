@@ -27,8 +27,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.praxislive.code.CodeComponentFactoryService;
-import org.praxislive.core.ComponentFactory;
-import org.praxislive.core.ComponentFactoryProvider;
+import org.praxislive.core.services.ComponentFactory;
+import org.praxislive.core.services.ComponentFactoryProvider;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.Lookup;
 

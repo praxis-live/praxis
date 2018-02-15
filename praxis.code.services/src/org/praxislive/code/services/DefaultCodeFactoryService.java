@@ -44,7 +44,7 @@ import org.praxislive.code.CodeFactory;
 import org.praxislive.compiler.ClassBodyContext;
 import org.praxislive.core.Value;
 import org.praxislive.core.Call;
-import org.praxislive.core.ComponentFactory;
+import org.praxislive.core.services.ComponentFactory;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.Lookup;

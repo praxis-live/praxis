@@ -27,12 +27,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.praxislive.core.Component;
-import org.praxislive.core.ComponentFactory;
-import org.praxislive.core.ComponentInstantiationException;
+import org.praxislive.core.services.ComponentFactory;
+import org.praxislive.core.services.ComponentInstantiationException;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.Root;
-import org.praxislive.core.interfaces.ComponentFactoryService;
+import org.praxislive.core.services.ComponentFactoryService;
 import org.praxislive.impl.InstanceLookup;
 
 /**

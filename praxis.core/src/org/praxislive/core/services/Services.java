@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.core.interfaces;
+package org.praxislive.core.services;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,32 +32,15 @@ import org.praxislive.core.InterfaceDefinition;
  *
  * @author Neil C Smith
  */
-public abstract class Services {
+public interface Services {
 
-    public Optional<ComponentAddress> locate(Class<? extends Service> service) {
-        try {
-            return Optional.of(findService(service));
-        } catch (ServiceUnavailableException ex) {
-            return Optional.empty();
-        }
-    }
+    public Optional<ComponentAddress> locate(Class<? extends Service> service);
     
-    public List<ComponentAddress> locateAll(Class<? extends Service> service) {
-        try {
-            return Arrays.asList(findAllServices(service.newInstance()));
-        } catch (Exception ex) {
-            return Collections.emptyList();
-        }
-    }
+    public List<ComponentAddress> locateAll(Class<? extends Service> service);
 
     @Deprecated
-    public ComponentAddress findService(Class<? extends InterfaceDefinition> info) throws ServiceUnavailableException {
-        throw new ServiceUnavailableException();
-    }
-
-    @Deprecated
-    public ComponentAddress[] findAllServices(InterfaceDefinition info) throws ServiceUnavailableException {
-        throw new ServiceUnavailableException();
+    public default ComponentAddress findService(Class<? extends InterfaceDefinition> info) throws ServiceUnavailableException {
+        return locate((Class<? extends Service>) info).orElseThrow(ServiceUnavailableException::new);
     }
 
 }

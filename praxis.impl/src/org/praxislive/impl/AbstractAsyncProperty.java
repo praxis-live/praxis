@@ -32,9 +32,9 @@ import org.praxislive.core.ControlPort;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
-import org.praxislive.core.interfaces.ServiceManager;
-import org.praxislive.core.interfaces.ServiceUnavailableException;
-import org.praxislive.core.interfaces.TaskService;
+import org.praxislive.core.services.Services;
+import org.praxislive.core.services.ServiceUnavailableException;
+import org.praxislive.core.services.TaskService;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PNumber;
 import org.praxislive.core.types.PReference;
@@ -206,13 +206,10 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
         value = null;
     }
 
-    private ControlAddress getTaskSubmitAddress() throws ServiceUnavailableException {
+    private ControlAddress getTaskSubmitAddress() {
         if (taskSubmitAddress == null) {
-            ServiceManager sm = getLookup().get(ServiceManager.class);
-            if (sm == null) {
-                throw new ServiceUnavailableException("Can't find Service Manager");
-            }
-            ComponentAddress service = sm.findService(TaskService.INSTANCE);
+            Services sm = getLookup().get(Services.class);
+            ComponentAddress service = sm.locate(TaskService.class).get();
             taskSubmitAddress = ControlAddress.create(service, TaskService.SUBMIT);
         }
         return taskSubmitAddress;
@@ -254,13 +251,12 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
     }
 
     private void startTask(TaskService.Task task, PacketRouter router, long time)
-            throws ServiceUnavailableException {
+            throws Exception {
         ControlAddress to = getTaskSubmitAddress();
         if (router == null) {
             router = getLookup().get(PacketRouter.class);
             if (router == null) {
-                LOG.warning("Can't find a router");
-                throw new ServiceUnavailableException();
+                throw new IllegalStateException("No packet router");
             }
         }
         taskCall = Call.createCall(to, getAddress(), time, PReference.wrap(task));

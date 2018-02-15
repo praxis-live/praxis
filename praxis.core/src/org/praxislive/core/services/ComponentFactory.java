@@ -19,10 +19,12 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.core;
+package org.praxislive.core.services;
 
-import org.praxislive.core.interfaces.ComponentFactoryService;
-import org.praxislive.core.interfaces.RootFactoryService;
+import org.praxislive.core.Component;
+import org.praxislive.core.ComponentType;
+import org.praxislive.core.Lookup;
+import org.praxislive.core.Root;
 
 /**
  *

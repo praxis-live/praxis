@@ -33,7 +33,7 @@ import org.praxislive.core.Lookup;
 import org.praxislive.core.Packet;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.ControlInfo;
-import org.praxislive.core.interfaces.ScriptService;
+import org.praxislive.core.services.ScriptService;
 import org.praxislive.impl.AbstractRoot;
 import org.praxislive.script.Env;
 

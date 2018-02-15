@@ -39,9 +39,9 @@ import org.praxislive.core.Control;
 import org.praxislive.core.ExecutionContext;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.ControlInfo;
-import org.praxislive.core.interfaces.RootManagerService;
-import org.praxislive.core.interfaces.Service;
-import org.praxislive.core.interfaces.ServiceUnavailableException;
+import org.praxislive.core.services.RootManagerService;
+import org.praxislive.core.services.Service;
+import org.praxislive.core.services.ServiceUnavailableException;
 import org.praxislive.core.types.PMap;
 import org.praxislive.impl.AbstractRoot;
 

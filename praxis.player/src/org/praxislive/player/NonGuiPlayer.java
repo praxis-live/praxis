@@ -32,10 +32,10 @@ import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Root;
 import org.praxislive.core.RootHub;
-import org.praxislive.core.interfaces.ServiceUnavailableException;
+import org.praxislive.core.services.ServiceUnavailableException;
 import org.praxislive.core.ControlInfo;
-import org.praxislive.core.interfaces.ScriptService;
-import org.praxislive.core.interfaces.SystemManagerService;
+import org.praxislive.core.services.ScriptService;
+import org.praxislive.core.services.SystemManagerService;
 import org.praxislive.core.types.PReference;
 import org.praxislive.core.types.PString;
 import org.praxislive.impl.AbstractControl;
@@ -61,7 +61,7 @@ class NonGuiPlayer extends AbstractRoot {
         this.script = script;
         scriptControl = new ScriptControl();
         registerControl("_script-control", scriptControl);
-        registerInterface(SystemManagerService.INSTANCE);
+        registerInterface(SystemManagerService.class);
         registerControl(SystemManagerService.SYSTEM_EXIT, new ExitControl());
 
     }

@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -43,9 +44,9 @@ import org.praxislive.core.Lookup;
 import org.praxislive.core.Packet;
 import org.praxislive.core.Root;
 import org.praxislive.core.RootHub;
-import org.praxislive.core.interfaces.ServiceManager;
-import org.praxislive.core.interfaces.ServiceUnavailableException;
-import org.praxislive.core.interfaces.Services;
+import org.praxislive.core.services.Service;
+import org.praxislive.core.services.ServiceUnavailableException;
+import org.praxislive.core.services.Services;
 import org.praxislive.impl.InstanceLookup;
 import org.praxislive.script.impl.ScriptServiceImpl;
 import org.praxislive.util.ArrayUtils;
@@ -211,39 +212,25 @@ public final class Hub {
 
     }
 
-    private class ServicesImpl extends Services implements ServiceManager {
+    private class ServicesImpl implements Services {
 
-        // THREAD SAFE
         @Override
-        public ComponentAddress findService(InterfaceDefinition info) throws ServiceUnavailableException {
-            return findService(info.getClass());
-        }
-
-        // THREAD SAFE
-        @Override
-        public ComponentAddress[] findAllServices(InterfaceDefinition info) throws ServiceUnavailableException {
-            return findAllServices(info.getClass());
-        }
-
-        // THREAD SAFE
-        public ComponentAddress findService(Class<? extends InterfaceDefinition> def)
-                throws ServiceUnavailableException {
-            return findServicesImpl(def)[0];
-        }
-
-        // THREAD SAFE
-        public ComponentAddress[] findAllServices(Class<? extends InterfaceDefinition> def)
-                throws ServiceUnavailableException {
-            ComponentAddress[] provs = findServicesImpl(def);
-            return Arrays.copyOf(provs, provs.length);
-        }
-
-        private ComponentAddress[] findServicesImpl(Class<? extends InterfaceDefinition> def) throws ServiceUnavailableException {
-            ComponentAddress[] provs = services.get(def);
-            if (provs == null) {
-                throw new ServiceUnavailableException();
+        public Optional<ComponentAddress> locate(Class<? extends Service> service) {
+            ComponentAddress[] provs = services.get(service);
+            if (provs == null || provs.length == 0) {
+                return Optional.empty();
             } else {
-                return provs;
+                return Optional.of(provs[0]);
+            }
+        }
+
+        @Override
+        public List<ComponentAddress> locateAll(Class<? extends Service> service) {
+            ComponentAddress[] provs = services.get(service);
+            if (provs == null) {
+                return Collections.EMPTY_LIST;
+            } else {
+                return new ArrayList<>(Arrays.asList(provs));
             }
         }
 

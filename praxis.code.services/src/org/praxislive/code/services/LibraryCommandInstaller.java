@@ -27,7 +27,7 @@ import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
-import org.praxislive.core.interfaces.Services;
+import org.praxislive.core.services.Services;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.Value;
 import org.praxislive.script.Command;

@@ -22,8 +22,8 @@
 package org.praxislive.video.factory;
 
 import org.praxislive.code.AbstractComponentFactory;
-import org.praxislive.core.ComponentFactory;
-import org.praxislive.core.ComponentFactoryProvider;
+import org.praxislive.core.services.ComponentFactory;
+import org.praxislive.core.services.ComponentFactoryProvider;
 import org.praxislive.meta.TypeRewriter;
 import org.praxislive.video.code.VideoCodeFactory;
 

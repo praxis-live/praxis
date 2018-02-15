@@ -46,7 +46,7 @@ import org.praxislive.core.ControlAddress;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
-import org.praxislive.core.interfaces.ScriptService;
+import org.praxislive.core.services.ScriptService;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;

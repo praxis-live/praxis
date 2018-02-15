@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.core.interfaces;
+package org.praxislive.core.services;
 
 import org.praxislive.core.Component;
 import org.praxislive.core.ComponentType;
@@ -34,8 +34,6 @@ import org.praxislive.core.types.PReference;
  */
 public class ComponentFactoryService extends Service {
 
-    @Deprecated
-    public final static ComponentFactoryService INSTANCE = new ComponentFactoryService();
     public final static String NEW_INSTANCE = "new-instance";
     public final static ControlInfo NEW_INSTANCE_INFO =
             ControlInfo.createFunctionInfo(

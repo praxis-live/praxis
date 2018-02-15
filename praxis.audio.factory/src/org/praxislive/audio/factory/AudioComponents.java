@@ -23,8 +23,8 @@ package org.praxislive.audio.factory;
 
 import org.praxislive.audio.code.AudioCodeFactory;
 import org.praxislive.code.AbstractComponentFactory;
-import org.praxislive.core.ComponentFactory;
-import org.praxislive.core.ComponentFactoryProvider;
+import org.praxislive.core.services.ComponentFactory;
+import org.praxislive.core.services.ComponentFactoryProvider;
 
 /**
  *

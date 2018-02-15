@@ -21,8 +21,8 @@
  */
 package org.praxislive.video.components;
 
-import org.praxislive.core.ComponentFactory;
-import org.praxislive.core.ComponentFactoryProvider;
+import org.praxislive.core.services.ComponentFactory;
+import org.praxislive.core.services.ComponentFactoryProvider;
 import org.praxislive.impl.AbstractComponentFactory;
 import org.praxislive.meta.TypeRewriter;
 import org.praxislive.video.components.analysis.blobs.BlobTracker;

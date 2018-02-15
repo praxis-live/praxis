@@ -33,7 +33,7 @@ import org.praxislive.core.Port;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.PortInfo;
-import org.praxislive.core.interfaces.TaskService;
+import org.praxislive.core.services.TaskService;
 import org.praxislive.core.types.PError;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PNumber;

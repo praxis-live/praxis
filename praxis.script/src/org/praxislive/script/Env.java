@@ -25,7 +25,6 @@ package org.praxislive.script;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.PacketRouter;
-import org.praxislive.core.interfaces.ServiceManager;
 
 /**
  *
@@ -37,9 +36,6 @@ public interface Env {
     public final static String PWD = "_PWD";
 
     public abstract Lookup getLookup();
-
-//    @Deprecated
-//    public abstract ServiceManager getServiceManager();
 
     public abstract long getTime();
 

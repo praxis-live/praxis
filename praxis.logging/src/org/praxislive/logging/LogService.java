@@ -26,7 +26,7 @@ package org.praxislive.logging;
 import org.praxislive.core.Value;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
-import org.praxislive.core.interfaces.Service;
+import org.praxislive.core.services.Service;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;

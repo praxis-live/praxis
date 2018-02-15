@@ -26,8 +26,8 @@ import org.praxislive.audio.components.container.AudioContainerInput;
 import org.praxislive.audio.components.container.AudioContainerOutput;
 import org.praxislive.audio.components.mix.XFader;
 import org.praxislive.audio.components.sampling.Looper;
-import org.praxislive.core.ComponentFactory;
-import org.praxislive.core.ComponentFactoryProvider;
+import org.praxislive.core.services.ComponentFactory;
+import org.praxislive.core.services.ComponentFactoryProvider;
 import org.praxislive.impl.AbstractComponentFactory;
 
 /**

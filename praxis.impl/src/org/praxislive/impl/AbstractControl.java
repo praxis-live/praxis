@@ -28,10 +28,9 @@ import org.praxislive.core.InterfaceDefinition;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
-import org.praxislive.core.interfaces.Service;
-import org.praxislive.core.interfaces.ServiceManager;
-import org.praxislive.core.interfaces.ServiceUnavailableException;
-import org.praxislive.core.interfaces.Services;
+import org.praxislive.core.services.Service;
+import org.praxislive.core.services.ServiceUnavailableException;
+import org.praxislive.core.services.Services;
 import org.praxislive.core.types.PBoolean;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;
@@ -86,21 +85,18 @@ public abstract class AbstractControl implements AbstractComponent.ExtendedContr
     @Deprecated
     protected ComponentAddress findService(InterfaceDefinition service)
             throws ServiceUnavailableException {
-        ServiceManager sm = getLookup().get(ServiceManager.class);
-        if (sm == null) {
-            throw new ServiceUnavailableException("No ServiceManager in Lookup");
-        }
-        return sm.findService(service);
-
+        return findService((Class<? extends Service>) service.getClass());
     }
     
+    @Deprecated
     protected ComponentAddress findService(Class<? extends Service> service)
             throws ServiceUnavailableException {
-        Services srvs = getLookup().get(Services.class);
-        if (srvs == null) {
-            throw new ServiceUnavailableException("No Services found in Lookup");
+        try {
+            Services srvs = getLookup().get(Services.class);
+            return srvs.locate(service).get();
+        } catch (Exception ex) {
+            throw new ServiceUnavailableException();
         }
-        return srvs.findService(service);
     }
     
     public static abstract class Builder<B extends Builder<B>> {

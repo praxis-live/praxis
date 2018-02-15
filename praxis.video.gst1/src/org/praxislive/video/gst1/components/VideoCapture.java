@@ -29,7 +29,7 @@ import org.praxislive.core.CallArguments;
 import org.praxislive.core.ControlPort;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.ArgumentInfo;
-import org.praxislive.core.interfaces.TaskService;
+import org.praxislive.core.services.TaskService;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PReference;

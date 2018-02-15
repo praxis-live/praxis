@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,27 +19,14 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
+package org.praxislive.core.services;
 
-package org.praxislive.core.interfaces;
+import org.praxislive.core.InterfaceDefinition;
 
 /**
  *
- * @author Neil C Smith
+ * @author Neil C Smith <http://neilcsmith.net>
  */
-public class ServiceUnavailableException extends Exception {
-
-    /**
-     * Creates a new instance of <code>ServiceUnavailableException</code> without detail message.
-     */
-    public ServiceUnavailableException() {
-    }
-
-
-    /**
-     * Constructs an instance of <code>ServiceUnavailableException</code> with the specified detail message.
-     * @param msg the detail message.
-     */
-    public ServiceUnavailableException(String msg) {
-        super(msg);
-    }
+public abstract class Service extends InterfaceDefinition {
+    
 }

@@ -42,7 +42,7 @@ import org.praxislive.core.PortConnectionException;
 import org.praxislive.core.PortListener;
 import org.praxislive.core.VetoException;
 import org.praxislive.core.ControlInfo;
-import org.praxislive.core.interfaces.ComponentFactoryService;
+import org.praxislive.core.services.ComponentFactoryService;
 import org.praxislive.core.interfaces.ContainerInterface;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PReference;
@@ -186,7 +186,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
                 throw new IllegalArgumentException("Invalid Component ID");
             }
             ControlAddress to = ControlAddress.create(
-                    findService(ComponentFactoryService.INSTANCE),
+                    findService(ComponentFactoryService.class),
                     ComponentFactoryService.NEW_INSTANCE);
             return Call.createCall(to, getAddress(), call.getTimecode(), args.get(1));
         }

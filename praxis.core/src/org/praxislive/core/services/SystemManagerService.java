@@ -20,7 +20,7 @@
  * have any questions.
  */
 
-package org.praxislive.core.interfaces;
+package org.praxislive.core.services;
 
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
@@ -30,8 +30,6 @@ import org.praxislive.core.types.PMap;
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public class SystemManagerService extends Service {
-
-    public final static SystemManagerService INSTANCE = new SystemManagerService();
 
     public final static String SYSTEM_EXIT = "system-exit";
 

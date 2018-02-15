@@ -23,8 +23,8 @@ package org.praxislive.core.factory;
 
 import org.praxislive.code.AbstractComponentFactory;
 import org.praxislive.core.code.CoreCodeFactory;
-import org.praxislive.core.ComponentFactory;
-import org.praxislive.core.ComponentFactoryProvider;
+import org.praxislive.core.services.ComponentFactory;
+import org.praxislive.core.services.ComponentFactoryProvider;
 
 /**
  *

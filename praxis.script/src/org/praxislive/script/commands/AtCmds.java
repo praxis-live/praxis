@@ -32,8 +32,8 @@ import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.interfaces.ContainerInterface;
-import org.praxislive.core.interfaces.RootManagerService;
-import org.praxislive.core.interfaces.ServiceManager;
+import org.praxislive.core.services.RootManagerService;
+import org.praxislive.core.services.Services;
 import org.praxislive.core.types.PReference;
 import org.praxislive.core.types.PString;
 import org.praxislive.script.Command;
@@ -146,8 +146,8 @@ public class AtCmds implements CommandInstaller {
                     int depth = ctxt.getDepth();
                     if (depth == 1) {
                         to = ControlAddress.create(
-                                env.getLookup().get(ServiceManager.class).
-                                findService(RootManagerService.INSTANCE),
+                                env.getLookup().get(Services.class).
+                                locate(RootManagerService.class).get(),
                                 RootManagerService.ADD_ROOT);
                         args = CallArguments.create(new Value[]{
                                     PString.valueOf(ctxt.getRootID()), type});
@@ -233,8 +233,8 @@ public class AtCmds implements CommandInstaller {
 
         private Call createRootRemovalCall(Env env, String id) throws Exception {
             ControlAddress to = ControlAddress.create(
-                    env.getLookup().get(ServiceManager.class).
-                    findService(RootManagerService.INSTANCE),
+                    env.getLookup().get(Services.class).
+                    locate(RootManagerService.class).get(),
                     RootManagerService.REMOVE_ROOT);
             return Call.createCall(to, env.getAddress(), env.getTime(), PString.valueOf(id));
 

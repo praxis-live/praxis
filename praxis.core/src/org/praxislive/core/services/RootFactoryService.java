@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.core.interfaces;
+package org.praxislive.core.services;
 
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.Root;
@@ -34,8 +34,6 @@ import org.praxislive.core.types.PReference;
  */
 public class RootFactoryService extends Service {
 
-    @Deprecated
-    public final static RootFactoryService INSTANCE = new RootFactoryService();
     public final static String NEW_ROOT_INSTANCE = "new-root-instance";
     public final static ControlInfo NEW_ROOT_INSTANCE_INFO =
             ControlInfo.createFunctionInfo(

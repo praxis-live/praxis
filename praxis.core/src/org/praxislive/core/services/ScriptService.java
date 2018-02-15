@@ -19,48 +19,43 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.core.interfaces;
+package org.praxislive.core.services;
 
-import org.praxislive.core.Value;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
-import org.praxislive.core.types.PMap;
-import org.praxislive.core.types.PReference;
+import org.praxislive.core.types.PString;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class TaskService extends Service {
+public class ScriptService extends Service {
 
-    @Deprecated public final static TaskService INSTANCE = new TaskService();
-    public final static String SUBMIT = "submit";
-    public final static ControlInfo SUBMIT_INFO =
-            ControlInfo.createFunctionInfo(
-            new ArgumentInfo[]{PReference.info(Task.class)},
-            new ArgumentInfo[]{Value.info()},
-            PMap.EMPTY);
+    public final static String EVAL = "eval";
+    public final static String CLEAR = "clear";
+    public final static ScriptService INSTANCE = new ScriptService();
+    private final static ControlInfo EVAL_INFO = ControlInfo.createFunctionInfo(
+                new ArgumentInfo[]{PString.info()},
+                new ArgumentInfo[0],
+                null);
+    private final static ControlInfo CLEAR_INFO = ControlInfo.createFunctionInfo(
+            new ArgumentInfo[0],
+            new ArgumentInfo[0],
+            null);
 
     @Override
     public String[] getControls() {
-        return new String[]{SUBMIT};
+        return new String[]{EVAL, CLEAR};
     }
 
     @Override
     public ControlInfo getControlInfo(String control) {
-        if (SUBMIT.equals(control)) {
-            return SUBMIT_INFO;
+        if (EVAL.equals(control)) {
+            return EVAL_INFO;
+        }
+        if (CLEAR.equals(control)) {
+            return CLEAR_INFO;
         }
         throw new IllegalArgumentException();
-    }
-
-    public static interface Task {
-
-        /**
-         * Called to execute task.
-         * @return Value (use PReference to wrap arbitrary Objects)
-         * @throws java.lang.Exception
-         */
-        public Value execute() throws Exception;
     }
 }

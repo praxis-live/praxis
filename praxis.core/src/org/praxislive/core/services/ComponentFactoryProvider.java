@@ -19,20 +19,16 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.core.interfaces;
 
-import org.praxislive.core.ComponentAddress;
-import org.praxislive.core.InterfaceDefinition;
+package org.praxislive.core.services;
 
 /**
  *
  * @author Neil C Smith
  */
-@Deprecated
-public interface ServiceManager {
+public interface ComponentFactoryProvider {
 
-   public ComponentAddress findService(InterfaceDefinition info) throws ServiceUnavailableException;
-
-   public ComponentAddress[] findAllServices(InterfaceDefinition info) throws ServiceUnavailableException;
-
+    public ComponentFactory getFactory();
+    
+    
 }

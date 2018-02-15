@@ -48,7 +48,7 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.praxislive.core.interfaces.StartableInterface;
-import org.praxislive.core.interfaces.SystemManagerService;
+import org.praxislive.core.services.SystemManagerService;
 import org.praxislive.core.types.PBoolean;
 import org.praxislive.core.types.PReference;
 import org.praxislive.core.types.PString;
@@ -132,8 +132,8 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             }
             try {
                 this.address = ComponentAddress.valueOf("/" + ID);
-            } catch (ValueFormatException ArgumentFormatException) {
-                throw new IllegalArgumentException(ArgumentFormatException);
+            } catch (ValueFormatException ex) {
+                throw new IllegalArgumentException(ex);
             }
             this.ID = ID;
             this.hub = hub;
@@ -545,7 +545,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         private void idling() {
             if (exit) {
                 try {
-                    ControlAddress to = ControlAddress.create(findService(SystemManagerService.INSTANCE),
+                    ControlAddress to = ControlAddress.create(findService(SystemManagerService.class),
                             SystemManagerService.SYSTEM_EXIT);
                     getPacketRouter().route(Call.createCall(
                             to,

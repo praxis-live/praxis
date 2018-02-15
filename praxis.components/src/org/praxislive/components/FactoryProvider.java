@@ -25,8 +25,8 @@ import org.praxislive.components.container.ContainerInput;
 import org.praxislive.components.container.ContainerOutput;
 import org.praxislive.components.container.UserContainer;
 import org.praxislive.components.routing.Send;
-import org.praxislive.core.ComponentFactory;
-import org.praxislive.core.ComponentFactoryProvider;
+import org.praxislive.core.services.ComponentFactory;
+import org.praxislive.core.services.ComponentFactoryProvider;
 import org.praxislive.impl.AbstractComponentFactory;
 
 /**

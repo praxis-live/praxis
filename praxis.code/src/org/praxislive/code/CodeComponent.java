@@ -32,8 +32,8 @@ import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Port;
 import org.praxislive.core.VetoException;
 import org.praxislive.core.ComponentInfo;
-import org.praxislive.core.interfaces.ServiceUnavailableException;
-import org.praxislive.core.interfaces.Services;
+import org.praxislive.core.services.ServiceUnavailableException;
+import org.praxislive.core.services.Services;
 import org.praxislive.logging.LogLevel;
 import org.praxislive.logging.LogService;
 

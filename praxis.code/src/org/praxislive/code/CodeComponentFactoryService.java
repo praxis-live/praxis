@@ -22,7 +22,7 @@
 
 package org.praxislive.code;
 
-import org.praxislive.core.interfaces.ComponentFactoryService;
+import org.praxislive.core.services.ComponentFactoryService;
 
 /**
  *

@@ -26,7 +26,7 @@ import org.praxislive.core.CallArguments;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.ControlInfo;
-import org.praxislive.core.interfaces.ScriptService;
+import org.praxislive.core.services.ScriptService;
 import org.praxislive.core.types.PString;
 import org.praxislive.impl.AbstractControl;
 import org.praxislive.terminal.Terminal;

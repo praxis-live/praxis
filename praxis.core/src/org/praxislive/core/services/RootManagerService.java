@@ -20,7 +20,7 @@
  * have any questions.
  */
 
-package org.praxislive.core.interfaces;
+package org.praxislive.core.services;
 
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.ArgumentInfo;

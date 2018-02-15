@@ -27,7 +27,7 @@ import java.net.SocketAddress;
 import java.util.Collections;
 import java.util.List;
 import org.praxislive.core.ComponentType;
-import org.praxislive.core.interfaces.Service;
+import org.praxislive.core.services.Service;
 
 /**
  *
