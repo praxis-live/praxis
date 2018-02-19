@@ -39,13 +39,11 @@ import java.util.logging.Logger;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.InterfaceDefinition;
-import org.praxislive.core.InvalidAddressException;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.Packet;
 import org.praxislive.core.Root;
 import org.praxislive.core.RootHub;
 import org.praxislive.core.services.Service;
-import org.praxislive.core.services.ServiceUnavailableException;
 import org.praxislive.core.services.Services;
 import org.praxislive.impl.InstanceLookup;
 import org.praxislive.script.impl.ScriptServiceImpl;
@@ -196,7 +194,7 @@ public final class Hub {
     private class RootHubImpl implements RootHub {
 
         @Override
-        public void dispatch(Packet packet) throws InvalidAddressException {
+        public void dispatch(Packet packet) {
             Root.Controller dest = roots.get(packet.getRootID());
             if (dest != null) {
                 dest.submitPacket(packet);

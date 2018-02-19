@@ -24,7 +24,6 @@ package org.praxislive.impl;
 import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ControlAddress;
-import org.praxislive.core.InvalidAddressException;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Call;
 import org.praxislive.core.RootHub;
@@ -108,14 +107,14 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         registerControl(StartableInterface.IS_RUNNING,
                 ArgumentProperty.createReadOnly(PBoolean.info(),
                         new ArgumentProperty.ReadBinding() {
-                            public Value getBoundValue() {
-                                if (state.get() == RootState.ACTIVE_RUNNING) {
-                                    return PBoolean.TRUE;
-                                } else {
-                                    return PBoolean.FALSE;
-                                }
-                            }
-                        }));
+                    public Value getBoundValue() {
+                        if (state.get() == RootState.ACTIVE_RUNNING) {
+                            return PBoolean.TRUE;
+                        } else {
+                            return PBoolean.FALSE;
+                        }
+                    }
+                }));
         registerInterface(StartableInterface.INSTANCE);
     }
 
@@ -177,11 +176,10 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 //    protected void setTime(long time) {
 //        this.time = time;
 //    }
-    
     protected Context createContext() {
         return new Context();
     }
-    
+
     protected void activating() {
     }
 
@@ -564,21 +562,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     private class Router implements PacketRouter {
 
         public void route(Packet packet) {
-            try {
-                hub.dispatch(packet);
-            } catch (InvalidAddressException ex) {
-                if (packet instanceof Call) {
-                    Call call = (Call) packet;
-                    Call.Type type = call.getType();
-                    if ((type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET)
-                            && call.getFromAddress().getComponentAddress().getRootID().equals(ID)) {
-                        controller.submitPacket(
-                                Call.createErrorCall((Call) packet, PReference.wrap(ex)));
-                    }
-                } else {
-                    throw new UnsupportedOperationException();
-                }
-            }
+            hub.dispatch(packet);
         }
     }
 

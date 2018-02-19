@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.praxislive.core.Call;
@@ -36,7 +35,6 @@ import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.InterfaceDefinition;
-import org.praxislive.core.InvalidAddressException;
 import org.praxislive.core.Root;
 import org.praxislive.core.RootHub;
 import org.praxislive.core.ComponentInfo;
@@ -128,7 +126,7 @@ public class DefaultCoreRoot extends AbstractRoot {
             try {
                 LOG.log(Level.CONFIG, "Installing extension {0}", extID);
                 installRoot(extID, "sysex", ext);
-            } catch (InvalidAddressException | IllegalRootStateException ex) {
+            } catch (Exception ex) {
                 LOG.log(Level.SEVERE, "Failed to install extension\n{0} to /{1}\n{2}",
                         new Object[]{ext.getClass(), extID, ex});
                 continue;
@@ -153,9 +151,9 @@ public class DefaultCoreRoot extends AbstractRoot {
     }
     
     protected void installRoot(String id, String type, Root root)
-            throws InvalidAddressException, IllegalRootStateException {
+            throws Exception {
         if (!ComponentAddress.isValidID(id) || hubAccess.getRootController(id) != null) {
-            throw new InvalidAddressException();
+            throw new IllegalArgumentException();
         }
         Root.Controller ctrl = root.initialize(id, hubAccess.getRootHub());
         if (hubAccess.registerRootController(id, ctrl)) {

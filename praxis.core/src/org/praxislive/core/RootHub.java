@@ -29,7 +29,7 @@ import java.util.List;
  */
 public interface RootHub {
 
-    public void dispatch(Packet packet) throws InvalidAddressException;
+    public void dispatch(Packet packet);
 
     public Lookup getLookup();
 

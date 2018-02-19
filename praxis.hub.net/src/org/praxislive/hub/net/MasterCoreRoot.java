@@ -34,8 +34,6 @@ import org.praxislive.core.CallArguments;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.ControlAddress;
-import org.praxislive.core.IllegalRootStateException;
-import org.praxislive.core.InvalidAddressException;
 import org.praxislive.core.Root;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.services.RootFactoryService;
@@ -89,7 +87,7 @@ class MasterCoreRoot extends DefaultCoreRoot {
             String id = SLAVE_PREFIX + (i + 1);
             try {
                 installRoot(id, "netex", new MasterClientRoot(slaves[i], fileServerInfo));
-            } catch (InvalidAddressException | IllegalRootStateException ex) {
+            } catch (Exception ex) {
                 Logger.getLogger(MasterCoreRoot.class.getName()).log(Level.SEVERE, null, ex);
 //                throw new RuntimeException(ex);
             }
