@@ -76,7 +76,7 @@ public abstract class AbstractControl implements AbstractComponent.ExtendedContr
 
     protected Lookup getLookup() {
         if (host == null) {
-            return EmptyLookup.getInstance();
+            return Lookup.EMPTY;
         } else {
             return host.getLookup();
         }

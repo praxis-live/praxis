@@ -22,8 +22,8 @@
 
 package org.praxislive.nb.lookup;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.Optional;
+import java.util.stream.Stream;
 import org.praxislive.core.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -37,28 +37,15 @@ public class LookupBridge implements Lookup {
     public LookupBridge() {}
 
     @Override
-    public <T> T get(Class<T> type) {
-        return org.openide.util.Lookup.getDefault().lookup(type);
+    public <T> Optional<T> find(Class<T> type) {
+        return Optional.ofNullable(org.openide.util.Lookup.getDefault().lookup(type));
     }
 
     @Override
-    public <T> Result<T> getAll(Class<T> type) {
-        return new ResultWrapper<T>(org.openide.util.Lookup.getDefault().lookupAll(type));
+    @SuppressWarnings("unchecked")
+    public <T> Stream<T> findAll(Class<T> type) {
+        return (Stream<T>) org.openide.util.Lookup.getDefault().lookupAll(type).stream();
     }
 
-    private class ResultWrapper<T> implements Lookup.Result<T> {
-
-        private Collection<? extends T> all;
-
-        private ResultWrapper(Collection<? extends T> all) {
-            this.all = all;
-        }
-
-        @Override
-        public Iterator<T> iterator() {
-            return (Iterator<T>) all.iterator();
-        }
-
-    }
 
 }

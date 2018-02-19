@@ -2,14 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package org.praxislive.impl;
 
-import org.praxislive.impl.InstanceLookup;
-import java.util.Collections;
-import java.util.Iterator;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.praxislive.core.Lookup;
-import org.praxislive.core.Lookup.Result;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -43,56 +40,36 @@ public class InstanceLookupTest {
     }
 
     /**
-     * Test of get method, of class InstanceLookup.
+     * Test of find method, of class InstanceLookup.
      */
     @Test
-    public void testGet() {
-        System.out.println("get");
+    public void testFind() {
+        System.out.println("find");
         InstanceLookup lkp = create();
-        System.out.println(lkp.get(String.class));
-        System.out.println(lkp.get(Object.class));
-
+        Optional<String> s = lkp.find(String.class);
+        assertEquals(s.get(), "This");
+        Optional<Boolean> b = lkp.find(Boolean.class);
+        assertEquals(b.get(), true);
+        Optional<Number> n = lkp.find(Number.class);
+        assertEquals(n.get(), 42);
     }
 
     /**
-     * Test of getAll method, of class InstanceLookup.
+     * Test of findAll method, of class InstanceLookup.
      */
     @Test
-    public void testGetAll() {
-        System.out.println("getAll");
+    public void testFindAll() {
+        System.out.println("findAll");
         InstanceLookup lkp = create();
-        Lookup.Result<String> r1 = lkp.getAll(String.class);
-        for (String str : r1) {
-            System.out.print(str + " ");
-        }
-        System.out.println("");
-        Lookup.Result<Object> r2 = lkp.getAll(Object.class);
-        for (Object obj : r2) {
-            System.out.print(obj + " ");
-        }
-        System.out.println("");
+        String test = lkp.findAll(String.class).collect(Collectors.joining(" "));
+        assertEquals(test, "This is our test String");
+        assertEquals(8, lkp.findAll(Object.class).count());
     }
 
     private InstanceLookup create() {
         return InstanceLookup.create(
-                new EmptyLookup(), new Object[]{"This", "Is", "Our", "Test", "String", new Object()});
-    }
-
-    private static class EmptyLookup implements Lookup {
-
-        public <T> T get(Class<T> type) {
-            return null;
-        }
-
-        public <T> Result<T> getAll(Class<T> type) {
-            return new Result<T>() {
-
-                public Iterator<T> iterator() {
-                    return Collections.EMPTY_LIST.iterator();
-                }
-            };
-        }
-
+                InstanceLookup.create(Lookup.EMPTY, "test", "String", true),
+                "This", "is", 42, "our", new Object());
     }
 
 }

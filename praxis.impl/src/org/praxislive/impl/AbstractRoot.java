@@ -149,7 +149,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 
     void disconnect() {
         this.router = null;
-        this.lookup = EmptyLookup.getInstance();
+        this.lookup = Lookup.EMPTY;
         for (String id : getChildIDs()) {
             removeChild(id);
         }

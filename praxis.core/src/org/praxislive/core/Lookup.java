@@ -21,20 +21,56 @@
  */
 package org.praxislive.core;
 
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  *
  * @author Neil C Smith
  */
 public interface Lookup {
     
-    public final static Lookup EMPTY = new EmptyLookup();
+    public final static Lookup EMPTY = new Empty();
     public final static Lookup SYSTEM = new SystemLookup();
 
-    public <T> T get(Class<T> type);
+    @Deprecated
+    public default <T> T get(Class<T> type) {
+        return find(type).orElse(null);
+    }
 
-    public <T> Result<T> getAll(Class<T> type);
-
+    @Deprecated
+    public default <T> Result<T> getAll(Class<T> type) {
+        Iterable<T> itr = findAll(type).collect(Collectors.toList());
+        return new Result<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return itr.iterator();
+            }
+        };
+    }
+    
+    public <T> Optional<T> find(Class<T> type);
+    
+    public <T> Stream<T> findAll(Class<T> type);
+    
+    @Deprecated
     public interface Result<T> extends Iterable<T> {
+    }
+
+    static class Empty implements Lookup {
+
+        @Override
+        public <T> Optional<T> find(Class<T> type) {
+            return Optional.empty();
+        }
+
+        @Override
+        public <T> Stream<T> findAll(Class<T> type) {
+            return Stream.empty();
+        }
+        
     }
     
 }

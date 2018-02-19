@@ -22,9 +22,15 @@
 package org.praxislive.core;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  *
@@ -38,49 +44,48 @@ class SystemLookup implements Lookup {
     
     SystemLookup() {
         Lookup lkp = new ServiceLoaderLookup();
-        Lookup override = lkp.get(Lookup.class);
-        if (override != null) {
-            lkp = override;
-            LOG.log(Level.FINE, "Overriding system lookup with {0}", override);
-        }
-        lookup = lkp;
+        lookup = lkp.find(Lookup.class).orElse(lkp);
     }
 
-    public <T> T get(Class<T> type) {
-        return lookup.get(type);
+    @Override
+    public <T> Optional<T> find(Class<T> type) {
+        return lookup.find(type);
     }
 
-    public <T> Result<T> getAll(Class<T> type) {
-        return lookup.getAll(type);
+    @Override
+    public <T> Stream<T> findAll(Class<T> type) {
+        return lookup.findAll(type);
     }
 
     private static class ServiceLoaderLookup implements Lookup {
 
-        public <T> T get(Class<T> type) {
-            Iterator<T> results = getAll(type).iterator();
-            if (results.hasNext()) {
-                return results.next();
-            } else {
-                return null;
+        @Override
+        public <T> Optional<T> find(Class<T> type) {
+            ServiceLoader<T> loader = ServiceLoader.load(type);
+            try {
+                Iterator<T> itr = loader.iterator();
+                if (itr.hasNext()) {
+                    return Optional.of(itr.next());
+                }
+            } catch (ServiceConfigurationError ex) {
+                LOG.log(Level.SEVERE, "Error in service configuration", ex);
             }
+            return Optional.empty();
         }
 
-        public <T> Result<T> getAll(Class<T> type) {
-            ServiceLoader<T> serviceLoader = ServiceLoader.load(type);
-            return new ServiceLoaderLookup.ServiceLoaderWrapper<T>(serviceLoader);
-        }
-
-        private class ServiceLoaderWrapper<T> implements Lookup.Result<T> {
-
-            private ServiceLoader<T> serviceLoader;
-
-            ServiceLoaderWrapper(ServiceLoader<T> serviceLoader) {
-                this.serviceLoader = serviceLoader;
+        @Override
+        public <T> Stream<T> findAll(Class<T> type) {
+            ServiceLoader<T> loader = ServiceLoader.load(type);
+            // @TODO make lazy?
+            try {
+                List<T> results = StreamSupport.stream(loader.spliterator(), false)
+                        .collect(Collectors.toList());
+                return results.stream();
+            } catch (ServiceConfigurationError ex) {
+                LOG.log(Level.SEVERE, "Error in service configuration", ex);
             }
-
-            public Iterator<T> iterator() {
-                return serviceLoader.iterator();
-            }
+            return Stream.empty();
         }
+        
     }
 }

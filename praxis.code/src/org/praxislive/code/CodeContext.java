@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,6 +40,7 @@ import org.praxislive.core.Lookup;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Port;
 import org.praxislive.core.ComponentInfo;
+import org.praxislive.core.services.Service;
 import org.praxislive.core.services.ServiceUnavailableException;
 import org.praxislive.core.services.Services;
 import org.praxislive.logging.LogBuilder;
@@ -297,13 +299,14 @@ public abstract class CodeContext<D extends CodeDelegate> {
     }
 
     // @TODO implement caching?
+    @Deprecated
     public ComponentAddress findService(Class<? extends InterfaceDefinition> type)
             throws ServiceUnavailableException {
-        Services sm = getLookup().get(Services.class);
-        if (sm == null) {
-            throw new ServiceUnavailableException("Can't find Service Manager");
-        }
-        return sm.findService(type);
+        return locateService((Class<? extends Service>) type).orElseThrow(ServiceUnavailableException::new);
+    }
+    
+    public Optional<ComponentAddress> locateService(Class<? extends Service> type) {
+        return getLookup().find(Services.class).flatMap(s -> s.locate(type));
     }
 
     public long getTime() {

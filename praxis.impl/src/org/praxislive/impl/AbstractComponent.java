@@ -330,7 +330,7 @@ public abstract class AbstractComponent implements Component {
 
     protected Lookup getLookup() {
         if (parent == null) {
-            return EmptyLookup.getInstance();
+            return Lookup.EMPTY;
         } else {
             return parent.getLookup();
         }

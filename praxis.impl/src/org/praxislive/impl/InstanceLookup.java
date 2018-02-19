@@ -19,13 +19,11 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package org.praxislive.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 import org.praxislive.core.Lookup;
 
 /**
@@ -34,42 +32,35 @@ import org.praxislive.core.Lookup;
  */
 public class InstanceLookup implements Lookup {
 
-    private Object[] instances;
-    private Lookup parent;
+    private final Object[] instances;
+    private final Lookup parent;
 
     private InstanceLookup(Object[] instances, Lookup parent) {
         this.instances = instances;
         this.parent = parent;
     }
 
-    public <T> T get(Class<T> type) {
+    public <T> Optional<T> find(Class<T> type) {
         for (Object obj : instances) {
             if (type.isInstance(obj)) {
-                return type.cast(obj);
+                return Optional.of(type.cast(obj));
             }
         }
-        return parent.get(type);
+        return parent.find(type);
     }
 
-    public <T> Result<T> getAll(Class<T> type) {
-        List<T> list = new ArrayList<T>();
-        for (Object obj : instances) {
-            if (type.isInstance(obj)) {
-                list.add(type.cast(obj));
-            }
-        }
-        if (list.isEmpty()) {
-            return parent.getAll(type);
-        } else {
-            return new ProxyResult<T>(list, parent.getAll(type));
-        }
+    public <T> Stream<T> findAll(Class<T> type) {
+        return Stream.concat(Stream.of(instances)
+                .filter(type::isInstance)
+                .map(type::cast),
+                parent.findAll(type));
     }
-    
-    public static InstanceLookup create(Object ... instances) {
+
+    public static InstanceLookup create(Object... instances) {
         return create(null, instances);
     }
-    
-    public static InstanceLookup create( Lookup parent, Object ... instances) {
+
+    public static InstanceLookup create(Lookup parent, Object... instances) {
         if (instances == null) {
             throw new NullPointerException();
         }
@@ -77,58 +68,6 @@ public class InstanceLookup implements Lookup {
             parent = Lookup.EMPTY;
         }
         return new InstanceLookup(Arrays.copyOf(instances, instances.length), parent);
-    }
-
-
-
-    private static class ProxyResult<T> implements Result<T> {
-
-        private List<T> instances;
-        private Result<T> parent;
-
-        private ProxyResult(List<T> instances, Result<T> parent) {
-            this.instances = instances;
-            this.parent = parent;
-        }
-
-        public Iterator<T> iterator() {
-            return new ProxyIterator<T>(instances.iterator(), parent.iterator());
-        }
-
-    }
-
-    private static class ProxyIterator<T> implements Iterator<T> {
-
-        private Iterator<T> first;
-        private Iterator<T> second;
-
-        private ProxyIterator(Iterator<T> first, Iterator<T> second) {
-            this.first = first;
-            this.second = second;
-        }
-
-        public boolean hasNext() {
-            if (first.hasNext()) {
-                return true;
-            } else {
-                return second.hasNext();
-            }
-        }
-
-        public T next() {
-            if (first.hasNext()) {
-                return first.next();
-            } else {
-                return second.next();
-            }
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-
-
     }
 
 }
