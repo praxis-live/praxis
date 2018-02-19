@@ -402,6 +402,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param id
      * @return Property, or null if the given ID is not valid
      */
+    @Deprecated
     public final Property p(String id) {
         Control c = getContext().getControl(id);
         if (c instanceof Property) {
