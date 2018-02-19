@@ -49,8 +49,8 @@ public class Looper extends AbstractComponent {
     public Looper() {
         looper = new LooperUG();
         looper.setLoopSize(1);
-        registerPort(Port.IN, new DefaultAudioInputPort(this, looper));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(this, looper));
+        registerPort(Port.IN, new DefaultAudioInputPort(looper));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(looper));
         buildControls();
     }
 

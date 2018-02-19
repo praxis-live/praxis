@@ -31,13 +31,11 @@ public class AudioSettings {
     
     public final static String KEY_LIBRARY = "audio.library";
     public final static String KEY_DEVICE = "audio.device";
-    @Deprecated public final static String KEY_SAMPLERATE = "audio.samplerate";
     public final static String KEY_BUFFERSIZE = "audio.buffersize";
     public final static String KEY_INPUT_DEVICE = "audio.input-device";
     
-    private static int DEFAULT_SAMPLERATE = 48000;
-    private static int DEFAULT_BUFFERSIZE = 2048;
-    private static String DEFAULT_LIBRARY = "JavaSound";
+    private static final int DEFAULT_BUFFERSIZE = 2048;
+    private static final String DEFAULT_LIBRARY = "JavaSound";
     
     private AudioSettings() {}
     
@@ -47,16 +45,6 @@ public class AudioSettings {
     
     public static void setLibrary(String library) {
         Settings.put(KEY_LIBRARY, library);
-    }
-    
-    @Deprecated
-    public static int getSamplerate() {
-        return Settings.getInt(KEY_SAMPLERATE, DEFAULT_SAMPLERATE);
-    }
-    
-    @Deprecated
-    public static void setSamplerate(int samplerate) {
-        Settings.putInt(KEY_SAMPLERATE, samplerate);
     }
     
     public static int getBuffersize() {

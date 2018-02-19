@@ -48,17 +48,6 @@ public class DefaultAudioOutputPort extends AudioPort.Output {
     private boolean multiChannelCapable;
     private PortListenerSupport pls;
 
-    @Deprecated
-    public DefaultAudioOutputPort(Component host, Pipe source) {
-        this(source, false);
-    }
-
-    @Deprecated
-    public DefaultAudioOutputPort(Component host, Pipe source,
-            boolean multiChannelCapable) {
-        this(source, multiChannelCapable);
-    }
-    
     public DefaultAudioOutputPort(Pipe source) {
         this(source, false);
     }

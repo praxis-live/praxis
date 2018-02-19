@@ -56,9 +56,9 @@ public class XFader extends AbstractComponent {
         } catch (Exception ex) {
             throw new Error();
         }
-        registerPort(Port.IN + "-1", new DefaultAudioInputPort(this, g1h));
-        registerPort(Port.IN + "-2", new DefaultAudioInputPort(this, g2h));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(this, mixer));
+        registerPort(Port.IN + "-1", new DefaultAudioInputPort(g1h));
+        registerPort(Port.IN + "-2", new DefaultAudioInputPort(g2h));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(mixer));
         NumberProperty mix = NumberProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());

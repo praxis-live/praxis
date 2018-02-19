@@ -46,8 +46,8 @@ public class Level extends AbstractClockComponent {
     public Level() {
         cmp = new AudioMeasure();
         out = new DefaultControlOutputPort();
-        registerPort(Port.IN, new DefaultAudioInputPort(this, cmp));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(this, cmp));
+        registerPort(Port.IN, new DefaultAudioInputPort(cmp));
+        registerPort(Port.OUT, new DefaultAudioOutputPort(cmp));
         registerPort("level", out);
     }
     

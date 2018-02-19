@@ -94,7 +94,7 @@ public class AudioInput extends AbstractComponent {
         for (int i=0; i<MAX_CHANNELS; i++) {
             if (i < channelCount) {
                 if (ports[i] == null) {
-                    AudioPort.Output port = new DefaultAudioOutputPort(this, placeholders[i]);
+                    AudioPort.Output port = new DefaultAudioOutputPort(placeholders[i]);
                     registerPort(Port.OUT + "-" + (i+1), port);
                     ports[i] = port;
                 }

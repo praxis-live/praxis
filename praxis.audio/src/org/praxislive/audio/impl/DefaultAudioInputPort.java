@@ -47,15 +47,6 @@ public class DefaultAudioInputPort extends AudioPort.Input {
     private List<AudioPort.Output> connections;
     private boolean multiChannelCapable;
     private PortListenerSupport pls;
-
-    public DefaultAudioInputPort(Component host, Pipe sink) {
-        this(sink, false);
-    }
-
-    public DefaultAudioInputPort(Component host, Pipe sink,
-            boolean multiChannelCapable) {
-        this(sink, multiChannelCapable);
-    }
     
     public DefaultAudioInputPort(Pipe sink) {
         this(sink, false);
