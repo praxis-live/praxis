@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.praxislive.core.Lookup;
 import org.praxislive.settings.Settings;
 import org.praxislive.video.ClientConfiguration;
 import org.praxislive.video.Player;
@@ -68,7 +69,7 @@ class SWPlayer implements Player {
     private final static double DEG_90 = Math.toRadians(90);
     private final static double DEG_180 = Math.toRadians(180);
     private final static double DEG_270 = Math.toRadians(270);
-    
+
     private int noSleepsPerYield = 0; // maximum number of frames without sleep before yielding
     private int maxSkip = 2; // maximum number of frames that can be skipped before rendering
     private int width, height; // dimensions of surface
@@ -127,7 +128,6 @@ class SWPlayer implements Player {
         }
         period = (long) (1000000000.0 / fps);
 
-
         //render first frame
         time = System.nanoTime();
 //        updateAndRender();
@@ -166,7 +166,6 @@ class SWPlayer implements Player {
                 }
                 updateAndRender();
             }
-
 
         }
 
@@ -507,39 +506,32 @@ class SWPlayer implements Player {
                 throw new IllegalArgumentException("Invalid client configuration");
             }
 
-
             int width = config.getWidth();
             int height = config.getHeight();
-            int outWidth = width;
-            int outHeight = height;
-            int rotation = 0;
-            int device = -1;
 
-            ClientConfiguration.Dimension dim =
-                    clients[0].getLookup().get(ClientConfiguration.Dimension.class);
-            if (dim != null) {
-                outWidth = dim.getWidth();
-                outHeight = dim.getHeight();
-            }
+            Lookup lkp = clients[0].getLookup();
 
-            ClientConfiguration.Rotation rot =
-                    clients[0].getLookup().get(ClientConfiguration.Rotation.class);
-            if (rot != null) {
-                rotation = rot.getAngle();
-            }
+            int outWidth = lkp.find(ClientConfiguration.Dimension.class)
+                    .map(ClientConfiguration.Dimension::getWidth)
+                    .orElse(width);
 
-            ClientConfiguration.DeviceIndex dev =
-                    clients[0].getLookup().get(ClientConfiguration.DeviceIndex.class);
-            if (dev != null) {
-                device = dev.getValue();
-            }
+            int outHeight = lkp.find(ClientConfiguration.Dimension.class)
+                    .map(ClientConfiguration.Dimension::getHeight)
+                    .orElse(height);
 
-            WindowHints wHints = clients[0].getLookup().get(WindowHints.class);
-            if (wHints == null) {
-                wHints = new WindowHints();
-            }
-            
-            QueueContext queue = config.getLookup().get(QueueContext.class);
+            int rotation = lkp.find(ClientConfiguration.Rotation.class)
+                    .map(ClientConfiguration.Rotation::getAngle)
+                    .filter(i -> i == 0 || i == 90 || i == 180 || i == 270)
+                    .orElse(0);
+
+            int device = lkp.find(ClientConfiguration.DeviceIndex.class)
+                    .map(ClientConfiguration.DeviceIndex::getValue)
+                    .orElse(-1);
+
+            WindowHints wHints = lkp.find(WindowHints.class).orElseGet(WindowHints::new);
+
+            // @TODO fake queue rather than get()?
+            QueueContext queue = config.getLookup().find(QueueContext.class).get();
 
             return new SWPlayer(
                     config.getWidth(),

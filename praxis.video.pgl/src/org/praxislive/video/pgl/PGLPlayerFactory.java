@@ -22,6 +22,7 @@
 package org.praxislive.video.pgl;
 
 import com.jogamp.opengl.GLProfile;
+import org.praxislive.core.Lookup;
 import org.praxislive.video.ClientConfiguration;
 import org.praxislive.video.Player;
 import org.praxislive.video.PlayerConfiguration;
@@ -54,50 +55,35 @@ public class PGLPlayerFactory implements PlayerFactory {
 
         int width = config.getWidth();
         int height = config.getHeight();
-        int outWidth = width;
-        int outHeight = height;
-        int rotation = 0;
-        int device = -1;
 
         PGLProfile glProfile = profile;
         if (profile == null) {
             glProfile = GLProfile.isAvailable(GLProfile.GL2GL3) ? PGLProfile.GL3 : PGLProfile.GLES2;
         }
+        
+        Lookup lkp = clients[0].getLookup();
 
-        ClientConfiguration.Dimension dim
-                = clients[0].getLookup().get(ClientConfiguration.Dimension.class);
-        if (dim != null) {
-            outWidth = dim.getWidth();
-            outHeight = dim.getHeight();
-        }
+        int outWidth = lkp.find(ClientConfiguration.Dimension.class)
+                .map(ClientConfiguration.Dimension::getWidth)
+                .orElse(width);
+        
+        int outHeight = lkp.find(ClientConfiguration.Dimension.class)
+                .map(ClientConfiguration.Dimension::getHeight)
+                .orElse(height);
 
-        ClientConfiguration.Rotation rot
-                = clients[0].getLookup().get(ClientConfiguration.Rotation.class);
-        if (rot != null) {
-            rotation = rot.getAngle();
-        }
-        switch (rotation) {
-            case 0:
-            case 90:
-            case 180:
-            case 270:
-                break;
-            default:
-                rotation = 0;
-        }
+        int rotation = lkp.find(ClientConfiguration.Rotation.class)
+                .map(ClientConfiguration.Rotation::getAngle)
+                .filter(i -> i == 0 || i == 90 || i == 180 || i == 270)
+                .orElse(0);
 
-        ClientConfiguration.DeviceIndex dev
-                = clients[0].getLookup().get(ClientConfiguration.DeviceIndex.class);
-        if (dev != null) {
-            device = dev.getValue();
-        }
+        int device = lkp.find(ClientConfiguration.DeviceIndex.class)
+                .map(ClientConfiguration.DeviceIndex::getValue)
+                .orElse(-1);
 
-        WindowHints wHints = clients[0].getLookup().get(WindowHints.class);
-        if (wHints == null) {
-            wHints = new WindowHints();
-        }
+        WindowHints wHints = lkp.find(WindowHints.class).orElseGet(WindowHints::new);
 
-        QueueContext queue = config.getLookup().get(QueueContext.class);
+        // @TODO fake queue rather than get()?
+        QueueContext queue = config.getLookup().find(QueueContext.class).get();
 
         return new PGLPlayer(
                 config.getWidth(),
