@@ -21,7 +21,6 @@
  */
 package org.praxislive.code;
 
-import org.praxislive.compiler.ClassBodyContext;
 import org.praxislive.core.Value;
 import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.Call;

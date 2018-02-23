@@ -21,7 +21,6 @@
  */
 package org.praxislive.code;
 
-import org.praxislive.compiler.ClassBodyContext;
 import org.praxislive.core.ComponentType;
 import org.praxislive.logging.LogBuilder;
 

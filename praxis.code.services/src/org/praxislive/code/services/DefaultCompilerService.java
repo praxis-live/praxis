@@ -30,11 +30,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import org.praxislive.code.CodeCompilerService;
-import org.praxislive.compiler.ClassBodyCompiler;
-import org.praxislive.compiler.ClassBodyContext;
-import org.praxislive.compiler.JavaCompilerProvider;
-import org.praxislive.compiler.MessageHandler;
+import org.praxislive.code.services.tools.ClassBodyCompiler;
+import org.praxislive.code.ClassBodyContext;
+import org.praxislive.code.services.tools.JavaCompilerProvider;
+import org.praxislive.code.services.tools.MessageHandler;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.types.PArray;
@@ -62,10 +63,10 @@ public class DefaultCompilerService extends AbstractRoot {
         registerControl(CodeCompilerService.COMPILE, new CompileControl());
         registerControl("add-libs", new AddLibsControl());
         registerInterface(CodeCompilerService.class);
-        JavaCompilerProvider compilerProvider = Lookup.SYSTEM.get(JavaCompilerProvider.class);
-        if (compilerProvider != null) {
-            compiler = compilerProvider.getJavaCompiler();
-        } else {
+        compiler = Lookup.SYSTEM.find(JavaCompilerProvider.class)
+                .map(JavaCompilerProvider::getJavaCompiler)
+                .orElse(ToolProvider.getSystemJavaCompiler());
+        if (compiler == null) {
             throw new RuntimeException("No compiler found");
         }
         libJARs = new LinkedHashSet<>();

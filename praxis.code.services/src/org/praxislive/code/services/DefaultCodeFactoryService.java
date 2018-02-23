@@ -41,7 +41,7 @@ import org.praxislive.code.CodeContext;
 import org.praxislive.code.CodeContextFactoryService;
 import org.praxislive.code.CodeDelegate;
 import org.praxislive.code.CodeFactory;
-import org.praxislive.compiler.ClassBodyContext;
+import org.praxislive.code.ClassBodyContext;
 import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.services.ComponentFactory;

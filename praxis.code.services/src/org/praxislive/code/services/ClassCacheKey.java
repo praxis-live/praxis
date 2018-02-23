@@ -22,7 +22,7 @@
 package org.praxislive.code.services;
 
 import java.util.Objects;
-import org.praxislive.compiler.ClassBodyContext;
+import org.praxislive.code.ClassBodyContext;
 
 /**
  *

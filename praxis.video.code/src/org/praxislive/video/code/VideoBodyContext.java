@@ -22,7 +22,7 @@
 package org.praxislive.video.code;
 
 import org.praxislive.code.CodeUtils;
-import org.praxislive.compiler.ClassBodyContext;
+import org.praxislive.code.ClassBodyContext;
 
 /**
  *
