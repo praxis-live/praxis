@@ -48,70 +48,113 @@ public final class Call extends Packet {
          * Error call.
          */
         ERROR
-    };       
-             
-    
+    };
 
     /**
-     * Create a Call with Type INVOKE.
+     * Create a Call with Type INVOKE and empty arguments.
      *
      * @param toAddress ControlAddress of receiving Control.
      * @param fromAddress ControlAddress for response.
-     * @param timeCode long time relative to System.nanoTime() when Control should be called.
-     * @param args CallArguments (use CallArguments.EMPTY for no arguments)
+     * @param timeCode long nanosecond time relative to hub clock
      * @return Call
      */
-    public static  Call createCall(
-            ControlAddress toAddress, ControlAddress fromAddress, long timeCode, CallArguments args
-            ) {
+    public static Call createCall(
+            ControlAddress toAddress,
+            ControlAddress fromAddress,
+            long timeCode) {
 
-        return createCall(toAddress, fromAddress, timeCode, args, Type.INVOKE);
+        return createCall(toAddress, fromAddress, timeCode, CallArguments.EMPTY, Type.INVOKE);
     }
-    
+
     /**
      * Create a Call with Type INVOKE.
      *
      * @param toAddress ControlAddress of receiving Control.
      * @param fromAddress ControlAddress for response.
-     * @param timeCode long time relative to System.nanoTime() when Control should be called.
-     * @param arg single Value which will be automatically wrapped in a CallArguments object.
+     * @param timeCode long nanosecond time relative to hub clock
+     * @param arg single Value which will be automatically wrapped in a
+     * CallArguments object.
      * @return Call
      */
-    public static  Call createCall(
-            ControlAddress toAddress, ControlAddress fromAddress, long timeCode, Value arg
-            ) {
-
+    public static Call createCall(
+            ControlAddress toAddress,
+            ControlAddress fromAddress,
+            long timeCode,
+            Value arg) {
         return createCall(toAddress, fromAddress, timeCode, CallArguments.create(arg), Type.INVOKE);
     }
-    
-    /**
-     * Create a Call with Type INVOKE_QUIET. This indicates that the sender does not
-     * require a response (though it might still get one), except in case of error.
-     *
-     * @param toAddress ControlAddress of receiving Control.
-     * @param fromAddress ControlAddress for response.
-     * @param timeCode long time relative to System.nanoTime() when Control should be called.
-     * @param arg single Value which will be automatically wrapped in a CallArguments object.
-     * @return Call
-     */
-    public static  Call createQuietCall(
-            ControlAddress toAddress, ControlAddress fromAddress, long timeCode, Value arg) {
-           return createCall(toAddress, fromAddress, timeCode, CallArguments.create(arg), Type.INVOKE_QUIET);
-    }
 
     /**
-     * Create a Call with Type INVOKE_QUIET. This indicates that the sender does not
-     * require a response (though it might still get one), except in case of error.
+     * Create a Call with Type INVOKE.
      *
      * @param toAddress ControlAddress of receiving Control.
      * @param fromAddress ControlAddress for response.
-     * @param timeCode long time relative to System.nanoTime() when Control should be called.
+     * @param timeCode long nanosecond time relative to hub clock
      * @param args CallArguments (use CallArguments.EMPTY for no arguments)
      * @return Call
      */
-    public static  Call createQuietCall(
-            ControlAddress toAddress, ControlAddress fromAddress, long timeCode, CallArguments args      ) {
-           return createCall(toAddress, fromAddress, timeCode, args, Type.INVOKE_QUIET);
+    public static Call createCall(
+            ControlAddress toAddress,
+            ControlAddress fromAddress,
+            long timeCode,
+            CallArguments args) {
+        return createCall(toAddress, fromAddress, timeCode, args, Type.INVOKE);
+    }
+
+    /**
+     * Create a Call with Type INVOKE_QUIET and empty empty arguments. This indicates
+     * that the sender does not require a response (though it might still get one),
+     * except in case of error.
+     *
+     * @param toAddress ControlAddress of receiving Control.
+     * @param fromAddress ControlAddress for response.
+     * @param timeCode long nanosecond time relative to hub clock
+     * @return Call
+     */
+    public static Call createQuietCall(
+            ControlAddress toAddress,
+            ControlAddress fromAddress,
+            long timeCode) {
+        return createCall(toAddress, fromAddress, timeCode, CallArguments.EMPTY, Type.INVOKE_QUIET);
+    }
+    
+    /**
+     * Create a Call with Type INVOKE_QUIET. This indicates that the sender does
+     * not require a response (though it might still get one), except in case of
+     * error.
+     *
+     * @param toAddress ControlAddress of receiving Control.
+     * @param fromAddress ControlAddress for response.
+     * @param timeCode long nanosecond time relative to hub clock
+     * @param arg single Value which will be automatically wrapped in a
+     * CallArguments object.
+     * @return Call
+     */
+    public static Call createQuietCall(
+            ControlAddress toAddress,
+            ControlAddress fromAddress,
+            long timeCode,
+            Value arg) {
+        return createCall(toAddress, fromAddress, timeCode, CallArguments.create(arg), Type.INVOKE_QUIET);
+    }
+
+    /**
+     * Create a Call with Type INVOKE_QUIET. This indicates that the sender does
+     * not require a response (though it might still get one), except in case of
+     * error.
+     *
+     * @param toAddress ControlAddress of receiving Control.
+     * @param fromAddress ControlAddress for response.
+     * @param timeCode long nanosecond time relative to hub clock
+     * @param args CallArguments
+     * @return Call
+     */
+    public static Call createQuietCall(
+            ControlAddress toAddress,
+            ControlAddress fromAddress,
+            long timeCode,
+            CallArguments args) {
+        return createCall(toAddress, fromAddress, timeCode, args, Type.INVOKE_QUIET);
     }
 
     private static Call createCall(
@@ -126,13 +169,40 @@ public final class Call extends Packet {
         if (args == null) {
             args = CallArguments.EMPTY;
         }
-        String root = toAddress.getComponentAddress().getComponentID(0);
+        String root = toAddress.getComponentAddress().getRootID();
         return new Call(root, toAddress, fromAddress, timeCode, args, type);
     }
 
     /**
-     * Create a Call of type RETURN. Addresses, ID and timeCode will automatically
-     * be set from the given inward Call.
+     * Create a Call of type RETURN. Addresses, ID and timeCode will
+     * automatically be set from the given inward Call.
+     *
+     * @param inwardCall Call this is a response to.
+     * @return Call
+     */
+    public static Call createReturnCall(
+            Call inwardCall) {
+        return createResponseCall(inwardCall, CallArguments.EMPTY, Type.RETURN);
+    }
+    
+    /**
+     * Create a Call of type RETURN. Addresses, ID and timeCode will
+     * automatically be set from the given inward Call.
+     *
+     * @param inwardCall Call this is a response to.
+     * @param arg Value, will automatically be wrapped in a CallArguments
+     * object.
+     * @return Call
+     */
+    public static Call createReturnCall(
+            Call inwardCall,
+            Value arg) {
+        return createResponseCall(inwardCall, CallArguments.create(arg), Type.RETURN);
+    }
+    
+    /**
+     * Create a Call of type RETURN. Addresses, ID and timeCode will
+     * automatically be set from the given inward Call.
      *
      * @param inwardCall Call this is a response to.
      * @param args Arguments
@@ -143,24 +213,37 @@ public final class Call extends Packet {
             CallArguments args) {
         return createResponseCall(inwardCall, args, Type.RETURN);
     }
-    
-    /**
-     * Create a Call of type RETURN. Addresses, ID and timeCode will automatically
-     * be set from the given inward Call.
-     *
-     * @param inwardCall Call this is a response to.
-     * @param arg Value, will automatically be wrapped in a CallArguments object.
-     * @return Call
-     */
-    public static Call createReturnCall(
-            Call inwardCall,
-            Value arg) {
-        return createResponseCall(inwardCall, CallArguments.create(arg), Type.RETURN);
-    }
 
     /**
-     * Create a Call of type ERROR. Addresses, ID and timeCode will automatically
-     * be set from the given inward Call.
+     * Create a Call of type ERROR. Addresses, ID and timeCode will
+     * automatically be set from the given inward Call.
+     *
+     * @param inwardCall Call this is a response to.
+     * @return Call
+     */
+    public static Call createErrorCall(
+            Call inwardCall) {
+        return createResponseCall(inwardCall, CallArguments.EMPTY, Type.ERROR);
+    }
+    
+    /**
+     * Create a Call of type ERROR. Addresses, ID and timeCode will
+     * automatically be set from the given inward Call.
+     *
+     * @param inwardCall Call this is a response to.
+     * @param arg Value, will automatically be wrapped in a CallArguments
+     * object.
+     * @return Call
+     */
+    public static Call createErrorCall(
+            Call inwardCall,
+            Value arg) {
+        return createResponseCall(inwardCall, CallArguments.create(arg), Type.ERROR);
+    }
+    
+    /**
+     * Create a Call of type ERROR. Addresses, ID and timeCode will
+     * automatically be set from the given inward Call.
      *
      * @param inwardCall Call this is a response to.
      * @param args Arguments
@@ -170,20 +253,6 @@ public final class Call extends Packet {
             Call inwardCall,
             CallArguments args) {
         return createResponseCall(inwardCall, args, Type.ERROR);
-    }
-    
-    /**
-     * Create a Call of type ERROR. Addresses, ID and timeCode will automatically
-     * be set from the given inward Call.
-     *
-     * @param inwardCall Call this is a response to.
-     * @param arg Value, will automatically be wrapped in a CallArguments object.
-     * @return Call
-     */
-    public static Call createErrorCall(
-            Call inwardCall,
-            Value arg) {
-        return createResponseCall(inwardCall, CallArguments.create(arg), Type.ERROR);
     }
 
     private static Call createResponseCall(
@@ -203,14 +272,7 @@ public final class Call extends Packet {
         int matchID = inwardCall.getID();
         return new Call(root, toAddress, fromAddress, timeCode, args, type, matchID);
     }
-    
-    
-    
-    
-    
-//    private String rootID;
-//    private long timeCode;
-//    private long id;
+
     private final Type type;
     private final CallArguments args;
     private final ControlAddress toAddress;
@@ -289,7 +351,8 @@ public final class Call extends Packet {
      * ID to match up calls and responses.
      *
      * For INVOKE and INVOKE_QUIET calls, this will return the same as getID().
-     * For RETURN and ERROR calls, this ID will match the ID of the invoking call.
+     * For RETURN and ERROR calls, this ID will match the ID of the invoking
+     * call.
      *
      * @return long ID
      */
@@ -297,12 +360,9 @@ public final class Call extends Packet {
         return this.matchID;
     }
 
-
-
-
     /**
-     * String representation of this Call. Only to be used for debugging purposes.
-     * It is not guaranteed to retain the same format.
+     * String representation of this Call. Only to be used for debugging
+     * purposes. It is not guaranteed to retain the same format.
      *
      * @return String
      */
@@ -325,9 +385,7 @@ public final class Call extends Packet {
             sb.append("}\n");
         }
 
-
         return sb.toString();
-
 
     }
 }

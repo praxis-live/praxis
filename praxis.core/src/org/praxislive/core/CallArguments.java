@@ -22,19 +22,24 @@
 
 package org.praxislive.core;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 /**
- * Holder for Arguments in Calls.
+ * A lightweight read-only holder of Values for use as 
+ * arguments in a Call.
  *
  * @author Neil C Smith
  */
-public abstract class CallArguments {
+public abstract class CallArguments implements Iterable<Value> {
     
-//    public final static CallArguments EMPTY = new CallArguments(new Value[0]);
     /**
-     * EMPTY CallArguments, returns 0 for getSize().
+     * Empty CallArguments.
      */
     public final static CallArguments EMPTY = new Empty();
     
@@ -46,14 +51,29 @@ public abstract class CallArguments {
     public abstract int getSize();
 
     /**
-     * Get Value. Index must be between 0 and count-1.
+     * Get Value at index. Index must be between 0 and getSize()-1.
      *
      * @param index int position in Value array
+     * @throws IndexOutOfBoundsException
      * @return Value
      */
     public abstract Value get(int index);
 
+    @Deprecated
     public abstract Value[] getAll();
+    
+    /**
+     * Convenience method to check whether the arguments is empty.
+     * 
+     * @return boolean true when getSize() == 0
+     */
+    public abstract boolean isEmpty();
+    
+    /**
+     * Create a Stream of Values from the arguments.
+     * @return Stream of Value
+     */
+    public abstract Stream<Value> stream();
     
     private static class Empty extends CallArguments {
 
@@ -90,8 +110,20 @@ public abstract class CallArguments {
             return "{}";
         }
 
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
 
+        @Override
+        public Iterator<Value> iterator() {
+            return Collections.EMPTY_LIST.iterator();
+        }
 
+        @Override
+        public Stream<Value> stream() {
+            return Stream.empty();
+        }
 
     }
     
@@ -127,8 +159,21 @@ public abstract class CallArguments {
             return ("{{" + arg.toString() + "}}");
         }
 
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
 
-   
+        @Override
+        public Iterator<Value> iterator() {
+            return Collections.singletonList(arg).iterator();
+        }
+
+        @Override
+        public Stream<Value> stream() {
+            return Stream.of(arg);
+        }
+        
     }
     
     
@@ -167,34 +212,25 @@ public abstract class CallArguments {
             return str.toString();
         }
 
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
 
+        @Override
+        public Iterator<Value> iterator() {
+            return Stream.of(args).iterator();
+        }
 
+        @Override
+        public Stream<Value> stream() {
+            return Stream.of(args);
+        }
 
     }
-    
-        
-
-
-//    private CallArguments(Value[] args) {
-//        this.args = args;
-//    }
-    
-//    public int getSize() {
-//        return args.length;
-//    }
-//
-//    public Value get(int index) {
-//        return args[index];
-//    }
-
-    
-//    public static CallArguments create() {
-//        return EMPTY;
-//    }
-    
     /**
      * Create a CallArguments wrapping the given Value. The CallArguments
-     * returned will be optimized for single Arguments.
+     * returned will be optimized for single values.
      *
      * @param arg
      * @return CallArguments
@@ -212,10 +248,8 @@ public abstract class CallArguments {
      * @param list
      * @return CallArguments
      */
-    public static CallArguments create(List<Value> list) {
-        return create(list.toArray(new Value[list.size()]));
-        
-
+    public static CallArguments create(Collection<? extends Value> list) {
+        return create(list.toArray(new Value[list.size()]), false);
     }
     
     /**
@@ -225,6 +259,10 @@ public abstract class CallArguments {
      * @return CallArguments
      */
     public static CallArguments create(Value ... args) {
+        return create(args, true);
+    }
+    
+    private static CallArguments create(Value[] args, boolean clone) {
         if (args.length == 0) {
             return EMPTY;
         } else if (args.length == 1) {
@@ -234,33 +272,28 @@ public abstract class CallArguments {
             }
             return new Single(arg);
         } else {
-            for (Value arg : args) {
+            Value[] safeArgs = clone ? args.clone() : args;
+            for (Value arg : safeArgs) {
                 if (arg == null) {
                     throw new NullPointerException();
                 }
             }
-            return new Multi(args.clone());
+            return new Multi(safeArgs);
         }
     }
-
-
     
-//    public static CallArguments create(Value[] args) {
-//        int size = args.length;
-//        if (size == 0) {
-//            return EMPTY;
-//        }
-//        Value[] copy = new Value[size];
-//        for (int i=0; i < size; i++) {
-//            Value arg = args[i];
-//            if (arg == null) {
-//                throw new NullPointerException();
-//            }
-//            copy[i] = arg;
-//        }
-//        return new CallArguments(copy);
-//    }
-    
+    public static <T extends Value> Collector<T, ?, CallArguments> collector() {
+
+        return Collector.<T, List<T>, CallArguments>of(
+                ArrayList::new,
+                List::add,
+                (list1, list2) -> {
+                    list1.addAll(list2);
+                    return list1;
+                },
+                l -> CallArguments.create(l.toArray(new Value[l.size()]), false)
+        );
+    }
     
 
 }
