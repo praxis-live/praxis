@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.InterfaceDefinition;
@@ -223,12 +224,12 @@ public final class Hub {
         }
 
         @Override
-        public List<ComponentAddress> locateAll(Class<? extends Service> service) {
+        public Stream<ComponentAddress> locateAll(Class<? extends Service> service) {
             ComponentAddress[] provs = services.get(service);
             if (provs == null) {
-                return Collections.EMPTY_LIST;
+                return Stream.empty();
             } else {
-                return new ArrayList<>(Arrays.asList(provs));
+                return Stream.of(provs);
             }
         }
 
