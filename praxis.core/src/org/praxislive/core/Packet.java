@@ -22,16 +22,14 @@
  */
 package org.praxislive.core;
 
-import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Common superclass of Call and CallBundle
  * 
  * @author Neil C Smith
  */
-public class Packet implements Comparable<Packet>, Serializable {
+public class Packet implements Comparable<Packet> {
 
     private static AtomicInteger idSource = new AtomicInteger(0);
 
