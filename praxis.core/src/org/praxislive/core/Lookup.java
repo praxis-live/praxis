@@ -31,7 +31,7 @@ import java.util.stream.Stream;
  * @author Neil C Smith
  */
 public interface Lookup {
-    
+
     public final static Lookup EMPTY = new Empty();
     public final static Lookup SYSTEM = new SystemLookup();
 
@@ -50,11 +50,17 @@ public interface Lookup {
             }
         };
     }
-    
+
     public <T> Optional<T> find(Class<T> type);
-    
+
     public <T> Stream<T> findAll(Class<T> type);
-    
+
+    public interface Provider {
+
+        public Lookup getLookup();
+
+    }
+
     @Deprecated
     public interface Result<T> extends Iterable<T> {
     }
@@ -70,7 +76,7 @@ public interface Lookup {
         public <T> Stream<T> findAll(Class<T> type) {
             return Stream.empty();
         }
-        
+
     }
-    
+
 }

@@ -22,8 +22,11 @@
 package org.praxislive.core;
 
 /**
- * Components are the main building blocks within Praxis. They may provide Controls
- * and Ports. Components expect to be used within a hierarchy, inside a Root
+ * Components are the main building blocks (actors) within Praxis CORE. They may 
+ * provide Controls (asynchronous message endpoints) and Ports (synchronous message
+ * points). 
+ * 
+ * Components expect to be used within a hierarchy, inside a Root
  * component, and potentially inside other Container components.
  *
  * @author Neil C Smith
@@ -41,9 +44,8 @@ public interface Component {
     /**
      * Notify the Component that it has been added to the supplied Container, or
      * removed from its parent if the supplied argument is null. The
-     * Component may throw a VetoException if it should not be added to or removed
-     * from the Container provided. It should also throw this exception if the existing
-     * parent has not been nulled prior to a new parent being notified.
+     * Component may throw a VetoException if it should not be added to the Container
+     * provided. It should also throw this exception if a parent is already set.
      *
      * @param parent
      * @throws org.praxislive.core.VetoException
@@ -51,25 +53,29 @@ public interface Component {
     public void parentNotify(Container parent) throws VetoException;
 
     /**
-     * Notify the component that a change has happened further up its component
-     * hierarchy (eg. the parent of this Component's parent has changed).
+     * Notify the component that a change has happened in its component
+     * hierarchy. For example its direct parent or an ancestor has changed.
+     * 
+     * This method will be called after parentNotify() if the result of an
+     * immediate parent change.
      *
      */
     public void hierarchyChanged();
-
+    
     /**
-     * Get the Control with the given ID, or null if it does not exist.
+     * Get a Control that can handle a Call to the given ID, or null if it does 
+     * not exist. Component implementations are free to return a different Control
+     * for each ID, a single control to handle any message, or somewhere in between.
+     * 
+     * A null return from this method shall be handled by the Root component by
+     * responding with an error message to the sender where required.
+     * 
      * @param id
      * @return Control or null
      */
+    
     public Control getControl(String id);
 
-
-    /**
-     * Get an array of all the Control IDs from this component.
-     * @return String[]
-     */
-    public String[] getControlIDs();
 
     /**
      * Get the Port with the given ID, or null if it does not exist.
@@ -79,11 +85,6 @@ public interface Component {
     public Port getPort(String id);
 
 
-    /**
-     * Get an array of all the Port IDs from this component.
-     * @return String[]
-     */
-    public String[] getPortIDs();
 
     /**
      * Get the ComponentInfo object for this component.
@@ -91,5 +92,5 @@ public interface Component {
      */
     public ComponentInfo getInfo();
 
-
+    
 }

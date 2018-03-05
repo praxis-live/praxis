@@ -27,14 +27,13 @@ import java.util.List;
  *
  * @author Neil C Smith
  */
-public interface RootHub {
+public interface RootHub extends Lookup.Provider {
 
     public void dispatch(Packet packet);
 
-    public Lookup getLookup();
-
     public static interface ExtensionProvider {
         
+        // @TODO need to get services from here?
         public List<Root> getExtensions();
         
     }

@@ -75,7 +75,7 @@ public final class CodeComponent<D extends CodeDelegate> implements Component {
     }
 
     private void disconnectAll() {
-        for (String portID : getPortIDs()) {
+        for (String portID : codeCtxt.getPortIDs()) {
             getPort(portID).disconnectAll();
         }
     }
@@ -102,18 +102,8 @@ public final class CodeComponent<D extends CodeDelegate> implements Component {
     }
 
     @Override
-    public String[] getControlIDs() {
-        return codeCtxt.getControlIDs();
-    }
-
-    @Override
     public Port getPort(String id) {
         return codeCtxt.getPort(id);
-    }
-
-    @Override
-    public String[] getPortIDs() {
-        return codeCtxt.getPortIDs();
     }
 
     @Override

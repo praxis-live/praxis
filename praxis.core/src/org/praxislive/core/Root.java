@@ -26,13 +26,9 @@ package org.praxislive.core;
  *
  * @author Neil C Smith
  */
-public interface Root { 
+public interface Root extends Lookup.Provider { 
     
     public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException;
-
-    @Deprecated
-    public InterfaceDefinition[] getInterfaces();
-
     
     public interface Controller {
         
