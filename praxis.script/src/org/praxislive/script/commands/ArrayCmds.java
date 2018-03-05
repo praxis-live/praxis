@@ -55,7 +55,8 @@ public class ArrayCmds implements CommandInstaller {
     private static class Array extends AbstractInlineCommand {
 
         public CallArguments process(Env context, Namespace namespace, CallArguments args) throws ExecutionException {
-            return CallArguments.create(PArray.valueOf(args));
+            PArray ar = args.stream().collect(PArray.collector());
+            return CallArguments.create(ar);
         }
 
     }

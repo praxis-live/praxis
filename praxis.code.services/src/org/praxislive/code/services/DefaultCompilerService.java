@@ -92,7 +92,7 @@ public class DefaultCompilerService extends AbstractRoot {
                             .compile(code);
             PMap classes = convertClasses(classFiles);
             PMap response = PMap.create(CodeCompilerService.KEY_CLASSES, classes,
-                    CodeCompilerService.KEY_LOG, PArray.valueOf(log.toCallArguments()),
+                    CodeCompilerService.KEY_LOG, log.toCallArguments().stream().collect(PArray.collector()),
                     EXT_CLASSPATH, convertClasspath());
             return CallArguments.create(response);
         }
