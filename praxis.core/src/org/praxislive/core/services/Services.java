@@ -21,12 +21,9 @@
  */
 package org.praxislive.core.services;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.praxislive.core.ComponentAddress;
-import org.praxislive.core.InterfaceDefinition;
 
 /**
  *
@@ -36,11 +33,6 @@ public interface Services {
 
     public Optional<ComponentAddress> locate(Class<? extends Service> service);
     
-    public List<ComponentAddress> locateAll(Class<? extends Service> service);
-
-    @Deprecated
-    public default ComponentAddress findService(Class<? extends InterfaceDefinition> info) throws ServiceUnavailableException {
-        return locate((Class<? extends Service>) info).orElseThrow(ServiceUnavailableException::new);
-    }
+    public Stream<ComponentAddress> locateAll(Class<? extends Service> service);
 
 }

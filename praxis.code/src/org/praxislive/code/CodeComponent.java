@@ -169,20 +169,17 @@ public final class CodeComponent<D extends CodeDelegate> implements Component {
     }
     
     private void initLogInfo() {
-        ControlAddress toAddress = null;
-        Services srvs = getLookup().get(Services.class);
-        if (srvs != null) {
-            ComponentAddress srv;
-            try {
-                srv = srvs.findService(LogService.class);
-                toAddress = ControlAddress.create(srv, LogService.LOG);
-            } catch (ServiceUnavailableException ex) {
-            }
-        }
-        LogLevel level = getLookup().get(LogLevel.class);
-        if (level == null || toAddress == null) {
+        ControlAddress toAddress = getLookup().find(Services.class)
+                .flatMap(srvs -> srvs.locate(LogService.class))
+                .map(srv -> ControlAddress.create(srv, LogService.LOG))
+                .orElse(null);
+        
+        LogLevel level = getLookup().find(LogLevel.class).orElse(LogLevel.ERROR);
+        
+        if (toAddress == null) {
             level = LogLevel.ERROR;
         }
+        
         ControlAddress fromAddress = ControlAddress.create(address, "_log");
         logInfo = new LogInfo(level, toAddress, fromAddress);
     }
