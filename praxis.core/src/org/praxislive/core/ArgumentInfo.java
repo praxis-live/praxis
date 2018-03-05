@@ -22,18 +22,16 @@
 package org.praxislive.core;
 
 import java.util.Optional;
-import org.praxislive.core.Value;
-import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;
 
 /**
- * Info object for an Value, usually used to define the valid input and
- * output arguments of a Control. As well as giving the type of the argument, an
- * ArgumentInfo can have an optional set of properties. This might be used for
- * defining the "minimum" and "maximum" values of a PNumber argument, for
- * example.
+ * Info object used to define the valid input and output arguments of a Control.
+ * 
+ * As well as giving the type of the argument, an ArgumentInfo can have an optional
+ * set of properties. This might be used for defining the "minimum" and "maximum"
+ * values of a PNumber argument, for example.
  *
  * @author Neil C Smith
  */
@@ -50,13 +48,13 @@ public final class ArgumentInfo extends Value {
         Always, Optional, Variable
     }
 
-    private final Class<? extends Value> type;
+    private final Value.Type<? extends Value> type;
     private final Presence presence;
     private final PMap properties;
 
     private volatile String string;
 
-    private ArgumentInfo(Class<? extends Value> type,
+    private ArgumentInfo(Value.Type<? extends Value> type,
             Presence presence,
             PMap properties,
             String string) {
@@ -70,7 +68,12 @@ public final class ArgumentInfo extends Value {
      *
      * @return String name of Value subclass
      */
+    @Deprecated
     public Class<? extends Value> getType() {
+        return type.asClass();
+    }
+    
+    public Value.Type<? extends Value> type() {
         return type;
     }
 
@@ -92,7 +95,7 @@ public final class ArgumentInfo extends Value {
         if (str == null) {
 //            str = type.getName() + " " + presence.name() + " {" + escape(properties.toString()) + "}";
             str = PArray.valueOf(
-                    PString.valueOf(type.getName()),
+                    PString.valueOf(type.name()),
                     PString.valueOf(presence.name()),
                     properties
             
@@ -131,6 +134,18 @@ public final class ArgumentInfo extends Value {
      * additional properties.
      *
      * @param argClass
+     * @return ArgumentInfo
+     */
+    public static ArgumentInfo create(Class<? extends Value> argClass) {
+        return create(argClass, Presence.Always, PMap.EMPTY);
+
+    }
+    
+    /**
+     * Create an ArgumentInfo from the Value class and optional PMap of
+     * additional properties.
+     *
+     * @param argClass
      * @param properties
      * @return ArgumentInfo
      */
@@ -157,7 +172,7 @@ public final class ArgumentInfo extends Value {
         if (properties == null) {
             properties = PMap.EMPTY;
         }
-        return new ArgumentInfo(argClass, presence, properties, null);
+        return new ArgumentInfo(Value.Type.of(argClass), presence, properties, null);
 
     }
 
@@ -187,12 +202,10 @@ public final class ArgumentInfo extends Value {
     private static ArgumentInfo valueOf(String string) throws ValueFormatException {
         PArray arr = PArray.valueOf(string);
         try {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            Class<? extends Value> cls = (Class<? extends Value>) cl.loadClass(arr.get(0).toString());
-//            Class<? extends Value> cls = (Class<? extends Value>) Class.forName(arr.get(0).toString());
+            Value.Type<? extends Value> type = Value.Type.fromName(arr.get(0).toString()).get();
             Presence presence = Presence.valueOf(arr.get(1).toString());
             PMap properties = PMap.coerce(arr.get(2));
-            return new ArgumentInfo(cls, presence, properties, string);
+            return new ArgumentInfo(type, presence, properties, string);
         } catch (Exception ex) {
             throw new ValueFormatException(ex);
         }

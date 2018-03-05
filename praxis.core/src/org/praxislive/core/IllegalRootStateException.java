@@ -26,7 +26,8 @@ package org.praxislive.core;
  *
  * @author Neil C Smith
  */
-public class IllegalRootStateException extends Exception {
+@Deprecated
+public class IllegalRootStateException extends IllegalStateException {
 
     /**
      * Creates a new instance of <code>IllegalRootStateException</code> without detail message.

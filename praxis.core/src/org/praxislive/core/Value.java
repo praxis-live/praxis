@@ -23,7 +23,9 @@ package org.praxislive.core;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PBoolean;
 import org.praxislive.core.types.PBytes;
@@ -85,11 +87,21 @@ public abstract class Value {
     public boolean equivalent(Value value) {
         return this == value || this.toString().equals(value.toString());
     }
-
+    
+    @SuppressWarnings("unchecked")
+    public Type<?> type() {
+        Class<?> cls = getClass();
+        Type<?> type;
+        while ((type = Type.typesByClass.get(cls)) == null) {
+            cls = cls.getSuperclass();
+        }
+        return type;
+    } 
+    
     /**
      * Use this method to return an ArgumentInfo argument that can be used to refer
-     * to ANY Argument subclass. Usually, you will want to get an ArgumentInfo object
-     * directly from a specific Argument subclass.
+     * to ANY Value subclass. Usually, you will want to get an ArgumentInfo object
+     * directly from a specific Value subclass.
      *
      * @return ArgumentInfo info
      */
@@ -98,9 +110,77 @@ public abstract class Value {
         return ArgumentInfo.create(Value.class, null);
     }
     
-    public static class Type {
+    public static class Type<T extends Value> {
+        
+        private final Class<T> type;
+        private final String name;
+        private final Function<Value, Optional<T>> converter;
+        
+        Type(Class<T> type, Function<Value, Optional<T>> converter) {
+            this(type, type.getSimpleName(), converter);
+        }
+        
+        Type(Class<T> type, String name, Function<Value, Optional<T>> converter) {
+            this.type = Objects.requireNonNull(type);
+            this.name = Objects.requireNonNull(name);
+            this.converter = Objects.requireNonNull(converter);
+        }
+        
+        Class<T> asClass() {
+            return type;
+        }
+        
+        String name() {
+            return name;
+        }
+        
+        Function<Value, Optional<T>> converter() {
+            return converter;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        @Override
+        public int hashCode() {
+            return type.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final Type<?> other = (Type<?>) obj;
+            if (!Objects.equals(this.type, other.type)) {
+                return false;
+            }
+            return true;
+        }
+        
+        @SuppressWarnings("unchecked")
+        public static <T extends Value> Type<T> of(Class<T> cls) {
+            Type<T> type = (Type<T>) typesByClass.get(cls);
+            if (type == null) {
+                throw new IllegalArgumentException("Unregistered Value type : " + cls.getName());
+            }
+            return type;
+        }
+        
+        public static Optional<Type<? extends Value>> fromName(String name) {
+            return Optional.ofNullable(typesByName.get(name));
+        }
 
         @FunctionalInterface
+        @Deprecated
         public static interface Converter<T extends Value> {
 
             Optional<T> from(Value arg);
@@ -108,43 +188,49 @@ public abstract class Value {
         }
 
         @SuppressWarnings("unchecked")
-        public static <T extends Value> Converter<T> findConverter(Class<T> type) {
-            Converter<T> converter = (Converter<T>) converters.get(type);
-            if (converter == null) {
-                throw new IllegalArgumentException("Unregistered Value type : " + type.getName());
-            }
-            return converter;
+        @Deprecated
+        public static <T extends Value> Converter<T> findConverter(Class<T> cls) {
+            Type<T> type = Type.of(cls);
+            return v -> type.converter().apply(v);
         }
-
-        private final static Map<Class<?>, Converter<?>> converters
+        
+        private final static Map<Class<? extends Value>, Type<? extends Value>> typesByClass
+                = new HashMap<>();
+        private final static Map<String, Type<? extends Value>> typesByName
                 = new HashMap<>();
 
-        private static <T extends Value> void registerConverter(Class<T> type, Converter<T> converter) {
-            converters.put(type, converter);
+        private static <T extends Value> void register(Type<T> type) {
+            if (typesByClass.containsKey(type.asClass()) || typesByName.containsKey(type.name())) {
+                throw new IllegalStateException("Already registered type");
+            }
+            typesByClass.put(type.asClass(), type);
+            typesByName.put(type.name(), type);
         }
 
         static {
             
-            registerConverter(Value.class, v -> Optional.of(v));
+            register(new Type<>(Value.class, v -> Optional.of(v)));
             
-            registerConverter(PArray.class, PArray::from);
-            registerConverter(PBoolean.class, PBoolean::from);
-            registerConverter(PBytes.class, PBytes::from);
-            registerConverter(PError.class, PError::from);
-            registerConverter(PMap.class, PMap::from);
-            registerConverter(PNumber.class, PNumber::from);
-            registerConverter(PReference.class, PReference::from);
-            registerConverter(PResource.class, PResource::from);
-            registerConverter(PString.class, PString::from);
-
-            registerConverter(ArgumentInfo.class, ArgumentInfo::from);
-            registerConverter(ComponentInfo.class, ComponentInfo::from);
-            registerConverter(ControlInfo.class, ControlInfo::from);
-            registerConverter(PortInfo.class, PortInfo::from);
-
-            registerConverter(ComponentAddress.class, ComponentAddress::from);
-            registerConverter(ControlAddress.class, ControlAddress::from);
-            registerConverter(PortAddress.class, PortAddress::from);
+            register(new Type<>(PArray.class, "Array", PArray::from));
+            register(new Type<>(PBoolean.class, "Boolean", PBoolean::from));
+            register(new Type<>(PBytes.class, "Bytes", PBytes::from));
+            register(new Type<>(PError.class, "Error", PError::from));
+            register(new Type<>(PMap.class, "Map", PMap::from));
+            register(new Type<>(PNumber.class, "Number", PNumber::from));
+            register(new Type<>(PReference.class, "Reference", PReference::from));
+            register(new Type<>(PResource.class, "Resource", PResource::from));
+            register(new Type<>(PString.class, "String", PString::from));
+            
+            register(new Type<>(ArgumentInfo.class, ArgumentInfo::from));
+            register(new Type<>(ComponentInfo.class, ComponentInfo::from));
+            register(new Type<>(ControlInfo.class, ControlInfo::from));
+            register(new Type<>(PortInfo.class, PortInfo::from));
+            
+            register(new Type<>(ComponentAddress.class, ComponentAddress::from));
+            register(new Type<>(ControlAddress.class, ControlAddress::from));
+            register(new Type<>(PortAddress.class, PortAddress::from));
+            
+            register(new Type<>(ComponentType.class, ComponentType::from));
 
         }
     }

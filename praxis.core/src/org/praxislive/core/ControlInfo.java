@@ -23,8 +23,6 @@ package org.praxislive.core;
 
 import java.util.Arrays;
 import java.util.Optional;
-import org.praxislive.core.Value;
-import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;

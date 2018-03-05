@@ -22,10 +22,10 @@
 
 package org.praxislive.core;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * @TODO Enforce String with regex
  * @author Neil C Smith (http://neilcsmith.net)
  */
 public class ComponentType extends Value {
@@ -59,7 +59,7 @@ public class ComponentType extends Value {
             return false;
         }
     }
-
+    
     public static ComponentType create(String str) {
         try {
             return valueOf(str);
@@ -89,6 +89,14 @@ public class ComponentType extends Value {
             return (ComponentType) arg;
         } else {
             return valueOf(arg.toString());
+        }
+    }
+    
+    public static Optional<ComponentType> from(Value arg) {
+        try {
+            return Optional.of(coerce(arg));
+        } catch (ValueFormatException ex) {
+            return Optional.empty();
         }
     }
 

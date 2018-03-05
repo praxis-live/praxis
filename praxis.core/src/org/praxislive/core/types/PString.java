@@ -22,7 +22,6 @@
 
 package org.praxislive.core.types;
 
-import org.praxislive.core.Value;
 import java.util.Optional;
 import org.praxislive.core.Value;
 import org.praxislive.core.ArgumentInfo;

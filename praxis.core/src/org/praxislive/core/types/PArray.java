@@ -165,43 +165,24 @@ public final class PArray extends Value implements Iterable<Value> {
     }
 
     public static PArray valueOf(Collection<? extends Value> collection) {
-        Value[] values = collection.stream()
-                .map(arg -> arg instanceof Value ? (Value) arg : PString.valueOf(arg))
-                .toArray(Value[]::new);
-        return new PArray(values, null);
+        return valueOf(collection.toArray(new Value[collection.size()]), false);
     }
 
-//    @Deprecated
-//    public static PArray valueOf(Value... args) {
-//        int size = args.length;
-//        if (size == 0) {
-//            return PArray.EMPTY;
-//        }
-//        Value[] copy = new Value[size];
-//        for (int i = 0; i < size; i++) {
-//            Value arg = args[i];
-//            if (arg == null) {
-//                throw new NullPointerException();
-//            }
-//            copy[i] = arg instanceof Value ? (Value) arg : PString.valueOf(arg);
-//        }
-//        return new PArray(copy, null);
-//    }
-
     public static PArray valueOf(Value... args) {
-        int size = args.length;
-        if (size == 0) {
+        return valueOf(args, true);
+    }
+    
+    private static PArray valueOf(Value[] args, boolean clone) {
+        if (args.length == 0) {
             return PArray.EMPTY;
         }
-        Value[] copy = new Value[size];
-        for (int i = 0; i < size; i++) {
-            Value arg = args[i];
-            if (arg == null) {
+        Value[] safeArgs = clone ? args.clone() : args;
+        for (Value v : safeArgs) {
+            if (v == null) {
                 throw new NullPointerException();
             }
-            copy[i] = arg;
         }
-        return new PArray(copy, null);
+        return new PArray(args, null);
     }
 
     @Deprecated

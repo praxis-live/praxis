@@ -28,11 +28,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.Value;
-import org.praxislive.core.ValueFormatException;
-import org.praxislive.core.ControlAddress;
-import org.praxislive.core.InterfaceDefinition;
-import org.praxislive.core.PortAddress;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;
@@ -231,12 +226,13 @@ public class ComponentInfo extends Value {
     }
 
     public static ArgumentInfo info() {
-        return ArgumentInfo.create(ComponentInfo.class, null);
+        return ArgumentInfo.create(ComponentInfo.class);
     }
 
     private static ComponentInfo valueOf(String string) throws ValueFormatException {
         try {
             PArray arr = PArray.valueOf(string);
+            // @TODO size? interfaces optional?
             if (arr.getSize() < 4 || !INFO_PREFIX.equals(arr.get(0).toString())) {
                 throw new ValueFormatException();
             }
