@@ -19,20 +19,21 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.core.interfaces;
+package org.praxislive.core.protocols;
 
-import org.praxislive.core.InterfaceDefinition;
+import java.util.stream.Stream;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
+import org.praxislive.core.Protocol;
 import org.praxislive.core.types.PBoolean;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class StartableInterface extends InterfaceDefinition {
+public class StartableProtocol implements Protocol {
 
-    public final static StartableInterface INSTANCE = new StartableInterface();
+    public final static StartableProtocol INSTANCE = new StartableProtocol();
 
     public final static String START = "start";
     public final static String STOP = "stop";
@@ -53,8 +54,8 @@ public class StartableInterface extends InterfaceDefinition {
  
 
     @Override
-    public String[] getControls() {
-        return new String[]{START, STOP, IS_RUNNING};
+    public Stream<String> controls() {
+        return Stream.of(START, STOP, IS_RUNNING);
     }
 
     @Override

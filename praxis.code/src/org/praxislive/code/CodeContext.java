@@ -35,7 +35,6 @@ import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.Control;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.ExecutionContext;
-import org.praxislive.core.InterfaceDefinition;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Port;
@@ -278,10 +277,6 @@ public abstract class CodeContext<D extends CodeDelegate> {
         return info;
     }
 
-    protected InterfaceDefinition[] getInterfaces() {
-        return new InterfaceDefinition[0];
-    }
-
     protected ControlAddress getAddress(Control control) {
         ComponentAddress ad = cmp == null ? null : cmp.getAddress();
         if (ad != null) {
@@ -300,9 +295,9 @@ public abstract class CodeContext<D extends CodeDelegate> {
 
     // @TODO implement caching?
     @Deprecated
-    public ComponentAddress findService(Class<? extends InterfaceDefinition> type)
+    public ComponentAddress findService(Class<? extends Service> type)
             throws ServiceUnavailableException {
-        return locateService((Class<? extends Service>) type).orElseThrow(ServiceUnavailableException::new);
+        return locateService(type).orElseThrow(ServiceUnavailableException::new);
     }
     
     public Optional<ComponentAddress> locateService(Class<? extends Service> type) {

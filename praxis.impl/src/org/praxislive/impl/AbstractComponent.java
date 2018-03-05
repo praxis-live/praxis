@@ -21,10 +21,8 @@
  */
 package org.praxislive.impl;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.praxislive.core.Value;
@@ -33,7 +31,6 @@ import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.Container;
 import org.praxislive.core.Control;
 import org.praxislive.core.ControlAddress;
-import org.praxislive.core.InterfaceDefinition;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Port;
@@ -42,7 +39,8 @@ import org.praxislive.core.VetoException;
 import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.PortInfo;
-import org.praxislive.core.interfaces.ComponentInterface;
+import org.praxislive.core.Protocol;
+import org.praxislive.core.protocols.ComponentProtocol;
 import org.praxislive.core.services.Service;
 import org.praxislive.core.services.ServiceUnavailableException;
 import org.praxislive.core.services.Services;
@@ -56,7 +54,7 @@ public abstract class AbstractComponent implements Component {
 
     private final Map<String, Control> controlMap;
     private final Map<String, Port> portMap;
-    private final Set<Class<? extends InterfaceDefinition>> interfaceSet;
+    private final Set<Class<? extends Protocol>> interfaceSet;
     
     private Container parent;
     private ComponentAddress address;
@@ -85,14 +83,14 @@ public abstract class AbstractComponent implements Component {
     }
 
     private void buildComponentInterface() {
-        registerControl(ComponentInterface.INFO,
+        registerControl(ComponentProtocol.INFO,
                 ArgumentProperty.createReadOnly(ComponentInfo.info(),
                 new ArgumentProperty.ReadBinding() {
                     public Value getBoundValue() {
                         return getInfo();
                     }
                 }));
-        registerInterface(ComponentInterface.INSTANCE);
+        registerProtocol(ComponentProtocol.class);
     }
 
     public Control getControl(String id) {
@@ -204,12 +202,7 @@ public abstract class AbstractComponent implements Component {
         info = null;
     }
 
-    @Deprecated
-    protected void registerInterface(InterfaceDefinition id) {
-        registerInterface(id.getClass());
-    }
-    
-    protected void registerInterface(Class<? extends InterfaceDefinition> type) {
+    protected void registerProtocol(Class<? extends Protocol> type) {
         if (type == null) {
             throw new NullPointerException();
         }
@@ -217,35 +210,8 @@ public abstract class AbstractComponent implements Component {
         info = null;
     }
 
-    @Deprecated
-    public final InterfaceDefinition[] getInterfaces() {
-        List<InterfaceDefinition> ids = new ArrayList<>();
-        for (Class<? extends InterfaceDefinition> idClass : interfaceSet) {
-            try {
-                ids.add(idClass.newInstance());
-            } catch (Exception ex) {
-            }
-        }
-        return ids.toArray(new InterfaceDefinition[ids.size()]);
-    }
-
     public Container getParent() {
         return parent;
-    }
-
-    @Deprecated
-    public Root getRoot() {
-        Container c = getParent();
-        if (c == null) {
-            return null;
-        }
-        do {
-            if (c.getParent() == null && c instanceof Root) {
-                return (Root) c;
-            }
-
-        } while ((c = c.getParent()) != null);
-        return null;
     }
 
     public ComponentAddress getAddress() {
@@ -341,12 +307,6 @@ public abstract class AbstractComponent implements Component {
             router = getLookup().get(PacketRouter.class);
         }
         return router;
-    }
-
-    @Deprecated
-    protected ComponentAddress findService(InterfaceDefinition service)
-            throws ServiceUnavailableException {
-        return findService((Class<? extends Service>) service.getClass());
     }
     
     @Deprecated

@@ -28,7 +28,7 @@ import org.praxislive.core.CallArguments;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.PortAddress;
-import org.praxislive.core.interfaces.ContainerInterface;
+import org.praxislive.core.protocols.ContainerProtocol;
 import org.praxislive.core.types.PString;
 import org.praxislive.script.Command;
 import org.praxislive.script.CommandInstaller;
@@ -101,7 +101,7 @@ public class ConnectionCmds implements CommandInstaller {
                     PString.valueOf(c2.getComponentID(c1.getDepth() - 1)),
                     PString.valueOf(p2.getID()));
             ControlAddress to = ControlAddress.create(container,
-                    connect ? ContainerInterface.CONNECT : ContainerInterface.DISCONNECT);
+                    connect ? ContainerProtocol.CONNECT : ContainerProtocol.DISCONNECT);
             return Call.createCall(to, env.getAddress(), env.getTime(), sendArgs);
 
         }

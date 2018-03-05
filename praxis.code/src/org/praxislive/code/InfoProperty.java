@@ -25,7 +25,7 @@ import org.praxislive.core.Call;
 import org.praxislive.core.Control;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.ControlInfo;
-import org.praxislive.core.interfaces.ComponentInterface;
+import org.praxislive.core.protocols.ComponentProtocol;
 
 /**
  *
@@ -47,7 +47,7 @@ public class InfoProperty implements Control {
 
     @Override
     public ControlInfo getInfo() {
-        return ComponentInterface.INFO_INFO;
+        return ComponentProtocol.INFO_INFO;
 
     }
 
@@ -56,7 +56,7 @@ public class InfoProperty implements Control {
         private final InfoProperty control;
 
         public Descriptor(int index) {
-            super(ComponentInterface.INFO, Category.Internal, index);
+            super(ComponentProtocol.INFO, Category.Internal, index);
             control = new InfoProperty();
         }
 

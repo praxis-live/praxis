@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,34 +19,27 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.core;
+package org.praxislive.code.internal;
+
+import java.util.stream.Stream;
+import org.praxislive.code.CodeCompilerService;
+import org.praxislive.code.CodeComponentFactoryService;
+import org.praxislive.code.CodeContextFactoryService;
+import org.praxislive.core.Protocol;
 
 /**
  *
- * @author Neil C Smith (http://neilcsmith.net)
+ * @author Neil C Smith - http://www.neilcsmith.net
  */
-public abstract class InterfaceDefinition {
+public class CodeProtocolsProvider implements Protocol.TypeProvider {
+
+    @Override
+    public Stream<Protocol.Type> types() {
+        return Stream.of(
+                new Protocol.Type<>(CodeCompilerService.class),
+                new Protocol.Type<>(CodeComponentFactoryService.class),
+                new Protocol.Type<>(CodeContextFactoryService.class)
+        );
+    }
     
-    public abstract String[] getControls();
-
-    public abstract ControlInfo getControlInfo(String control);
-
-    @Override
-    public final boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        return obj == null ? false : this.getClass().equals(obj.getClass());
-    }
-
-    @Override
-    public final int hashCode() {
-        return this.getClass().hashCode();
-    }
-
-    @Override
-    public final String toString() {
-        return this.getClass().getName();
-    }
-
 }

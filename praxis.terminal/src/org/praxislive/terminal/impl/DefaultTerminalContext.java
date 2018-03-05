@@ -50,7 +50,7 @@ public class DefaultTerminalContext extends AbstractControl implements Terminal.
     @Override
     public void eval(String script) throws Exception {
         ControlAddress to = ControlAddress.create(
-                findService(ScriptService.INSTANCE),
+                findService(ScriptService.class),
                 ScriptService.EVAL);
         Call call = Call.createCall(to, getAddress(), System.nanoTime(), PString.valueOf(script));
         route(call);
@@ -60,7 +60,7 @@ public class DefaultTerminalContext extends AbstractControl implements Terminal.
     @Override
     public void clear() throws Exception {
         ControlAddress to = ControlAddress.create(
-                findService(ScriptService.INSTANCE),
+                findService(ScriptService.class),
                 ScriptService.CLEAR);
         Call call = Call.createQuietCall(to, getAddress(), System.nanoTime(), CallArguments.EMPTY);
         route(call);

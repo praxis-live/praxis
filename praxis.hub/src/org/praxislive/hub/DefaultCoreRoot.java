@@ -24,17 +24,18 @@ package org.praxislive.hub;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Component;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.IllegalRootStateException;
-import org.praxislive.core.InterfaceDefinition;
 import org.praxislive.core.Root;
 import org.praxislive.core.RootHub;
 import org.praxislive.core.ComponentInfo;
@@ -113,15 +114,13 @@ public class DefaultCoreRoot extends AbstractRoot {
         registerControl(RootManagerService.ADD_ROOT, new AddRootControl());
         registerControl(RootManagerService.REMOVE_ROOT, new RemoveRootControl());
         registerControl(RootManagerService.ROOTS, new RootsControl());
-        registerInterface(RootManagerService.class);
+        registerProtocol(RootManagerService.class);
         hubAccess.registerService(RootManagerService.class, getAddress());
     }
     
     protected void installExtensions() {
-        List<Class<? extends Service>> services = new ArrayList<>();
         for (Root ext : exts) {
-            services.clear();
-            extractServices(ext, services);
+            List<Class<? extends Service>> services = extractServices(ext);
             String extID = Hub.EXT_PREFIX + Integer.toHexString(ext.hashCode());
             try {
                 LOG.log(Level.CONFIG, "Installing extension {0}", extID);
@@ -139,14 +138,16 @@ public class DefaultCoreRoot extends AbstractRoot {
         }
     }
     
-    private void extractServices(Root root, List<Class<? extends Service>> services) {
+    private List<Class<? extends Service>> extractServices(Root root) {
         if (root instanceof Component) {
             ComponentInfo info = ((Component) root).getInfo();
-            for (Class<? extends InterfaceDefinition> id : info.getAllInterfaces()) {
-                if (Service.class.isAssignableFrom(id)) {
-                    services.add((Class<? extends Service>) id);
-                }
-            }
+            return info.protocols()
+                    .filter(Service.class::isAssignableFrom)
+                    .map(c -> c.asSubclass(Service.class))
+                    .collect(Collectors.toList());
+            
+        } else {
+            return Collections.EMPTY_LIST;
         }
     }
     

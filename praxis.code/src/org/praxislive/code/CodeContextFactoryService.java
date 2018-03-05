@@ -21,6 +21,7 @@
  */
 package org.praxislive.code;
 
+import java.util.stream.Stream;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.services.Service;
@@ -33,7 +34,7 @@ import org.praxislive.logging.LogLevel;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class CodeContextFactoryService extends Service {
+public class CodeContextFactoryService implements Service {
 
     public final static String NEW_CONTEXT = "new-context";
     public final static ControlInfo NEW_CONTEXT_INFO =
@@ -43,10 +44,10 @@ public class CodeContextFactoryService extends Service {
             PMap.EMPTY);
 
     @Override
-    public String[] getControls() {
-        return new String[]{NEW_CONTEXT};
+    public Stream<String> controls() {
+        return Stream.of(NEW_CONTEXT);
     }
-
+    
     @Override
     public ControlInfo getControlInfo(String control) {
         if (NEW_CONTEXT.equals(control)) {

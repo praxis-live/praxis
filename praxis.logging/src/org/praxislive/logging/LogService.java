@@ -23,9 +23,11 @@
 
 package org.praxislive.logging;
 
+import java.util.stream.Stream;
 import org.praxislive.core.Value;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
+import org.praxislive.core.Protocol;
 import org.praxislive.core.services.Service;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
@@ -35,7 +37,7 @@ import org.praxislive.core.types.PString;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public class LogService extends Service {
+public class LogService implements Service {
     
     public final static String LOG = "log";
     public final static ControlInfo LOG_INFO =
@@ -54,8 +56,8 @@ public class LogService extends Service {
             PMap.EMPTY);
 
     @Override
-    public String[] getControls() {
-        return new String[]{LOG};
+    public Stream<String> controls() {
+        return Stream.of(LOG);
     }
 
     @Override
@@ -64,6 +66,15 @@ public class LogService extends Service {
             return LOG_INFO;
         }
         throw new IllegalArgumentException();
+    }
+    
+    public static class Provider implements Protocol.TypeProvider {
+
+        @Override
+        public Stream<Type> types() {
+            return Stream.of(new Protocol.Type<>(LogService.class));
+        }
+        
     }
     
 }

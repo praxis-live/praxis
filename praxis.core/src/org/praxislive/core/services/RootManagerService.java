@@ -22,6 +22,7 @@
 
 package org.praxislive.core.services;
 
+import java.util.stream.Stream;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
@@ -32,7 +33,7 @@ import org.praxislive.core.types.PString;
 /**
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class RootManagerService extends Service {
+public class RootManagerService implements Service {
 
     public final static RootManagerService INSTANCE = new RootManagerService();
 
@@ -56,8 +57,8 @@ public class RootManagerService extends Service {
 
 
     @Override
-    public String[] getControls() {
-        return new String[] {ADD_ROOT, REMOVE_ROOT, ROOTS};
+    public Stream<String> controls() {
+        return Stream.of(ADD_ROOT, REMOVE_ROOT, ROOTS);
     }
 
     @Override

@@ -21,12 +21,12 @@
  */
 package org.praxislive.core.services;
 
-import org.praxislive.core.InterfaceDefinition;
+import org.praxislive.core.Protocol;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-public abstract class Service extends InterfaceDefinition {
+public interface Service extends Protocol {
     
 }

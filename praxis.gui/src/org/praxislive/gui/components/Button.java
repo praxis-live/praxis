@@ -152,7 +152,7 @@ public class Button extends SingleBindingGuiComponent {
                 return;
             }
             ControlAddress to = ControlAddress.create(
-                    findService(ScriptService.INSTANCE),
+                    findService(ScriptService.class),
                     ScriptService.EVAL);
             ControlAddress from = ControlAddress.create(
                     getAddress(), "_on-click-log");

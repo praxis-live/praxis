@@ -105,7 +105,6 @@ public abstract class Value {
      *
      * @return ArgumentInfo info
      */
-    @Deprecated
     public static ArgumentInfo info() {
         return ArgumentInfo.create(Value.class, null);
     }

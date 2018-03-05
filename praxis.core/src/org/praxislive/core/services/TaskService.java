@@ -21,6 +21,7 @@
  */
 package org.praxislive.core.services;
 
+import java.util.stream.Stream;
 import org.praxislive.core.Value;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
@@ -31,9 +32,8 @@ import org.praxislive.core.types.PReference;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class TaskService extends Service {
+public class TaskService implements Service {
 
-    @Deprecated public final static TaskService INSTANCE = new TaskService();
     public final static String SUBMIT = "submit";
     public final static ControlInfo SUBMIT_INFO =
             ControlInfo.createFunctionInfo(
@@ -42,8 +42,8 @@ public class TaskService extends Service {
             PMap.EMPTY);
 
     @Override
-    public String[] getControls() {
-        return new String[]{SUBMIT};
+    public Stream<String> controls() {
+        return Stream.of(SUBMIT);
     }
 
     @Override

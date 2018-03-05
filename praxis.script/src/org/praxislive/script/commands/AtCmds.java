@@ -31,7 +31,7 @@ import org.praxislive.core.CallArguments;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.ControlAddress;
-import org.praxislive.core.interfaces.ContainerInterface;
+import org.praxislive.core.protocols.ContainerProtocol;
 import org.praxislive.core.services.RootManagerService;
 import org.praxislive.core.services.Services;
 import org.praxislive.core.types.PReference;
@@ -153,7 +153,7 @@ public class AtCmds implements CommandInstaller {
                                     PString.valueOf(ctxt.getRootID()), type});
                     } else {
                         to = ControlAddress.create(ctxt.getParentAddress(),
-                                ContainerInterface.ADD_CHILD);
+                                ContainerProtocol.ADD_CHILD);
                         args = CallArguments.create(new Value[]{
                                     PString.valueOf(ctxt.getComponentID(depth - 1)), type});
                     }
@@ -242,7 +242,7 @@ public class AtCmds implements CommandInstaller {
 
         private Call createChildRemovalCall(Env env, ComponentAddress comp) throws Exception {
             ControlAddress to = ControlAddress.create(comp.getParentAddress(),
-                    ContainerInterface.REMOVE_CHILD);
+                    ContainerProtocol.REMOVE_CHILD);
             return Call.createCall(to, env.getAddress(), env.getTime(),
                     PString.valueOf(comp.getComponentID(comp.getDepth() - 1)));
         }

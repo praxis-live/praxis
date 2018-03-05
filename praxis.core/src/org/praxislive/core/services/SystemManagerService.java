@@ -22,6 +22,7 @@
 
 package org.praxislive.core.services;
 
+import java.util.stream.Stream;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.types.PMap;
@@ -29,7 +30,7 @@ import org.praxislive.core.types.PMap;
 /**
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class SystemManagerService extends Service {
+public class SystemManagerService implements Service {
 
     public final static String SYSTEM_EXIT = "system-exit";
 
@@ -40,8 +41,8 @@ public class SystemManagerService extends Service {
                 PMap.EMPTY);
 
     @Override
-    public String[] getControls() {
-        return new String[] {SYSTEM_EXIT};
+    public Stream<String> controls() {
+        return Stream.of(SYSTEM_EXIT);
     }
 
     @Override

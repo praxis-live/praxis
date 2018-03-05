@@ -19,13 +19,13 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.core.interfaces;
+package org.praxislive.core.protocols;
 
+import java.util.stream.Stream;
 import org.praxislive.core.ComponentType;
-import org.praxislive.core.InterfaceDefinition;
 import org.praxislive.core.ArgumentInfo;
-import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.ControlInfo;
+import org.praxislive.core.Protocol;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;
@@ -34,9 +34,9 @@ import org.praxislive.core.types.PString;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ContainerInterface extends InterfaceDefinition {
+public class ContainerProtocol implements Protocol {
 
-    public final static ContainerInterface INSTANCE = new ContainerInterface();
+    public final static ContainerProtocol INSTANCE = new ContainerProtocol();
     public final static String ADD_CHILD = "add-child";
     public final static String REMOVE_CHILD = "remove-child";
     public final static String CHILDREN = "children";
@@ -76,9 +76,9 @@ public class ContainerInterface extends InterfaceDefinition {
 
 
     @Override
-    public String[] getControls() {
-        return new String[]{ADD_CHILD, REMOVE_CHILD, CHILDREN,
-        CONNECT, DISCONNECT, CONNECTIONS};
+    public Stream<String> controls() {
+        return Stream.of(ADD_CHILD, REMOVE_CHILD, CHILDREN,
+        CONNECT, DISCONNECT, CONNECTIONS);
     }
 
     @Override

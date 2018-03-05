@@ -17,7 +17,7 @@
             </test-dependencies>
             <public-packages>
                 <package>org.praxislive.core</package>
-                <package>org.praxislive.core.interfaces</package>
+                <package>org.praxislive.core.protocols</package>
                 <package>org.praxislive.core.services</package>
                 <package>org.praxislive.core.syntax</package>
                 <package>org.praxislive.core.types</package>

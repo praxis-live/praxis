@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.interfaces.StartableInterface;
+import org.praxislive.core.protocols.StartableProtocol;
 import org.praxislive.core.services.SystemManagerService;
 import org.praxislive.core.types.PBoolean;
 import org.praxislive.core.types.PReference;
@@ -102,9 +102,9 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     }
 
     private void createStartableInterface() {
-        registerControl(StartableInterface.START, new TransportControl(true));
-        registerControl(StartableInterface.STOP, new TransportControl(false));
-        registerControl(StartableInterface.IS_RUNNING,
+        registerControl(StartableProtocol.START, new TransportControl(true));
+        registerControl(StartableProtocol.STOP, new TransportControl(false));
+        registerControl(StartableProtocol.IS_RUNNING,
                 ArgumentProperty.createReadOnly(PBoolean.info(),
                         new ArgumentProperty.ReadBinding() {
                     public Value getBoundValue() {
@@ -115,7 +115,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                         }
                     }
                 }));
-        registerInterface(StartableInterface.INSTANCE);
+        registerProtocol(StartableProtocol.class);
     }
 
     private void createExitOnStopControl() {
@@ -426,11 +426,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         return null;
     }
 
-    @Override
-    public Root getRoot() {
-        return this;
-    }
-
 //    @Deprecated
 //    public ServiceManager getServiceManager() {
 ////        return hub.getServiceManager();
@@ -502,8 +497,8 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         private boolean start;
 
         private TransportControl(boolean start) {
-            super(start ? StartableInterface.START_INFO
-                    : StartableInterface.STOP_INFO);
+            super(start ? StartableProtocol.START_INFO
+                    : StartableProtocol.STOP_INFO);
             this.start = start;
         }
 

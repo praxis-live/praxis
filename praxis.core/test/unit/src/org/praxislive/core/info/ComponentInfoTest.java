@@ -15,11 +15,9 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import org.praxislive.core.Value;
-import org.praxislive.core.Component;
 import org.praxislive.core.ControlPort;
-import org.praxislive.core.InterfaceDefinition;
-import org.praxislive.core.interfaces.ComponentInterface;
-import org.praxislive.core.interfaces.StartableInterface;
+import org.praxislive.core.protocols.ComponentProtocol;
+import org.praxislive.core.protocols.StartableProtocol;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PNumber;
 import org.praxislive.core.types.PString;
@@ -29,6 +27,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.praxislive.core.Protocol;
 
 /**
  *
@@ -51,9 +50,9 @@ public class ComponentInfoTest {
     
     @Before
     public void setUp() {
-        Set<Class<? extends InterfaceDefinition>> interfaces = new LinkedHashSet<>(2);
-        interfaces.add(ComponentInterface.class);
-        interfaces.add(StartableInterface.class);
+        Set<Class<? extends Protocol>> interfaces = new LinkedHashSet<>(2);
+        interfaces.add(ComponentProtocol.class);
+        interfaces.add(StartableProtocol.class);
         
         Map<String, ControlInfo> controls = new LinkedHashMap<>();
         controls.put("p1", ControlInfo.createPropertyInfo(new ArgumentInfo[]{PNumber.info(0, 1)}, new Value[]{PNumber.ONE}, PMap.create(ControlInfo.KEY_TRANSIENT, true)));

@@ -21,6 +21,7 @@
  */
 package org.praxislive.code;
 
+import java.util.stream.Stream;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.services.Service;
@@ -31,7 +32,7 @@ import org.praxislive.core.types.PReference;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class CodeCompilerService extends Service {
+public class CodeCompilerService implements Service {
 
     public final static String COMPILE = "compile";
     public final static ControlInfo COMPILE_INFO = 
@@ -55,8 +56,8 @@ public class CodeCompilerService extends Service {
             "log";
     
     @Override
-    public String[] getControls() {
-        return new String[]{COMPILE};
+    public Stream<String> controls() {
+        return Stream.of(COMPILE);
     }
 
     @Override

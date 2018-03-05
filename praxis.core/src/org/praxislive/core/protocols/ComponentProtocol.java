@@ -19,30 +19,31 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.core.interfaces;
+package org.praxislive.core.protocols;
 
-import org.praxislive.core.InterfaceDefinition;
+import java.util.stream.Stream;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.ControlInfo;
+import org.praxislive.core.Protocol;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ComponentInterface extends InterfaceDefinition {
+public class ComponentProtocol implements Protocol {
 
-    public final static ComponentInterface INSTANCE = new ComponentInterface();
+    public final static ComponentProtocol INSTANCE = new ComponentProtocol();
     public final static String INFO = "info";
     public final static ControlInfo INFO_INFO = ControlInfo.createReadOnlyPropertyInfo(
                 new ArgumentInfo[]{ComponentInfo.info()},
                 null);;
 
     @Override
-    public String[] getControls() {
-        return new String[]{INFO};
+    public Stream<String> controls() {
+        return Stream.of(INFO);
     }
-
+    
     @Override
     public ControlInfo getControlInfo(String control) {
         if (INFO.equals(control)) {
@@ -50,6 +51,7 @@ public class ComponentInterface extends InterfaceDefinition {
         }
         throw new IllegalArgumentException();
     }
+
 }
 
 

@@ -54,7 +54,7 @@ public class ScriptServiceImpl extends AbstractRoot {
         super(EnumSet.noneOf(Caps.class));
         registerControl(ScriptService.EVAL, new EvalControl());
         registerControl(ScriptService.CLEAR, new ClearControl());
-        registerInterface(ScriptService.INSTANCE);
+        registerProtocol(ScriptService.class);
         contexts = new HashMap<ControlAddress, ScriptContext>();
     }
 
@@ -109,7 +109,7 @@ public class ScriptServiceImpl extends AbstractRoot {
         }
 
         public ControlInfo getInfo() {
-            return ScriptService.INSTANCE.getControlInfo(ScriptService.EVAL);
+            return ScriptService.EVAL_INFO;
         }
 
     }
@@ -131,7 +131,7 @@ public class ScriptServiceImpl extends AbstractRoot {
         }
 
         public ControlInfo getInfo() {
-            return ScriptService.INSTANCE.getControlInfo(ScriptService.CLEAR);
+            return ScriptService.CLEAR_INFO;
         }
 
     }

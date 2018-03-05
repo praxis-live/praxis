@@ -28,6 +28,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;
@@ -43,33 +45,33 @@ public class ComponentInfo extends Value {
     private final static String INFO_PREFIX = "INFO:";
 
 //    private Class<? extends Component> type;
-    private final Set<Class<? extends InterfaceDefinition>> interfaces;
+    private final Set<Protocol.Type<?>> protocols;
     private final PMap controls;
     private final PMap ports;
     private final PMap properties;
 
     private volatile String string;
 
-    private ComponentInfo(Set<Class<? extends InterfaceDefinition>> interfaces,
+    private ComponentInfo(Set<Protocol.Type<?>> interfaces,
             PMap controls,
             PMap ports,
             PMap properties,
             String string
     ) {
 //        this.type = type;
-        this.interfaces = interfaces;
+        this.protocols = interfaces;
         this.controls = controls;
         this.ports = ports;
         this.properties = properties;
         this.string = string;
     }
 
-    public boolean hasInterface(Class<? extends InterfaceDefinition> type) {
-        return interfaces.contains(type);
+    public Stream<Class<? extends Protocol>> protocols() {
+        return protocols.stream().map(Protocol.Type::asClass);
     }
-
-    public Set<Class<? extends InterfaceDefinition>> getAllInterfaces() {
-        return interfaces;
+    
+    public boolean hasProtocol(Class<? extends Protocol> protocol) {
+        return protocols().anyMatch(protocol::isAssignableFrom);
     }
 
     public String[] getControls() {
@@ -113,16 +115,14 @@ public class ComponentInfo extends Value {
     }
 
     private String buildString() {
-        PString[] ints = new PString[interfaces.size()];
-        int i=0;
-        for (Class<? extends InterfaceDefinition> id : interfaces) {
-            ints[i++] = PString.valueOf(id.getName());
-        }
+        PArray protos = protocols.stream()
+                .map(p -> PString.valueOf(p.name()))
+                .collect(PArray.collector());
         PArray arr = PArray.valueOf(
                 PString.valueOf(INFO_PREFIX),
                 controls,
                 ports,
-                PArray.valueOf(ints),
+                protos,
                 properties
         );
         return arr.toString();           
@@ -135,7 +135,7 @@ public class ComponentInfo extends Value {
                 return true;
             }
             ComponentInfo other = ComponentInfo.coerce(arg);
-            return interfaces.equals(other.interfaces)
+            return protocols.equals(other.protocols)
                     && controls.equivalent(other.controls)
                     && ports.equivalent(other.ports)
                     && properties.equivalent(other.properties);
@@ -151,7 +151,7 @@ public class ComponentInfo extends Value {
         }
         if (obj instanceof ComponentInfo) {
             ComponentInfo o = (ComponentInfo) obj;
-            return interfaces.equals(o.interfaces)
+            return protocols.equals(o.protocols)
                     && controls.equals(o.controls)
                     && ports.equals(o.ports)
                     && properties.equals(o.properties);
@@ -163,7 +163,7 @@ public class ComponentInfo extends Value {
     public int hashCode() {
         int hash = 5;
 //        hash = 79 * hash + (this.type != null ? this.type.hashCode() : 0);
-        hash = 79 * hash + interfaces.hashCode();
+        hash = 79 * hash + protocols.hashCode();
         hash = 79 * hash + (this.controls != null ? this.controls.hashCode() : 0);
         hash = 79 * hash + (this.ports != null ? this.ports.hashCode() : 0);
         hash = 79 * hash + (this.properties != null ? this.properties.hashCode() : 0);
@@ -173,7 +173,7 @@ public class ComponentInfo extends Value {
     public static ComponentInfo create(
             Map<String, ControlInfo> controls,
             Map<String, PortInfo> ports,
-            Set<Class<? extends InterfaceDefinition>> interfaces,
+            Set<Class<? extends Protocol>> interfaces,
             PMap properties) {
 
         PMap ctrls;
@@ -196,16 +196,20 @@ public class ComponentInfo extends Value {
             }
             prts = pBld.build();
         }
+        Set<Protocol.Type<?>> protos;
         if (interfaces == null || interfaces.isEmpty()) {
-            interfaces = Collections.emptySet();
+            protos = Collections.emptySet();
         } else {
-            interfaces = Collections.unmodifiableSet(new LinkedHashSet<>(interfaces));
+            protos = interfaces.stream()
+                    .map(cls -> Protocol.Type.of(cls))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            protos = Collections.unmodifiableSet(protos);
         }
         if (properties == null) {
             properties = PMap.EMPTY;
         }
 
-        return new ComponentInfo(interfaces, ctrls, prts, properties, null);
+        return new ComponentInfo(protos, ctrls, prts, properties, null);
 
     }
 
@@ -273,17 +277,17 @@ public class ComponentInfo extends Value {
             }
 
             // optional arr(3) is interfaces
-            Set<Class<? extends InterfaceDefinition>> interfaces;
+            Set<Protocol.Type<?>> protocols;
             if (arr.getSize() > 3) {
                 PArray ints = PArray.coerce(arr.get(3));
-                interfaces = new LinkedHashSet<>();
-                ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                for (int i = 0; i < ints.getSize(); i++) {
-                    interfaces.add((Class<? extends InterfaceDefinition>) cl.loadClass(ints.get(i).toString()));
-                }
-                interfaces = Collections.unmodifiableSet(interfaces);
+                protocols = ints.stream()
+                        .map(s -> Protocol.Type.fromName(s.toString()))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
+                protocols = Collections.unmodifiableSet(protocols);
             } else {
-                interfaces = Collections.emptySet();
+                protocols = Collections.emptySet();
             }
 
             // optional arr(4) is properties
@@ -294,7 +298,7 @@ public class ComponentInfo extends Value {
                 properties = PMap.EMPTY;
             }
 
-            return new ComponentInfo(interfaces, controls, ports, properties, null);
+            return new ComponentInfo(protocols, controls, ports, properties, null);
         } catch (Exception ex) {
             throw new ValueFormatException(ex);
         }

@@ -22,7 +22,6 @@
 package org.praxislive.hub;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -36,10 +35,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.IllegalRootStateException;
-import org.praxislive.core.InterfaceDefinition;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.Packet;
 import org.praxislive.core.Root;
@@ -61,7 +60,7 @@ public final class Hub {
     public final static String EXT_PREFIX = SYS_PREFIX + "ext_";
 
     private final ConcurrentMap<String, Root.Controller> roots;
-    private final ConcurrentMap<Class<? extends InterfaceDefinition>, ComponentAddress[]> services;
+    private final ConcurrentMap<Class<? extends Service>, ComponentAddress[]> services;
     private final Root core;
     private final Lookup lookup;
     private final RootHubImpl rootHub;
@@ -87,15 +86,9 @@ public final class Hub {
     }
 
     private void extractExtensions(Builder builder, List<Root> exts) {
-            exts.add(builder.componentFactory == null ? 
-                    new DefaultComponentFactoryService() :
-                    builder.componentFactory);
-            exts.add(builder.scriptService == null ?
-                    new ScriptServiceImpl() :
-                    builder.scriptService);
-            exts.add(builder.taskService == null ?
-                    new DefaultTaskService() :
-                    builder.taskService);
+            exts.add(new DefaultComponentFactoryService());
+            exts.add(new ScriptServiceImpl());
+            exts.add(new DefaultTaskService());
             exts.addAll(builder.extensions);
     }
     
@@ -168,7 +161,7 @@ public final class Hub {
         return rootHub;
     }
     
-    private void registerService(Class<? extends InterfaceDefinition> service,
+    private void registerService(Class<? extends Service> service,
             ComponentAddress provider) {
         if (service == null || provider == null) {
             throw new NullPointerException();
@@ -184,7 +177,7 @@ public final class Hub {
         }
     }
             
-    private Set<Class<? extends InterfaceDefinition>> getServices() {
+    private Set<Class<? extends Service>> getServices() {
         return Collections.unmodifiableSet(services.keySet());
     }
     
@@ -253,12 +246,12 @@ public final class Hub {
             return Hub.this.getRootIDs();
         }
 
-        public void registerService(Class<? extends InterfaceDefinition> service,
+        public void registerService(Class<? extends Service> service,
             ComponentAddress provider) {
             Hub.this.registerService(service, provider);
         }
         
-        public Set<Class<? extends InterfaceDefinition>> getServices() {
+        public Set<Class<? extends Service>> getServices() {
             return Hub.this.getServices();
         }
         
@@ -283,44 +276,22 @@ public final class Hub {
         private final List<Root> extensions;
         private final List<Object> lookupContent;
         private CoreRootFactory coreRootFactory;
-        private Root componentFactory;
-        private Root scriptService;
-        private Root taskService;
 
         private Builder() {
             extensions = new ArrayList<>();
             lookupContent = new ArrayList<>();
             coreRootFactory = DefaultCoreRoot.factory();
-            findDefaultExtensions();
+            extensions.addAll(findDefaultExtensions());
         }
        
-        private void findDefaultExtensions() {
-            for (RootHub.ExtensionProvider provider :
-                    Lookup.SYSTEM.getAll(RootHub.ExtensionProvider.class)) {
-                extensions.addAll(provider.getExtensions());
-            }
+        private List<Root> findDefaultExtensions() {
+            return Lookup.SYSTEM.findAll(RootHub.ExtensionProvider.class)
+                    .flatMap(ep -> ep.getExtensions().stream())
+                    .collect(Collectors.toList());
         }
         
         public Builder setCoreRootFactory(CoreRootFactory coreRootFactory) {
             this.coreRootFactory = Objects.requireNonNull(coreRootFactory);
-            return this;
-        }
-        
-        @Deprecated
-        public Builder replaceComponentFactoryService(Root componentFactory) {
-            this.componentFactory = componentFactory;
-            return this;
-        }
-        
-        @Deprecated
-        public Builder replaceScriptService(Root scriptService) {
-            this.scriptService = scriptService;
-            return this;
-        }
-        
-        @Deprecated
-        public Builder replaceTaskService(Root taskService) {
-            this.taskService = taskService;
             return this;
         }
         

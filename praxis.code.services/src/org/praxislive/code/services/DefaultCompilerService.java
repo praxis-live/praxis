@@ -62,7 +62,7 @@ public class DefaultCompilerService extends AbstractRoot {
         super(EnumSet.noneOf(Caps.class));
         registerControl(CodeCompilerService.COMPILE, new CompileControl());
         registerControl("add-libs", new AddLibsControl());
-        registerInterface(CodeCompilerService.class);
+        registerProtocol(CodeCompilerService.class);
         compiler = Lookup.SYSTEM.find(JavaCompilerProvider.class)
                 .map(JavaCompilerProvider::getJavaCompiler)
                 .orElse(ToolProvider.getSystemJavaCompiler());

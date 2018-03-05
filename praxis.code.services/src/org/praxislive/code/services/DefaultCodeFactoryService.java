@@ -78,8 +78,8 @@ public class DefaultCodeFactoryService extends AbstractRoot {
         libs = new LinkedHashSet<>();
         registerControl(CodeComponentFactoryService.NEW_INSTANCE, new NewInstanceControl());
         registerControl(CodeContextFactoryService.NEW_CONTEXT, new NewContextControl());
-        registerInterface(CodeComponentFactoryService.class);
-        registerInterface(CodeContextFactoryService.class);
+        registerProtocol(CodeComponentFactoryService.class);
+        registerProtocol(CodeContextFactoryService.class);
     }
 
     @Override

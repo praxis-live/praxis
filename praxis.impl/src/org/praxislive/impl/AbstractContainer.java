@@ -43,7 +43,7 @@ import org.praxislive.core.PortListener;
 import org.praxislive.core.VetoException;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.services.ComponentFactoryService;
-import org.praxislive.core.interfaces.ContainerInterface;
+import org.praxislive.core.protocols.ContainerProtocol;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PReference;
 import org.praxislive.core.types.PString;
@@ -73,13 +73,13 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
     }
 
     private void buildContainerInterface() {
-        registerControl(ContainerInterface.ADD_CHILD, new AddChildControl());
-        registerControl(ContainerInterface.REMOVE_CHILD, new RemoveChildControl());
-        registerControl(ContainerInterface.CHILDREN, new ChildrenControl());
-        registerControl(ContainerInterface.CONNECT, new ConnectionControl(true));
-        registerControl(ContainerInterface.DISCONNECT, new ConnectionControl(false));
-        registerControl(ContainerInterface.CONNECTIONS, new ConnectionListControl());
-        registerInterface(ContainerInterface.INSTANCE);
+        registerControl(ContainerProtocol.ADD_CHILD, new AddChildControl());
+        registerControl(ContainerProtocol.REMOVE_CHILD, new RemoveChildControl());
+        registerControl(ContainerProtocol.CHILDREN, new ChildrenControl());
+        registerControl(ContainerProtocol.CONNECT, new ConnectionControl(true));
+        registerControl(ContainerProtocol.DISCONNECT, new ConnectionControl(false));
+        registerControl(ContainerProtocol.CONNECTIONS, new ConnectionListControl());
+        registerProtocol(ContainerProtocol.class);
 
     }
 
@@ -204,14 +204,14 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         }
 
         public ControlInfo getInfo() {
-            return ContainerInterface.ADD_CHILD_INFO;
+            return ContainerProtocol.ADD_CHILD_INFO;
         }
     }
 
     private class RemoveChildControl extends SimpleControl {
 
         private RemoveChildControl() {
-            super(ContainerInterface.REMOVE_CHILD_INFO);
+            super(ContainerProtocol.REMOVE_CHILD_INFO);
         }
 
         @Override
@@ -224,7 +224,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
     private class ChildrenControl extends SimpleControl {
 
         private ChildrenControl() {
-            super(ContainerInterface.CHILDREN_INFO);
+            super(ContainerProtocol.CHILDREN_INFO);
         }
 
         @Override
@@ -245,8 +245,8 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         private final boolean connect;
 
         private ConnectionControl(boolean connect) {
-            super(connect ? ContainerInterface.CONNECT_INFO
-                    : ContainerInterface.DISCONNECT_INFO);
+            super(connect ? ContainerProtocol.CONNECT_INFO
+                    : ContainerProtocol.DISCONNECT_INFO);
             this.connect = connect;
         }
 
@@ -315,7 +315,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
     private class ConnectionListControl extends SimpleControl {
 
         private ConnectionListControl() {
-            super(ContainerInterface.CONNECTIONS_INFO);
+            super(ContainerProtocol.CONNECTIONS_INFO);
         }
 
         @Override

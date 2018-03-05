@@ -21,6 +21,7 @@
  */
 package org.praxislive.core.services;
 
+import java.util.stream.Stream;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.types.PString;
@@ -29,23 +30,23 @@ import org.praxislive.core.types.PString;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class ScriptService extends Service {
+public class ScriptService implements Service {
 
     public final static String EVAL = "eval";
     public final static String CLEAR = "clear";
-    public final static ScriptService INSTANCE = new ScriptService();
-    private final static ControlInfo EVAL_INFO = ControlInfo.createFunctionInfo(
-                new ArgumentInfo[]{PString.info()},
-                new ArgumentInfo[0],
-                null);
-    private final static ControlInfo CLEAR_INFO = ControlInfo.createFunctionInfo(
+
+    public final static ControlInfo EVAL_INFO = ControlInfo.createFunctionInfo(
+            new ArgumentInfo[]{PString.info()},
+            new ArgumentInfo[0],
+            null);
+    public final static ControlInfo CLEAR_INFO = ControlInfo.createFunctionInfo(
             new ArgumentInfo[0],
             new ArgumentInfo[0],
             null);
 
     @Override
-    public String[] getControls() {
-        return new String[]{EVAL, CLEAR};
+    public Stream<String> controls() {
+        return Stream.of(EVAL, CLEAR);
     }
 
     @Override

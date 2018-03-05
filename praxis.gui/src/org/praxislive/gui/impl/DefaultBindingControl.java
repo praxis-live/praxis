@@ -37,7 +37,7 @@ import org.praxislive.core.ControlAddress;
 import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.ControlInfo;
-import org.praxislive.core.interfaces.ComponentInterface;
+import org.praxislive.core.protocols.ComponentProtocol;
 import org.praxislive.gui.ControlBinding;
 import org.praxislive.impl.AbstractControl;
 
@@ -265,8 +265,7 @@ public class DefaultBindingControl extends AbstractControl {
         private void sendInfoRequest() {
             PacketRouter router = getRouter();
             ControlAddress returnAddress = getReturnAddress();
-            ControlAddress toAddress = ControlAddress.create(
-                    boundAddress.getComponentAddress(), ComponentInterface.INFO);
+            ControlAddress toAddress = ControlAddress.create(boundAddress.getComponentAddress(), ComponentProtocol.INFO);
             Call call = Call.createCall(toAddress, returnAddress,
                     System.nanoTime(), CallArguments.EMPTY);
 

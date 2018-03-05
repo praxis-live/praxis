@@ -74,7 +74,7 @@ class MasterCoreRoot extends DefaultCoreRoot {
         registerControl(RootManagerService.ADD_ROOT, new AddRootControl());
         registerControl(RootManagerService.REMOVE_ROOT, new RemoveRootControl());
         registerControl(RootManagerService.ROOTS, new RootsControl());
-        registerInterface(RootManagerService.class);
+        registerProtocol(RootManagerService.class);
         getHubAccessor().registerService(RootManagerService.class, getAddress());
     }
 

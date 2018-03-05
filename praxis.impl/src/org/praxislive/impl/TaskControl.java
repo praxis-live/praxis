@@ -49,7 +49,7 @@ public class TaskControl extends AbstractControl {
     }
 
     public int submitTask(long time, TaskService.Task task, Callback callback) throws ServiceUnavailableException {
-        ControlAddress to = ControlAddress.create(findService(TaskService.INSTANCE),
+        ControlAddress to = ControlAddress.create(findService(TaskService.class),
                 TaskService.SUBMIT);
         PacketRouter router = getLookup().get(PacketRouter.class);
         if (router == null) {

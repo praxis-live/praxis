@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.code.processors;
+package org.praxislive.code.internal;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

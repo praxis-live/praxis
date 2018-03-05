@@ -45,11 +45,10 @@ import org.praxislive.code.userapi.ReadOnly;
 import org.praxislive.code.userapi.Ref;
 import org.praxislive.code.userapi.T;
 import org.praxislive.core.ControlAddress;
-import org.praxislive.core.InterfaceDefinition;
 import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.PortInfo;
-import org.praxislive.core.interfaces.ComponentInterface;
+import org.praxislive.core.protocols.ComponentProtocol;
 import org.praxislive.core.types.PMap;
 import org.praxislive.logging.LogBuilder;
 
@@ -183,10 +182,9 @@ public abstract class CodeConnector<D extends CodeDelegate> {
                 portInfo.put(e.getKey(), e.getValue().getInfo());
             }
         }
-        return ComponentInfo.create(
-                controlInfo,
+        return ComponentInfo.create(controlInfo,
                 portInfo,
-                Collections.<Class<? extends InterfaceDefinition>>singleton(ComponentInterface.class),
+                Collections.singleton(ComponentProtocol.class),
                 PMap.create(ComponentInfo.KEY_DYNAMIC, true));
     }
     

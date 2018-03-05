@@ -24,7 +24,6 @@ package org.praxislive.impl;
 import org.praxislive.core.Value;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
-import org.praxislive.core.InterfaceDefinition;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
@@ -80,12 +79,6 @@ public abstract class AbstractControl implements AbstractComponent.ExtendedContr
         } else {
             return host.getLookup();
         }
-    }
-
-    @Deprecated
-    protected ComponentAddress findService(InterfaceDefinition service)
-            throws ServiceUnavailableException {
-        return findService((Class<? extends Service>) service.getClass());
     }
     
     @Deprecated

@@ -72,7 +72,7 @@ class DefaultTaskService extends AbstractRoot {
         });
         Control submitter = new SubmitControl();
         registerControl(TaskService.SUBMIT, submitter);
-        registerInterface(TaskService.class);
+        registerProtocol(TaskService.class);
         futures = new HashMap<>();
         completed = new ArrayList<Future>();
     }

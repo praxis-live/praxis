@@ -61,7 +61,7 @@ class NonGuiPlayer extends AbstractRoot {
         this.script = script;
         scriptControl = new ScriptControl();
         registerControl("_script-control", scriptControl);
-        registerInterface(SystemManagerService.class);
+        registerProtocol(SystemManagerService.class);
         registerControl(SystemManagerService.SYSTEM_EXIT, new ExitControl());
 
     }
@@ -132,7 +132,7 @@ class NonGuiPlayer extends AbstractRoot {
 
         private void runScript(String script) {
             try {
-                ComponentAddress ss = findService(ScriptService.INSTANCE);
+                ComponentAddress ss = findService(ScriptService.class);
                 evalControl = ControlAddress.create(ss, ScriptService.EVAL);
             } catch (ServiceUnavailableException ex) {
                 LOG.log(Level.SEVERE, "", ex);

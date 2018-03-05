@@ -21,6 +21,7 @@
  */
 package org.praxislive.core.services;
 
+import java.util.stream.Stream;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.Root;
 import org.praxislive.core.ArgumentInfo;
@@ -32,7 +33,7 @@ import org.praxislive.core.types.PReference;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class RootFactoryService extends Service {
+public class RootFactoryService implements Service {
 
     public final static String NEW_ROOT_INSTANCE = "new-root-instance";
     public final static ControlInfo NEW_ROOT_INSTANCE_INFO =
@@ -42,8 +43,8 @@ public class RootFactoryService extends Service {
             PMap.EMPTY);
 
     @Override
-    public String[] getControls() {
-        return new String[]{NEW_ROOT_INSTANCE};
+    public Stream<String> controls() {
+        return Stream.of(NEW_ROOT_INSTANCE);
     }
 
     @Override
