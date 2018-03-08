@@ -21,6 +21,7 @@
  */
 package org.praxislive.video;
 
+import java.util.stream.Stream;
 import org.praxislive.core.Port;
 import org.praxislive.core.PortConnectionException;
 import org.praxislive.core.PortInfo;
@@ -95,4 +96,14 @@ public abstract class VideoPort implements Port {
             port.removeVideoOutputPort(this, source);
         }
     }
+    
+    public static class Provider implements Port.TypeProvider {
+
+        @Override
+        public Stream<Type> types() {
+            return Stream.of(new Port.Type<>(VideoPort.class));
+        }
+        
+    }
+    
 }

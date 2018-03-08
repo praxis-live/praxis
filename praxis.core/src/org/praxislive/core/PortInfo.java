@@ -33,13 +33,13 @@ public final class PortInfo extends Value {
 
     public static enum Direction { IN, OUT, BIDI };
 
-    private final Class<? extends Port> type;
+    private final Port.Type<? extends Port> type;
     private final Direction direction;
     private final PMap properties;
     
     private volatile String string;
 
-    private PortInfo(Class<? extends Port> type,
+    private PortInfo(Port.Type<? extends Port> type,
             Direction direction,
             PMap properties,
             String string) {
@@ -49,7 +49,12 @@ public final class PortInfo extends Value {
         this.string = string;
     }
 
+    @Deprecated
     public Class<? extends Port> getType() {
+        return type.asClass();
+    }
+    
+    public Port.Type<? extends Port> getPortType() {
         return type;
     }
 
@@ -65,10 +70,17 @@ public final class PortInfo extends Value {
     public String toString() {
         String str = string;
         if (str == null) {
-            str = type.getName() + " " + direction.name() + " {" + properties.toString() + "}";
-            string = str;
+            StringBuilder sb = new StringBuilder();
+            sb.append(type.name()).append(" ");
+            sb.append(direction.name());
+            if (!properties.isEmpty()) {
+                sb.append(" {");
+                sb.append(properties.toString());
+                sb.append("}");
+            }
+            string = sb.toString();
         }
-        return str;
+        return string;
     }
 
 //    @Override
@@ -103,7 +115,7 @@ public final class PortInfo extends Value {
         if (properties == null) {
             properties = PMap.EMPTY;
         }
-        return new PortInfo(typeClass, direction, properties, null);
+        return new PortInfo(Port.Type.of(typeClass), direction, properties, null);
 
     }
     
@@ -133,11 +145,12 @@ public final class PortInfo extends Value {
     private static PortInfo valueOf(String string) throws ValueFormatException {
         PArray arr = PArray.valueOf(string);
         try {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            Class<? extends Port> cls = (Class<? extends Port>) cl.loadClass(arr.get(0).toString());
+            Port.Type<? extends Port> type = Port.Type.fromName(arr.get(0).toString()).get();
             Direction direction = Direction.valueOf(arr.get(1).toString());
-            PMap properties = PMap.coerce(arr.get(2));
-            return new PortInfo(cls, direction, properties, string);
+            PMap properties = arr.getSize() > 2 ?
+                    PMap.coerce(arr.get(2)) :
+                    PMap.EMPTY;
+            return new PortInfo(type, direction, properties, string);
         } catch (Exception ex) {
             throw new ValueFormatException(ex);
         }

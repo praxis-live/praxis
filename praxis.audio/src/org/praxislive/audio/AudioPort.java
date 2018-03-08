@@ -21,6 +21,7 @@
  */
 package org.praxislive.audio;
 
+import java.util.stream.Stream;
 import org.praxislive.core.Port;
 import org.praxislive.core.PortConnectionException;
 import org.praxislive.core.PortInfo;
@@ -92,4 +93,14 @@ public abstract class AudioPort implements Port {
             port.removeAudioOutputPort(this, source);
         }
     }
+    
+    public static class Provider implements Port.TypeProvider {
+
+        @Override
+        public Stream<Type> types() {
+            return Stream.of(new Port.Type<>(AudioPort.class));
+        }
+        
+    }
+    
 }

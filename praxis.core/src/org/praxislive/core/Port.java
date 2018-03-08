@@ -22,6 +22,12 @@
 
 package org.praxislive.core;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 /**
  *
  * @author Neil C Smith
@@ -44,5 +50,94 @@ public interface Port {
     public void addListener(PortListener listener);
 
     public void removeListener(PortListener listener);
+    
+    public static class Type<T extends Port> {
+        
+        private final Class<T> baseClass;
+        private final String name;
+        
+        public Type(Class<T> baseClass) {
+            this.baseClass = Objects.requireNonNull(baseClass);
+            this.name = baseClass.getSimpleName();
+        }
+        
+        public Class<T> asClass() {
+            return baseClass;
+        }
+        
+        public String name() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        @Override
+        public int hashCode() {
+            return baseClass.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final Type<?> other = (Type<?>) obj;
+            return Objects.equals(this.baseClass, other.baseClass);
+        }
+        
+        @SuppressWarnings("unchecked")
+        public static <T extends Port> Type<T> of(Class<T> baseClass) {
+            Type<T> type = (Type<T>) typesByClass.get(baseClass);
+            if (type == null) {
+                throw new IllegalArgumentException("Unregistered Port type : "
+                        + baseClass.getName());
+            }
+            return type;
+        }
+        
+        public static Optional<Type<? extends Port>> fromName(String name) {
+            return Optional.ofNullable(typesByName.get(name));
+        }
+        
+        private final static Map<Class<? extends Port>, Type<? extends Port>> typesByClass
+                = new HashMap<>();
+        private final static Map<String, Type<? extends Port>> typesByName
+                = new HashMap<>();
+        
+        private static <T extends Port> void register(Type<T> type) {
+            if (typesByClass.containsKey(type.asClass()) || typesByName.containsKey(type.name())) {
+                throw new IllegalStateException("Already registered type");
+            }
+            typesByClass.put(type.asClass(), type);
+            typesByName.put(type.name(), type);
+        }
+        
+        static {
+            
+            register(new Type<>(ControlPort.class));
+            
+            Lookup.SYSTEM.findAll(TypeProvider.class)
+                    .flatMap(TypeProvider::types)
+                    .forEachOrdered(Type::register);
+            
+        }
+        
+        
+    }
+    
+    public static interface TypeProvider {
+        
+        Stream<Type> types();
+        
+    }
     
 }
