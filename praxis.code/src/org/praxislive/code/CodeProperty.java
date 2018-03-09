@@ -169,11 +169,6 @@ class CodeProperty<D extends CodeDelegate>
         }
     }
 
-    @Override
-    public ControlInfo getInfo() {
-        return info;
-    }
-
     static class Descriptor<D extends CodeDelegate>
             extends ControlDescriptor {
 

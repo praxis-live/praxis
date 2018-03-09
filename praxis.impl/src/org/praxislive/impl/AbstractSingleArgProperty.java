@@ -39,7 +39,7 @@ public abstract class AbstractSingleArgProperty extends AbstractProperty {
         super(info);
     }
 
-    public ControlPort.Input createPort() {
+    public InputPort createPort() {
         return new InputPort();
     }
 
@@ -57,7 +57,7 @@ public abstract class AbstractSingleArgProperty extends AbstractProperty {
 
     protected abstract Value get();
 
-    private class InputPort extends AbstractControlInputPort {
+    public class InputPort extends AbstractControlInputPort {
 
         @Override
         public void receive(long time, double value) {

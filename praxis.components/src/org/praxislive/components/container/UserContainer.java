@@ -21,11 +21,11 @@
  */
 package org.praxislive.components.container;
 
-import org.praxislive.core.ContainerContext;
+import org.praxislive.impl.ContainerContext;
 import org.praxislive.core.Control;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.Port;
-import org.praxislive.core.RegistrationException;
+import org.praxislive.impl.RegistrationException;
 import org.praxislive.impl.AbstractContainer;
 import org.praxislive.impl.InstanceLookup;
 
@@ -64,7 +64,7 @@ public class UserContainer extends AbstractContainer {
     private class Context extends ContainerContext {
 
         @Override
-        public void registerControl(String id, Control control) throws RegistrationException {
+        public void registerControl(String id, ControlEx control) throws RegistrationException {
             try {
                 UserContainer.this.registerControl(id, control);
             } catch (Exception ex) {
@@ -73,13 +73,13 @@ public class UserContainer extends AbstractContainer {
         }
 
         @Override
-        public void unregisterControl(String id, Control control) {
+        public void unregisterControl(String id, ControlEx control) {
             // check control is correct
             UserContainer.this.unregisterControl(id);
         }
 
         @Override
-        public void registerPort(String id, Port port) throws RegistrationException {
+        public void registerPort(String id, PortEx port) throws RegistrationException {
             try {
                 UserContainer.this.registerPort(id, port);
             } catch (Exception ex) {
@@ -88,18 +88,18 @@ public class UserContainer extends AbstractContainer {
         }
 
         @Override
-        public void unregisterPort(String id, Port port) {
+        public void unregisterPort(String id, PortEx port) {
             // check port is correct
             UserContainer.this.unregisterPort(id);
         }
 
         @Override
-        public void refreshControlInfo(String id, Control control) {
+        public void refreshControlInfo(String id, ControlEx control) {
             UserContainer.this.refreshControlInfo(id);
         }
 
         @Override
-        public void refreshPortInfo(String id, Port port) {
+        public void refreshPortInfo(String id, PortEx port) {
             UserContainer.this.refreshPortInfo(id);
         }
         

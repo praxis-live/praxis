@@ -60,7 +60,7 @@ public class Send extends AbstractComponent {
                         PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true)),
                 new AddressBinding(),
                 PString.EMPTY));
-        registerPort(Port.IN, ArgumentInputPort.create(new InputBinding()));
+        registerPort(PortEx.IN, ArgumentInputPort.create(new InputBinding()));
         logErrors = BooleanProperty.create(true);
         registerControl("log-errors", logErrors);
         LOG = new LogControl();
@@ -105,7 +105,7 @@ public class Send extends AbstractComponent {
 
     }
 
-    private class LogControl implements Control {
+    private class LogControl implements ControlEx {
 
         private final LogBuilder logBuilder = new LogBuilder(LogLevel.ERROR);
         private ControlAddress logService;

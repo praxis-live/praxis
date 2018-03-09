@@ -19,15 +19,25 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
+package org.praxislive.video.impl;
 
-package org.praxislive.core;
+import org.praxislive.core.Component;
+import org.praxislive.impl.AbstractComponent;
+import org.praxislive.video.DefaultVideoInputPort;
+import org.praxislive.video.pipes.VideoPipe;
 
 /**
  *
  * @author Neil C Smith
  */
-public interface Control {
+public class VideoInputPortEx extends DefaultVideoInputPort implements AbstractComponent.PortEx {
 
-    public void call(Call call, PacketRouter router) throws Exception;
-    
+    @Deprecated
+    public VideoInputPortEx(Component host, VideoPipe sink) {
+        this(sink);
+    }
+
+    public VideoInputPortEx(VideoPipe sink) {
+        super(sink);
+    }
 }

@@ -378,7 +378,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     }
 
     protected void processCall(Call call) {
-        Control control = getControl(call.getToAddress());
+        org.praxislive.core.Control control = getControl(call.getToAddress());
         try {
             if (control != null) {
                 control.call(call, router);
@@ -397,7 +397,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         }
     }
 
-    protected Control getControl(ControlAddress address) {
+    protected org.praxislive.core.Control getControl(ControlAddress address) {
         Component comp = getComponent(address.getComponentAddress());
         if (comp != null) {
             return comp.getControl(address.getID());

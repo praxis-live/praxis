@@ -55,7 +55,7 @@ class ConnectedProperty implements Control {
         }
     }
 
-    @Override
+//    @Override
     public ControlInfo getInfo() {
         return INFO;
 

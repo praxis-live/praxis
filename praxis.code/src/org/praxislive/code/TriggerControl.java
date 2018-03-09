@@ -66,11 +66,6 @@ public class TriggerControl extends Trigger implements Control {
         }
     }
 
-    @Override
-    public ControlInfo getInfo() {
-        return INFO;
-    }
-
     protected void trigger(long time) {
         if (context.checkActive()) {
             context.update(time);

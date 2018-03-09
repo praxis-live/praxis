@@ -195,7 +195,7 @@ public class OSCInput extends AbstractComponent {
         }
     }
     
-    private class OSCLogControl implements Control {
+    private class OSCLogControl implements ControlEx {
 
         @Override
         public void call(Call call, PacketRouter router) throws Exception {

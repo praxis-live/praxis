@@ -45,8 +45,6 @@ public interface Port {
     
     public Port[] getConnections();
     
-    public PortInfo getInfo();
-
     public void addListener(PortListener listener);
 
     public void removeListener(PortListener listener);

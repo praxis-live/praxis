@@ -70,7 +70,7 @@ class DefaultTaskService extends AbstractRoot {
                return thr;
             }
         });
-        Control submitter = new SubmitControl();
+        ControlEx submitter = new SubmitControl();
         registerControl(TaskService.SUBMIT, submitter);
         registerProtocol(TaskService.class);
         futures = new HashMap<>();
@@ -114,7 +114,7 @@ class DefaultTaskService extends AbstractRoot {
             }
         }
 
-    private class SubmitControl implements Control {
+    private class SubmitControl implements ControlEx {
 
         @Override
         public void call(Call call, PacketRouter router) throws Exception {

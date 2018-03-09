@@ -48,8 +48,8 @@ import org.praxislive.video.InvalidVideoResourceException;
  */
 public class VideoPlayer extends AbstractVideoComponent {
 
-    private final ControlPort.Output readyPort;
-    private final ControlPort.Output errorPort;
+    private final DefaultControlOutputPort readyPort;
+    private final DefaultControlOutputPort errorPort;
     
     private final StringProperty audioSink;
     private final DelegateLoader loader;

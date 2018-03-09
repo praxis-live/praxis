@@ -19,17 +19,15 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.audio.impl;
+package org.praxislive.audio;
 
 import org.praxislive.core.PortListener;
 import org.praxislive.core.PortConnectionException;
-import org.praxislive.core.Component;
 import org.praxislive.audio.AudioPort.Output;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.audio.AudioPort;
 import org.praxislive.impl.PortListenerSupport;
 import org.jaudiolibs.pipes.Pipe;
 import org.jaudiolibs.pipes.impl.Mixer;

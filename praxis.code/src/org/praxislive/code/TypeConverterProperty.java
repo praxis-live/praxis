@@ -82,11 +82,6 @@ class TypeConverterProperty<T> extends AbstractAsyncProperty<T> {
     }
 
     @Override
-    public ControlInfo getInfo() {
-        return info;
-    }
-
-    @Override
     protected void valueChanged(long time) {
         try {
             field.set(context.getDelegate(), getValue());

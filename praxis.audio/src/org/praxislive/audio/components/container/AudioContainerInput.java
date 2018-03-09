@@ -23,12 +23,10 @@ package org.praxislive.audio.components.container;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.audio.AudioPort;
-import org.praxislive.audio.impl.DefaultAudioInputPort;
-import org.praxislive.audio.impl.DefaultAudioOutputPort;
-import org.praxislive.core.ContainerContext;
-import org.praxislive.core.Port;
-import org.praxislive.core.RegistrationException;
+import org.praxislive.audio.impl.AudioInputPortEx;
+import org.praxislive.audio.impl.AudioOutputPortEx;
+import org.praxislive.impl.ContainerContext;
+import org.praxislive.impl.RegistrationException;
 import org.praxislive.impl.AbstractComponent;
 import org.jaudiolibs.pipes.impl.Placeholder;
 
@@ -40,13 +38,13 @@ public class AudioContainerInput extends AbstractComponent {
     
     private ContainerContext context;
     private String id;
-    private AudioPort.Input containerPort;
+    private AudioInputPortEx containerPort;
 
     public AudioContainerInput() {
         Placeholder pl = new Placeholder();
-        AudioPort.Output output = new DefaultAudioOutputPort(pl);
-        containerPort = new DefaultAudioInputPort(pl);
-        registerPort(Port.OUT, output);
+        AudioOutputPortEx output = new AudioOutputPortEx(pl);
+        containerPort = new AudioInputPortEx(pl);
+        registerPort(PortEx.OUT, output);
     }
 
     @Override

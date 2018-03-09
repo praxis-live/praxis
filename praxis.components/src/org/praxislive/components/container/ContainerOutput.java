@@ -23,10 +23,8 @@ package org.praxislive.components.container;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.ContainerContext;
-import org.praxislive.core.ControlPort;
-import org.praxislive.core.Port;
-import org.praxislive.core.RegistrationException;
+import org.praxislive.impl.ContainerContext;
+import org.praxislive.impl.RegistrationException;
 import org.praxislive.impl.AbstractComponent;
 import org.praxislive.impl.DefaultControlOutputPort;
 
@@ -38,12 +36,12 @@ public class ContainerOutput extends AbstractComponent {
 
     private ContainerContext context;
     private String id;
-    private ControlPort.Output containerPort;
+    private DefaultControlOutputPort containerPort;
 
     public ContainerOutput() {
         containerPort = new DefaultControlOutputPort();
-        ControlPort.Input input = new LinkedInputPort(containerPort);
-        registerPort(Port.IN, input);
+        LinkedInputPort input = new LinkedInputPort(containerPort);
+        registerPort(PortEx.IN, input);
     }
 
     @Override

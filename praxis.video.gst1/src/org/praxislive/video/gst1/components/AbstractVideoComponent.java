@@ -34,7 +34,7 @@ import org.praxislive.impl.NumberProperty;
 import org.praxislive.impl.StringProperty;
 import org.praxislive.impl.TriggerControl;
 import org.praxislive.video.gst1.components.VideoDelegate.StateException;
-import org.praxislive.video.impl.DefaultVideoOutputPort;
+import org.praxislive.video.impl.VideoOutputPortEx;
 import org.praxislive.video.pipes.impl.SingleOut;
 import org.praxislive.video.render.Surface;
 import org.praxislive.video.utils.ResizeMode;
@@ -63,7 +63,7 @@ class AbstractVideoComponent extends AbstractExecutionContextComponent {
         container = new Delegator();
         resizeMode = new ResizeMode(ResizeMode.Type.Stretch, 0.5, 0.5);
 
-        registerPort(Port.OUT, new DefaultVideoOutputPort(container));
+        registerPort(PortEx.OUT, new VideoOutputPortEx(container));
 
     }
 

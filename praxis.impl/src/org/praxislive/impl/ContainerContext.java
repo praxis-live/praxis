@@ -21,7 +21,10 @@
  *
  */
 
-package org.praxislive.core;
+package org.praxislive.impl;
+
+import org.praxislive.core.Control;
+import org.praxislive.core.Port;
 
 /**
  *
@@ -36,7 +39,7 @@ public abstract class ContainerContext {
      * @param control
      * @throws RegistrationException
      */
-    public abstract void registerControl(String id, Control control) throws RegistrationException;
+    public abstract void registerControl(String id, AbstractComponent.ControlEx control) throws RegistrationException;
 
     /**
      * Unregister child control.
@@ -44,9 +47,9 @@ public abstract class ContainerContext {
      * @param child
      * @param control
      */
-    public abstract void unregisterControl(String id, Control control);
+    public abstract void unregisterControl(String id, AbstractComponent.ControlEx control);
     
-    public abstract void refreshControlInfo(String id, Control control);
+    public abstract void refreshControlInfo(String id, AbstractComponent.ControlEx control);
 
      /**
      * Allows children to register a port on this container.
@@ -55,7 +58,7 @@ public abstract class ContainerContext {
      * @param port
      * @throws org.praxislive.core.PortRegistrationException
      */
-    public abstract void registerPort(String id, Port port) throws RegistrationException;
+    public abstract void registerPort(String id, AbstractComponent.PortEx port) throws RegistrationException;
 
 
     /**
@@ -64,8 +67,8 @@ public abstract class ContainerContext {
      * @param child
      * @param port
      */
-    public abstract void unregisterPort(String id, Port port);
+    public abstract void unregisterPort(String id, AbstractComponent.PortEx port);
     
-    public abstract void refreshPortInfo(String id, Port port);
+    public abstract void refreshPortInfo(String id, AbstractComponent.PortEx port);
 
 }

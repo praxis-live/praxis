@@ -25,20 +25,17 @@ package org.praxislive.audio.code;
 import java.lang.reflect.Field;
 import org.praxislive.audio.AudioPort;
 import org.praxislive.audio.code.userapi.AudioIn;
-import org.praxislive.audio.code.userapi.AudioOut;
-import org.praxislive.audio.impl.DefaultAudioInputPort;
 import org.praxislive.code.CodeConnector;
 import org.praxislive.code.CodeContext;
 import org.praxislive.code.PortDescriptor;
 import org.praxislive.code.userapi.AuxIn;
-import org.praxislive.code.userapi.AuxOut;
 import org.praxislive.code.userapi.In;
-import org.praxislive.code.userapi.Out;
 import org.praxislive.core.Port;
 import org.praxislive.core.PortInfo;
 import org.praxislive.core.types.PMap;
 import org.praxislive.logging.LogLevel;
 import org.jaudiolibs.pipes.Buffer;
+import org.praxislive.audio.DefaultAudioInputPort;
 
 /**
  *

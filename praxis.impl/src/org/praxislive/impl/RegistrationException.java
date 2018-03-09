@@ -19,15 +19,36 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
-package org.praxislive.core;
+package org.praxislive.impl;
 
 /**
  *
  * @author Neil C Smith
  */
-public interface Control {
+public class RegistrationException extends Exception {
 
-    public void call(Call call, PacketRouter router) throws Exception;
-    
+    /**
+     * Creates a new instance of
+     * <code>PortRegistrationException</code> without detail message.
+     */
+    public RegistrationException() {
+    }
+
+    /**
+     * Constructs an instance of
+     * <code>PortRegistrationException</code> with the specified detail message.
+     *
+     * @param msg the detail message.
+     */
+    public RegistrationException(String msg) {
+        super(msg);
+    }
+
+    public RegistrationException(Throwable cause) {
+        super(cause);
+    }
+
+    public RegistrationException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 }

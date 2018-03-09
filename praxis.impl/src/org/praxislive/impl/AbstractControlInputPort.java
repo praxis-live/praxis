@@ -37,7 +37,7 @@ import org.praxislive.core.PortInfo;
  *
  * @author Neil C Smith
  */
-public abstract class AbstractControlInputPort extends ControlPort.Input {
+public abstract class AbstractControlInputPort extends ControlPort.Input implements AbstractComponent.PortEx {
 
     private ControlPort.Output[] connections;
     private PortListenerSupport pls;

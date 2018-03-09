@@ -53,8 +53,10 @@ import org.praxislive.core.types.PString;
 import org.praxislive.gui.ControlBinding.Adaptor;
 import org.praxislive.gui.impl.ActionAdaptor;
 import org.praxislive.gui.impl.SingleBindingGuiComponent;
+import org.praxislive.impl.AbstractControl;
 import org.praxislive.impl.ArgumentProperty;
 import org.praxislive.impl.ArrayProperty;
+import org.praxislive.impl.SimpleControl;
 
 /**
  *
@@ -198,7 +200,7 @@ public class Button extends SingleBindingGuiComponent {
         }
     }
 
-    private class OnClickLog implements Control {
+    private class OnClickLog extends AbstractControl {
 
         public void call(Call call, PacketRouter router) throws Exception {
             if (call.getType() == Call.Type.ERROR) {

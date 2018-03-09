@@ -23,8 +23,8 @@ package org.praxislive.video.components.timefx;
 
 import org.praxislive.core.Port;
 import org.praxislive.impl.AbstractComponent;
-import org.praxislive.video.impl.DefaultVideoInputPort;
-import org.praxislive.video.impl.DefaultVideoOutputPort;
+import org.praxislive.video.impl.VideoInputPortEx;
+import org.praxislive.video.impl.VideoOutputPortEx;
 import org.praxislive.video.pipes.impl.MultiInOut;
 import org.praxislive.video.pipes.impl.Placeholder;
 import org.praxislive.video.render.PixelData;
@@ -49,9 +49,9 @@ public class Ripple extends AbstractComponent {
         disturbance = new Placeholder();
         rip.addSource(input);
         rip.addSource(disturbance);
-        registerPort(Port.IN, new DefaultVideoInputPort(this, input));
-        registerPort("disturbance", new DefaultVideoInputPort(this, disturbance));
-        registerPort(Port.OUT, new DefaultVideoOutputPort(this, rip));
+        registerPort(PortEx.IN, new VideoInputPortEx(this, input));
+        registerPort("disturbance", new VideoInputPortEx(this, disturbance));
+        registerPort(PortEx.OUT, new VideoOutputPortEx(this, rip));
 //        } catch (SinkIsFullException ex) {
 //            Logger.getLogger(Ripple.class.getName()).log(Level.SEVERE, null, ex);
 //        } catch (SourceIsFullException ex) {

@@ -38,7 +38,7 @@ import org.praxislive.core.types.PString;
  *
  * @author Neil C Smith
  */
-public abstract class AbstractControl implements AbstractComponent.ExtendedControl {
+public abstract class AbstractControl implements AbstractComponent.ControlEx {
 
     private AbstractComponent host;
     private ControlAddress address;

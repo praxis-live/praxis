@@ -58,8 +58,8 @@ public class VideoCapture extends AbstractVideoComponent {
         suggestedValues = Collections.unmodifiableList(list);
     }
 
-    private final ControlPort.Output readyPort;
-    private final ControlPort.Output errorPort;
+    private final DefaultControlOutputPort readyPort;
+    private final DefaultControlOutputPort errorPort;
     
     private DelegateLoader loader;
 

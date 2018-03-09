@@ -40,7 +40,7 @@ import org.praxislive.video.ClientConfiguration;
 import org.praxislive.video.ClientRegistrationException;
 import org.praxislive.video.VideoContext;
 import org.praxislive.video.WindowHints;
-import org.praxislive.video.impl.DefaultVideoInputPort;
+import org.praxislive.video.impl.VideoInputPortEx;
 import org.praxislive.video.pipes.VideoPipe;
 import org.praxislive.video.pipes.impl.Placeholder;
 
@@ -65,7 +65,7 @@ public class VideoOutput extends AbstractComponent {
 
     public VideoOutput() {
         placeholder = new Placeholder();
-        registerPort(Port.IN, new DefaultVideoInputPort(placeholder));
+        registerPort(PortEx.IN, new VideoInputPortEx(placeholder));
         client = new OutputClientImpl();
         wHints = new WindowHints();
 

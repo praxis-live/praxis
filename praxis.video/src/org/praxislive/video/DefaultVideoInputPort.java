@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.video.impl;
+package org.praxislive.video;
 
 import org.praxislive.core.PortListener;
 import org.praxislive.core.Component;
@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.praxislive.impl.PortListenerSupport;
-import org.praxislive.video.VideoPort;
 import org.praxislive.video.pipes.VideoPipe;
 import org.praxislive.video.pipes.impl.MultiInOut;
 import org.praxislive.video.render.Surface;
@@ -51,11 +50,6 @@ public class DefaultVideoInputPort extends VideoPort.Input {
     
     private VideoPipe portSink;
     private Mixer mixer;
-
-    @Deprecated
-    public DefaultVideoInputPort(Component host, VideoPipe sink) {
-        this(sink);
-    }
 
     public DefaultVideoInputPort(VideoPipe sink) {
         if (sink == null) {

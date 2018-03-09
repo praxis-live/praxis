@@ -26,8 +26,8 @@ import org.praxislive.impl.AbstractComponent;
 import org.praxislive.impl.BooleanProperty;
 import org.praxislive.impl.NumberProperty;
 import org.praxislive.impl.StringProperty;
-import org.praxislive.video.impl.DefaultVideoInputPort;
-import org.praxislive.video.impl.DefaultVideoOutputPort;
+import org.praxislive.video.impl.VideoInputPortEx;
+import org.praxislive.video.impl.VideoOutputPortEx;
 import org.praxislive.video.pipes.impl.MultiInOut;
 import org.praxislive.video.pipes.impl.Placeholder;
 import org.praxislive.video.render.Surface;
@@ -64,9 +64,9 @@ public class Composite extends AbstractComponent {
         comp.addSource(dst);
         comp.addSource(src);
 
-        registerPort(Port.IN, new DefaultVideoInputPort(dst));
-        registerPort("src", new DefaultVideoInputPort(src));
-        registerPort(Port.OUT, new DefaultVideoOutputPort(comp));
+        registerPort(PortEx.IN, new VideoInputPortEx(dst));
+        registerPort("src", new VideoInputPortEx(src));
+        registerPort(PortEx.OUT, new VideoOutputPortEx(comp));
 
         StringProperty mode = createModeControl();
         registerControl("mode", mode);

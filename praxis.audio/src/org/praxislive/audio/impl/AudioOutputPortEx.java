@@ -19,15 +19,20 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
+package org.praxislive.audio.impl;
 
-package org.praxislive.core;
+import org.jaudiolibs.pipes.Pipe;
+import org.praxislive.audio.DefaultAudioOutputPort;
+import org.praxislive.impl.AbstractComponent;
 
 /**
  *
  * @author Neil C Smith
  */
-public interface Control {
+public class AudioOutputPortEx extends DefaultAudioOutputPort implements AbstractComponent.PortEx {
 
-    public void call(Call call, PacketRouter router) throws Exception;
-    
+    public AudioOutputPortEx(Pipe source) {
+        super(source);
+    }
+
 }

@@ -23,8 +23,8 @@
 
 package org.praxislive.audio.components.mix;
 
-import org.praxislive.audio.impl.DefaultAudioInputPort;
-import org.praxislive.audio.impl.DefaultAudioOutputPort;
+import org.praxislive.audio.impl.AudioInputPortEx;
+import org.praxislive.audio.impl.AudioOutputPortEx;
 import org.praxislive.core.Port;
 import org.praxislive.impl.AbstractComponent;
 import org.praxislive.impl.NumberProperty;
@@ -56,9 +56,9 @@ public class XFader extends AbstractComponent {
         } catch (Exception ex) {
             throw new Error();
         }
-        registerPort(Port.IN + "-1", new DefaultAudioInputPort(g1h));
-        registerPort(Port.IN + "-2", new DefaultAudioInputPort(g2h));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(mixer));
+        registerPort(PortEx.IN + "-1", new AudioInputPortEx(g1h));
+        registerPort(PortEx.IN + "-2", new AudioInputPortEx(g2h));
+        registerPort(PortEx.OUT, new AudioOutputPortEx(mixer));
         NumberProperty mix = NumberProperty.create( new MixBinding(), 0, 1, 0);
         registerControl("mix", mix);
         registerPort("mix", mix.createPort());

@@ -36,8 +36,8 @@ public class StartTrigger extends AbstractExecutionContextComponent {
     private DefaultControlOutputPort output;
     
     public StartTrigger() {
-        output = new DefaultControlOutputPort(this);
-        registerPort(Port.OUT, output);
+        output = new DefaultControlOutputPort();
+        registerPort(PortEx.OUT, output);
     }
 
     public void stateChanged(ExecutionContext source) {

@@ -25,7 +25,6 @@ package org.praxislive.impl;
 import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
-import org.praxislive.core.Control;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Port;
 import org.praxislive.core.ControlInfo;
@@ -34,7 +33,7 @@ import org.praxislive.core.ControlInfo;
  *
  * @author Neil C Smith
  */
-public class TriggerControl implements Control {
+public class TriggerControl implements AbstractComponent.ControlEx {
     
     private ControlInfo info;
     private Binding binding;
@@ -48,7 +47,7 @@ public class TriggerControl implements Control {
         return info;
     }
     
-    public Port createPort() {
+    public InputPort createPort() {
         return new InputPort();
     }
 
@@ -68,7 +67,7 @@ public class TriggerControl implements Control {
     }
     
     
-    private class InputPort extends AbstractControlInputPort {
+    public class InputPort extends AbstractControlInputPort {
         
         private InputPort() {
         }

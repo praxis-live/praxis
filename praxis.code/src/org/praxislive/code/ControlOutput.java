@@ -114,11 +114,6 @@ public class ControlOutput extends ControlPort.Output {
     }
 
     @Override
-    public PortInfo getInfo() {
-        return INFO;
-    }
-
-    @Override
     public void send(long time, double value) {
         if (sending) {
             return; // @TODO recursion strategy - allow up to maximum count?

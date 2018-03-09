@@ -32,7 +32,7 @@ import org.praxislive.core.ControlInfo;
  *
  * @author Neil C Smith
  */
-public abstract class SimpleControl implements Control {
+public abstract class SimpleControl implements AbstractComponent.ControlEx {
 
     private final static Logger LOG = Logger.getLogger(SimpleControl.class.getName());
     
@@ -60,6 +60,18 @@ public abstract class SimpleControl implements Control {
         if (out != null) {
             router.route(Call.createReturnCall(call, out));
         }
+    }
+
+    @Override
+    public void addNotify(AbstractComponent component) {
+    }
+
+    @Override
+    public void removeNotify(AbstractComponent component) {
+    }
+
+    @Override
+    public void hierarchyChanged() {
     }
 
     public final ControlInfo getInfo() {

@@ -302,7 +302,7 @@ class MasterClientRoot extends AbstractRoot {
 
     }
 
-    private class RootControl implements Control {
+    private class RootControl implements ControlEx {
 
         private final boolean add;
 

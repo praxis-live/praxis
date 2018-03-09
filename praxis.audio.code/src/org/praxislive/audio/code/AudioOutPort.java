@@ -25,7 +25,6 @@ package org.praxislive.audio.code;
 import java.lang.reflect.Field;
 import org.praxislive.audio.AudioPort;
 import org.praxislive.audio.code.userapi.AudioOut;
-import org.praxislive.audio.impl.DefaultAudioOutputPort;
 import org.praxislive.code.CodeConnector;
 import org.praxislive.code.CodeContext;
 import org.praxislive.code.PortDescriptor;
@@ -37,6 +36,7 @@ import org.praxislive.core.types.PMap;
 import org.praxislive.logging.LogLevel;
 import org.jaudiolibs.pipes.Buffer;
 import org.jaudiolibs.pipes.Pipe;
+import org.praxislive.audio.DefaultAudioOutputPort;
 
 /**
  *

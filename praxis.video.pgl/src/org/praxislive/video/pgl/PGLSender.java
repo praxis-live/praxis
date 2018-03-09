@@ -28,8 +28,8 @@ import org.praxislive.core.Port;
 import org.praxislive.impl.AbstractExecutionContextComponent;
 import org.praxislive.impl.StringProperty;
 import org.praxislive.impl.TriggerControl;
-import org.praxislive.video.impl.DefaultVideoInputPort;
-import org.praxislive.video.impl.DefaultVideoOutputPort;
+import org.praxislive.video.impl.VideoInputPortEx;
+import org.praxislive.video.impl.VideoOutputPortEx;
 import org.praxislive.video.pipes.impl.SingleInOut;
 import org.praxislive.video.render.Surface;
 import processing.core.PGraphics;
@@ -50,8 +50,8 @@ public final class PGLSender extends AbstractExecutionContextComponent {
     public PGLSender() {
         delegator = new Delegator();
         textureSharer = PGLTextureSharer.find().orElse(null);
-        registerPort(Port.IN, new DefaultVideoInputPort(delegator));
-        registerPort(Port.OUT, new DefaultVideoOutputPort(delegator));
+        registerPort(PortEx.IN, new VideoInputPortEx(delegator));
+        registerPort(PortEx.OUT, new VideoOutputPortEx(delegator));
         registerControl("server-id", StringProperty.builder().binding(new StringProperty.Binding() {
             @Override
             public void setBoundValue(long time, String value) {

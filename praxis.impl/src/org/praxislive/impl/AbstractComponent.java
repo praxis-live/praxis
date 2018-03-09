@@ -34,7 +34,6 @@ import org.praxislive.core.ControlAddress;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Port;
-import org.praxislive.core.Root;
 import org.praxislive.core.VetoException;
 import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.ControlInfo;
@@ -52,8 +51,8 @@ import org.praxislive.core.types.PMap;
  */
 public abstract class AbstractComponent implements Component {
 
-    private final Map<String, Control> controlMap;
-    private final Map<String, Port> portMap;
+    private final Map<String, ControlEx> controlMap;
+    private final Map<String, PortEx> portMap;
     private final Set<Class<? extends Protocol>> interfaceSet;
     
     private Container parent;
@@ -93,14 +92,14 @@ public abstract class AbstractComponent implements Component {
         registerProtocol(ComponentProtocol.class);
     }
 
-    public Control getControl(String id) {
+    public ControlEx getControl(String id) {
         return controlMap.get(id);
     }
 
-    public ControlAddress getAddress(Control control) {
+    public ControlAddress getAddress(ControlEx control) {
         ComponentAddress thisAddress = getAddress();
         if (thisAddress != null) {
-            for (Map.Entry<String, Control> entry : controlMap.entrySet()) {
+            for (Map.Entry<String, ControlEx> entry : controlMap.entrySet()) {
                 if (entry.getValue() == control) {
                     return ControlAddress.create(thisAddress, entry.getKey());
                 }
@@ -120,7 +119,7 @@ public abstract class AbstractComponent implements Component {
      * @param control
      */
     // @TODO only nullify info if control is visible
-    protected void registerControl(String id, Control control) {
+    protected void registerControl(String id, ControlEx control) {
         if (id == null || control == null) {
             throw new NullPointerException();
         }
@@ -128,8 +127,8 @@ public abstract class AbstractComponent implements Component {
             throw new IllegalArgumentException();
         }
         controlMap.put(id, control);
-        if (control instanceof ExtendedControl) {
-            ExtendedControl exc = (ExtendedControl) control;
+        if (control instanceof ControlEx) {
+            ControlEx exc = (ControlEx) control;
             exc.addNotify(this);
             exc.hierarchyChanged();
         }
@@ -141,10 +140,10 @@ public abstract class AbstractComponent implements Component {
      * @param id
      * @return
      */
-    protected Control unregisterControl(String id) {
-        Control control = controlMap.remove(id);
-        if (control instanceof ExtendedControl) {
-            ExtendedControl exc = (ExtendedControl) control;
+    protected ControlEx unregisterControl(String id) {
+        ControlEx control = controlMap.remove(id);
+        if (control instanceof ControlEx) {
+            ControlEx exc = (ControlEx) control;
             exc.removeNotify(this);
             exc.hierarchyChanged();
         }
@@ -158,7 +157,7 @@ public abstract class AbstractComponent implements Component {
         info = null;
     }
 
-    public Port getPort(String id) {
+    public PortEx getPort(String id) {
         return portMap.get(id);
     }
 
@@ -172,7 +171,7 @@ public abstract class AbstractComponent implements Component {
      * @param id
      * @param port
      */
-    protected void registerPort(String id, Port port) {
+    protected void registerPort(String id, PortEx port) {
         if (id == null || port == null) {
             throw new NullPointerException();
         }
@@ -188,8 +187,8 @@ public abstract class AbstractComponent implements Component {
      * @param id
      * @return
      */
-    protected Port unregisterPort(String id) {
-        Port port = portMap.remove(id);
+    protected PortEx unregisterPort(String id) {
+        PortEx port = portMap.remove(id);
         if (port != null) {
 //            port.removeConnectionListener(portListener);
             port.disconnectAll();
@@ -241,7 +240,7 @@ public abstract class AbstractComponent implements Component {
     }
 
     private void disconnectAll() {
-        for (Port p : portMap.values()) {
+        for (PortEx p : portMap.values()) {
             p.disconnectAll();
         }
     }
@@ -249,10 +248,10 @@ public abstract class AbstractComponent implements Component {
     public void hierarchyChanged() {
         address = null;
         router = null;
-        for (Map.Entry<String, Control> entry : controlMap.entrySet()) {
-            Control c = entry.getValue();
-            if (c instanceof ExtendedControl) {
-                ((ExtendedControl) c).hierarchyChanged();
+        for (Map.Entry<String, ControlEx> entry : controlMap.entrySet()) {
+            ControlEx c = entry.getValue();
+            if (c instanceof ControlEx) {
+                ((ControlEx) c).hierarchyChanged();
             }
         }
     }
@@ -272,8 +271,8 @@ public abstract class AbstractComponent implements Component {
 
     private Map<String, ControlInfo> buildControlInfoMap() {
         Map<String, ControlInfo> infos = new LinkedHashMap<String, ControlInfo>();
-        Set<Map.Entry<String, Control>> controls = controlMap.entrySet();
-        for (Map.Entry<String, Control> entry : controls) {
+        Set<Map.Entry<String, ControlEx>> controls = controlMap.entrySet();
+        for (Map.Entry<String, ControlEx> entry : controls) {
             ControlInfo inf = entry.getValue().getInfo();
             if (inf != null) {
                 infos.put(entry.getKey(), inf);
@@ -284,8 +283,8 @@ public abstract class AbstractComponent implements Component {
 
     private Map<String, PortInfo> buildPortInfoMap() {
         Map<String, PortInfo> infos = new LinkedHashMap<String, PortInfo>();
-        Set<Map.Entry<String, Port>> ports = portMap.entrySet();
-        for (Map.Entry<String, Port> entry : ports) {
+        Set<Map.Entry<String, PortEx>> ports = portMap.entrySet();
+        for (Map.Entry<String, PortEx> entry : ports) {
             PortInfo inf = entry.getValue().getInfo();
             if (inf != null) {
                 infos.put(entry.getKey(), inf);
@@ -320,12 +319,21 @@ public abstract class AbstractComponent implements Component {
         }
     }
 
-    public static interface ExtendedControl extends Control {
+    public static interface ControlEx extends Control {
 
-        public void addNotify(AbstractComponent component);
+        public default void addNotify(AbstractComponent component) {}
 
-        public void removeNotify(AbstractComponent component);
+        public default void removeNotify(AbstractComponent component) {}
 
-        public void hierarchyChanged();
+        public default void hierarchyChanged() {};
+
+        public ControlInfo getInfo();
+        
+    }
+    
+    public static interface PortEx extends Port {
+        
+        public PortInfo getInfo();
+        
     }
 }

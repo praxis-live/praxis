@@ -45,12 +45,6 @@ public class InfoProperty implements Control {
         }
     }
 
-    @Override
-    public ControlInfo getInfo() {
-        return ComponentProtocol.INFO_INFO;
-
-    }
-
     public static class Descriptor extends ControlDescriptor {
 
         private final InfoProperty control;
@@ -62,7 +56,7 @@ public class InfoProperty implements Control {
 
         @Override
         public ControlInfo getInfo() {
-            return control.getInfo();
+            return ComponentProtocol.INFO_INFO;
         }
 
         @Override

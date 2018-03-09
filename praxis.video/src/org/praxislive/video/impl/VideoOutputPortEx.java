@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2010 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,36 +19,25 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.core;
+package org.praxislive.video.impl;
+
+import org.praxislive.core.Component;
+import org.praxislive.impl.AbstractComponent;
+import org.praxislive.video.DefaultVideoOutputPort;
+import org.praxislive.video.pipes.VideoPipe;
 
 /**
  *
  * @author Neil C Smith
  */
-public class RegistrationException extends Exception {
-
-    /**
-     * Creates a new instance of
-     * <code>PortRegistrationException</code> without detail message.
-     */
-    public RegistrationException() {
+public class VideoOutputPortEx extends DefaultVideoOutputPort implements AbstractComponent.PortEx {
+    
+    @Deprecated
+    public VideoOutputPortEx(Component host, VideoPipe source) {
+        this(source);
     }
 
-    /**
-     * Constructs an instance of
-     * <code>PortRegistrationException</code> with the specified detail message.
-     *
-     * @param msg the detail message.
-     */
-    public RegistrationException(String msg) {
-        super(msg);
-    }
-
-    public RegistrationException(Throwable cause) {
-        super(cause);
-    }
-
-    public RegistrationException(String msg, Throwable cause) {
-        super(msg, cause);
+    public VideoOutputPortEx(VideoPipe source) {
+        super(source);
     }
 }

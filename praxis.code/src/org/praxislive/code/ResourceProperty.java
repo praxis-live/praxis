@@ -96,11 +96,6 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
     }
 
     @Override
-    public ControlInfo getInfo() {
-        return INFO;
-    }
-
-    @Override
     protected void valueChanged(long time) {
         try {
             field.set(context.getDelegate(), getValue());

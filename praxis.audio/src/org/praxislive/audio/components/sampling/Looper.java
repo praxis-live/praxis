@@ -22,8 +22,8 @@
 package org.praxislive.audio.components.sampling;
 
 import java.util.logging.Logger;
-import org.praxislive.audio.impl.DefaultAudioInputPort;
-import org.praxislive.audio.impl.DefaultAudioOutputPort;
+import org.praxislive.audio.impl.AudioInputPortEx;
+import org.praxislive.audio.impl.AudioOutputPortEx;
 import org.praxislive.audio.io.SampleTable;
 import org.praxislive.core.Port;
 import org.praxislive.core.ControlInfo;
@@ -49,8 +49,8 @@ public class Looper extends AbstractComponent {
     public Looper() {
         looper = new LooperUG();
         looper.setLoopSize(1);
-        registerPort(Port.IN, new DefaultAudioInputPort(looper));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(looper));
+        registerPort(PortEx.IN, new AudioInputPortEx(looper));
+        registerPort(PortEx.OUT, new AudioOutputPortEx(looper));
         buildControls();
     }
 

@@ -28,7 +28,7 @@ import org.praxislive.core.Port;
 import org.praxislive.impl.AbstractExecutionContextComponent;
 import org.praxislive.impl.StringProperty;
 import org.praxislive.impl.TriggerControl;
-import org.praxislive.video.impl.DefaultVideoOutputPort;
+import org.praxislive.video.impl.VideoOutputPortEx;
 import org.praxislive.video.pipes.impl.SingleOut;
 import org.praxislive.video.render.Surface;
 import processing.core.PGraphics;
@@ -49,7 +49,7 @@ public final class PGLReceiver extends AbstractExecutionContextComponent {
     public PGLReceiver() {
         delegator = new Delegator();
         textureSharer = PGLTextureSharer.find().orElse(null);
-        registerPort(Port.OUT, new DefaultVideoOutputPort(delegator));
+        registerPort(PortEx.OUT, new VideoOutputPortEx(delegator));
         registerControl("server-id", StringProperty.builder().binding(new StringProperty.Binding() {
             @Override
             public void setBoundValue(long time, String value) {

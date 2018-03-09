@@ -58,7 +58,7 @@ class DeviceProperty extends AbstractBasicProperty {
         return PString.valueOf(context.getUID());
     }
 
-    @Override
+//    @Override
     public ControlInfo getInfo() {
         return INFO;
     }

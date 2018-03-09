@@ -177,7 +177,7 @@ public class MidiControlIn extends AbstractMidiInComponent {
 
     }
 
-    private class LogControl implements Control {
+    private class LogControl implements ControlEx {
 
         public void call(Call call, PacketRouter router) throws Exception {
             if (call.getType() != Call.Type.RETURN) {

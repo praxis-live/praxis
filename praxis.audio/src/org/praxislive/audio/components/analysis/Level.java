@@ -21,14 +21,11 @@
  */
 package org.praxislive.audio.components.analysis;
 
-import org.praxislive.audio.impl.DefaultAudioInputPort;
-import org.praxislive.audio.impl.DefaultAudioOutputPort;
-import org.praxislive.core.ControlPort;
+import org.praxislive.audio.impl.AudioInputPortEx;
+import org.praxislive.audio.impl.AudioOutputPortEx;
 import org.praxislive.core.ExecutionContext;
-import org.praxislive.core.Port;
 import org.praxislive.impl.AbstractClockComponent;
 import org.praxislive.impl.DefaultControlOutputPort;
-import org.praxislive.impl.TriggerControl;
 import org.jaudiolibs.pipes.Buffer;
 import org.jaudiolibs.pipes.impl.SingleInOut;
 
@@ -40,14 +37,14 @@ import org.jaudiolibs.pipes.impl.SingleInOut;
 public class Level extends AbstractClockComponent {
     
     private AudioMeasure cmp;
-    private ControlPort.Output out;
+    private DefaultControlOutputPort out;
     private float[] cache;
     
     public Level() {
         cmp = new AudioMeasure();
         out = new DefaultControlOutputPort();
-        registerPort(Port.IN, new DefaultAudioInputPort(cmp));
-        registerPort(Port.OUT, new DefaultAudioOutputPort(cmp));
+        registerPort(PortEx.IN, new AudioInputPortEx(cmp));
+        registerPort(PortEx.OUT, new AudioOutputPortEx(cmp));
         registerPort("level", out);
     }
     

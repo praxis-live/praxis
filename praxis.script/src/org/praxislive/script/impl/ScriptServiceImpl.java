@@ -94,7 +94,7 @@ public class ScriptServiceImpl extends AbstractRoot {
     }
 
 
-    private class EvalControl implements Control {
+    private class EvalControl implements ControlEx {
 
         public void call(Call call, PacketRouter router) throws Exception {
             switch (call.getType()) {
@@ -114,7 +114,7 @@ public class ScriptServiceImpl extends AbstractRoot {
 
     }
 
-    private class ClearControl implements Control {
+    private class ClearControl implements ControlEx {
 
         public void call(Call call, PacketRouter router) throws Exception {
             switch (call.getType()) {
@@ -137,7 +137,7 @@ public class ScriptServiceImpl extends AbstractRoot {
     }
 
 
-    private class ScriptControl implements Control {
+    private class ScriptControl implements ControlEx {
 
         private ScriptExecutor executor;
 

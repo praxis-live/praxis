@@ -23,13 +23,12 @@ package org.praxislive.video.components.container;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.ContainerContext;
-import org.praxislive.core.Port;
-import org.praxislive.core.RegistrationException;
+import org.praxislive.impl.ContainerContext;
+import org.praxislive.impl.RegistrationException;
 import org.praxislive.impl.AbstractComponent;
 import org.praxislive.video.VideoPort;
-import org.praxislive.video.impl.DefaultVideoInputPort;
-import org.praxislive.video.impl.DefaultVideoOutputPort;
+import org.praxislive.video.impl.VideoInputPortEx;
+import org.praxislive.video.impl.VideoOutputPortEx;
 import org.praxislive.video.pipes.impl.Placeholder;
 
 /**
@@ -40,13 +39,13 @@ public class VideoContainerInput extends AbstractComponent {
     
     private ContainerContext context;
     private String id;
-    private VideoPort.Input containerPort;
+    private VideoInputPortEx containerPort;
 
     public VideoContainerInput() {
         Placeholder pl = new Placeholder();
-        VideoPort.Output output = new DefaultVideoOutputPort(pl);
-        containerPort = new DefaultVideoInputPort(pl);
-        registerPort(Port.OUT, output);
+        VideoOutputPortEx output = new VideoOutputPortEx(pl);
+        containerPort = new VideoInputPortEx(pl);
+        registerPort(PortEx.OUT, output);
     }
 
     @Override

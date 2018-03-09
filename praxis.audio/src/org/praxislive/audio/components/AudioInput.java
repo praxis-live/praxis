@@ -27,8 +27,8 @@ import java.util.logging.Logger;
 import org.praxislive.audio.AudioContext;
 import org.praxislive.audio.AudioPort;
 import org.praxislive.audio.ClientRegistrationException;
-import org.praxislive.audio.impl.DefaultAudioInputPort;
-import org.praxislive.audio.impl.DefaultAudioOutputPort;
+import org.praxislive.audio.impl.AudioInputPortEx;
+import org.praxislive.audio.impl.AudioOutputPortEx;
 import org.praxislive.core.Port;
 import org.praxislive.impl.AbstractComponent;
 import org.praxislive.impl.IntProperty;
@@ -94,14 +94,14 @@ public class AudioInput extends AbstractComponent {
         for (int i=0; i<MAX_CHANNELS; i++) {
             if (i < channelCount) {
                 if (ports[i] == null) {
-                    AudioPort.Output port = new DefaultAudioOutputPort(placeholders[i]);
-                    registerPort(Port.OUT + "-" + (i+1), port);
+                    AudioOutputPortEx port = new AudioOutputPortEx(placeholders[i]);
+                    registerPort(PortEx.OUT + "-" + (i+1), port);
                     ports[i] = port;
                 }
             } else {
                 if (ports[i] != null) {
                     // unregister will disconnect all
-                    unregisterPort(Port.OUT + "-" + (i+1));
+                    unregisterPort(PortEx.OUT + "-" + (i+1));
                     ports[i] = null;
                 }
             }

@@ -27,8 +27,8 @@ import org.praxislive.code.PortDescriptor;
 import org.praxislive.core.Port;
 import org.praxislive.core.PortInfo;
 import org.praxislive.core.types.PMap;
+import org.praxislive.video.DefaultVideoOutputPort;
 import org.praxislive.video.VideoPort;
-import org.praxislive.video.impl.DefaultVideoOutputPort;
 import org.praxislive.video.pipes.VideoPipe;
 import org.praxislive.video.pipes.impl.Placeholder;
 

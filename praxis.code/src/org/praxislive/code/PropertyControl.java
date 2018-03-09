@@ -32,7 +32,6 @@ import org.praxislive.code.userapi.Property;
 import org.praxislive.code.userapi.ReadOnly;
 import org.praxislive.code.userapi.Transient;
 import org.praxislive.code.userapi.Type;
-import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
@@ -165,11 +164,6 @@ public class PropertyControl extends Property implements Control {
         } else {
 //            throw new IllegalValueException();
         }
-    }
-
-    @Override
-    public ControlInfo getInfo() {
-        return info;
     }
 
     private void setLatest(long time) {

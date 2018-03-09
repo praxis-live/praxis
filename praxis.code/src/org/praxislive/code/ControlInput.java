@@ -116,11 +116,6 @@ public class ControlInput extends ControlPort.Input {
     }
 
     @Override
-    public PortInfo getInfo() {
-        return INFO;
-    }
-
-    @Override
     public void receive(long time, double value) {
         link.receive(time, value);
     }

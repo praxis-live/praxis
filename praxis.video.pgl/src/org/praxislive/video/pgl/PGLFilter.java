@@ -29,8 +29,8 @@ import org.praxislive.impl.AbstractExecutionContextComponent;
 import org.praxislive.impl.BooleanProperty;
 import org.praxislive.impl.NumberProperty;
 import org.praxislive.impl.StringProperty;
-import org.praxislive.video.impl.DefaultVideoInputPort;
-import org.praxislive.video.impl.DefaultVideoOutputPort;
+import org.praxislive.video.impl.VideoInputPortEx;
+import org.praxislive.video.impl.VideoOutputPortEx;
 import org.praxislive.video.pipes.impl.MultiInOut;
 import org.praxislive.video.pipes.impl.Placeholder;
 import org.praxislive.video.render.Surface;
@@ -107,8 +107,8 @@ public class PGLFilter extends AbstractExecutionContextComponent {
         try {
             Placeholder in = new Placeholder();
             delegate.addSource(in);
-            registerPort(Port.IN, new DefaultVideoInputPort(in));
-            registerPort(Port.OUT, new DefaultVideoOutputPort(delegate));
+            registerPort(PortEx.IN, new VideoInputPortEx(in));
+            registerPort(PortEx.OUT, new VideoOutputPortEx(delegate));
 //            registerControl("fragment", ArgumentProperty.create(
 //                    ArgumentInfo.create(PString.class,
 //                    PMap.create(PString.KEY_MIME_TYPE, "text/x-glsl-frag",
