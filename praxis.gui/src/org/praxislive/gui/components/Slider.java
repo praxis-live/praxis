@@ -41,7 +41,7 @@ import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PNumber;
 import org.praxislive.core.types.PString;
-import org.praxislive.gui.ControlBinding.Adaptor;
+import org.praxislive.impl.swing.ControlBinding.Adaptor;
 import org.praxislive.impl.ArgumentProperty;
 
 /**

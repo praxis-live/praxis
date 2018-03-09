@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.gui.impl;
+package org.praxislive.impl.swing;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,7 +38,7 @@ import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.protocols.ComponentProtocol;
-import org.praxislive.gui.ControlBinding;
+import org.praxislive.impl.swing.ControlBinding;
 import org.praxislive.impl.AbstractControl;
 
 /**

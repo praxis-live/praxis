@@ -41,8 +41,8 @@ import javax.swing.text.Keymap;
 import net.miginfocom.swing.MigLayout;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.types.PString;
-import org.praxislive.gui.ControlBinding;
-import org.praxislive.gui.ControlBinding.Adaptor;
+import org.praxislive.impl.swing.ControlBinding;
+import org.praxislive.impl.swing.ControlBinding.Adaptor;
 import org.praxislive.gui.impl.SingleBindingGuiComponent;
 
 /**

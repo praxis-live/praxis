@@ -50,7 +50,7 @@ import org.praxislive.core.services.ScriptService;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;
-import org.praxislive.gui.ControlBinding.Adaptor;
+import org.praxislive.impl.swing.ControlBinding.Adaptor;
 import org.praxislive.gui.impl.ActionAdaptor;
 import org.praxislive.gui.impl.SingleBindingGuiComponent;
 import org.praxislive.impl.AbstractControl;

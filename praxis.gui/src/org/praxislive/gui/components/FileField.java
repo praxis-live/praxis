@@ -39,8 +39,8 @@ import org.praxislive.core.Value;
 import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.types.PResource;
-import org.praxislive.gui.ControlBinding;
-import org.praxislive.gui.ControlBinding.Adaptor;
+import org.praxislive.impl.swing.ControlBinding;
+import org.praxislive.impl.swing.ControlBinding.Adaptor;
 import org.praxislive.gui.impl.SingleBindingGuiComponent;
 import org.praxislive.impl.StringProperty;
 

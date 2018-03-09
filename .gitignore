@@ -165,3 +165,6 @@
 /praxis.video.components/nbproject/private/
 /praxis.audio.components/build/
 /praxis.video.components/build/
+/praxis.audio.impl/nbproject/private/
+/praxis.video.impl/nbproject/private/
+/praxis.impl.swing/build/

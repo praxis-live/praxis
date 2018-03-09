@@ -147,7 +147,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         throw new IllegalRootStateException();
     }
 
-    void disconnect() {
+    protected void disconnect() {
         this.router = null;
         this.lookup = Lookup.EMPTY;
         for (String id : getChildIDs()) {

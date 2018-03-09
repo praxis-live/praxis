@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.impl;
+package org.praxislive.impl.swing;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -32,6 +32,8 @@ import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.Packet;
 import org.praxislive.core.Root;
 import org.praxislive.core.RootHub;
+import org.praxislive.impl.AbstractRoot;
+import org.praxislive.impl.RootState;
 
 /**
  *
@@ -112,7 +114,7 @@ public class AbstractSwingRoot extends AbstractRoot {
     }
 
     @Override
-    final void disconnect() {
+    final protected void disconnect() {
         try {
             EventQueue.invokeAndWait(new Runnable() {
 

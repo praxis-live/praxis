@@ -37,7 +37,7 @@ import javax.swing.plaf.basic.BasicToggleButtonUI;
 import org.praxislive.core.Value;
 import org.praxislive.core.types.PBoolean;
 import org.praxislive.gui.impl.SingleBindingGuiComponent;
-import org.praxislive.gui.ControlBinding.Adaptor;
+import org.praxislive.impl.swing.ControlBinding.Adaptor;
 import org.praxislive.gui.impl.ToggleButtonModelAdaptor;
 import org.praxislive.impl.ArgumentProperty;
 

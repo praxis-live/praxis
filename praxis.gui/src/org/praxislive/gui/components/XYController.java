@@ -38,7 +38,7 @@ import org.praxislive.core.types.PNumber;
 import org.praxislive.core.types.PString;
 import org.praxislive.gui.impl.AbstractGuiComponent;
 import org.praxislive.gui.impl.BoundedValueAdaptor;
-import org.praxislive.gui.BindingContext;
+import org.praxislive.impl.swing.BindingContext;
 import org.praxislive.impl.ArgumentProperty;
 import org.praxislive.impl.StringProperty;
 

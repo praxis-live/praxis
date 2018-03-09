@@ -20,7 +20,7 @@
  * have any questions.
  */
 
-package org.praxislive.gui;
+package org.praxislive.impl.swing;
 
 import org.praxislive.core.ControlAddress;
 

@@ -28,8 +28,8 @@ import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;
-import org.praxislive.gui.ControlBinding;
-import org.praxislive.gui.BindingContext;
+import org.praxislive.impl.swing.ControlBinding;
+import org.praxislive.impl.swing.BindingContext;
 import org.praxislive.impl.ArgumentProperty;
 
 /**

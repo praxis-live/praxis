@@ -28,7 +28,7 @@ import java.awt.event.ActionListener;
 import java.util.logging.Logger;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ControlInfo;
-import org.praxislive.gui.ControlBinding;
+import org.praxislive.impl.swing.ControlBinding;
 
 /**
  *
