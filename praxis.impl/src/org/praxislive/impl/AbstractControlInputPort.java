@@ -21,6 +21,7 @@
  */
 package org.praxislive.impl;
 
+import org.praxislive.util.PortListenerSupport;
 import org.praxislive.core.PortListener;
 import java.util.ArrayList;
 import java.util.Arrays;

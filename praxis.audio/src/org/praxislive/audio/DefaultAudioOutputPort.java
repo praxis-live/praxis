@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.impl.PortListenerSupport;
+import org.praxislive.util.PortListenerSupport;
 import org.jaudiolibs.pipes.Pipe;
 import org.jaudiolibs.pipes.impl.Splitter;
 

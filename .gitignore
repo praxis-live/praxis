@@ -159,3 +159,9 @@
 /praxis.video.pgl.spout/build/
 /lib.spout/build/
 /praxis.video.pgl.spout/nbproject/private/
+/praxis.audio.impl/build/
+/praxis.audio.components/nbproject/private/
+/praxis.video.impl/build/
+/praxis.video.components/nbproject/private/
+/praxis.audio.components/build/
+/praxis.video.components/build/

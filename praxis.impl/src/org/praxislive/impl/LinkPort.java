@@ -21,6 +21,7 @@
  */
 package org.praxislive.impl;
 
+import org.praxislive.util.PortListenerSupport;
 import java.util.logging.Logger;
 import org.praxislive.util.ArrayUtils;
 import org.praxislive.core.Port;

@@ -23,13 +23,12 @@ package org.praxislive.video;
 
 import org.praxislive.core.PortListener;
 import org.praxislive.core.Port;
-import org.praxislive.core.Component;
 import org.praxislive.core.PortConnectionException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.impl.PortListenerSupport;
+import org.praxislive.util.PortListenerSupport;
 import org.praxislive.video.pipes.VideoPipe;
 import org.praxislive.video.pipes.impl.MultiInOut;
 import org.praxislive.video.render.Surface;
@@ -50,11 +49,6 @@ public class DefaultVideoOutputPort extends VideoPort.Output {
     private VideoPipe portSource;
     private Splitter splitter;
     
-    @Deprecated
-    public DefaultVideoOutputPort(Component host, VideoPipe source) {
-        this(source);
-    }
-
     public DefaultVideoOutputPort(VideoPipe source) {
         if (source == null) {
             throw new NullPointerException();

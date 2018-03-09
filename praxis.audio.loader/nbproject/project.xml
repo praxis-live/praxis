@@ -9,6 +9,7 @@
             <friend-packages>
                 <friend>org.praxislive.audio</friend>
                 <friend>org.praxislive.audio.code</friend>
+                <friend>org.praxislive.audio.impl</friend>
                 <package>org.praxislive.audio.io</package>
             </friend-packages>
         </data>
