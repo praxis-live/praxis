@@ -38,25 +38,31 @@ import static org.praxislive.code.userapi.Constants.*;
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-@GenerateTemplate(CoreProperty.TEMPLATE_PATH)
-public class CoreProperty extends CoreCodeDelegate {
+@GenerateTemplate(CoreRoutingInhibitor.TEMPLATE_PATH)
+public class CoreRoutingInhibitor extends CoreCodeDelegate {
     
-    final static String TEMPLATE_PATH = "resources/property.pxj";
+    final static String TEMPLATE_PATH = "resources/routing_inhibitor.pxj";
 
     // PXJ-BEGIN:body
 
-    @P(1) @Config.Port(false) @OnChange("valueChanged")
-    Property value;
-
-    @Out(1) Output out;
+    @P(1) @Type.Number(min = 0, max = 60)
+    double time;
+    @P(100)
+    Property _timer;
     
+    @Out(1) Output out;
+
     @Override
-    public void starting() {
-        out.send(value.get());
+    public void stopping() {
+        _timer.set(0);
     }
     
-    void valueChanged() {
-        out.send(value.get());
+    @In(1) void in(Value arg) {
+        if (_timer.isAnimating() && d(_timer) < time) {
+            return;
+        }
+        _timer.set(0).to(100).in(100);
+        out.send(arg);
     }
     
     // PXJ-END:body

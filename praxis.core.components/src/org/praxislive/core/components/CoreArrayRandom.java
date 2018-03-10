@@ -38,25 +38,44 @@ import static org.praxislive.code.userapi.Constants.*;
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-@GenerateTemplate(CoreProperty.TEMPLATE_PATH)
-public class CoreProperty extends CoreCodeDelegate {
+@GenerateTemplate(CoreArrayRandom.TEMPLATE_PATH)
+public class CoreArrayRandom extends CoreCodeDelegate {
     
-    final static String TEMPLATE_PATH = "resources/property.pxj";
+    final static String TEMPLATE_PATH = "resources/array_random.pxj";
 
     // PXJ-BEGIN:body
-
-    @P(1) @Config.Port(false) @OnChange("valueChanged")
-    Property value;
-
+    
+    @P(1) @Type(cls = PArray.class) @OnChange("extractArray")
+    Property values;
+    @P(2) @ReadOnly
+    int index;
+    
     @Out(1) Output out;
     
+    PArray array;
+    
     @Override
-    public void starting() {
-        out.send(value.get());
+    public void setup() {
+        extractArray();
+    }
+
+    @T(1) void trigger() {
+        if (array.isEmpty()) {
+            index = -1;
+            out.send();
+        } else {
+            index = (int) random(array.getSize());
+            out.send(array.get(index));
+        }
     }
     
-    void valueChanged() {
-        out.send(value.get());
+    void extractArray() {
+        try {
+            array = PArray.coerce(values.get());
+        } catch (ValueFormatException ex) {
+            log(ERROR, ex, "values isn't an array");
+            array = PArray.EMPTY;
+        }
     }
     
     // PXJ-END:body

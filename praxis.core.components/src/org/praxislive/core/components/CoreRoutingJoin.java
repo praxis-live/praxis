@@ -38,25 +38,44 @@ import static org.praxislive.code.userapi.Constants.*;
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-@GenerateTemplate(CoreProperty.TEMPLATE_PATH)
-public class CoreProperty extends CoreCodeDelegate {
+@GenerateTemplate(CoreRoutingJoin.TEMPLATE_PATH)
+public class CoreRoutingJoin extends CoreCodeDelegate {
     
-    final static String TEMPLATE_PATH = "resources/property.pxj";
+    final static String TEMPLATE_PATH = "resources/routing_join.pxj";
 
     // PXJ-BEGIN:body
 
-    @P(1) @Config.Port(false) @OnChange("valueChanged")
-    Property value;
-
-    @Out(1) Output out;
+    @P(1) @ReadOnly boolean latch1;
+    @P(2) @ReadOnly boolean latch2;
     
+    @Out(1) Output out;
+
     @Override
-    public void starting() {
-        out.send(value.get());
+    public void stopping() {
+        reset();
+    }
+
+    @In(1) void in1(Value arg) {
+        if (latch2) {
+            out.send(arg);
+            reset();
+        } else {
+            latch1 = true;
+        }
     }
     
-    void valueChanged() {
-        out.send(value.get());
+    @In(2) void in2(Value arg) {
+        if (latch1) {
+            out.send(arg);
+            reset();
+        } else {
+            latch2 = true;
+        }
+    }
+    
+    @T(1) void reset() {
+        latch1 = false;
+        latch2 = false;
     }
     
     // PXJ-END:body

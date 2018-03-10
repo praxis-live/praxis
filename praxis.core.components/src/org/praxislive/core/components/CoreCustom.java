@@ -23,13 +23,15 @@ package org.praxislive.core.components;
 
 import org.praxislive.code.GenerateTemplate;
 
+import org.praxislive.core.code.CoreCodeDelegate;
+
 // default imports
 import java.util.*;
-import org.praxislive.core.Value;
-import org.praxislive.core.ValueFormatException;
+import java.util.function.*;
+import java.util.stream.*;
+import org.praxislive.core.*;
 import org.praxislive.core.types.*;
 import org.praxislive.code.userapi.*;
-import org.praxislive.core.code.CoreCodeDelegate;
 import static org.praxislive.code.userapi.Constants.*;
 
 /**

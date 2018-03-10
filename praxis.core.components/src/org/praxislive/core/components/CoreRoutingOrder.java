@@ -38,25 +38,19 @@ import static org.praxislive.code.userapi.Constants.*;
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-@GenerateTemplate(CoreProperty.TEMPLATE_PATH)
-public class CoreProperty extends CoreCodeDelegate {
+@GenerateTemplate(CoreRoutingOrder.TEMPLATE_PATH)
+public class CoreRoutingOrder extends CoreCodeDelegate {
     
-    final static String TEMPLATE_PATH = "resources/property.pxj";
+    final static String TEMPLATE_PATH = "resources/routing_order.pxj";
 
     // PXJ-BEGIN:body
-
-    @P(1) @Config.Port(false) @OnChange("valueChanged")
-    Property value;
-
-    @Out(1) Output out;
     
-    @Override
-    public void starting() {
-        out.send(value.get());
-    }
+    @Out(1) Output out1;
+    @Out(2) Output out2;    
     
-    void valueChanged() {
-        out.send(value.get());
+    @In(1) void in(Value value) {
+        out1.send(value);
+        out2.send(value);
     }
     
     // PXJ-END:body

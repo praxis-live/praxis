@@ -38,25 +38,37 @@ import static org.praxislive.code.userapi.Constants.*;
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-@GenerateTemplate(CoreProperty.TEMPLATE_PATH)
-public class CoreProperty extends CoreCodeDelegate {
+@GenerateTemplate(CoreMathScale.TEMPLATE_PATH)
+public class CoreMathScale extends CoreCodeDelegate {
     
-    final static String TEMPLATE_PATH = "resources/property.pxj";
+    final static String TEMPLATE_PATH = "resources/math_scale.pxj";
 
     // PXJ-BEGIN:body
-
-    @P(1) @Config.Port(false) @OnChange("valueChanged")
-    Property value;
-
+    
+    @P(1) @Type.Number(def = 0) @ID("x1")
+    double x1;
+    @P(2) @Type.Number(def = 1) @ID("x2")
+    double x2;
+    @P(3) @Type.Number(def = 0) @ID("y1")
+    double y1;
+    @P(4) @Type.Number(def = 1) @ID("y2")
+    double y2;
+    
     @Out(1) Output out;
     
-    @Override
-    public void starting() {
-        out.send(value.get());
-    }
-    
-    void valueChanged() {
-        out.send(value.get());
+    @In(1) void in(double value) {
+        double xMin, xMax;
+        xMin = min(x1, x2);
+        if (value < xMin) {
+            value = xMin;
+        }
+        xMax = max(x1, x2);
+        if (value > xMax) {
+            value = xMax;
+        }
+        value = (value - x1) / (x2 - x1);
+        value = value * (y2 - y1) + y1;
+        out.send(value);
     }
     
     // PXJ-END:body

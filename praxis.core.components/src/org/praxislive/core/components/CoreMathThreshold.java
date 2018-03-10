@@ -38,25 +38,24 @@ import static org.praxislive.code.userapi.Constants.*;
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-@GenerateTemplate(CoreProperty.TEMPLATE_PATH)
-public class CoreProperty extends CoreCodeDelegate {
+@GenerateTemplate(CoreMathThreshold.TEMPLATE_PATH)
+public class CoreMathThreshold extends CoreCodeDelegate {
     
-    final static String TEMPLATE_PATH = "resources/property.pxj";
+    final static String TEMPLATE_PATH = "resources/math_threshold.pxj";
 
     // PXJ-BEGIN:body
-
-    @P(1) @Config.Port(false) @OnChange("valueChanged")
-    Property value;
-
-    @Out(1) Output out;
     
-    @Override
-    public void starting() {
-        out.send(value.get());
-    }
+    @P(1) double threshold;
     
-    void valueChanged() {
-        out.send(value.get());
+    @Out(1) Output outLow;
+    @Out(2) Output outHigh;
+    
+    @In(1) void in(double x) {
+        if (x >= threshold) {
+            outHigh.send(x);
+        } else {
+            outLow.send(x);
+        }
     }
     
     // PXJ-END:body

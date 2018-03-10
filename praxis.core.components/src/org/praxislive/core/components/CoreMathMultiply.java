@@ -38,25 +38,19 @@ import static org.praxislive.code.userapi.Constants.*;
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-@GenerateTemplate(CoreProperty.TEMPLATE_PATH)
-public class CoreProperty extends CoreCodeDelegate {
+@GenerateTemplate(CoreMathMultiply.TEMPLATE_PATH)
+public class CoreMathMultiply extends CoreCodeDelegate {
     
-    final static String TEMPLATE_PATH = "resources/property.pxj";
+    final static String TEMPLATE_PATH = "resources/math_multiply.pxj";
 
     // PXJ-BEGIN:body
 
-    @P(1) @Config.Port(false) @OnChange("valueChanged")
-    Property value;
-
+    @P(1) double value;
+    
     @Out(1) Output out;
     
-    @Override
-    public void starting() {
-        out.send(value.get());
-    }
-    
-    void valueChanged() {
-        out.send(value.get());
+    @In(1) void in(double x) {
+        out.send(x * value);
     }
     
     // PXJ-END:body

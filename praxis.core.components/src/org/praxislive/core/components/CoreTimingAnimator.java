@@ -38,25 +38,43 @@ import static org.praxislive.code.userapi.Constants.*;
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-@GenerateTemplate(CoreProperty.TEMPLATE_PATH)
-public class CoreProperty extends CoreCodeDelegate {
+@GenerateTemplate(CoreTimingAnimator.TEMPLATE_PATH)
+public class CoreTimingAnimator extends CoreCodeDelegate {
     
-    final static String TEMPLATE_PATH = "resources/property.pxj";
+    final static String TEMPLATE_PATH = "resources/timing_animator.pxj";
 
     // PXJ-BEGIN:body
 
-    @P(1) @Config.Port(false) @OnChange("valueChanged")
+    @P(1) @Type.Number @Transient @OnChange("toChanged")
+    double to;
+    @P(2) @Type.Number @OnChange("valueChanged")
     Property value;
-
-    @Out(1) Output out;
+    @P(3) @Type.Number(min = 0, max = 60, def = 0)
+    double time;
     
+    @Out(1) Output out;
+    boolean active;
+
     @Override
-    public void starting() {
-        out.send(value.get());
+    public void update() {
+        if (value.isAnimating()) {
+            out.send(d(value));
+            active = true;
+        } else if (active) {
+            out.send(to);
+            active = false;
+        }
+    }
+    
+    void toChanged() {
+        value.to(to).in(time);
+        active = true;
     }
     
     void valueChanged() {
-        out.send(value.get());
+        to = d(value);
+        active = false;
+        out.send(to);
     }
     
     // PXJ-END:body

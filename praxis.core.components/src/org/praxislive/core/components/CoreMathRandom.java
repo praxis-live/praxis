@@ -38,25 +38,26 @@ import static org.praxislive.code.userapi.Constants.*;
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-@GenerateTemplate(CoreProperty.TEMPLATE_PATH)
-public class CoreProperty extends CoreCodeDelegate {
+@GenerateTemplate(CoreMathRandom.TEMPLATE_PATH)
+public class CoreMathRandom extends CoreCodeDelegate {
     
-    final static String TEMPLATE_PATH = "resources/property.pxj";
+    final static String TEMPLATE_PATH = "resources/math_random.pxj";
 
     // PXJ-BEGIN:body
-
-    @P(1) @Config.Port(false) @OnChange("valueChanged")
-    Property value;
-
+    
+    @P(1) @Type.Number(def = 0)
+    double minimum;
+    @P(2) @Type.Number(min = 0, def = 1)
+    double range;
+    
     @Out(1) Output out;
     
-    @Override
-    public void starting() {
-        out.send(value.get());
-    }
-    
-    void valueChanged() {
-        out.send(value.get());
+    @T(1) void trigger() {
+        if (range > 0) {
+            out.send(random(range) + minimum);
+        } else {
+            out.send(minimum);
+        }
     }
     
     // PXJ-END:body
