@@ -40,7 +40,6 @@ import org.praxislive.code.userapi.In;
 import org.praxislive.code.userapi.Inject;
 import org.praxislive.code.userapi.Out;
 import org.praxislive.code.userapi.P;
-import org.praxislive.code.userapi.Port;
 import org.praxislive.code.userapi.ReadOnly;
 import org.praxislive.code.userapi.Ref;
 import org.praxislive.code.userapi.T;
@@ -467,10 +466,6 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         Config.Port port = element.getAnnotation(Config.Port.class);
         if (port != null) {
             return port.value();
-        }
-        Port ann = element.getAnnotation(Port.class);
-        if (ann != null) {
-            return ann.value();
         }
         return true;
     }
