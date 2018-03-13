@@ -24,6 +24,7 @@ package org.praxislive.audio.code;
 
 import org.praxislive.code.CodeContext;
 import org.praxislive.code.CodeFactory;
+import org.praxislive.core.ComponentType;
 
 /**
  *
@@ -33,16 +34,10 @@ public class AudioCodeFactory extends CodeFactory<AudioCodeDelegate> {
     
     private final static AudioBodyContext ABC = new AudioBodyContext();
     
-    private final boolean emptyDefault;
-
-    public AudioCodeFactory(String type) {
-        super(ABC, type, AudioBodyContext.TEMPLATE);
-        emptyDefault = true;
-    }
-    
-    public AudioCodeFactory(String type, String sourceTemplate) {
-        super(ABC, type, sourceTemplate);
-        emptyDefault = false;
+    public AudioCodeFactory(ComponentType type,
+            Class<? extends AudioCodeDelegate> baseClass,
+            String sourceTemplate) {
+        super(ABC, type, baseClass, sourceTemplate);
     }
     
     @Override
@@ -62,17 +57,6 @@ public class AudioCodeFactory extends CodeFactory<AudioCodeDelegate> {
                      new AudioCodeConnector(this, delegate, getPrevious()));
         }
 
-        @Override
-        protected AudioCodeDelegate createDefaultDelegate() throws Exception {
-            if (emptyDefault) {
-                return new AudioCodeDelegate(){  
-                };
-            } else {
-                return super.createDefaultDelegate();
-            }
-        }
-        
-        
         
     }
     

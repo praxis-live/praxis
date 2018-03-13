@@ -22,9 +22,11 @@
 package org.praxislive.video.factory;
 
 import org.praxislive.code.AbstractComponentFactory;
+import org.praxislive.core.ComponentType;
 import org.praxislive.core.services.ComponentFactory;
 import org.praxislive.core.services.ComponentFactoryProvider;
 import org.praxislive.meta.TypeRewriter;
+import org.praxislive.video.code.VideoCodeDelegate;
 import org.praxislive.video.code.VideoCodeFactory;
 
 /**
@@ -48,38 +50,32 @@ public class VideoComponents implements ComponentFactoryProvider {
         private void build() {
             
             // custom
-            add(data(new VideoCodeFactory("video:custom")));
+            add("video:custom", VideoCustom.class, VideoCustom.TEMPLATE_PATH);
             
             // built-in
             
             // CORE VIDEO
-            add("video:snapshot", "resources/snapshot.pxj");
-            add("video:still", "resources/still.pxj");
+            add("video:snapshot", VideoSnapshot.class, VideoSnapshot.TEMPLATE_PATH);
+            add("video:still", VideoStill.class, VideoStill.TEMPLATE_PATH);
             
             // ANALYSIS
-            add("video:analysis:frame-delay", "resources/analysis_framedelay.pxj");
-            add("video:analysis:difference", "resources/analysis_difference.pxj");
+            add("video:analysis:frame-delay", VideoAnalysisFrameDelay.class,
+                    VideoAnalysisFrameDelay.TEMPLATE_PATH);
+            add("video:analysis:difference", VideoAnalysisDifference.class,
+                    VideoAnalysisDifference.TEMPLATE_PATH);
             
             // FX
-            add("video:fx:blur", "resources/fx_blur.pxj");
+            add("video:fx:blur", VideoFXBlur.class, VideoFXBlur.TEMPLATE_PATH);
             
             // SOURCE
-            add("video:source:noise", "resources/source_noise.pxj");
-            
-            
-            // DEPRECATED COMPONENTs
-            add(data("video:filter:blur", "resources/fx_blur.pxj")
-                    .deprecated().replacement("video:fx:blur").add(TypeRewriter.getIdentity()));
-            
+            add("video:source:noise", VideoSourceNoise.class, VideoSourceNoise.TEMPLATE_PATH);
             
         }
 
-        private void add(String type, String sourceFile) {
-            add(data(type, sourceFile));
-        }
-        
-        private Data data(String type, String sourceFile) {
-            return data(new VideoCodeFactory(type, source(sourceFile)));
+        private void add(String type, Class<? extends VideoCodeDelegate> cls, String path) {
+            add(data(
+                    new VideoCodeFactory(ComponentType.create(type), cls, source(path))
+            ));
         }
         
     }

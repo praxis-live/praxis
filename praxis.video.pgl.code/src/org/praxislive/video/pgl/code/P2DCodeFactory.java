@@ -38,15 +38,6 @@ public class P2DCodeFactory extends CodeFactory<P2DCodeDelegate> {
             return new P2DCodeContext(new P2DCodeConnector(this, delegate));
         }
 
-        @Override
-        protected P2DCodeDelegate createDefaultDelegate() throws Exception {
-            if (emptyDefault) {
-                return new P2DCodeDelegate() {
-                };
-            } else {
-                return super.createDefaultDelegate();
-            }
-        }
 
     }
     

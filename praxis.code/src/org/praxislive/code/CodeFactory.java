@@ -21,6 +21,7 @@
  */
 package org.praxislive.code;
 
+import java.util.Optional;
 import org.praxislive.core.ComponentType;
 import org.praxislive.logging.LogBuilder;
 
@@ -33,24 +34,34 @@ public abstract class CodeFactory<D extends CodeDelegate> {
     private final ComponentType type;
     private final ClassBodyContext<D> cbc;
     private final String template;
+    private final Class<? extends D> defaultDelegateClass;
+
+    protected CodeFactory(
+            ClassBodyContext<D> cbc,
+            ComponentType type,
+            Class<? extends D> defaultCls,
+            String template) {
+        this.cbc = cbc;
+        this.type = type;
+        this.defaultDelegateClass = defaultCls;
+        this.template = template;
+    }
     
     protected CodeFactory(
             ClassBodyContext<D> cbc,
             ComponentType type,
             String template) {
-
-        this.cbc = cbc;
-        this.type = type;
-        this.template = template;
+        this(cbc, type, null, template);
     }
 
+    @Deprecated
     protected CodeFactory(
             ClassBodyContext<D> cbc,
             String type,
             String template) {
         this(cbc, ComponentType.create(type), template);
     }
-
+    
     public final ComponentType getComponentType() {
         return type;
     }
@@ -62,13 +73,9 @@ public abstract class CodeFactory<D extends CodeDelegate> {
     public final String getSourceTemplate() {
         return template;
     }
-
-    @Deprecated
-    public CodeComponent<D> createComponent() throws Exception {
-        CodeContext<D> ctxt = task().createDefaultCodeContext();
-        CodeComponent<D> cmp = new CodeComponent<>();
-        cmp.install(ctxt);
-        return cmp;
+    
+    public final Optional<Class<? extends D>> getDefaultDelegateClass() {
+        return Optional.ofNullable(defaultDelegateClass);
     }
 
     public abstract Task<D> task();
@@ -104,16 +111,6 @@ public abstract class CodeFactory<D extends CodeDelegate> {
             return createCodeContext(delegate);
         }
         
-        @Deprecated
-        public CodeContext<D> createCodeContext(String source) throws Exception {
-            return createCodeContext(createDelegate(source));
-        }
-
-        @Deprecated
-        public CodeContext<D> createDefaultCodeContext() throws Exception {
-            return createCodeContext(createDefaultDelegate());
-        }
-
         protected LogBuilder getLog() {
             return log;
         }
@@ -124,21 +121,6 @@ public abstract class CodeFactory<D extends CodeDelegate> {
 
         protected CodeFactory<D> getFactory() {
             return factory;
-        }
-       
-        @Deprecated
-        protected D createDelegate(String source) throws Exception {
-            return null;
-        }
-
-        @Deprecated
-        protected D createDefaultDelegate() throws Exception {
-            return null;
-        }
-
-        @Deprecated
-        protected Class<D> compile(String source) throws Exception {
-            throw new UnsupportedOperationException();
         }
 
         protected abstract CodeContext<D> createCodeContext(D delegate);

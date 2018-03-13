@@ -22,6 +22,8 @@
 package org.praxislive.core.components;
 
 import org.praxislive.code.AbstractComponentFactory;
+import org.praxislive.core.ComponentType;
+import org.praxislive.core.code.CoreCodeDelegate;
 import org.praxislive.core.code.CoreCodeFactory;
 import org.praxislive.core.services.ComponentFactory;
 import org.praxislive.core.services.ComponentFactoryProvider;
@@ -31,6 +33,7 @@ import org.praxislive.core.services.ComponentFactoryProvider;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public class CoreComponents implements ComponentFactoryProvider {
+
     private final static Factory instance = new Factory();
 
     @Override
@@ -45,49 +48,45 @@ public class CoreComponents implements ComponentFactoryProvider {
         }
 
         private void build() {
-            
+
             // custom
-            add(data(new CoreCodeFactory("core:custom")));
-            
+            add("core:custom", CoreCustom.class, CoreCustom.TEMPLATE_PATH);
+
             // built-in
-            
             // CORE
-            add("core:property", "resources/property.pxj");
-            add("core:variable", "resources/variable.pxj");
-            
+            add("core:property", CoreProperty.class, CoreProperty.TEMPLATE_PATH);
+            add("core:variable", CoreVariable.class, CoreVariable.TEMPLATE_PATH);
+
             // ARRAY
-            add("core:array:random", "resources/array_random.pxj");
-            add("core:array:iterator", "resources/array_iterator.pxj");
-            
+            add("core:array:random", CoreArrayRandom.class, CoreArrayRandom.TEMPLATE_PATH);
+            add("core:array:iterator", CoreArrayIterator.class, CoreArrayIterator.TEMPLATE_PATH);
+
             // MATH
-            add("core:math:add", "resources/math_add.pxj");
-            add("core:math:multiply", "resources/math_multiply.pxj");
-            add("core:math:random", "resources/math_random.pxj");
-            add("core:math:scale", "resources/math_scale.pxj");
-            add("core:math:threshold", "resources/math_threshold.pxj");
-            
+            add("core:math:add", CoreMathAdd.class, CoreMathAdd.TEMPLATE_PATH);
+            add("core:math:multiply", CoreMathMultiply.class, CoreMathMultiply.TEMPLATE_PATH);
+            add("core:math:random", CoreMathRandom.class, CoreMathRandom.TEMPLATE_PATH);
+            add("core:math:scale", CoreMathScale.class, CoreMathScale.TEMPLATE_PATH);
+            add("core:math:threshold", CoreMathThreshold.class, CoreMathThreshold.TEMPLATE_PATH);
+
             // ROUTING
-            add("core:routing:every", "resources/routing_every.pxj");
-            add("core:routing:gate", "resources/routing_gate.pxj");
-            add("core:routing:inhibitor", "resources/routing_inhibitor.pxj");
-            add("core:routing:join", "resources/routing_join.pxj");
-            add("core:routing:order", "resources/routing_order.pxj");
+            add("core:routing:every", CoreRoutingEvery.class, CoreRoutingEvery.TEMPLATE_PATH);
+            add("core:routing:gate", CoreRoutingGate.class, CoreRoutingGate.TEMPLATE_PATH);
+            add("core:routing:inhibitor", CoreRoutingInhibitor.class, CoreRoutingInhibitor.TEMPLATE_PATH);
+            add("core:routing:join", CoreRoutingJoin.class, CoreRoutingJoin.TEMPLATE_PATH);
+            add("core:routing:order", CoreRoutingOrder.class, CoreRoutingOrder.TEMPLATE_PATH);
 
             // TIMING
-            add("core:timing:animator", "resources/timing_animator.pxj");
-            add("core:timing:delay", "resources/timing_delay.pxj");
-            add("core:timing:timer", "resources/timing_timer.pxj");
-            
-            
+            add("core:timing:animator", CoreTimingAnimator.class, CoreTimingAnimator.TEMPLATE_PATH);
+            add("core:timing:delay", CoreTimingDelay.class, CoreTimingDelay.TEMPLATE_PATH);
+            add("core:timing:timer", CoreTimingTimer.class, CoreTimingTimer.TEMPLATE_PATH);
+
         }
 
-        private void add(String type, String sourceFile) {
-            add(data(type, sourceFile));
+        private void add(String type, Class<? extends CoreCodeDelegate> cls, String path) {
+            add(data(
+                    new CoreCodeFactory(ComponentType.create(type), cls, source(path))
+            ));
         }
-        
-        private Data data(String type, String sourceFile) {
-            return data(new CoreCodeFactory(type, source(sourceFile)));
-        }
-        
+
     }
 }

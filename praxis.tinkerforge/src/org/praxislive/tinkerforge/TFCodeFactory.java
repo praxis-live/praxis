@@ -62,16 +62,6 @@ public class TFCodeFactory extends CodeFactory<TFCodeDelegate> {
             return new TFCodeContext(new TFCodeConnector(this, delegate));
         }
 
-        @Override
-        protected TFCodeDelegate createDefaultDelegate() throws Exception {
-            if (emptyDefault) {
-                return new TFCodeDelegate() {
-                };
-            } else {
-                return super.createDefaultDelegate();
-            }
-        }
-
     }
 
 }

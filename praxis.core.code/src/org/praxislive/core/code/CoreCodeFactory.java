@@ -24,21 +24,16 @@ package org.praxislive.core.code;
 
 import org.praxislive.code.CodeContext;
 import org.praxislive.code.CodeFactory;
+import org.praxislive.core.ComponentType;
 
 public class CoreCodeFactory extends CodeFactory<CoreCodeDelegate> {
 
     private final static CoreBodyContext CBC = new CoreBodyContext();
 
-    private final boolean emptyDefault;
-    
-    public CoreCodeFactory(String type) {
-        super(CBC, type, CoreBodyContext.TEMPLATE);
-        emptyDefault = true;
-    }
-    
-    public CoreCodeFactory(String type, String sourceTemplate) {
-        super(CBC, type, sourceTemplate);
-        emptyDefault = false;
+    public CoreCodeFactory(ComponentType type,
+            Class<? extends CoreCodeDelegate> baseClass,
+            String sourceTemplate) {
+        super(CBC, type, baseClass, sourceTemplate);
     }
 
     @Override
@@ -57,15 +52,6 @@ public class CoreCodeFactory extends CodeFactory<CoreCodeDelegate> {
             return new CoreCodeContext(new CoreCodeConnector(this, delegate));
         }
 
-        @Override
-        protected CoreCodeDelegate createDefaultDelegate() throws Exception {
-            if (emptyDefault) {
-                return new CoreCodeDelegate() {
-                };
-            } else {
-                return super.createDefaultDelegate();
-            }
-        }
 
     }
 

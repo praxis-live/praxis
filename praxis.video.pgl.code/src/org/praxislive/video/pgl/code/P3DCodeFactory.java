@@ -38,15 +38,6 @@ public class P3DCodeFactory extends CodeFactory<P3DCodeDelegate> {
             return new P3DCodeContext(new P3DCodeConnector(this, delegate));
         }
 
-        @Override
-        protected P3DCodeDelegate createDefaultDelegate() throws Exception {
-            if (emptyDefault) {
-                return new P3DCodeDelegate() {
-                };
-            } else {
-                return super.createDefaultDelegate();
-            }
-        }
 
     }
     

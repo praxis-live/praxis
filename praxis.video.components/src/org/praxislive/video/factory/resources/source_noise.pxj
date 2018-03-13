@@ -1,6 +1,0 @@
-import org.praxislive.video.render.ops.Noise;
- 
-    @Override
-    public void draw() {
-        op(Noise.op());
-    }

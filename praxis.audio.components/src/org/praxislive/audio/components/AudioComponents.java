@@ -21,8 +21,10 @@
  */
 package org.praxislive.audio.components;
 
+import org.praxislive.audio.code.AudioCodeDelegate;
 import org.praxislive.audio.code.AudioCodeFactory;
 import org.praxislive.code.AbstractComponentFactory;
+import org.praxislive.core.ComponentType;
 import org.praxislive.core.services.ComponentFactory;
 import org.praxislive.core.services.ComponentFactoryProvider;
 
@@ -48,29 +50,28 @@ public class AudioComponents implements ComponentFactoryProvider {
         private void build() {
             
             // custom
-            add(data(new AudioCodeFactory("audio:custom")));
+            add("audio:custom", AudioCustom.class, AudioCustom.TEMPLATE_PATH);
             
-            add("audio:clock", "resources/audio_clock.pxj");
-            add("audio:gain", "resources/gain.pxj");
-            add("audio:osc", "resources/osc.pxj");
-            add("audio:player", "resources/player.pxj");
+            add("audio:clock", AudioClock.class, AudioClock.TEMPLATE_PATH);
+            add("audio:gain", AudioGain.class, AudioGain.TEMPLATE_PATH);
+            add("audio:osc", AudioOsc.class, AudioOsc.TEMPLATE_PATH);
+            add("audio:player", AudioPlayer.class, AudioPlayer.TEMPLATE_PATH);
             
-            add("audio:fx:chorus", "resources/chorus.pxj");
-            add("audio:fx:comb-filter", "resources/comb_filter.pxj");
-            add("audio:fx:delay", "resources/delay.pxj");
-            add("audio:fx:filter", "resources/filter.pxj");
-            add("audio:fx:lfo-delay", "resources/lfo_delay.pxj");
-            add("audio:fx:overdrive", "resources/overdrive.pxj");
-            add("audio:fx:reverb", "resources/reverb.pxj");
+            add("audio:fx:chorus", AudioFXChorus.class, AudioFXChorus.TEMPLATE_PATH);
+            add("audio:fx:comb-filter", AudioFXCombFilter.class, AudioFXCombFilter.TEMPLATE_PATH);
+            add("audio:fx:delay", AudioFXDelay.class, AudioFXDelay.TEMPLATE_PATH);
+            add("audio:fx:filter", AudioFXFilter.class, AudioFXFilter.TEMPLATE_PATH);
+            add("audio:fx:lfo-delay", AudioFXLFODelay.class, AudioFXLFODelay.TEMPLATE_PATH);
+            add("audio:fx:overdrive", AudioFXOverdrive.class, AudioFXOverdrive.TEMPLATE_PATH);
+            add("audio:fx:reverb", AudioFXReverb.class, AudioFXReverb.TEMPLATE_PATH);
             
         }
         
-        private void add(String type, String sourceFile) {
-            add(data(type, sourceFile));
-        }
         
-        private Data data(String type, String sourceFile) {
-            return data(new AudioCodeFactory(type, source(sourceFile)));
+        private void add(String type, Class<? extends AudioCodeDelegate> cls, String path) {
+            add(data(
+                    new AudioCodeFactory(ComponentType.create(type), cls, source(path))
+            ));
         }
         
     }

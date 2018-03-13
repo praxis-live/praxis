@@ -21,6 +21,7 @@
  */
 package org.praxislive.core.services;
 
+import java.util.Optional;
 import org.praxislive.core.Component;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.Lookup;
@@ -59,9 +60,6 @@ public interface ComponentFactory {
     public static abstract class MetaData<T> {
 
         @Deprecated
-        public abstract Class<T> getComponentClass();
-
-        @Deprecated
         public boolean isTest() {
             return false;
         }
@@ -70,8 +68,14 @@ public interface ComponentFactory {
             return false;
         }
 
+        @Deprecated
         public ComponentType getReplacement() {
             return null;
+        }
+        
+        @SuppressWarnings("deprecation")
+        public Optional<ComponentType> findReplacement() {
+            return Optional.ofNullable(getReplacement());
         }
 
         public Lookup getLookup() {

@@ -39,12 +39,12 @@ import org.praxislive.core.Root;
  */
 public class AbstractComponentFactory implements ComponentFactory {
 
-    private Map<ComponentType, MetaData<? extends Component>> componentMap;
-    private Map<ComponentType, MetaData<? extends Root>> rootMap;
+    private Map<ComponentType, MetaDataEx<? extends Component>> componentMap;
+    private Map<ComponentType, MetaDataEx<? extends Root>> rootMap;
 
     protected AbstractComponentFactory() {
-        componentMap = new LinkedHashMap<ComponentType, MetaData<? extends Component>>();
-        rootMap = new LinkedHashMap<ComponentType, MetaData<? extends Root>>(1);
+        componentMap = new LinkedHashMap<>();
+        rootMap = new LinkedHashMap<>(1);
     }
 
     public ComponentType[] getComponentTypes() {
@@ -58,7 +58,7 @@ public class AbstractComponentFactory implements ComponentFactory {
     }
 
     public Component createComponent(ComponentType type) throws ComponentInstantiationException {
-        MetaData<? extends Component> data = componentMap.get(type);
+        MetaDataEx<? extends Component> data = componentMap.get(type);
         if (data == null) {
             throw new IllegalArgumentException();
         }
@@ -71,7 +71,7 @@ public class AbstractComponentFactory implements ComponentFactory {
     }
 
     public Root createRootComponent(ComponentType type) throws ComponentInstantiationException {
-        MetaData<? extends Root> data = rootMap.get(type);
+        MetaDataEx<? extends Root> data = rootMap.get(type);
         if (data == null) {
             throw new IllegalArgumentException();
         }
@@ -111,7 +111,7 @@ public class AbstractComponentFactory implements ComponentFactory {
         return new Data<T>(cls);
     }
 
-    private static class MetaDataImpl<T> extends ComponentFactory.MetaData<T> {
+    private static class MetaDataEx<T> extends ComponentFactory.MetaData<T> {
 
         private final Class<T> cls;
         private final boolean test;
@@ -119,7 +119,7 @@ public class AbstractComponentFactory implements ComponentFactory {
         private final ComponentType replacement;
         private final Lookup lookup;
 
-        private MetaDataImpl(Class<T> cls,
+        private MetaDataEx(Class<T> cls,
                 boolean test,
                 boolean deprecated,
                 ComponentType replacement,
@@ -131,7 +131,6 @@ public class AbstractComponentFactory implements ComponentFactory {
             this.lookup = lookup;
         }
 
-        @Override
         public Class<T> getComponentClass() {
             return cls;
         }
@@ -196,8 +195,8 @@ public class AbstractComponentFactory implements ComponentFactory {
             return this;
         }
         
-        private MetaData<T> toMetaData() {
-            return new MetaDataImpl<T>(cls, test, deprecated, replacement,
+        private MetaDataEx<T> toMetaData() {
+            return new MetaDataEx<T>(cls, test, deprecated, replacement,
                     lookupList == null ? null : InstanceLookup.create(lookupList.toArray()));
         }
     }

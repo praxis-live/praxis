@@ -24,21 +24,16 @@ package org.praxislive.video.code;
 
 import org.praxislive.code.CodeContext;
 import org.praxislive.code.CodeFactory;
+import org.praxislive.core.ComponentType;
 
 public class VideoCodeFactory extends CodeFactory<VideoCodeDelegate> {
 
     private final static VideoBodyContext VBC = new VideoBodyContext();
 
-    private final boolean emptyDefault;
-
-    public VideoCodeFactory(String type) {
-        super(VBC, type, VideoBodyContext.TEMPLATE);
-        emptyDefault = true;
-    }
-
-    public VideoCodeFactory(String type, String sourceTemplate) {
-        super(VBC, type, sourceTemplate);
-        emptyDefault = false;
+    public VideoCodeFactory(ComponentType type,
+            Class<? extends VideoCodeDelegate> baseClass,
+            String sourceTemplate) {
+        super(VBC, type, baseClass, sourceTemplate);
     }
 
     @Override
@@ -55,16 +50,6 @@ public class VideoCodeFactory extends CodeFactory<VideoCodeDelegate> {
         @Override
         protected CodeContext<VideoCodeDelegate> createCodeContext(VideoCodeDelegate delegate) {
             return new VideoCodeContext(new VideoCodeConnector(this, delegate));
-        }
-
-        @Override
-        protected VideoCodeDelegate createDefaultDelegate() throws Exception {
-            if (emptyDefault) {
-                return new VideoCodeDelegate() {
-                };
-            } else {
-                return super.createDefaultDelegate();
-            }
         }
 
     }

@@ -24,6 +24,7 @@ package org.praxislive.tracker.impl;
 import org.praxislive.core.services.ComponentFactory;
 import org.praxislive.core.services.ComponentFactoryProvider;
 import org.praxislive.code.AbstractComponentFactory;
+import org.praxislive.core.ComponentType;
 import org.praxislive.core.code.CoreCodeFactory;
 
 /**
@@ -47,16 +48,12 @@ public class Components implements ComponentFactoryProvider {
 
         private void build() {
         
-            add("core:tracker", "resources/tracker.pxj");    
+            add(data(new CoreCodeFactory(
+                    ComponentType.create("core:tracker"),
+                    CoreTracker.class,
+                    source(CoreTracker.TEMPLATE_PATH)
+            )));
             
-        }
-
-        private void add(String type, String sourceFile) {
-            add(data(type, sourceFile));
-        }
-        
-        private Data data(String type, String sourceFile) {
-            return data(new CoreCodeFactory(type, source(sourceFile)));
         }
         
     }

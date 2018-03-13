@@ -148,7 +148,8 @@ public class DefaultCodeFactoryService extends AbstractRoot {
             CodeFactory<CodeDelegate> codeFactory = findCodeFactory();
             ClassBodyContext<?> cbc = codeFactory.getClassBodyContext();
             String src = codeFactory.getSourceTemplate();
-            Class<? extends CodeDelegate> cls = CODE_CACHE.get(new ClassCacheKey(cbc, src));
+            Class<? extends CodeDelegate> cls = codeFactory.getDefaultDelegateClass()
+                    .orElseGet( () -> CODE_CACHE.get(new ClassCacheKey(cbc, src)));
             if (cls != null) {
                 return Call.createReturnCall(call,
                         PReference.wrap(createComponent(codeFactory, cls)));

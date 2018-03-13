@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import org.praxislive.core.Component;
 import org.praxislive.core.services.ComponentFactory;
-import org.praxislive.core.services.ComponentInstantiationException;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.Root;
@@ -87,34 +86,17 @@ public class AbstractComponentFactory implements ComponentFactory {
 
     private static class MetaData extends ComponentFactory.MetaData<Component> {
 
-        private final CodeFactory<?> factory;
-        private final boolean test;
         private final boolean deprecated;
         private final ComponentType replacement;
         private final Lookup lookup;
 
         private MetaData(
-                CodeFactory<?> factory,
-                boolean test,
                 boolean deprecated,
                 ComponentType replacement,
                 Lookup lookup) {
-            this.factory = factory;
-            this.test = test;
             this.deprecated = deprecated;
             this.replacement = replacement;
             this.lookup = lookup;
-        }
-
-        @Override
-        @Deprecated
-        public Class<Component> getComponentClass() {
-            return Component.class;
-        }
-
-        @Override
-        public boolean isTest() {
-            return test;
         }
 
         @Override
@@ -132,17 +114,12 @@ public class AbstractComponentFactory implements ComponentFactory {
             return lookup;
         }
 
-        private CodeFactory<?> getCodeFactory() {
-            return factory;
-        }
-
     }
 
     public static class Data {
 
         private final CodeFactory<?> factory;
         private final List<Object> lookupList;
-        private boolean test;
         private boolean deprecated;
         private ComponentType replacement;
 
@@ -150,11 +127,6 @@ public class AbstractComponentFactory implements ComponentFactory {
             this.factory = factory;
             lookupList = new ArrayList<>();
             lookupList.add(factory);
-        }
-
-        public Data test() {
-            test = true;
-            return this;
         }
 
         public Data deprecated() {
@@ -174,7 +146,7 @@ public class AbstractComponentFactory implements ComponentFactory {
         }
 
         private MetaData toMetaData() {
-            return new MetaData(factory, test, deprecated, replacement,
+            return new MetaData(deprecated, replacement,
                     InstanceLookup.create(lookupList.toArray()));
         }
     }
