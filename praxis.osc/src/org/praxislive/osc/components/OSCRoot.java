@@ -32,7 +32,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.Lookup;
 import org.praxislive.impl.AbstractRoot;
 import org.praxislive.impl.InstanceLookup;
@@ -89,13 +88,11 @@ public class OSCRoot extends AbstractRoot {
             server = OSCServer.newUsing(DEFAULT_PROTOCOL, port);
             server.addOSCListener(new OSCListenerImpl());
             server.start();
-            setInterrupt(new OSCRunnable());
+            setDelegate(new OSCRunnable());
+            interrupt();
         } catch (IOException ex) {
             Logger.getLogger(OSCRoot.class.getName()).log(Level.SEVERE, null, ex);
-            try {
-                setIdle();
-            } catch (IllegalRootStateException ex1) {
-            }
+            setIdle();
         }
     }
 
@@ -171,10 +168,7 @@ public class OSCRoot extends AbstractRoot {
         public void run() {
             while (getState() == RootState.ACTIVE_RUNNING) {
                 long time = System.nanoTime();
-                try {
-                    nextControlFrame(time);
-                } catch (IllegalRootStateException ex) {
-                }
+                update(time, true);
                 OSCMessage msg = null;
                 try {
                     msg = messages.poll(50, TimeUnit.MILLISECONDS);
@@ -187,10 +181,7 @@ public class OSCRoot extends AbstractRoot {
                     msg = messages.poll();
                 }
                 if (server != null && !server.isActive()) {
-                    try {
-                        setIdle();
-                    } catch (IllegalRootStateException ex) {
-                    }
+                    setIdle();
                 }
             }
         }

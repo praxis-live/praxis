@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
-import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.Lookup;
 import org.praxislive.impl.AbstractRoot;
 import org.praxislive.impl.InstanceLookup;
@@ -100,7 +99,7 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
                 skipcount++;
             }
             update(source.getTime(), true);
-        } catch (IllegalRootStateException ex) {
+        } catch (Exception ex) {
             // @TODO remove source
             player.terminate();
         }
@@ -121,20 +120,12 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
             setDelegate(new Runnable() {
                 public void run() {
                     player.run();
-                    try {
-                        setIdle();
-                    } catch (IllegalRootStateException ex) {
-                        // ignore - state already changed?
-                    }
+                    setIdle();
                 }
             });
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, "Couldn't start video renderer", ex);
-            try {
-                setIdle();
-            } catch (IllegalRootStateException ex1) {
-                // ignore - state already changed?
-            }
+            setIdle();
         }
     }
 

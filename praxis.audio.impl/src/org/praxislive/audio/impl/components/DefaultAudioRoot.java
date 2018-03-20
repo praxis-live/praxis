@@ -31,7 +31,6 @@ import java.util.logging.Logger;
 import org.praxislive.audio.AudioContext;
 import org.praxislive.audio.AudioSettings;
 import org.praxislive.audio.ClientRegistrationException;
-import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.Lookup;
 import org.praxislive.impl.AbstractRoot;
 import org.praxislive.impl.InstanceLookup;
@@ -208,11 +207,7 @@ public class DefaultAudioRoot extends AbstractRoot {
     @Override
     protected void starting() {
         if (outputClient == null) {
-            try {
-                setIdle();
-            } catch (IllegalRootStateException ex) {
-            }
-            return;
+            setIdle();
         }
         bus = new BusClient(blockSize.value,
                 inputClient == null ? 0 : inputClient.getInputCount(),
@@ -228,10 +223,7 @@ public class DefaultAudioRoot extends AbstractRoot {
             server = createServer(bus);
         } catch (Exception ex) {
             Logger.getLogger(DefaultAudioRoot.class.getName()).log(Level.SEVERE, null, ex);
-            try {
-                setIdle();
-            } catch (IllegalRootStateException ex1) {
-            }
+            setIdle();
             return;
         }
         setDelegate(new Runnable() {
@@ -241,11 +233,7 @@ public class DefaultAudioRoot extends AbstractRoot {
                 } catch (Exception ex) {
                     Logger.getLogger(DefaultAudioRoot.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                try {
-                    setIdle();
-                } catch (IllegalRootStateException ex) {
-                    // ignore - state already changed
-                }
+                setIdle();
             }
         });
         interrupt();
@@ -393,15 +381,11 @@ public class DefaultAudioRoot extends AbstractRoot {
         if (bus == null) {
             return;
         }
-//        setInterrupt(new Runnable() {
-//            public void run() {
         server.shutdown();
         bus.disconnectAll();
         server = null;
         bus = null;
         busListener = null;
-//            }
-//        });
         interrupt();
     }
 
@@ -425,7 +409,7 @@ public class DefaultAudioRoot extends AbstractRoot {
         public void nextBuffer(BufferRateSource source) {
             try {
                 update(source.getTime(), true);
-            } catch (IllegalRootStateException ex) {
+            } catch (Exception ex) {
                 server.shutdown();
             }
         }
@@ -479,11 +463,7 @@ public class DefaultAudioRoot extends AbstractRoot {
                 outputClient = null;
                 if (bus != null) {
                     bus.disconnectAll();
-                    try {
-                        setIdle();
-                    } catch (IllegalRootStateException ex) {
-                        // ignore, already stopping?
-                    }
+                    setIdle();
                 }
             }
         }

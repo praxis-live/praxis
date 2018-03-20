@@ -28,7 +28,6 @@ import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
-import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Root;
 import org.praxislive.core.RootHub;
@@ -74,7 +73,7 @@ class NonGuiPlayer extends AbstractRoot {
     }
 
     @Override
-    public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException {
+    public Root.Controller initialize(String ID, RootHub hub) {
         controller = super.initialize(ID, hub);
         return controller;
     }

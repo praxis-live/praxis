@@ -38,7 +38,6 @@ import org.praxislive.core.Value;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Call;
 import org.praxislive.core.Component;
-import org.praxislive.core.Control;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.VetoException;
 import org.praxislive.core.ControlInfo;
@@ -84,7 +83,7 @@ class DefaultTaskService extends AbstractRoot {
     }
     
     @Override
-    protected void processingControlFrame() {
+    protected void update() {
             for (Future<Value> future : futures.keySet()) {
                 if (future.isDone()) {
                     try {

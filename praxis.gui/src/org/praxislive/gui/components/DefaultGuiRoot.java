@@ -43,7 +43,6 @@ import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 import net.miginfocom.swing.MigLayout;
 import org.praxislive.core.ControlAddress;
-import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.gui.Keys;
 import org.praxislive.impl.swing.ControlBinding;
 import org.praxislive.impl.swing.ControlBinding.Adaptor;
@@ -91,11 +90,7 @@ public class DefaultGuiRoot extends AbstractSwingRoot {
 
             @Override
             public void windowClosing(WindowEvent e) {
-                try {
-                    setIdle();
-                } catch (IllegalRootStateException ex) {
-                    Logger.getLogger(DefaultGuiRoot.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                setIdle();
             }
         });
         frame.getContentPane().setLayout(new MigLayout("fill", "[fill, grow]"));

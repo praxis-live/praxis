@@ -21,7 +21,6 @@
  */
 package org.praxislive.impl;
 
-import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.CallArguments;
@@ -37,7 +36,6 @@ import org.praxislive.core.ExecutionContext;
 import org.praxislive.core.Container;
 import org.praxislive.core.Value;
 import org.praxislive.core.PacketRouter;
-import org.praxislive.core.Control;
 import java.util.EnumSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -124,7 +122,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         registerControl("_exit-log", exitOnStop);
     }
 
-    public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException {
+    public Root.Controller initialize(String ID, RootHub hub) {
         if (state.compareAndSet(RootState.NEW, RootState.INITIALIZING)) {
             if (ID == null || hub == null) {
                 throw new NullPointerException();
@@ -144,7 +142,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                 return controller;
             }
         }
-        throw new IllegalRootStateException();
+        throw new IllegalStateException();
     }
 
     protected void disconnect() {
@@ -163,19 +161,10 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         return router;
     }
 
-    @Deprecated
-    protected RootHub getRootHub() {
-        return hub;
-    }
-
     public long getTime() {
         return time;
     }
 
-//    @Deprecated
-//    protected void setTime(long time) {
-//        this.time = time;
-//    }
     protected Context createContext() {
         return new Context();
     }
@@ -191,32 +180,27 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 
     protected void stopping() {
     }
-
-    @Deprecated
-    protected void processingControlFrame() {
+    
+    protected void update() {
     }
 
     public RootState getState() {
         return state.get();
     }
 
-    protected final void setRunning() throws IllegalRootStateException {
+    protected final void setRunning() {
         if (state.compareAndSet(RootState.ACTIVE_IDLE, RootState.ACTIVE_RUNNING)) {
             starting();
-            return;
         }
-        throw new IllegalRootStateException();
     }
 
-    protected final void setIdle() throws IllegalRootStateException {
+    protected final void setIdle() {
         if (state.compareAndSet(RootState.ACTIVE_RUNNING, RootState.ACTIVE_IDLE)) {
             stopping();
             if (exitOnStop != null) {
                 exitOnStop.idling();
             }
-            return;
         }
-        throw new IllegalRootStateException();
     }
 
     protected void run() {
@@ -245,13 +229,13 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     }
 
     @SuppressWarnings("deprecation")
-    protected final void update(long time, boolean poll) throws IllegalRootStateException {
+    protected final void update(long time, boolean poll) {
 
         interrupted = false;
 
         RootState currentState = state.get();
         if (currentState != RootState.ACTIVE_IDLE && currentState != RootState.ACTIVE_RUNNING) {
-            throw new IllegalRootStateException();
+            throw new IllegalStateException();
         }
 
         if (currentState != cachedState) {
@@ -275,7 +259,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         context.updateClock(time);
         orderedQueue.setTime(time);
 
-        processingControlFrame();
+        update();
 
         Packet pkt = orderedQueue.poll();
         while (pkt != null) {
@@ -358,11 +342,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         }
     }
 
-    @Deprecated
-    protected void nextControlFrame(long time) throws IllegalRootStateException {
-        update(time, true);
-    }
-
     protected void processTask(Runnable task) {
         task.run();
     }
@@ -426,11 +405,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         return null;
     }
 
-//    @Deprecated
-//    public ServiceManager getServiceManager() {
-////        return hub.getServiceManager();
-//        return hub.getLookup().get(ServiceManager.class);
-//    }
     @Override
     public Lookup getLookup() {
         return lookup;
@@ -475,7 +449,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             }
         }
 
-        public void run() throws IllegalRootStateException {
+        public void run() {
             if (state.compareAndSet(RootState.INITIALIZED, defaultRunState)) {
                 activating();
                 AbstractRoot.this.run();
@@ -486,7 +460,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                 // disconnect all children?
                 state.set(RootState.TERMINATED);
             } else {
-                throw new IllegalRootStateException();
+                throw new IllegalStateException();
             }
 
         }

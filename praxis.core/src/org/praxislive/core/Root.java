@@ -28,7 +28,7 @@ package org.praxislive.core;
  */
 public interface Root extends Lookup.Provider { 
     
-    public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException;
+    public Root.Controller initialize(String ID, RootHub hub);
     
     public interface Controller {
         
@@ -36,7 +36,7 @@ public interface Root extends Lookup.Provider {
         
         public void shutdown();
         
-        public void run() throws IllegalRootStateException;
+        public void run();
         
     }
     

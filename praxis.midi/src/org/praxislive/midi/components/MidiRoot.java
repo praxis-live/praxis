@@ -35,7 +35,6 @@ import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Transmitter;
 import org.praxislive.core.Value;
-import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.Packet;
 import org.praxislive.core.PacketRouter;
@@ -124,11 +123,7 @@ public class MidiRoot extends AbstractRoot {
             transmitter.setReceiver(receiver);
             midiDevice.open();
         } catch (MidiUnavailableException ex) {
-            try {
-                setIdle();
-            } catch (IllegalRootStateException ex1) {
-                // ignore
-            }
+            setIdle();
         }
     }
 

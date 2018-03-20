@@ -35,7 +35,6 @@ import org.praxislive.core.CallArguments;
 import org.praxislive.core.Component;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
-import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.Root;
 import org.praxislive.core.RootHub;
 import org.praxislive.core.ComponentInfo;
@@ -75,7 +74,7 @@ public class DefaultCoreRoot extends AbstractRoot {
     }
 
     @Override
-    public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException {
+    public Root.Controller initialize(String ID, RootHub hub) {
         controller = super.initialize(ID, hub);
         this.ID = ID;
         return controller;
@@ -178,7 +177,7 @@ public class DefaultCoreRoot extends AbstractRoot {
             public void run() {
                 try {
                     ctrl.run();
-                } catch (IllegalRootStateException ex) {
+                } catch (Exception ex) {
                     LOG.severe("Root " + id + " threw root state exception");
                 } finally {
                     if (hubAccess.unregisterRootController(id) != null) {

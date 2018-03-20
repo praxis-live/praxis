@@ -28,7 +28,6 @@ import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Timer;
-import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.Packet;
 import org.praxislive.core.Root;
 import org.praxislive.core.RootHub;
@@ -55,7 +54,7 @@ public class AbstractSwingRoot extends AbstractRoot {
     }
 
     @Override
-    public Root.Controller initialize(String ID, RootHub hub) throws IllegalRootStateException {
+    public Root.Controller initialize(String ID, RootHub hub) {
         Root.Controller ctrl = super.initialize(ID, hub);
         timer = new Timer(DEFAULT_PERIOD, new TimerProcessor());
         return new DelegateController(ctrl);
@@ -127,10 +126,10 @@ public class AbstractSwingRoot extends AbstractRoot {
         }
     }
 
-    private void update() {
+    private void delegateUpdate() {
         try {
             update(System.nanoTime(), true);
-        } catch (IllegalRootStateException ex) {
+        } catch (Exception ex) {
             timer.stop();
             synchronized (lock) {
                 lock.notifyAll();
@@ -148,7 +147,7 @@ public class AbstractSwingRoot extends AbstractRoot {
             runner = new Runnable() {
 
                 public void run() {
-                    update();
+                    delegateUpdate();
                 }
             };
         }
@@ -167,7 +166,7 @@ public class AbstractSwingRoot extends AbstractRoot {
             ctrl.shutdown();
         }
 
-        public void run() throws IllegalRootStateException {
+        public void run() {
             ctrl.run();
         }
     }

@@ -38,7 +38,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.praxislive.core.ComponentAddress;
-import org.praxislive.core.IllegalRootStateException;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.Packet;
 import org.praxislive.core.Root;
@@ -105,7 +104,7 @@ public final class Hub {
             public void run() {
                 try {
                     coreController.run();
-                } catch (IllegalRootStateException ex) {
+                } catch (Exception ex) {
                     Logger.getLogger(Hub.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
