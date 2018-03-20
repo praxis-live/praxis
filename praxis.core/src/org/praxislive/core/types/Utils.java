@@ -46,7 +46,7 @@ class Utils {
     }
 
     static boolean equivalent(Value arg1, Value arg2) {
-        return arg1.equivalent(arg2) || arg2.equivalent(arg2);
+        return arg1.equivalent(arg2) || arg2.equivalent(arg1);
     }
     
     private static String doPlain(String input) {
