@@ -38,7 +38,9 @@ import org.praxislive.core.Value;
 import org.praxislive.core.PacketRouter;
 import java.util.EnumSet;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
@@ -180,7 +182,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 
     protected void stopping() {
     }
-    
+
     protected void update() {
     }
 
@@ -433,36 +435,43 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             return blockingQueue.offer(packet);
         }
 
-        public void shutdown() {
-            RootState s = state.get();
-            while (true) {
-                if (s == RootState.TERMINATED) {
-                    return;
-                } else {
-                    if (state.compareAndSet(s, RootState.TERMINATING)) {
-                        // System.out.println("State set to terminated");
-                        return;
-                    } else {
-                        s = state.get();
-                    }
-                }
-            }
+        @Override
+        public void start(ThreadFactory threadFactory) {
+            threadFactory.newThread(() -> {
+                activate();
+                run();
+                terminate();
+            }).start();
         }
 
-        public void run() {
+        public void shutdown() {
+            state.updateAndGet(s -> s == RootState.TERMINATED
+                    ? RootState.TERMINATED : RootState.TERMINATING);
+        }
+
+        protected void activate() {
             if (state.compareAndSet(RootState.INITIALIZED, defaultRunState)) {
                 activating();
-                AbstractRoot.this.run();
-                state.set(RootState.TERMINATING); // in case run finished before shutdown called
-                terminating();
-                context.updateState(System.nanoTime(), ExecutionContext.State.TERMINATED);
-                disconnect();
-                // disconnect all children?
-                state.set(RootState.TERMINATED);
             } else {
                 throw new IllegalStateException();
             }
+        }
 
+        protected void run() {
+            AbstractRoot.this.run();
+        }
+
+        protected void terminate() {
+            RootState s = state.get();
+            while (s != RootState.TERMINATED) {
+                if (state.compareAndSet(s, RootState.TERMINATED)) {
+                    terminating();
+                    context.updateState(System.nanoTime(), ExecutionContext.State.TERMINATED);
+                    disconnect();
+                } else {
+                    s = state.get();
+                }
+            }
         }
     }
 

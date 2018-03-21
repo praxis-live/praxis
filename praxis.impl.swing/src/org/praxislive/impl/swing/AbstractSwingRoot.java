@@ -25,6 +25,7 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.EnumSet;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Timer;
@@ -64,12 +65,7 @@ public class AbstractSwingRoot extends AbstractRoot {
     protected final void activating() {
         super.activating();
         try {
-            EventQueue.invokeAndWait(new Runnable() {
-
-                public void run() {
-                    setup();
-                }
-            });
+            EventQueue.invokeAndWait(this::setup);
         } catch (Exception ex) {
             // @TODO what to do about exception?
         }
@@ -95,12 +91,7 @@ public class AbstractSwingRoot extends AbstractRoot {
     protected final void terminating() {
         super.terminating();
         try {
-            EventQueue.invokeAndWait(new Runnable() {
-
-                public void run() {
-                    dispose();
-                }
-            });
+            EventQueue.invokeAndWait(this::dispose);
         } catch (Exception ex) {
             // @TODO what to do about exception?
         }
@@ -140,16 +131,9 @@ public class AbstractSwingRoot extends AbstractRoot {
     private class DelegateController implements Root.Controller {
 
         private Root.Controller ctrl;
-        private Runnable runner;
 
         private DelegateController(Root.Controller ctrl) {
             this.ctrl = ctrl;
-            runner = new Runnable() {
-
-                public void run() {
-                    delegateUpdate();
-                }
-            };
         }
 
         public boolean submitPacket(Packet packet) {
@@ -157,24 +141,26 @@ public class AbstractSwingRoot extends AbstractRoot {
             RootState state = getState();
             if (state == RootState.ACTIVE_RUNNING
                     || state == RootState.ACTIVE_IDLE) {
-                EventQueue.invokeLater(runner);
+                EventQueue.invokeLater(AbstractSwingRoot.this::delegateUpdate);
             }
             return ret;
         }
 
-        public void shutdown() {
-            ctrl.shutdown();
+        // @TODO remove delegate and thread use
+        @Override
+        public void start(ThreadFactory threadFactory) {
+            ctrl.start(threadFactory);
         }
 
-        public void run() {
-            ctrl.run();
+        public void shutdown() {
+            ctrl.shutdown();
         }
     }
 
     private class TimerProcessor implements ActionListener {
 
         public void actionPerformed(ActionEvent e) {
-            update();
+            delegateUpdate();
         }
     }
 }

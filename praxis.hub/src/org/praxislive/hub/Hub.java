@@ -66,7 +66,7 @@ public final class Hub {
 
 //    private Thread coreThread;
     private String[] rootIDs;
-    private FutureTask<?> coreExecutor;
+    private Thread coreThread;
     private Root.Controller coreController;
 
     private Hub(Builder builder) {
@@ -92,42 +92,36 @@ public final class Hub {
     }
     
     public synchronized void start() throws Exception {
-        if (coreExecutor != null) {
+        if (coreThread != null) {
             throw new IllegalStateException();
         }
         String coreID = CORE_PREFIX + Integer.toHexString(core.hashCode());
         coreController = core.initialize(coreID, rootHub);
         roots.put(coreID, coreController);
-        coreExecutor = new FutureTask<>( new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    coreController.run();
-                } catch (Exception ex) {
-                    Logger.getLogger(Hub.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }, null);
-        Thread t = new Thread(coreExecutor, "PRAXIS_CORE_THREAD");
-        t.start();
+        coreController.start(r -> {
+            coreThread =  new Thread(r, "PRAXIS_CORE_THREAD");
+            return coreThread;
+        });
+        assert coreThread.isAlive();
     }
 
     public void shutdown() {
         coreController.shutdown();
     }
 
-    public void await() throws InterruptedException, ExecutionException {
-        coreExecutor.get();
+    public void await() throws InterruptedException {
+        coreThread.join();
     }
     
-    public void await(long time, TimeUnit unit) throws InterruptedException,
-            ExecutionException, TimeoutException {
-        coreExecutor.get(time, unit);
+    public void await(long time, TimeUnit unit) throws InterruptedException, TimeoutException {
+        coreThread.join(unit.toMillis(time));
+        if (coreThread.isAlive()) {
+            throw new TimeoutException();
+        }
     }
     
     public boolean isAlive() {
-        return !coreExecutor.isDone();
+        return coreThread.isAlive();
     }
 
     private boolean registerRootController(String id, Root.Controller controller) {

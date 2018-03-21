@@ -171,28 +171,7 @@ public class DefaultCoreRoot extends AbstractRoot {
     }
     
     protected void startRoot(final String id, String type, final Root.Controller ctrl) {
-        Thread thr = new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    ctrl.run();
-                } catch (Exception ex) {
-                    LOG.severe("Root " + id + " threw root state exception");
-                } finally {
-                    if (hubAccess.unregisterRootController(id) != null) {
-                        LOG.warning("Root " + id + " terminated unexpectedly");
-                    }
-                }
-            }
-        }, id);
-        if ("root:audio".equals(type)) {
-            thr.setPriority(Thread.MAX_PRIORITY);
-        } else {
-            thr.setPriority(7); // @TODO work out priority scheme
-        }
-
-        thr.start();
+        ctrl.start(r -> new Thread(r, id));
     }
     
     protected Hub.Accessor getHubAccessor() {

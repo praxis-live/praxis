@@ -25,7 +25,7 @@ package org.praxislive.core;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Common superclass of Call and CallBundle
+ * Superclass of Call. Intended to allow future support for atomic Call bundles.
  * 
  * @author Neil C Smith
  */

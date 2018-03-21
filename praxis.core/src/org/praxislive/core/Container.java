@@ -30,27 +30,6 @@ package org.praxislive.core;
  */
 public interface Container extends Component, Lookup.Provider {
     
-//    /**
-//     * Add child to this Container.
-//     *
-//     * Containers may throw InvalidChildException if the child component is not
-//     * of a required type, or if the requested ID is invalid or already in use.
-//     *
-//     * @param id
-//     * @param child
-//     * @throws org.praxislive.core.VetoException
-//     */
-//    public void addChild(String id, Component child) throws VetoException;
-//    
-//    /**
-//     * Remove child with given ID.
-//     *
-//     * @param id
-//     * @return Component, or null if no component of that ID.
-//     * @throws org.praxislive.core.VetoException
-//     */
-//    public Component removeChild(String id) throws VetoException;
-    
     /**
      * Get child component with specific ID.
      * @param id
