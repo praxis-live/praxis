@@ -49,11 +49,6 @@ public final class Player extends MultiOut implements Resettable {
         channels = new Channel[]{new Channel()};
         reset();
     }
-
-    @Deprecated
-    public Player table(Table table) {
-        return table((AudioTable) table);
-    }
     
     public Player table(AudioTable table) {
         if (table != this.table) {

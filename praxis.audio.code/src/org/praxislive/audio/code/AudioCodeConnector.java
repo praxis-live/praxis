@@ -28,7 +28,6 @@ import java.util.List;
 import org.praxislive.audio.code.userapi.AudioIn;
 import org.praxislive.audio.code.userapi.AudioOut;
 import org.praxislive.audio.code.userapi.AudioTable;
-import org.praxislive.audio.code.userapi.Table;
 import org.praxislive.audio.code.userapi.UGen;
 import org.praxislive.code.CodeConnector;
 import org.praxislive.code.CodeFactory;
@@ -98,7 +97,7 @@ public class AudioCodeConnector<D extends AudioCodeDelegate> extends CodeConnect
             }
         }
         
-        if (Table.class.isAssignableFrom(field.getType())) {
+        if (AudioTable.class.isAssignableFrom(field.getType())) {
             P p = field.getAnnotation(P.class);
             if (p != null) {
                 ResourceProperty.Descriptor<AudioTable> ipd =

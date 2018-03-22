@@ -26,10 +26,10 @@ import org.praxislive.audio.code.userapi.Add;
 import org.praxislive.audio.code.userapi.Function;
 import org.praxislive.audio.code.userapi.Mod;
 import org.praxislive.audio.code.userapi.OpGen;
-import org.praxislive.audio.code.userapi.Table;
 import org.praxislive.audio.code.userapi.Tee;
 import org.praxislive.code.DefaultCodeDelegate;
 import org.jaudiolibs.pipes.Pipe;
+import org.praxislive.audio.code.userapi.AudioTable;
 
 /**
  *
@@ -118,7 +118,7 @@ public class AudioCodeDelegate extends DefaultCodeDelegate {
         return NoteUtils.midiToFrequency(midi);
     }
     
-    public double tabread(Table table, double position) {
+    public double tabread(AudioTable table, double position) {
         return table == null ? 0 : table.get(0, position * table.size());
     }
     

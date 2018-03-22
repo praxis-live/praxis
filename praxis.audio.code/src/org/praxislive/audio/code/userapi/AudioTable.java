@@ -26,10 +26,68 @@ package org.praxislive.audio.code.userapi;
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-public class AudioTable extends Table {
+public class AudioTable {
+    
+    private final float[] data;
+    private final double sampleRate;
+    private final int channels;
+    private final int size;
     
     AudioTable(float[] data, double sampleRate, int channels) {
-        super(data, sampleRate, channels);
+        this.data = data;
+        this.sampleRate = sampleRate;
+        this.channels= channels;
+        this.size = data.length / channels;
+    }
+    
+    public float[] data() {
+        return data;
+    }
+    
+    public boolean hasSampleRate() {
+        return sampleRate > 0.5;
+    }
+    
+    public double sampleRate() {
+        return sampleRate;
+    }
+    
+    public int channels() {
+        return channels;
+    }
+    
+    public int size() {
+        return size;
+    }
+    
+    public void set(int channel, int index, double value) {
+            data[(index * channels) + channel] = (float) value;
+        }
+    
+    public double get(int channel, int idx) {
+        return data[(idx * channels) + channel];
+    }
+    
+    public double get(int channel, double pos) {
+        int iPos = (int) pos;
+        double frac;
+        double a,b,c,d;
+        double cminusb;
+        if (iPos < 1) {
+            iPos = 1;
+            frac = 0;
+        } else if (iPos > (size() - 3)) {
+            iPos = size() - 3;
+            frac = 1;
+        } else {
+            frac = pos - iPos;
+        }
+        a = get(channel, iPos - 1);
+        b = get(channel, iPos);
+        c = get(channel, iPos + 1);
+        d = get(channel, iPos + 2);
+        cminusb = c - b;
+        return b + frac * (cminusb - 0.5f * (frac - 1) * ((a - d + 3.0f * cminusb) * frac + (b - a - cminusb)));
     }
     
     public static AudioTable wrap(float[] data, double sampleRate, int channels) {
