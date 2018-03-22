@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.praxislive.audio.AudioContext;
@@ -45,6 +46,7 @@ import org.jaudiolibs.audioservers.ext.Device;
 import org.jaudiolibs.pipes.BufferRateListener;
 import org.jaudiolibs.pipes.BufferRateSource;
 import org.jaudiolibs.pipes.impl.BusClient;
+import org.praxislive.core.Clock;
 
 /**
  *
@@ -212,7 +214,7 @@ public class DefaultAudioRoot extends AbstractRoot {
         bus = new BusClient(blockSize.value,
                 inputClient == null ? 0 : inputClient.getInputCount(),
                 outputClient.getOutputCount());
-        busListener = new BusListener();
+        busListener = new BusListener(getRootHub().getClock());
         bus.addBufferRateListener(busListener);
         bus.addConfigurationListener(busListener);
         if (inputClient != null) {
@@ -406,9 +408,15 @@ public class DefaultAudioRoot extends AbstractRoot {
 
     private class BusListener implements BufferRateListener, BusClient.ConfigurationListener {
 
+        private final long offset;
+        
+        private BusListener(Clock clock) {
+            offset = System.nanoTime() - clock.getTime();
+        }
+
         public void nextBuffer(BufferRateSource source) {
             try {
-                update(source.getTime(), true);
+                update(source.getTime() - offset, true);
             } catch (Exception ex) {
                 server.shutdown();
             }
@@ -482,13 +490,8 @@ public class DefaultAudioRoot extends AbstractRoot {
     private class Context extends AbstractRoot.Context {
 
         @Override
-        public long getPeriod() {
-            return period;
-        }
-
-        @Override
-        public boolean supportsPeriod() {
-            return true;
+        public OptionalLong getPeriod() {
+            return OptionalLong.of(period);
         }
 
     }

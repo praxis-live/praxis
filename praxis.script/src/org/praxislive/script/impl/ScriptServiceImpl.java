@@ -196,7 +196,7 @@ public class ScriptServiceImpl extends AbstractRoot {
         }
 
         public long getTime() {
-            return ScriptServiceImpl.this.getTime();
+            return ScriptServiceImpl.this.getExecutionContext().getTime();
         }
 
         public PacketRouter getPacketRouter() {

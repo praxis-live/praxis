@@ -44,8 +44,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.praxislive.core.Clock;
 import org.praxislive.core.Lookup;
-import org.praxislive.settings.Settings;
 import org.praxislive.video.ClientConfiguration;
 import org.praxislive.video.Player;
 import org.praxislive.video.PlayerConfiguration;
@@ -70,28 +70,31 @@ class SWPlayer implements Player {
     private final static double DEG_180 = Math.toRadians(180);
     private final static double DEG_270 = Math.toRadians(270);
 
-    private int noSleepsPerYield = 0; // maximum number of frames without sleep before yielding
-    private int maxSkip = 2; // maximum number of frames that can be skipped before rendering
-    private int width, height; // dimensions of surface
-    private int outputWidth, outputHeight, outputRotation, outputDevice;
-    private double fps; // frames per second
+    private final int noSleepsPerYield = 0; // maximum number of frames without sleep before yielding
+    private final int maxSkip = 2; // maximum number of frames that can be skipped before rendering
+    private final int width, height; // dimensions of surface
+    private final int outputWidth, outputHeight, outputRotation, outputDevice;
+    private final double fps; // frames per second
+    private final OutputSink sink;
+    private final WindowHints wHints;
+    private final QueueContext queueContext;
+    private final Clock clock;
+    
     private long period; // period per frame in nanosecs
 //    private long frameIndex; // index of current frame
-    private long time; // time of currently computing frame in relation to System.nanotime
+    private long time; // time of currently computing frame in relation to clock
     private volatile boolean running = false; // flag to control animation
     private SWSurface surface = null; // surface to be passed up tree
     private SWSurface rotated = null; // rotated surface if required
     private Frame frame = null;
     private Canvas canvas = null;
     private BufferStrategy bs = null;
-    private OutputSink sink = null;
     // listener list
     private List<FrameRateListener> listeners = new ArrayList<FrameRateListener>();
     private boolean rendering = false; // used by frame rate listeners
-    private final WindowHints wHints;
-    private final QueueContext queueContext;
 
     private SWPlayer(
+            Clock clock,
             int width,
             int height,
             double fps,
@@ -104,6 +107,7 @@ class SWPlayer implements Player {
         if (width <= 0 || height <= 0 || fps <= 0) {
             throw new IllegalArgumentException();
         }
+        this.clock = clock;
         this.width = width;
         this.height = height;
         this.fps = fps;
@@ -128,24 +132,20 @@ class SWPlayer implements Player {
         }
         period = (long) (1000000000.0 / fps);
 
-        //render first frame
-        time = System.nanoTime();
-//        updateAndRender();
-
         long afterTime = 0L; // time after render
         long sleepTime = 0L; // time to sleep
         long overSleepTime = 0L; // time over slept
         long excess = 0L; // excess time taken to render frame
         int noSleeps = 0;
 
-        time = System.nanoTime();
+        time = clock.getTime();
 
         // animation loop
         long now = 0L;
         long difference = 0L;
         while (running) {
             time += period;
-            now = System.nanoTime();
+            now = clock.getTime();
             difference = now - time;
             if (difference > 0) {
                 fireListeners();
@@ -161,7 +161,7 @@ class SWPlayer implements Player {
 //                        Thread.sleep(1);
                     } catch (InterruptedException ex) {
                     }
-                    now = System.nanoTime();
+                    now = clock.getTime();
                     difference = now - time;
                 }
                 updateAndRender();
@@ -534,6 +534,7 @@ class SWPlayer implements Player {
             QueueContext queue = config.getLookup().find(QueueContext.class).get();
 
             return new SWPlayer(
+                    config.getClock(),
                     config.getWidth(),
                     config.getHeight(),
                     config.getFPS(),

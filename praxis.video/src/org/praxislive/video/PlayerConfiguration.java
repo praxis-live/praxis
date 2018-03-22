@@ -21,34 +21,42 @@
  */
 package org.praxislive.video;
 
+import java.util.Objects;
+import org.praxislive.core.Clock;
 import org.praxislive.core.Lookup;
 
 /**
  *
- * @author nsigma
+ * @author Neil C Smith
  */
 public final class PlayerConfiguration {
     
+    private final Clock clock;
     private final int width;
     private final int height;
     private final double fps;
     private final Lookup lookup;
     
-    public PlayerConfiguration(int width, int height, double fps) {
-        this(width, height, fps, Lookup.EMPTY);
+    public PlayerConfiguration(Clock clock, int width, int height, double fps) {
+        this(clock, width, height, fps, Lookup.EMPTY);
     }
     
-    public PlayerConfiguration(int width, int height, double fps, Lookup lookup) {
+    public PlayerConfiguration(Clock clock, int width, int height, double fps, Lookup lookup) {
         if (width < 1 || height < 1) {
             throw new IllegalArgumentException("Illegal dimensions");
         }
         if (lookup == null) {
             throw new NullPointerException();
         } 
+        this.clock = Objects.requireNonNull(clock);
         this.width = width;
         this.height = height;
         this.fps = fps;
         this.lookup = lookup;
+    }
+    
+    public Clock getClock() {
+        return clock;
     }
     
     public int getWidth() {

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.praxislive.core.Clock;
 import org.praxislive.core.Lookup;
 import org.praxislive.impl.InstanceLookup;
 import org.praxislive.video.Player;
@@ -55,6 +56,7 @@ public class PGLPlayer implements Player {
     private final WindowHints wHints;
     private final QueueContext queue;
     private final PGLProfile profile;
+    private final Clock clock;
 
     private volatile boolean running = false; // flag to control animation
     private volatile long time;
@@ -63,7 +65,9 @@ public class PGLPlayer implements Player {
     private PGLOutputSink sink = null;
     private Lookup lookup;
 
-    PGLPlayer(int width,
+    PGLPlayer(
+            Clock clock,
+            int width,
             int height,
             double fps,
             int outputWidth,
@@ -76,6 +80,7 @@ public class PGLPlayer implements Player {
         if (width <= 0 || height <= 0 || fps <= 0) {
             throw new IllegalArgumentException();
         }
+        this.clock = clock;
         this.surfaceWidth = width;
         this.surfaceHeight = height;
         this.fps = fps;
@@ -102,7 +107,7 @@ public class PGLPlayer implements Player {
     public void run() {
         LOG.info("Starting experimental PGL renderer.");
         running = true;
-        time = System.nanoTime();
+        time = clock.getTime();
         try {
             init();
         } catch (Exception ex) {
@@ -116,7 +121,7 @@ public class PGLPlayer implements Player {
         }
         while (running) {
             try {
-                if (System.nanoTime() < (time + frameNanos - 2_000_000)) {
+                if (clock.getTime() < (time + frameNanos - 2_000_000)) {
                     synchronized (applet) {
                         queue.process(0, TimeUnit.MILLISECONDS);
                     }
@@ -295,7 +300,7 @@ public class PGLPlayer implements Player {
 
         @Override
         public synchronized void draw() {
-            time = System.nanoTime() + frameNanos;
+            time = clock.getTime() + frameNanos;
             fireListeners();
             sink.process(pglSurface, time);
             PImage img = context.asImage(pglSurface);

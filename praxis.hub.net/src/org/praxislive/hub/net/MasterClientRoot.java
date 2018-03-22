@@ -35,7 +35,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
-import org.praxislive.core.Control;
+import org.praxislive.core.Clock;
 import org.praxislive.core.ExecutionContext;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.ControlInfo;
@@ -77,13 +77,9 @@ class MasterClientRoot extends AbstractRoot {
     @Override
     protected void activating() {
         super.activating();
-        getLookup().get(ExecutionContext.class).addClockListener(new ExecutionContext.ClockListener() {
-
-            @Override
-            public void tick(ExecutionContext source) {
-                MasterClientRoot.this.tick(source);
-            }
-        });
+        ExecutionContext context = getExecutionContext();
+        context.addClockListener(MasterClientRoot.this::tick);
+        lastPurgeTime = context.getTime();
         dispatcher.remoteSysPrefix = getAddress().toString() + "/_remote";
     }
 
@@ -152,7 +148,7 @@ class MasterClientRoot extends AbstractRoot {
             client = OSCClient.newUsing(codec, OSCClient.TCP);
             client.setBufferSize(65536);
             client.setTarget(slaveInfo.getAddress());
-            watchdog = new Watchdog(client);
+            watchdog = new Watchdog(getRootHub().getClock(), client);
             watchdog.start();
 //            client.connect();
 //            LOG.fine("Connected - sending /HLO");
@@ -215,7 +211,7 @@ class MasterClientRoot extends AbstractRoot {
         private String remoteSysPrefix;
 
         private Dispatcher(PraxisPacketCodec codec) {
-            super(codec);
+            super(codec, () -> getExecutionContext().getTime());
         }
 
         @Override
@@ -240,20 +236,23 @@ class MasterClientRoot extends AbstractRoot {
 
     private class Watchdog extends Thread {
 
+        private final Clock clock;
         private final OSCClient client;
+        
         private volatile long lastTickTime;
         private volatile boolean active;
 
-        private Watchdog(OSCClient client) {
+        private Watchdog(Clock clock, OSCClient client) {
+            this.clock = clock;
             this.client = client;
-            lastTickTime = System.nanoTime();
+            lastTickTime = clock.getTime();
             setDaemon(true);
         }
 
         @Override
         public void run() {
             while (active) {
-                if ((System.nanoTime() - lastTickTime) > TimeUnit.SECONDS.toNanos(10)) {
+                if ((clock.getTime() - lastTickTime) > TimeUnit.SECONDS.toNanos(10)) {
                     client.dispose();
                     active = false;
                 }
@@ -266,7 +265,7 @@ class MasterClientRoot extends AbstractRoot {
         }
 
         private void tick() {
-            lastTickTime = System.nanoTime();
+            lastTickTime = clock.getTime();
         }
 
         private void shutdown() {

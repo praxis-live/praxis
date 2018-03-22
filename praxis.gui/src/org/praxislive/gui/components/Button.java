@@ -46,6 +46,7 @@ import org.praxislive.core.ControlAddress;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
+import org.praxislive.core.ExecutionContext;
 import org.praxislive.core.services.ScriptService;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
@@ -158,7 +159,9 @@ public class Button extends SingleBindingGuiComponent {
                     ScriptService.EVAL);
             ControlAddress from = ControlAddress.create(
                     getAddress(), "_on-click-log");
-            Call call = Call.createQuietCall(to, from, System.nanoTime(), PString.valueOf(script));
+            Call call = Call.createQuietCall(to, from,
+                    getLookup().find(ExecutionContext.class).get().getTime(),
+                    PString.valueOf(script));
             getPacketRouter().route(call);
             
         } catch (Exception ex) {

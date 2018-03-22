@@ -44,7 +44,7 @@ public class Packet implements Comparable<Packet> {
     }
 
     /**
-     * Get the time that this Packet should be processed, relative to System.nanoTime()
+     * Get the time that this Packet should be processed, relative to {@link RootHub#getClock() }
      *
      * @return long time
      */

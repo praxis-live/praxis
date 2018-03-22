@@ -86,6 +86,7 @@ public class PGLPlayerFactory implements PlayerFactory {
         QueueContext queue = config.getLookup().find(QueueContext.class).get();
 
         return new PGLPlayer(
+                config.getClock(),
                 config.getWidth(),
                 config.getHeight(),
                 config.getFPS(),

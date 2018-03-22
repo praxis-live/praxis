@@ -168,17 +168,6 @@ public class TFContext {
         listeners = ArrayUtils.remove(listeners, listener);
     }
 
-    @Deprecated
-    public long getTime() {
-//        return root.getTime();
-        return System.nanoTime();
-    }
-
-    @Deprecated
-    public boolean invokeLater(Runnable task) {
-        return root.invokeLater(task);
-    }
-
     // @TODO change to deviceAdded, deviceRemoved, deviceReset?
     public static interface Listener {
 

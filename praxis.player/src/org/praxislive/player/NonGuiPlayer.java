@@ -136,7 +136,7 @@ class NonGuiPlayer extends AbstractRoot {
             } catch (ServiceUnavailableException ex) {
                 LOG.log(Level.SEVERE, "", ex);
             }
-            activeCall = Call.createCall(evalControl, getAddress(), System.nanoTime(), PString.valueOf(script));
+            activeCall = Call.createCall(evalControl, getAddress(), getExecutionContext().getTime(), PString.valueOf(script));
             getPacketRouter().route(activeCall);
 
         }

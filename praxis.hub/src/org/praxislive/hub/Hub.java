@@ -37,6 +37,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.praxislive.core.Clock;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.Packet;
@@ -68,6 +69,7 @@ public final class Hub {
     private String[] rootIDs;
     private Thread coreThread;
     private Root.Controller coreController;
+    long startTime;
 
     private Hub(Builder builder) {
         CoreRootFactory coreFactory = builder.coreRootFactory;
@@ -95,6 +97,7 @@ public final class Hub {
         if (coreThread != null) {
             throw new IllegalStateException();
         }
+        startTime = System.nanoTime();
         String coreID = CORE_PREFIX + Integer.toHexString(core.hashCode());
         coreController = core.initialize(coreID, rootHub);
         roots.put(coreID, coreController);
@@ -178,21 +181,31 @@ public final class Hub {
         return new Builder();
     }
 
-    private class RootHubImpl implements RootHub {
+    private class RootHubImpl implements RootHub, Clock {
 
         @Override
-        public void dispatch(Packet packet) {
+        public boolean dispatch(Packet packet) {
             Root.Controller dest = roots.get(packet.getRootID());
             if (dest != null) {
-                dest.submitPacket(packet);
+                return dest.submitPacket(packet);
             } else {
-                coreController.submitPacket(packet);
+                return coreController.submitPacket(packet);
             }
         }
 
         @Override
         public Lookup getLookup() {
             return lookup;
+        }
+
+        @Override
+        public Clock getClock() {
+            return this;
+        }
+
+        @Override
+        public long getTime() {
+            return System.nanoTime() - startTime;
         }
 
     }

@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.praxislive.core.Clock;
 import org.praxislive.core.Value;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.types.PString;
@@ -131,12 +132,13 @@ public class TFRoot extends AbstractRoot {
         @Override
         public void run() {
             LOG.info("Starting delegate runner");
-            long target = System.nanoTime();
+            Clock clock = getRootHub().getClock();
+            long target = clock.getTime();
             while (getState() == RootState.ACTIVE_RUNNING) {
                 target += DEFAULT_PERIOD;
                 try {
                     update(target, false);
-                    while (target - System.nanoTime() > 0) {
+                    while (target - clock.getTime() > 0) {
                         poll(1, TimeUnit.MILLISECONDS);
                     }
                 } catch (Exception ex) {

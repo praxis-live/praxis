@@ -32,6 +32,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.praxislive.core.Clock;
 import org.praxislive.core.Lookup;
 import org.praxislive.impl.AbstractRoot;
 import org.praxislive.impl.InstanceLookup;
@@ -88,7 +89,7 @@ public class OSCRoot extends AbstractRoot {
             server = OSCServer.newUsing(DEFAULT_PROTOCOL, port);
             server.addOSCListener(new OSCListenerImpl());
             server.start();
-            setDelegate(new OSCRunnable());
+            setDelegate(new OSCRunnable(getRootHub().getClock()));
             interrupt();
         } catch (IOException ex) {
             Logger.getLogger(OSCRoot.class.getName()).log(Level.SEVERE, null, ex);
@@ -163,11 +164,17 @@ public class OSCRoot extends AbstractRoot {
     }
 
     private class OSCRunnable implements Runnable {
+        
+        private final Clock clock;
+        
+        private OSCRunnable(Clock clock) {
+            this.clock = clock;
+        }
 
         @Override
         public void run() {
             while (getState() == RootState.ACTIVE_RUNNING) {
-                long time = System.nanoTime();
+                long time = clock.getTime();
                 update(time, true);
                 OSCMessage msg = null;
                 try {

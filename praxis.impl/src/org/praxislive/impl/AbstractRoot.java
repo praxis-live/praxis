@@ -38,7 +38,6 @@ import org.praxislive.core.Value;
 import org.praxislive.core.PacketRouter;
 import java.util.EnumSet;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -56,8 +55,8 @@ import org.praxislive.util.ArrayUtils;
 /**
  *
  * @author Neil C Smith
- * @TODO Add Control address caching
  */
+// * @TODO Add Control address caching
 public abstract class AbstractRoot extends AbstractContainer implements Root {
 
     public static enum Caps {
@@ -74,7 +73,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     private ComponentAddress address;
     private PacketQueue orderedQueue = new PacketQueue();
     private BlockingQueue<Object> blockingQueue = new LinkedBlockingQueue<Object>();
-    private long time;
+//    private long time;
     private Root.Controller controller;
     //private Runnable interrupt;
     private Lookup lookup;
@@ -162,9 +161,13 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     protected PacketRouter getPacketRouter() {
         return router;
     }
+    
+    protected final RootHub getRootHub() {
+        return hub;
+    }
 
-    public long getTime() {
-        return time;
+    protected final ExecutionContext getExecutionContext() {
+        return context;
     }
 
     protected Context createContext() {
@@ -217,7 +220,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                         delegate = null;
                     }
                 }
-                update(System.nanoTime(), true);
+                update(hub.getClock().getTime(), true);
                 if (!interrupted) {
                     poll(DEFAULT_FRAME_TIME, TimeUnit.MILLISECONDS);
                 }
@@ -230,7 +233,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         }
     }
 
-    @SuppressWarnings("deprecation")
     protected final void update(long time, boolean poll) {
 
         interrupted = false;
@@ -257,7 +259,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             }
         }
 
-        this.time = time;
         context.updateClock(time);
         orderedQueue.setTime(time);
 
@@ -290,7 +291,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             obj = blockingQueue.poll(timeout, unit);
         }
 
-        long now = time;
+        long now = context.time;
         while (obj != null) {
 
             if (obj instanceof Packet) {
@@ -466,7 +467,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             while (s != RootState.TERMINATED) {
                 if (state.compareAndSet(s, RootState.TERMINATED)) {
                     terminating();
-                    context.updateState(System.nanoTime(), ExecutionContext.State.TERMINATED);
+                    context.updateState(hub.getClock().getTime(), ExecutionContext.State.TERMINATED);
                     disconnect();
                 } else {
                     s = state.get();
@@ -526,7 +527,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                     getPacketRouter().route(Call.createCall(
                             to,
                             ControlAddress.create(getAddress(), "_exit-log"),
-                            getTime(),
+                            context.time,
                             CallArguments.EMPTY));
                 } catch (Exception ex) {
                     LOG.log(Level.WARNING, "Can't access SystemManagerService - exiting manually", ex);
@@ -544,7 +545,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         }
     }
 
-    protected class Context extends ExecutionContext {
+    protected class Context implements ExecutionContext {
 
         private ExecutionContext.StateListener[] stateListeners;
         private ExecutionContext.ClockListener[] clockListeners;
@@ -556,7 +557,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             this.stateListeners = new ExecutionContext.StateListener[0];
             this.clockListeners = new ExecutionContext.ClockListener[0];
             this.state = ExecutionContext.State.NEW;
-            this.time = System.nanoTime();
+            this.time = hub.getClock().getTime();
             this.startTime = this.time;
         }
 
@@ -626,11 +627,6 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         @Override
         public long getTime() {
             return time;
-        }
-
-        @Override
-        public boolean supportsStartTime() {
-            return true;
         }
 
         @Override

@@ -136,7 +136,7 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
         }
         PlayerFactory factory = findPlayerFactory(library);
         Lookup plLkp = InstanceLookup.create(new QueueContextImpl());
-        return factory.createPlayer(new PlayerConfiguration(width, height, fps, plLkp),
+        return factory.createPlayer(new PlayerConfiguration(getRootHub().getClock(), width, height, fps, plLkp),
                 new ClientConfiguration[]{
                     new ClientConfiguration(0, 1, clientLookup)
                 });

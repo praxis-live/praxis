@@ -37,8 +37,8 @@ import org.praxislive.core.ControlAddress;
 import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.ControlInfo;
+import org.praxislive.core.ExecutionContext;
 import org.praxislive.core.protocols.ComponentProtocol;
-import org.praxislive.impl.swing.ControlBinding;
 import org.praxislive.impl.AbstractControl;
 
 /**
@@ -57,6 +57,7 @@ public class DefaultBindingControl extends AbstractControl {
     private ControlAddress boundAddress;
     private Binding binding;
     private PacketRouter router;
+    private ExecutionContext context;
 
     public DefaultBindingControl(ControlAddress boundAddress) {
         if (boundAddress == null) {
@@ -120,14 +121,8 @@ public class DefaultBindingControl extends AbstractControl {
     @Override
     public void hierarchyChanged() {
         super.hierarchyChanged();
-        router = null;
-    }
-
-    private PacketRouter getRouter() {
-        if (router == null) {
-            router = getLookup().get(PacketRouter.class);
-        }
-        return router;
+        router = getLookup().find(PacketRouter.class).orElse(null);
+        context = getLookup().find(ExecutionContext.class).orElse(null);
     }
 
     private class Binding extends ControlBinding {
@@ -189,15 +184,14 @@ public class DefaultBindingControl extends AbstractControl {
 
         @Override
         protected void send(Adaptor adaptor, CallArguments args) {
-            PacketRouter router = getRouter();
             ControlAddress returnAddress = getReturnAddress();
             Call call;
             if (adaptor.getValueIsAdjusting()) {
                 call = Call.createQuietCall(boundAddress, returnAddress,
-                        System.nanoTime(), args);
+                        context.getTime(), args);
             } else {
                 call = Call.createCall(boundAddress, returnAddress,
-                        System.nanoTime(), args);
+                        context.getTime(), args);
             }
             router.route(call);
             activeCall = call;
@@ -263,11 +257,10 @@ public class DefaultBindingControl extends AbstractControl {
         }
 
         private void sendInfoRequest() {
-            PacketRouter router = getRouter();
             ControlAddress returnAddress = getReturnAddress();
             ControlAddress toAddress = ControlAddress.create(boundAddress.getComponentAddress(), ComponentProtocol.INFO);
             Call call = Call.createCall(toAddress, returnAddress,
-                    System.nanoTime(), CallArguments.EMPTY);
+                    context.getTime(), CallArguments.EMPTY);
 
             infoMatchID = call.getMatchID();
             router.route(call);
@@ -343,7 +336,7 @@ public class DefaultBindingControl extends AbstractControl {
         }
 
         private void processSync() {
-            long now = System.nanoTime();
+            long now = context.getTime();
             if (activeCall != null) {
                 if (activeCall.getType() == Call.Type.INVOKE) {
                     if ((now - activeCall.getTimecode()) < invokeTimeOut) {
@@ -356,7 +349,6 @@ public class DefaultBindingControl extends AbstractControl {
                 }
             }
             if (isProperty) {
-                PacketRouter router = getRouter();
                 Call call = Call.createCall(boundAddress, getReturnAddress(),
                         now, CallArguments.EMPTY);
                 router.route(call);
@@ -364,11 +356,6 @@ public class DefaultBindingControl extends AbstractControl {
                 activeAdaptor = null;
             }
 
-//            PacketRouter router = getRouter();
-//            Call call = Call.createCall(boundAddress, getReturnAddress(),
-//                    System.nanoTime(), CallArguments.EMPTY);
-//            router.route(call);
-//            lastCallID = call.getMatchID();
         }
 
         @Override

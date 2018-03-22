@@ -119,7 +119,7 @@ public class AbstractSwingRoot extends AbstractRoot {
 
     private void delegateUpdate() {
         try {
-            update(System.nanoTime(), true);
+            update(getRootHub().getClock().getTime(), true);
         } catch (Exception ex) {
             timer.stop();
             synchronized (lock) {

@@ -26,6 +26,7 @@ import org.praxislive.core.CallArguments;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.ControlInfo;
+import org.praxislive.core.ExecutionContext;
 import org.praxislive.core.services.ScriptService;
 import org.praxislive.core.types.PString;
 import org.praxislive.impl.AbstractControl;
@@ -35,6 +36,7 @@ import org.praxislive.terminal.Terminal;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
+@Deprecated
 public class DefaultTerminalContext extends AbstractControl implements Terminal.Context {
 
     private Call activeCall;
@@ -52,7 +54,8 @@ public class DefaultTerminalContext extends AbstractControl implements Terminal.
         ControlAddress to = ControlAddress.create(
                 findService(ScriptService.class),
                 ScriptService.EVAL);
-        Call call = Call.createCall(to, getAddress(), System.nanoTime(), PString.valueOf(script));
+        Call call = Call.createCall(to, getAddress(),
+                getLookup().find(ExecutionContext.class).get().getTime(), PString.valueOf(script));
         route(call);
         activeCall = call;
     }
@@ -62,7 +65,8 @@ public class DefaultTerminalContext extends AbstractControl implements Terminal.
         ControlAddress to = ControlAddress.create(
                 findService(ScriptService.class),
                 ScriptService.CLEAR);
-        Call call = Call.createQuietCall(to, getAddress(), System.nanoTime(), CallArguments.EMPTY);
+        Call call = Call.createQuietCall(to, getAddress(),
+                getLookup().find(ExecutionContext.class).get().getTime(), CallArguments.EMPTY);
         route(call);
         activeCall = null;
     }

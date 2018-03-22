@@ -75,7 +75,6 @@ public abstract class CodeContext<D extends CodeDelegate> {
     protected CodeContext(CodeConnector<D> connector, boolean requireClock) {
         this.driver = new Driver();
         clockListeners = new ClockListener[0];
-        time = System.nanoTime() - 10 * 1000_000_000;
         // @TODO what is maximum allowed amount a root can be behind system time?
         try {
             connector.process();

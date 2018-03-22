@@ -39,6 +39,7 @@ import org.praxislive.core.Lookup;
 import org.praxislive.core.Packet;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.ArgumentInfo;
+import org.praxislive.core.Clock;
 import org.praxislive.core.types.PMap;
 import org.praxislive.impl.AbstractRoot;
 import org.praxislive.impl.ArgumentProperty;
@@ -102,7 +103,7 @@ public class MidiRoot extends AbstractRoot {
     protected void activating() {
         super.activating();
         router = new MidiThreadRouter(getPacketRouter());
-        receiver = new MidiContextReceiver();
+        receiver = new MidiContextReceiver(getRootHub().getClock());
     }
 
     @Override
@@ -191,9 +192,15 @@ public class MidiRoot extends AbstractRoot {
 
     private class MidiContextReceiver
             extends MidiInputContext implements Receiver {
+        
+        private final Clock clock;
+        
+        private MidiContextReceiver(Clock clock) {
+            this.clock = clock;
+        }
 
         public void send(final MidiMessage message, long timeStamp) {
-            final long time = System.nanoTime(); //@TODO use timestamp
+            final long time = clock.getTime(); //@TODO use timestamp
             invokeLater(new Runnable() {
                 public void run() {
 //                    if (getState() == RootState.ACTIVE_RUNNING) {

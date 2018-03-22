@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.praxislive.core.Call;
+import org.praxislive.core.Clock;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.ExecutionContext;
@@ -82,7 +83,6 @@ class SlaveCoreRoot extends DefaultCoreRoot {
         this.codec = new PraxisPacketCodec();
         this.dispatcher = new Dispatcher(codec);
         this.resourceResolver = new ResourceResolver();
-        lastPurgeTime = System.nanoTime();
     }
 
     @Override
@@ -118,6 +118,7 @@ class SlaveCoreRoot extends DefaultCoreRoot {
             }
         });
         super.activating();
+        
     }
 
     @Override
@@ -245,7 +246,7 @@ class SlaveCoreRoot extends DefaultCoreRoot {
     private class Dispatcher extends OSCDispatcher {
 
         private Dispatcher(PraxisPacketCodec codec) {
-            super(codec);
+            super(codec, () -> getExecutionContext().getTime());
         }
 
         @Override

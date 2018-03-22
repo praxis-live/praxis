@@ -213,12 +213,8 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final long millis() {
-        if (getContext().getExecutionContext().supportsStartTime()) {
-            return (time() - getContext().getExecutionContext().getStartTime())
-                    / 1_000_000;
-        } else {
-            return time() / 1_000_000;
-        }
+        return (time() - getContext().getExecutionContext().getStartTime())
+                / 1_000_000;
     }
 
     /**

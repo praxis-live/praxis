@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 import org.praxislive.core.Value;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
+import org.praxislive.core.Clock;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.types.PString;
@@ -57,11 +58,13 @@ abstract class OSCDispatcher {
 //    final static String REMOTE_SYS_PREFIX = "/_remote";
 
     private final PraxisPacketCodec codec;
+    private final Clock clock;
     private final Map<Integer, SentCallInfo> sentCalls;
     private final Map<Integer, Integer> localToRemoteID;
 
-    OSCDispatcher(PraxisPacketCodec codec) {
+    OSCDispatcher(PraxisPacketCodec codec, Clock clock) {
         this.codec = codec;
+        this.clock = clock;
         sentCalls = new LinkedHashMap<>();
         localToRemoteID = new HashMap<>();
     }
@@ -186,7 +189,7 @@ abstract class OSCDispatcher {
         oscArgs[2] = codec.toOSCObject(call.getArgs().get(0));
         oscArgs[3] = codec.toOSCObject(call.getArgs().get(1));
         send(ADD, call.getTimecode(), oscArgs);
-        sentCalls.put(call.getMatchID(), new SentCallInfo(System.nanoTime(), call));
+        sentCalls.put(call.getMatchID(), new SentCallInfo(clock.getTime(), call));
     }
     
     void handleRemoveRoot(Call call) {
@@ -195,7 +198,7 @@ abstract class OSCDispatcher {
         oscArgs[1] = call.getFromAddress().toString();
         oscArgs[2] = codec.toOSCObject(call.getArgs().get(0));
         send(DEL, call.getTimecode(), oscArgs);
-        sentCalls.put(call.getMatchID(), new SentCallInfo(System.nanoTime(), call));
+        sentCalls.put(call.getMatchID(), new SentCallInfo(clock.getTime(), call));
     }
 
     void handleInvoke(String target, Call call) {
@@ -212,7 +215,7 @@ abstract class OSCDispatcher {
             oscArgs[i] = codec.toOSCObject(callArgs.get(k));
         }
         send(target, call.getTimecode(), oscArgs);
-        sentCalls.put(call.getMatchID(), new SentCallInfo(System.nanoTime(), call));
+        sentCalls.put(call.getMatchID(), new SentCallInfo(clock.getTime(), call));
     }
 
     void handleResponse(String target, Call call) {
@@ -242,7 +245,7 @@ abstract class OSCDispatcher {
     
     void purge(long time, TimeUnit unit) {
         long ago = unit.toNanos(time);
-        long now = System.nanoTime();
+        long now = clock.getTime();
         Iterator<SentCallInfo> itr = sentCalls.values().iterator();
         while (itr.hasNext()) {
             SentCallInfo info = itr.next();
@@ -266,7 +269,7 @@ abstract class OSCDispatcher {
     }
 
     long timeTagToNanos(long timeTag) {
-        return System.nanoTime();
+        return clock.getTime();
     }
 
     long nanosToTimeTag(long nanos) {

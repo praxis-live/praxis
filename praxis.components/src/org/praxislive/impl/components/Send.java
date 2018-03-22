@@ -30,6 +30,7 @@ import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Port;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
+import org.praxislive.core.ExecutionContext;
 import org.praxislive.core.services.ServiceUnavailableException;
 import org.praxislive.core.types.PError;
 import org.praxislive.core.types.PMap;
@@ -109,8 +110,15 @@ public class Send extends AbstractComponent {
 
         private final LogBuilder logBuilder = new LogBuilder(LogLevel.ERROR);
         private ControlAddress logService;
-        private long lastSend = System.nanoTime();
+        private long lastSend;
 
+        @Override
+        public void hierarchyChanged() {
+            lastSend = getLookup().find(ExecutionContext.class)
+                    .map(ExecutionContext::getTime)
+                    .orElse(0L);
+        }
+        
         @Override
         public void call(Call call, PacketRouter router) throws Exception {
             if (call.getType() == Call.Type.ERROR && logErrors.getValue()) {
@@ -151,10 +159,8 @@ public class Send extends AbstractComponent {
         }
 
         private void initLog() throws ServiceUnavailableException {
-            LogLevel level = getLookup().get(LogLevel.class);
-            if (level != null) {
-                logBuilder.setLevel(level);
-            }
+            LogLevel level = getLookup().find(LogLevel.class).orElse(LogLevel.ERROR);
+            logBuilder.setLevel(level);
             logService = ControlAddress.create(findService(LogService.class),
                     LogService.LOG);
         }
