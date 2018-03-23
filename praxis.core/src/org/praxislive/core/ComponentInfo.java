@@ -40,6 +40,7 @@ import org.praxislive.core.types.PString;
  */
 public class ComponentInfo extends Value {
 
+    public final static String KEY_COMPONENT_TYPE = "component-type";
     public final static String KEY_DYNAMIC = "dynamic";
 
     private final static String INFO_PREFIX = "INFO:";

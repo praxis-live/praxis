@@ -184,7 +184,10 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         return ComponentInfo.create(controlInfo,
                 portInfo,
                 Collections.singleton(ComponentProtocol.class),
-                PMap.create(ComponentInfo.KEY_DYNAMIC, true));
+                PMap.create(
+                        ComponentInfo.KEY_DYNAMIC, true,
+                        ComponentInfo.KEY_COMPONENT_TYPE, factory.getComponentType()
+                        ));
     }
     
     private boolean excludeFromInfo(String id, ControlDescriptor desc) {
