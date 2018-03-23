@@ -125,15 +125,15 @@ public abstract class Value {
             this.converter = Objects.requireNonNull(converter);
         }
         
-        Class<T> asClass() {
+        public Class<T> asClass() {
             return type;
         }
         
-        String name() {
+        public String name() {
             return name;
         }
         
-        Function<Value, Optional<T>> converter() {
+        public Function<Value, Optional<T>> converter() {
             return converter;
         }
 

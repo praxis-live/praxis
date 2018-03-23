@@ -23,15 +23,15 @@
 package org.praxislive.code;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 import org.praxislive.code.userapi.AuxIn;
 import org.praxislive.code.userapi.In;
-import org.praxislive.core.Value;
 import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.Port;
 import org.praxislive.core.PortInfo;
 import org.praxislive.core.types.PNumber;
-import org.praxislive.core.types.PString;
 import org.praxislive.core.Value;
+import org.praxislive.logging.LogLevel;
 
 /**
  *
@@ -39,8 +39,8 @@ import org.praxislive.core.Value;
  */
 abstract class MethodInput {
 
-    private final Method method;
-    private CodeContext<?> context;
+    final Method method;
+    CodeContext<?> context;
 
     private MethodInput(Method method) {
         this.method = method;
@@ -85,8 +85,8 @@ abstract class MethodInput {
                 input = new IntInput(method);
             } else if (type == String.class) {
                 input = new StringInput(method);
-            } else if (type == Value.class || type == Value.class) {
-                input = new ValueInput(method);
+            } else if (Value.class.isAssignableFrom(type)) {
+                input = new ValueInput((Class<Value>) type, method);
             }
         }
         if (input == null) {
@@ -208,8 +208,11 @@ abstract class MethodInput {
 
     private static class ValueInput extends MethodInput {
 
-        private ValueInput(Method method) {
+        private Value.Type<Value> type;
+        
+        private ValueInput(Class<Value> cls, Method method) {
             super(method);
+            type = Value.Type.of(cls);
         }
 
         @Override
@@ -219,8 +222,14 @@ abstract class MethodInput {
 
         @Override
         void receive(long time, Value value) {
-            Value v = value instanceof Value ? (Value) value : PString.valueOf(value);
-            invoke(time, v);
+            Optional<Value> v = type.converter().apply(value);
+            if (v.isPresent()) {
+                invoke(time, v.get());
+            } else {
+                context.getLog().log(LogLevel.WARNING, 
+                        "Invalid argument " + value  + 
+                                " received by " + method.getName());
+            }
         }
 
     }

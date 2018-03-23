@@ -402,8 +402,8 @@ public class PropertyControl extends Property implements Control {
             } else if (field.isAnnotationPresent(Type.Boolean.class)
                     || BooleanBinding.isBindableFieldType(type)) {
                 binding = BooleanBinding.create(connector, field);
-            } else if (ArrayBinding.isBindableFieldType(type)) {
-                binding = ArrayBinding.create(connector, field);
+            } else if (ValueBinding.isBindableFieldType(type)) {
+                binding = ValueBinding.create(connector, field);
             } else if (BytesBinding.isBindableFieldType(type)) {
                 binding = BytesBinding.create(connector, field);
             }
