@@ -113,13 +113,12 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
     
     private class Processor extends AbstractProcessPipe {
 
-        private final PGraphics pg;
+        private PGraphics pg;
         private PGLImage[] images;
 
         private Processor(int inputs) {
             super(inputs);
             images = new PGLImage[inputs];
-            pg = new PGraphics();
         }
 
         @Override
@@ -149,10 +148,15 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
             
             validateOffscreen(pglOut);
             
-            pg.init(pglOut.getGraphics(), setupRequired);
+            PGLGraphics p2d = pglOut.getGraphics();
+            if (pg == null || pg.width != p2d.width || pg.height != p2d.height) {
+                pg = new PGraphics(p2d.width, p2d.height);
+            }
+            pg.init(p2d, setupRequired);
+            
             del.configure(pglOut.getContext().parent(), pg, output.getWidth(), output.getHeight());
             if (setupRequired) {
-                reset();
+                reset(false);
                 try {
                     del.setup();
                 } catch (Exception ex) {
@@ -209,6 +213,10 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
 
         private int matrixStackDepth;
         private PStyle styles;
+        
+        private PGraphics(int width, int height) {
+            super(width, height);
+        }
         
         private void init(PGLGraphics pgl, boolean setupRequired) {
             pgl.beginDraw();

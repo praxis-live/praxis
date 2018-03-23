@@ -28,7 +28,10 @@ import org.praxislive.video.pgl.PGLGraphics;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public abstract class PGraphics2D extends PGraphics {
-    
+
+    protected PGraphics2D(int width, int height) {
+        super(width, height);
+    }
 
     protected final void initGraphics(PGLGraphics graphics) {
         init(graphics, graphics.getContext());

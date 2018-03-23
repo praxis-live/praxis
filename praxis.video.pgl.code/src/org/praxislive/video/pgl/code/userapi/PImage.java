@@ -40,13 +40,9 @@ import org.praxislive.video.pgl.PGLContext;
  */
 public abstract class PImage {
     
-    public /*final*/ int width;
-    public /*final*/ int height;
-    
-    PImage() {
-        
-    }
-    
+    public final int width;
+    public final int height;
+       
     public PImage(int width, int height) {
         this.width = width;
         this.height = height;

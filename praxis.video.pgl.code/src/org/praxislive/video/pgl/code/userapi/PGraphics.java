@@ -37,19 +37,23 @@ abstract class PGraphics extends PImage {
     processing.core.PGraphics g;
     PGLContext context;
 
+    PGraphics(int width, int height) {
+        super(width, height);
+    }
+    
     void init(processing.core.PGraphics g, PGLContext context) {
         this.g = g;
         this.context = context;
-        this.width = g.width;
-        this.height = g.height;
+//        this.width = g.width;
+//        this.height = g.height;
     }
     
     processing.core.PGraphics release() {
         processing.core.PGraphics ret = g;
         g = null;
         context = null;
-        this.width = 0;
-        this.height = 0;
+//        this.width = 0;
+//        this.height = 0;
         return ret;
     }
     

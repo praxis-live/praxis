@@ -117,7 +117,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
 
     private class Processor extends AbstractProcessPipe {
 
-        private final PGraphics pg;
+        private PGraphics pg;
         private PGLImage[] images;
         private PGLContext context;
         private PGLGraphics3D p3d;
@@ -125,7 +125,6 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         private Processor(int inputs) {
             super(inputs);
             images = new PGLImage[inputs];
-            pg = new PGraphics(P3DCodeContext.this);
         }
 
         @Override
@@ -163,11 +162,16 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
 
             p3d.beginDraw();
             p3d.clear();
+            
+            if (pg == null || pg.width != p3d.width || pg.height != p3d.height) {
+                pg = new PGraphics(P3DCodeContext.this, p3d.width, p3d.height);
+            }
+            
             pg.init(p3d);
             del.configure(pglOut.getContext().parent(), pg, output.getWidth(), output.getHeight());
 //            pg.resetMatrix();
             if (setupRequired) {
-                reset();
+                reset(false);
                 try {
                     del.setup();
                 } catch (Exception ex) {
@@ -241,7 +245,8 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         PGLGraphics3D pgl;
         private int matrixStackDepth;
 
-        PGraphics(P3DCodeContext context) {
+        PGraphics(P3DCodeContext context, int width, int height) {
+            super(width, height);
             this.context = context;
         }
 

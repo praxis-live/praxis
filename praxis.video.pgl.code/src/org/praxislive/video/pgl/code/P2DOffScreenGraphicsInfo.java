@@ -84,8 +84,9 @@ class P2DOffScreenGraphicsInfo {
             surface = output.createSurface(calculateWidth(output), calculateHeight(output), true);
         }
         
-        if (graphics == null) {
-            graphics = new PGraphics();
+        PGLGraphics p2d = surface.getGraphics();
+        if (graphics == null || graphics.width != p2d.width || graphics.height != p2d.height) {
+            graphics = new PGraphics(p2d.width, p2d.height);
             graphics.init(surface.getGraphics(), true);
             try {
                 field.set(context.getDelegate(), graphics);
@@ -165,6 +166,10 @@ class P2DOffScreenGraphicsInfo {
         private int matrixStackDepth;
         private PStyle styles;
         private PGLGraphics pgl;
+        
+        private PGraphics(int width, int height) {
+            super(width, height);
+        }
 
         private void init(PGLGraphics pgl, boolean setupRequired) {
             this.pgl = pgl;

@@ -63,16 +63,12 @@ class P3DOffScreenGraphicsInfo {
 
     void attach(P3DCodeContext context, P3DOffScreenGraphicsInfo previous) {
         this.context = context;
-        graphics = new PGraphics();
-        try {
-            field.set(context.getDelegate(), graphics);
-        } catch (Exception ex) {
-            context.getLog().log(LogLevel.ERROR, ex);
-        }
         if (previous != null) {
             pgl = previous.pgl;
             previous.pgl = null;
-            previous.graphics.pgl = null;
+            if (previous.graphics != null) {
+                previous.graphics.pgl = null;
+            }
         }
     }
 
@@ -84,6 +80,15 @@ class P3DOffScreenGraphicsInfo {
             clear = true;
         }
 
+        if (graphics == null || graphics.width != pgl.width || graphics.height != pgl.height) {
+            graphics = new PGraphics(pgl.width, pgl.height);
+            try {
+                field.set(context.getDelegate(), graphics);
+            } catch (Exception ex) {
+                context.getLog().log(LogLevel.ERROR, ex);
+            }
+        }
+
         if (pgl != graphics.pgl) {
             if (graphics.pgl != null) {
                 graphics.release();
@@ -93,13 +98,15 @@ class P3DOffScreenGraphicsInfo {
     }
 
     void endFrame() {
-        if (!persistent) {
+        if (!persistent && graphics != null) {
             graphics.release();
         }
     }
 
     void release() {
-        graphics.pgl = null;
+        if (graphics != null) {
+            graphics.pgl = null;
+        }
     }
 
     private boolean isValid(PGLGraphics3D pgl, PGLSurface output) {
@@ -154,6 +161,10 @@ class P3DOffScreenGraphicsInfo {
 
         PGLGraphics3D pgl;
         private int matrixStackDepth;
+
+        private PGraphics(int width, int height) {
+            super(width, height);
+        }
 
         void init(PGLGraphics3D pgl, boolean clear) {
             initGraphics(pgl);

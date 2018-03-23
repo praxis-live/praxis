@@ -30,6 +30,10 @@ import processing.core.PConstants;
  */
 public abstract class PGraphics3D extends PGraphics {
 
+    protected PGraphics3D(int width, int height) {
+        super(width, height);
+    }
+
     protected void initGraphics(PGLGraphics3D graphics) {
         super.init(graphics, graphics.getContext());
     }
