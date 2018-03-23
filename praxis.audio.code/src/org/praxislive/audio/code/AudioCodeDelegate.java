@@ -40,6 +40,12 @@ public class AudioCodeDelegate extends DefaultCodeDelegate {
     public double sampleRate;
     public int blockSize;
     
+    @SuppressWarnings("deprecation")
+    public void init() {
+        setup();
+    }
+    
+    @Deprecated
     public void setup() {
     }
 

@@ -66,7 +66,7 @@ public class AudioFXReverb extends AudioCodeDelegate {
     Property dry;
     
     @Override
-    public void setup() {
+    public void init() {
         roomSize.link(r::roomSize);
         damp.link(r::damp);
         width.link(r::width);

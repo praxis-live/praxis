@@ -62,7 +62,7 @@ public class AudioFXChorus extends AudioCodeDelegate {
     Property feedback;
     
     @Override
-    public void setup() {
+    public void init() {
         depth.link(ch1::depth, ch2::depth);
         rate.link(ch1::rate, ch2::rate);
         feedback.link(ch1::feedback, ch2::feedback);

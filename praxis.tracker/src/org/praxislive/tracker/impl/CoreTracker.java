@@ -67,7 +67,7 @@ public class CoreTracker extends CoreCodeDelegate {
     Output[] outs;
 
     @Override
-    public void setup() {
+    public void init() {
         outs = new Output[]{out1, out2, out3, out4, out5, out6, out7, out8};
     }
 

@@ -71,7 +71,7 @@ public class AudioPlayer extends AudioCodeDelegate {
     @AuxOut(2) Output error;
     
     @Override
-    public void setup() {
+    public void init() {
         pl.table(sample);
         start.link(pl::in);
         end.link(pl::out);

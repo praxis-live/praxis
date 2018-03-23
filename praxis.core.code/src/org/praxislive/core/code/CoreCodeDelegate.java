@@ -19,7 +19,6 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-
 package org.praxislive.core.code;
 
 import org.praxislive.code.DefaultCodeDelegate;
@@ -29,13 +28,23 @@ import org.praxislive.code.DefaultCodeDelegate;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public class CoreCodeDelegate extends DefaultCodeDelegate {
-    
-   public void setup() {}
-   
-   public void starting() {}
-   
-   public void update() {}
-   
-   public void stopping() {}
-    
+
+    @SuppressWarnings("deprecation")
+    public void init() {
+        setup();
+    }
+
+    @Deprecated
+    public void setup() {
+    }
+
+    public void starting() {
+    }
+
+    public void update() {
+    }
+
+    public void stopping() {
+    }
+
 }

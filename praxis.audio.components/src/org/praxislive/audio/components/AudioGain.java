@@ -56,7 +56,7 @@ public class AudioGain extends AudioCodeDelegate {
             Property level;
     
     @Override
-    public void setup() {
+    public void init() {
         level.link(gain::level);
         link(in, gain, out);
     }

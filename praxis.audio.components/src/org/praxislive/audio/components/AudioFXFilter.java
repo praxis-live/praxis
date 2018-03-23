@@ -62,7 +62,7 @@ public class AudioFXFilter extends AudioCodeDelegate {
     Property resonance;
     
     @Override
-    public void setup() {
+    public void init() {
         type.linkAs(arg -> IIRFilter.Type.valueOf(arg.toString()), type -> {
             f1.type(type);
             f2.type(type);

@@ -60,7 +60,7 @@ public class AudioFXDelay extends AudioCodeDelegate {
     Property feedback;
     
     @Override
-    public void setup() {
+    public void init() {
         time.link(dl1::time, dl2::time);
         feedback.link(dl1::feedback, dl2::feedback);
         link(in1, dl1, out1);

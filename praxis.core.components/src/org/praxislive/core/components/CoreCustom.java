@@ -46,7 +46,7 @@ public class CoreCustom extends CoreCodeDelegate {
     // PXJ-BEGIN:body
     
     @Override
-    public void setup() {
+    public void init() {
 
     }
 

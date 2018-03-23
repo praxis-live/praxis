@@ -55,7 +55,7 @@ public class CoreArrayRandom extends CoreCodeDelegate {
     PArray array;
     
     @Override
-    public void setup() {
+    public void init() {
         extractArray();
     }
 

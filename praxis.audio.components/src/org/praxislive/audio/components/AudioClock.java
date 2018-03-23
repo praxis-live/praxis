@@ -71,7 +71,7 @@ public class AudioClock extends AudioCodeDelegate {
     @Inject int position; 
 
     @Override
-    public void setup() {
+    public void init() {
         updatePulse();
     }
 

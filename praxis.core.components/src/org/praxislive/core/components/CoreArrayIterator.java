@@ -66,7 +66,7 @@ public class CoreArrayIterator extends CoreCodeDelegate {
     boolean forwards;
     
     @Override
-    public void setup() {
+    public void init() {
         extractArray();
     }
 

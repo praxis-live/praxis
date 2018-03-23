@@ -57,7 +57,7 @@ public class CoreRoutingGate extends CoreCodeDelegate {
     double[] pt;
 
     @Override
-    public void setup() {
+    public void init() {
         updatePattern();
     }
 

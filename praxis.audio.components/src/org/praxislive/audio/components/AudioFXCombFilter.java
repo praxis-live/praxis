@@ -60,7 +60,7 @@ public class AudioFXCombFilter extends AudioCodeDelegate {
     Property feedback;
     
     @Override
-    public void setup() {
+    public void init() {
         frequency.link(f1::frequency, f2::frequency);
         feedback.link(f1::feedback, f2::feedback);
         link(in1, f1, out1);

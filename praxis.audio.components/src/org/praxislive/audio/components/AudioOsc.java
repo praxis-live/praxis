@@ -62,7 +62,7 @@ public class AudioOsc extends AudioCodeDelegate {
     Property level;
     
     @Override
-    public void setup() {
+    public void init() {
         waveform.linkAs(arg -> Waveform.valueOf(arg.toString()), osc::waveform);
         frequency.link(osc::frequency);
         level.link(gain::level);

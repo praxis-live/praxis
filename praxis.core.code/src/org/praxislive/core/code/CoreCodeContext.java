@@ -39,7 +39,7 @@ public class CoreCodeContext extends CodeContext<CoreCodeDelegate> {
     @Override
     protected void starting(ExecutionContext source, boolean fullStart) {
         try {
-            getDelegate().setup();
+            getDelegate().init();
         } catch (Exception e) {
             getLog().log(LogLevel.ERROR, e, "Exception thrown during setup()");
         }

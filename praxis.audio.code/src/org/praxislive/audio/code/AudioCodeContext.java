@@ -89,7 +89,7 @@ public class AudioCodeContext<D extends AudioCodeDelegate> extends CodeContext<D
             delegate.blockSize = 64;
         }
         try {
-            delegate.setup();
+            delegate.init();
         } catch (Exception e) {
             getLog().log(LogLevel.ERROR, e, "Exception thrown during setup()");
         }

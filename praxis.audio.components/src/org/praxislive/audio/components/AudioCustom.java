@@ -48,7 +48,7 @@ public class AudioCustom extends AudioCodeDelegate {
     // PXJ-BEGIN:body
     
     @Override
-    public void setup() {
+    public void init() {
 
     }
 
