@@ -24,6 +24,8 @@ package org.praxislive.code;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.praxislive.code.userapi.Inject;
 import org.praxislive.code.userapi.OnChange;
 import org.praxislive.code.userapi.OnError;
@@ -87,7 +89,7 @@ public class PropertyControl extends Property implements Control {
 
     @Override
     protected void setImpl(long time, Value arg) throws Exception {
-        binding.set(time, arg);
+        binding.set(arg);
         setLatest(time);
         if (hasLinks()) {
             updateLinks(arg);
@@ -97,7 +99,7 @@ public class PropertyControl extends Property implements Control {
 
     @Override
     protected void setImpl(long time, double value) throws Exception {
-        binding.set(time, value);
+        binding.set(value);
         setLatest(time);
         if (hasLinks()) {
             updateLinks(value);
@@ -125,7 +127,7 @@ public class PropertyControl extends Property implements Control {
             latest = pc.latest;
             latestSet = pc.latestSet;
             try {
-                binding.set(latest, pc.binding.get());
+                binding.set(pc.binding.get());
             } catch (Exception ex) {
                 // do nothing?
             }
@@ -194,9 +196,9 @@ public class PropertyControl extends Property implements Control {
             // no op hook
         }
 
-        public abstract void set(long time, Value value) throws Exception;
+        public abstract void set(Value value) throws Exception;
 
-        public abstract void set(long time, double value) throws Exception;
+        public abstract void set(double value) throws Exception;
 
         public abstract Value get();
 
@@ -229,12 +231,12 @@ public class PropertyControl extends Property implements Control {
         }
 
         @Override
-        public void set(long time, Value value) throws Exception {
+        public void set(Value value) throws Exception {
             this.argValue = value;
         }
 
         @Override
-        public void set(long time, double value) throws Exception {
+        public void set(double value) throws Exception {
             this.dblValue = value;
             this.argValue = null;
         }
@@ -273,6 +275,7 @@ public class PropertyControl extends Property implements Control {
 
         private final PropertyControl control;
         private final Field propertyField;
+        private final boolean synthetic;
 
         private Descriptor(String id,
                 int index,
@@ -285,12 +288,14 @@ public class PropertyControl extends Property implements Control {
             super(id, Category.Property, index);
             control = new PropertyControl(info, binding, onChange, onError);
             this.propertyField = field;
+            this.synthetic = false;
         }
 
         private Descriptor(String id, int index, Binding binding, Field field) {
             super(id, Category.Synthetic, index);
             control = new PropertyControl(null, binding, null, null);
             propertyField = field;
+            this.synthetic = true;
         }
 
         @Override
@@ -322,6 +327,13 @@ public class PropertyControl extends Property implements Control {
         @Override
         public void reset(boolean full) {
             control.reset(full);
+            if (full && synthetic) {
+                try {
+                    control.binding.set(control.binding.getDefaultValue());
+                } catch (Exception ex) {
+                    control.context.getLog().log(LogLevel.ERROR, ex);
+                }
+            }
         }
 
         @Override

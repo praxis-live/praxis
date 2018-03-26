@@ -49,26 +49,26 @@ abstract class IntegerBinding extends PropertyControl.Binding {
     }
 
     @Override
-    public void set(long time, Value value) throws Exception {
+    public void set(Value value) throws Exception {
         PNumber n = PNumber.coerce(value);
         double d = n.value();
         if (d < min || d > max) {
             throw new IllegalArgumentException();
         }
-        set(n);
+        setImpl(n);
     }
 
     @Override
-    public void set(long time, double value) throws Exception {
+    public void set(double value) throws Exception {
         if (value < min || value > max) {
             throw new IllegalArgumentException();
         }
-        set(value);
+        setImpl(value);
     }
 
-    abstract void set(PNumber value) throws Exception;
+    abstract void setImpl(PNumber value) throws Exception;
 
-    abstract void set(double value) throws Exception;
+    abstract void setImpl(double value) throws Exception;
 
     @Override
     public ArgumentInfo getArgumentInfo() {
@@ -133,13 +133,13 @@ abstract class IntegerBinding extends PropertyControl.Binding {
         }
 
         @Override
-        void set(PNumber value) throws Exception {
+        void setImpl(PNumber value) throws Exception {
             this.value = value.toIntValue();
             last = value;
         }
 
         @Override
-        void set(double value) throws Exception {
+        void setImpl(double value) throws Exception {
             this.value = (int) Math.round(value);
         }
 
@@ -167,13 +167,13 @@ abstract class IntegerBinding extends PropertyControl.Binding {
         }
 
         @Override
-        void set(PNumber value) throws Exception {
-            set(value.toIntValue());
+        void setImpl(PNumber value) throws Exception {
+            setImpl(value.toIntValue());
             last = value;
         }
 
         @Override
-        void set(double value) throws Exception {
+        void setImpl(double value) throws Exception {
             set((int) Math.round(value));
         }
         

@@ -54,26 +54,26 @@ abstract class NumberBinding extends PropertyControl.Binding {
     }
 
     @Override
-    public void set(long time, Value value) throws Exception {
+    public void set(Value value) throws Exception {
         PNumber n = PNumber.coerce(value);
         double d = n.value();
         if (d < min || d > max) {
             throw new IllegalArgumentException();
         }
-        set(n);
+        setImpl(n);
     }
 
     @Override
-    public void set(long time, double value) throws Exception {
+    public void set(double value) throws Exception {
         if (value < min || value > max) {
             throw new IllegalArgumentException();
         }
-        set(value);
+        setImpl(value);
     }
 
-    abstract void set(PNumber value) throws Exception;
+    abstract void setImpl(PNumber value) throws Exception;
 
-    abstract void set(double value) throws Exception;
+    abstract void setImpl(double value) throws Exception;
 
     @Override
     public ArgumentInfo getArgumentInfo() {
@@ -148,13 +148,13 @@ abstract class NumberBinding extends PropertyControl.Binding {
         }
 
         @Override
-        void set(PNumber value) throws Exception {
-            set(value.value());
+        void setImpl(PNumber value) throws Exception {
+            setImpl(value.value());
             last = value;
         }
 
         @Override
-        void set(double value) throws Exception {
+        void setImpl(double value) throws Exception {
             this.value = value;
         }
 
@@ -182,13 +182,13 @@ abstract class NumberBinding extends PropertyControl.Binding {
         }
 
         @Override
-        void set(PNumber value) throws Exception {
-            set(value.value());
+        void setImpl(PNumber value) throws Exception {
+            setImpl(value.value());
             last = value;
         }
 
         @Override
-        void set(double value) throws Exception {
+        void setImpl(double value) throws Exception {
             field.setDouble(delegate, value);
         }
 
@@ -234,13 +234,13 @@ abstract class NumberBinding extends PropertyControl.Binding {
         }
 
         @Override
-        void set(PNumber value) throws Exception {
-            set(value.value());
+        void setImpl(PNumber value) throws Exception {
+            setImpl(value.value());
             last = value;
         }
 
         @Override
-        void set(double value) throws Exception {
+        void setImpl(double value) throws Exception {
             field.setFloat(delegate, (float) value);
         }
 

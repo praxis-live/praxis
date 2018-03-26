@@ -47,16 +47,9 @@ abstract class ValueBinding extends PropertyControl.Binding {
     }
 
     @Override
-    public void set(long time, Value value) throws Exception {
-        set(value);
+    public void set(double value) throws Exception {
+        set(PNumber.valueOf(value));
     }
-
-    @Override
-    public void set(long time, double value) throws Exception {
-        set(time, PNumber.valueOf(value));
-    }
-
-    abstract void set(Value value) throws Exception;
 
     @Override
     public ArgumentInfo getArgumentInfo() {
@@ -128,7 +121,7 @@ abstract class ValueBinding extends PropertyControl.Binding {
         }
 
         @Override
-        void set(Value value) throws Exception {
+        public void set(Value value) throws Exception {
             if (value.isEmpty()) {
                 field.set(delegate, type.converter().apply(value)
                         .orElse(null));
@@ -172,7 +165,7 @@ abstract class ValueBinding extends PropertyControl.Binding {
         }
 
         @Override
-        void set(Value value) throws Exception {
+        public void set(Value value) throws Exception {
             field.set(delegate, type.converter().apply(value));
         }
 

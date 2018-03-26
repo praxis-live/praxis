@@ -41,16 +41,16 @@ abstract class BooleanBinding extends PropertyControl.Binding {
     }
 
     @Override
-    public void set(long time, Value value) throws Exception {
-        set(PBoolean.coerce(value));
+    public void set(Value value) throws Exception {
+        setImpl(PBoolean.coerce(value));
     }
 
     @Override
-    public void set(long time, double value) throws Exception {
+    public void set(double value) throws Exception {
         set(value > 0.5 ? PBoolean.TRUE : PBoolean.FALSE);
     }
 
-    abstract void set(PBoolean value) throws Exception;
+    abstract void setImpl(PBoolean value) throws Exception;
 
     @Override
     public ArgumentInfo getArgumentInfo() {
@@ -89,7 +89,7 @@ abstract class BooleanBinding extends PropertyControl.Binding {
         }
 
         @Override
-        void set(PBoolean value) throws Exception {
+        void setImpl(PBoolean value) throws Exception {
             this.value = value;
         }
 
@@ -121,7 +121,7 @@ abstract class BooleanBinding extends PropertyControl.Binding {
         }
 
         @Override
-        void set(PBoolean value) throws Exception {
+        void setImpl(PBoolean value) throws Exception {
             field.setBoolean(delegate, value.value());
         }
 

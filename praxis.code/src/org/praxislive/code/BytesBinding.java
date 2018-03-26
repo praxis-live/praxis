@@ -44,21 +44,21 @@ import org.praxislive.logging.LogLevel;
 abstract class BytesBinding extends PropertyControl.Binding {
 
     @Override
-    public void set(long time, Value value) throws Exception {
+    public void set(Value value) throws Exception {
         Optional<PBytes> bytes = PBytes.from(value);
         if (bytes.isPresent()) {
-            set(bytes.get());
+            setImpl(bytes.get());
         } else {
             throw new IllegalArgumentException();
         }
     }
 
     @Override
-    public void set(long time, double value) throws Exception {
+    public void set(double value) throws Exception {
         throw new IllegalArgumentException();
     }
 
-    abstract void set(PBytes value) throws Exception;
+    abstract void setImpl(PBytes value) throws Exception;
 
     @Override
     public ArgumentInfo getArgumentInfo() {
@@ -138,7 +138,7 @@ abstract class BytesBinding extends PropertyControl.Binding {
         }
 
         @Override
-        void set(PBytes value) throws Exception {
+        void setImpl(PBytes value) throws Exception {
             field.set(delegate, value);
         }
 
@@ -173,7 +173,7 @@ abstract class BytesBinding extends PropertyControl.Binding {
         }
 
         @Override
-        void set(PBytes value) throws Exception {
+        void setImpl(PBytes value) throws Exception {
             if (value.isEmpty()) {
                 if (field.getType().isArray()) {
                     field.set(delegate, Array.newInstance(field.getType().getComponentType(), 0));
@@ -220,7 +220,7 @@ abstract class BytesBinding extends PropertyControl.Binding {
         }
 
         @Override
-        void set(PBytes value) throws Exception {
+        void setImpl(PBytes value) throws Exception {
             List<?> list;
             if (value.isEmpty()) {
                 list = new ArrayList<>();

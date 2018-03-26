@@ -72,21 +72,21 @@ abstract class StringBinding extends PropertyControl.Binding {
     }
 
     @Override
-    public void set(long time, Value value) throws Exception {
+    public void set(Value value) throws Exception {
         PString pstr = PString.coerce(value);
         if (allowed == null || allowed.contains(pstr)) {
-            set(pstr);
+            setImpl(pstr);
         } else {
             throw new IllegalArgumentException();
         }
     }
 
     @Override
-    public void set(long time, double value) throws Exception {
-        set(time, PNumber.valueOf(value));
+    public void set(double value) throws Exception {
+        set(PNumber.valueOf(value));
     }
 
-    abstract void set(PString value) throws Exception;
+    abstract void setImpl(PString value) throws Exception;
 
     @Override
     public ArgumentInfo getArgumentInfo() {
@@ -164,7 +164,7 @@ abstract class StringBinding extends PropertyControl.Binding {
             value = this.def;
         }
                
-        void set(PString value) throws Exception {
+        void setImpl(PString value) throws Exception {
             this.value = value;
         }
 
@@ -201,7 +201,7 @@ abstract class StringBinding extends PropertyControl.Binding {
         }
 
         @Override
-        void set(PString value) throws Exception {
+        void setImpl(PString value) throws Exception {
             field.set(delegate, value.toString());
         }
 
@@ -241,7 +241,7 @@ abstract class StringBinding extends PropertyControl.Binding {
         }
 
         @Override
-        void set(PString value) throws Exception {
+        void setImpl(PString value) throws Exception {
             field.set(delegate, Enum.valueOf(type, value.toString()));
         }
 
