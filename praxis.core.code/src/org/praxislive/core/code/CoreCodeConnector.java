@@ -32,7 +32,6 @@ import org.praxislive.code.CodeFactory;
  */
 public class CoreCodeConnector extends CodeConnector<CoreCodeDelegate> {
 
-//    public final static String SETUP = "setup";
     private final static String UPDATE = "update";
 
     private boolean foundUpdate;
@@ -44,20 +43,14 @@ public class CoreCodeConnector extends CodeConnector<CoreCodeDelegate> {
 
     @Override
     protected boolean requiresClock() {
-        return foundUpdate;
+        return super.requiresClock() || foundUpdate;
     }
 
-    @Deprecated
-    protected boolean hasUpdateMethod() {
-        return foundUpdate;
-    }
-    
     @Override
     protected void analyseMethod(Method method) {
 
         if (UPDATE.equals(method.getName())
-                && method.getParameterTypes().length == 0
-                && method.getReturnType().equals(Void.TYPE)) {
+                && method.getParameterCount() == 0) {
             foundUpdate = true;
         }
 

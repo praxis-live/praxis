@@ -41,7 +41,7 @@ public class CoreCodeContext extends CodeContext<CoreCodeDelegate> {
         try {
             getDelegate().init();
         } catch (Exception e) {
-            getLog().log(LogLevel.ERROR, e, "Exception thrown during setup()");
+            getLog().log(LogLevel.ERROR, e, "Exception thrown during init()");
         }
         if (fullStart) {
             try {
