@@ -54,6 +54,10 @@ public class VideoCodeDelegate extends DefaultCodeDelegate {
         this.height = height;
     }
 
+    public void init(){}
+    
+    public void update(){}
+    
     public void setup(){}
     
     public void draw(){}

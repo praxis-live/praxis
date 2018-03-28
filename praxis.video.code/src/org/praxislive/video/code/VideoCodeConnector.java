@@ -23,6 +23,7 @@
 package org.praxislive.video.code;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -42,12 +43,14 @@ import org.praxislive.video.code.userapi.PImage;
  */
 public class VideoCodeConnector<T extends VideoCodeDelegate> extends CodeConnector<T> {
 
-//    public final static String SETUP = "setup";
-//    public final static String DRAW = "draw";
+    private final static String INIT = "init";
+    private final static String UPDATE = "update";
     
     private final Map<String, OffScreenGraphicsInfo> offscreen;
     
     private VideoOutputPort.Descriptor output;
+    private boolean hasInit;
+    private boolean hasUpdate;
 
     public VideoCodeConnector(CodeFactory.Task<T> contextCreator,
             T delegate) {
@@ -61,6 +64,14 @@ public class VideoCodeConnector<T extends VideoCodeDelegate> extends CodeConnect
 
     Map<String, OffScreenGraphicsInfo> extractOffScreenInfo() {
         return offscreen.isEmpty() ? Collections.EMPTY_MAP : offscreen;
+    }
+    
+    boolean hasInit() {
+        return hasInit;
+    }
+    
+    boolean hasUpdate() {
+        return hasUpdate;
     }
     
     @Override
@@ -118,6 +129,22 @@ public class VideoCodeConnector<T extends VideoCodeDelegate> extends CodeConnect
         
         super.analyseField(field);
     }
+
+    @Override
+    protected void analyseMethod(Method method) {
+        if (INIT.equals(method.getName())
+                && method.getParameterCount() == 0) {
+            hasInit = true;
+        } else if (UPDATE.equals(method.getName()) 
+                && method.getParameterCount() == 0) {
+            hasUpdate = true;
+        }
+        
+        super.analyseMethod(method);
+        
+    }
+    
+    
     
 
     

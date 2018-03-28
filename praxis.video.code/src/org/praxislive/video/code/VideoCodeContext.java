@@ -46,14 +46,16 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
     private final VideoInputPort.Descriptor[] inputs;
     private final Map<String, OffScreenGraphicsInfo> offscreen;
     private final Processor processor;
+    private final boolean resetOnSetup;
 
     private boolean setupRequired;
 
     public VideoCodeContext(VideoCodeConnector<D> connector) {
-        super(connector, false);
+        super(connector, connector.hasUpdate());
         setupRequired = true;
         output = connector.extractOutput();
-
+        resetOnSetup = !connector.hasInit();
+        
         List<VideoInputPort.Descriptor> ins = new ArrayList<>();
 
         for (String id : getPortIDs()) {
@@ -87,8 +89,20 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
     }
 
     @Override
-    protected void starting(ExecutionContext state) {
+    protected void starting(ExecutionContext source, boolean fullStart) {
         setupRequired = true;
+        try {
+            getDelegate().init();
+        } catch (Exception e) {
+            getLog().log(LogLevel.ERROR, e, "Exception thrown during init()");
+        }
+//        if (fullStart) {
+//            try {
+//                getDelegate().starting();
+//            } catch (Exception e) {
+//                getLog().log(LogLevel.ERROR, e, "Exception thrown during starting()");
+//            }
+//        }
     }
 
     @Override
@@ -97,8 +111,15 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
             offscreen.forEach((id, osgi) -> osgi.release());
         }
     }
-    
-    
+
+    @Override
+    protected void tick(ExecutionContext source) {
+        try {
+            getDelegate().update();
+        } catch (Exception e) {
+            getLog().log(LogLevel.ERROR, e, "Exception thrown during update()");
+        }
+    }
     
     
     private class Processor extends AbstractProcessPipe {
@@ -180,7 +201,9 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
         }
         
         private void invokeSetup(VideoCodeDelegate delegate) {
-            reset();
+            if (resetOnSetup) {
+                reset(false);
+            }
             try {
                 delegate.setup();
             } catch (Exception ex) {
