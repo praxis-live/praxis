@@ -3,7 +3,7 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>org.praxislive.video.gst1</code-name-base>
+            <code-name-base>org.praxislive.video.gstreamer</code-name-base>
             <suite-component/>
             <module-dependencies>
                 <dependency>
@@ -11,7 +11,7 @@
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
-                        <specification-version>3.5.1</specification-version>
+                        <specification-version>4.2.0</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>
@@ -31,6 +31,14 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
+                    <code-name-base>org.praxislive.code</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>1.0</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
                     <code-name-base>org.praxislive.core</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -39,7 +47,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.praxislive.impl</code-name-base>
+                    <code-name-base>org.praxislive.logging</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -63,15 +71,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.praxislive.video.impl</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>1.0</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>org.praxislive.video.pipes</code-name-base>
+                    <code-name-base>org.praxislive.video.code</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -88,7 +88,7 @@
                 </dependency>
             </module-dependencies>
             <public-packages>
-                <package>org.praxislive.video.gst1</package>
+                <package>org.praxislive.video.gstreamer.configuration</package>
             </public-packages>
         </data>
     </configuration>

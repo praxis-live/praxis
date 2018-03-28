@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.video.gst1;
+package org.praxislive.video.gstreamer.configuration;
 
 import com.sun.jna.Platform;
 import org.praxislive.settings.Settings;

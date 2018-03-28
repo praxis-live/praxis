@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2016 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -19,17 +19,20 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.video.gst1.components;
+package org.praxislive.video.gstreamer.components;
 
+import org.praxislive.code.AbstractComponentFactory;
+import org.praxislive.core.ComponentType;
 import org.praxislive.core.services.ComponentFactory;
 import org.praxislive.core.services.ComponentFactoryProvider;
-import org.praxislive.impl.AbstractComponentFactory;
+import org.praxislive.video.code.VideoCodeDelegate;
+import org.praxislive.video.code.VideoCodeFactory;
 
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
-public class GStreamerFactoryProvider implements ComponentFactoryProvider {
+public class GStreamerComponents implements ComponentFactoryProvider {
 
     private final static ComponentFactory factory = new Factory();
 
@@ -45,8 +48,15 @@ public class GStreamerFactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-            addComponent("video:player", VideoPlayer.class);
-            addComponent("video:capture", VideoCapture.class);
+            add("video:player", VideoPlayerComponent.class, VideoPlayerComponent.TEMPLATE_PATH);
+            add("video:capture", VideoCaptureComponent.class, VideoCaptureComponent.TEMPLATE_PATH);
         }
+        
+        private void add(String type, Class<? extends VideoCodeDelegate> cls, String path) {
+            add(data(
+                    new VideoCodeFactory(ComponentType.create(type), cls, source(path))
+            ));
+        }
+        
     }
 }

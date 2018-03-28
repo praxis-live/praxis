@@ -20,14 +20,14 @@
  * have any questions.
  *
  */
-package org.praxislive.video.gst1.components;
+package org.praxislive.video.gstreamer.components;
 
 import com.sun.jna.Platform;
 import com.sun.jna.platform.win32.Kernel32;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.praxislive.video.gst1.GStreamerSettings;
+import org.praxislive.video.gstreamer.configuration.GStreamerSettings;
 import org.freedesktop.gstreamer.Gst;
 
 /**
