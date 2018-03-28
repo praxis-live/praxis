@@ -64,7 +64,6 @@
                 </dependency>
             </module-dependencies>
             <friend-packages>
-                <friend>org.praxislive.video.gst1</friend>
                 <friend>org.praxislive.video.pgl</friend>
                 <package>org.praxislive.video.impl</package>
             </friend-packages>
