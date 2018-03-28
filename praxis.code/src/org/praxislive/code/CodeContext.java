@@ -54,7 +54,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
 
     private final Map<String, ControlDescriptor> controls;
     private final Map<String, PortDescriptor> ports;
-    private final Map<String, RefDescriptor> refs;
+    private final Map<String, ReferenceDescriptor> refs;
     private final ComponentInfo info;
 
     private final D delegate;
@@ -138,7 +138,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
     }
     
     private void configureRefs(CodeContext<D> oldCtxt) {
-        Map<String, RefDescriptor> oldRefs = oldCtxt == null
+        Map<String, ReferenceDescriptor> oldRefs = oldCtxt == null
                 ? Collections.EMPTY_MAP : oldCtxt.refs;
         refs.forEach( (id, ref) -> ref.attach(this, oldRefs.remove(id)));
         oldRefs.forEach( (id, ref) -> ref.dispose() );
@@ -226,7 +226,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
     final void handleDispose() {
         cmp = null;
         handleHierarchyChanged();
-        refs.values().forEach(RefDescriptor::dispose);
+        refs.values().forEach(ReferenceDescriptor::dispose);
         refs.clear();
         controls.clear();
         ports.clear();

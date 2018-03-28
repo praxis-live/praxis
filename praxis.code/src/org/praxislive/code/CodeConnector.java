@@ -29,9 +29,11 @@ import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.praxislive.code.userapi.AuxIn;
 import org.praxislive.code.userapi.AuxOut;
 import org.praxislive.code.userapi.Config;
@@ -40,12 +42,14 @@ import org.praxislive.code.userapi.In;
 import org.praxislive.code.userapi.Inject;
 import org.praxislive.code.userapi.Out;
 import org.praxislive.code.userapi.P;
+import org.praxislive.code.userapi.Property;
 import org.praxislive.code.userapi.ReadOnly;
 import org.praxislive.code.userapi.Ref;
 import org.praxislive.code.userapi.T;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.ControlInfo;
+import org.praxislive.core.Lookup;
 import org.praxislive.core.PortInfo;
 import org.praxislive.core.protocols.ComponentProtocol;
 import org.praxislive.core.types.PMap;
@@ -66,19 +70,24 @@ public abstract class CodeConnector<D extends CodeDelegate> {
                     "(?<=[A-Za-z])(?=[^A-Za-z])"
             )
     );
-
+    
+    private final static List<Plugin> ALL_PLUGINS =
+            Lookup.SYSTEM.findAll(Plugin.class).collect(Collectors.toList());
+    
     private final CodeFactory<D> factory;
     private final LogBuilder log;
     private final D delegate;
     private final Map<ControlDescriptor.Category, Map<Integer, ControlDescriptor>> controls;
     private final Map<PortDescriptor.Category, Map<Integer, PortDescriptor>> ports;
-    private final Map<String, RefDescriptor> refs;
+    private final Map<String, ReferenceDescriptor> refs;
 
+    private List<Plugin> plugins;
     private Map<String, ControlDescriptor> extControls;
     private Map<String, PortDescriptor> extPorts;
-    private Map<String, RefDescriptor> extRefs;
+    private Map<String, ReferenceDescriptor> extRefs;
     private ComponentInfo info;
     private int syntheticIdx = Integer.MIN_VALUE;
+    private boolean hasPropertyField;
 
     public CodeConnector(CodeFactory.Task<D> task, D delegate) {
         this.factory = task.getFactory();
@@ -96,6 +105,8 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     }
 
     protected void process() {
+        plugins = ALL_PLUGINS.stream().filter(p -> p.isSupportedConnector(this))
+                .collect(Collectors.toList());
         Class<? extends CodeDelegate> cls = delegate.getClass();
         analyseFields(cls.getDeclaredFields());
         analyseMethods(cls.getDeclaredMethods());
@@ -120,7 +131,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         return extPorts;
     }
     
-    /*protected*/ Map<String, RefDescriptor> extractRefs() {
+    protected Map<String, ReferenceDescriptor> extractRefs() {
         return extRefs;
     }
 
@@ -129,7 +140,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     }
     
     protected boolean requiresClock() {
-        return false;
+        return hasPropertyField;
     }
 
     private void buildExternalData() {
@@ -159,7 +170,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         return map;
     }
     
-    private Map<String, RefDescriptor> buildExternalRefsMap() {
+    private Map<String, ReferenceDescriptor> buildExternalRefsMap() {
         if (refs.isEmpty()) {
             return Collections.EMPTY_MAP;
         } else {
@@ -198,12 +209,16 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         return id.startsWith("_");
     }
 
-    protected void addControl(ControlDescriptor ctl) {
+    public void addControl(ControlDescriptor ctl) {
         controls.get(ctl.getCategory()).put(ctl.getIndex(), ctl);
     }
 
-    protected void addPort(PortDescriptor port) {
+    public void addPort(PortDescriptor port) {
         ports.get(port.getCategory()).put(port.getIndex(), port);
+    }
+    
+    public void addReference(ReferenceDescriptor ref) {
+        refs.put(ref.getID(), ref);
     }
 
     protected void addDefaultControls() {
@@ -229,6 +244,9 @@ public abstract class CodeConnector<D extends CodeDelegate> {
             if (Modifier.isStatic(f.getModifiers())) {
                 continue;
             }
+            if (f.getType() == Property.class) {
+                hasPropertyField = true;
+            }
             analyseField(f);
         }
     }
@@ -244,6 +262,12 @@ public abstract class CodeConnector<D extends CodeDelegate> {
 
     protected void analyseField(Field field) {
 
+        for (Plugin p : plugins) {
+            if (p.analyseField(this, field)) {
+                return;
+            }
+        }
+        
         P prop = field.getAnnotation(P.class);
         if (prop != null && analysePropertyField(prop, field)) {
             return;
@@ -278,6 +302,13 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     }
 
     protected void analyseMethod(Method method) {
+        
+        for (Plugin p : plugins) {
+            if (p.analyseMethod(this, method)) {
+                return;
+            }
+        }
+        
         T trig = method.getAnnotation(T.class);
         if (trig != null && analyseTriggerMethod(trig, method)) {
             return;
@@ -380,9 +411,9 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     private boolean analyseInjectField(Inject ann, Field field) {
         
         if (Ref.class.equals(field.getType())) {
-            RefDescriptor rdsc = RefDescriptor.create(this, field);
+            ReferenceDescriptor rdsc = RefImpl.Descriptor.create(this, field);
             if (rdsc != null) {
-                refs.put(rdsc.getID(), rdsc);
+                addReference(rdsc);
                 return true;
             } else {
                 return false;
@@ -462,7 +493,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         return ret.toLowerCase();
     }
 
-    protected boolean shouldAddPort(AnnotatedElement element) {
+    public boolean shouldAddPort(AnnotatedElement element) {
         if (element.isAnnotationPresent(ReadOnly.class)) {
             return false;
         }
@@ -473,8 +504,25 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         return true;
     }
 
-    protected int getSyntheticIndex() {
+    public int getSyntheticIndex() {
         return syntheticIdx++;
+    }
+    
+    
+    public static interface Plugin {
+        
+        default boolean analyseField(CodeConnector<?> connector, Field field) {
+            return false;
+        }
+        
+        default boolean analyseMethod(CodeConnector<?> connector, Method method) {
+            return false;
+        }
+        
+        default boolean isSupportedConnector(CodeConnector<?> connector) {
+            return true;
+        }
+        
     }
     
 }
