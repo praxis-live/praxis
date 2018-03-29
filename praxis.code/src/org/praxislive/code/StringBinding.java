@@ -24,8 +24,9 @@ package org.praxislive.code;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.praxislive.code.userapi.Type;
 import org.praxislive.core.ArgumentInfo;
@@ -41,40 +42,55 @@ import org.praxislive.core.Value;
  */
 abstract class StringBinding extends PropertyControl.Binding {
 
-    private final Set<PString> allowed;
+    private final List<PString> allowed;
+    private final List<PString> suggested;
     private final PString mime;
     private final PString template;
+    private final boolean emptyIsDefault;
     final PString def;
 
-    private StringBinding(String mime, String template, String def) {
-        allowed = null;
+    private StringBinding(String mime,
+            String template,
+            String def,
+            String[] suggested,
+            boolean emptyIsDefault) {
         this.mime = mime == null ? PString.EMPTY : PString.valueOf(mime);
         this.template = template == null ? PString.EMPTY : PString.valueOf(template);
         this.def = def == null ? PString.EMPTY : PString.valueOf(def);
+        if (suggested.length > 0) {
+            this.suggested = Stream.of(suggested)
+                    .map(PString::valueOf)
+                    .collect(Collectors.toList());
+        } else {
+            this.suggested = Collections.EMPTY_LIST;
+        }
+        this.allowed = Collections.EMPTY_LIST;
+        this.emptyIsDefault = emptyIsDefault;
     }
 
     private StringBinding(String[] allowedValues, String def) {
         if (allowedValues.length == 0) {
             throw new IllegalArgumentException();
         }
-        boolean foundDef = false;
-        allowed = new LinkedHashSet<>(allowedValues.length);
-        for (String s : allowedValues) {
-            allowed.add(PString.valueOf(s));
-            if (s.equals(def)) {
-                foundDef = true;
-            }
+        allowed = Stream.of(allowedValues)
+                .distinct()
+                .map(PString::valueOf)
+                .collect(Collectors.toList());
+        PString d = PString.valueOf(def);
+        if (!allowed.contains(d)) {
+            d = allowed.get(0);
         }
-        this.def = foundDef ? PString.valueOf(def)
-                : PString.valueOf(allowedValues[0]);
+        this.def = d;
         mime = PString.EMPTY;
         template = PString.EMPTY;
+        this.suggested = Collections.EMPTY_LIST;
+        this.emptyIsDefault = false;
     }
 
     @Override
     public void set(Value value) throws Exception {
         PString pstr = PString.coerce(value);
-        if (allowed == null || allowed.contains(pstr)) {
+        if (allowed.isEmpty() || allowed.contains(pstr)) {
             setImpl(pstr);
         } else {
             throw new IllegalArgumentException();
@@ -91,16 +107,29 @@ abstract class StringBinding extends PropertyControl.Binding {
     @Override
     public ArgumentInfo getArgumentInfo() {
         PMap keys = PMap.EMPTY;
-        if (allowed != null) {
-            keys = PMap.create(PString.KEY_ALLOWED_VALUES, PArray.valueOf(allowed));
+        if (!allowed.isEmpty()) {
+            keys = PMap.create(PString.KEY_ALLOWED_VALUES,
+                    PArray.valueOf(allowed));
         } else if (!mime.isEmpty()) {
             if (!template.isEmpty()) {
                 keys = PMap.create(
                         PString.KEY_MIME_TYPE, mime,
-                        ArgumentInfo.KEY_TEMPLATE, template);
+                        PString.KEY_TEMPLATE, template);
             } else {
                 keys = PMap.create(PString.KEY_MIME_TYPE, mime);
             }
+        } else if (!suggested.isEmpty()) {
+            if (emptyIsDefault) {
+                keys = PMap.create(PString.KEY_SUGGESTED_VALUES,
+                    PArray.valueOf(suggested),
+                    PString.KEY_EMPTY_IS_DEFAULT,
+                    true);
+            } else {
+                keys = PMap.create(PString.KEY_SUGGESTED_VALUES,
+                    PArray.valueOf(suggested));
+            }
+        } else if (emptyIsDefault) {
+            keys = PMap.create(PString.KEY_EMPTY_IS_DEFAULT, true);
         }
         return ArgumentInfo.create(PString.class, keys);
     }
@@ -115,23 +144,27 @@ abstract class StringBinding extends PropertyControl.Binding {
     }
 
     static StringBinding create(CodeConnector<?> connector, Field field) {
-        String[] allowed = null;
+        String[] allowed = new String[0];
+        String[] suggested = new String[0];
+        boolean emptyIsDefault = false;
         String mime = "";
         String def = "";
         String template = "";
         Type.String ann = field.getAnnotation(Type.String.class);
         if (ann != null) {
             allowed = ann.allowed();
+            suggested = ann.suggested();
+            emptyIsDefault = ann.emptyIsDefault();
             mime = ann.mime();
             def = ann.def();
             template = ann.template();
         }
         Class<?> type = field.getType();
         if (type == String.class) {
-            if (allowed != null && allowed.length > 0) {
+            if (allowed.length > 0) {
                 return new StringField(field, allowed, def);
             } else {
-                return new StringField(field, mime, template, def);
+                return new StringField(field, mime, template, def, suggested, emptyIsDefault);
             }
         } else if (type.isEnum()) {
             allowed = Stream.of(type.getEnumConstants())
@@ -145,7 +178,7 @@ abstract class StringBinding extends PropertyControl.Binding {
             if (allowed != null && allowed.length > 0) {
                 return new NoField(allowed, def);
             } else {
-                return new NoField(mime, template, def);
+                return new NoField(mime, template, def, suggested, emptyIsDefault);
             }
         }
     }
@@ -154,8 +187,12 @@ abstract class StringBinding extends PropertyControl.Binding {
 
         private PString value;
 
-        private NoField(String mime, String template, String def) {
-            super(mime, template, def);
+        private NoField(String mime,
+                String template,
+                String def,
+                String[] suggested,
+                boolean emptyIsDefault) {
+            super(mime, template, def, suggested, emptyIsDefault);
             value = this.def;
         }
         
@@ -180,8 +217,13 @@ abstract class StringBinding extends PropertyControl.Binding {
         private final Field field;
         private CodeDelegate delegate;
         
-        private StringField(Field field, String mime, String template, String def) {
-            super(mime, template, def);
+        private StringField(Field field,
+                String mime,
+                String template,
+                String def,
+                String[] suggested,
+                boolean emptyIsDefault) {
+            super(mime, template, def, suggested, emptyIsDefault);
             this.field = field;
         }
         

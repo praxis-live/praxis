@@ -424,8 +424,8 @@ public class PropertyControl extends Property implements Control {
                 Type typeAnn = field.getAnnotation(Type.class);
                 if (typeAnn != null) {
                     binding = new DefaultBinding(
-                            ArgumentInfo.create(typeAnn.cls(), PMap.EMPTY),
-                            PString.EMPTY);
+                            connector.infoFromType(typeAnn),
+                            connector.defaultValueFromType(typeAnn));
                 } else {
                     binding = new DefaultBinding();
                 }

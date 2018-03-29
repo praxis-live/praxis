@@ -46,13 +46,17 @@ import org.praxislive.code.userapi.Property;
 import org.praxislive.code.userapi.ReadOnly;
 import org.praxislive.code.userapi.Ref;
 import org.praxislive.code.userapi.T;
+import org.praxislive.code.userapi.Type;
+import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.PortInfo;
+import org.praxislive.core.Value;
 import org.praxislive.core.protocols.ComponentProtocol;
 import org.praxislive.core.types.PMap;
+import org.praxislive.core.types.PString;
 import org.praxislive.logging.LogBuilder;
 
 /**
@@ -70,10 +74,10 @@ public abstract class CodeConnector<D extends CodeDelegate> {
                     "(?<=[A-Za-z])(?=[^A-Za-z])"
             )
     );
-    
-    private final static List<Plugin> ALL_PLUGINS =
-            Lookup.SYSTEM.findAll(Plugin.class).collect(Collectors.toList());
-    
+
+    private final static List<Plugin> ALL_PLUGINS
+            = Lookup.SYSTEM.findAll(Plugin.class).collect(Collectors.toList());
+
     private final CodeFactory<D> factory;
     private final LogBuilder log;
     private final D delegate;
@@ -130,7 +134,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     protected Map<String, PortDescriptor> extractPorts() {
         return extPorts;
     }
-    
+
     protected Map<String, ReferenceDescriptor> extractRefs() {
         return extRefs;
     }
@@ -138,7 +142,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     protected ComponentInfo extractInfo() {
         return info;
     }
-    
+
     protected boolean requiresClock() {
         return hasPropertyField;
     }
@@ -169,7 +173,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         }
         return map;
     }
-    
+
     private Map<String, ReferenceDescriptor> buildExternalRefsMap() {
         if (refs.isEmpty()) {
             return Collections.EMPTY_MAP;
@@ -183,7 +187,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         Map<String, ControlInfo> controlInfo = new LinkedHashMap<>(controls.size());
         for (Map.Entry<String, ControlDescriptor> e : controls.entrySet()) {
             if (!excludeFromInfo(e.getKey(), e.getValue())) {
-               controlInfo.put(e.getKey(), e.getValue().getInfo()); 
+                controlInfo.put(e.getKey(), e.getValue().getInfo());
             }
         }
         Map<String, PortInfo> portInfo = new LinkedHashMap<>(ports.size());
@@ -198,13 +202,13 @@ public abstract class CodeConnector<D extends CodeDelegate> {
                 PMap.create(
                         ComponentInfo.KEY_DYNAMIC, true,
                         ComponentInfo.KEY_COMPONENT_TYPE, factory.getComponentType()
-                        ));
+                ));
     }
-    
+
     private boolean excludeFromInfo(String id, ControlDescriptor desc) {
         return desc.getInfo() == null || id.startsWith("_");
     }
-    
+
     private boolean excludeFromInfo(String id, PortDescriptor desc) {
         return id.startsWith("_");
     }
@@ -216,7 +220,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     public void addPort(PortDescriptor port) {
         ports.get(port.getCategory()).put(port.getIndex(), port);
     }
-    
+
     public void addReference(ReferenceDescriptor ref) {
         refs.put(ref.getID(), ref);
     }
@@ -267,7 +271,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
                 return;
             }
         }
-        
+
         P prop = field.getAnnotation(P.class);
         if (prop != null && analysePropertyField(prop, field)) {
             return;
@@ -302,13 +306,13 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     }
 
     protected void analyseMethod(Method method) {
-        
+
         for (Plugin p : plugins) {
             if (p.analyseMethod(this, method)) {
                 return;
             }
         }
-        
+
         T trig = method.getAnnotation(T.class);
         if (trig != null && analyseTriggerMethod(trig, method)) {
             return;
@@ -322,7 +326,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
             return;
         }
     }
-    
+
     private boolean analyseInputField(In ann, Field field) {
         InputImpl.Descriptor odsc = InputImpl.createDescriptor(this, ann, field);
         if (odsc != null) {
@@ -390,14 +394,14 @@ public abstract class CodeConnector<D extends CodeDelegate> {
             return false;
         }
     }
-    
+
     private boolean analyseCustomPropertyField(P ann, Field field) {
         TypeConverter<?> converter = TypeConverter.find(field.getType());
         if (converter == null) {
             return false;
         }
-        TypeConverterProperty.Descriptor<?> tcpd =
-                TypeConverterProperty.Descriptor.create(this, ann, field, converter);
+        TypeConverterProperty.Descriptor<?> tcpd
+                = TypeConverterProperty.Descriptor.create(this, ann, field, converter);
         if (tcpd != null) {
             addControl(tcpd);
 //            if (shouldAddPort(field)) {
@@ -407,9 +411,9 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         }
         return false;
     }
-    
+
     private boolean analyseInjectField(Inject ann, Field field) {
-        
+
         if (Ref.class.equals(field.getType())) {
             ReferenceDescriptor rdsc = RefImpl.Descriptor.create(this, field);
             if (rdsc != null) {
@@ -419,7 +423,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
                 return false;
             }
         }
-        
+
         PropertyControl.Descriptor pdsc
                 = PropertyControl.Descriptor.create(this, ann, field);
         if (pdsc != null) {
@@ -507,22 +511,53 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     public int getSyntheticIndex() {
         return syntheticIdx++;
     }
-    
-    
+
+    @SuppressWarnings("deprecation")
+    ArgumentInfo infoFromType(Type typeAnnotation) {
+        Class<? extends Value> valueCls = typeAnnotation.value() == Value.class
+                ? typeAnnotation.cls() : typeAnnotation.value();
+        PMap properties = createPropertyMap(typeAnnotation.properties());
+        return ArgumentInfo.create(valueCls, properties);
+    }
+
+    private PMap createPropertyMap(String... properties) {
+        if (properties.length == 0) {
+            return PMap.EMPTY;
+        }
+        if (properties.length % 2 != 0) {
+            throw new IllegalArgumentException();
+        }
+        PMap.Builder bld = PMap.builder(properties.length / 2);
+        for (int i = 0; i < properties.length; i += 2) {
+            bld.put(properties[i], properties[i + 1]);
+        }
+        return bld.build();
+    }
+
+    @SuppressWarnings("deprecation")
+    Value defaultValueFromType(Type typeAnnotation) {
+        Class<Value> valueCls = typeAnnotation.value() == Value.class
+                ? (Class<Value>) typeAnnotation.cls()
+                : (Class<Value>) typeAnnotation.value();
+        Value.Type<Value> valueType = Value.Type.of(valueCls);
+        String defaultString = typeAnnotation.def();
+        return valueType.converter().apply(PString.valueOf(defaultString)).orElse(PString.EMPTY);
+    }
+
     public static interface Plugin {
-        
+
         default boolean analyseField(CodeConnector<?> connector, Field field) {
             return false;
         }
-        
+
         default boolean analyseMethod(CodeConnector<?> connector, Method method) {
             return false;
         }
-        
+
         default boolean isSupportedConnector(CodeConnector<?> connector) {
             return true;
         }
-        
+
     }
-    
+
 }

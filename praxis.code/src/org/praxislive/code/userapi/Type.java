@@ -32,8 +32,12 @@ import org.praxislive.core.types.PNumber;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Type {
 
+    Class<? extends Value> value() default Value.class;
+    java.lang.String[] properties() default {};
+    java.lang.String def() default "";
+    
+    @Deprecated
     Class<? extends Value> cls() default Value.class;
-//    String[] properties() default {};
 
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface Number {
@@ -53,7 +57,7 @@ public @interface Type {
     @Retention(RetentionPolicy.RUNTIME)
     public static @interface String {
         java.lang.String[] allowed() default {};
-//        java.lang.String[] suggested() default {};
+        java.lang.String[] suggested() default {};
         boolean emptyIsDefault() default false;
         java.lang.String mime() default "";
         java.lang.String def() default "";
