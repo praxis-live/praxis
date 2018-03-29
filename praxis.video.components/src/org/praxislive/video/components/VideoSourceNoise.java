@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.video.factory;
+package org.praxislive.video.components;
 
 import org.praxislive.code.GenerateTemplate;
 
@@ -37,30 +37,23 @@ import org.praxislive.video.code.userapi.*;
 import static org.praxislive.video.code.userapi.VideoConstants.*;
 
 // PXJ-BEGIN:imports
-import org.praxislive.video.render.ops.Blur;     
+import org.praxislive.video.render.ops.Noise;
 // PXJ-END:imports
 
 /**
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-@GenerateTemplate(VideoFXBlur.TEMPLATE_PATH)
-public class VideoFXBlur extends VideoCodeDelegate {
+@GenerateTemplate(VideoSourceNoise.TEMPLATE_PATH)
+public class VideoSourceNoise extends VideoCodeDelegate {
     
-    final static String TEMPLATE_PATH = "resources/fx_blur.pxj";
+    final static String TEMPLATE_PATH = "resources/source_noise.pxj";
 
     // PXJ-BEGIN:body
-
-    @P(1) @Type.Number(min = 0, max = 64)
-    double radius;
-    
-    @In(1) PImage in;
-    
+ 
     @Override
     public void draw() {
-        copy(in);
-        release(in);
-        op(Blur.op((int) (radius + 0.5)));
+        op(Noise.op());
     }
     
     // PXJ-END:body

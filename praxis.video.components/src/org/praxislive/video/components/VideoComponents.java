@@ -19,13 +19,12 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.video.factory;
+package org.praxislive.video.components;
 
 import org.praxislive.code.AbstractComponentFactory;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.services.ComponentFactory;
 import org.praxislive.core.services.ComponentFactoryProvider;
-import org.praxislive.meta.TypeRewriter;
 import org.praxislive.video.code.VideoCodeDelegate;
 import org.praxislive.video.code.VideoCodeFactory;
 
@@ -51,6 +50,8 @@ public class VideoComponents implements ComponentFactoryProvider {
             
             // custom
             add("video:custom", VideoCustom.class, VideoCustom.TEMPLATE_PATH);
+            add("video:composite", VideoComposite.class, VideoComposite.TEMPLATE_PATH);
+            add("video:xfader", VideoXFader.class, VideoXFader.TEMPLATE_PATH);
             
             // built-in
             

@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.video.factory;
+package org.praxislive.video.components;
 
 import org.praxislive.code.GenerateTemplate;
 
@@ -40,10 +40,10 @@ import static org.praxislive.video.code.userapi.VideoConstants.*;
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-@GenerateTemplate(VideoCustom.TEMPLATE_PATH)
+@GenerateTemplate(VideoStill.TEMPLATE_PATH)
 public class VideoStill extends VideoCodeDelegate {
     
-    final static String TEMPLATE_PATH = "resources/custom.pxj";
+    final static String TEMPLATE_PATH = "resources/still.pxj";
 
     // PXJ-BEGIN:body
 

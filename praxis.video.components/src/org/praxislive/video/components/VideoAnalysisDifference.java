@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.video.factory;
+package org.praxislive.video.components;
 
 import org.praxislive.code.GenerateTemplate;
 
@@ -37,23 +37,53 @@ import org.praxislive.video.code.userapi.*;
 import static org.praxislive.video.code.userapi.VideoConstants.*;
 
 // PXJ-BEGIN:imports
-import org.praxislive.video.render.ops.Noise;
+import org.praxislive.video.render.ops.DifferenceOp;
 // PXJ-END:imports
 
 /**
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-@GenerateTemplate(VideoSourceNoise.TEMPLATE_PATH)
-public class VideoSourceNoise extends VideoCodeDelegate {
+@GenerateTemplate(VideoAnalysisDifference.TEMPLATE_PATH)
+public class VideoAnalysisDifference extends VideoCodeDelegate {
     
-    final static String TEMPLATE_PATH = "resources/source_noise.pxj";
+    final static String TEMPLATE_PATH = "resources/analysis_difference.pxj";
 
     // PXJ-BEGIN:body
- 
+    
+    final String COLOR = "Color";
+    final String MONO = "Mono";
+    final String THRESHOLD = "Threshold";
+    
+    @In(1) PImage in1;
+    @In(2) PImage in2;
+
+    @P(1) @Type.String(allowed = {COLOR, MONO, THRESHOLD}) @Config.Port(false)
+    String mode;
+    @P(2) @Type.Number(min = 0, max = 1)
+    double threshold;
+    
+    DifferenceOp diff = new DifferenceOp();
+    
     @Override
     public void draw() {
-        op(Noise.op());
+        switch (mode) {
+            case COLOR:
+                diff.setMode(DifferenceOp.Mode.Color);
+                break;
+            case MONO:
+                diff.setMode(DifferenceOp.Mode.Mono);
+                break;
+            case THRESHOLD:
+                diff.setMode(DifferenceOp.Mode.Threshold);
+                break;
+        }
+        diff.setThreshold(threshold);
+        
+        copy(in1);
+        release(in1);
+        op(diff, in2);
+        release(in2);
     }
     
     // PXJ-END:body

@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.video.factory;
+package org.praxislive.video.components;
 
 import org.praxislive.code.GenerateTemplate;
 
@@ -36,54 +36,77 @@ import static org.praxislive.code.userapi.Constants.*;
 import org.praxislive.video.code.userapi.*;
 import static org.praxislive.video.code.userapi.VideoConstants.*;
 
-// PXJ-BEGIN:imports
-import org.praxislive.video.render.ops.DifferenceOp;
-// PXJ-END:imports
-
 /**
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-@GenerateTemplate(VideoCustom.TEMPLATE_PATH)
-public class VideoAnalysisDifference extends VideoCodeDelegate {
+@GenerateTemplate(VideoXFader.TEMPLATE_PATH)
+public class VideoXFader extends VideoCodeDelegate {
     
-    final static String TEMPLATE_PATH = "resources/custom.pxj";
+    final static String TEMPLATE_PATH = "resources/xfader.pxj";
 
     // PXJ-BEGIN:body
     
-    final String COLOR = "Color";
-    final String MONO = "Mono";
-    final String THRESHOLD = "Threshold";
+    enum Mode {Normal, Add, Difference, BitXor}
     
     @In(1) PImage in1;
     @In(2) PImage in2;
-
-    @P(1) @Type.String(allowed = {COLOR, MONO, THRESHOLD}) @Config.Port(false)
-    String mode;
-    @P(2) @Type.Number(min = 0, max = 1)
-    double threshold;
     
-    DifferenceOp diff = new DifferenceOp();
+    @P(1)
+    Mode mode;
+    @P(2) @Type.Number(min = 0, max = 1)
+    double mix;
+    
+    @Override
+    public void init() {
+        attachRenderQuery("in-1", rendering -> rendering && mix < 0.999);
+        attachRenderQuery("in-2", rendering -> rendering && mix > 0.001);
+    }
     
     @Override
     public void draw() {
+        if (mix < 0.001) {
+            copy(in1);
+            release(in1);
+        } else if (mix > 0.999) {
+            copy(in2);
+            release(in2);
+        } else if (mode == Mode.Normal) {
+            blendMode(ADD, 1 - mix);
+            image(in1, 0, 0);
+            blendMode(ADD, mix);
+            image(in2, 0, 0);
+        } else {
+            drawBlended();
+        }
+    }
+    
+    void drawBlended() {
+        PImage fg, bg;
+        double opacity;
+        if (mix > 0.5) {
+            fg = in1;
+            bg = in2;
+            opacity = (1.0 - mix) * 2;
+        } else {
+            fg = in2;
+            bg = in1;
+            opacity = mix * 2;
+        }
+        copy(bg);
+        release(bg);
         switch (mode) {
-            case COLOR:
-                diff.setMode(DifferenceOp.Mode.Color);
+            case Difference:
+                blendMode(DIFFERENCE, opacity);
                 break;
-            case MONO:
-                diff.setMode(DifferenceOp.Mode.Mono);
+            case BitXor:
+                blendMode(BITXOR, opacity);
                 break;
-            case THRESHOLD:
-                diff.setMode(DifferenceOp.Mode.Threshold);
+            default:
+                blendMode(ADD, opacity);
                 break;
         }
-        diff.setThreshold(threshold);
-        
-        copy(in1);
-        release(in1);
-        op(diff, in2);
-        release(in2);
+        image(fg, 0, 0);
     }
     
     // PXJ-END:body

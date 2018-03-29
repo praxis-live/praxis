@@ -19,7 +19,7 @@
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
  */
-package org.praxislive.video.factory;
+package org.praxislive.video.components;
 
 import org.praxislive.code.GenerateTemplate;
 
@@ -51,7 +51,6 @@ public class VideoCustom extends VideoCodeDelegate {
     public void setup() {
 
     }
-
     
     @Override
     public void draw() {
