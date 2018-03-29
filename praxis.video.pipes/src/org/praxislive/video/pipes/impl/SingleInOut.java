@@ -78,12 +78,12 @@ public abstract class SingleInOut extends SingleOut {
 
     boolean isRendering(long time) {
         if (time != renderReqTime) {
+            renderReqTime = time;
             if (sink == null) {
                 renderReqCache = false;
             } else {
                 renderReqCache = sinkRequiresRender(sink, time);
             }
-            renderReqTime = time;
         }
         return renderReqCache;
     }
