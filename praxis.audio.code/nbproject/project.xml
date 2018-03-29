@@ -72,7 +72,7 @@
                 </dependency>
             </module-dependencies>
             <friend-packages>
-                <friend>org.praxislive.audio.factory</friend>
+                <friend>org.praxislive.audio.components</friend>
                 <package>org.praxislive.audio.code</package>
                 <package>org.praxislive.audio.code.userapi</package>
             </friend-packages>
