@@ -167,8 +167,11 @@ abstract class StringBinding extends PropertyControl.Binding {
                 return new StringField(field, mime, template, def, suggested, emptyIsDefault);
             }
         } else if (type.isEnum()) {
+            List<String> filter = Arrays.asList(allowed);
             allowed = Stream.of(type.getEnumConstants())
-                    .map(Object::toString).toArray(String[]::new);
+                    .map(Object::toString)
+                    .filter(s -> filter.isEmpty() || filter.contains(s))
+                    .toArray(String[]::new);
             int defIdx = 0;
             if (!def.isEmpty()) {
                 defIdx = Arrays.asList(allowed).indexOf(def);
