@@ -52,8 +52,6 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
 
             // COMPONENTS
             addComponent("video:output", VideoOutput.class);
-            addComponent("video:composite", Composite.class);
-            addComponent("video:xfader", XFader.class);
 
             // ANALYSIS
             addComponent("video:analysis:simple-tracker", BlobTracker.class);
