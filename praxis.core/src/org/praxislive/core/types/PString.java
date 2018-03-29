@@ -33,7 +33,10 @@ import org.praxislive.core.ArgumentInfo;
 public class PString extends Value implements Comparable<PString> {
 
     public final static String KEY_ALLOWED_VALUES = ArgumentInfo.KEY_ALLOWED_VALUES;
-    public final static String KEY_MIME_TYPE = "mime-type";
+    public final static String KEY_SUGGESTED_VALUES = ArgumentInfo.KEY_SUGGESTED_VALUES;
+    public final static String KEY_TEMPLATE = ArgumentInfo.KEY_TEMPLATE;
+    public final static String KEY_MIME_TYPE = ArgumentInfo.KEY_MIME_TYPE;
+    public final static String KEY_EMPTY_IS_DEFAULT = ArgumentInfo.KEY_EMPTY_IS_DEFAULT;
     
     public final static PString EMPTY = PString.valueOf("");
     

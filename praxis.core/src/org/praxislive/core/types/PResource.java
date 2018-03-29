@@ -22,7 +22,6 @@
 
 package org.praxislive.core.types;
 
-import org.praxislive.core.Value;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -37,7 +36,9 @@ import org.praxislive.core.ArgumentInfo;
  *
  * @author Neil C Smith
  */
-public final class PResource extends Value implements Comparable<PResource>{
+public final class PResource extends Value implements Comparable<PResource> {
+    
+    public final static String KEY_ALLOW_EMPTY = ArgumentInfo.KEY_ALLOW_EMPTY;
 
     private final URI uri;
     

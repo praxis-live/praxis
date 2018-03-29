@@ -42,6 +42,7 @@ public final class ArgumentInfo extends Value {
     public final static String KEY_ALLOW_EMPTY = "allow-empty";
     public final static String KEY_EMPTY_IS_DEFAULT = "empty-is-default";
     public final static String KEY_TEMPLATE = "template";
+    public final static String KEY_MIME_TYPE = "mime-type";
 
     public static enum Presence {
 

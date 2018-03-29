@@ -37,9 +37,11 @@ import org.praxislive.core.types.PResource;
 import org.praxislive.core.types.PString;
 
 /**
- * Eventual replacement for Value
+ * Abstract base class of all types used in messaging inside Praxis CORE.
+ * 
+ * All Value sub-types are guaranteed to be immutable.
  *
- * @author Neil C Smith (http://neilcsmith.net)
+ * @author Neil C Smith (http://www.neilcsmith.net)
  */
 public abstract class Value {
 
