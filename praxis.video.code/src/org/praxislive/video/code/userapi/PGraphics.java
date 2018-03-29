@@ -144,18 +144,31 @@ public abstract class PGraphics extends PImage {
         shape.bezierVertex(x1, y1, x2, y2, x3, y3);
     }
 
-    public void blendMode(BlendMode blend) {
+    public void blendMode(org.praxislive.video.code.userapi.VideoConstants.BlendMode blend) {
         blendMode(blend, 1);
     }
 
-    public void blendMode(BlendMode blend, double opacity) {
-        this.blendMode = blend;
+    public void blendMode(org.praxislive.video.code.userapi.VideoConstants.BlendMode blend, double opacity) {
+        this.blendMode = extractBlendMode(blend);
         if (opacity < 0) {
             opacity = 0;
         } else if (opacity > 1) {
             opacity = 1;
         }
         this.opacity = opacity;
+    }
+    
+    private BlendMode extractBlendMode(org.praxislive.video.code.userapi.VideoConstants.BlendMode mode) {
+        switch (mode) {
+            case Add : return BlendMode.Add;
+            case Subtract : return BlendMode.Sub;
+            case Difference : return BlendMode.Difference;
+            case Multiply : return BlendMode.Multiply;
+            case Screen : return BlendMode.Screen;
+            case BitXor : return BlendMode.BitXor;
+            case Mask : return BlendMode.Mask;
+            default : return BlendMode.Normal;
+        }
     }
 
     public void breakShape() {

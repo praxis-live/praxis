@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.UnaryOperator;
 import org.praxislive.code.CodeComponent;
 import org.praxislive.code.CodeContext;
 import org.praxislive.code.PortDescriptor;
@@ -42,6 +44,8 @@ import org.praxislive.video.render.Surface;
  */
 public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D> {
 
+    private final static UnaryOperator<Boolean> DEFAULT_RENDER_QUERY = b -> b;
+    
     private final VideoOutputPort.Descriptor output;
     private final VideoInputPort.Descriptor[] inputs;
     private final Map<String, OffScreenGraphicsInfo> offscreen;
@@ -49,6 +53,7 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
     private final boolean resetOnSetup;
 
     private boolean setupRequired;
+    private UnaryOperator<Boolean> renderQuery = DEFAULT_RENDER_QUERY;
 
     public VideoCodeContext(VideoCodeConnector<D> connector) {
         super(connector, connector.hasUpdate());
@@ -79,6 +84,7 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
             processor.addSource(vidp.getPort().getPipe());
         }
         configureOffScreen((VideoCodeContext<D>) oldCtxt);
+        getDelegate().context = this;
     }
     
     private void configureOffScreen(VideoCodeContext<D> oldCtxt) {
@@ -91,6 +97,7 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
     @Override
     protected void starting(ExecutionContext source, boolean fullStart) {
         setupRequired = true;
+        renderQuery = DEFAULT_RENDER_QUERY;
         try {
             getDelegate().init();
         } catch (Exception e) {
@@ -121,6 +128,27 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
         }
     }
     
+    void attachRenderQuery(UnaryOperator<Boolean> renderQuery) {
+        this.renderQuery = Objects.requireNonNull(renderQuery);
+    }
+    
+    void attachRenderQuery(String source, UnaryOperator<Boolean> renderQuery) {
+        PortDescriptor pd = getPortDescriptor(source);
+        if (pd instanceof VideoInputPort.Descriptor) {
+            ((VideoInputPort.Descriptor) pd).attachRenderQuery(renderQuery);
+        } else {
+            getLog().log(LogLevel.ERROR, "No source found to attach render query : " + source);
+        }
+    }
+    
+    void attachAlphaQuery(String source, UnaryOperator<Boolean> alphaQuery) {
+        PortDescriptor pd = getPortDescriptor(source);
+        if (pd instanceof VideoInputPort.Descriptor) {
+            ((VideoInputPort.Descriptor) pd).attachAlphaQuery(alphaQuery);
+        } else {
+            getLog().log(LogLevel.ERROR, "No source found to attach alpha query : " + source);
+        }
+    }
     
     private class Processor extends AbstractProcessPipe {
         
@@ -147,6 +175,11 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
         }
 
         @Override
+        protected boolean isRendering(long time) {
+            return renderQuery.apply(super.isRendering(time));
+        }
+
+        @Override
         protected void render(Surface output, long time) {
             output.clear();
             if (pg == null || pg.surface != output) {
@@ -164,23 +197,30 @@ public class VideoCodeContext<D extends VideoCodeDelegate> extends CodeContext<D
             invokeDraw(del);
             pg.endDraw();
             endOffscreen();
+            releaseImages();
             flush();
         }
         
         private void validateImages(Surface output) {
             VideoCodeDelegate del = getDelegate();
-            for (int i=0; i<images.length; i++) {
+            for (int i = 0; i < images.length; i++) {
                 SurfacePImage img = images[i];
-                Surface s = img == null ? null : img.surface;
-                if (s == null || !output.checkCompatible(s, true, true)) {
-                    if (s != null) {
-                        s.release();
+                Surface s1 = img == null ? null : img.surface;
+                Surface s2 = inputs[i].validateSurface(s1, output);
+                if (s1 != s2) {
+                    if (s1 != null) {
+                        s1.release();
                     }
-                    s = output.createSurface();
-                    img = new SurfacePImage(s);
+                    img = new SurfacePImage(s2);
                     images[i] = img;
                     setImageField(del, inputs[i].getField(), img);
                 }
+            }
+        }
+        
+        private void releaseImages() {
+            for (SurfacePImage image : images) {
+                image.surface.release();
             }
         }
         

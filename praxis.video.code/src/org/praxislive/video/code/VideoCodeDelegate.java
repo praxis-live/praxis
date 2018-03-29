@@ -30,12 +30,13 @@
 
 package org.praxislive.video.code;
 
+import java.util.function.UnaryOperator;
 import org.praxislive.code.DefaultCodeDelegate;
 import org.praxislive.video.code.userapi.PFont;
 import org.praxislive.video.code.userapi.PGraphics;
 import org.praxislive.video.code.userapi.PImage;
+import org.praxislive.video.code.userapi.VideoConstants;
 import org.praxislive.video.render.SurfaceOp;
-import org.praxislive.video.render.ops.BlendMode;
 
 /**
  *
@@ -46,6 +47,7 @@ public class VideoCodeDelegate extends DefaultCodeDelegate {
     public int width;
     public int height;
     
+    VideoCodeContext<?> context;
     PGraphics pg;
 
     void setupGraphics(PGraphics pg, int width, int height) {
@@ -61,6 +63,18 @@ public class VideoCodeDelegate extends DefaultCodeDelegate {
     public void setup(){}
     
     public void draw(){}
+    
+    public final void attachAlphaQuery(String source, UnaryOperator<Boolean> query) {
+        context.attachAlphaQuery(source, query);
+    }
+    
+    public final void attachRenderQuery(UnaryOperator<Boolean> query) {
+        context.attachRenderQuery(query);
+    }
+    
+    public final void attachRenderQuery(String source, UnaryOperator<Boolean> query) {
+        context.attachRenderQuery(source, query);
+    }
     
     // Start generated PGraphics 
     public void background(double grey) {
@@ -91,11 +105,11 @@ public class VideoCodeDelegate extends DefaultCodeDelegate {
         pg.bezierVertex(x1, y1, x2, y2, x3, y3);
     }
 
-    public void blendMode(BlendMode blend) {
+    public void blendMode(VideoConstants.BlendMode blend) {
         pg.blendMode(blend);
     }
 
-    public void blendMode(BlendMode blend, double opacity) {
+    public void blendMode(VideoConstants.BlendMode blend, double opacity) {
         pg.blendMode(blend, opacity);
     }
 

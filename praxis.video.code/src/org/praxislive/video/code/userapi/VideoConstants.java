@@ -30,10 +30,6 @@
 
 package org.praxislive.video.code.userapi;
 
-import org.praxislive.video.render.ops.BlendMode;
-
-
-
 /**
  *
  * @author Neil C Smith (http://neilcsmith.net)
@@ -42,11 +38,9 @@ public class VideoConstants {
 
     private VideoConstants() {}
 
-    @Deprecated public final static BlendMode NORMAL = BlendMode.Normal;
-    public final static BlendMode BLEND = BlendMode.Normal;
+    public final static BlendMode BLEND = BlendMode.Blend;
     public final static BlendMode ADD = BlendMode.Add;
-    @Deprecated public final static BlendMode SUB = BlendMode.Sub;
-    public final static BlendMode SUBTRACT = BlendMode.Sub;
+    public final static BlendMode SUBTRACT = BlendMode.Subtract;
     public final static BlendMode DIFFERENCE = BlendMode.Difference;
     public final static BlendMode MULTIPLY = BlendMode.Multiply;
     public final static BlendMode SCREEN = BlendMode.Screen;
@@ -57,7 +51,11 @@ public class VideoConstants {
     public final static boolean CLOSE = true;
     
     
-
+    public enum BlendMode {
+        
+        Blend, Add, Subtract, Difference, Multiply, Screen, BitXor, Mask;
+        
+    }
     
 
 }
