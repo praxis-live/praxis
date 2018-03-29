@@ -56,7 +56,7 @@ public class VideoCaptureComponent extends VideoCodeDelegate {
     @T(1) Trigger play;
     @T(2) Trigger stop;
     
-    @P(1) @Type.String
+    @P(1) @Type.String(emptyIsDefault = true, suggested = {"", "1", "2", "3", "4"})
     Property device;
     @P(2)
     ResizeMode resizeMode;

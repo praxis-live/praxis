@@ -57,7 +57,7 @@ public class VideoPlayerComponent extends VideoCodeDelegate {
     @T(2) Trigger pause;
     @T(3) Trigger stop;
     
-    @P(1) @Type(cls = PResource.class)
+    @P(1) @Type(value = PResource.class, properties = {PResource.KEY_ALLOW_EMPTY, "true"})
     Property video;
     @P(2) @OnChange("seek") @Type.Number(min = 0, max = 1)
     double position;
@@ -73,7 +73,7 @@ public class VideoPlayerComponent extends VideoCodeDelegate {
     double alignY;
     @P(8) @Type.Number(min = 0, max = 8, def = 1, skew = 4)
     double zoom;
-    @P(9) @Type.String @Config.Port(false)
+    @P(9) @Type.String(suggested = "autoaudiosink") @Config.Port(false)
     Property audioSink;
     @P(10) @ReadOnly
     String state;
