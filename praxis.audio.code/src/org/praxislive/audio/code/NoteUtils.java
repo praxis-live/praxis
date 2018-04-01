@@ -1,8 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
- * Derived from code in Frinika copyright 2007 Jens Gulden
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -25,62 +24,78 @@ package org.praxislive.audio.code;
 
 /**
  *
- * @author Jens Gulden
- * @author Neil C Smith (http://neilcsmith.net)
+ * @author Neil C Smith (http://www.neilcsmith.net)
  */
 class NoteUtils {
-    
-    private NoteUtils() {}
-    
-    private final static String NOTES = "c d ef g a b";
-    private final static String NOTES_UPPER = NOTES.toUpperCase();
 
-    static int noteToMidi(String s) {
-        int note;
-        int mod = 0; // -1, 0, +1
-        int octave = 0;
+    private NoteUtils() {
+    }
 
-        char n = s.charAt(0);
-        note = NOTES.indexOf(n);
-        if (note == -1) {
-            note = NOTES_UPPER.indexOf(n);
-            if (note == -1) {
-                return -1; // invalid
-            }
+    static int noteToMidi(String note) {
+        int len = note.length();
+        if (len < 2 || len > 3) {
+            return -1;
         }
+        int midi;
 
-        int len = s.length();
-        switch (len) {
-            case 3:
-                char m = s.charAt(1);
-                switch (m) {
-                    case '#':
-                        mod = 1;
-                        break;
-                    case 'b':
-                        mod = -1;
-                        break;
-                    default:
-                        return -1; // invalid
-                }
-            // fallthrough
-            case 2:
-                char oc = s.charAt(len - 1);
-                octave += (int) oc - 48;
-                if (octave < 0 || octave > 9) {
-                    return -1;
-                }
+        switch (note.charAt(0)) {
+            case 'c':
+            case 'C':
+                midi = 0;
+                break;
+            case 'd':
+            case 'D':
+                midi = 2;
+                break;
+            case 'e':
+            case 'E':
+                midi = 4;
+                break;
+            case 'f':
+            case 'F':
+                midi = 5;
+                break;
+            case 'g':
+            case 'G':
+                midi = 7;
+                break;
+            case 'a':
+            case 'A':
+                midi = 9;
+                break;
+            case 'b':
+            case 'B':
+                midi = 11;
                 break;
             default:
                 return -1;
         }
 
-        int result = note + mod + 12 + (octave * 12);
-        return result;
+        switch (len) {
+            case 3:
+                switch (note.charAt(1)) {
+                    case '#':
+                        midi++;
+                        break;
+                    case 'b':
+                        midi--;
+                        break;
+                    default:
+                        return -1;
+                }
+            default:
+                int octave = note.charAt(len - 1) - '0';
+                if (octave < 0 || octave > 9) {
+                    return -1;
+                }
+                midi += (octave * 12) + 12; 
+         }
+        
+        return midi;
     }
 
     static double midiToFrequency(int midi) {
-        return 440.0 * Math.pow(2.0, ((midi - 69.0) / 12.0));
+        return midi < 1 ? 0 : 440.0 * Math.pow(2.0, ((midi - 69.0) / 12.0));
     }
-    
+
 }
