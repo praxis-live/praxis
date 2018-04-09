@@ -11,7 +11,7 @@
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
-                        <specification-version>4.2.2</specification-version>
+                        <specification-version>4.5.1</specification-version>
                     </run-dependency>
                 </dependency>
             </module-dependencies>
@@ -20,6 +20,7 @@
                 <package>com.sun.jna.platform.dnd</package>
                 <package>com.sun.jna.platform.mac</package>
                 <package>com.sun.jna.platform.unix</package>
+                <package>com.sun.jna.platform.unix.solaris</package>
                 <package>com.sun.jna.platform.win32</package>
                 <package>com.sun.jna.platform.win32.COM</package>
                 <package>com.sun.jna.platform.win32.COM.tlb</package>
@@ -29,8 +30,8 @@
                 <package>com.sun.jna.platform.wince</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/jna-platform-4.2.2.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jna-platform-4.2.2.jar</binary-origin>
+                <runtime-relative-path>ext/jna-platform-4.5.1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jna-platform-4.5.1.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>
