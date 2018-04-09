@@ -1,0 +1,95 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright 2018 Neil C Smith.
+ *
+ * This code is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 3 only, as
+ * published by the Free Software Foundation.
+ *
+ * This code is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+ * version 3 for more details.
+ *
+ * You should have received a copy of the GNU General Public License version 3
+ * along with this work; if not, see http://www.gnu.org/licenses/
+ *
+ *
+ * Please visit http://neilcsmith.net if you need additional information or
+ * have any questions.
+ *
+ */
+package org.praxislive.code;
+
+import org.praxislive.core.ArgumentInfo;
+import org.praxislive.core.Call;
+import org.praxislive.core.CallArguments;
+import org.praxislive.core.Control;
+import org.praxislive.core.ControlInfo;
+import org.praxislive.core.PacketRouter;
+import org.praxislive.core.Value;
+import org.praxislive.core.types.PError;
+import org.praxislive.core.types.PMap;
+
+/**
+ *
+ * @author Neil C Smith - http://www.neilcsmith.net
+ */
+class InputPortControl implements Control {
+
+    private final ControlInput.Link link;
+    
+    private InputPortControl(ControlInput.Link link) {
+        this.link = link;
+    }
+    
+    @Override
+    public void call(Call call, PacketRouter router) throws Exception {
+        CallArguments args = call.getArgs();
+        if (args.getSize() != 1) {
+            router.route(Call.createErrorCall(call, PError.create(IllegalArgumentException.class,
+                    "Input port requires single argument")));
+        }
+        link.receive(call.getTimecode(), args.get(0));
+        router.route(Call.createReturnCall(call));
+    }
+    
+    static class Descriptor extends ControlDescriptor {
+        
+        private final static ControlInfo INFO = ControlInfo.createFunctionInfo(
+                new ArgumentInfo[]{ArgumentInfo.create(Value.class)}, new ArgumentInfo[0], PMap.EMPTY);
+        
+        
+        private final InputPortControl control;
+
+        private Descriptor(String id, Category category, int index, ControlInput.Link link) {
+            super(id, category, index);
+            control = new InputPortControl(link);
+        }
+        
+        @Override
+        public ControlInfo getInfo() {
+            return INFO;
+        }
+
+        @Override
+        public void attach(CodeContext<?> context, Control previous) {
+        }
+
+        @Override
+        public Control getControl() {
+            return control;
+        }
+        
+        static Descriptor createInput(String id, int index, ControlInput.Link link) {
+            return new Descriptor(id, Category.In, index, link);
+        }
+        
+        static Descriptor createAuxInput(String id, int index, ControlInput.Link link) {
+            return new Descriptor(id, Category.AuxIn, index, link);
+        }
+        
+    }
+    
+}

@@ -98,13 +98,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         this.log = task.getLog();
         this.delegate = delegate;
         controls = new EnumMap<>(ControlDescriptor.Category.class);
-        for (ControlDescriptor.Category cat : ControlDescriptor.Category.values()) {
-            controls.put(cat, new TreeMap<Integer, ControlDescriptor>());
-        }
         ports = new EnumMap<>(PortDescriptor.Category.class);
-        for (PortDescriptor.Category cat : PortDescriptor.Category.values()) {
-            ports.put(cat, new TreeMap<Integer, PortDescriptor>());
-        }
         refs = new TreeMap<>();
     }
 
@@ -214,11 +208,11 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     }
 
     public void addControl(ControlDescriptor ctl) {
-        controls.get(ctl.getCategory()).put(ctl.getIndex(), ctl);
+        controls.computeIfAbsent(ctl.getCategory(), c -> new TreeMap<>()).put(ctl.getIndex(), ctl);
     }
 
     public void addPort(PortDescriptor port) {
-        ports.get(port.getCategory()).put(port.getIndex(), port);
+        ports.computeIfAbsent(port.getCategory(), c -> new TreeMap<>()).put(port.getIndex(), port);
     }
 
     public void addReference(ReferenceDescriptor ref) {
@@ -331,6 +325,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         InputImpl.Descriptor odsc = InputImpl.createDescriptor(this, ann, field);
         if (odsc != null) {
             addPort(odsc);
+            addControl(InputPortControl.Descriptor.createInput(odsc.getID(), odsc.getIndex(), odsc));
             return true;
         } else {
             return false;
@@ -341,6 +336,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         InputImpl.Descriptor odsc = InputImpl.createDescriptor(this, ann, field);
         if (odsc != null) {
             addPort(odsc);
+            addControl(InputPortControl.Descriptor.createAuxInput(odsc.getID(), odsc.getIndex(), odsc));
             return true;
         } else {
             return false;
@@ -453,6 +449,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
                 = MethodInput.createDescriptor(this, ann, method);
         if (desc != null) {
             addPort(desc);
+            addControl(InputPortControl.Descriptor.createInput(desc.getID(), desc.getIndex(), desc));
             return true;
         } else {
             return false;
@@ -464,6 +461,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
                 = MethodInput.createDescriptor(this, ann, method);
         if (desc != null) {
             addPort(desc);
+            addControl(InputPortControl.Descriptor.createAuxInput(desc.getID(), desc.getIndex(), desc));
             return true;
         } else {
             return false;

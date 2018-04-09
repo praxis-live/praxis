@@ -31,7 +31,7 @@ import org.praxislive.core.ControlInfo;
  */
 public abstract class ControlDescriptor {
     
-    public static enum Category {Internal, Synthetic, Action, Property}
+    public static enum Category {Internal, Synthetic, In, Action, Property, AuxIn, Function}
     
     private final String id;
     private final Category category;
