@@ -129,6 +129,7 @@ class GStreamerVideoPlayer implements VideoPlayer {
                 playbin.play();
                 double r = rate;
                 if (r != 1) {
+                    playbin.getState(); // make sure we're playing
                     handleSeek(false, -1);
                 }
             }
