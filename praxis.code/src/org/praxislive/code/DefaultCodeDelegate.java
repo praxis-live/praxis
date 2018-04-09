@@ -708,6 +708,16 @@ public class DefaultCodeDelegate extends CodeDelegate {
     public final double constrain(double amt, double low, double high) {
         return (amt < low) ? low : ((amt > high) ? high : amt);
     }
+    
+    /**
+     * Round a value to the nearest integer.
+     *
+     * @param amt input value
+     * @return rounded value
+     */
+    public final int round(double amt) {
+        return Math.round((float) amt);
+    }
 
     /**
      * Converts an angle in radians to an angle in degrees.
