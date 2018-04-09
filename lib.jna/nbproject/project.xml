@@ -29,8 +29,8 @@
                 <package>com.sun.jna.win32</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/jna-4.2.2.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/jna-4.2.2.jar</binary-origin>
+                <runtime-relative-path>ext/jna-4.5.1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/jna-4.5.1.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>
