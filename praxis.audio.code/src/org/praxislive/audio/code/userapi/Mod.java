@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2016 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,6 +22,7 @@
  */
 package org.praxislive.audio.code.userapi;
 
+import java.util.function.DoubleBinaryOperator;
 import org.praxislive.audio.code.Resettable;
 import org.jaudiolibs.pipes.Buffer;
 import org.jaudiolibs.pipes.impl.MultiInOut;
@@ -32,13 +33,13 @@ import org.jaudiolibs.pipes.impl.MultiInOut;
  */
 public class Mod extends MultiInOut implements Resettable {
 
-    private Function function;
+    private DoubleBinaryOperator function;
 
     public Mod() {
         super(32, 1);
     }
 
-    public Mod function(Function function) {
+    public Mod function(DoubleBinaryOperator function) {
         this.function = function;
         return this;
     }
@@ -72,7 +73,7 @@ public class Mod extends MultiInOut implements Resettable {
                     }
                 } else {
                     for (int k = 0, z = output.getSize(); k < z; k++) {
-                        out[k] = (float) function.process(in[k], out[k]);
+                        out[k] = (float) function.applyAsDouble(in[k], out[k]);
                     }
                 }
             }
@@ -83,12 +84,6 @@ public class Mod extends MultiInOut implements Resettable {
     @Override
     public void reset() {
         function = null;
-    }
-
-    public static interface Function {
-
-        public double process(double a, double b);
-
     }
 
 }

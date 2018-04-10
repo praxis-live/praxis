@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,6 +22,7 @@
  */
 package org.praxislive.audio.code.userapi;
 
+import java.util.function.DoubleUnaryOperator;
 import org.praxislive.audio.code.Resettable;
 import org.jaudiolibs.pipes.Buffer;
 import org.jaudiolibs.pipes.impl.SingleInOut;
@@ -32,16 +33,10 @@ import org.jaudiolibs.pipes.impl.SingleInOut;
  */
 public final class OpGen extends SingleInOut implements Resettable {
     
-    private final static Function PASSTHROUGH = new Function() {
-
-        @Override
-        public double process(double in) {
-            return in;
-        }
-    };
+    private final static DoubleUnaryOperator PASSTHROUGH = d -> d;
 
 //    private double[] scratch;
-    private Function fn;
+    private DoubleUnaryOperator fn;
     
     public OpGen() {
         reset();
@@ -50,15 +45,15 @@ public final class OpGen extends SingleInOut implements Resettable {
     
     @Override
     protected void process(Buffer buffer, boolean rendering) {
-        Function f = fn == null ? PASSTHROUGH : fn;
+        DoubleUnaryOperator f = fn == null ? PASSTHROUGH : fn;
         int size = buffer.getSize();
         float[] data = buffer.getData();
         for (int i=0; i < size; i++) {
-            data[i] = (float) f.process(data[i]);
+            data[i] = (float) f.applyAsDouble(data[i]);
         }
     }
 
-    public OpGen function(Function fn) {
+    public OpGen function(DoubleUnaryOperator fn) {
         this.fn = fn == null ? PASSTHROUGH : fn;
         return this;
     }
