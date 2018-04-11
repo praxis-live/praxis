@@ -37,7 +37,7 @@ import org.praxislive.core.types.PMap;
  * @author Neil C Smith - http://www.neilcsmith.net
  */
 class InputPortControl implements Control {
-
+    
     private final ControlInput.Link link;
     
     private InputPortControl(ControlInput.Link link) {
@@ -57,26 +57,30 @@ class InputPortControl implements Control {
     
     static class Descriptor extends ControlDescriptor {
         
-        private final static ControlInfo INFO = ControlInfo.createFunctionInfo(
-                new ArgumentInfo[]{ArgumentInfo.create(Value.class)}, new ArgumentInfo[0], PMap.EMPTY);
-        
-        
         private final InputPortControl control;
-
+        private final ControlInfo info;
+        
         private Descriptor(String id, Category category, int index, ControlInput.Link link) {
             super(id, category, index);
             control = new InputPortControl(link);
+            info = ControlInfo.createFunctionInfo(
+                    new ArgumentInfo[]{
+                        ArgumentInfo.create(Value.class)
+                    },
+                    new ArgumentInfo[0],
+                    PMap.create("input-port", id)
+            );
         }
         
         @Override
         public ControlInfo getInfo() {
-            return INFO;
+            return info;
         }
-
+        
         @Override
         public void attach(CodeContext<?> context, Control previous) {
         }
-
+        
         @Override
         public Control getControl() {
             return control;
