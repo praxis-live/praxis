@@ -51,13 +51,15 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
     private final PGLVideoInputPort.Descriptor[] inputs;
     private final Map<String, P2DOffScreenGraphicsInfo> offscreen;
     private final Processor processor;
+    private final boolean resetOnSetup;
 
     private boolean setupRequired;
 
     public P2DCodeContext(P2DCodeConnector connector) {
-        super(connector, false);
+        super(connector, connector.hasUpdate());
         setupRequired = true;
         output = connector.extractOutput();
+        resetOnSetup = !connector.hasInit();
 
         List<PGLVideoInputPort.Descriptor> ins = new ArrayList<>();
 
@@ -94,11 +96,25 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
     @Override
     protected void starting(ExecutionContext source) {
         setupRequired = true;
+        try {
+            getDelegate().init();
+        } catch (Exception e) {
+            getLog().log(LogLevel.ERROR, e, "Exception thrown during init()");
+        }
     }
 
     @Override
     protected void stopping(ExecutionContext source, boolean fullStop) {
         offscreen.forEach((id, osgi) -> osgi.release());
+    }
+    
+    @Override
+    protected void tick(ExecutionContext source) {
+        try {
+            getDelegate().update();
+        } catch (Exception e) {
+            getLog().log(LogLevel.ERROR, e, "Exception thrown during update()");
+        }
     }
 
     void beginOffscreen() {
@@ -156,7 +172,9 @@ public class P2DCodeContext extends CodeContext<P2DCodeDelegate> {
             
             del.configure(pglOut.getContext().parent(), pg, output.getWidth(), output.getHeight());
             if (setupRequired) {
-                reset(false);
+                if (resetOnSetup) {
+                    reset(false);
+                }
                 try {
                     del.setup();
                 } catch (Exception ex) {

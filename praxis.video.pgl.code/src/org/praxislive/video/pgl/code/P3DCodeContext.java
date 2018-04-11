@@ -52,13 +52,15 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
     private final PGLVideoInputPort.Descriptor[] inputs;
     private final Map<String, P3DOffScreenGraphicsInfo> offscreen;
     private final Processor processor;
+    private final boolean resetOnSetup;
 
     private boolean setupRequired;
 
     public P3DCodeContext(P3DCodeConnector connector) {
-        super(connector, false);
+        super(connector, connector.hasUpdate());
         setupRequired = true;
         output = connector.extractOutput();
+        resetOnSetup = !connector.hasInit();
 
         List<PGLVideoInputPort.Descriptor> ins = new ArrayList<>();
 
@@ -97,12 +99,26 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
     public void starting(ExecutionContext source) {
         setupRequired = true;
         processor.dispose3D();
+        try {
+            getDelegate().init();
+        } catch (Exception e) {
+            getLog().log(LogLevel.ERROR, e, "Exception thrown during init()");
+        }
     }
 
     @Override
     protected void stopping(ExecutionContext source, boolean fullStop) {
         processor.dispose3D();
         offscreen.forEach((id, osgi) -> osgi.release());
+    }
+    
+    @Override
+    protected void tick(ExecutionContext source) {
+        try {
+            getDelegate().update();
+        } catch (Exception e) {
+            getLog().log(LogLevel.ERROR, e, "Exception thrown during update()");
+        }
     }
     
     void beginOffscreen() {
@@ -171,7 +187,9 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             del.configure(pglOut.getContext().parent(), pg, output.getWidth(), output.getHeight());
 //            pg.resetMatrix();
             if (setupRequired) {
-                reset(false);
+                if (resetOnSetup) {
+                    reset(false);
+                }
                 try {
                     del.setup();
                 } catch (Exception ex) {

@@ -57,11 +57,13 @@ public class P2DCodeDelegate extends DefaultCodeDelegate {
         this.mousePressed = parent.mousePressed;
     }
 
-    public void setup() {
-    }
-
-    public void draw() {
-    }
+    public void init(){}
+    
+    public void update(){}
+    
+    public void setup(){}
+    
+    public void draw(){}
     
     @Override
     public <T> Optional<T> find(Class<T> type) {

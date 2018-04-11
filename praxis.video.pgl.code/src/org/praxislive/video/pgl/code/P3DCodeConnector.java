@@ -23,6 +23,7 @@
 package org.praxislive.video.pgl.code;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -44,12 +45,14 @@ import org.praxislive.video.pgl.code.userapi.PShape;
  */
 public class P3DCodeConnector extends CodeConnector<P3DCodeDelegate> {
 
-    public final static String SETUP = "setup";
-    public final static String DRAW = "draw";
+    private final static String INIT = "init";
+    private final static String UPDATE = "update";
 
     private final Map<String, P3DOffScreenGraphicsInfo> offscreen;
     
     private PGLVideoOutputPort.Descriptor output;
+    private boolean hasInit;
+    private boolean hasUpdate;
 
     public P3DCodeConnector(CodeFactory.Task<P3DCodeDelegate> creator,
             P3DCodeDelegate delegate) {
@@ -63,6 +66,14 @@ public class P3DCodeConnector extends CodeConnector<P3DCodeDelegate> {
     
     Map<String, P3DOffScreenGraphicsInfo> extractOffScreenInfo() {
         return offscreen.isEmpty() ? Collections.EMPTY_MAP : offscreen;
+    }
+    
+    boolean hasInit() {
+        return hasInit;
+    }
+    
+    boolean hasUpdate() {
+        return hasUpdate;
     }
 
     @Override
@@ -137,6 +148,20 @@ public class P3DCodeConnector extends CodeConnector<P3DCodeDelegate> {
         }
 
         super.analyseField(field);
+    }
+    
+    @Override
+    protected void analyseMethod(Method method) {
+        if (INIT.equals(method.getName())
+                && method.getParameterCount() == 0) {
+            hasInit = true;
+        } else if (UPDATE.equals(method.getName()) 
+                && method.getParameterCount() == 0) {
+            hasUpdate = true;
+        }
+        
+        super.analyseMethod(method);
+        
     }
 
 }
