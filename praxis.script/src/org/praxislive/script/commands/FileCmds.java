@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -23,6 +23,7 @@ package org.praxislive.script.commands;
 
 import org.praxislive.script.impl.AbstractInlineCommand;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.DirectoryStream;
@@ -30,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -129,14 +131,18 @@ public class FileCmds implements CommandInstaller {
 
     private static List<Path> listFiles(Namespace namespace, String path, String glob) throws Exception {
         URI base = path.isEmpty() ? getPWD(namespace) : resolve(namespace, path);
-        List<Path> list = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(base), glob)) {
-            for (Path entry : stream) {
-                list.add(entry);
+        try {
+            List<Path> list = new ArrayList<>();
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(base), glob)) {
+                for (Path entry : stream) {
+                    list.add(entry);
+                }
             }
+            list.sort(Comparator.naturalOrder());
+            return list;
+        } catch (IOException ex) {
+            return Collections.EMPTY_LIST;
         }
-        list.sort(Comparator.naturalOrder());
-        return list;
     }
 
     private static class FileCmd extends AbstractInlineCommand {
