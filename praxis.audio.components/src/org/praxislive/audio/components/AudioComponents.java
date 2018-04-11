@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2016 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -56,6 +56,7 @@ public class AudioComponents implements ComponentFactoryProvider {
             add("audio:gain", AudioGain.class, AudioGain.TEMPLATE_PATH);
             add("audio:osc", AudioOsc.class, AudioOsc.TEMPLATE_PATH);
             add("audio:player", AudioPlayer.class, AudioPlayer.TEMPLATE_PATH);
+            add("audio:looper", AudioLooper.class, AudioLooper.TEMPLATE_PATH);
             
             add("audio:fx:chorus", AudioFXChorus.class, AudioFXChorus.TEMPLATE_PATH);
             add("audio:fx:comb-filter", AudioFXCombFilter.class, AudioFXCombFilter.TEMPLATE_PATH);
