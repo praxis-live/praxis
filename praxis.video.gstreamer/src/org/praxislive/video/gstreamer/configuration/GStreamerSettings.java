@@ -45,7 +45,7 @@ public class GStreamerSettings {
                 DEFAULT_LIBRARY_PATH = "C:\\gstreamer\\1.0\\x86\\bin\\";
             }
         } else if (Platform.isMac()) {
-            DEFAULT_CAPTURE_PREFIX = "qtkitvideosrc device-index=";
+            DEFAULT_CAPTURE_PREFIX = "avfvideosrc device-index=";
             DEFAULT_LIBRARY_PATH = "/Library/Frameworks/GStreamer.framework/Libraries/";
         } else {
             DEFAULT_CAPTURE_PREFIX = "v4l2src device=/dev/video";
