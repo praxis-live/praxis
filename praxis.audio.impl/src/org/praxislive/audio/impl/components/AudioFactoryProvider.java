@@ -51,8 +51,8 @@ public class AudioFactoryProvider implements ComponentFactoryProvider {
             addComponent("audio:input", AudioInput.class);
             addComponent("audio:output", AudioOutput.class);
             addComponent("audio:analysis:level", Level.class);
-            addComponent("audio:mix:xfader", XFader.class);
-            addComponent("audio:sampling:looper", Looper.class);
+            addComponent("audio:mix:xfader", data(XFader.class).deprecated());
+            addComponent("audio:sampling:looper", data(Looper.class).deprecated());
             
             addComponent("audio:container:in", data(AudioContainerInput.class));
             addComponent("audio:container:out", data(AudioContainerOutput.class));
