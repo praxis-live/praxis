@@ -221,11 +221,15 @@ public class PGLPlayer implements Player {
         Throwable error;
         
         private final PGLContext context;
+        private final boolean transformEvents;
         private boolean rendering;
         private PGLSurface pglSurface;
 
         private Applet() {
             context = new PGLContext(this, profile, surfaceWidth, surfaceHeight);
+            transformEvents = surfaceWidth != outputWidth ||
+                    surfaceHeight != outputHeight ||
+                    outputRotation != 0;
         }
 
         @Override
@@ -301,8 +305,22 @@ public class PGLPlayer implements Player {
         @Override
         public synchronized void draw() {
             time = clock.getTime() + frameNanos;
-            fireListeners();
-            sink.process(pglSurface, time);
+            if (transformEvents) {
+                int mX = mouseX;
+                int mY = mouseY;
+                int pmX = pmouseX;
+                int pmY = pmouseY;
+                transformMouse();
+                fireListeners();
+                sink.process(pglSurface, time);
+                mouseX = mX;
+                mouseY = mY;
+                pmouseX = pmX;
+                pmouseY = pmY;
+            } else {
+                fireListeners();
+                sink.process(pglSurface, time);
+            }
             PImage img = context.asImage(pglSurface);
             context.primary().endOffscreen();
             clear();
@@ -310,6 +328,48 @@ public class PGLPlayer implements Player {
             rotate(radians(outputRotation));
             image(img, -outputWidth / 2, -outputHeight / 2,
                     outputWidth, outputHeight);
+        }
+        
+        private void transformMouse() {
+            double x,y;
+            switch (outputRotation) {
+                case 90:
+                    x = mouseY * ( (double) surfaceWidth / outputWidth );
+                    y = mouseX * ( (double) surfaceHeight / outputHeight );
+                    mouseX = (int) (x);
+                    mouseY = (int) (surfaceHeight - y);
+                    x = pmouseY * ( (double) surfaceWidth / outputWidth );
+                    y = pmouseX * ( (double) surfaceHeight / outputHeight );
+                    pmouseX = (int) (x);
+                    pmouseY = (int) (surfaceHeight - y);
+                    break;
+                case 180:
+                    x = mouseX * ( (double) surfaceWidth / outputWidth );
+                    y = mouseY * ( (double) surfaceHeight / outputHeight );
+                    mouseX = (int) (surfaceWidth - x);
+                    mouseY = (int) (surfaceHeight - y);
+                    x = pmouseX * ( (double) surfaceWidth / outputWidth );
+                    y = pmouseY * ( (double) surfaceHeight / outputHeight );
+                    pmouseX = (int) (surfaceWidth - x);
+                    pmouseY = (int) (surfaceHeight - y);
+                    break;
+                case 270:
+                    x = mouseY * ( (double) surfaceWidth / outputWidth );
+                    y = mouseX * ( (double) surfaceHeight / outputHeight );
+                    mouseX = (int) (surfaceWidth - x);
+                    mouseY = (int) (y);
+                    x = pmouseY * ( (double) surfaceWidth / outputWidth );
+                    y = pmouseX * ( (double) surfaceHeight / outputHeight );
+                    pmouseX = (int) (surfaceWidth - x);
+                    pmouseY = (int) (y);
+                    break;
+                default:
+                    mouseX *= ( (double) surfaceWidth / outputWidth);
+                    mouseY *= ( (double) surfaceHeight / outputHeight);
+                    pmouseX *= ( (double) surfaceWidth / outputWidth);
+                    pmouseY *= ( (double) surfaceHeight / outputHeight);
+            }
+            
         }
 
         @Override
