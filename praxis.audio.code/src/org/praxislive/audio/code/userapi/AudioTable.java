@@ -33,11 +33,11 @@ public class AudioTable {
     private final int channels;
     private final int size;
     
-    AudioTable(float[] data, double sampleRate, int channels) {
+    private AudioTable(float[] data, double sampleRate, int channels, int size) {
         this.data = data;
         this.sampleRate = sampleRate;
         this.channels= channels;
-        this.size = data.length / channels;
+        this.size = size;
     }
     
     public float[] data() {
@@ -90,8 +90,19 @@ public class AudioTable {
         return b + frac * (cminusb - 0.5f * (frac - 1) * ((a - d + 3.0f * cminusb) * frac + (b - a - cminusb)));
     }
     
+    public static AudioTable generate(int size, int channels) {
+        return new AudioTable(new float[size * channels], 0, channels, size);
+    }
+    
+    public static AudioTable wrap(AudioTable original, int size) {
+        if (size < 0 || size > original.size) {
+            throw new IllegalArgumentException();
+        }
+        return new AudioTable(original.data, original.sampleRate, original.channels, size);
+    }
+    
     public static AudioTable wrap(float[] data, double sampleRate, int channels) {
-        return new AudioTable(data, sampleRate, channels);
+        return new AudioTable(data, sampleRate, channels, data.length / channels);
     }
     
 }
