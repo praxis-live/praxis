@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -21,6 +21,9 @@
  */
 package org.praxislive.nb.launcher;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.praxislive.core.Value;
@@ -29,9 +32,6 @@ import org.praxislive.core.CallArguments;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.PacketRouter;
-import org.praxislive.core.Root;
-import org.praxislive.core.RootHub;
-import org.praxislive.core.services.ServiceUnavailableException;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.services.ScriptService;
 import org.praxislive.core.services.SystemManagerService;
@@ -41,6 +41,7 @@ import org.praxislive.impl.AbstractControl;
 import org.praxislive.impl.AbstractRoot;
 import org.praxislive.impl.SimpleControl;
 import org.openide.LifecycleManager;
+import org.praxislive.core.services.Services;
 
 /**
  *
@@ -49,16 +50,13 @@ import org.openide.LifecycleManager;
 class NonGuiPlayer extends AbstractRoot {
 
     private final static Logger LOG = Logger.getLogger(NonGuiPlayer.class.getName());
-    private String script;
     private ScriptControl scriptControl;
-    private Root.Controller controller;
 
-    public NonGuiPlayer(String script) {
-        if (script == null) {
+    public NonGuiPlayer(List<String> scripts) {
+        if (scripts == null) {
             throw new NullPointerException();
         }
-        this.script = script;
-        scriptControl = new ScriptControl();
+        scriptControl = new ScriptControl(scripts);
         registerControl("_script-control", scriptControl);
         registerProtocol(SystemManagerService.class);
         registerControl(SystemManagerService.SYSTEM_EXIT, new ExitControl());
@@ -66,26 +64,28 @@ class NonGuiPlayer extends AbstractRoot {
     }
 
     @Override
-    protected void run() {
-        
-        scriptControl.runScript(script);
-        super.run();
+    protected void activating() {
+        try {
+            scriptControl.nextScript();
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, "ERROR: ", ex);
+            exit();
+        }
     }
-
-    @Override
-    public Root.Controller initialize(String ID, RootHub hub) {
-        controller = super.initialize(ID, hub);
-        return controller;
+    
+    private void exit() {
+        LifecycleManager.getDefault().exit();
     }
 
     private class ScriptControl extends AbstractControl {
 
-        ControlAddress evalControl;
-        ControlAddress clearControl;
-        Call activeCall;
+        private final Queue<String> scriptQueue;
+        
+        private ControlAddress evalControl;
+        private Call activeCall;
 
-        ScriptControl() {
-            
+        ScriptControl(List<String> scripts) {
+            scriptQueue = new LinkedList<>(scripts);
         }
 
         public void call(Call call, PacketRouter router) throws Exception {
@@ -104,6 +104,7 @@ class NonGuiPlayer extends AbstractRoot {
         private void processReturn(Call call) throws Exception {
             if (activeCall != null && call.getMatchID() == activeCall.getMatchID()) {
                 activeCall = null;
+                nextScript();
             }
         }
 
@@ -124,39 +125,48 @@ class NonGuiPlayer extends AbstractRoot {
                         LOG.log(Level.SEVERE, "ERROR: {0}", err.toString());
                     }
                 }
-                System.exit(1);
+                exit();
             }
 
         }
+        
+        private void nextScript() {
+            String script = scriptQueue.poll();
+            if (script != null) {
+                runScript(script);
+            }
+        }
 
         private void runScript(String script) {
-            try {
-                ComponentAddress ss = findService(ScriptService.class);
+            if (evalControl == null) {
+                ComponentAddress ss = getLookup()
+                    .find(Services.class)
+                    .flatMap(s -> s.locate(ScriptService.class))
+                    .orElseThrow(IllegalStateException::new);
                 evalControl = ControlAddress.create(ss, ScriptService.EVAL);
-            } catch (ServiceUnavailableException ex) {
-                LOG.log(Level.SEVERE, "", ex);
             }
-            activeCall = Call.createCall(evalControl, getAddress(), getExecutionContext().getTime(), PString.valueOf(script));
+            activeCall = Call.createCall(evalControl,
+                    getAddress(),
+                    getExecutionContext().getTime(),
+                    PString.valueOf(script));
             getPacketRouter().route(activeCall);
-
         }
 
         public ControlInfo getInfo() {
             return null;
         }
     }
-    
+
     private class ExitControl extends SimpleControl {
-        
+
         private ExitControl() {
             super(SystemManagerService.SYSTEM_EXIT_INFO);
         }
 
         @Override
         protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
-            LifecycleManager.getDefault().exit();
+            exit();
             return CallArguments.EMPTY;
         }
-        
     }
 }
