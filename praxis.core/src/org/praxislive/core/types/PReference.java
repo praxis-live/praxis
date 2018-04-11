@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -22,7 +22,6 @@
 
 package org.praxislive.core.types;
 
-import org.praxislive.core.Value;
 import java.util.Optional;
 import org.praxislive.core.Value;
 import org.praxislive.core.ValueFormatException;
@@ -36,19 +35,27 @@ public class PReference extends Value {
     
     public final static String REFERENCE_TYPE = "reference-type";
     
-    private Object ref;
-    private Class refClass;
-    private int refHash;
+    private final Object ref;
+    private final Class refClass;
+    private final int refHash;
     
     private PReference(Object ref) {
         this.ref = ref;
         refHash = System.identityHashCode(ref);
         refClass = ref.getClass();
-        
     }
     
+    //@Deprecated
     public Object getReference() {
         return ref;
+    }
+    
+    public <T> Optional<T> as(Class<T> cls) {
+        if (cls.isInstance(ref)) {
+            return Optional.of(cls.cast(ref));
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
