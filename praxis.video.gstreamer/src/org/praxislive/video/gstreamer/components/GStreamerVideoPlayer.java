@@ -275,8 +275,8 @@ class GStreamerVideoPlayer implements VideoPlayer {
             async(() -> handleSeek(true, -1));
         } else {
             stop();
-            messages.add(this::messageOnEOS);
         }
+        messages.add(this::messageOnEOS);
     }
 
     private void handleSeek(boolean eos, long position) {
