@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2017 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 3 only, as
@@ -46,7 +46,7 @@ public abstract class Ref<T> {
     private Consumer<? super T> onDisposeHandler;
 
     /**
-     * Initialize the reference, calling the suppler function if a value is needed.
+     * Initialize the reference, calling the supplier function if a value is needed.
      * 
      * The supplier may return null although this is not recommended.
      * 
@@ -54,7 +54,7 @@ public abstract class Ref<T> {
      * @return this
      */
     public Ref<T> init(Supplier<? extends T> supplier) {
-        if (value == null) {
+        if (!inited) {
             value = supplier.get();
         }
         inited = true;
@@ -92,9 +92,7 @@ public abstract class Ref<T> {
      */
     public Ref<T> apply(Consumer<? super T> consumer) {
         checkInit();
-        if (value != null) {
-            consumer.accept(value);
-        }
+        consumer.accept(value);
         return this;
     }
     
