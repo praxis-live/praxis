@@ -77,7 +77,7 @@ public class ClassBodyCompiler {
             if (messageHandler != null) {
                 cbe.setMessageHandler(messageHandler);
             }
-            cbe.setOptions(Arrays.asList("-Xlint:all", "-classpath", buildClasspath()));
+            cbe.setOptions(Arrays.asList("-Xlint:all", "-proc:none", "-classpath", buildClasspath()));
             cbe.cook(new StringReader(code));
             return cbe.getCompiledClasses();
         } catch (CompilationException ex) {
