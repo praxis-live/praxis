@@ -209,11 +209,6 @@ public abstract class CodeContext<D extends CodeDelegate> {
     protected void tick(ExecutionContext source) {
     }
     
-    @Deprecated
-    protected final void reset() {
-        reset(false);
-    }
-    
     protected final void reset(boolean full) {
         controls.values().forEach(cd -> cd.reset(full));
         ports.values().forEach(pd -> pd.reset(full));
@@ -308,12 +303,6 @@ public abstract class CodeContext<D extends CodeDelegate> {
 
     protected ExecutionContext getExecutionContext() {
         return cmp == null ? null : cmp.getExecutionContext();
-    }
-    
-    @Deprecated
-    protected boolean isActive() {
-        ExecutionContext ctxt = getExecutionContext();
-        return ctxt == null ? false : ctxt.getState() == ExecutionContext.State.ACTIVE;
     }
     
     protected boolean checkActive() {
