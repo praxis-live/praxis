@@ -23,6 +23,7 @@ package org.praxislive.nb.launcher;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,7 +32,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.praxislive.hub.Hub;
 import org.praxislive.hub.net.SlaveFactory;
@@ -84,16 +84,28 @@ public class CLIProcessor extends OptionProcessor {
             LOG.log(Level.FINE, "netbeans.user.dir : {0}", System.getProperty("netbeans.user.dir"));
         }
 
-        if (optionValues.containsKey(HARNESS)) {
-            processHarness(env, optionValues);
-        } else if (optionValues.containsKey(SLAVE)) {
+        if (optionValues.containsKey(SLAVE)) {
+            printVersion(env);
             processSlave(env, optionValues);
+        } else if (optionValues.containsKey(HARNESS)) {
+            processHarness(env, optionValues);
         } else if (optionValues.containsKey(ARGUMENTS)) {
+            printVersion(env);
             processScript(env, optionValues.get(ARGUMENTS));
-
         }
 
     }
+    
+    private void printVersion(Env env) {
+        String version = System.getProperty("praxis.version", "");
+        PrintStream out = env.getOutputStream();
+        if (version.isEmpty()) {
+            out.println("Praxis CORE v4");
+        } else {
+            out.println("Praxis CORE v" + version);
+        }
+        out.flush();
+    } 
 
     private void processHarness(Env env, Map<Option, String[]> options) throws CommandException {
 
