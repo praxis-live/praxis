@@ -3,7 +3,7 @@
  * Forked from NanoHttpd-Webserver
  * %%
  * Copyright (C) 2012 - 2015 nanohttpd
- * Copyright (C) 2016 Neil C Smith
+ * Copyright 2018 Neil C Smith
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:

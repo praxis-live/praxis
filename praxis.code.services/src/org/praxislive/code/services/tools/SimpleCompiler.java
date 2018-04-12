@@ -2,7 +2,7 @@
 /*
  * Forked from Janino - An embedded Java[TM] compiler
  *
- * Copyright (c) 2017 Neil C Smith
+ * Copyright 2018 Neil C Smith
  * Copyright (c) 2001-2010, Arno Unkrig
  * All rights reserved.
  *

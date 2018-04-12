@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2017 Neil C Smith  
+  Copyright 2018 Neil C Smith  
 
   Derived from the Processing project - http://processing.org
 

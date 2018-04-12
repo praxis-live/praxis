@@ -1,14 +1,14 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011 Neil C Smith.
+ * Copyright 2018 Neil C Smith.
  *
  * Copying and distribution of this file, with or without modification,
  * are permitted in any medium without royalty provided the copyright
  * notice and this notice are preserved.  This file is offered as-is,
  * without any warranty.
  *
- * Please visit http://neilcsmith.net if you need additional information or
+ * Please visit https://www.praxislive.org if you need additional information or
  * have any questions.
  *
  */
