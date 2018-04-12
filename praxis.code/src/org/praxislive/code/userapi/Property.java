@@ -203,7 +203,6 @@ public abstract class Property {
         return this;
     }
 
-    @Deprecated
     public Property link(DoubleConsumer... consumers) {
         for (DoubleConsumer consumer : consumers) {
             link(consumer);
@@ -239,7 +238,6 @@ public abstract class Property {
         return this;
     }
 
-    @Deprecated
     public <T> Property linkAs(
             Function<Value, T> converter,
             Consumer<T>... consumers) {
@@ -478,11 +476,6 @@ public abstract class Property {
 
         private void attach(Property p) {
             this.property = p;
-        }
-
-        @Deprecated
-        public double to() {
-            return to[index];
         }
 
         /**
