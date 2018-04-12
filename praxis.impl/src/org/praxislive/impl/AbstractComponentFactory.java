@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.praxislive.core.Component;
 import org.praxislive.core.services.ComponentFactory;
@@ -136,18 +137,13 @@ public class AbstractComponentFactory implements ComponentFactory {
         }
 
         @Override
-        public boolean isTest() {
-            return test;
-        }
-
-        @Override
         public boolean isDeprecated() {
             return deprecated;
         }
 
         @Override
-        public ComponentType getReplacement() {
-            return replacement;
+        public Optional<ComponentType> findReplacement() {
+            return Optional.ofNullable(replacement);
         }
 
         @Override

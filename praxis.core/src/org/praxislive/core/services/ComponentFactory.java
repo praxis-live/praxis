@@ -59,23 +59,12 @@ public interface ComponentFactory {
     
     public static abstract class MetaData<T> {
 
-        @Deprecated
-        public boolean isTest() {
-            return false;
-        }
-
         public boolean isDeprecated() {
             return false;
         }
 
-        @Deprecated
-        public ComponentType getReplacement() {
-            return null;
-        }
-        
-        @SuppressWarnings("deprecation")
         public Optional<ComponentType> findReplacement() {
-            return Optional.ofNullable(getReplacement());
+            return Optional.empty();
         }
 
         public Lookup getLookup() {
