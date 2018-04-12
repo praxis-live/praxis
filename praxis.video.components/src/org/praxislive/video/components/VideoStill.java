@@ -47,16 +47,20 @@ public class VideoStill extends VideoCodeDelegate {
 
     // PXJ-BEGIN:body
 
+    enum ResizeMode {Stretch, Scale, Crop};
+    
     @In(1) PImage in;
     
     @P(1) @OnChange("imageChanged") @OnError("imageError")
     PImage image;
-    @P(2) @Type.String(allowed = {"Stretch", "Scale", "Crop"}, def = "Stretch")
-    String resizeMode;
+    @P(2)
+    ResizeMode resizeMode;
     @P(3) @Type.Number(min = 0, max = 1, def = 0.5)
     double alignX;
     @P(4) @Type.Number(min = 0, max = 1, def = 0.5)
     double alignY;
+    @P(5) @Type.Number(min = 0, max = 8, def = 1, skew = 4)
+    double zoom;
     
     @AuxOut(1) Output ready;
     @AuxOut(2) Output error;
@@ -66,71 +70,25 @@ public class VideoStill extends VideoCodeDelegate {
         copy(in);
         release(in);
         if (image != null) {
-            switch (resizeMode) {
-                case "Scale" :
-                    drawScaled();
-                    break;
-                case "Crop" :
-                    drawCropped();
-                    break;
-                default:
-                    drawStretched();
-            }
+            draw(image);
         }
     }
     
-    void drawStretched() {
-        image(image, 0, 0, width, height);
-    }
-    
-    void drawScaled() {
-        double oX, oY, oW, oH;
-        double r = min((double) width / image.width, (double) height / image.height);
-        oW = r * image.width;
-        oH = r * image.height;
-        double diff = width - oW;
-        if (diff > 1) {
-            oX = alignX * diff;
-        } else {
-            oX = 0;
+    void draw(PImage image) {
+        double outWidth = zoom * image.width;
+        double outHeight = zoom * image.height;
+        if (resizeMode == ResizeMode.Stretch) {
+            outWidth *= (double) width / image.width;
+            outHeight *= (double) height / image.height;
+        } else if (resizeMode == ResizeMode.Scale) {
+            double r = min((double) width / image.width, (double) height / image.height);
+            outWidth *= r;
+            outHeight *= r;
         }
-        diff = height - oH;
-        if (diff > 1) {
-            oY = alignY * diff;
-        } else {
-            oY = 0;
-        }
-        image(image, oX, oY, oW, oH);
-    }
-    
-    void drawCropped() {
-        if (image.width == width && image.height == height) {
-            image(image,0,0);
-            return;
-        }
-        
-        double iX, iY, oX, oY, w, h;
-        double diff = image.width - width;
-        if (diff > 0) {
-            iX = diff * alignX;
-            oX = 0;
-            w = width;
-        } else {
-            oX = -diff * alignX;
-            iX = 0;
-            w = image.width;
-        }
-        diff = image.height - height;
-        if (diff > 0) {
-            iY = diff * alignY;
-            oY = 0;
-            h = height;
-        } else {
-            oY = -diff * alignY;
-            iY = 0;
-            h = image.height;
-        }
-        image(image, oX, oY, w, h, iX, iY);
+        image(image, alignX * (width - outWidth),
+                alignY * (height - outHeight),
+                outWidth,
+                outHeight);
     }
     
     void imageChanged() {
