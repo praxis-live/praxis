@@ -79,9 +79,9 @@ public abstract class Input {
      * @return Linkable of input
      */
     public <T extends Value> Linkable<T> valuesAs(Class<T> type) {
-        Value.Type.Converter<T> converter = Value.Type.findConverter(type);
+        Function<Value, Optional<T>> converter = Value.Type.of(type).converter();
         return new ValueLink()
-                .map(v -> converter.from((Value) v))
+                .map(converter::apply)
                 .filter(Optional::isPresent)
                 .map(Optional::get);
     }

@@ -268,13 +268,13 @@ public abstract class Property {
      * Linkable.
      *
      * @param <T> required type
-     * @param converter convert Value into required type
+     * @param type Sub-type of Value
      * @return Linkable of values
      */
     public <T extends Value> Linkable<T> valuesAs(Class<T> type) {
-        Value.Type.Converter<T> converter = Value.Type.findConverter(type);
+        Function<Value, Optional<T>> converter = Value.Type.of(type).converter();
         return new ValueLink()
-                .map(v -> converter.from(v))
+                .map(converter::apply)
                 .filter(Optional::isPresent)
                 .map(Optional::get);
     }

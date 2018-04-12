@@ -180,21 +180,6 @@ public abstract class Value {
             return Optional.ofNullable(typesByName.get(name));
         }
 
-        @FunctionalInterface
-        @Deprecated
-        public static interface Converter<T extends Value> {
-
-            Optional<T> from(Value arg);
-
-        }
-
-        @SuppressWarnings("unchecked")
-        @Deprecated
-        public static <T extends Value> Converter<T> findConverter(Class<T> cls) {
-            Type<T> type = Type.of(cls);
-            return v -> type.converter().apply(v);
-        }
-        
         private final static Map<Class<? extends Value>, Type<? extends Value>> typesByClass
                 = new HashMap<>();
         private final static Map<String, Type<? extends Value>> typesByName
