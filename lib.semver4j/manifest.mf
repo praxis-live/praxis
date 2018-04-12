@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+AutoUpdate-Show-In-Client: true
+OpenIDE-Module: com.vdurmont.semver4j
+OpenIDE-Module-Localizing-Bundle: com/vdurmont/semver4j/Bundle.properties
+OpenIDE-Module-Specification-Version: 2.2.0
+

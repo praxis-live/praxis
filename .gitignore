@@ -171,3 +171,5 @@
 /lib.jna.platform/nbproject/private/
 /praxis.nb.launcher/nbproject/private/
 /praxis.nb.launcher/build/
+/lib.semver4j/build/
+/lib.semver4j/nbproject/private/
