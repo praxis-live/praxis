@@ -30,6 +30,7 @@ import org.praxislive.core.ControlAddress;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
+import org.praxislive.core.services.ServiceUnavailableException;
 import org.praxislive.core.types.PError;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PReference;
@@ -94,7 +95,8 @@ class CodeProperty<D extends CodeDelegate>
                                 context.getDelegate().getClass());
                 if (contextFactory == null) {
                     contextFactory = ControlAddress.create(
-                            context.findService(CodeContextFactoryService.class),
+                            context.locateService(CodeContextFactoryService.class)
+                            .orElseThrow(ServiceUnavailableException::new),
                             CodeContextFactoryService.NEW_CONTEXT);
                 }
                 taskCall = Call.createCall(contextFactory, context.getAddress(this), time, PReference.wrap(task));

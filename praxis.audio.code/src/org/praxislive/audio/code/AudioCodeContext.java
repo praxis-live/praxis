@@ -59,7 +59,7 @@ public class AudioCodeContext<D extends AudioCodeDelegate> extends CodeContext<D
 
     @Override
     protected void hierarchyChanged() {
-        audioCtxt = getLookup().get(AudioContext.class);
+        audioCtxt = getLookup().find(AudioContext.class).orElse(null);
     }
 
     @Override

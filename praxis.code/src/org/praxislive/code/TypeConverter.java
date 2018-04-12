@@ -66,8 +66,9 @@ public abstract class TypeConverter<T> {
     }
     
     public final static <T> TypeConverter<T> find(Class<T> type, Annotation ... annotations) {
+        Provider[] providers = Lookup.SYSTEM.findAll(Provider.class).toArray(Provider[]::new);
         try {
-            for (Provider p : Lookup.SYSTEM.getAll(Provider.class)) {
+            for (Provider p : providers) {
                 TypeConverter converter = p.getTypeConverter(type, annotations);
                 if (converter != null) {
                     return converter;

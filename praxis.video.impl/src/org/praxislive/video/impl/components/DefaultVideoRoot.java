@@ -54,9 +54,8 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     private final static List<String> RENDERERS = new ArrayList<>();
     static {
         RENDERERS.add(SOFTWARE);
-        for (PlayerFactory.Provider renderer : Lookup.SYSTEM.getAll(PlayerFactory.Provider.class)) {
-            RENDERERS.add(renderer.getLibraryName());
-        }
+        Lookup.SYSTEM.findAll(PlayerFactory.Provider.class)
+                .forEach(r -> RENDERERS.add(r.getLibraryName()));
     }
 
     private final static Logger LOG = Logger.getLogger(DefaultVideoRoot.class.getName());
@@ -112,8 +111,7 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
             player = createPlayer(lib);
             player.addFrameRateListener(this);
             lookup = InstanceLookup.create(getLookup(),
-                    StreamSupport.stream(player.getLookup().getAll(Object.class)
-                            .spliterator(), false).toArray());
+                    player.getLookup().findAll(Object.class).toArray());
             if (outputClient != null && outputClient.getOutputCount() > 0) {
                 player.getSink(0).addSource(outputClient.getOutputSource(0));
             }
@@ -146,12 +144,11 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
         if (lib == null || lib.isEmpty() || "Software".equals(lib)) {
             return SWPlayer.getFactory();
         }
-        for (PlayerFactory.Provider provider : Lookup.SYSTEM.getAll(PlayerFactory.Provider.class)) {
-            if (provider.getLibraryName().equals(lib)) {
-                return provider.getFactory();
-            }
-        }
-        throw new IllegalArgumentException("No valid renderer found");
+        return Lookup.SYSTEM.findAll(PlayerFactory.Provider.class)
+                .filter(p -> lib.equals(p.getLibraryName()))
+                .map(PlayerFactory.Provider::getFactory)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No valid renderer found"));
     }
 
     @Override

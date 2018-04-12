@@ -69,7 +69,7 @@ public class AudioOutput extends AbstractComponent {
     @Override
     public void hierarchyChanged() {
         super.hierarchyChanged();
-        AudioContext ctxt = getLookup().get(AudioContext.class);
+        AudioContext ctxt = getLookup().find(AudioContext.class).orElse(null);
         if (ctxt != context) {
             if (context != null) {
                 context.unregisterAudioOutputClient(client);

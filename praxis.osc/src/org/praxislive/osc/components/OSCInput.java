@@ -77,7 +77,7 @@ public class OSCInput extends AbstractComponent {
     @Override
     public void hierarchyChanged() {
         super.hierarchyChanged();
-        OSCContext ctxt = getLookup().get(OSCContext.class);
+        OSCContext ctxt = getLookup().find(OSCContext.class).orElse(null);
         if (ctxt != context) {
             if (context != null) {
                 unregisterListener();

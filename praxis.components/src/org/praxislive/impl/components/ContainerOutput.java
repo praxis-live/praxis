@@ -47,7 +47,7 @@ public class ContainerOutput extends AbstractComponent {
     @Override
     public void hierarchyChanged() {
         super.hierarchyChanged();
-        ContainerContext ctxt = getLookup().get(ContainerContext.class);
+        ContainerContext ctxt = getLookup().find(ContainerContext.class).orElse(null);
         if (context != ctxt) {
             if (context != null) {
                 context.unregisterPort(id, containerPort);

@@ -303,20 +303,16 @@ public abstract class AbstractComponent implements Component {
 
     protected PacketRouter getPacketRouter() {
         if (router == null) {
-            router = getLookup().get(PacketRouter.class);
+            router = getLookup().find(PacketRouter.class).orElse(null);
         }
         return router;
     }
     
-    @Deprecated
     protected ComponentAddress findService(Class<? extends Service> service)
             throws ServiceUnavailableException {
-        try {
-            Services srvs = getLookup().get(Services.class);
-            return srvs.locate(service).get();
-        } catch (Exception ex) {
-            throw new ServiceUnavailableException();
-        }
+        return getLookup().find(Services.class)
+                .flatMap(sm -> sm.locate(service))
+                .orElseThrow(ServiceUnavailableException::new);
     }
 
     public static interface ControlEx extends Control {

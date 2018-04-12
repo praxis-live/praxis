@@ -176,7 +176,8 @@ public class DefaultCodeFactoryService extends AbstractRoot {
         private CodeFactory<CodeDelegate> findCodeFactory() throws Exception {
             ComponentType type = ComponentType.coerce(getActiveCall().getArgs().get(0));
             ComponentFactory cmpFactory = registry.getComponentFactory(type);
-            return cmpFactory.getMetaData(type).getLookup().get(CodeFactory.class);
+            return cmpFactory.getMetaData(type).getLookup()
+                    .find(CodeFactory.class).orElse(null);
         }
 
         private CodeComponent<CodeDelegate> createComponent(

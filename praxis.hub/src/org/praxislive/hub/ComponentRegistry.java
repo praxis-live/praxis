@@ -72,8 +72,9 @@ class ComponentRegistry {
         Map<ComponentType, ComponentFactory> rootCache =
                 new LinkedHashMap<>();
 
-        Lookup.Result<ComponentFactoryProvider> providers =
-                Lookup.SYSTEM.getAll(ComponentFactoryProvider.class);
+        ComponentFactoryProvider[] providers =
+                Lookup.SYSTEM.findAll(ComponentFactoryProvider.class)
+                .toArray(ComponentFactoryProvider[]::new);
         for (ComponentFactoryProvider provider : providers) {
             ComponentFactory factory = provider.getFactory();
             logger.log(Level.INFO, "Adding components from : {0}", factory.getClass());

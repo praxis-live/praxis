@@ -110,13 +110,15 @@ class SlaveCoreRoot extends DefaultCoreRoot {
             forceTermination();
             throw new RuntimeException(ex);
         }
-        getLookup().get(ExecutionContext.class).addClockListener(new ExecutionContext.ClockListener() {
+        getLookup().find(ExecutionContext.class)
+                .orElseThrow(IllegalStateException::new)
+                .addClockListener(new ExecutionContext.ClockListener() {
 
-            @Override
-            public void tick(ExecutionContext source) {
-                SlaveCoreRoot.this.tick(source);
-            }
-        });
+                    @Override
+                    public void tick(ExecutionContext source) {
+                        SlaveCoreRoot.this.tick(source);
+                    }
+                });
         super.activating();
         
     }

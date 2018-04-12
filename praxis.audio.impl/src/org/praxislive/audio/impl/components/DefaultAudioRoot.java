@@ -90,8 +90,10 @@ public class DefaultAudioRoot extends AbstractRoot {
         libraries = new LinkedHashMap<String, LibraryInfo>();
         List<Device> devices = new ArrayList<Device>();
         List<Device> inputDevices = new ArrayList<Device>();
-        for (AudioServerProvider lib
-                : Lookup.SYSTEM.getAll(AudioServerProvider.class)) {
+        AudioServerProvider[] providers = 
+                Lookup.SYSTEM.findAll(AudioServerProvider.class)
+                        .toArray(AudioServerProvider[]::new);
+        for (AudioServerProvider lib : providers) {
             LOG.log(Level.FINE, "Audio Library : {0}", lib.getLibraryName());
             devices.clear();
             inputDevices.clear();

@@ -46,7 +46,7 @@ public class PGLComponentFactoryProvider implements ComponentFactoryProvider {
 
         private void build() {      
 
-            addComponent("video:gl:filter", data(PGLFilter.class));
+            addComponent("video:gl:filter", data(PGLFilter.class).deprecated());
             addComponent("video:gl:receive", data(PGLReceiver.class));
             addComponent("video:gl:send", data(PGLSender.class));
         }

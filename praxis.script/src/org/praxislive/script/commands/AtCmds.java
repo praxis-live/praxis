@@ -33,6 +33,7 @@ import org.praxislive.core.ComponentType;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.protocols.ContainerProtocol;
 import org.praxislive.core.services.RootManagerService;
+import org.praxislive.core.services.ServiceUnavailableException;
 import org.praxislive.core.services.Services;
 import org.praxislive.core.types.PReference;
 import org.praxislive.core.types.PString;
@@ -138,16 +139,15 @@ public class AtCmds implements CommandInstaller {
             if (stage == 0) {
                 stage++;
                 try {
-//                    CallArguments ca = CallArguments.create(new Value[]{ctxt, type});
-//                    return namespace.getCommand("create").createStackFrame(namespace, ca);
 
                     ControlAddress to;
                     CallArguments args;
                     int depth = ctxt.getDepth();
                     if (depth == 1) {
                         to = ControlAddress.create(
-                                env.getLookup().get(Services.class).
-                                locate(RootManagerService.class).get(),
+                                env.getLookup().find(Services.class)
+                                .flatMap(sm -> sm.locate(RootManagerService.class))
+                                .orElseThrow(ServiceUnavailableException::new),
                                 RootManagerService.ADD_ROOT);
                         args = CallArguments.create(new Value[]{
                                     PString.valueOf(ctxt.getRootID()), type});
@@ -233,11 +233,11 @@ public class AtCmds implements CommandInstaller {
 
         private Call createRootRemovalCall(Env env, String id) throws Exception {
             ControlAddress to = ControlAddress.create(
-                    env.getLookup().get(Services.class).
-                    locate(RootManagerService.class).get(),
+                    env.getLookup().find(Services.class)
+                            .flatMap(sm -> sm.locate(RootManagerService.class))
+                            .orElseThrow(ServiceUnavailableException::new),
                     RootManagerService.REMOVE_ROOT);
             return Call.createCall(to, env.getAddress(), env.getTime(), PString.valueOf(id));
-
         }
 
         private Call createChildRemovalCall(Env env, ComponentAddress comp) throws Exception {

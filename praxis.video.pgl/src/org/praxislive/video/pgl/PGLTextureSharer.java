@@ -39,12 +39,9 @@ public interface PGLTextureSharer {
     
     
     public static Optional<PGLTextureSharer> find() {
-        for (PGLTextureSharer t : Lookup.SYSTEM.getAll(PGLTextureSharer.class)) {
-            if (t.isSupported()) {
-                return Optional.of(t);
-            }
-        }
-        return Optional.empty();
+        return Lookup.SYSTEM.findAll(PGLTextureSharer.class)
+                .filter(PGLTextureSharer::isSupported)
+                .findFirst();
     }
     
     public static interface Sender {

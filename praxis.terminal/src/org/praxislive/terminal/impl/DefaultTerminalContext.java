@@ -97,7 +97,8 @@ public class DefaultTerminalContext extends AbstractControl implements Terminal.
     }
 
     private void route(Call call) {
-        PacketRouter router = getLookup().get(PacketRouter.class);
+        PacketRouter router = getLookup().find(PacketRouter.class)
+                .orElseThrow(IllegalStateException::new);
         router.route(call);
     }
 }

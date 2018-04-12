@@ -83,7 +83,7 @@ public abstract class AbstractGuiContainer extends AbstractContainer {
     public void hierarchyChanged() {
         super.hierarchyChanged();
         // use super.getLookup() - don't want our own!
-        GuiContext ctxt = super.getLookup().get(GuiContext.class);
+        GuiContext ctxt = super.getLookup().find(GuiContext.class).orElse(null);
         if (context != ctxt) {
             if (context != null) {
                 context.getContainer().remove(getSwingContainer());

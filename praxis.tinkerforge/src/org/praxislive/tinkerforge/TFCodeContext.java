@@ -65,7 +65,7 @@ class TFCodeContext extends CodeContext<TFCodeDelegate> {
         if (oldCtxt instanceof TFCodeContext) {
             TFCodeContext old = (TFCodeContext) oldCtxt;
             // tinkerforge not set yet as hierarchyChanged not called
-            TFContext tf = getLookup().get(TFContext.class);
+            TFContext tf = getLookup().find(TFContext.class).orElse(null);
             this.uid = old.uid; // copy over UID
             if (this.deviceClass == old.deviceClass &&
                     tf != null &&
@@ -73,7 +73,6 @@ class TFCodeContext extends CodeContext<TFCodeDelegate> {
                 tf.releaseDevice(old.device);
                 old.device = null;
             }
-//            refresh();
         }
         
     }
@@ -82,7 +81,7 @@ class TFCodeContext extends CodeContext<TFCodeDelegate> {
     protected void hierarchyChanged() {
         super.hierarchyChanged();
         //Exec Ctxt
-        ExecutionContext ctxt = getLookup().get(ExecutionContext.class);
+        ExecutionContext ctxt = getLookup().find(ExecutionContext.class).orElse(null);
         if (execCtxt != ctxt) {
             if (execCtxt != null) {
                 execCtxt.removeStateListener(listener);
@@ -96,7 +95,7 @@ class TFCodeContext extends CodeContext<TFCodeDelegate> {
             }
         }
         //TinkerForge Ctxt
-        TFContext tf = getLookup().get(TFContext.class);
+        TFContext tf = getLookup().find(TFContext.class).orElse(null);
         if (tinkerforge != tf) {
             if (tinkerforge != null) {
                 tinkerforge.removeListener(listener);

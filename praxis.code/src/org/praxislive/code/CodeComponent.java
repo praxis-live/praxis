@@ -135,24 +135,19 @@ public final class CodeComponent<D extends CodeDelegate> implements Component {
     
     ExecutionContext getExecutionContext() {
         if (execCtxt == null) {
-            execCtxt = getLookup().get(ExecutionContext.class);
+            execCtxt = getLookup().find(ExecutionContext.class)
+                    .orElse(null);
         }
         return execCtxt;
     }
 
     PacketRouter getPacketRouter() {
         if (router == null) {
-            router = getLookup().get(PacketRouter.class);
+            router = getLookup().find(PacketRouter.class)
+                    .orElse(null);
         }
         return router;
     }
-    
-//    LogLevel getLogLevel() {
-//        if (logInfo == null) {
-//            initLogInfo();
-//        }
-//        return logInfo.level;
-//    }
     
     ControlAddress getLogToAddress() {
         if (logInfo == null) {

@@ -81,15 +81,11 @@ public abstract class AbstractControl implements AbstractComponent.ControlEx {
         }
     }
     
-    @Deprecated
     protected ComponentAddress findService(Class<? extends Service> service)
             throws ServiceUnavailableException {
-        try {
-            Services srvs = getLookup().get(Services.class);
-            return srvs.locate(service).get();
-        } catch (Exception ex) {
-            throw new ServiceUnavailableException();
-        }
+        return getLookup().find(Services.class)
+                .flatMap(srvs -> srvs.locate(service))
+                .orElseThrow(ServiceUnavailableException::new);
     }
     
     public static abstract class Builder<B extends Builder<B>> {

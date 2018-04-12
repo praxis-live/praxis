@@ -30,6 +30,7 @@ import org.praxislive.core.ControlAddress;
 import org.praxislive.core.services.Services;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.Value;
+import org.praxislive.core.services.ServiceUnavailableException;
 import org.praxislive.script.Command;
 import org.praxislive.script.CommandInstaller;
 import org.praxislive.script.Env;
@@ -81,7 +82,9 @@ public class LibraryCommandInstaller implements CommandInstaller {
         @Override
         protected Call createCall(Env env, CallArguments args) throws Exception {
             PArray libs = array ? PArray.coerce(args.get(0)) : PArray.valueOf((Value)args.get(0));
-            ComponentAddress service = env.getLookup().get(Services.class).locate(CodeCompilerService.class).get();
+            ComponentAddress service = env.getLookup().find(Services.class)
+                    .flatMap(sm -> sm.locate(CodeCompilerService.class))
+                    .orElseThrow(ServiceUnavailableException::new);
             ControlAddress addLibsControl = ControlAddress.create(service, "add-libs");
             return Call.createCall(addLibsControl, env.getAddress(), env.getTime(), libs);
         }

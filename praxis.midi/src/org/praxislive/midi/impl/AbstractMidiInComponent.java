@@ -38,7 +38,7 @@ public abstract class AbstractMidiInComponent extends AbstractComponent
     @Override
     public void hierarchyChanged() {
         super.hierarchyChanged();
-        MidiInputContext ctxt = getLookup().get(MidiInputContext.class);
+        MidiInputContext ctxt = getLookup().find(MidiInputContext.class).orElse(null);
         if (context != ctxt) {
             if (context != null) {
                 context.removeListener(this);

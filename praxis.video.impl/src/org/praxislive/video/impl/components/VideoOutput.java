@@ -112,7 +112,7 @@ public class VideoOutput extends AbstractComponent {
     @Override
     public void hierarchyChanged() {
         super.hierarchyChanged();
-        VideoContext ctxt = getLookup().get(VideoContext.class);
+        VideoContext ctxt = getLookup().find(VideoContext.class).orElse(null);
         if (ctxt != context) {
             if (context != null) {
                 context.unregisterVideoOutputClient(client);

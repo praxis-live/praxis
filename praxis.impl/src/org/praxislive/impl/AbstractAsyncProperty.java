@@ -157,10 +157,8 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
 
         if (call.getType() == Call.Type.INVOKE) {
             if (router == null) {
-                router = getLookup().get(PacketRouter.class);
-                if (router == null) {
-                    LOG.warning("No PacketRouter found in Lookup");
-                }
+                router = getLookup().find(PacketRouter.class)
+                        .orElseThrow(() -> new IllegalStateException("No PacketRouter found in Lookup"));
             }
             router.route(Call.createReturnCall(call, args));
         }
@@ -208,8 +206,9 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
 
     private ControlAddress getTaskSubmitAddress() {
         if (taskSubmitAddress == null) {
-            Services sm = getLookup().get(Services.class);
-            ComponentAddress service = sm.locate(TaskService.class).get();
+            ComponentAddress service = getLookup().find(Services.class)
+                    .flatMap(sm -> sm.locate(TaskService.class))
+                    .orElseThrow(IllegalStateException::new);
             taskSubmitAddress = ControlAddress.create(service, TaskService.SUBMIT);
         }
         return taskSubmitAddress;
@@ -254,10 +253,8 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
             throws Exception {
         ControlAddress to = getTaskSubmitAddress();
         if (router == null) {
-            router = getLookup().get(PacketRouter.class);
-            if (router == null) {
-                throw new IllegalStateException("No packet router");
-            }
+            router = getLookup().find(PacketRouter.class)
+                    .orElseThrow(() -> new IllegalStateException("No packet router"));
         }
         taskCall = Call.createCall(to, getAddress(), time, PReference.wrap(task));
         router.route(taskCall);

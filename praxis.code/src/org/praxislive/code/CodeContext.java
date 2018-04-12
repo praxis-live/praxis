@@ -147,10 +147,8 @@ public abstract class CodeContext<D extends CodeDelegate> {
     final void handleHierarchyChanged() {
         hierarchyChanged();
         
-        LogLevel level = getLookup().get(LogLevel.class);
-        if (level == null) {
-            level = LogLevel.ERROR;
-        }
+        LogLevel level = getLookup().find(LogLevel.class)
+                .orElse(LogLevel.ERROR);
         log.setLevel(level);
         
         ExecutionContext ctxt = cmp == null ? null : cmp.getExecutionContext();
@@ -292,13 +290,6 @@ public abstract class CodeContext<D extends CodeDelegate> {
         return cmp == null ? Lookup.EMPTY : cmp.getLookup();
     }
 
-    // @TODO implement caching?
-    @Deprecated
-    public ComponentAddress findService(Class<? extends Service> type)
-            throws ServiceUnavailableException {
-        return locateService(type).orElseThrow(ServiceUnavailableException::new);
-    }
-    
     public Optional<ComponentAddress> locateService(Class<? extends Service> type) {
         return getLookup().find(Services.class).flatMap(s -> s.locate(type));
     }

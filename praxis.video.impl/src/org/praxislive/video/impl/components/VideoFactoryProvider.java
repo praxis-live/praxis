@@ -59,9 +59,6 @@ public class VideoFactoryProvider implements ComponentFactoryProvider {
             // FX
             addComponent("video:fx:ripple", data(Ripple.class));
 
-            // TEST COMPONENTS
-            addComponent("video:test:save", data(ImageSave.class).test());
-            
             /// CONTAINER
             addComponent("video:container:in", data(VideoContainerInput.class));
             addComponent("video:container:out", data(VideoContainerOutput.class));

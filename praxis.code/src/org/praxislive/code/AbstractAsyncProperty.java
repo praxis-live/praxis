@@ -163,7 +163,8 @@ public abstract class AbstractAsyncProperty<V> implements Control {
 
         if (call.getType() == Call.Type.INVOKE) {
             if (router == null) {
-                router = getLookup().get(PacketRouter.class);
+                router = getLookup().find(PacketRouter.class)
+                        .orElseThrow(IllegalStateException::new);
             }
             router.route(Call.createReturnCall(call, args));
         }
@@ -214,7 +215,8 @@ public abstract class AbstractAsyncProperty<V> implements Control {
     }
 
     private ControlAddress getTaskSubmitAddress() throws ServiceUnavailableException {
-        ComponentAddress service = context.findService(TaskService.class);
+        ComponentAddress service = context.locateService(TaskService.class)
+                .orElseThrow(ServiceUnavailableException::new);
         return ControlAddress.create(service, TaskService.SUBMIT);
     }
 
@@ -251,10 +253,8 @@ public abstract class AbstractAsyncProperty<V> implements Control {
             throws ServiceUnavailableException {
         ControlAddress to = getTaskSubmitAddress();
         if (router == null) {
-            router = getLookup().get(PacketRouter.class);
-            if (router == null) {
-                throw new ServiceUnavailableException();
-            }
+            router = getLookup().find(PacketRouter.class)
+                    .orElseThrow(() -> new IllegalStateException("No PacketRouter found"));
         }
         taskCall = Call.createCall(to, context.getAddress(this), time, PReference.wrap(task));
         router.route(taskCall);

@@ -30,6 +30,7 @@ import org.praxislive.core.Component;
 import org.praxislive.core.Container;
 import org.praxislive.core.Control;
 import org.praxislive.core.ControlPort;
+import org.praxislive.core.Lookup;
 import org.praxislive.core.Port;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PBoolean;
@@ -186,6 +187,15 @@ public class DefaultCodeDelegate extends CodeDelegate {
             return null;
         }
     }
+
+    /**
+     * Return a Lookup for finding instances of features.
+     * 
+     * @return Lookup context
+     */
+    public Lookup getLookup() {
+        return getContext().getLookup();
+    }
     
     /**
      * Search for an instance of the given type.
@@ -194,7 +204,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return Optional wrapping the result if found, or empty if not
      */
     public <T> Optional<T> find(Class<T> type) {
-        return Optional.ofNullable(getContext().getLookup().get(type));
+        return getLookup().find(type);
     }
 
     /**

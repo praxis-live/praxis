@@ -41,7 +41,6 @@ class ComponentRegistry {
     private final static Logger logger
             = Logger.getLogger(ComponentRegistry.class.getName());
     private final Map<ComponentType, ComponentFactory> componentCache;
-//    private final Map<ComponentType, ComponentFactory> rootCache;
 
     private ComponentRegistry(Map<ComponentType, ComponentFactory> componentCache) {
         this.componentCache = componentCache;
@@ -52,23 +51,17 @@ class ComponentRegistry {
         return keys.toArray(new ComponentType[keys.size()]);
     }
 
-//    ComponentType[] getRootComponentTypes() {
-//        Set<ComponentType> keys = rootCache.keySet();
-//        return keys.toArray(new ComponentType[keys.size()]);
-//    }
     ComponentFactory getComponentFactory(ComponentType type) {
         return componentCache.get(type);
     }
 
-//    ComponentFactory getRootComponentFactory(ComponentType type) {
-//        return rootCache.get(type);
-//    }
     static ComponentRegistry getInstance() {
         Map<ComponentType, ComponentFactory> componentCache
                 = new LinkedHashMap<>();
 
-        Lookup.Result<ComponentFactoryProvider> providers
-                = Lookup.SYSTEM.getAll(ComponentFactoryProvider.class);
+        ComponentFactoryProvider[] providers =
+                Lookup.SYSTEM.findAll(ComponentFactoryProvider.class)
+                .toArray(ComponentFactoryProvider[]::new);
         for (ComponentFactoryProvider provider : providers) {
             ComponentFactory factory = provider.getFactory();
             if (factory.getFactoryService() == CodeComponentFactoryService.class) {

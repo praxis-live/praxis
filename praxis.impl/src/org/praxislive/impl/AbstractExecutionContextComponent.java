@@ -35,7 +35,7 @@ public abstract class AbstractExecutionContextComponent extends AbstractComponen
     @Override
     public void hierarchyChanged() {
         super.hierarchyChanged();
-        ExecutionContext ctxt = getLookup().get(ExecutionContext.class);
+        ExecutionContext ctxt = getLookup().find(ExecutionContext.class).orElse(null);
         if (context != ctxt) {
             if (context != null) {
                 context.removeStateListener(this);

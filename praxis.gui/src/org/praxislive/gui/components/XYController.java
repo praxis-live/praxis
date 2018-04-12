@@ -154,21 +154,7 @@ public class XYController extends AbstractGuiComponent {
     @Override
     public void hierarchyChanged() {
         super.hierarchyChanged();
-//        Root r = getRoot();
-//        if (r instanceof BindingContext) {
-//            ctxt = (BindingContext) r;
-//        } else {
-//            if (xBinding != null) {
-//                ctxt.unbind(xAdaptor);
-//                xBinding = null;
-//            }
-//            if (yBinding != null) {
-//                ctxt.unbind(yAdaptor);
-//                yBinding = null;
-//            }
-//            ctxt = null;
-//        }
-        BindingContext ctxt = getLookup().get(BindingContext.class);
+        BindingContext ctxt = getLookup().find(BindingContext.class).orElse(null);
         if (bindingContext != ctxt) {
             if (bindingContext != null) {
                 if (xBinding != null) {

@@ -77,7 +77,7 @@ public class ScriptExecutor {
         commandMap = new HashMap<String, Command>();
         CommandInstaller installer = new CoreCommandsInstaller();
         installer.install(commandMap);
-        Lookup.SYSTEM.getAll(CommandInstaller.class).forEach(cmds -> cmds.install(commandMap));
+        Lookup.SYSTEM.findAll(CommandInstaller.class).forEach(cmds -> cmds.install(commandMap));
     }
 
     public void queueEvalCall(Call call) {

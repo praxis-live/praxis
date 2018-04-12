@@ -126,7 +126,7 @@ public final class PResource extends Value implements Comparable<PResource> {
     }
     
     public List<URI> resolve(Lookup lookup) {
-        Resolver res = lookup.get(Resolver.class);
+        Resolver res = lookup.find(Resolver.class).orElse(null);
         if (res != null) {
             return res.resolve(this);
         } else {

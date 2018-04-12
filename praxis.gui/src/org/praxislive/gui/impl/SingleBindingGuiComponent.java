@@ -84,7 +84,7 @@ public abstract class SingleBindingGuiComponent extends AbstractGuiComponent {
     @Override
     public void hierarchyChanged() {
         super.hierarchyChanged();
-        BindingContext ctxt = getLookup().get(BindingContext.class);
+        BindingContext ctxt = getLookup().find(BindingContext.class).orElse(null);
         if (bindingContext != ctxt) {
             if (bindingContext != null && binding != null) {
                 bindingContext.unbind(adaptor);

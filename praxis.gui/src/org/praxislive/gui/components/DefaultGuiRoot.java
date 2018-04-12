@@ -108,7 +108,7 @@ public class DefaultGuiRoot extends AbstractSwingRoot {
                     new UIManager.LookAndFeelInfo(
                             DarculaLaf.NAME,
                             DarculaLaf.class.getName()));
-            UIManager.put("ClassLoader", Lookup.SYSTEM.get(ClassLoader.class));
+            Lookup.SYSTEM.find(ClassLoader.class).ifPresent(cl -> UIManager.put("ClassLoader", cl));
             UIManager.setLookAndFeel(new DarculaLaf());
         } catch (Exception ex) {
             Logger.getLogger(DefaultGuiRoot.class.getName()).log(Level.SEVERE, null, ex);

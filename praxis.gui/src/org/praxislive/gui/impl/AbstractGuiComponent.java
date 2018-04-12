@@ -85,7 +85,7 @@ public abstract class AbstractGuiComponent extends AbstractComponent {
     public void hierarchyChanged() {
         super.hierarchyChanged();
 //        getSwingComponent().putClientProperty(Keys.Address, getAddress());
-        GuiContext ctxt = getLookup().get(GuiContext.class);
+        GuiContext ctxt = getLookup().find(GuiContext.class).orElse(null);
         if (context != ctxt) {
             if (context != null) {
                 context.getContainer().remove(getSwingComponent());
