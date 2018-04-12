@@ -21,7 +21,7 @@
  *
  */
 
-package org.praxislive.util;
+package org.praxislive.gui.impl;
 
 import java.util.ArrayList;
 import org.praxislive.core.types.PNumber;
@@ -30,8 +30,8 @@ import org.praxislive.core.types.PNumber;
  *
  * @author Neil C Smith
  */
-@Deprecated
-public class PMath {
+// @TODO - replace this
+class PMath {
 
     private PMath() {
 
