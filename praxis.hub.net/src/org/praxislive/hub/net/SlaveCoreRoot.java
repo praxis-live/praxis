@@ -248,7 +248,12 @@ class SlaveCoreRoot extends DefaultCoreRoot {
     private class Dispatcher extends OSCDispatcher {
 
         private Dispatcher(PraxisPacketCodec codec) {
-            super(codec, () -> getExecutionContext().getTime());
+            super(codec, new Clock() {
+                @Override
+                public long getTime() {
+                    return getExecutionContext().getTime();
+                }
+            });
         }
 
         @Override

@@ -211,7 +211,12 @@ class MasterClientRoot extends AbstractRoot {
         private String remoteSysPrefix;
 
         private Dispatcher(PraxisPacketCodec codec) {
-            super(codec, () -> getExecutionContext().getTime());
+            super(codec, new Clock() {
+                @Override
+                public long getTime() {
+                    return getExecutionContext().getTime();
+                }
+            });
         }
 
         @Override
