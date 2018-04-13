@@ -87,6 +87,7 @@ public class AudioLooper extends AudioCodeDelegate {
         loop.linkAs(arg -> PBoolean.from(arg).get().value(), looper::looping);
         link(in1, looper, out1);
         link(in2, looper, out2);
+        updateState();
     }
 
     @Override
