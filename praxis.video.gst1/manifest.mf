@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-AutoUpdate-Show-In-Client: true
-OpenIDE-Module: net.neilcsmith.praxis.video.gst1
-OpenIDE-Module-Localizing-Bundle: net/neilcsmith/praxis/video/gst1/Bundle.properties
-OpenIDE-Module-Specification-Version: 1.0
-

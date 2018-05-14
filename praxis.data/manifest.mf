@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 AutoUpdate-Show-In-Client: true
-OpenIDE-Module: net.neilcsmith.praxis.data
-OpenIDE-Module-Localizing-Bundle: net/neilcsmith/praxis/data/Bundle.properties
+OpenIDE-Module: org.praxislive.data
+OpenIDE-Module-Localizing-Bundle: org/praxislive/data/Bundle.properties
 OpenIDE-Module-Specification-Version: 1.0
 

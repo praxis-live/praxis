@@ -3,11 +3,11 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>net.neilcsmith.praxis.midi</code-name-base>
+            <code-name-base>org.praxislive.midi</code-name-base>
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.core</code-name-base>
+                    <code-name-base>org.praxislive.core</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -15,7 +15,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.impl</code-name-base>
+                    <code-name-base>org.praxislive.impl</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -23,7 +23,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.util</code-name-base>
+                    <code-name-base>org.praxislive.util</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -32,8 +32,8 @@
                 </dependency>
             </module-dependencies>
             <public-packages>
-                <package>net.neilcsmith.praxis.midi</package>
-                <package>net.neilcsmith.praxis.midi.impl</package>
+                <package>org.praxislive.midi</package>
+                <package>org.praxislive.midi.impl</package>
             </public-packages>
         </data>
     </configuration>

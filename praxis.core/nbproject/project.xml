@@ -3,7 +3,7 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>net.neilcsmith.praxis.core</code-name-base>
+            <code-name-base>org.praxislive.core</code-name-base>
             <suite-component/>
             <module-dependencies/>
             <test-dependencies>
@@ -16,11 +16,11 @@
                 </test-type>
             </test-dependencies>
             <public-packages>
-                <package>net.neilcsmith.praxis.core</package>
-                <package>net.neilcsmith.praxis.core.info</package>
-                <package>net.neilcsmith.praxis.core.interfaces</package>
-                <package>net.neilcsmith.praxis.core.syntax</package>
-                <package>net.neilcsmith.praxis.core.types</package>
+                <package>org.praxislive.core</package>
+                <package>org.praxislive.core.protocols</package>
+                <package>org.praxislive.core.services</package>
+                <package>org.praxislive.core.syntax</package>
+                <package>org.praxislive.core.types</package>
             </public-packages>
         </data>
     </configuration>

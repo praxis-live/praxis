@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: org.praxislive.compiler.javac
-OpenIDE-Module-Localizing-Bundle: org/praxislive/compiler/javac/Bundle.properties
-OpenIDE-Module-Provides: net.neilcsmith.praxis.compiler.JavaCompilerProvider
-OpenIDE-Module-Specification-Version: 8.91
-

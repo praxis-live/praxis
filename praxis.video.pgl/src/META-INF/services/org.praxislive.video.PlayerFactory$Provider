@@ -1,0 +1,5 @@
+org.praxislive.video.pgl.PGLPlayerFactory$Default
+org.praxislive.video.pgl.PGLPlayerFactory$GLES2
+org.praxislive.video.pgl.PGLPlayerFactory$GL2
+org.praxislive.video.pgl.PGLPlayerFactory$GL3
+org.praxislive.video.pgl.PGLPlayerFactory$GL4

@@ -3,11 +3,11 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>net.neilcsmith.praxis.video.pipes</code-name-base>
+            <code-name-base>org.praxislive.video.pipes</code-name-base>
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.video.render</code-name-base>
+                    <code-name-base>org.praxislive.video.render</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -16,8 +16,8 @@
                 </dependency>
             </module-dependencies>
             <public-packages>
-                <package>net.neilcsmith.praxis.video.pipes</package>
-                <package>net.neilcsmith.praxis.video.pipes.impl</package>
+                <package>org.praxislive.video.pipes</package>
+                <package>org.praxislive.video.pipes.impl</package>
             </public-packages>
         </data>
     </configuration>

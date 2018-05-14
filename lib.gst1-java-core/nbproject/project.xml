@@ -11,13 +11,14 @@
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
-                        <specification-version>3.5.1</specification-version>
+                        <specification-version>4.5.1</specification-version>
                     </run-dependency>
                 </dependency>
             </module-dependencies>
             <public-packages>
                 <package>org.freedesktop.gstreamer</package>
                 <package>org.freedesktop.gstreamer.controller</package>
+                <package>org.freedesktop.gstreamer.device</package>
                 <package>org.freedesktop.gstreamer.elements</package>
                 <package>org.freedesktop.gstreamer.event</package>
                 <package>org.freedesktop.gstreamer.glib</package>
@@ -29,8 +30,8 @@
                 <package>org.freedesktop.gstreamer.query</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/gst1-java-core-0.9-161201.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/gst1-java-core-0.9-161201.jar</binary-origin>
+                <runtime-relative-path>ext/gst1-java-core-0.9.3.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/gst1-java-core-0.9.3.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

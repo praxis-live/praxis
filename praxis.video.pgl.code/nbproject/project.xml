@@ -3,11 +3,11 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>net.neilcsmith.praxis.video.pgl.code</code-name-base>
+            <code-name-base>org.praxislive.video.pgl.code</code-name-base>
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.code</code-name-base>
+                    <code-name-base>org.praxislive.code</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -15,7 +15,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.compiler</code-name-base>
+                    <code-name-base>org.praxislive.core</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -23,7 +23,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.core</code-name-base>
+                    <code-name-base>org.praxislive.impl</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -31,7 +31,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.impl</code-name-base>
+                    <code-name-base>org.praxislive.logging</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -39,7 +39,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.logging</code-name-base>
+                    <code-name-base>org.praxislive.video</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -47,15 +47,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.video</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>1.0</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>net.neilcsmith.praxis.video.pgl</code-name-base>
+                    <code-name-base>org.praxislive.video.pgl</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -63,7 +55,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.video.pipes</code-name-base>
+                    <code-name-base>org.praxislive.video.pipes</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -71,7 +63,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.video.render</code-name-base>
+                    <code-name-base>org.praxislive.video.render</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>

@@ -1,8 +1,0 @@
-
-    @Out(1) Output out1;
-    @Out(2) Output out2;    
-    
-    @In(1) void in(Argument value) {
-        out1.send(value);
-        out2.send(value);
-    }

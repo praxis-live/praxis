@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-OpenIDE-Module: net.neilcsmith.praxis.logging
-OpenIDE-Module-Localizing-Bundle: net/neilcsmith/praxis/logging/Bundle.properties
+OpenIDE-Module: org.praxislive.logging
+OpenIDE-Module-Localizing-Bundle: org/praxislive/logging/Bundle.properties
 OpenIDE-Module-Specification-Version: 1.0
 

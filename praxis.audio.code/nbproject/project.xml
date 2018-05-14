@@ -3,11 +3,11 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>net.neilcsmith.praxis.audio.code</code-name-base>
+            <code-name-base>org.praxislive.audio.code</code-name-base>
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.audio</code-name-base>
+                    <code-name-base>org.praxislive.audio</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -15,7 +15,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.audio.io</code-name-base>
+                    <code-name-base>org.praxislive.audio.io</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -23,7 +23,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.code</code-name-base>
+                    <code-name-base>org.praxislive.code</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -31,7 +31,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.compiler</code-name-base>
+                    <code-name-base>org.praxislive.core</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -39,15 +39,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.core</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>1.0</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
-                    <code-name-base>net.neilcsmith.praxis.logging</code-name-base>
+                    <code-name-base>org.praxislive.logging</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -71,14 +63,6 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.jaudiolibs.audioops.impl.gpl</code-name-base>
-                    <build-prerequisite/>
-                    <compile-dependency/>
-                    <run-dependency>
-                        <specification-version>1.0</specification-version>
-                    </run-dependency>
-                </dependency>
-                <dependency>
                     <code-name-base>org.jaudiolibs.pipes</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
@@ -87,10 +71,19 @@
                     </run-dependency>
                 </dependency>
             </module-dependencies>
+            <test-dependencies>
+                <test-type>
+                    <name>unit</name>
+                    <test-dependency>
+                        <code-name-base>org.netbeans.libs.junit4</code-name-base>
+                        <compile-dependency/>
+                    </test-dependency>
+                </test-type>
+            </test-dependencies>
             <friend-packages>
-                <friend>net.neilcsmith.praxis.audio.factory</friend>
-                <package>net.neilcsmith.praxis.audio.code</package>
-                <package>net.neilcsmith.praxis.audio.code.userapi</package>
+                <friend>org.praxislive.audio.components</friend>
+                <package>org.praxislive.audio.code</package>
+                <package>org.praxislive.audio.code.userapi</package>
             </friend-packages>
         </data>
     </configuration>

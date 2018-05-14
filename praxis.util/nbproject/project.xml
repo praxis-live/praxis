@@ -3,11 +3,11 @@
     <type>org.netbeans.modules.apisupport.project</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
-            <code-name-base>net.neilcsmith.praxis.util</code-name-base>
+            <code-name-base>org.praxislive.util</code-name-base>
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>net.neilcsmith.praxis.core</code-name-base>
+                    <code-name-base>org.praxislive.core</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -16,8 +16,8 @@
                 </dependency>
             </module-dependencies>
             <public-packages>
-                <package>net.neilcsmith.praxis.util</package>
-                <package>net.neilcsmith.praxis.util.interpolation</package>
+                <package>org.praxislive.util</package>
+                <package>org.praxislive.util.interpolation</package>
             </public-packages>
         </data>
     </configuration>
