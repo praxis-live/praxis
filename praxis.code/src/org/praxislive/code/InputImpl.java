@@ -25,7 +25,6 @@ import java.lang.reflect.Field;
 import org.praxislive.code.userapi.AuxIn;
 import org.praxislive.code.userapi.In;
 import org.praxislive.code.userapi.Input;
-import org.praxislive.core.Value;
 import org.praxislive.core.Port;
 import org.praxislive.core.PortInfo;
 import org.praxislive.core.types.PString;
@@ -47,19 +46,12 @@ class InputImpl extends Input {
     }
 
     private void update(long time, double value) {
-        if (context.checkActive()) {
-            context.update(time);
-            super.updateLinks(value);
-        }
+        context.invoke(time, () -> updateLinks(value));
     }
     
     private void update(long time, Value value) {
-        if (context.checkActive()) {
-            context.update(time);
-            super.updateLinks(value);
-        }
+        context.invoke(time, () -> updateLinks(value));
     }
-    
     
     static Descriptor createDescriptor(CodeConnector<?> connector,
             In ann, Field field) {

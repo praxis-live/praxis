@@ -326,12 +326,12 @@ public abstract class CodeContext<D extends CodeDelegate> {
             }
         }
     }
-
-    public void invoke(long time, Invoker invoker) {
+    
+    public void invoke(long time, Runnable task) {
         if (checkActive()) {
             update(time);
             try {
-                invoker.invoke();
+                task.run();
             } catch (Exception ex) {
                 log.log(LogLevel.ERROR, ex);
             }
@@ -404,9 +404,14 @@ public abstract class CodeContext<D extends CodeDelegate> {
 
     }
 
-    public static interface Invoker {
+    @Deprecated
+    public static interface Invoker extends Runnable {
 
         public void invoke();
+        
+        public default void run() {
+            invoke();
+        }
 
     }
 
