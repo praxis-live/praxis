@@ -114,6 +114,11 @@ class InputImpl extends Input {
         }
 
         @Override
+        public void reset(boolean full) {
+            input.clearLinks();
+        }
+
+        @Override
         public Port getPort() {
             return port;
         }

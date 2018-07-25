@@ -129,6 +129,7 @@ public abstract class Input {
      *
      * @param full
      */
+    @Deprecated
     protected void reset(boolean full) {
         clearLinks();
     }
