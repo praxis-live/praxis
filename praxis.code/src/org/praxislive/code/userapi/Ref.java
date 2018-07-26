@@ -21,6 +21,9 @@
  */
 package org.praxislive.code.userapi;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -44,6 +47,7 @@ public abstract class Ref<T> {
     private boolean inited;
     private Consumer<? super T> onResetHandler;
     private Consumer<? super T> onDisposeHandler;
+    private List<Runnable> resetTasks;
 
     /**
      * Initialize the reference, calling the supplier function if a value is needed.
@@ -116,6 +120,39 @@ public abstract class Ref<T> {
     }
     
     /**
+     * Bind something (usually a callback / listener) to the reference, providing for automatic
+     * removal on reset or disposal. This also allows for the easy removal of listeners
+     * that are lambdas or method references, without the need to keep a reference to them.
+     * 
+     * The binder and unbinder arguments will usually be method references for the
+     * add and remove listener methods. The bindee will usually be the listener,
+     * often as a lambda or method reference.
+     * 
+     * @param <V> the type of the value to bind to the reference, usually a callback / listener
+     * @param binder the function to bind the value, usually a method reference on T that accepts a value V
+     * @param unbinder the function to unbind the value, usually a method reference on T that accepts a value V
+     * @param bindee the value, usually a lambda or method reference
+     * @return this
+     */
+    public <V> Ref<T> bind(BiConsumer<? super T, V> binder,
+            BiConsumer<? super T, V> unbinder,
+            V bindee) {
+        checkInit();
+        try {
+            binder.accept(value, bindee);
+            if (resetTasks == null) {
+                resetTasks = new ArrayList<>();
+            }
+            resetTasks.add(() -> 
+                unbinder.accept(value, bindee)
+            );
+        } catch (Exception ex) {
+            log(ex);
+        }
+        return this;
+    }
+    
+    /**
      * Pass the value to the provided Consumer function <strong>if one exists.</strong>
      * Unlike {@link #apply(java.util.function.Consumer) apply} this may be safely called prior to initialization.
      * 
@@ -163,6 +200,7 @@ public abstract class Ref<T> {
     }
     
     protected void reset() {
+        runResetTasks();
         if (value != null && onResetHandler != null) {
             try {
                 onResetHandler.accept(value);
@@ -183,7 +221,21 @@ public abstract class Ref<T> {
         }
     }
     
+    private void runResetTasks() {
+        if (resetTasks != null) {
+            resetTasks.forEach(r -> {
+                try {
+                    r.run();
+                } catch (Exception ex) {
+                    log(ex);
+                }
+            });
+            resetTasks = null;
+        }
+    }
+    
     private void disposeValue() {
+        runResetTasks();
         if (value != null && onResetHandler != null) {
             try {
                 onResetHandler.accept(value);
