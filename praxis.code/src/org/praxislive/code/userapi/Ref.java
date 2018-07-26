@@ -54,7 +54,7 @@ public abstract class Ref<T> {
      * @return this
      */
     public Ref<T> init(Supplier<? extends T> supplier) {
-        if (!inited) {
+        if (!inited && value == null) {
             value = supplier.get();
         }
         inited = true;
