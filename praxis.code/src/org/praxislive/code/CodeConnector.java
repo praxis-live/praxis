@@ -411,9 +411,10 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     private boolean analyseInjectField(Inject ann, Field field) {
 
         if (Ref.class.equals(field.getType())) {
-            ReferenceDescriptor rdsc = RefImpl.Descriptor.create(this, field);
+            RefImpl.Descriptor rdsc = RefImpl.Descriptor.create(this, field);
             if (rdsc != null) {
                 addReference(rdsc);
+                addControl(rdsc.getControlDescriptor());
                 return true;
             } else {
                 return false;

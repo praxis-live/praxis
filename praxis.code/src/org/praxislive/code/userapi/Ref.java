@@ -118,6 +118,23 @@ public abstract class Ref<T> {
         }
         return this;
     }
+
+    /**
+     * Run an intensive or time consuming function as a background task to update
+     * the value. The function should be self-contained and try not to capture or
+     * access any state from the component. Use the key argument to pass in data
+     * required to compute the new value - ideally not the current contents of the
+     * Ref unless it is immutable or thread-safe.
+     *
+     * @param <K> type of key value 
+     * @param key a key value used by the function to calculate the new value
+     * @param function an intensive or time-consuming function
+     * @return this
+     */
+    public <K> Ref<T> asyncCompute(K key, Function<K,? extends T> function) {
+        throw new UnsupportedOperationException();
+    }
+    
     
     /**
      * Bind something (usually a callback / listener) to the reference, providing for automatic

@@ -23,7 +23,20 @@ package org.praxislive.code;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Function;
 import org.praxislive.code.userapi.Ref;
+import org.praxislive.core.Call;
+import org.praxislive.core.CallArguments;
+import org.praxislive.core.Control;
+import org.praxislive.core.ControlAddress;
+import org.praxislive.core.ControlInfo;
+import org.praxislive.core.PacketRouter;
+import org.praxislive.core.services.TaskService;
+import org.praxislive.core.types.PError;
+import org.praxislive.core.types.PReference;
 import org.praxislive.logging.LogLevel;
 
 /**
@@ -32,12 +45,63 @@ import org.praxislive.logging.LogLevel;
  */
 class RefImpl<T> extends Ref<T> {
 
-    private CodeContext<?> context;
+    private final Class<?> refType;
+    private final Set<Integer> activeCalls;
 
-    private void attach(CodeContext<?> context) {
-        this.context = context;
+    private CodeContext<?> context;
+    private ReferenceDescriptor desc;
+
+    private RefImpl(Class<?> refType) {
+        this.refType = refType;
+        this.activeCalls = new HashSet<>(1);
     }
-    
+
+    private void attach(CodeContext<?> context, ReferenceDescriptor desc) {
+        this.context = context;
+        this.desc = desc;
+    }
+
+    @Override
+    public <K> Ref<T> asyncCompute(K key, Function<K, ? extends T> function) {
+        ControlAddress to = context.locateService(TaskService.class)
+                .map(ad -> ControlAddress.create(ad, TaskService.SUBMIT))
+                .orElseThrow(IllegalStateException::new);
+        ControlAddress from = ControlAddress.create(context.getComponent().getAddress(), desc.getID());
+        TaskService.Task task = () -> PReference.wrap(function.apply(key));
+        Call call = Call.createCall(to, from, context.getTime(), PReference.wrap(task));
+        context.getLookup().find(PacketRouter.class)
+                .orElseThrow(IllegalStateException::new)
+                .route(call);
+        activeCalls.add(call.getMatchID());
+        return this;
+    }
+
+    private void handleAsyncResponse(Call call) {
+        if (activeCalls.remove(call.getMatchID())) {
+            if (call.getType() == Call.Type.RETURN) {
+                try {
+                    T val = (T) PReference.from(call.getArgs().get(0)).get().getReference();
+                    if (!refType.isInstance(val)) {
+                        throw new IllegalArgumentException(val.getClass() + " is not a " + refType);
+                    }
+                    init(() -> val).compute(v -> val);
+                } catch (Exception ex) {
+                    context.getLog().log(LogLevel.ERROR, ex);
+                }
+            } else {
+                CallArguments args = call.getArgs();
+                if (args.isEmpty()) {
+                    context.getLog().log(LogLevel.ERROR, "Error in asyncCompute on "
+                            + call.getToAddress().getID());
+                } else {
+                    PError err = PError.from(args.get(0)).orElse(PError.create(args.get(0).toString()));
+                    context.getLog().log(LogLevel.ERROR, err);
+                }
+            }
+        }
+
+    }
+
     @Override
     protected void reset() {
         super.reset();
@@ -46,6 +110,7 @@ class RefImpl<T> extends Ref<T> {
     @Override
     protected void dispose() {
         super.dispose();
+        activeCalls.clear();
     }
 
     @Override
@@ -56,18 +121,22 @@ class RefImpl<T> extends Ref<T> {
     static class Descriptor extends ReferenceDescriptor {
 
         private final Field refField;
+        private final Class<?> refType;
+        private final ControlImpl control;
         private RefImpl<?> ref;
 
-        private Descriptor(String id, Field refField) {
+        private Descriptor(CodeConnector<?> connector, String id, Field refField, Class<?> refType) {
             super(id);
             this.refField = refField;
+            this.refType = refType;
+            this.control = new ControlImpl(connector, id, this);
         }
 
         @Override
         public void attach(CodeContext<?> context, ReferenceDescriptor previous) {
             if (previous instanceof RefImpl.Descriptor) {
                 RefImpl.Descriptor pd = (RefImpl.Descriptor) previous;
-                if (refField.getGenericType().equals(pd.refField.getGenericType())) {
+                if (isCompatible(pd)) {
                     ref = pd.ref;
                     pd.ref = null;
                 } else {
@@ -78,17 +147,21 @@ class RefImpl<T> extends Ref<T> {
             }
 
             if (ref == null) {
-                ref = new RefImpl<>();
+                ref = new RefImpl<>(refType);
             }
 
-            ref.attach(context);
-            
+            ref.attach(context, this);
+
             try {
                 refField.set(context.getDelegate(), ref);
             } catch (Exception ex) {
                 context.getLog().log(LogLevel.ERROR, ex);
             }
 
+        }
+
+        private boolean isCompatible(Descriptor other) {
+            return refField.getGenericType().equals(other.refField.getGenericType());
         }
 
         @Override
@@ -107,13 +180,61 @@ class RefImpl<T> extends Ref<T> {
             }
         }
 
+        ControlDescriptor getControlDescriptor() {
+            return control;
+        }
+
         static Descriptor create(CodeConnector<?> connector, Field field) {
             if (Ref.class.equals(field.getType())
                     && field.getGenericType() instanceof ParameterizedType) {
+                Class<?> refType = findRefType((ParameterizedType) field.getGenericType());
                 field.setAccessible(true);
-                return new Descriptor(field.getName(), field);
+                return new Descriptor(connector, field.getName(), field, refType);
             } else {
                 return null;
+            }
+        }
+
+        private static Class<?> findRefType(ParameterizedType type) {
+            Type[] types = type.getActualTypeArguments();
+            if (types.length > 0 && types[0] instanceof Class) {
+                return (Class) types[0];
+            } else {
+                return Object.class;
+            }
+        }
+
+    }
+
+    private static class ControlImpl extends ControlDescriptor implements Control {
+
+        private final Descriptor rd;
+
+        ControlImpl(CodeConnector<?> connector, String id, Descriptor rd) {
+            super(id, Category.Synthetic, connector.getSyntheticIndex());
+            this.rd = rd;
+        }
+
+        @Override
+        public ControlInfo getInfo() {
+            return null;
+        }
+
+        @Override
+        public void attach(CodeContext<?> context, Control previous) {
+        }
+
+        @Override
+        public Control getControl() {
+            return this;
+        }
+
+        @Override
+        public void call(Call call, PacketRouter router) throws Exception {
+            if (call.getType() == Call.Type.RETURN || call.getType() == Call.Type.ERROR) {
+                rd.ref.handleAsyncResponse(call);
+            } else {
+                throw new IllegalArgumentException("Reference control received unexpected call : " + call);
             }
         }
 
