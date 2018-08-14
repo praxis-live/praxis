@@ -100,7 +100,7 @@ public abstract class VideoPort implements Port {
     public static class Provider implements Port.TypeProvider {
 
         @Override
-        public Stream<Type> types() {
+        public Stream<Type<?>> types() {
             return Stream.of(new Port.Type<>(VideoPort.class));
         }
         

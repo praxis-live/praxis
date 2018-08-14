@@ -97,7 +97,7 @@ public abstract class AudioPort implements Port {
     public static class Provider implements Port.TypeProvider {
 
         @Override
-        public Stream<Type> types() {
+        public Stream<Type<?>> types() {
             return Stream.of(new Port.Type<>(AudioPort.class));
         }
         

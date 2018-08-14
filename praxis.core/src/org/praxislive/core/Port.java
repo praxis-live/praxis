@@ -134,7 +134,7 @@ public interface Port {
     
     public static interface TypeProvider {
         
-        Stream<Type> types();
+        Stream<Type<?>> types();
         
     }
     
