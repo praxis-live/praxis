@@ -23,8 +23,8 @@ package org.praxislive.code;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -153,7 +153,9 @@ public abstract class DataPort<T> implements Port {
             super(id, category, index);
             this.field = field;
             this.type = type;
-            this.info = PortInfo.create(DataPort.class, PortInfo.Direction.IN, PMap.EMPTY);
+            this.info = PortInfo.create(DataPort.class,
+                    PortInfo.Direction.IN,
+                    PMap.create("category", typeToCategory(type)));
         }
 
         @Override
@@ -317,7 +319,9 @@ public abstract class DataPort<T> implements Port {
             super(id, category, index);
             this.field = field;
             this.type = type;
-            this.info = PortInfo.create(DataPort.class, PortInfo.Direction.OUT, PMap.EMPTY);
+            this.info = PortInfo.create(DataPort.class,
+                    PortInfo.Direction.OUT,
+                    PMap.create("category", typeToCategory(type)));
         }
 
         @Override
@@ -401,5 +405,49 @@ public abstract class DataPort<T> implements Port {
         return type1.equals(type2);
     }
     
+    
+    private static String typeToCategory(java.lang.reflect.Type type) {
+        StringBuilder sb = new StringBuilder();
+        buildSimpleName(sb, type);
+        return sb.toString();
+    }
+    
+    private static void buildSimpleName(StringBuilder sb, java.lang.reflect.Type type) {
+        if (type instanceof Class) {
+            sb.append(((Class<?>) type).getSimpleName());
+        } else if (type instanceof ParameterizedType) {
+            buildSimpleName(sb, ((ParameterizedType) type).getRawType());
+            java.lang.reflect.Type[] parTypes = ((ParameterizedType) type).getActualTypeArguments();
+            sb.append("<");
+            for (int i = 0; i < parTypes.length; i++) {
+                if (i > 0) {
+                    sb.append(", ");
+                }
+                buildSimpleName(sb, parTypes[i]);
+            }
+            sb.append(">");
+        } else if (type instanceof WildcardType) {
+            java.lang.reflect.Type[] bounds = ((WildcardType) type).getLowerBounds();
+            if (bounds.length > 0) {
+                sb.append("? super ");
+            } else {
+                bounds = ((WildcardType) type).getUpperBounds();
+                if (bounds.length > 0 && !Object.class.equals(bounds[0])) {
+                    sb.append("? extends ");
+                } else {
+                    sb.append("?");
+                    return;
+                }
+            }
+            for (int i = 0; i < bounds.length; i++) {
+                if (i > 0) {
+                    sb.append(" & ");
+                }
+                buildSimpleName(sb, bounds[i]);
+            }
+        } else {
+            sb.append("?");
+        }
+    }
     
 }
