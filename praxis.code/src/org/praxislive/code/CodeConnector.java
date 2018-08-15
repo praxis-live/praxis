@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 import org.praxislive.code.userapi.AuxIn;
 import org.praxislive.code.userapi.AuxOut;
 import org.praxislive.code.userapi.Config;
+import org.praxislive.code.userapi.Data;
 import org.praxislive.code.userapi.ID;
 import org.praxislive.code.userapi.In;
 import org.praxislive.code.userapi.Inject;
@@ -327,9 +328,15 @@ public abstract class CodeConnector<D extends CodeDelegate> {
             addPort(odsc);
             addControl(InputPortControl.Descriptor.createInput(odsc.getID(), odsc.getIndex(), odsc));
             return true;
-        } else {
-            return false;
         }
+        
+        DataPort.InputDescriptor din = DataPort.InputDescriptor.create(this, ann, field);
+        if (din != null) {
+            addPort(din);
+            return true;
+        }
+        
+        return false;
     }
 
     private boolean analyseAuxInputField(AuxIn ann, Field field) {
@@ -338,9 +345,16 @@ public abstract class CodeConnector<D extends CodeDelegate> {
             addPort(odsc);
             addControl(InputPortControl.Descriptor.createAuxInput(odsc.getID(), odsc.getIndex(), odsc));
             return true;
-        } else {
-            return false;
         }
+        
+        DataPort.InputDescriptor din = DataPort.InputDescriptor.create(this, ann, field);
+        if (din != null) {
+            addPort(din);
+            return true;
+        }
+        
+        return false;
+        
     }
 
     private boolean analyseOutputField(Out ann, Field field) {
@@ -348,9 +362,15 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         if (odsc != null) {
             addPort(odsc);
             return true;
-        } else {
-            return false;
+        } 
+        
+        DataPort.OutputDescriptor dout = DataPort.OutputDescriptor.create(this, ann, field);
+        if (dout != null) {
+            addPort(dout);
+            return true;
         }
+        
+        return false;
     }
 
     private boolean analyseAuxOutputField(AuxOut ann, Field field) {
@@ -358,9 +378,16 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         if (odsc != null) {
             addPort(odsc);
             return true;
-        } else {
-            return false;
         }
+        
+        DataPort.OutputDescriptor dout = DataPort.OutputDescriptor.create(this, ann, field);
+        if (dout != null) {
+            addPort(dout);
+            return true;
+        }
+        
+        return false;
+        
     }
 
     private boolean analyseTriggerField(T ann, Field field) {
@@ -415,6 +442,16 @@ public abstract class CodeConnector<D extends CodeDelegate> {
             if (rdsc != null) {
                 addReference(rdsc);
                 addControl(rdsc.getControlDescriptor());
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        if (Data.Sink.class.equals(field.getType())) {
+            DataSink.Descriptor dsdsc = DataSink.Descriptor.create(this, field);
+            if (dsdsc != null) {
+                addReference(dsdsc);
                 return true;
             } else {
                 return false;
