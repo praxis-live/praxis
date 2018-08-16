@@ -23,11 +23,14 @@
 package org.praxislive.code;
 
 import java.lang.reflect.Field;
+import java.util.stream.IntStream;
 import org.praxislive.code.userapi.Property;
 import org.praxislive.code.userapi.Type;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.types.PNumber;
 import org.praxislive.core.Value;
+import org.praxislive.core.types.PArray;
+import org.praxislive.core.types.PMap;
 
 /**
  *
@@ -35,17 +38,16 @@ import org.praxislive.core.Value;
  */
 abstract class IntegerBinding extends PropertyControl.Binding {
 
+    private final ArgumentInfo info;
     private final int min;
     private final int max;
     final int def;
-    private final boolean ranged;
 
-    private IntegerBinding(int min, int max, int def) {
+    private IntegerBinding(ArgumentInfo info, int min, int max, int def) {
+        this.info = info;
         this.min = min;
         this.max = max;
         this.def = def;
-        ranged = (min != PNumber.MIN_VALUE
-                || max != PNumber.MAX_VALUE);
     }
 
     @Override
@@ -72,11 +74,7 @@ abstract class IntegerBinding extends PropertyControl.Binding {
 
     @Override
     public ArgumentInfo getArgumentInfo() {
-        if (ranged) {
-            return PNumber.integerInfo(min, max);
-        } else {
-            return PNumber.integerInfo();
-        }
+        return info;
     }
 
     @Override
@@ -92,17 +90,39 @@ abstract class IntegerBinding extends PropertyControl.Binding {
         int min = PNumber.MIN_VALUE;
         int max = PNumber.MAX_VALUE;
         int def = 0;
+        int[] suggested = {};
         Type.Integer ann = field.getAnnotation(Type.Integer.class);
         if (ann != null) {
             min = ann.min();
             max = ann.max();
             def = ann.def();
+            suggested = ann.suggested();
         }
+        PMap.Builder props = PMap.builder();
+        props.put(PNumber.KEY_IS_INTEGER, true);
+        if (min != PNumber.MIN_VALUE) {
+            props.put(PNumber.KEY_MINIMUM, min);
+        }
+        if (max != PNumber.MAX_VALUE) {
+            props.put(PNumber.KEY_MAXIMUM, max);
+        }
+        if (suggested.length > 0) {
+            PArray vals = IntStream.of(suggested)
+                    .mapToObj(PNumber::valueOf)
+                    .collect(PArray.collector());
+            props.put(ArgumentInfo.KEY_SUGGESTED_VALUES, vals);
+        } else if (max > min && max-min <= 16) {
+            PArray vals = IntStream.rangeClosed(min, max)
+                    .mapToObj(PNumber::valueOf)
+                    .collect(PArray.collector());
+            props.put(ArgumentInfo.KEY_SUGGESTED_VALUES, vals);
+        }
+        ArgumentInfo info = ArgumentInfo.create(PNumber.class, props.build());
         Class<?> type = field.getType();
         if (type == int.class) { // || type == Double.class) {
-            return new IntField(field, min, max, def);
+            return new IntField(field, info, min, max, def);
         } else if (Property.class.isAssignableFrom(type)) {
-            return new NoField(min, max, def);
+            return new NoField(info, min, max, def);
         } else {
             return null;
         }
@@ -114,8 +134,8 @@ abstract class IntegerBinding extends PropertyControl.Binding {
         private int value;
         private PNumber last = PNumber.ZERO;
 
-        public NoField(int min, int max, int def) {
-            super(min, max, def);
+        private NoField(ArgumentInfo info, int min, int max, int def) {
+            super(info, min, max, def);
             value = def;
         }
 
@@ -151,8 +171,8 @@ abstract class IntegerBinding extends PropertyControl.Binding {
         private CodeDelegate delegate;
         private PNumber last = PNumber.ZERO;
 
-        public IntField(Field field, int min, int max, int def) {
-            super(min, max, def);
+        private IntField(Field field, ArgumentInfo info, int min, int max, int def) {
+            super(info, min, max, def);
             this.field = field;
         }
 

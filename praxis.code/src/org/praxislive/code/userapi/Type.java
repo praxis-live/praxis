@@ -52,6 +52,7 @@ public @interface Type {
         int min() default PNumber.MIN_VALUE;
         int max() default PNumber.MAX_VALUE;
         int def() default 0;
+        int[] suggested() default {};
     }
 
     @Retention(RetentionPolicy.RUNTIME)
