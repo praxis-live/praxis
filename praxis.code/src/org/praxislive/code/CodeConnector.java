@@ -268,11 +268,16 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         }
 
         P prop = field.getAnnotation(P.class);
-        if (prop != null && analysePropertyField(prop, field)) {
-            return;
-        }
-        if (prop != null && analyseCustomPropertyField(prop, field)) {
-            return;
+        if (prop != null) {
+            if (analyseResourcePropertyField(prop, field)) {
+                return;
+            }
+            if (analysePropertyField(prop, field)) {
+                return;
+            }
+            if (analyseCustomPropertyField(prop, field)) {
+                return;
+            }
         }
         T trig = field.getAnnotation(T.class);
         if (trig != null && analyseTriggerField(trig, field)) {
@@ -402,6 +407,22 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         } else {
             return false;
         }
+    }
+    
+    private boolean analyseResourcePropertyField(P ann, Field field) {
+        if (field.getAnnotation(Type.Resource.class) != null &&
+                String.class.equals(field.getType())) {
+            ResourceProperty.Descriptor<String> rpd =
+                    ResourceProperty.Descriptor.create(this, ann, field, ResourceProperty.getStringLoader());
+            if (rpd != null) {
+                addControl(rpd);
+                if (shouldAddPort(field)) {
+                    addPort(rpd.createPortDescriptor());
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean analysePropertyField(P ann, Field field) {

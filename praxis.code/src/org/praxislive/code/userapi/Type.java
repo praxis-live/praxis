@@ -70,5 +70,10 @@ public @interface Type {
         boolean def() default false;
     }
     
+    @Retention(RetentionPolicy.RUNTIME)
+    public static @interface Resource {
+        
+    }
+    
 
 }
