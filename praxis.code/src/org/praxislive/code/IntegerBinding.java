@@ -111,11 +111,6 @@ abstract class IntegerBinding extends PropertyControl.Binding {
                     .mapToObj(PNumber::valueOf)
                     .collect(PArray.collector());
             props.put(ArgumentInfo.KEY_SUGGESTED_VALUES, vals);
-        } else if (max > min && max-min <= 16) {
-            PArray vals = IntStream.rangeClosed(min, max)
-                    .mapToObj(PNumber::valueOf)
-                    .collect(PArray.collector());
-            props.put(ArgumentInfo.KEY_SUGGESTED_VALUES, vals);
         }
         ArgumentInfo info = ArgumentInfo.create(PNumber.class, props.build());
         Class<?> type = field.getType();
