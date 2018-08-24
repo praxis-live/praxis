@@ -52,11 +52,11 @@ class PGLJOGL extends PJOGL {
     }
 
     String[] preprocessFragmentSource(String[] fragment) {
-        return preprocessFragmentSource(fragment, getGLSLVersion());
+        return preprocessFragmentSource(fragment, getGLSLVersion(), getGLSLVersionSuffix());
     }
 
     String[] preprocessVertexSource(String[] vertex) {
-        return preprocessVertexSource(vertex, getGLSLVersion());
+        return preprocessVertexSource(vertex, getGLSLVersion(), getGLSLVersionSuffix());
     }
 
     private void disposeResources() {

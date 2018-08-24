@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 import org.praxislive.code.userapi.AuxIn;
 import org.praxislive.code.userapi.AuxOut;
 import org.praxislive.code.userapi.Config;
+import org.praxislive.code.userapi.Data;
 import org.praxislive.code.userapi.ID;
 import org.praxislive.code.userapi.In;
 import org.praxislive.code.userapi.Inject;
@@ -267,11 +268,16 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         }
 
         P prop = field.getAnnotation(P.class);
-        if (prop != null && analysePropertyField(prop, field)) {
-            return;
-        }
-        if (prop != null && analyseCustomPropertyField(prop, field)) {
-            return;
+        if (prop != null) {
+            if (analyseResourcePropertyField(prop, field)) {
+                return;
+            }
+            if (analysePropertyField(prop, field)) {
+                return;
+            }
+            if (analyseCustomPropertyField(prop, field)) {
+                return;
+            }
         }
         T trig = field.getAnnotation(T.class);
         if (trig != null && analyseTriggerField(trig, field)) {
@@ -327,9 +333,15 @@ public abstract class CodeConnector<D extends CodeDelegate> {
             addPort(odsc);
             addControl(InputPortControl.Descriptor.createInput(odsc.getID(), odsc.getIndex(), odsc));
             return true;
-        } else {
-            return false;
         }
+        
+        DataPort.InputDescriptor din = DataPort.InputDescriptor.create(this, ann, field);
+        if (din != null) {
+            addPort(din);
+            return true;
+        }
+        
+        return false;
     }
 
     private boolean analyseAuxInputField(AuxIn ann, Field field) {
@@ -338,9 +350,16 @@ public abstract class CodeConnector<D extends CodeDelegate> {
             addPort(odsc);
             addControl(InputPortControl.Descriptor.createAuxInput(odsc.getID(), odsc.getIndex(), odsc));
             return true;
-        } else {
-            return false;
         }
+        
+        DataPort.InputDescriptor din = DataPort.InputDescriptor.create(this, ann, field);
+        if (din != null) {
+            addPort(din);
+            return true;
+        }
+        
+        return false;
+        
     }
 
     private boolean analyseOutputField(Out ann, Field field) {
@@ -348,9 +367,15 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         if (odsc != null) {
             addPort(odsc);
             return true;
-        } else {
-            return false;
+        } 
+        
+        DataPort.OutputDescriptor dout = DataPort.OutputDescriptor.create(this, ann, field);
+        if (dout != null) {
+            addPort(dout);
+            return true;
         }
+        
+        return false;
     }
 
     private boolean analyseAuxOutputField(AuxOut ann, Field field) {
@@ -358,9 +383,16 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         if (odsc != null) {
             addPort(odsc);
             return true;
-        } else {
-            return false;
         }
+        
+        DataPort.OutputDescriptor dout = DataPort.OutputDescriptor.create(this, ann, field);
+        if (dout != null) {
+            addPort(dout);
+            return true;
+        }
+        
+        return false;
+        
     }
 
     private boolean analyseTriggerField(T ann, Field field) {
@@ -375,6 +407,22 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         } else {
             return false;
         }
+    }
+    
+    private boolean analyseResourcePropertyField(P ann, Field field) {
+        if (field.getAnnotation(Type.Resource.class) != null &&
+                String.class.equals(field.getType())) {
+            ResourceProperty.Descriptor<String> rpd =
+                    ResourceProperty.Descriptor.create(this, ann, field, ResourceProperty.getStringLoader());
+            if (rpd != null) {
+                addControl(rpd);
+                if (shouldAddPort(field)) {
+                    addPort(rpd.createPortDescriptor());
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean analysePropertyField(P ann, Field field) {
@@ -411,9 +459,20 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     private boolean analyseInjectField(Inject ann, Field field) {
 
         if (Ref.class.equals(field.getType())) {
-            ReferenceDescriptor rdsc = RefImpl.Descriptor.create(this, field);
+            RefImpl.Descriptor rdsc = RefImpl.Descriptor.create(this, field);
             if (rdsc != null) {
                 addReference(rdsc);
+                addControl(rdsc.getControlDescriptor());
+                return true;
+            } else {
+                return false;
+            }
+        }
+        
+        if (Data.Sink.class.equals(field.getType())) {
+            DataSink.Descriptor dsdsc = DataSink.Descriptor.create(this, field);
+            if (dsdsc != null) {
+                addReference(dsdsc);
                 return true;
             } else {
                 return false;

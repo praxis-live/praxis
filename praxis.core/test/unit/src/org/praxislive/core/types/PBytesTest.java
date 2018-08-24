@@ -271,6 +271,9 @@ public class PBytesTest {
     public void testCollector() {
         PBytes bytes = Stream.of(new Data(10, 20, 30), new Data(40, 50, 60)).collect(PBytes.collector());
         assertEquals(bytes, testBytes);
+        Data d = new Data();
+        PBytes bytes2 = bytes.streamOf((() -> d)).collect(PBytes.collector());
+        assertEquals(bytes2, testBytes);
     }
 
     /**

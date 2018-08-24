@@ -314,30 +314,61 @@ public final class PBytes extends Value {
         }
 
     }
+    
+    private static class DataOutputImpl extends DataOutputStream {
+        
+        private OutputStream out;
+        
+        public DataOutputImpl(OutputStream out) {
+            super(out);
+            this.out = out;
+        }
+        
+    }
 
-    private static class StreamableCollector<T extends DataObject> implements Collector<T, List<T>, PBytes> {
+    private static class StreamableCollector<T extends DataObject> implements Collector<T, DataOutputImpl, PBytes> {
 
         @Override
-        public Supplier<List<T>> supplier() {
-            return ArrayList::new;
+        public Supplier<DataOutputImpl> supplier() {
+            return () -> new DataOutputImpl(new OutputStream());
         }
 
         @Override
-        public BiConsumer<List<T>, T> accumulator() {
-            return List::add;
-        }
-
-        @Override
-        public BinaryOperator<List<T>> combiner() {
-            return (list1, list2) -> {
-                list1.addAll(list2);
-                return list1;
+        public BiConsumer<DataOutputImpl, T> accumulator() {
+            return (stream, data) -> {
+                try { 
+                    data.writeTo(stream);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
             };
         }
 
         @Override
-        public Function<List<T>, PBytes> finisher() {
-            return list -> PBytes.valueOf(list);
+        public BinaryOperator<DataOutputImpl> combiner() {
+            return (stream1, stream2) -> {
+                try {
+                    stream2.flush();
+                    stream2.out.writeTo(stream1);
+                    stream2.close();
+                    return stream1;
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            };
+        }
+
+        @Override
+        public Function<DataOutputImpl, PBytes> finisher() {
+            return stream -> {
+                try {
+                    stream.flush();
+                    stream.close();
+                    return stream.out.toBytes();
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            };
         }
 
         @Override

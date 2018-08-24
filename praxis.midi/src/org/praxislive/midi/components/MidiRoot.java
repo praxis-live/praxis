@@ -22,6 +22,8 @@
  */
 package org.praxislive.midi.components;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -34,15 +36,11 @@ import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Transmitter;
-import org.praxislive.core.Value;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.Packet;
 import org.praxislive.core.PacketRouter;
-import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.Clock;
-import org.praxislive.core.types.PMap;
 import org.praxislive.impl.AbstractRoot;
-import org.praxislive.impl.ArgumentProperty;
 import org.praxislive.impl.InstanceLookup;
 import org.praxislive.impl.StringProperty;
 import org.praxislive.midi.MidiInputContext;
@@ -54,7 +52,7 @@ import org.praxislive.midi.MidiInputContext;
 public class MidiRoot extends AbstractRoot {
 
     private final static Logger LOG = Logger.getLogger(MidiRoot.class.getName());
-    private ArgumentProperty device;
+    private StringProperty device;
     private MidiThreadRouter router;
     private MidiDevice midiDevice;
     private Transmitter transmitter;
@@ -69,9 +67,10 @@ public class MidiRoot extends AbstractRoot {
     }
 
     private void buildControls() {
-        ArgumentInfo info = ArgumentInfo.create(
-                Value.class, PMap.create(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
-        device = ArgumentProperty.create(info);
+        device = StringProperty.builder()
+                .emptyIsDefault()
+                .suggestedValues(getDeviceNames().toArray(new String[0]))
+                .build();
         registerControl("device", device);
         registerControl("last-message", StringProperty.builder()
                 .binding(new StringProperty.ReadBinding() {
@@ -188,6 +187,21 @@ public class MidiRoot extends AbstractRoot {
         }
         throw new MidiUnavailableException();
 
+    }
+    
+    private List<String> getDeviceNames() {
+        MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
+        List<String> names = new ArrayList<>(infos.length);
+        for (MidiDevice.Info info : infos) {
+            try {
+                MidiDevice dev = MidiSystem.getMidiDevice(info);
+                if (dev.getMaxTransmitters() != 0) {
+                    names.add(info.getName());
+                }
+            } catch (MidiUnavailableException ex) {
+            }
+        }
+        return names;
     }
 
     private class MidiContextReceiver

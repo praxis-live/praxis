@@ -22,13 +22,17 @@
  */
 package org.praxislive.code;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.praxislive.code.userapi.OnChange;
 import org.praxislive.code.userapi.OnError;
 import org.praxislive.code.userapi.P;
@@ -76,15 +80,20 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
         super.attach(context);
         this.context = context;
         this.field = field;
-        try {
-            field.set(context.getDelegate(), getValue());
-        } catch (IllegalArgumentException | IllegalAccessException ex) {
-            context.getLog().log(LogLevel.WARNING, ex);
-        }
+        setFieldValue();
         this.onChange = onChange;
         this.onError = onError;
     }
 
+    private void setFieldValue() {
+        try {
+            V v = getValue();
+            field.set(context.getDelegate(), v == null ? loader.getEmptyValue() : v);
+        } catch (IllegalArgumentException | IllegalAccessException ex) {
+            context.getLog().log(LogLevel.ERROR, ex);
+        }
+    }
+    
     @Override
     protected TaskService.Task createTask(CallArguments keys) throws Exception {
         Value arg = keys.get(0);
@@ -97,11 +106,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
 
     @Override
     protected void valueChanged(long time) {
-        try {
-            field.set(context.getDelegate(), getValue());
-        } catch (IllegalArgumentException | IllegalAccessException ex) {
-            context.getLog().log(LogLevel.ERROR, ex);
-        }
+        setFieldValue();
         if (onChange != null) {
             context.invoke(time, onChange);
         }
@@ -168,7 +173,43 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
         }
 
         public abstract V load(URI uri) throws IOException;
+        
+        public V getEmptyValue() {
+            return null;
+        }
 
+    }
+    
+    public static Loader<String> getStringLoader() {
+        return StringLoader.INSTANCE;
+    }
+    
+    private static class StringLoader extends Loader<String> {
+        
+        private final static StringLoader INSTANCE = new StringLoader();
+
+        private StringLoader() {
+            super(String.class);
+        }
+
+        @Override
+        public String load(URI uri) throws IOException {
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(uri.toURL().openStream(), StandardCharsets.UTF_8)
+            )) {
+                return br.lines().collect(Collectors.joining("\n"));
+            } catch (IOException ex) {
+                throw ex;
+            } catch (Exception ex) {
+                throw new IOException(ex);
+            }
+        }
+
+        @Override
+        public String getEmptyValue() {
+            return "";
+        }
+        
     }
 
     public static class Descriptor<V> extends ControlDescriptor {

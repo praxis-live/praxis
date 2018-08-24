@@ -67,15 +67,14 @@ public class TriggerControl extends Trigger implements Control {
     }
 
     protected void trigger(long time) {
-        if (context.checkActive()) {
-            context.update(time);
+        context.invoke(time, () -> {
             try {
                 binding.trigger(time);
             } catch (Exception ex) {
                 context.getLog().log(LogLevel.ERROR, ex);
             }
             super.trigger(time);
-        }
+        });
     }
 
     private void attach(CodeContext<?> context, Control previous) {
