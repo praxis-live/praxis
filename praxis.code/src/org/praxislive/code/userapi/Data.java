@@ -312,31 +312,36 @@ public class Data {
 
         @Override
         public void clear() {
-            try {
-                sink.clearer.apply(data);
-            } catch (Exception ex) {
-                sink.log(ex);
-            }
+            apply(sink.clearer);
         }
 
         @Override
         public void apply(Function<? super T, ? extends T> operator) {
-            T cur = data;
-            data = operator.apply(data);
-            if (data != cur) {
-                sink.disposer.accept(cur);
+            try {
+                T cur = data;
+                data = operator.apply(data);
+                if (data != cur) {
+                    sink.disposer.accept(cur);
+                }
+            } catch (Exception ex) {
+                sink.log(ex);
             }
+
         }
 
         @Override
         public void accumulate(List<Packet<T>> packets) {
+            if (!packets.contains(this)) {
+                clear();
+            }
             try {
-                sink.clearer.apply(data);
                 packets.forEach(src -> {
-                    T cur = data;
-                    data = sink.accumulator.apply(data, src.data());
-                    if (data != cur) {
-                        sink.disposer.accept(cur);
+                    if (src != this) {
+                        T cur = data;
+                        data = sink.accumulator.apply(data, src.data());
+                        if (data != cur) {
+                            sink.disposer.accept(cur);
+                        }
                     }
                 });
             } catch (Exception ex) {
