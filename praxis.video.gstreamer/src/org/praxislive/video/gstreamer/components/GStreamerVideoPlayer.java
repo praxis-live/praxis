@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -25,6 +25,7 @@ package org.praxislive.video.gstreamer.components;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,13 +33,13 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.freedesktop.gstreamer.Bin;
 import org.freedesktop.gstreamer.Bus;
+import org.freedesktop.gstreamer.ElementFactory;
 import org.freedesktop.gstreamer.Format;
 import org.freedesktop.gstreamer.Gst;
 import org.freedesktop.gstreamer.GstObject;
-import org.freedesktop.gstreamer.SeekFlags;
-import org.freedesktop.gstreamer.SeekType;
+import org.freedesktop.gstreamer.event.SeekFlags;
+import org.freedesktop.gstreamer.event.SeekType;
 import org.freedesktop.gstreamer.elements.PlayBin;
 import org.praxislive.code.CodeConnector;
 import org.praxislive.code.CodeContext;
@@ -54,7 +55,7 @@ import org.praxislive.video.gstreamer.VideoPlayer;
  * @author Neil C Smith - http://www.neilcsmith.net
  */
 class GStreamerVideoPlayer implements VideoPlayer {
-
+    
     private volatile State state;
 
     private final PlayBin playbin;
@@ -298,9 +299,9 @@ class GStreamerVideoPlayer implements VideoPlayer {
             }
 
             if (rate > 0) {
-                playbin.seek(rate, Format.TIME, SeekFlags.FLUSH | SeekFlags.ACCURATE, SeekType.SET, position, SeekType.SET, duration);
+                playbin.seek(rate, Format.TIME, EnumSet.of(SeekFlags.FLUSH, SeekFlags.ACCURATE), SeekType.SET, position, SeekType.SET, duration);
             } else {
-                playbin.seek(rate, Format.TIME, SeekFlags.FLUSH | SeekFlags.ACCURATE, SeekType.SET, 0, SeekType.SET, position);
+                playbin.seek(rate, Format.TIME, EnumSet.of(SeekFlags.FLUSH, SeekFlags.ACCURATE), SeekType.SET, 0, SeekType.SET, position);
             }
         }
         playbin.getState(10, TimeUnit.MILLISECONDS);
@@ -331,10 +332,10 @@ class GStreamerVideoPlayer implements VideoPlayer {
         int flags = (int) playbin.get("flags");
         if (audio.isEmpty()) {
             flags &= ~(1 << 1);
-            playbin.setAudioSink(null);
+            playbin.setAudioSink(ElementFactory.make("fakesink", "fakesink"));
         } else {
             flags |= (1 << 1);
-            playbin.setAudioSink(Bin.launch(audio, true));
+            playbin.setAudioSink(Gst.parseBinFromDescription(audio, true));
         }
         playbin.set("flags", flags);
     }

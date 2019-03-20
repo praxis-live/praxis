@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -67,7 +67,7 @@ class GStreamerVideoCapture implements VideoCapture {
 
     private GStreamerVideoCapture() {
         pipeline = new Pipeline();
-        bin = Bin.launch(DEFAULT_DEVICE, true);
+        bin = Gst.parseBinFromDescription(DEFAULT_DEVICE, true);
         device = DEFAULT_DEVICE;
         sink = new PImageSink();
         Element videorate = ElementFactory.make("videorate", "rate");
@@ -100,7 +100,7 @@ class GStreamerVideoCapture implements VideoCapture {
                     bin.unlink(head);
                     pipeline.remove(bin);
                     bin.dispose();
-                    bin = Bin.launch(dsc, true);
+                    bin = Gst.parseBinFromDescription(dsc, true);
                     pipeline.add(bin);
                     bin.link(head);
                     pipeline.setState(org.freedesktop.gstreamer.State.READY);
