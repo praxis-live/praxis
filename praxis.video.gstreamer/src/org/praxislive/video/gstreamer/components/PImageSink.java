@@ -67,7 +67,11 @@ class PImageSink {
     private int requestRate;
 
     PImageSink() {
-        sink = new AppSink("PImageSink");
+        this(new AppSink("PImageSink"));
+    }
+    
+    PImageSink(AppSink sink) {
+        this.sink = sink;
         sink.set("emit-signals", true);
         newSampleListener = new NewSampleListener();
         newPrerollListener = new NewPrerollListener();
@@ -134,6 +138,18 @@ class PImageSink {
             imageLock.unlock();
         }
     } 
+    
+    void dispose() {
+        imageLock.lock();
+        try {
+            if (surface != null && surface.sample != null) {
+                surface.sample.dispose();
+            }
+            surface = null;
+        } finally {
+            imageLock.unlock();
+        }
+    }
 
     private class NewSampleListener implements AppSink.NEW_SAMPLE {
 

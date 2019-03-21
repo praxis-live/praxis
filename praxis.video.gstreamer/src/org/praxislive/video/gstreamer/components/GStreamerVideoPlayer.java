@@ -101,6 +101,7 @@ class GStreamerVideoPlayer implements VideoPlayer {
                 URI loc = resolve(location, lkp);
                 if (loc != null) {
                     playbin.stop();
+                    sink.dispose();
                     playbin.setURI(loc);
                     playbin.setState(org.freedesktop.gstreamer.State.READY);
                     if (playbin.getState() == org.freedesktop.gstreamer.State.READY) {
@@ -155,6 +156,7 @@ class GStreamerVideoPlayer implements VideoPlayer {
             if (location.isPresent()) {
                 state = State.Empty;
                 playbin.stop();
+                sink.dispose();
             }
         });
         return this;
