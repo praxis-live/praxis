@@ -76,12 +76,13 @@ class GStreamerVideoCapture implements VideoCapture {
 
     @Override
     public VideoCapture device(String device) {
-        if (!this.device.equals(Objects.requireNonNull(device))) {
-            this.device = device;
-            async(() -> {
+        boolean changed = !this.device.equals(Objects.requireNonNull(device));
+        this.device = device;
+        async(() -> {
+            if (pipeline == null || changed) {
                 buildPipeline(device);
-            });
-        }
+            }
+        });
         return this;
     }
 
