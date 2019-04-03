@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -392,6 +392,10 @@ public class P3DCodeDelegate extends DefaultCodeDelegate {
         pg.rectMode(mode);
     }
 
+    public void square(double x, double y, double extent) {
+        pg.square(x, y, extent);
+    }
+    
     public void rect(double a, double b, double c, double d) {
         pg.rect(a, b, c, d);
     }
@@ -408,6 +412,10 @@ public class P3DCodeDelegate extends DefaultCodeDelegate {
         pg.ellipseMode(mode);
     }
 
+    public void circle(double x, double y, double extent) {
+        pg.circle(x, y, extent);
+    }
+    
     public void ellipse(double a, double b, double c, double d) {
         pg.ellipse(a, b, c, d);
     }
