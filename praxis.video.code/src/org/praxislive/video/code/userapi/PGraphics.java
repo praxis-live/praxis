@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -183,6 +183,10 @@ public abstract class PGraphics extends PImage {
         getSurface().copy(src.getSurface());
     }
 
+    public void circle(double x, double y, double extent) {
+        ellipse(x, y, extent, extent);
+    }
+    
     public void ellipse(double x, double y, double w, double h) {
         x -= (w / 2);
         y -= (h / 2);
@@ -338,6 +342,10 @@ public abstract class PGraphics extends PImage {
         yPoints[2] = (int) y3;
         yPoints[3] = (int) y4;
         polygon(xPoints, yPoints, 4);
+    }
+    
+    public void square(double x, double y, double extent) {
+        rect(x, y, extent, extent);
     }
 
     public void rect(double x, double y, double w, double h) {
