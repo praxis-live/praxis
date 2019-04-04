@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -24,10 +24,12 @@ package org.praxislive.code.userapi;
 
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
+import java.util.function.DoubleFunction;
 import java.util.function.DoublePredicate;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
+import java.util.function.IntFunction;
 import java.util.function.IntPredicate;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
@@ -121,6 +123,23 @@ public interface Linkable<T> {
                 }
             };
         }
+        
+        /**
+         * Returns a Linkable that wraps this Linkable.Double and transforms
+         * values using the provided mapping function.
+         *
+         * @param <R> generic type of returned Linkable
+         * @param function transform values
+         * @return Linkable
+         */
+        public default <R> Linkable<R> mapTo(DoubleFunction<? extends R> function) {
+            return new AbstractLinkable.DoubleToObj<R>(this) {
+                @Override
+                void process(double value, Consumer<R> sink) {
+                    sink.accept(function.apply(value));
+                }
+            };
+        }
 
         /**
          * Returns a Linkable.Double that wraps this Linkable.Double and filters 
@@ -173,6 +192,23 @@ public interface Linkable<T> {
             };
         }
 
+        /**
+         * Returns a Linkable that wraps this Linkable.Int and transforms
+         * values using the provided mapping function.
+         *
+         * @param <R> generic type of returned Linkable
+         * @param function transform values
+         * @return Linkable
+         */
+        public default <R> Linkable<R> mapTo(IntFunction<? extends R> function) {
+            return new AbstractLinkable.IntToObj<R>(this) {
+                @Override
+                void process(int value, Consumer<R> sink) {
+                    sink.accept(function.apply(value));
+                }
+            };
+        }
+        
         /**
          * Returns a Linkable.Int that wraps this Linkable.Int and filters 
          * values using the provided predicate function.

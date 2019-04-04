@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -125,6 +125,10 @@ public class VideoCodeDelegate extends DefaultCodeDelegate {
         pg.copy(src);
     }
 
+    public void circle(double x, double y, double extent) {
+        pg.circle(x, y, extent);
+    }
+
     public void ellipse(double x, double y, double w, double h) {
         pg.ellipse(x, y, w, h);
     }
@@ -199,6 +203,10 @@ public class VideoCodeDelegate extends DefaultCodeDelegate {
 
     public void quad(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
         pg.quad(x1, y1, x2, y2, x3, y3, x4, y4);
+    }
+
+    public void square(double x, double y, double extent) {
+        pg.square(x, y, extent);
     }
 
     public void rect(double x, double y, double w, double h) {

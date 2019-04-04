@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -26,14 +26,13 @@ import java.lang.reflect.Field;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import org.freedesktop.gstreamer.Bin;
 import org.freedesktop.gstreamer.Bus;
-import org.freedesktop.gstreamer.Element;
-import org.freedesktop.gstreamer.ElementFactory;
 import org.freedesktop.gstreamer.Gst;
 import org.freedesktop.gstreamer.GstObject;
 import org.freedesktop.gstreamer.Pipeline;
+import org.freedesktop.gstreamer.elements.AppSink;
 import org.praxislive.code.CodeConnector;
 import org.praxislive.code.CodeContext;
 import org.praxislive.code.ReferenceDescriptor;
@@ -48,16 +47,17 @@ import org.praxislive.video.gstreamer.configuration.GStreamerSettings;
  */
 class GStreamerVideoCapture implements VideoCapture {
 
+    private final static String PIPELINE_END
+            = " ! videorate ! videoscale add-border=true ! videoconvert ! appsink name=sink";
+
     private volatile State state;
 
-    private final Pipeline pipeline;
-    private final PImageSink sink;
+    private final AtomicReference<PImageSink> sinkRef;
     private final CodeContext.ClockListener clockListener;
     private final Queue<Runnable> messages;
 
+    private Pipeline pipeline;
     private CodeContext<?> context;
-    private Bin bin;
-    private Element head;
 
     private Runnable onReady;
     private Consumer<String> onError;
@@ -66,59 +66,57 @@ class GStreamerVideoCapture implements VideoCapture {
     private volatile String device;
 
     private GStreamerVideoCapture() {
-        pipeline = new Pipeline();
-        bin = Bin.launch(DEFAULT_DEVICE, true);
-        device = DEFAULT_DEVICE;
-        sink = new PImageSink();
-        Element videorate = ElementFactory.make("videorate", "rate");
-        Element videoscale = ElementFactory.make("videoscale", "scale");
-        videoscale.set("add-borders", true);
-        Element colorspace = ElementFactory.make("videoconvert", "convert");
-        pipeline.addMany(bin, videorate, videoscale, colorspace, sink.getElement());
-        Pipeline.linkMany(bin, videorate, videoscale, colorspace, sink.getElement());
-        head = videorate;
-        
-        Bus bus = pipeline.getBus();
-        bus.connect((Bus.ERROR) this::handleError);
-        bus.connect((Bus.EOS) this::handleEOS);
-        
         clockListener = this::processMessages;
         messages = new ConcurrentLinkedQueue<>();
-
+        sinkRef = new AtomicReference<>();
         state = State.Ready;
+        device = DEFAULT_DEVICE;
+        buildPipeline(device);
     }
 
-    
     @Override
     public VideoCapture device(String device) {
-        if (!this.device.equals(Objects.requireNonNull(device))) {
-            this.device = device;
-            async(() -> {
-                try {
-                    String dsc = deviceStringToDescription(device);
-                    pipeline.stop();
-                    bin.unlink(head);
-                    pipeline.remove(bin);
-                    bin.dispose();
-                    bin = Bin.launch(dsc, true);
-                    pipeline.add(bin);
-                    bin.link(head);
-                    pipeline.setState(org.freedesktop.gstreamer.State.READY);
-                    if (pipeline.getState() == org.freedesktop.gstreamer.State.READY) {
-                        state = State.Ready;
-                        messages.add(this::messageOnReady);
-                    } else {
-                        state = State.Error;
-                    }
-                } catch (Exception e) {
-                    state = State.Error;
-                }
-                
-            });
-        }
+        boolean changed = !this.device.equals(Objects.requireNonNull(device));
+        this.device = device;
+        async(() -> {
+            if (pipeline == null || changed) {
+                buildPipeline(device);
+            }
+        });
         return this;
     }
-    
+
+    private void buildPipeline(String device) {
+        try {
+            if (pipeline != null) {
+                pipeline.stop();
+                pipeline.dispose();
+                pipeline = null;
+            }
+            PImageSink sink = sinkRef.getAndSet(null);
+            if (sink != null) {
+                sink.dispose();
+            }
+            String dsc = deviceStringToDescription(device);
+            dsc += PIPELINE_END;
+            pipeline = (Pipeline) Gst.parseLaunch(dsc);
+            Bus bus = pipeline.getBus();
+            bus.connect((Bus.ERROR) this::handleError);
+            bus.connect((Bus.EOS) this::handleEOS);
+            AppSink appsink = (AppSink) pipeline.getElementByName("sink");
+            sinkRef.set(new PImageSink(appsink));
+            pipeline.setState(org.freedesktop.gstreamer.State.READY);
+            if (pipeline.getState() == org.freedesktop.gstreamer.State.READY) {
+                state = State.Ready;
+                messages.add(this::messageOnReady);
+            } else {
+                state = State.Error;
+            }
+        } catch (Exception e) {
+            state = State.Error;
+        }
+    }
+
     private String deviceStringToDescription(String device) {
         device = device.trim();
         if (device.isEmpty()) {
@@ -126,22 +124,25 @@ class GStreamerVideoCapture implements VideoCapture {
         } else if (device.length() == 1) {
             try {
                 device = GStreamerSettings.getCaptureDevice(Integer.valueOf(device));
-            } catch (Exception ex) { 
+            } catch (Exception ex) {
                 // fall through
             }
         }
         return device;
     }
-    
+
     public String device() {
         return device;
     }
-    
+
     @Override
     public VideoCapture play() {
         async(() -> {
             if (state != State.Playing) {
                 state = State.Playing;
+                if (pipeline == null) {
+                    buildPipeline(device);
+                }
                 pipeline.play();
             }
         });
@@ -152,7 +153,13 @@ class GStreamerVideoCapture implements VideoCapture {
     public VideoCapture stop() {
         async(() -> {
             state = State.Ready;
-            pipeline.stop();
+            if (pipeline != null) {
+                pipeline.stop();
+            }
+            PImageSink sink = sinkRef.get();
+            if (sink != null) {
+                sink.dispose();
+            }
         }
         );
         return this;
@@ -166,10 +173,12 @@ class GStreamerVideoCapture implements VideoCapture {
     @Override
     public boolean render(Consumer<PImage> renderer) {
         if (state == State.Playing) {
-            return sink.render(renderer);
-        } else {
-            return false;
+            PImageSink sink = sinkRef.get();
+            if (sink != null) {
+                return sink.render(renderer);
+            }
         }
+        return false;
     }
 
     @Override
@@ -189,16 +198,26 @@ class GStreamerVideoCapture implements VideoCapture {
         this.onEOS = eos;
         return this;
     }
-    
+
     @Override
     public VideoCapture requestFrameSize(int width, int height) {
-        sink.requestFrameSize(width, height);
+        async(() -> {
+            PImageSink sink = sinkRef.get();
+            if (sink != null) {
+                sink.requestFrameSize(width, height);
+            }
+        });
         return this;
     }
 
     @Override
     public VideoCapture requestFrameRate(double fps) {
-        sink.requestFrameRate(fps);
+        async(() -> {
+            PImageSink sink = sinkRef.get();
+            if (sink != null) {
+                sink.requestFrameRate(fps);
+            }
+        });
         return this;
     }
 
@@ -206,6 +225,8 @@ class GStreamerVideoCapture implements VideoCapture {
         async(() -> {
             state = State.Error;
             pipeline.stop();
+            pipeline.dispose();
+            pipeline = null;
             messages.add(() -> messageOnError(message));
         });
     }
@@ -228,21 +249,30 @@ class GStreamerVideoCapture implements VideoCapture {
         onError = null;
         onEOS = null;
         if (full) {
-            stop();
             messages.clear();
+            state = State.Ready;
+            async(this::disposePipeline);
         }
     }
 
     private void dispose() {
-        async(() -> {
-            pipeline.stop();
-            pipeline.getBus().dispose();
-            pipeline.dispose();
-        });
+        async(this::disposePipeline);
         messages.clear();
         if (this.context != null) {
             this.context.removeClockListener(clockListener);
             this.context = null;
+        }
+    }
+
+    private void disposePipeline() {
+        if (pipeline != null) {
+            pipeline.stop();
+            pipeline.dispose();
+            pipeline = null;
+        }
+        PImageSink sink = sinkRef.getAndSet(null);
+        if (sink != null) {
+            sink.dispose();
         }
     }
 
@@ -274,7 +304,6 @@ class GStreamerVideoCapture implements VideoCapture {
             onEOS.run();
         }
     }
-
 
     static class Descriptor extends ReferenceDescriptor {
 

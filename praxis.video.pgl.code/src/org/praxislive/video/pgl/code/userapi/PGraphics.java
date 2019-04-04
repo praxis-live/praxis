@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -242,6 +242,10 @@ abstract class PGraphics extends PImage {
         g.rectMode(mode.unwrap());
     }
 
+    public void square(double x, double y, double extent) {
+        g.square((float) x, (float) y, (float) extent);
+    }
+    
     public void rect(double a, double b, double c, double d) {
         g.rect((float)a, (float)b, (float)c, (float)d);
     }
@@ -259,6 +263,10 @@ abstract class PGraphics extends PImage {
         g.ellipseMode(mode.unwrap());
     }
 
+    public void circle(double x, double y, double extent) {
+        g.circle((float) x, (float) y, (float) extent);
+    }
+    
     public void ellipse(double a, double b, double c, double d) {
         g.ellipse((float)a, (float)b, (float)c, (float)d);
     }

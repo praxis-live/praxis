@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
 OpenIDE-Module: com.tinkerforge
 OpenIDE-Module-Localizing-Bundle: com/tinkerforge/Bundle.properties
-OpenIDE-Module-Specification-Version: 2.1.16
+OpenIDE-Module-Specification-Version: 2.1.22
 
