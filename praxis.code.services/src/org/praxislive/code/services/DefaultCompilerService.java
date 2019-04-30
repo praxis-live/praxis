@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.lang.model.SourceVersion;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import org.praxislive.code.CodeCompilerService;
@@ -41,6 +42,7 @@ import org.praxislive.core.Lookup;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PBytes;
 import org.praxislive.core.types.PMap;
+import org.praxislive.core.types.PNumber;
 import org.praxislive.core.types.PResource;
 import org.praxislive.impl.AbstractRoot;
 import org.praxislive.impl.SimpleControl;
@@ -57,11 +59,13 @@ public class DefaultCompilerService extends AbstractRoot {
     
     private final JavaCompiler compiler;
     private final Set<File> libJARs;
+    private SourceVersion release;
     
     public DefaultCompilerService() {
         super(EnumSet.noneOf(Caps.class));
         registerControl(CodeCompilerService.COMPILE, new CompileControl());
         registerControl("add-libs", new AddLibsControl());
+        registerControl("release", new JavaReleaseControl());
         registerProtocol(CodeCompilerService.class);
         compiler = Lookup.SYSTEM.find(JavaCompilerProvider.class)
                 .map(JavaCompilerProvider::getJavaCompiler)
@@ -69,6 +73,7 @@ public class DefaultCompilerService extends AbstractRoot {
         if (compiler == null) {
             throw new RuntimeException("No compiler found");
         }
+        release = SourceVersion.RELEASE_8;
         libJARs = new LinkedHashSet<>();
     }
     
@@ -87,6 +92,7 @@ public class DefaultCompilerService extends AbstractRoot {
             Map<String, byte[]> classFiles
                     = ClassBodyCompiler.create(cbc)
                             .setCompiler(compiler)
+                            .setRelease(release)
                             .addMessageHandler(new LogMessageHandler(log))
                             .extendClasspath(libJARs)
                             .compile(code);
@@ -97,10 +103,11 @@ public class DefaultCompilerService extends AbstractRoot {
             return CallArguments.create(response);
         }
         
-        private ClassBodyContext<?> getClassBodyContext(PMap map) throws ClassNotFoundException,
-                InstantiationException, IllegalAccessException {
+        private ClassBodyContext<?> getClassBodyContext(PMap map) throws Exception {
             String cbcClass = map.getString(CodeCompilerService.KEY_CLASS_BODY_CONTEXT, null);
-            return (ClassBodyContext<?>) Class.forName(cbcClass, true, Thread.currentThread().getContextClassLoader()).newInstance();
+            return (ClassBodyContext<?>) Class.forName(cbcClass, true, Thread.currentThread().getContextClassLoader())
+                    .getDeclaredConstructor()
+                    .newInstance();
         }
         
         private LogLevel getLogLevel(PMap map) {
@@ -156,6 +163,31 @@ public class DefaultCompilerService extends AbstractRoot {
                     .map(File::new)
                     .filter(f -> f.exists() && f.getName().endsWith(".jar"))
                     .findFirst().orElseThrow(() -> new IllegalArgumentException("Invalid library : " + res));
+        }
+        
+    }
+    
+    private class JavaReleaseControl extends SimpleControl {
+
+        private JavaReleaseControl() {
+            super(null);
+        }
+        
+        @Override
+        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
+            int requestedRelease = PNumber.from(args.get(0))
+                    .orElseThrow(IllegalArgumentException::new).toIntValue();
+            if (requestedRelease == release.ordinal()) {
+                return args;
+            }
+            if (requestedRelease < release.ordinal()) {
+                throw new IllegalArgumentException("Cannot set release version lower than existing : " + release.ordinal());
+            }
+            SourceVersion requested = compiler.getSourceVersions().stream()
+                    .filter(v -> v.ordinal() == requestedRelease)
+                    .findFirst().orElseThrow(() -> new IllegalArgumentException("Unsupported release version : " + requestedRelease));
+            release = requested;
+            return args;
         }
         
     }
