@@ -5,4 +5,20 @@
 <project name="processing.core" default="netbeans" basedir=".">
     <description>Builds, tests, and runs the project processing.core.</description>
     <import file="nbproject/build-impl.xml"/>
+    
+    <target name="build-init" depends="harness.build-init">
+        <delete failonerror="false" file="${basedir}/release/modules/ext/core.jar" />
+        <jar destfile="${basedir}/release/modules/ext/core.jar" >
+            <zipfileset src="${basedir}/resources/core.jar">
+                <exclude name="**/ThinkDifferent*.class" />
+                <exclude name="processing/javafx/" />
+            </zipfileset>
+        </jar>
+        
+    </target>
+    
+<!--    <target name="clean" depends="projectized-common.clean">
+        <delete failonerror="false" file="${basedir}/release/modules/ext/core.jar" />
+    </target>-->
+    
 </project>
