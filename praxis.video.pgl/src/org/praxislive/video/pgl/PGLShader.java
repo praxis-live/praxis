@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -36,10 +36,9 @@ public class PGLShader extends PShader {
     private PMatrix3D matrix;
     
     public PGLShader(PGLContext context, String vertex, String fragment) {
-        super(context.primary().parent);
-        setVertexShader(context.getPGL().preprocessVertexSource(new String[]{vertex}));
-        setFragmentShader(context.getPGL().preprocessFragmentSource(new String[]{fragment}));
-        setType(POLY);
+        super(context.primary().parent,
+                context.getPGL().preprocessVertexSource(new String[]{vertex}),
+                context.getPGL().preprocessFragmentSource(new String[]{fragment}));
     }
 
     @Override
