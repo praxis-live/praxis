@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -28,6 +28,7 @@ import org.praxislive.video.Player;
 import org.praxislive.video.PlayerConfiguration;
 import org.praxislive.video.PlayerFactory;
 import org.praxislive.video.QueueContext;
+import org.praxislive.video.RenderingHints;
 import org.praxislive.video.WindowHints;
 
 /**
@@ -55,32 +56,36 @@ public class PGLPlayerFactory implements PlayerFactory {
 
         int width = config.getWidth();
         int height = config.getHeight();
+        
+        Lookup configLookup = config.getLookup();
+        
+        RenderingHints renderHints = configLookup.find(RenderingHints.class).orElseGet(RenderingHints::new);
 
         PGLProfile glProfile = profile;
         if (profile == null) {
             glProfile = GLProfile.isAvailable(GLProfile.GL2GL3) ? PGLProfile.GL3 : PGLProfile.GLES2;
         }
         
-        Lookup lkp = clients[0].getLookup();
+        Lookup clientLookup = clients[0].getLookup();
 
-        int outWidth = lkp.find(ClientConfiguration.Dimension.class)
+        int outWidth = clientLookup.find(ClientConfiguration.Dimension.class)
                 .map(ClientConfiguration.Dimension::getWidth)
                 .orElse(width);
         
-        int outHeight = lkp.find(ClientConfiguration.Dimension.class)
+        int outHeight = clientLookup.find(ClientConfiguration.Dimension.class)
                 .map(ClientConfiguration.Dimension::getHeight)
                 .orElse(height);
 
-        int rotation = lkp.find(ClientConfiguration.Rotation.class)
+        int rotation = clientLookup.find(ClientConfiguration.Rotation.class)
                 .map(ClientConfiguration.Rotation::getAngle)
                 .filter(i -> i == 0 || i == 90 || i == 180 || i == 270)
                 .orElse(0);
 
-        int device = lkp.find(ClientConfiguration.DeviceIndex.class)
+        int device = clientLookup.find(ClientConfiguration.DeviceIndex.class)
                 .map(ClientConfiguration.DeviceIndex::getValue)
                 .orElse(-1);
 
-        WindowHints wHints = lkp.find(WindowHints.class).orElseGet(WindowHints::new);
+        WindowHints wHints = clientLookup.find(WindowHints.class).orElseGet(WindowHints::new);
 
         // @TODO fake queue rather than get()?
         QueueContext queue = config.getLookup().find(QueueContext.class).get();
@@ -90,6 +95,7 @@ public class PGLPlayerFactory implements PlayerFactory {
                 config.getWidth(),
                 config.getHeight(),
                 config.getFPS(),
+                renderHints,
                 outWidth,
                 outHeight,
                 rotation,

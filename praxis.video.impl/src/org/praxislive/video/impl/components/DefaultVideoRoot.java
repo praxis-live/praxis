@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.StreamSupport;
 import org.praxislive.core.Lookup;
 import org.praxislive.impl.AbstractRoot;
+import org.praxislive.impl.BooleanProperty;
 import org.praxislive.impl.InstanceLookup;
 import org.praxislive.impl.IntProperty;
 import org.praxislive.impl.NumberProperty;
@@ -40,6 +40,7 @@ import org.praxislive.video.Player;
 import org.praxislive.video.PlayerConfiguration;
 import org.praxislive.video.PlayerFactory;
 import org.praxislive.video.QueueContext;
+import org.praxislive.video.RenderingHints;
 import org.praxislive.video.VideoContext;
 import org.praxislive.video.pipes.FrameRateListener;
 import org.praxislive.video.pipes.FrameRateSource;
@@ -68,6 +69,7 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
     private int height = HEIGHT_DEFAULT;
     private double fps = FPS_DEFAULT;
     private StringProperty renderer;
+    private BooleanProperty smooth;
     private Player player;
     private VideoContext.OutputClient outputClient;
     private VideoContextImpl ctxt;
@@ -75,11 +77,13 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
 
     public DefaultVideoRoot() {
         renderer = StringProperty.builder().defaultValue(SOFTWARE).allowedValues(RENDERERS.toArray(new String[0])).build();
-
+        smooth = BooleanProperty.create(true);
+        
         registerControl("renderer", renderer);
         registerControl("width", IntProperty.create(new WidthBinding(), 1, 16384, width));
         registerControl("height", IntProperty.create(new HeightBinding(), 1, 16384, height));
         registerControl("fps", NumberProperty.create(new FpsBinding(), 1, 256, fps));
+        registerControl("smooth", smooth);
         
         ctxt = new VideoContextImpl();
     }
@@ -133,7 +137,9 @@ public class DefaultVideoRoot extends AbstractRoot implements FrameRateListener 
             clientLookup = outputClient.getLookup();
         }
         PlayerFactory factory = findPlayerFactory(library);
-        Lookup plLkp = InstanceLookup.create(new QueueContextImpl());
+        RenderingHints renderHints = new RenderingHints();
+        renderHints.setSmooth(smooth.getValue());
+        Lookup plLkp = InstanceLookup.create(renderHints, new QueueContextImpl());
         return factory.createPlayer(new PlayerConfiguration(getRootHub().getClock(), width, height, fps, plLkp),
                 new ClientConfiguration[]{
                     new ClientConfiguration(0, 1, clientLookup)

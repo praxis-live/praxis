@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -32,6 +32,7 @@ import org.praxislive.core.Lookup;
 import org.praxislive.impl.InstanceLookup;
 import org.praxislive.video.Player;
 import org.praxislive.video.QueueContext;
+import org.praxislive.video.RenderingHints;
 import org.praxislive.video.WindowHints;
 import org.praxislive.video.pipes.FrameRateListener;
 import org.praxislive.video.pipes.VideoPipe;
@@ -53,6 +54,7 @@ public class PGLPlayer implements Player {
     private final int outputWidth, outputHeight, outputRotation, outputDevice;
     private final double fps; // frames per second
     private final long frameNanos;
+    private final RenderingHints renderHints;
     private final WindowHints wHints;
     private final QueueContext queue;
     private final PGLProfile profile;
@@ -70,6 +72,7 @@ public class PGLPlayer implements Player {
             int width,
             int height,
             double fps,
+            RenderingHints renderHints,
             int outputWidth,
             int outputHeight,
             int outputRotation,
@@ -84,6 +87,7 @@ public class PGLPlayer implements Player {
         this.surfaceWidth = width;
         this.surfaceHeight = height;
         this.fps = fps;
+        this.renderHints = renderHints;
         frameNanos = (long) (1000000000.0 / fps);
         this.outputWidth = outputWidth;
         this.outputHeight = outputHeight;
@@ -276,6 +280,9 @@ public class PGLPlayer implements Player {
                 } else {
                     size(outputHeight, outputWidth, PGLGraphics.ID);
                 }
+            }
+            if (!renderHints.isSmooth()) {
+                noSmooth();
             }
         }
 
