@@ -182,6 +182,8 @@ abstract class PGraphics extends PImage {
 //
     public void resetShader() {
         g.resetShader();
+        g.resetShader(PConstants.POINTS);
+        g.resetShader(PConstants.LINES);
     }
 //
 //    public void resetShader(int kind) {
