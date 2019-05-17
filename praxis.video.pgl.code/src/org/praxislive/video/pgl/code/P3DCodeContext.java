@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -72,9 +72,9 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         }
 
         inputs = ins.toArray(new PGLVideoInputPort.Descriptor[ins.size()]);
-        
+
         offscreen = connector.extractOffScreenInfo();
-        
+
         processor = new Processor(inputs.length);
     }
 
@@ -85,9 +85,11 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         for (PGLVideoInputPort.Descriptor vidp : inputs) {
             processor.addSource(vidp.getPort().getPipe());
         }
-        configureOffScreen((P3DCodeContext) oldCtxt);
+        P3DCodeContext oldP3DCtxt = (P3DCodeContext) oldCtxt;
+        configureOffScreen(oldP3DCtxt);
+        configureProcessor(oldP3DCtxt);
     }
-    
+
     private void configureOffScreen(P3DCodeContext oldCtxt) {
         Map<String, P3DOffScreenGraphicsInfo> oldOffscreen = oldCtxt == null
                 ? Collections.EMPTY_MAP : oldCtxt.offscreen;
@@ -95,10 +97,17 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         oldOffscreen.forEach( (id, osgi) -> osgi.release());
     }
 
+    private void configureProcessor(P3DCodeContext oldP3DCtxt) {
+        if (oldP3DCtxt != null) {
+            processor.context = oldP3DCtxt.processor.context;
+            processor.p3d = oldP3DCtxt.processor.p3d;
+        }
+    }
+
     @Override
     public void starting(ExecutionContext source) {
         setupRequired = true;
-        processor.dispose3D();
+//        processor.dispose3D();
         try {
             getDelegate().init();
         } catch (Exception e) {
@@ -111,7 +120,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         processor.dispose3D();
         offscreen.forEach((id, osgi) -> osgi.release());
     }
-    
+
     @Override
     protected void tick(ExecutionContext source) {
         try {
@@ -120,16 +129,15 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
             getLog().log(LogLevel.ERROR, e, "Exception thrown during update()");
         }
     }
-    
+
     void beginOffscreen() {
         processor.pg.pushMatrix();
     }
-    
+
     void endOffscreen() {
         processor.pg.beginDraw();
         processor.pg.popMatrix();
     }
-    
 
     private class Processor extends AbstractProcessPipe {
 
@@ -173,16 +181,16 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
                 context = curCtxt;
                 p3d = context.create3DGraphics(output.getWidth(), output.getHeight());
             }
-            
+
             validateOffscreen(pglOut);
 
             p3d.beginDraw();
             p3d.clear();
-            
+
             if (pg == null || pg.width != p3d.width || pg.height != p3d.height) {
                 pg = new PGraphics(P3DCodeContext.this, p3d.width, p3d.height);
             }
-            
+
             pg.init(p3d);
             del.configure(pglOut.getContext().parent(), pg, output.getWidth(), output.getHeight());
 //            pg.resetMatrix();
@@ -190,6 +198,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
                 if (resetOnSetup) {
                     reset(false);
                 }
+                p3d.style(null);
                 try {
                     del.setup();
                 } catch (Exception ex) {
@@ -237,11 +246,11 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
                 getLog().log(LogLevel.ERROR, ex);
             }
         }
-        
+
         private void validateOffscreen(PGLSurface output) {
             offscreen.forEach((id, osgi) -> osgi.validate(output));
         }
-        
+
         private void releaseOffscreen() {
             offscreen.forEach((id, osgi) -> osgi.endFrame());
         }
@@ -322,7 +331,7 @@ public class P3DCodeContext extends CodeContext<P3DCodeDelegate> {
         protected processing.core.PImage unwrap(PGLContext context) {
             return context.asImage(surface);
         }
-        
+
         @Override
         public <T> Optional<T> find(Class<T> type) {
             if (processing.core.PImage.class.isAssignableFrom(type) &&
