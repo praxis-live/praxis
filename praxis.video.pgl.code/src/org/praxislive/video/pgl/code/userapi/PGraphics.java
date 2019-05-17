@@ -151,7 +151,8 @@ abstract class PGraphics extends PImage {
         PGLGraphics pg = context.primary();
         int prevTextureMode = pg.textureMode;
         pg.textureMode = PConstants.NORMAL;
-        PShapeOpenGL glShape = PShapeOpenGL.createShape(pg, source.unwrap(context));
+//        PShapeOpenGL glShape = PShapeOpenGL.createShape(pg, source.unwrap(context));
+        PShapeOpenGL glShape = PShapeOpenGL.createShape(pg, source.find(processing.core.PShape.class).get());
         pg.textureMode = prevTextureMode;
         return new PShape(glShape, context);
     }
