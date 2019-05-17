@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -43,16 +43,18 @@ import org.praxislive.script.impl.AbstractSingleCallFrame;
  *
  * @author Neil C Smith - http://www.neilcsmith.net
  */
-public class LibraryCommandInstaller implements CommandInstaller {
+public class CompilerCommandInstaller implements CommandInstaller {
 
     private final static AddLibsCmd ADD_LIB = new AddLibsCmd(false);
     private final static AddLibsCmd ADD_LIBS = new AddLibsCmd(true);
+    private final static JavaReleaseCmd RELEASE = new JavaReleaseCmd();
     
     
     @Override
     public void install(Map<String, Command> commands) {
         commands.put("add-lib", ADD_LIB);
         commands.put("add-libs", ADD_LIBS);
+        commands.put("java-compiler-release", RELEASE);
     }
     
     private static class AddLibsCmd implements Command {
@@ -87,6 +89,32 @@ public class LibraryCommandInstaller implements CommandInstaller {
                     .orElseThrow(ServiceUnavailableException::new);
             ControlAddress addLibsControl = ControlAddress.create(service, "add-libs");
             return Call.createCall(addLibsControl, env.getAddress(), env.getTime(), libs);
+        }
+        
+    }
+    
+    private static class JavaReleaseCmd implements Command {
+
+        @Override
+        public StackFrame createStackFrame(Namespace namespace, CallArguments args) throws ExecutionException {
+            return new JavaReleaseStackFrame(namespace, args);
+        }
+        
+    }
+    
+    private static class JavaReleaseStackFrame extends AbstractSingleCallFrame {
+        
+        JavaReleaseStackFrame(Namespace namespace, CallArguments args) {
+            super(namespace, args);
+        }
+
+        @Override
+        protected Call createCall(Env env, CallArguments args) throws Exception {
+            ComponentAddress service = env.getLookup().find(Services.class)
+                    .flatMap(sm -> sm.locate(CodeCompilerService.class))
+                    .orElseThrow(ServiceUnavailableException::new);
+            ControlAddress releaseControl = ControlAddress.create(service, "release");
+            return Call.createCall(releaseControl, env.getAddress(), env.getTime(), args);
         }
         
     }
