@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -22,6 +22,7 @@
 package org.praxislive.video.pgl;
 
 import processing.core.PImage;
+import processing.core.PStyle;
 import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
@@ -185,6 +186,15 @@ public class PGLGraphics3D extends PGraphics3D {
         if (context.current != getPrimaryPG()) {
             context.current.endDraw();
             context.current = getPrimaryPG();
+        }
+    }
+    
+    @Override
+    public void style(PStyle s) {
+        if (s == null) {
+            defaultSettings();
+        } else {
+            super.style(s);
         }
     }
     
