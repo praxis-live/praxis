@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -22,6 +22,7 @@
  */
 package org.praxislive.video.pgl.code.userapi;
 
+import java.util.Optional;
 import org.praxislive.video.pgl.PGLContext;
 
 /**
@@ -29,7 +30,7 @@ import org.praxislive.video.pgl.PGLContext;
  * @author Neil C Smith <http://neilcsmith.net>
  */
 public class PShader {
-    
+
     private final PGLContext context;
     private final processing.opengl.PShader shader;
 
@@ -37,16 +38,23 @@ public class PShader {
         this.context = context;
         this.shader = shader;
     }
-    
+
+    public <T> Optional<T> find(Class<T> type) {
+        if (processing.opengl.PShader.class.isAssignableFrom(type)) {
+            return Optional.of(type.cast(shader));
+        } else {
+            return Optional.empty();
+        }
+    }
+
     processing.opengl.PShader unwrap(PGLContext context) {
         if (this.context == context) {
             return shader;
         }
         throw new IllegalStateException("Shader context is invalid");
     }
-    
+
     // PROCESSING API
-    
     public void set(String name, int x) {
         shader.set(name, x);
     }
@@ -64,19 +72,19 @@ public class PShader {
     }
 
     public void set(String name, double x) {
-        shader.set(name, (float)x);
+        shader.set(name, (float) x);
     }
 
     public void set(String name, double x, double y) {
-        shader.set(name, (float)x, (float)y);
+        shader.set(name, (float) x, (float) y);
     }
 
     public void set(String name, double x, double y, double z) {
-        shader.set(name, (float)x, (float)y, (float)z);
+        shader.set(name, (float) x, (float) y, (float) z);
     }
 
     public void set(String name, double x, double y, double z, double w) {
-        shader.set(name, (float)x, (float)y, (float)z, (float)w);
+        shader.set(name, (float) x, (float) y, (float) z, (float) w);
     }
 
     public void set(String name, boolean x) {
@@ -98,5 +106,5 @@ public class PShader {
     public void set(String name, PImage tex) {
         shader.set(name, tex.unwrap(context));
     }
-    
+
 }

@@ -30,6 +30,7 @@
 
 package org.praxislive.video.pgl.code.userapi;
 
+import java.util.Optional;
 import org.praxislive.code.userapi.PVector;
 import org.praxislive.video.pgl.PGLContext;
 
@@ -49,6 +50,14 @@ public class PShape {
     PShape(processing.core.PShape shape, PGLContext context) {
         this.shape = shape;
         this.context = context;
+    }
+    
+    public <T> Optional<T> find(Class<T> type) {
+        if (processing.core.PShape.class.isAssignableFrom(type)) {
+            return Optional.of(type.cast(shape));
+        } else {
+            return Optional.empty();
+        }
     }
     
     processing.core.PShape unwrap(PGLContext context) {
