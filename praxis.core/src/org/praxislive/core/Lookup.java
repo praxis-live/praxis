@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -36,6 +36,14 @@ public interface Lookup {
     public <T> Optional<T> find(Class<T> type);
 
     public <T> Stream<T> findAll(Class<T> type);
+    
+    public static Lookup of(Object ... instances) {
+        return ObjectLookup.create(instances);
+    }
+    
+    public static Lookup of(Lookup parent, Object ... instances) {
+        return ObjectLookup.create(parent, instances);
+    }
 
     public interface Provider {
 
@@ -53,6 +61,50 @@ public interface Lookup {
         @Override
         public <T> Stream<T> findAll(Class<T> type) {
             return Stream.empty();
+        }
+
+    }
+
+    static class ObjectLookup implements Lookup {
+
+        private final Object[] instances;
+        private final Lookup parent;
+
+        private ObjectLookup(Object[] instances, Lookup parent) {
+            this.instances = instances;
+            this.parent = parent;
+        }
+
+        @Override
+        public <T> Optional<T> find(Class<T> type) {
+            for (Object obj : instances) {
+                if (type.isInstance(obj)) {
+                    return Optional.of(type.cast(obj));
+                }
+            }
+            return parent.find(type);
+        }
+
+        @Override
+        public <T> Stream<T> findAll(Class<T> type) {
+            return Stream.concat(Stream.of(instances)
+                    .filter(type::isInstance)
+                    .map(type::cast),
+                    parent.findAll(type));
+        }
+
+        public static ObjectLookup create(Object... instances) {
+            return create(null, instances);
+        }
+
+        public static ObjectLookup create(Lookup parent, Object... instances) {
+            if (instances == null) {
+                throw new NullPointerException();
+            }
+            if (parent == null) {
+                parent = Lookup.EMPTY;
+            }
+            return new ObjectLookup(instances.clone(), parent);
         }
 
     }
