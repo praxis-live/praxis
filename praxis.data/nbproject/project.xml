@@ -7,7 +7,7 @@
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>org.praxislive.core</code-name-base>
+                    <code-name-base>org.praxislive.base</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
@@ -15,7 +15,7 @@
                     </run-dependency>
                 </dependency>
                 <dependency>
-                    <code-name-base>org.praxislive.impl</code-name-base>
+                    <code-name-base>org.praxislive.core</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>
