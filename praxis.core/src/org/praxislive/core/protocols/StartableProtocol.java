@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -46,8 +46,8 @@ public class StartableProtocol implements Protocol {
                 new ArgumentInfo[0],
                 new ArgumentInfo[0],
                 null);;
-    public final static ControlInfo IS_RUNNING_INFO = ControlInfo.createFunctionInfo(
-                new ArgumentInfo[0],
+    public final static ControlInfo IS_RUNNING_INFO =
+            ControlInfo.createReadOnlyPropertyInfo(
                 new ArgumentInfo[]{PBoolean.info()},
                 null);;
 
