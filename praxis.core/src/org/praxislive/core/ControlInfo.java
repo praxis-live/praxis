@@ -54,7 +54,7 @@ public class ControlInfo extends Value {
 
     private volatile String string;
 
-    private ControlInfo(ArgumentInfo[] inputs,
+    ControlInfo(ArgumentInfo[] inputs,
             ArgumentInfo[] outputs,
             Value[] defaults,
             Type type,

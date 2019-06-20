@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package org.praxislive.core.info;
+package org.praxislive.core;
 
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
@@ -12,8 +12,10 @@ import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.PortInfo;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.praxislive.core.Value;
 import org.praxislive.core.ControlPort;
 import org.praxislive.core.protocols.ComponentProtocol;
@@ -97,5 +99,14 @@ public class ComponentInfoTest {
         assertTrue(info.getPortInfo("in").equivalent(info2.getPortInfo("in")));
     }
 
+    
+    @Test
+    public void testProtocols() {
+        List<Class<? extends Protocol>> protocols = info.protocols().collect(Collectors.toList());
+        assertEquals(2, protocols.size());
+        assertEquals(ComponentProtocol.class, protocols.get(0));
+        assertEquals(StartableProtocol.class, protocols.get(1));
+        
+    }
    
 }

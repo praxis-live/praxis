@@ -21,14 +21,11 @@
  */
 package org.praxislive.core;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
@@ -46,21 +43,21 @@ public class ComponentInfo extends Value {
     private final static String INFO_PREFIX = "INFO:";
 
 //    private Class<? extends Component> type;
-    private final Set<Protocol.Type<?>> protocols;
+    private final PArray protocols;
     private final PMap controls;
     private final PMap ports;
     private final PMap properties;
 
     private volatile String string;
 
-    private ComponentInfo(Set<Protocol.Type<?>> interfaces,
+    ComponentInfo(PArray protocols,
             PMap controls,
             PMap ports,
             PMap properties,
             String string
     ) {
 //        this.type = type;
-        this.protocols = interfaces;
+        this.protocols = protocols;
         this.controls = controls;
         this.ports = ports;
         this.properties = properties;
@@ -68,11 +65,20 @@ public class ComponentInfo extends Value {
     }
 
     public Stream<Class<? extends Protocol>> protocols() {
-        return protocols.stream().map(Protocol.Type::asClass);
+        return protocols.stream().map(p ->
+                Protocol.Type.fromName(p.toString()))
+                .filter(Optional::isPresent)
+                .map(o -> o.get().asClass());
     }
     
     public boolean hasProtocol(Class<? extends Protocol> protocol) {
-        return protocols().anyMatch(protocol::isAssignableFrom);
+        String name = Protocol.Type.of(protocol).name();
+        for (int i = 0; i < protocols.getSize(); i++) {
+            if (protocols.get(i).toString().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public String[] getControls() {
@@ -116,14 +122,11 @@ public class ComponentInfo extends Value {
     }
 
     private String buildString() {
-        PArray protos = protocols.stream()
-                .map(p -> PString.valueOf(p.name()))
-                .collect(PArray.collector());
         PArray arr = PArray.valueOf(
                 PString.valueOf(INFO_PREFIX),
                 controls,
                 ports,
-                protos,
+                protocols,
                 properties
         );
         return arr.toString();           
@@ -174,7 +177,7 @@ public class ComponentInfo extends Value {
     public static ComponentInfo create(
             Map<String, ControlInfo> controls,
             Map<String, PortInfo> ports,
-            Set<Class<? extends Protocol>> interfaces,
+            Set<Class<? extends Protocol>> protocols,
             PMap properties) {
 
         PMap ctrls;
@@ -197,18 +200,10 @@ public class ComponentInfo extends Value {
             }
             prts = pBld.build();
         }
-        Set<Protocol.Type<?>> protos;
-        if (interfaces == null || interfaces.isEmpty()) {
-            protos = Collections.emptySet();
-        } else {
-            protos = interfaces.stream()
-                    .map(cls -> Protocol.Type.of(cls))
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
-            protos = Collections.unmodifiableSet(protos);
-        }
-        if (properties == null) {
-            properties = PMap.EMPTY;
-        }
+        PArray protos = protocols.stream()
+                .map(p -> Protocol.Type.of(p).name())
+                .map(PString::valueOf)
+                .collect(PArray.collector());
 
         return new ComponentInfo(protos, ctrls, prts, properties, null);
 
@@ -278,17 +273,9 @@ public class ComponentInfo extends Value {
             }
 
             // optional arr(3) is interfaces
-            Set<Protocol.Type<?>> protocols;
+            PArray protocols = PArray.EMPTY;
             if (arr.getSize() > 3) {
-                PArray ints = PArray.coerce(arr.get(3));
-                protocols = ints.stream()
-                        .map(s -> Protocol.Type.fromName(s.toString()))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toCollection(LinkedHashSet::new));
-                protocols = Collections.unmodifiableSet(protocols);
-            } else {
-                protocols = Collections.emptySet();
+                protocols = PArray.coerce(arr.get(3));
             }
 
             // optional arr(4) is properties

@@ -96,6 +96,9 @@ public abstract class Value {
         Type<?> type;
         while ((type = Type.typesByClass.get(cls)) == null) {
             cls = cls.getSuperclass();
+            if (cls == null) {
+                throw new IllegalStateException();
+            }
         }
         return type;
     } 

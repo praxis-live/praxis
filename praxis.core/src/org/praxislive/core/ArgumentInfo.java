@@ -55,7 +55,7 @@ public final class ArgumentInfo extends Value {
 
     private volatile String string;
 
-    private ArgumentInfo(Value.Type<? extends Value> type,
+    ArgumentInfo(Value.Type<? extends Value> type,
             Presence presence,
             PMap properties,
             String string) {

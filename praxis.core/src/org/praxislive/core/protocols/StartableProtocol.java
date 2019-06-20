@@ -23,7 +23,9 @@ package org.praxislive.core.protocols;
 
 import java.util.stream.Stream;
 import org.praxislive.core.ArgumentInfo;
+import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.ControlInfo;
+import org.praxislive.core.Info;
 import org.praxislive.core.Protocol;
 import org.praxislive.core.types.PBoolean;
 
@@ -51,6 +53,12 @@ public class StartableProtocol implements Protocol {
                 new ArgumentInfo[]{PBoolean.info()},
                 null);;
 
+    public static final ComponentInfo API_INFO = Info.component(cmp -> cmp
+            .protocol(StartableProtocol.class)
+            .control(START, START_INFO)
+            .control(STOP, STOP_INFO)
+            .control(IS_RUNNING, IS_RUNNING_INFO)
+    );
  
 
     @Override

@@ -39,7 +39,7 @@ public final class PortInfo extends Value {
     
     private volatile String string;
 
-    private PortInfo(Port.Type<? extends Port> type,
+    PortInfo(Port.Type<? extends Port> type,
             Direction direction,
             PMap properties,
             String string) {

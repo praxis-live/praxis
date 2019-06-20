@@ -24,7 +24,9 @@ package org.praxislive.core.protocols;
 import java.util.stream.Stream;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.ArgumentInfo;
+import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.ControlInfo;
+import org.praxislive.core.Info;
 import org.praxislive.core.Protocol;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
@@ -44,41 +46,49 @@ public class ContainerProtocol implements Protocol {
     public final static String DISCONNECT = "disconnect";
     public final static String CONNECTIONS = "connections";
     private final static ArgumentInfo STRING = PString.info();
-    public final static ControlInfo ADD_CHILD_INFO =
-            ControlInfo.createFunctionInfo(
-            new ArgumentInfo[]{STRING, ComponentType.info()},
-            new ArgumentInfo[0],
-            PMap.EMPTY);
-    public final static ControlInfo REMOVE_CHILD_INFO =
-            ControlInfo.createFunctionInfo(
-            new ArgumentInfo[]{STRING},
-            new ArgumentInfo[0],
-            PMap.EMPTY);
-    public final static ControlInfo CHILDREN_INFO =
-            ControlInfo.createReadOnlyPropertyInfo(
-            new ArgumentInfo[]{PArray.info()},
-            PMap.EMPTY);
-    public final static ControlInfo CONNECT_INFO =
-            ControlInfo.createFunctionInfo(
-            new ArgumentInfo[]{STRING, STRING, STRING, STRING},
-            new ArgumentInfo[0],
-            PMap.EMPTY);
-    public final static ControlInfo DISCONNECT_INFO =
-            ControlInfo.createFunctionInfo(
-            new ArgumentInfo[]{STRING, STRING, STRING, STRING},
-            new ArgumentInfo[0],
-            PMap.EMPTY);
-    public final static ControlInfo CONNECTIONS_INFO =
-            ControlInfo.createReadOnlyPropertyInfo(
-            new ArgumentInfo[]{PArray.info()},
-            PMap.EMPTY);
+    public final static ControlInfo ADD_CHILD_INFO
+            = ControlInfo.createFunctionInfo(
+                    new ArgumentInfo[]{STRING, ComponentType.info()},
+                    new ArgumentInfo[0],
+                    PMap.EMPTY);
+    public final static ControlInfo REMOVE_CHILD_INFO
+            = ControlInfo.createFunctionInfo(
+                    new ArgumentInfo[]{STRING},
+                    new ArgumentInfo[0],
+                    PMap.EMPTY);
+    public final static ControlInfo CHILDREN_INFO
+            = ControlInfo.createReadOnlyPropertyInfo(
+                    new ArgumentInfo[]{PArray.info()},
+                    PMap.EMPTY);
+    public final static ControlInfo CONNECT_INFO
+            = ControlInfo.createFunctionInfo(
+                    new ArgumentInfo[]{STRING, STRING, STRING, STRING},
+                    new ArgumentInfo[0],
+                    PMap.EMPTY);
+    public final static ControlInfo DISCONNECT_INFO
+            = ControlInfo.createFunctionInfo(
+                    new ArgumentInfo[]{STRING, STRING, STRING, STRING},
+                    new ArgumentInfo[0],
+                    PMap.EMPTY);
+    public final static ControlInfo CONNECTIONS_INFO
+            = ControlInfo.createReadOnlyPropertyInfo(
+                    new ArgumentInfo[]{PArray.info()},
+                    PMap.EMPTY);
 
-
+    public static final ComponentInfo API_INFO = Info.component(cmp -> cmp
+            .protocol(ContainerProtocol.class)
+            .control(ADD_CHILD, ADD_CHILD_INFO)
+            .control(REMOVE_CHILD, REMOVE_CHILD_INFO)
+            .control(CHILDREN, CHILDREN_INFO)
+            .control(CONNECT, CONNECT_INFO)
+            .control(DISCONNECT, DISCONNECT_INFO)
+            .control(CONNECTIONS, CONNECTIONS_INFO)
+    );
 
     @Override
     public Stream<String> controls() {
         return Stream.of(ADD_CHILD, REMOVE_CHILD, CHILDREN,
-        CONNECT, DISCONNECT, CONNECTIONS);
+                CONNECT, DISCONNECT, CONNECTIONS);
     }
 
     @Override
@@ -104,5 +114,3 @@ public class ContainerProtocol implements Protocol {
         throw new IllegalArgumentException();
     }
 }
-
-
