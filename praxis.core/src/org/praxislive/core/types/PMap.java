@@ -300,6 +300,7 @@ public class PMap extends Value {
 //            return this;
 //        }
         
+        @Deprecated
         public Builder put(PString key, Value value) {
             if (key == null || value == null) {
                 throw new NullPointerException();
@@ -315,7 +316,7 @@ public class PMap extends Value {
 //        }
         
         public Builder put(String key, Value value) {
-            put(PString.valueOf(key), value);
+            putImpl(PString.valueOf(key), value);
             return this;
         }
 
@@ -336,6 +337,11 @@ public class PMap extends Value {
 
         public Builder put(String key, String value) {
             putImpl(PString.valueOf(key), PString.valueOf(value));
+            return this;
+        }
+        
+        public Builder put(String key, Object value) {
+            putImpl(PString.valueOf(key), objToValue(value));
             return this;
         }
 
