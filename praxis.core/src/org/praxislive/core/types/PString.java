@@ -102,7 +102,7 @@ public class PString extends Value implements Comparable<PString> {
         return ArgumentInfo.create(PString.class, null);
     }
     
-    public static ArgumentInfo info(String[] allowed) {
+    public static ArgumentInfo info(String ... allowed) {
         if (allowed == null) {
             return info();
         } else {
