@@ -21,20 +21,12 @@
  */
 package org.praxislive.data;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
 import org.praxislive.base.AbstractRootContainer;
 import org.praxislive.core.ComponentInfo;
-import org.praxislive.core.ControlInfo;
 import org.praxislive.core.Info;
-import org.praxislive.core.Protocol;
 import org.praxislive.core.protocols.ComponentProtocol;
 import org.praxislive.core.protocols.ContainerProtocol;
 import org.praxislive.core.protocols.StartableProtocol;
-import org.praxislive.core.types.PMap;
 
 
 /**
@@ -54,7 +46,7 @@ public class DataRoot extends AbstractRootContainer {
     }
 
     @Override
-    protected ComponentInfo getInfo() {
+    public ComponentInfo getInfo() {
         return INFO;
     }
     

@@ -106,14 +106,18 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             throw new VetoException("Child ID already in use");
         }
         try {
-            child.parentNotify(this);
+            notifyChild(child);
         } catch (VetoException ex) {
             childMap.remove(id);
             throw new VetoException();
         }
         child.hierarchyChanged();
     }
-
+    
+    protected void notifyChild(Component child) throws VetoException {
+        child.parentNotify(this);
+    }
+    
     protected Component removeChild(String id) {
         Component child = childMap.remove(id);
         if (child != null) {

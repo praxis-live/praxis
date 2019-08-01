@@ -30,6 +30,8 @@ import org.praxislive.core.Control;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.PacketRouter;
+import org.praxislive.core.Port;
+import org.praxislive.core.VetoException;
 import org.praxislive.core.protocols.StartableProtocol;
 import org.praxislive.core.types.PBoolean;
 import org.praxislive.core.types.PError;
@@ -38,13 +40,13 @@ import org.praxislive.core.types.PString;
 /**
  *
  */
-public abstract class AbstractRootContainer extends AbstractRoot {
+public abstract class AbstractRootContainer extends AbstractRoot implements Container {
 
-    private final ContainerImpl container;
+    private final ContainerImpl delegate;
     private ComponentAddress address;
 
     protected AbstractRootContainer() {
-        container = new ContainerImpl();
+        delegate = new ContainerImpl(this);
         registerControl(StartableProtocol.START, (call, router) -> {
             setRunning();
             router.route(Call.createReturnCall(call));
@@ -58,6 +60,48 @@ public abstract class AbstractRootContainer extends AbstractRoot {
                     PBoolean.valueOf(getState() == State.ACTIVE_RUNNING)));
         });
     }
+
+    @Override
+    public Component getChild(String id) {
+        return delegate.getChild(id);
+    }
+
+    @Override
+    public String[] getChildIDs() {
+        return delegate.getChildIDs();
+    }
+
+    @Override
+    public ComponentAddress getAddress(Component child) {
+        return delegate.getAddress(child);
+    }
+
+    @Override
+    public Container getParent() {
+        return null;
+    }
+
+    @Override
+    public void parentNotify(Container parent) throws VetoException {
+        throw new VetoException();
+    }
+
+    @Override
+    public void hierarchyChanged() {
+    }
+
+    @Override
+    public Control getControl(String id) {
+        return delegate.getControl(id);
+    }
+
+    @Override
+    public Port getPort(String id) {
+        return delegate.getPort(id);
+    }
+
+    @Override
+    public abstract ComponentInfo getInfo();
 
     @Override
     protected void processCall(Call call, PacketRouter router) {
@@ -80,14 +124,12 @@ public abstract class AbstractRootContainer extends AbstractRoot {
     }
 
     protected final void registerControl(String id, Control control) {
-        container.registerControl(id, control);
+        delegate.registerControl(id, control);
     }
 
     protected final void unregisterControl(String id) {
-        container.unregisterControl(id);
+        delegate.unregisterControl(id);
     }
-    
-    protected abstract ComponentInfo getInfo();
 
     private Control findControl(ControlAddress address) {
         Component comp = findComponent(address.getComponentAddress());
@@ -99,7 +141,7 @@ public abstract class AbstractRootContainer extends AbstractRoot {
     }
 
     private Component findComponent(ComponentAddress address) {
-        Component comp = container;
+        Component comp = delegate;
         for (int i = 1; i < address.getDepth(); i++) {
             if (comp instanceof Container) {
                 comp = ((Container) comp).getChild(address.getComponentID(i));
@@ -109,7 +151,7 @@ public abstract class AbstractRootContainer extends AbstractRoot {
         }
         return comp;
     }
-    
+
     private ComponentAddress getAddress() {
         if (address == null) {
             address = ComponentAddress.create("/" + getID());
@@ -117,25 +159,36 @@ public abstract class AbstractRootContainer extends AbstractRoot {
         return address;
     }
 
-    private class ContainerImpl extends AbstractContainer {
+    private static class ContainerImpl extends AbstractContainer {
+        
+        private final AbstractRootContainer wrapper;
+        
+        private ContainerImpl(AbstractRootContainer wrapper) {
+            this.wrapper = wrapper;
+        }
 
         @Override
         public ComponentInfo getInfo() {
-            return AbstractRootContainer.this.getInfo();
+            return wrapper.getInfo();
         }
 
         @Override
         public Lookup getLookup() {
-            return AbstractRootContainer.this.getLookup();
+            return wrapper.getLookup();
         }
 
         @Override
         protected ComponentAddress getAddress() {
-            return AbstractRootContainer.this.getAddress();
+            return wrapper.getAddress();
         }
 
+        @Override
+        protected void notifyChild(Component child) throws VetoException {
+            child.parentNotify(wrapper);
+        }
         
         
+
     }
 
 }
