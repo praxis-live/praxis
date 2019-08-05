@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -21,35 +21,77 @@
  */
 package org.praxislive.hub;
 
-import java.util.EnumSet;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.praxislive.base.AbstractAsyncControl;
+import org.praxislive.base.AbstractRoot;
 import org.praxislive.core.Call;
 import org.praxislive.core.Component;
 import org.praxislive.core.services.ComponentFactory;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.Root;
-import org.praxislive.core.ControlInfo;
+import org.praxislive.core.PacketRouter;
+import org.praxislive.core.RootHub;
 import org.praxislive.core.services.ComponentFactoryService;
 import org.praxislive.core.services.RootFactoryService;
+import org.praxislive.core.services.Service;
+import org.praxislive.core.services.Services;
+import org.praxislive.core.types.PError;
 import org.praxislive.core.types.PReference;
-import org.praxislive.impl.AbstractAsyncControl;
-import org.praxislive.impl.AbstractRoot;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-class DefaultComponentFactoryService extends AbstractRoot {
+class DefaultComponentFactoryService extends AbstractRoot
+        implements RootHub.ServiceProvider {
 
     private final ComponentRegistry registry;
+    private final NewInstanceControl newInstance;
+    private final NewRootInstanceControl newRoot;
 
     public DefaultComponentFactoryService() {
-        super(EnumSet.noneOf(Caps.class));
         registry = ComponentRegistry.getInstance();
-        registerControl(ComponentFactoryService.NEW_INSTANCE, new NewInstanceControl());
-        registerControl(RootFactoryService.NEW_ROOT_INSTANCE, new NewRootInstanceControl());
-        registerProtocol(ComponentFactoryService.class);
-        registerProtocol(RootFactoryService.class);
+        newInstance = new NewInstanceControl();
+        newRoot = new NewRootInstanceControl();
+    }
+
+    @Override
+    public List<Class<? extends Service>> services() {
+        return Stream.of(ComponentFactoryService.class,
+                RootFactoryService.class)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    protected void processCall(Call call, PacketRouter router) {
+        switch (call.getToAddress().getID()) {
+            case ComponentFactoryService.NEW_INSTANCE: {
+                try {
+                    newInstance.call(call, router);
+                } catch (Exception ex) {
+                    router.route(Call.createErrorCall(call, PError.create(ex)));
+                }
+            }
+            break;
+            case RootFactoryService.NEW_ROOT_INSTANCE: {
+                try {
+                    newRoot.call(call, router);
+                } catch (Exception ex) {
+                    router.route(Call.createErrorCall(call, PError.create(ex)));
+                }
+            }
+            break;
+            default:
+                if (call.getType() == Call.Type.INVOKE ||
+                        call.getType() == Call.Type.INVOKE_QUIET) {
+                    router.route(Call.createErrorCall(call));
+                }
+
+        }
+
     }
 
     private class NewInstanceControl extends AbstractAsyncControl {
@@ -59,11 +101,15 @@ class DefaultComponentFactoryService extends AbstractRoot {
             ComponentType type = ComponentType.coerce(call.getArgs().get(0));
             ComponentFactory factory = registry.getComponentFactory(type);
             if (factory.getFactoryService() != ComponentFactoryService.class) {
-                ControlAddress altFactory = 
-                        ControlAddress.create(
-                                findService(factory.getFactoryService()),
-                                        ComponentFactoryService.NEW_INSTANCE);
-                return Call.createCall(altFactory, getAddress(), call.getTimecode(), call.getArgs());
+                ControlAddress altFactory = getLookup().find(Services.class)
+                        .flatMap(srvs -> srvs.locate(factory.getFactoryService()))
+                        .map(cmp -> ControlAddress.create(cmp, ComponentFactoryService.NEW_INSTANCE))
+                        .orElseThrow(() -> new IllegalStateException("Alternative factory service not found"));
+                        
+                return Call.createCall(altFactory,
+                        call.getToAddress(),
+                        call.getTimecode(),
+                        call.getArgs());
             } else {
                 Component component = factory.createComponent(type);
                 return Call.createReturnCall(call, PReference.wrap(component));
@@ -75,10 +121,6 @@ class DefaultComponentFactoryService extends AbstractRoot {
             return Call.createReturnCall(getActiveCall(), call.getArgs());
         }
 
-        @Override
-        public ControlInfo getInfo() {
-            return ComponentFactoryService.NEW_INSTANCE_INFO;
-        }
     }
 
     private class NewRootInstanceControl extends AbstractAsyncControl {
@@ -96,10 +138,6 @@ class DefaultComponentFactoryService extends AbstractRoot {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
-        @Override
-        public ControlInfo getInfo() {
-            return RootFactoryService.NEW_ROOT_INSTANCE_INFO;
-        }
     }
 
 }

@@ -19,17 +19,18 @@
  * Please visit https://www.praxislive.org if you need additional information or
  * have any questions.
  */
-
 package org.praxislive.hub;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.praxislive.base.AbstractAsyncControl;
+import org.praxislive.base.AbstractRoot;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.Component;
@@ -38,54 +39,51 @@ import org.praxislive.core.ControlAddress;
 import org.praxislive.core.Root;
 import org.praxislive.core.RootHub;
 import org.praxislive.core.ComponentInfo;
-import org.praxislive.core.ControlInfo;
+import org.praxislive.core.Control;
+import org.praxislive.core.PacketRouter;
 import org.praxislive.core.services.RootFactoryService;
 import org.praxislive.core.services.RootManagerService;
 import org.praxislive.core.services.Service;
+import org.praxislive.core.services.Services;
 import org.praxislive.core.types.PArray;
+import org.praxislive.core.types.PError;
 import org.praxislive.core.types.PReference;
 import org.praxislive.core.types.PString;
-import org.praxislive.impl.AbstractAsyncControl;
-import org.praxislive.impl.AbstractRoot;
-import org.praxislive.impl.SimpleControl;
 
 /**
  *
- * @author Neil C Smith <http://neilcsmith.net>
  */
-@Deprecated
-public class DefaultCoreRoot extends AbstractRoot {
-    
-    private final static Logger LOG = Logger.getLogger(DefaultCoreRoot.class.getName());
-    
+public class BasicCoreRoot extends AbstractRoot {
+
+    private final static Logger LOG = Logger.getLogger(BasicCoreRoot.class.getName());
+
     private final Hub.Accessor hubAccess;
     private final List<Root> exts;
-    
-    private RootHub rootHub;
-    private Root.Controller controller;
-    private String ID;
-    
-    protected DefaultCoreRoot(Hub.Accessor hubAccess, List<Root> exts) {
-        super(EnumSet.noneOf(Caps.class));
-        if (hubAccess == null || exts == null) {
-            throw new NullPointerException();
-        }
-        this.hubAccess = hubAccess;
-        this.exts = exts;
+    private final AddRootControl addRoot;
+    private final RemoveRootControl removeRoot;
+    private final RootsControl roots;
+
+    private Controller controller;
+
+    protected BasicCoreRoot(Hub.Accessor hubAccess, List<Root> exts) {
+        this.hubAccess = Objects.requireNonNull(hubAccess);
+        this.exts = Objects.requireNonNull(exts);
+        this.addRoot = new AddRootControl();
+        this.removeRoot = new RemoveRootControl();
+        this.roots = new RootsControl();
     }
 
     @Override
-    public Root.Controller initialize(String ID, RootHub hub) {
-        controller = super.initialize(ID, hub);
-        this.ID = ID;
-        return controller;
+    public Controller initialize(String id, RootHub hub) {
+        Controller ctrl = super.initialize(id, hub);
+        this.controller = ctrl;
+        return ctrl;
     }
-    
-    
 
     @Override
     protected void activating() {
-        createDefaultControls();
+        hubAccess.registerService(RootManagerService.class,
+                ComponentAddress.create("/" + getID()));
         installExtensions();
     }
 
@@ -96,28 +94,33 @@ public class DefaultCoreRoot extends AbstractRoot {
             uninstallRoot(id);
         }
     }
-    
+
     protected void forceTermination() {
         controller.shutdown();
         interrupt();
     }
     
-    protected String getID() {
-        return ID;
+    @Override
+    protected void processCall(Call call, PacketRouter router) {
+        try {
+            switch (call.getToAddress().getID()) {
+                case RootManagerService.ADD_ROOT:
+                    addRoot.call(call, router);
+                    break;
+                case RootManagerService.REMOVE_ROOT:
+                    removeRoot.call(call, router);
+                    break;
+                case RootManagerService.ROOTS:
+                    roots.call(call, router);
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        } catch (Exception ex) {
+            router.route(Call.createErrorCall(call, PError.create(ex)));
+        }
     }
-    
-    protected void createDefaultControls() {
-        createRootManagerService();
-    }
-    
-    protected void createRootManagerService() {
-        registerControl(RootManagerService.ADD_ROOT, new AddRootControl());
-        registerControl(RootManagerService.REMOVE_ROOT, new RemoveRootControl());
-        registerControl(RootManagerService.ROOTS, new RootsControl());
-        registerProtocol(RootManagerService.class);
-        hubAccess.registerService(RootManagerService.class, getAddress());
-    }
-    
+
     protected void installExtensions() {
         for (Root ext : exts) {
             List<Class<? extends Service>> services = extractServices(ext);
@@ -137,7 +140,7 @@ public class DefaultCoreRoot extends AbstractRoot {
             }
         }
     }
-    
+
     private List<Class<? extends Service>> extractServices(Root root) {
         if (root instanceof RootHub.ServiceProvider) {
             return ((RootHub.ServiceProvider) root).services();
@@ -152,7 +155,7 @@ public class DefaultCoreRoot extends AbstractRoot {
             return Collections.EMPTY_LIST;
         }
     }
-    
+
     protected void installRoot(String id, String type, Root root)
             throws Exception {
         if (!ComponentAddress.isValidID(id) || hubAccess.getRootController(id) != null) {
@@ -165,26 +168,29 @@ public class DefaultCoreRoot extends AbstractRoot {
             assert false;
         }
     }
-    
+
     protected void uninstallRoot(String id) {
         Root.Controller ctrl = hubAccess.unregisterRootController(id);
         if (ctrl != null) {
             ctrl.shutdown();
         }
     }
-    
+
     protected void startRoot(final String id, String type, final Root.Controller ctrl) {
         ctrl.start(r -> new Thread(r, id));
     }
-    
+
     protected Hub.Accessor getHubAccessor() {
         return hubAccess;
     }
-    
+
     public static Hub.CoreRootFactory factory() {
         return new Factory();
     }
+
     
+
+
     private class AddRootControl extends AbstractAsyncControl {
 
         @Override
@@ -196,10 +202,11 @@ public class DefaultCoreRoot extends AbstractRoot {
             if (!ComponentAddress.isValidID(args.get(0).toString())) {
                 throw new IllegalArgumentException("Invalid Component ID");
             }
-            ControlAddress to = ControlAddress.create(
-                    findService(RootFactoryService.class),
-                    RootFactoryService.NEW_ROOT_INSTANCE);
-            return Call.createCall(to, getAddress(), call.getTimecode(), args.get(1));
+            ControlAddress to = getLookup().find(Services.class)
+                    .flatMap(srvs -> srvs.locate(RootFactoryService.class))
+                    .map(cmp -> ControlAddress.create(cmp, RootFactoryService.NEW_ROOT_INSTANCE))
+                    .orElseThrow(() -> new IllegalStateException("Root factory service not found"));
+            return Call.createCall(to, call.getToAddress(), call.getTimecode(), args.get(1));
         }
 
         @Override
@@ -217,64 +224,61 @@ public class DefaultCoreRoot extends AbstractRoot {
             return Call.createReturnCall(active, CallArguments.EMPTY);
         }
 
-        @Override
-        public ControlInfo getInfo() {
-            return RootManagerService.ADD_ROOT_INFO;
-        }
-        
-    }
-    
-    private class RemoveRootControl extends SimpleControl {
-
-        private RemoveRootControl() {
-            super(RootManagerService.REMOVE_ROOT_INFO);
-        }
-        
-        @Override
-        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
-            String id = args.get(0).toString();
-            uninstallRoot(id);
-            return CallArguments.EMPTY;
-        }
-        
     }
 
-    private class RootsControl extends SimpleControl {
+    private class RemoveRootControl implements Control {
+
+        @Override
+        public void call(Call call, PacketRouter router) throws Exception {
+            switch (call.getType()) {
+                case INVOKE:
+                case INVOKE_QUIET:
+                    String id = call.getArgs().get(0).toString();
+                    uninstallRoot(id);
+                    router.route(Call.createReturnCall(call));
+                    break;
+                default:
+                    throw new IllegalArgumentException();
+            }
+        }
+
+    }
+
+    private class RootsControl implements Control {
 
         private String[] knownIDs;
         private PArray ret;
-        
+
         private RootsControl() {
-            super(RootManagerService.ROOTS_INFO);
             knownIDs = new String[0];
             ret = PArray.EMPTY;
         }
 
         @Override
-        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
-            String[] ids = hubAccess.getRootIDs();
-            if (!Arrays.equals(ids, knownIDs)) {
-                knownIDs = ids;
-                List<PString> list = new ArrayList<>(ids.length);
-                for (String id : ids) {
-                    list.add(PString.valueOf(id));
-                }
-                ret = PArray.valueOf(list);
+        public void call(Call call, PacketRouter router) throws Exception {
+            switch (call.getType()) {
+                case INVOKE:
+                case INVOKE_QUIET:
+                    String[] ids = hubAccess.getRootIDs();
+                    if (!Arrays.equals(ids, knownIDs)) {
+                        knownIDs = ids;
+                        ret = Stream.of(ids).map(PString::valueOf).collect(PArray.collector());
+                        router.route(Call.createReturnCall(call, ret));
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException();
             }
-            return CallArguments.create(ret);
         }
-
-
-
     }
-    
+
     private static class Factory extends Hub.CoreRootFactory {
 
         @Override
         public Root createCoreRoot(Hub.Accessor accessor, List<Root> extensions) {
-            return new DefaultCoreRoot(accessor, extensions);
+            return new BasicCoreRoot(accessor, extensions);
         }
-        
+
     }
-    
+
 }

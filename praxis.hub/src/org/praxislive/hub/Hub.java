@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -29,12 +29,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.praxislive.core.Clock;
@@ -270,7 +266,7 @@ public final class Hub {
     public static abstract class CoreRootFactory {
 
         public abstract Root createCoreRoot(Accessor accessor, List<Root> extensions);
-
+        
         public Lookup extendLookup(Lookup lookup) {
             return lookup;
         }
@@ -286,7 +282,7 @@ public final class Hub {
         private Builder() {
             extensions = new ArrayList<>();
             lookupContent = new ArrayList<>();
-            coreRootFactory = DefaultCoreRoot.factory();
+            coreRootFactory = BasicCoreRoot.factory();
             extensions.addAll(findDefaultExtensions());
         }
        
