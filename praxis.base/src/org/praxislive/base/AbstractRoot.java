@@ -118,10 +118,10 @@ public abstract class AbstractRoot implements Root {
     public Lookup getLookup() {
         return lookup;
     }
-    
+
     /**
      * Get the ID of this Root.
-     * 
+     *
      * @return ID
      */
     protected final String getID() {
@@ -136,6 +136,16 @@ public abstract class AbstractRoot implements Root {
      */
     protected final RootHub getRootHub() {
         return hub;
+    }
+
+    /**
+     * Get the {@link PacketRouter} for this Root. Only valid after
+     * initialization.
+     *
+     * @return
+     */
+    protected final PacketRouter getRouter() {
+        return router;
     }
 
     /**
@@ -420,7 +430,8 @@ public abstract class AbstractRoot implements Root {
         private ScheduledExecutorService exec;
         private ScheduledFuture<?> updateTask;
         private ThreadFactory threadFactory;
-
+        private boolean ownsScheduler;
+        
         @Override
         public boolean submitPacket(Packet packet) {
             boolean ok = queue.offer(packet);
@@ -436,7 +447,11 @@ public abstract class AbstractRoot implements Root {
                 this.threadFactory = threadFactory;
                 this.exec = hub.getLookup()
                         .find(ScheduledExecutorService.class)
-                        .orElse(Executors.newScheduledThreadPool(1, threadFactory));
+                        .orElse(null);
+                if (exec == null) {
+                    exec = Executors.newScheduledThreadPool(1, threadFactory);
+                    ownsScheduler = true;
+                }
                 this.exec.execute(this::doActivate);
             } else {
                 throw new IllegalStateException();
@@ -463,7 +478,7 @@ public abstract class AbstractRoot implements Root {
                 exec.execute(this::doPoll);
             }
         }
-        
+
         private void doActivate() {
             try {
                 activating();
@@ -529,7 +544,9 @@ public abstract class AbstractRoot implements Root {
                         LOG.log(Level.SEVERE, "Uncaught error in termination", t);
                     }
                     context.updateState(hub.getClock().getTime(), ExecutionContext.State.TERMINATED);
-//                    disconnect();
+                    if (ownsScheduler) {
+                        exec.shutdown();
+                    }
                 } else {
                     s = state.get();
                 }
@@ -632,13 +649,15 @@ public abstract class AbstractRoot implements Root {
          * @throws InterruptedException
          */
         protected final void doTimedPoll(long time, TimeUnit unit) throws InterruptedException {
-            if (pollLock.tryLock() && pollCondition.await(time, unit)) {
+            if (pollLock.tryLock()) {
                 try {
-                    if (delegate.get() == this) {
-                        try {
-                            pollQueue();
-                        } catch (Throwable t) {
-                            LOG.log(Level.SEVERE, "Uncaught error", t);
+                    if (pollCondition.await(time, unit)) {
+                        if (delegate.get() == this) {
+                            try {
+                                pollQueue();
+                            } catch (Throwable t) {
+                                LOG.log(Level.SEVERE, "Uncaught error", t);
+                            }
                         }
                     }
                 } finally {
