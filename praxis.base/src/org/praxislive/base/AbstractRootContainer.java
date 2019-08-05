@@ -43,7 +43,6 @@ import org.praxislive.core.types.PString;
 public abstract class AbstractRootContainer extends AbstractRoot implements Container {
 
     private final ContainerImpl delegate;
-    private ComponentAddress address;
 
     protected AbstractRootContainer() {
         delegate = new ContainerImpl(this);
@@ -150,13 +149,6 @@ public abstract class AbstractRootContainer extends AbstractRoot implements Cont
             }
         }
         return comp;
-    }
-
-    private ComponentAddress getAddress() {
-        if (address == null) {
-            address = ComponentAddress.create("/" + getID());
-        }
-        return address;
     }
 
     private static class ContainerImpl extends AbstractContainer {

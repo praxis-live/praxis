@@ -35,12 +35,16 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.praxislive.core.Call;
+import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ExecutionContext;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.Packet;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Root;
 import org.praxislive.core.RootHub;
+import org.praxislive.core.services.Service;
+import org.praxislive.core.services.ServiceUnavailableException;
+import org.praxislive.core.services.Services;
 
 /**
  * A general purpose base implementation of {@link Root}. By default uses a
@@ -73,7 +77,7 @@ public abstract class AbstractRoot implements Root {
     private volatile long time;
 
     private Lookup lookup;
-    private String id;
+    private ComponentAddress address;
     private RootHub hub;
     private DefaultExecutionContext context;
     private Controller controller;
@@ -99,7 +103,7 @@ public abstract class AbstractRoot implements Root {
             if (id == null || hub == null) {
                 throw new NullPointerException();
             }
-            this.id = id;
+            this.address = ComponentAddress.create("/" + id);
             this.hub = hub;
             this.time = hub.getClock().getTime();
             this.pendingPackets = new PacketQueue(time);
@@ -120,12 +124,26 @@ public abstract class AbstractRoot implements Root {
     }
 
     /**
-     * Get the ID of this Root.
+     * Find a Service address in the lookup.
      *
-     * @return ID
+     * @param service
+     * @return service address
+     * @throws ServiceUnavailableException
      */
-    protected final String getID() {
-        return id;
+    protected ComponentAddress findService(Class<? extends Service> service)
+            throws ServiceUnavailableException {
+        return getLookup().find(Services.class)
+                .flatMap(sm -> sm.locate(service))
+                .orElseThrow(ServiceUnavailableException::new);
+    }
+
+    /**
+     * Get the address of this Root. Only valid after initialization.
+     *
+     * @return address
+     */
+    protected final ComponentAddress getAddress() {
+        return address;
     }
 
     /**
@@ -142,10 +160,20 @@ public abstract class AbstractRoot implements Root {
      * Get the {@link PacketRouter} for this Root. Only valid after
      * initialization.
      *
-     * @return
+     * @return router
      */
     protected final PacketRouter getRouter() {
         return router;
+    }
+
+    /**
+     * Get the {@link ExecutionContext} for this Root. Only valid after
+     * initialization.
+     *
+     * @return execution context
+     */
+    protected final ExecutionContext getExecutionContext() {
+        return context;
     }
 
     /**
@@ -431,7 +459,7 @@ public abstract class AbstractRoot implements Root {
         private ScheduledFuture<?> updateTask;
         private ThreadFactory threadFactory;
         private boolean ownsScheduler;
-        
+
         @Override
         public boolean submitPacket(Packet packet) {
             boolean ok = queue.offer(packet);
