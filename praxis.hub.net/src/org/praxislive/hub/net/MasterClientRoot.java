@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -27,23 +27,22 @@ import de.sciss.net.OSCMessage;
 import de.sciss.net.OSCPacket;
 import java.io.IOException;
 import java.net.SocketAddress;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.praxislive.base.AbstractRoot;
 import org.praxislive.core.Call;
-import org.praxislive.core.CallArguments;
 import org.praxislive.core.Clock;
+import org.praxislive.core.Control;
 import org.praxislive.core.ExecutionContext;
 import org.praxislive.core.PacketRouter;
-import org.praxislive.core.ControlInfo;
 import org.praxislive.core.services.RootManagerService;
 import org.praxislive.core.services.Service;
 import org.praxislive.core.services.ServiceUnavailableException;
+import org.praxislive.core.types.PError;
 import org.praxislive.core.types.PMap;
-import org.praxislive.impl.AbstractRoot;
 
 /**
  *
@@ -59,19 +58,20 @@ class MasterClientRoot extends AbstractRoot {
     private final Dispatcher dispatcher;
     private final SlaveInfo slaveInfo;
     private final FileServer.Info fileServerInfo;
+    private final Control addRootControl;
+    private final Control removeRootControl;
 
     private OSCClient client;
     private long lastPurgeTime;
     private Watchdog watchdog;
     
     MasterClientRoot(SlaveInfo slaveInfo, FileServer.Info fileServerInfo) {
-        super(EnumSet.noneOf(Caps.class));
         this.slaveInfo = slaveInfo;
         this.fileServerInfo = fileServerInfo;
         codec = new PraxisPacketCodec();
         dispatcher = new Dispatcher(codec);
-        registerControl(RootManagerService.ADD_ROOT, new RootControl(true));
-        registerControl(RootManagerService.REMOVE_ROOT, new RootControl(false));
+        addRootControl = new RootControl(true);
+        removeRootControl = new RootControl(false);
     }
 
     @Override
@@ -98,10 +98,22 @@ class MasterClientRoot extends AbstractRoot {
     }
 
     @Override
-    protected void processCall(Call call) {
-        if (call.getToAddress().getComponentAddress().getDepth() == 1 &&
-                getAddress().getRootID().equals(call.getRootID())) {
-            super.processCall(call);
+    protected void processCall(Call call, PacketRouter router) {
+        if (call.getToAddress().getComponentAddress().equals(getAddress())) {
+            try {
+                switch (call.getToAddress().getID()) {
+                    case RootManagerService.ADD_ROOT:
+                        addRootControl.call(call, router);
+                        break;
+                    case RootManagerService.REMOVE_ROOT:
+                        removeRootControl.call(call, router);
+                        break;
+                    default:
+                        throw new UnsupportedOperationException();
+                }
+            } catch (Exception ex) {
+                router.route(Call.createErrorCall(call, PError.create(ex)));
+            }
         } else if (client != null) {
             dispatcher.handleCall(call);
         } else {
@@ -109,8 +121,7 @@ class MasterClientRoot extends AbstractRoot {
             if (client != null) {
                 dispatcher.handleCall(call);
             } else {
-                getPacketRouter().route(Call.createErrorCall(call,
-                        CallArguments.EMPTY));
+                getRouter().route(Call.createErrorCall(call));
             }
         }
     }
@@ -206,6 +217,7 @@ class MasterClientRoot extends AbstractRoot {
         dispatcher.purge(0, TimeUnit.NANOSECONDS);
     }
 
+
     private class Dispatcher extends OSCDispatcher {
         
         private String remoteSysPrefix;
@@ -226,7 +238,7 @@ class MasterClientRoot extends AbstractRoot {
 
         @Override
         void send(Call call) {
-            getPacketRouter().route(call);
+            getRouter().route(call);
         }
 
         @Override
@@ -306,7 +318,7 @@ class MasterClientRoot extends AbstractRoot {
 
     }
 
-    private class RootControl implements ControlEx {
+    private class RootControl implements Control {
 
         private final boolean add;
 
@@ -326,8 +338,7 @@ class MasterClientRoot extends AbstractRoot {
                     if (client != null) {
                         dispatch(call);
                     } else {
-                        router.route(Call.createErrorCall(call,
-                                CallArguments.EMPTY));
+                        router.route(Call.createErrorCall(call));
                     }
                 }
             } else {
@@ -341,11 +352,6 @@ class MasterClientRoot extends AbstractRoot {
             } else {
                 dispatcher.handleRemoveRoot(call);
             }
-        }
-
-        @Override
-        public ControlInfo getInfo() {
-            return add ? RootManagerService.ADD_ROOT_INFO : RootManagerService.REMOVE_ROOT_INFO;
         }
 
     }

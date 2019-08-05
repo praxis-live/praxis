@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -22,35 +22,31 @@
 package org.praxislive.hub.net;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.praxislive.base.AbstractAsyncControl;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ComponentType;
+import org.praxislive.core.Control;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.Root;
-import org.praxislive.core.ControlInfo;
 import org.praxislive.core.services.RootFactoryService;
 import org.praxislive.core.services.RootManagerService;
-import org.praxislive.core.types.PArray;
+import org.praxislive.core.services.Services;
 import org.praxislive.core.types.PReference;
-import org.praxislive.core.types.PString;
-import org.praxislive.hub.DefaultCoreRoot;
+import org.praxislive.hub.BasicCoreRoot;
 import org.praxislive.hub.Hub;
-import org.praxislive.impl.AbstractAsyncControl;
-import org.praxislive.impl.SimpleControl;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-class MasterCoreRoot extends DefaultCoreRoot {
+class MasterCoreRoot extends BasicCoreRoot {
 
     private final static Logger LOG = Logger.getLogger(MasterCoreRoot.class.getName());
     private final static String SLAVE_PREFIX = Hub.SYS_PREFIX + "net_";
@@ -70,12 +66,10 @@ class MasterCoreRoot extends DefaultCoreRoot {
     }
 
     @Override
-    protected void createRootManagerService() {
-        registerControl(RootManagerService.ADD_ROOT, new AddRootControl());
-        registerControl(RootManagerService.REMOVE_ROOT, new RemoveRootControl());
-        registerControl(RootManagerService.ROOTS, new RootsControl());
-        registerProtocol(RootManagerService.class);
-        getHubAccessor().registerService(RootManagerService.class, getAddress());
+    protected void buildControlMap(Map<String, Control> ctrls) {
+        ctrls.put(RootManagerService.ADD_ROOT, new AddRootControl());
+        ctrls.put(RootManagerService.REMOVE_ROOT, new RemoveRootControl());
+        super.buildControlMap(ctrls);
     }
 
     @Override
@@ -151,12 +145,11 @@ class MasterCoreRoot extends DefaultCoreRoot {
             ControlAddress to;
             if (proxy != null) {
                 to = ControlAddress.create(proxy, RootManagerService.ADD_ROOT);
-                return Call.createCall(to, getAddress(), call.getTimecode(), args);
+                return Call.createCall(to, call.getToAddress(), call.getTimecode(), args);
             } else {
-                to = ControlAddress.create(
-                        findService(RootFactoryService.class),
+                to = ControlAddress.create(findService(RootFactoryService.class),
                         RootFactoryService.NEW_ROOT_INSTANCE);
-                return Call.createCall(to, getAddress(), call.getTimecode(), args.get(1));
+                return Call.createCall(to, call.getToAddress(), call.getTimecode(), args.get(1));
             }
         }
 
@@ -181,11 +174,6 @@ class MasterCoreRoot extends DefaultCoreRoot {
             return Call.createReturnCall(active, CallArguments.EMPTY);
         }
 
-        @Override
-        public ControlInfo getInfo() {
-            return RootManagerService.ADD_ROOT_INFO;
-        }
-
     }
 
     private class RemoveRootControl extends AbstractAsyncControl {
@@ -198,7 +186,7 @@ class MasterCoreRoot extends DefaultCoreRoot {
                 ControlAddress to = ControlAddress.create(
                         ComponentAddress.create("/" + remoteProxy),
                         RootManagerService.REMOVE_ROOT);
-                return Call.createCall(to, getAddress(), call.getTimecode(), call.getArgs());
+                return Call.createCall(to, call.getToAddress(), call.getTimecode(), call.getArgs());
             } else {
                 uninstallRoot(id);
                 return Call.createReturnCall(call, CallArguments.EMPTY);
@@ -212,40 +200,6 @@ class MasterCoreRoot extends DefaultCoreRoot {
             remotes.remove(id);
             return Call.createReturnCall(active, CallArguments.EMPTY);
         }
-
-        @Override
-        public ControlInfo getInfo() {
-            return RootManagerService.REMOVE_ROOT_INFO;
-        }
-
-    }
-
-     private class RootsControl extends SimpleControl {
-
-        private String[] knownIDs;
-        private PArray ret;
-        
-        private RootsControl() {
-            super(RootManagerService.ROOTS_INFO);
-            knownIDs = new String[0];
-            ret = PArray.EMPTY;
-        }
-
-        @Override
-        protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
-            String[] ids = getHubAccessor().getRootIDs();
-            if (!Arrays.equals(ids, knownIDs)) {
-                knownIDs = ids;
-                List<PString> list = new ArrayList<>(ids.length);
-                for (String id : ids) {
-                    list.add(PString.valueOf(id));
-                }
-                ret = PArray.valueOf(list);
-            }
-            return CallArguments.create(ret);
-        }
-
-
 
     }
 

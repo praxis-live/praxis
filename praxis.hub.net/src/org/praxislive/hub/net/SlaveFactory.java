@@ -27,7 +27,6 @@ import org.praxislive.core.Lookup;
 import org.praxislive.core.Root;
 import org.praxislive.core.types.PResource;
 import org.praxislive.hub.Hub;
-import org.praxislive.impl.InstanceLookup;
 
 
 public class SlaveFactory extends Hub.CoreRootFactory {
@@ -76,7 +75,7 @@ public class SlaveFactory extends Hub.CoreRootFactory {
 
     @Override
     public Lookup extendLookup(Lookup lookup) {
-        return InstanceLookup.create(lookup, resourceResolver);
+        return Lookup.of(lookup, resourceResolver);
     }
     
     

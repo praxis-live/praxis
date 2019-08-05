@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -41,19 +41,20 @@ import org.praxislive.core.Clock;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.ExecutionContext;
+import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Root;
 import org.praxislive.core.services.RootManagerService;
 import org.praxislive.core.services.Service;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PResource;
-import org.praxislive.hub.DefaultCoreRoot;
+import org.praxislive.hub.BasicCoreRoot;
 import org.praxislive.hub.Hub;
 
 /**
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
-class SlaveCoreRoot extends DefaultCoreRoot {
+class SlaveCoreRoot extends BasicCoreRoot {
 
     private final static Logger LOG = Logger.getLogger(SlaveCoreRoot.class.getName());
     private final String MASTER_SYS_PREFIX = "/_remote";
@@ -139,13 +140,15 @@ class SlaveCoreRoot extends DefaultCoreRoot {
     }
 
     @Override
-    protected void processCall(Call call) {
-        if (getID().equals(call.getRootID())) {
-            super.processCall(call);
+    protected void processCall(Call call, PacketRouter router) {
+        if (call.getToAddress().getComponentAddress().equals(getAddress())) {
+            super.processCall(call, router);
         } else {
             dispatcher.handleCall(call);
         }
     }
+    
+    
 
     PResource.Resolver getResourceResolver() {
         return resourceResolver;
@@ -267,7 +270,7 @@ class SlaveCoreRoot extends DefaultCoreRoot {
 
         @Override
         void send(Call call) {
-            getPacketRouter().route(call);
+            getRouter().route(call);
         }
 
         @Override

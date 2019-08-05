@@ -23,7 +23,9 @@ package org.praxislive.hub;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,7 +46,6 @@ import org.praxislive.core.PacketRouter;
 import org.praxislive.core.services.RootFactoryService;
 import org.praxislive.core.services.RootManagerService;
 import org.praxislive.core.services.Service;
-import org.praxislive.core.services.Services;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PError;
 import org.praxislive.core.types.PReference;
@@ -59,18 +60,14 @@ public class BasicCoreRoot extends AbstractRoot {
 
     private final Hub.Accessor hubAccess;
     private final List<Root> exts;
-    private final AddRootControl addRoot;
-    private final RemoveRootControl removeRoot;
-    private final RootsControl roots;
+    private final Map<String, Control> controls;
 
     private Controller controller;
 
     protected BasicCoreRoot(Hub.Accessor hubAccess, List<Root> exts) {
         this.hubAccess = Objects.requireNonNull(hubAccess);
         this.exts = Objects.requireNonNull(exts);
-        this.addRoot = new AddRootControl();
-        this.removeRoot = new RemoveRootControl();
-        this.roots = new RootsControl();
+        this.controls = new HashMap<>();
     }
 
     @Override
@@ -82,8 +79,10 @@ public class BasicCoreRoot extends AbstractRoot {
 
     @Override
     protected void activating() {
-        hubAccess.registerService(RootManagerService.class,
-                ComponentAddress.create("/" + getID()));
+        registerServices();
+        HashMap<String, Control> ctrls = new HashMap<>();
+        buildControlMap(ctrls);
+        controls.putAll(ctrls);
         installExtensions();
     }
 
@@ -103,22 +102,23 @@ public class BasicCoreRoot extends AbstractRoot {
     @Override
     protected void processCall(Call call, PacketRouter router) {
         try {
-            switch (call.getToAddress().getID()) {
-                case RootManagerService.ADD_ROOT:
-                    addRoot.call(call, router);
-                    break;
-                case RootManagerService.REMOVE_ROOT:
-                    removeRoot.call(call, router);
-                    break;
-                case RootManagerService.ROOTS:
-                    roots.call(call, router);
-                    break;
-                default:
-                    throw new UnsupportedOperationException();
-            }
+            controls.get(call.getToAddress().getID()).call(call, router);
         } catch (Exception ex) {
             router.route(Call.createErrorCall(call, PError.create(ex)));
         }
+    }
+    
+    protected void registerServices() {
+        hubAccess.registerService(RootManagerService.class, getAddress());
+    }
+    
+    protected void buildControlMap(Map<String, Control> ctrls) {
+        ctrls.computeIfAbsent(RootManagerService.ADD_ROOT, k -> new AddRootControl());
+        ctrls.computeIfAbsent(RootManagerService.REMOVE_ROOT, k -> new RemoveRootControl());
+        ctrls.computeIfAbsent(RootManagerService.ROOTS, k -> new RootsControl());
+//        ctrls.computeIfAbsent(ComponentProtocol.INFO, k -> (call, router) -> 
+//            router.route(Call.createReturnCall(call, RootManagerService.API_INFO))
+//        );
     }
 
     protected void installExtensions() {
@@ -202,10 +202,8 @@ public class BasicCoreRoot extends AbstractRoot {
             if (!ComponentAddress.isValidID(args.get(0).toString())) {
                 throw new IllegalArgumentException("Invalid Component ID");
             }
-            ControlAddress to = getLookup().find(Services.class)
-                    .flatMap(srvs -> srvs.locate(RootFactoryService.class))
-                    .map(cmp -> ControlAddress.create(cmp, RootFactoryService.NEW_ROOT_INSTANCE))
-                    .orElseThrow(() -> new IllegalStateException("Root factory service not found"));
+            ControlAddress to = ControlAddress.create(findService(RootFactoryService.class),
+                        RootFactoryService.NEW_ROOT_INSTANCE);
             return Call.createCall(to, call.getToAddress(), call.getTimecode(), args.get(1));
         }
 
@@ -263,8 +261,8 @@ public class BasicCoreRoot extends AbstractRoot {
                     if (!Arrays.equals(ids, knownIDs)) {
                         knownIDs = ids;
                         ret = Stream.of(ids).map(PString::valueOf).collect(PArray.collector());
-                        router.route(Call.createReturnCall(call, ret));
                     }
+                    router.route(Call.createReturnCall(call, ret));
                     break;
                 default:
                     throw new IllegalArgumentException();
