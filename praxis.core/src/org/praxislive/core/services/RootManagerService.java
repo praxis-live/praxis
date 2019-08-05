@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -25,7 +25,9 @@ package org.praxislive.core.services;
 import java.util.stream.Stream;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.ArgumentInfo;
+import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.ControlInfo;
+import org.praxislive.core.Info;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
 import org.praxislive.core.types.PString;
@@ -55,6 +57,13 @@ public class RootManagerService implements Service {
             new ArgumentInfo[]{PArray.info()},
             PMap.EMPTY);
 
+    public final static ComponentInfo API_INFO = Info.component(cmp -> cmp
+            .protocol(RootManagerService.class)
+            .control(ADD_ROOT, ADD_ROOT_INFO)
+            .control(REMOVE_ROOT, REMOVE_ROOT_INFO)
+            .control(ROOTS, ROOTS_INFO)
+    );
+    
 
     @Override
     public Stream<String> controls() {
