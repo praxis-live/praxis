@@ -122,6 +122,11 @@ class DefaultTaskService extends AbstractRoot implements RootHub.ServiceProvider
         }
     }
 
+    @Override
+    protected void terminating() {
+        threadService.shutdownNow();
+    }
+
     private void submitTask(Call call) throws Exception {
         CallArguments args = call.getArgs();
         if (args.getSize() == 1) {
