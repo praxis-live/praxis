@@ -25,15 +25,15 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * Root provides the companion part of the actor-model to Component within 
- * Praxis CORE's forest-of-actors model. The Root implementation handles initial
+ * PraxisCORE's forest-of-actors model. The Root implementation handles initial
  * message handling and scheduling. There may be many Roots within a running
- * Praxis CORE system - the Roots are sandboxed from each other and the RootHub
+ * PraxisCORE system - the Roots are sandboxed from each other and the RootHub
  * handles delivery of messages (Packet / Call) from one Root to another.
  * 
- * A Root will usually be a Component or Container, but this is not required. As
+ * A Root may be a Component or Container, but this is not required. As
  * Component implementations are intended to be lock-free and single-threaded,
  * the Root implementation will ensure that all messages are handled serially.
- * Most Root implementations will have a one-to-one relationship to a thread of
+ * Some Root implementations will have a one-to-one relationship to a thread of
  * execution.
  * 
  * @author Neil C Smith
@@ -86,7 +86,7 @@ public interface Root extends Lookup.Provider {
         public void start(ThreadFactory threadFactory);
         
         /**
-         * Single the Root to be shutdown. This method is intended to be called
+         * Signal the Root to be shutdown. This method is intended to be called
          * asynchronously and will return immediately - it will not wait for the
          * Root to actually complete execution.
          */
