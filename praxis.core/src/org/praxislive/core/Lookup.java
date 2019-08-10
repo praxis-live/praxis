@@ -22,31 +22,87 @@
 package org.praxislive.core;
 
 import java.util.Optional;
+import java.util.ServiceLoader;
 import java.util.stream.Stream;
 
 /**
+ * A general type-safe registry by which clients can access implementations of
+ * various services (eg. implementations of a specific interface).
  *
- * @author Neil C Smith
+ * It is inspired by the similarly named feature in the Apache NetBeans
+ * platform, but is generally simpler and more lightweight.
  */
 public interface Lookup {
 
+    /**
+     * An empty Lookup
+     */
     public final static Lookup EMPTY = new Empty();
+
+    /**
+     * A system-wide Lookup, that by default delegates to {@link ServiceLoader}.
+     *
+     * The implementation can be overridden or extended by registering a Lookup
+     * subclass to be found using ServiceLoader.
+     */
     public final static Lookup SYSTEM = new SystemLookup();
 
+    /**
+     * Search for the first implementation of the given type. Returns an
+     * {@link Optional} wrapping an instance of the given Class, or
+     * {@link Optional#EMPTY} if none exists.
+     *
+     * @param <T> service type to lookup
+     * @param type class of service to lookup
+     * @return Optional wrapping first instance of type, or an empty Optional if
+     * not found
+     */
     public <T> Optional<T> find(Class<T> type);
 
+    /**
+     * Search for all implementations of the given type.
+     *
+     * @param <T> service type to lookup
+     * @param type class of service to lookup
+     * @return Stream of all implementations of the given type
+     */
     public <T> Stream<T> findAll(Class<T> type);
-    
-    public static Lookup of(Object ... instances) {
+
+    /**
+     * Create a Lookup wrapping the given Objects. Searches will maintain the
+     * order of the provided instances.
+     *
+     * @param instances collection of objects
+     * @return lookup
+     */
+    public static Lookup of(Object... instances) {
         return ObjectLookup.create(instances);
     }
-    
-    public static Lookup of(Lookup parent, Object ... instances) {
+
+    /**
+     * Create a Lookup wrapping the given Objects and results from the provided
+     * parent Lookup. Searches will maintain the order of the provided
+     * instances. Instances registered directly will take priority over the
+     * parent.
+     *
+     * @param parent lookup to include results from
+     * @param instances collection of objects
+     * @return lookup
+     */
+    public static Lookup of(Lookup parent, Object... instances) {
         return ObjectLookup.create(parent, instances);
     }
 
+    /**
+     * Interface to be implemented by all types that provide access to a Lookup.
+     */
     public interface Provider {
 
+        /**
+         * Get the Lookup from this Provider.
+         * 
+         * @return lookup
+         */
         public Lookup getLookup();
 
     }
