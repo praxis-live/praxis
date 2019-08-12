@@ -35,7 +35,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.praxislive.base.AbstractRoot;
 import org.praxislive.core.Value;
-import org.praxislive.core.CallArguments;
 import org.praxislive.core.Call;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.RootHub;
@@ -69,21 +68,13 @@ class DefaultTaskService extends AbstractRoot implements RootHub.ServiceProvider
 
     @Override
     protected void processCall(Call call, PacketRouter router) {
-        switch (call.getType()) {
-            case INVOKE:
-            case INVOKE_QUIET: {
-                try {
-                    submitTask(call);
-                } catch (Exception ex) {
-                    router.route(Call.createErrorCall(call, PError.create(ex)));
-                }
+        if (call.isRequest()) {
+            try {
+                submitTask(call);
+            } catch (Exception ex) {
+                router.route(call.error(PError.create(ex)));
             }
-            break;
-
-            default:
-            // ignore or log?
         }
-
     }
 
     @Override
@@ -98,7 +89,7 @@ class DefaultTaskService extends AbstractRoot implements RootHub.ServiceProvider
                 try {
                     Value value = future.get();
                     Call call = futures.get(future);
-                    call = Call.createReturnCall(call, value);
+                    call = call.reply(value);
                     getRouter().route(call);
                     completed.add(future);
                 } catch (Exception ex) {
@@ -110,7 +101,7 @@ class DefaultTaskService extends AbstractRoot implements RootHub.ServiceProvider
                         }
                     }
                     Call call = futures.get(future);
-                    call = Call.createErrorCall(call, PError.create(ex));
+                    call = call.error(PError.create(ex));
                     getRouter().route(call);
                     completed.add(future);
                 }
@@ -128,8 +119,8 @@ class DefaultTaskService extends AbstractRoot implements RootHub.ServiceProvider
     }
 
     private void submitTask(Call call) throws Exception {
-        CallArguments args = call.getArgs();
-        if (args.getSize() == 1) {
+        List<Value> args = call.args();
+        if (args.size() == 1) {
             Value arg = args.get(0);
             if (arg instanceof PReference) {
                 Object ref = ((PReference) arg).getReference();

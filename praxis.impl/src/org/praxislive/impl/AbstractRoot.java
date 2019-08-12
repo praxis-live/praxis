@@ -296,7 +296,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 
             if (obj instanceof Packet) {
                 Packet pkt = (Packet) obj;
-                if ((pkt.getTimecode() - now) > 0) {
+                if ((pkt.time() - now) > 0) {
                     orderedQueue.add(pkt);
                 } else {
                     processPacket(pkt);
@@ -360,14 +360,14 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     }
 
     protected void processCall(Call call) {
-        org.praxislive.core.Control control = getControl(call.getToAddress());
+        org.praxislive.core.Control control = getControl(call.to());
         try {
             if (control != null) {
                 control.call(call, router);
             } else {
                 Call.Type type = call.getType();
                 if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
-                    router.route(Call.createErrorCall(call, PString.valueOf("Unknown control address : " + call.getToAddress())));
+                    router.route(Call.createErrorCall(call, PString.valueOf("Unknown control address : " + call.to())));
                 }
             }
         } catch (Exception ex) {

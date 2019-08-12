@@ -22,9 +22,9 @@
  */
 package org.praxislive.code;
 
+import java.util.List;
 import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.Call;
-import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.PacketRouter;
@@ -46,13 +46,13 @@ class InputPortControl implements Control {
     
     @Override
     public void call(Call call, PacketRouter router) throws Exception {
-        CallArguments args = call.getArgs();
-        if (args.getSize() != 1) {
-            router.route(Call.createErrorCall(call, PError.create(IllegalArgumentException.class,
+        List<Value> args = call.args();
+        if (args.size() != 1) {
+            router.route(call.error(PError.create(IllegalArgumentException.class,
                     "Input port requires single argument")));
         }
-        link.receive(call.getTimecode(), args.get(0));
-        router.route(Call.createReturnCall(call));
+        link.receive(call.time(), args.get(0));
+        router.route(call.reply());
     }
     
     static class Descriptor extends ControlDescriptor {

@@ -57,7 +57,7 @@ public class AbstractRootIT {
         LinkedBlockingQueue<Packet> responseQueue = new LinkedBlockingQueue<>();
         RootHubImpl hub = new RootHubImpl(root, responseQueue);
         hub.ctrl.start(Thread::new);
-        hub.ctrl.submitPacket(Call.createCall(ControlAddress.create("/test.hello"),
+        hub.ctrl.submitPacket(Call.create(ControlAddress.create("/test.hello"),
                 ControlAddress.create("/hub.world"),
                 hub.getClock().getTime() + TimeUnit.SECONDS.toNanos(1)));
         try {
@@ -75,7 +75,7 @@ public class AbstractRootIT {
         LinkedBlockingQueue<Packet> responseQueue = new LinkedBlockingQueue<>();
         RootHubImpl hub = new RootHubImpl(root, responseQueue);
         hub.ctrl.start(Thread::new);
-        hub.ctrl.submitPacket(Call.createCall(ControlAddress.create("/test.hello"),
+        hub.ctrl.submitPacket(Call.create(ControlAddress.create("/test.hello"),
                 ControlAddress.create("/hub.world"),
                 hub.getClock().getTime() + TimeUnit.SECONDS.toNanos(1)));
         try {
@@ -167,7 +167,7 @@ public class AbstractRootIT {
 
         @Override
         public boolean dispatch(Packet packet) {
-            if ("test".equals(packet.getRootID())) {
+            if ("test".equals(packet.rootID())) {
                 return ctrl.submitPacket(packet);
             } else {
                 System.out.println(packet);

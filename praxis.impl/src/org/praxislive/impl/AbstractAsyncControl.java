@@ -67,7 +67,7 @@ public abstract class AbstractAsyncControl extends AbstractControl {
     }
 
     private void processResponse(Call call, PacketRouter router) {
-        if (pending == null || pending.getMatchID() != call.getMatchID()) {
+        if (pending == null || pending.matchID() != call.matchID()) {
             LOG.warning("Unexpected call received by processResponse(call, router)");
             return;
         }
@@ -87,7 +87,7 @@ public abstract class AbstractAsyncControl extends AbstractControl {
                 case RETURN:
                 case ERROR:
                     Call active = callQueue.peek();
-                    if (active.getMatchID() != ret.getMatchID()) {
+                    if (active.matchID() != ret.matchID()) {
                         throw new IllegalStateException();
                     }
                     callQueue.poll();
@@ -115,7 +115,7 @@ public abstract class AbstractAsyncControl extends AbstractControl {
                         return;
                     case RETURN:
                     case ERROR:
-                        if (ret.getMatchID() != call.getMatchID()) {
+                        if (ret.matchID() != call.matchID()) {
                             LOG.warning("processInvoke(call) returned wrong response call");
                             throw new IllegalStateException();
                         }

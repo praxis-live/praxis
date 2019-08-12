@@ -93,7 +93,7 @@ public class EvalStackFrame implements StackFrame {
     }
 
     public void postResponse(Call call) {
-        if (pending != null && pending.getMatchID() == call.getMatchID()) {
+        if (pending != null && pending.matchID() == call.matchID()) {
             pending = null;
             if (call.getType() == Call.Type.RETURN) {
                 log.finest("EvalStackFrame - Received valid Return call : \n" + call);

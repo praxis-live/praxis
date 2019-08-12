@@ -181,7 +181,7 @@ public class AtCmds implements CommandInstaller {
         }
 
         public void postResponse(Call call) {
-            if (active != null && call.getMatchID() == active.getMatchID()) {
+            if (active != null && call.matchID() == active.matchID()) {
                 active = null;
                 if (call.getType() == Call.Type.RETURN && stage == 1) {
                     stage++;
@@ -237,13 +237,13 @@ public class AtCmds implements CommandInstaller {
                             .flatMap(sm -> sm.locate(RootManagerService.class))
                             .orElseThrow(ServiceUnavailableException::new),
                     RootManagerService.REMOVE_ROOT);
-            return Call.createCall(to, env.getAddress(), env.getTime(), PString.valueOf(id));
+            return Call.create(to, env.getAddress(), env.getTime(), PString.valueOf(id));
         }
 
         private Call createChildRemovalCall(Env env, ComponentAddress comp) throws Exception {
             ControlAddress to = ControlAddress.create(comp.getParentAddress(),
                     ContainerProtocol.REMOVE_CHILD);
-            return Call.createCall(to, env.getAddress(), env.getTime(),
+            return Call.create(to, env.getAddress(), env.getTime(),
                     PString.valueOf(comp.getComponentID(comp.getDepth() - 1)));
         }
     }

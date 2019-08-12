@@ -80,7 +80,7 @@ public class Send extends AbstractComponent {
             if (destination != null) {
                 PacketRouter router = getPacketRouter();
                 if (router != null) {
-                    Call call = Call.createQuietCall(destination, ControlAddress.create(getAddress(), "_log"), time, arg);
+                    Call call = Call.createQuiet(destination, ControlAddress.create(getAddress(), "_log"), time, arg);
                     router.route(call);
                 }
             }
@@ -140,15 +140,15 @@ public class Send extends AbstractComponent {
                         logBuilder.log(LogLevel.WARNING, errArg.toString());
                     }
                 } else {
-                    logBuilder.log(LogLevel.WARNING, "Error returned from " + call.getFromAddress());
+                    logBuilder.log(LogLevel.WARNING, "Error returned from " + call.from());
                 }
 
-                long callTime = call.getTimecode();
+                long callTime = call.time();
                 if ((callTime - lastSend) > 500_000_000) {
                     router.route(
                             Call.createQuietCall(logService,
                                     ControlAddress.create(getAddress(), "_log"),
-                                    call.getTimecode(),
+                                    call.time(),
                                     logBuilder.toCallArguments()));
 
                     logBuilder.clear();

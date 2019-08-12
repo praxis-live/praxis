@@ -22,7 +22,9 @@
 
 package org.praxislive.script;
 
+import java.util.List;
 import org.praxislive.core.CallArguments;
+import org.praxislive.core.Value;
 
 /**
  *
@@ -30,7 +32,14 @@ import org.praxislive.core.CallArguments;
  */
 public interface Command {
 
+    @Deprecated
     public StackFrame createStackFrame(Namespace namespace, CallArguments args)
             throws ExecutionException;
+    
+    @SuppressWarnings("deprecation")
+    public default StackFrame createStackFrame(Namespace namespace, List<? extends Value> args)
+            throws ExecutionException {
+        return createStackFrame(namespace, CallArguments.create(args));
+    }
 
 }

@@ -159,7 +159,7 @@ public class Button extends SingleBindingGuiComponent {
                     ScriptService.EVAL);
             ControlAddress from = ControlAddress.create(
                     getAddress(), "_on-click-log");
-            Call call = Call.createQuietCall(to, from,
+            Call call = Call.createQuiet(to, from,
                     getLookup().find(ExecutionContext.class).get().getTime(),
                     PString.valueOf(script));
             getPacketRouter().route(call);

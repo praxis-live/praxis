@@ -22,7 +22,10 @@
 
 package org.praxislive.script;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import org.praxislive.core.CallArguments;
+import org.praxislive.core.Value;
 
 /**
  *
@@ -30,7 +33,16 @@ import org.praxislive.core.CallArguments;
  */
 public interface InlineCommand extends Command {
 
+    @Deprecated
     public CallArguments process(Env context, Namespace namespace, CallArguments args)
             throws ExecutionException;
+    
+    @SuppressWarnings("deprecation")
+    public default List<? extends Value> process(Env context, Namespace namespace,
+            List<? extends Value> args)
+            throws ExecutionException {
+        return process(context, namespace, CallArguments.create(args))
+                .stream().collect(Collectors.toList());
+    }
 
 }

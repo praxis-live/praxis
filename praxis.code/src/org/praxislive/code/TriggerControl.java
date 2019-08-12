@@ -28,7 +28,6 @@ import org.praxislive.code.userapi.T;
 import org.praxislive.code.userapi.Trigger;
 import org.praxislive.core.Value;
 import org.praxislive.core.Call;
-import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Port;
@@ -55,14 +54,11 @@ public class TriggerControl extends Trigger implements Control {
 
     @Override
     public void call(Call call, PacketRouter router) throws Exception {
-        Call.Type type = call.getType();
-        if (type == Call.Type.INVOKE) {
-            trigger(call.getTimecode());
-            router.route(Call.createReturnCall(call, CallArguments.EMPTY));
-        } else if (type == Call.Type.INVOKE_QUIET) {
-            trigger(call.getTimecode());
-        } else {
-//            throw new IllegalArgumentException();
+        if (call.isRequest()) {
+            trigger(call.time());
+            if (call.isReplyRequired()) {
+                router.route(call.reply());
+            }
         }
     }
 
@@ -255,7 +251,7 @@ public class TriggerControl extends Trigger implements Control {
                 control.index(0);
             }
         }
-        
+
         @Override
         public Control getControl() {
             return control;

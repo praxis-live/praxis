@@ -55,11 +55,11 @@ public class TriggerControl implements AbstractComponent.ControlEx {
     public void call(Call call, PacketRouter router) throws Exception {
         switch (call.getType()) {
             case INVOKE :
-                binding.trigger(call.getTimecode());
+                binding.trigger(call.time());
                 router.route(Call.createReturnCall(call, CallArguments.EMPTY));
                 break;
             case INVOKE_QUIET :
-                binding.trigger(call.getTimecode());
+                binding.trigger(call.time());
                 break;
             default :
                 throw new IllegalArgumentException();

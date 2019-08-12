@@ -36,6 +36,7 @@ import java.util.stream.Stream;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public abstract class CallArguments implements Iterable<Value> {
     
     /**

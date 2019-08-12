@@ -42,9 +42,9 @@ class PacketQueue {
         if (p1 == p2) {
             return 0;
         }
-        long timeDiff = p1.getTimecode() - p2.getTimecode();
+        long timeDiff = p1.time() - p2.time();
         if (timeDiff == 0) {
-            int diff = p1.getID() - p2.getID();
+            int diff = p1.id() - p2.id();
             return diff < 0 ? -1 : 1;
         }
         return timeDiff < 0 ? -1 : 1;
@@ -63,7 +63,7 @@ class PacketQueue {
     }
 
     Packet poll() {
-        if (!q.isEmpty() && q.peek().getTimecode() - time <= 0) {
+        if (!q.isEmpty() && q.peek().time() - time <= 0) {
             return q.poll();
         }
         return null;

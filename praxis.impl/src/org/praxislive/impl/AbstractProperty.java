@@ -45,7 +45,7 @@ public abstract class AbstractProperty extends AbstractControl {
         if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
             CallArguments args = call.getArgs();
             int argCount = args.getSize();
-            long time = call.getTimecode();
+            long time = call.time();
             if (argCount > 0) {
                 if (isLatest(time)) {
                     setArguments(time, args);

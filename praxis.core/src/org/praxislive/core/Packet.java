@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -31,16 +31,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class Packet implements Comparable<Packet> {
 
-    private static AtomicInteger idSource = new AtomicInteger(0);
+    private static final AtomicInteger ID_SOURCE = new AtomicInteger(0);
 
-    private String rootID;
-    private long timeCode;
-    private int id;
+    private final String rootID;
+    private final long timeCode;
+    private final int id;
 
     Packet(String rootID, long timeCode) {
         this.rootID = rootID;
         this.timeCode = timeCode;
-        this.id = idSource.getAndIncrement();
+        this.id = ID_SOURCE.getAndIncrement();
     }
 
     /**
@@ -48,6 +48,16 @@ public class Packet implements Comparable<Packet> {
      *
      * @return long time
      */
+    public final long time() {
+        return timeCode;
+    }
+    
+    /**
+     * Get the time that this Packet should be processed, relative to {@link RootHub#getClock() }
+     *
+     * @return long time
+     */
+    @Deprecated
     public final long getTimecode() {
         return timeCode;
     }
@@ -57,10 +67,18 @@ public class Packet implements Comparable<Packet> {
      *
      * @return String Root ID
      */
+    public final String rootID() {
+        return rootID;
+    }
+    /**
+     * Get the ID of the Root component that this packet should be sent to.
+     *
+     * @return String Root ID
+     */
+    @Deprecated
     public final String getRootID() {
         return rootID;
     }
-
 
     /**
      * Get the ID of this Packet.
@@ -70,6 +88,20 @@ public class Packet implements Comparable<Packet> {
      *
      * @return long ID
      */
+    public final int id() {
+        // should not be used for object equality
+        // @TODO Change ID semantics to maintain uniqueness?
+        return id;
+    }
+    /**
+     * Get the ID of this Packet.
+     *
+     * This should not be used to test equality as it may not be unique if the
+     * Packet has been serialized.
+     *
+     * @return long ID
+     */
+    @Deprecated
     public final int getID() {
         // should not be used for object equality
         // @TODO Change ID semantics to maintain uniqueness?
@@ -86,11 +118,11 @@ public class Packet implements Comparable<Packet> {
         if (this == obj) {
             return 0;
         }
-        long thisTime = getTimecode();
-        long objTime = obj.getTimecode();
+        long thisTime = time();
+        long objTime = obj.time();
         if (thisTime == objTime) {
-            long thisID = getID();
-            long objID = obj.getID();
+            long thisID = id();
+            long objID = obj.id();
             if (thisID == objID) {
                 // duplicate ids could happen with serialization
                 return hashCode() < obj.hashCode() ? -1 : 1;

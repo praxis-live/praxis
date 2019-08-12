@@ -73,26 +73,20 @@ public abstract class AbstractAsyncProperty<V> implements Control {
 //        return new InputPort();
 //    }
 
+    @Override
     public void call(Call call, PacketRouter router) throws Exception {
-        switch (call.getType()) {
-            case INVOKE:
-            case INVOKE_QUIET:
-                processInvoke(call, router);
-                break;
-            case RETURN:
-                processReturn(call, router);
-                break;
-            case ERROR:
-                processError(call, router);
-                break;
-            default:
-                throw new IllegalArgumentException();
+        if (call.isRequest()) {
+            processInvoke(call, router);
+        } else if (call.isReply()) {
+            processReturn(call, router);
+        } else {
+            processError(call, router);
         }
     }
 
     private void processInvoke(Call call, PacketRouter router) throws Exception {
         CallArguments args = call.getArgs();
-        long time = call.getTimecode();
+        long time = call.time();
         if (args.getSize() > 0 && isLatest(time)) {
             TaskService.Task task = createTask(args);
             // no exception so valid args
@@ -119,7 +113,7 @@ public abstract class AbstractAsyncProperty<V> implements Control {
     }
 
     private void processReturn(Call call, PacketRouter router) throws Exception {
-        if (taskCall == null || taskCall.getMatchID() != call.getMatchID()) {
+        if (taskCall == null || taskCall.matchID() != call.matchID()) {
             //LOG.warning("Unexpected Call received\n" + call.toString());
             return;
         }
@@ -133,11 +127,11 @@ public abstract class AbstractAsyncProperty<V> implements Control {
             keys = portKeys;
             portKeys = null;
         }
-        valueChanged(call.getTimecode());
+        valueChanged(call.time());
     }
 
     private void processError(Call call, PacketRouter router) throws Exception {
-        if (taskCall == null || taskCall.getMatchID() != call.getMatchID()) {
+        if (taskCall == null || taskCall.matchID() != call.matchID()) {
             //LOG.warning("Unexpected Call received\n" + call.toString());
             return;
         }
@@ -256,7 +250,7 @@ public abstract class AbstractAsyncProperty<V> implements Control {
             router = getLookup().find(PacketRouter.class)
                     .orElseThrow(() -> new IllegalStateException("No PacketRouter found"));
         }
-        taskCall = Call.createCall(to, context.getAddress(this), time, PReference.wrap(task));
+        taskCall = Call.create(to, context.getAddress(this), time, PReference.wrap(task));
         router.route(taskCall);
     }
 

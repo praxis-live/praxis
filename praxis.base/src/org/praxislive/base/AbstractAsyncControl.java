@@ -45,13 +45,10 @@ public abstract class AbstractAsyncControl implements Control {
 
     @Override
     public void call(Call call, PacketRouter router) throws Exception {
-        switch (call.getType()) {
-            case INVOKE:
-            case INVOKE_QUIET:
-                processInvoke(call, router);
-                break;
-            default:
-                processResponse(call, router);
+        if (call.isRequest()) {
+            processInvoke(call, router);
+        } else {
+            processResponse(call, router);
         }
     }
 
@@ -64,7 +61,7 @@ public abstract class AbstractAsyncControl implements Control {
     protected abstract Call processResponse(Call call) throws Exception;
 
     protected Call processError(Call call) throws Exception {
-        return Call.createErrorCall(getActiveCall(), call.getArgs());
+        return getActiveCall().error(call.args());
     }
 
     private void processInvoke(Call call, PacketRouter router) {
@@ -78,36 +75,34 @@ public abstract class AbstractAsyncControl implements Control {
     }
 
     private void processResponse(Call call, PacketRouter router) {
-        if (pending == null || pending.getMatchID() != call.getMatchID()) {
+        if (pending == null || pending.matchID() != call.matchID()) {
             LOG.warning("Unexpected call received by processResponse(call, router)");
             return;
         }
         pending = null;
         try {
             Call ret;
-            if (call.getType() == Call.Type.ERROR) {
+            if (call.isError()) {
                 ret = processError(call);
             } else {
                 ret = processResponse(call);
             }
-            switch (ret.getType()) {
-                case INVOKE:
-                    pending = ret;
-                    router.route(ret);
-                    return;
-                case RETURN:
-                case ERROR:
-                    Call active = callQueue.peek();
-                    if (active.getMatchID() != ret.getMatchID()) {
-                        throw new IllegalStateException();
-                    }
-                    callQueue.poll();
-                    router.route(ret);
+            if (ret.isRequest()) {
+                pending = ret;
+                router.route(ret);
+                return;
+            } else {
+                Call active = callQueue.peek();
+                if (active.matchID() != ret.matchID()) {
+                    throw new IllegalStateException();
+                }
+                callQueue.poll();
+                router.route(ret);
             }
         } catch (Exception ex) {
             Call active = callQueue.poll();
             if (active != null) {
-                router.route(Call.createErrorCall(active, PError.create(ex)));
+                router.route(active.error(PError.create(ex)));
             }
         }
         doInvokeLoop(router);
@@ -119,28 +114,24 @@ public abstract class AbstractAsyncControl implements Control {
             Call call = callQueue.peek();
             try {
                 Call ret = processInvoke(call);
-                switch (ret.getType()) {
-                    case INVOKE:
-                        pending = ret;
-                        router.route(ret);
-                        return;
-                    case RETURN:
-                    case ERROR:
-                        if (ret.getMatchID() != call.getMatchID()) {
-                            LOG.warning("processInvoke(call) returned wrong response call");
-                            throw new IllegalStateException();
-                        }
-                        callQueue.poll();
-                        router.route(ret);
-                        break;
-                    default:
-                        LOG.warning("processInvoke(call) returned illegal INVOKE_QUIET call");
-                        throw new IllegalStateException();
+                if (ret.isRequest()) {
+                    if (!ret.isReplyRequired()) {
+                        throw new IllegalStateException("processInvoke(call) returned illegal quiet call");
+                    }
+                    pending = ret;
+                    router.route(ret);
+                    return;
+                } else {
+                    if (ret.matchID() != call.matchID()) {
+                        throw new IllegalStateException("processInvoke(call) returned non-matching response call");
+                    }
+                    callQueue.poll();
+                    router.route(ret);
                 }
             } catch (Exception ex) {
                 LOG.log(Level.FINE, "Exception thrown processing call", ex);
                 callQueue.poll();
-                router.route(Call.createErrorCall(call, PError.create(ex)));
+                router.route(call.error(PError.create(ex)));
             }
         }
 

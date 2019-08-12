@@ -46,13 +46,13 @@ public abstract class SimpleControl implements AbstractComponent.ControlEx {
         CallArguments out = null;
         switch (call.getType()) {
             case INVOKE:
-                out = process(call.getTimecode(), call.getArgs(), false);
+                out = process(call.time(), call.getArgs(), false);
                 if (out == null) {
                     throw new Exception("No response returned from INVOKE\n" + call);
                 }
                 break;
             case INVOKE_QUIET:
-                out = process(call.getTimecode(), call.getArgs(), true);
+                out = process(call.time(), call.getArgs(), true);
                 break;
             default:
                 LOG.warning("Unexpected call - \n" + call);

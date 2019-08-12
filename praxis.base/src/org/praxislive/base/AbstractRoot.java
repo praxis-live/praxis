@@ -402,7 +402,7 @@ public abstract class AbstractRoot implements Root {
 
             if (obj instanceof Packet) {
                 Packet pkt = (Packet) obj;
-                if ((pkt.getTimecode() - now) > 0) {
+                if ((pkt.time() - now) > 0) {
                     pendingPackets.add(pkt);
                 } else {
                     processPacket(pkt);

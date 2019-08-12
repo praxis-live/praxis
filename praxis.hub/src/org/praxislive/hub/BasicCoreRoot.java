@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 import org.praxislive.base.AbstractAsyncControl;
 import org.praxislive.base.AbstractRoot;
 import org.praxislive.core.Call;
-import org.praxislive.core.CallArguments;
 import org.praxislive.core.Component;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ControlAddress;
@@ -43,6 +42,7 @@ import org.praxislive.core.RootHub;
 import org.praxislive.core.ComponentInfo;
 import org.praxislive.core.Control;
 import org.praxislive.core.PacketRouter;
+import org.praxislive.core.Value;
 import org.praxislive.core.services.RootFactoryService;
 import org.praxislive.core.services.RootManagerService;
 import org.praxislive.core.services.Service;
@@ -98,20 +98,20 @@ public class BasicCoreRoot extends AbstractRoot {
         controller.shutdown();
         interrupt();
     }
-    
+
     @Override
     protected void processCall(Call call, PacketRouter router) {
         try {
-            controls.get(call.getToAddress().getID()).call(call, router);
+            controls.get(call.to().getID()).call(call, router);
         } catch (Exception ex) {
             router.route(Call.createErrorCall(call, PError.create(ex)));
         }
     }
-    
+
     protected void registerServices() {
         hubAccess.registerService(RootManagerService.class, getAddress());
     }
-    
+
     protected void buildControlMap(Map<String, Control> ctrls) {
         ctrls.computeIfAbsent(RootManagerService.ADD_ROOT, k -> new AddRootControl());
         ctrls.computeIfAbsent(RootManagerService.REMOVE_ROOT, k -> new RemoveRootControl());
@@ -150,7 +150,7 @@ public class BasicCoreRoot extends AbstractRoot {
                     .filter(Service.class::isAssignableFrom)
                     .map(c -> c.asSubclass(Service.class))
                     .collect(Collectors.toList());
-            
+
         } else {
             return Collections.EMPTY_LIST;
         }
@@ -188,38 +188,35 @@ public class BasicCoreRoot extends AbstractRoot {
         return new Factory();
     }
 
-    
-
-
     private class AddRootControl extends AbstractAsyncControl {
 
         @Override
         protected Call processInvoke(Call call) throws Exception {
-            CallArguments args = call.getArgs();
-            if (args.getSize() < 2) {
+            List<Value> args = call.args();
+            if (args.size() < 2) {
                 throw new IllegalArgumentException("Invalid arguments");
             }
             if (!ComponentAddress.isValidID(args.get(0).toString())) {
                 throw new IllegalArgumentException("Invalid Component ID");
             }
             ControlAddress to = ControlAddress.create(findService(RootFactoryService.class),
-                        RootFactoryService.NEW_ROOT_INSTANCE);
-            return Call.createCall(to, call.getToAddress(), call.getTimecode(), args.get(1));
+                    RootFactoryService.NEW_ROOT_INSTANCE);
+            return Call.create(to, call.to(), call.time(), args.get(1));
         }
 
         @Override
         protected Call processResponse(Call call) throws Exception {
-            CallArguments args = call.getArgs();
-            if (args.getSize() < 1) {
+            List<Value> args = call.args();
+            if (args.size() < 1) {
                 throw new IllegalArgumentException("Invalid response");
             }
             Root r = (Root) ((PReference) args.get(0)).getReference();
             Call active = getActiveCall();
 //            addChild(active.getArgs().get(0).toString(), c);
-            String id = active.getArgs().get(0).toString();
-            String type = active.getArgs().get(1).toString();
+            String id = active.args().get(0).toString();
+            String type = active.args().get(1).toString();
             installRoot(id, type, r);
-            return Call.createReturnCall(active, CallArguments.EMPTY);
+            return active.reply();
         }
 
     }
@@ -228,15 +225,12 @@ public class BasicCoreRoot extends AbstractRoot {
 
         @Override
         public void call(Call call, PacketRouter router) throws Exception {
-            switch (call.getType()) {
-                case INVOKE:
-                case INVOKE_QUIET:
-                    String id = call.getArgs().get(0).toString();
-                    uninstallRoot(id);
-                    router.route(Call.createReturnCall(call));
-                    break;
-                default:
-                    throw new IllegalArgumentException();
+            if (call.isRequest()) {
+                String id = call.args().get(0).toString();
+                uninstallRoot(id);
+                router.route(call.reply());
+            } else {
+                throw new IllegalArgumentException();
             }
         }
 
@@ -254,18 +248,15 @@ public class BasicCoreRoot extends AbstractRoot {
 
         @Override
         public void call(Call call, PacketRouter router) throws Exception {
-            switch (call.getType()) {
-                case INVOKE:
-                case INVOKE_QUIET:
-                    String[] ids = hubAccess.getRootIDs();
-                    if (!Arrays.equals(ids, knownIDs)) {
-                        knownIDs = ids;
-                        ret = Stream.of(ids).map(PString::valueOf).collect(PArray.collector());
-                    }
-                    router.route(Call.createReturnCall(call, ret));
-                    break;
-                default:
-                    throw new IllegalArgumentException();
+            if (call.isRequest()) {
+                String[] ids = hubAccess.getRootIDs();
+                if (!Arrays.equals(ids, knownIDs)) {
+                    knownIDs = ids;
+                    ret = Stream.of(ids).map(PString::valueOf).collect(PArray.collector());
+                }
+                router.route(call.reply(ret));
+            } else {
+                throw new IllegalArgumentException();
             }
         }
     }

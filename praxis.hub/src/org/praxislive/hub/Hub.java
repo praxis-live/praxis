@@ -181,7 +181,7 @@ public final class Hub {
 
         @Override
         public boolean dispatch(Packet packet) {
-            Root.Controller dest = roots.get(packet.getRootID());
+            Root.Controller dest = roots.get(packet.rootID());
             if (dest != null) {
                 return dest.submitPacket(packet);
             } else {

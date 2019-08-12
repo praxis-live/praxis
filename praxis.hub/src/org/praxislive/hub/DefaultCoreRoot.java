@@ -199,7 +199,7 @@ public class DefaultCoreRoot extends AbstractRoot {
             ControlAddress to = ControlAddress.create(
                     findService(RootFactoryService.class),
                     RootFactoryService.NEW_ROOT_INSTANCE);
-            return Call.createCall(to, getAddress(), call.getTimecode(), args.get(1));
+            return Call.create(to, getAddress(), call.time(), args.get(1));
         }
 
         @Override

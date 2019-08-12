@@ -72,7 +72,7 @@ public class PacketQueue {
 
     public void add(Packet packet) {
         if (inOverflowArea) {
-            if (packet.getTimecode() > 0) {
+            if (packet.time() > 0) {
                 secondaryQueue.add(packet);
             } else {
                 primaryQueue.add(packet);
@@ -85,7 +85,7 @@ public class PacketQueue {
     public Packet poll() {
         if (inOverflowArea) {
             return checkedPoll();
-        } else if (!primaryQueue.isEmpty() && primaryQueue.peek().getTimecode() < time) {
+        } else if (!primaryQueue.isEmpty() && primaryQueue.peek().time() < time) {
             return primaryQueue.poll();
         } else {
             return null;
@@ -95,7 +95,7 @@ public class PacketQueue {
 
     private Packet checkedPoll() {
         if (time > 0) {
-            if (!secondaryQueue.isEmpty() && secondaryQueue.peek().getTimecode() < time) {
+            if (!secondaryQueue.isEmpty() && secondaryQueue.peek().time() < time) {
                 return secondaryQueue.poll();
             } else {
                 return null;
@@ -103,7 +103,7 @@ public class PacketQueue {
         } else {
             if (!secondaryQueue.isEmpty()) {
                 return secondaryQueue.poll();
-            } else if (!primaryQueue.isEmpty() && primaryQueue.peek().getTimecode() < time) {
+            } else if (!primaryQueue.isEmpty() && primaryQueue.peek().time() < time) {
                 return primaryQueue.poll();
             } else {
                 return null;

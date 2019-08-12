@@ -134,7 +134,7 @@ public class MidiControlIn extends AbstractMidiInComponent {
     public void midiReceived(ShortMessage msg, long time) {
         if (msg.getChannel() == channel && msg.getCommand() == ShortMessage.CONTROL_CHANGE
                 && msg.getData1() == controller && binding != null) {
-            Call call = Call.createQuietCall(binding, returnAddress, time, parseArgument(msg.getData2()));
+            Call call = Call.createQuiet(binding, returnAddress, time, parseArgument(msg.getData2()));
             getPacketRouter().route(call);
 
         }

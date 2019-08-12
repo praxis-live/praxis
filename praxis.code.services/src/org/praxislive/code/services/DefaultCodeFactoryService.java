@@ -154,10 +154,10 @@ public class DefaultCodeFactoryService extends AbstractRoot {
                 return Call.createReturnCall(call,
                         PReference.wrap(createComponent(codeFactory, cls)));
             } else {
-                return Call.createCall(
+                return Call.create(
                         findCompilerService(),
                         getAddress(),
-                        call.getTimecode(),
+                        call.time(),
                         createCompilerTask(cbc, LogLevel.ERROR, src));
             }
 
@@ -216,10 +216,10 @@ public class DefaultCodeFactoryService extends AbstractRoot {
                 return Call.createReturnCall(call,
                         PReference.wrap(createContext(task, log, delegate)));
             } else {
-                return Call.createCall(
+                return Call.create(
                         findCompilerService(),
                         getAddress(),
-                        call.getTimecode(),
+                        call.time(),
                         createCompilerTask(cbc, LogLevel.ERROR, src));
             }
 

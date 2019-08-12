@@ -188,7 +188,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             ControlAddress to = ControlAddress.create(
                     findService(ComponentFactoryService.class),
                     ComponentFactoryService.NEW_INSTANCE);
-            return Call.createCall(to, getAddress(), call.getTimecode(), args.get(1));
+            return Call.create(to, getAddress(), call.time(), args.get(1));
         }
 
         @Override

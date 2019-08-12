@@ -101,7 +101,7 @@ public class ScriptServiceImpl extends AbstractRoot {
                 case INVOKE :
                 case INVOKE_QUIET :
 //                    defaultExecutor.queueEvalCall(call);
-                    getExecutor(call.getFromAddress()).queueEvalCall(call);
+                    getExecutor(call.from()).queueEvalCall(call);
                     break;
                 default:
                     LOG.warning("Eval control received unexpected call.\n" + call);
@@ -119,11 +119,11 @@ public class ScriptServiceImpl extends AbstractRoot {
         public void call(Call call, PacketRouter router) throws Exception {
             switch (call.getType()) {
                 case INVOKE :
-                    clearContext(call.getFromAddress());
+                    clearContext(call.from());
                     router.route(Call.createReturnCall(call, CallArguments.EMPTY));
                     break;
                 case INVOKE_QUIET :
-                    clearContext(call.getFromAddress());
+                    clearContext(call.from());
                     break;
                 default :
                     LOG.warning("Clear control received unexpected call.\n" + call);
@@ -149,7 +149,7 @@ public class ScriptServiceImpl extends AbstractRoot {
             switch (call.getType()) {
                 case INVOKE :
                 case INVOKE_QUIET :
-                    if (call.getToAddress().equals(call.getFromAddress())) {
+                    if (call.to().equals(call.from())) {
                         executor.processScriptCall(call);
                     } else {
                         throw new UnsupportedOperationException();

@@ -21,8 +21,8 @@
  */
 package org.praxislive.base;
 
+import java.util.List;
 import org.praxislive.core.Call;
-import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Value;
@@ -36,22 +36,21 @@ public abstract class AbstractProperty implements Control {
 
     @Override
     public void call(Call call, PacketRouter router) throws Exception {
-        Call.Type type = call.getType();
-        if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
-            CallArguments args = call.getArgs();
-            int argCount = args.getSize();
-            long time = call.getTimecode();
+        if (call.isRequest()) {
+            List<Value> args = call.args();
+            int argCount = args.size();
+            long time = call.time();
             if (argCount > 0) {
                 if (isLatest(time)) {
                     set(time, args.get(0));
                     setLatest(time);
                 }
-                if (type == Call.Type.INVOKE) {
-                    router.route(Call.createReturnCall(call, args));
+                if (call.isReplyRequired()) {
+                    router.route(call.reply(args));
                 }
             } else {
                 // ignore quiet hint?
-                router.route(Call.createReturnCall(call, get()));
+                router.route(call.reply(get()));
             }
         } else {
 //            throw new IllegalArgumentException();

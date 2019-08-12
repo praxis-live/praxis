@@ -37,8 +37,8 @@ public class PacketQueueTest {
     @Test
     public void testPoll() {
         PacketQueue pq = new PacketQueue(0);
-        Call c1 = Call.createCall(ControlAddress.create("/to.c1"), ControlAddress.create("/from.c1"), 1000);
-        Call c2 = Call.createCall(ControlAddress.create("/to.c2"), ControlAddress.create("/from.c2"), 2000);
+        Call c1 = Call.create(ControlAddress.create("/to.c1"), ControlAddress.create("/from.c1"), 1000);
+        Call c2 = Call.create(ControlAddress.create("/to.c2"), ControlAddress.create("/from.c2"), 2000);
         pq.add(c1);
         pq.add(c2);
         assertNull(pq.poll());
@@ -56,8 +56,8 @@ public class PacketQueueTest {
     @Test
     public void testWrappingPoll() {
         PacketQueue pq = new PacketQueue(Long.MAX_VALUE - 5000);
-        Call c1 = Call.createCall(ControlAddress.create("/to.c1"), ControlAddress.create("/from.c1"), Long.MAX_VALUE - 1000);
-        Call c2 = Call.createCall(ControlAddress.create("/to.c2"), ControlAddress.create("/from.c2"), Long.MAX_VALUE + 1000);
+        Call c1 = Call.create(ControlAddress.create("/to.c1"), ControlAddress.create("/from.c1"), Long.MAX_VALUE - 1000);
+        Call c2 = Call.create(ControlAddress.create("/to.c2"), ControlAddress.create("/from.c2"), Long.MAX_VALUE + 1000);
         pq.add(c1);
         pq.add(c2);
         assertNull(pq.poll());

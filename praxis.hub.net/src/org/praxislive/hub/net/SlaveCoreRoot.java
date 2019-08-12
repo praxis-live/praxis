@@ -141,7 +141,7 @@ class SlaveCoreRoot extends BasicCoreRoot {
 
     @Override
     protected void processCall(Call call, PacketRouter router) {
-        if (call.getToAddress().getComponentAddress().equals(getAddress())) {
+        if (call.to().getComponentAddress().equals(getAddress())) {
             super.processCall(call, router);
         } else {
             dispatcher.handleCall(call);

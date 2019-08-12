@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -21,10 +21,10 @@
  */
 package org.praxislive.code;
 
+import java.util.List;
 import org.praxislive.core.Value;
 import org.praxislive.core.ValueFormatException;
 import org.praxislive.core.Call;
-import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.PacketRouter;
@@ -48,7 +48,7 @@ class CodeProperty<D extends CodeDelegate>
     private CodeContext<D> context;
     private Call activeCall;
     private Call taskCall;
-    private CallArguments keys;
+    private List<Value> keys;
     private boolean latestSet;
     private long latest;
     private ControlAddress contextFactory;
@@ -65,26 +65,19 @@ class CodeProperty<D extends CodeDelegate>
     }
 
     public void call(Call call, PacketRouter router) throws Exception {
-        switch (call.getType()) {
-            case INVOKE:
-            case INVOKE_QUIET:
-                processInvoke(call, router);
-                break;
-            case RETURN:
-                processReturn(call, router);
-                break;
-            case ERROR:
-                processError(call, router);
-                break;
-            default:
-                throw new IllegalArgumentException();
+        if (call.isRequest()) {
+            processInvoke(call, router);
+        } else if (call.isReply()) {
+            processReturn(call, router);
+        } else {
+            processError(call, router);
         }
     }
 
     private void processInvoke(Call call, PacketRouter router) {
-        CallArguments args = call.getArgs();
-        long time = call.getTimecode();
-        if (args.getSize() > 0 && isLatest(time)) {
+        List<Value> args = call.args();
+        long time = call.time();
+        if (args.size() > 0 && isLatest(time)) {
             try {
                 String code = args.get(0).toString();
                 CodeContextFactoryService.Task task
@@ -99,53 +92,53 @@ class CodeProperty<D extends CodeDelegate>
                             .orElseThrow(ServiceUnavailableException::new),
                             CodeContextFactoryService.NEW_CONTEXT);
                 }
-                taskCall = Call.createCall(contextFactory, context.getAddress(this), time, PReference.wrap(task));
+                taskCall = Call.create(contextFactory, context.getAddress(this), time, PReference.wrap(task));
                 router.route(taskCall);
                 // managed to start task ok
                 setLatest(time);
                 if (activeCall != null) {
-                    router.route(Call.createReturnCall(activeCall, activeCall.getArgs()));
+                    router.route(activeCall.reply(activeCall.args()));
                 }
                 activeCall = call;
             } catch (Exception ex) {
-                router.route(Call.createErrorCall(call, PError.create(ex)));
+                router.route(call.error(PError.create(ex)));
             }
         } else {
-            router.route(Call.createReturnCall(call, keys));
+            router.route(call.reply(keys));
         }
     }
 
     private void processReturn(Call call, PacketRouter router) {
         try {
-            if (taskCall == null || taskCall.getMatchID() != call.getMatchID()) {
+            if (taskCall == null || taskCall.matchID() != call.matchID()) {
                 //LOG.warning("Unexpected Call received\n" + call.toString());
                 return;
             }
             taskCall = null;
             CodeContextFactoryService.Result result
-                    = (CodeContextFactoryService.Result) ((PReference) call.getArgs().get(0)).getReference();
-            keys = activeCall.getArgs();
-            router.route(Call.createReturnCall(activeCall, keys));
+                    = (CodeContextFactoryService.Result) ((PReference) call.args().get(0)).getReference();
+            keys = activeCall.args();
+            router.route(activeCall.reply(keys));
             activeCall = null;
             context.flush();
             context.getComponent().install((CodeContext<D>) result.getContext());
             LogBuilder log = result.getLog();
             context.log(log);
         } catch (Exception ex) {
-            router.route(Call.createErrorCall(activeCall, PError.create(ex)));
+            router.route(activeCall.error(PError.create(ex)));
         }
     }
 
     private void processError(Call call, PacketRouter router) throws Exception {
-        if (taskCall == null || taskCall.getMatchID() != call.getMatchID()) {
+        if (taskCall == null || taskCall.matchID() != call.matchID()) {
             //LOG.warning("Unexpected Call received\n" + call.toString());
             return;
         }
-        router.route(Call.createErrorCall(activeCall, call.getArgs()));
+        router.route(activeCall.error(call.args()));
         activeCall = null;
-        CallArguments args = call.getArgs();
+        List<Value> args = call.args();
         PError err;
-        if (args.getSize() > 0) {
+        if (args.size() > 0) {
             try {
                 err = PError.coerce(args.get(0));
             } catch (ValueFormatException ex) {

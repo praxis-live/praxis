@@ -54,7 +54,7 @@ public class DefaultTerminalContext extends AbstractControl implements Terminal.
         ControlAddress to = ControlAddress.create(
                 findService(ScriptService.class),
                 ScriptService.EVAL);
-        Call call = Call.createCall(to, getAddress(),
+        Call call = Call.create(to, getAddress(),
                 getLookup().find(ExecutionContext.class).get().getTime(), PString.valueOf(script));
         route(call);
         activeCall = call;
@@ -75,13 +75,13 @@ public class DefaultTerminalContext extends AbstractControl implements Terminal.
     public void call(Call call, PacketRouter router) throws Exception {
         switch (call.getType()) {
             case RETURN:
-                if (call.getMatchID() == activeCall.getMatchID()) {
+                if (call.matchID() == activeCall.matchID()) {
                     terminal.processResponse(call.getArgs());
                     activeCall = null;
                 }
                 break;
             case ERROR:
-                if (call.getMatchID() == activeCall.getMatchID()) {
+                if (call.matchID() == activeCall.matchID()) {
                     terminal.processError(call.getArgs());
                     activeCall = null;
                 }

@@ -99,9 +99,9 @@ class MasterClientRoot extends AbstractRoot {
 
     @Override
     protected void processCall(Call call, PacketRouter router) {
-        if (call.getToAddress().getComponentAddress().equals(getAddress())) {
+        if (call.to().getComponentAddress().equals(getAddress())) {
             try {
-                switch (call.getToAddress().getID()) {
+                switch (call.to().getID()) {
                     case RootManagerService.ADD_ROOT:
                         addRootControl.call(call, router);
                         break;
@@ -328,9 +328,7 @@ class MasterClientRoot extends AbstractRoot {
 
         @Override
         public void call(Call call, PacketRouter router) throws Exception {
-            if (call.getType() == Call.Type.INVOKE
-                    || call.getType() == Call.Type.INVOKE_QUIET) {
-
+            if (call.isRequest()) {
                 if (client != null) {
                     dispatch(call);
                 } else {
@@ -338,11 +336,9 @@ class MasterClientRoot extends AbstractRoot {
                     if (client != null) {
                         dispatch(call);
                     } else {
-                        router.route(Call.createErrorCall(call));
+                        router.route(call.error(PError.create("Couldn't connect to client")));
                     }
                 }
-            } else {
-                // 
             }
         }
 

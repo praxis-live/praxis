@@ -29,15 +29,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.praxislive.base.AbstractAsyncControl;
 import org.praxislive.core.Call;
-import org.praxislive.core.CallArguments;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.ComponentType;
 import org.praxislive.core.Control;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.Root;
+import org.praxislive.core.Value;
 import org.praxislive.core.services.RootFactoryService;
 import org.praxislive.core.services.RootManagerService;
-import org.praxislive.core.services.Services;
 import org.praxislive.core.types.PReference;
 import org.praxislive.hub.BasicCoreRoot;
 import org.praxislive.hub.Hub;
@@ -125,8 +124,8 @@ class MasterCoreRoot extends BasicCoreRoot {
 
         @Override
         protected Call processInvoke(Call call) throws Exception {
-            CallArguments args = call.getArgs();
-            if (args.getSize() < 2) {
+            List<Value> args = call.args();
+            if (args.size() < 2) {
                 throw new IllegalArgumentException("Invalid arguments");
             }
             String id = args.get(0).toString();
@@ -145,11 +144,11 @@ class MasterCoreRoot extends BasicCoreRoot {
             ControlAddress to;
             if (proxy != null) {
                 to = ControlAddress.create(proxy, RootManagerService.ADD_ROOT);
-                return Call.createCall(to, call.getToAddress(), call.getTimecode(), args);
+                return Call.create(to, call.to(), call.time(), args);
             } else {
                 to = ControlAddress.create(findService(RootFactoryService.class),
                         RootFactoryService.NEW_ROOT_INSTANCE);
-                return Call.createCall(to, call.getToAddress(), call.getTimecode(), args.get(1));
+                return Call.create(to, call.to(), call.time(), args.get(1));
             }
         }
 
@@ -157,21 +156,21 @@ class MasterCoreRoot extends BasicCoreRoot {
         protected Call processResponse(Call call) throws Exception {
             Call active = getActiveCall();
             String id = active.getArgs().get(0).toString();
-            String source = call.getFromAddress().getComponentAddress().getRootID();
+            String source = call.from().getComponentAddress().getRootID();
             if (source.startsWith(SLAVE_PREFIX)) {
                 Root.Controller ctrl = getHubAccessor().getRootController(source);
                 getHubAccessor().registerRootController(id, ctrl);
                 remotes.put(id, source);
             } else {
-                CallArguments args = call.getArgs();
-                if (args.getSize() < 1) {
+                List<Value> args = call.args();
+                if (args.size() < 1) {
                     throw new IllegalArgumentException("Invalid response");
                 }
                 Root r = (Root) ((PReference) args.get(0)).getReference();
                 String type = active.getArgs().get(1).toString();
                 installRoot(id, type, r);
             }
-            return Call.createReturnCall(active, CallArguments.EMPTY);
+            return active.reply();
         }
 
     }
@@ -180,25 +179,25 @@ class MasterCoreRoot extends BasicCoreRoot {
 
         @Override
         protected Call processInvoke(Call call) throws Exception {
-            String id = call.getArgs().get(0).toString();
+            String id = call.args().get(0).toString();
             String remoteProxy = remotes.get(id);
             if (remoteProxy != null) {
                 ControlAddress to = ControlAddress.create(
                         ComponentAddress.create("/" + remoteProxy),
                         RootManagerService.REMOVE_ROOT);
-                return Call.createCall(to, call.getToAddress(), call.getTimecode(), call.getArgs());
+                return Call.create(to, call.to(), call.time(), call.args());
             } else {
                 uninstallRoot(id);
-                return Call.createReturnCall(call, CallArguments.EMPTY);
+                return call.reply();
             }
         }
 
         @Override
         protected Call processResponse(Call call) throws Exception {
             Call active = getActiveCall();
-            String id = active.getArgs().get(0).toString();
+            String id = active.args().get(0).toString();
             remotes.remove(id);
-            return Call.createReturnCall(active, CallArguments.EMPTY);
+            return call.reply();
         }
 
     }

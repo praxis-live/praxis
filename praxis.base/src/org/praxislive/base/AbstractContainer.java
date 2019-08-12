@@ -24,13 +24,13 @@ package org.praxislive.base;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.praxislive.core.Call;
-import org.praxislive.core.CallArguments;
 import org.praxislive.core.Component;
 import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.Container;
@@ -41,6 +41,7 @@ import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Port;
 import org.praxislive.core.PortConnectionException;
 import org.praxislive.core.PortListener;
+import org.praxislive.core.Value;
 import org.praxislive.core.VetoException;
 import org.praxislive.core.protocols.ContainerProtocol;
 import org.praxislive.core.services.ComponentFactoryService;
@@ -194,8 +195,8 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
 
         @Override
         protected Call processInvoke(Call call) throws Exception {
-            CallArguments args = call.getArgs();
-            if (args.getSize() < 2) {
+            List<Value> args = call.args();
+            if (args.size() < 2) {
                 throw new IllegalArgumentException("Invalid arguments");
             }
             if (!ComponentAddress.isValidID(args.get(0).toString())) {
@@ -203,19 +204,19 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             }
             ControlAddress to = ControlAddress.create(findService(ComponentFactoryService.class),
                     ComponentFactoryService.NEW_INSTANCE);
-            return Call.createCall(to, call.getToAddress(), call.getTimecode(), args.get(1));
+            return Call.create(to, call.to(), call.time(), args.get(1));
         }
 
         @Override
         protected Call processResponse(Call call) throws Exception {
-            CallArguments args = call.getArgs();
-            if (args.getSize() < 1) {
+            List<Value> args = call.args();
+            if (args.size() < 1) {
                 throw new IllegalArgumentException("Invalid response");
             }
             Component c = (Component) ((PReference) args.get(0)).getReference();
             Call active = getActiveCall();
-            addChild(active.getArgs().get(0).toString(), c);
-            return Call.createReturnCall(active, CallArguments.EMPTY);
+            addChild(active.args().get(0).toString(), c);
+            return active.reply();
         }
     }
 
@@ -223,8 +224,8 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
 
         @Override
         public void call(Call call, PacketRouter router) throws Exception {
-            removeChild(call.getArgs().get(0).toString());
-            router.route(Call.createReturnCall(call));
+            removeChild(call.args().get(0).toString());
+            router.route(call.reply());
         }
 
     }
@@ -236,7 +237,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             PArray response = childMap.keySet().stream()
                     .map(PString::valueOf)
                     .collect(PArray.collector());
-            router.route(Call.createReturnCall(call, response));
+            router.route(call.reply(response));
         }
 
     }
@@ -250,7 +251,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
                     PString.coerce(call.getArgs().get(1)),
                     PString.coerce(call.getArgs().get(2)),
                     PString.coerce(call.getArgs().get(3)));
-            router.route(Call.createReturnCall(call));
+            router.route(call.reply());
         }
 
     }
@@ -264,7 +265,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
                     PString.coerce(call.getArgs().get(1)),
                     PString.coerce(call.getArgs().get(2)),
                     PString.coerce(call.getArgs().get(3)));
-            router.route(Call.createReturnCall(call));
+            router.route(call.reply());
         }
 
     }
@@ -274,7 +275,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         @Override
         public void call(Call call, PacketRouter router) throws Exception {
             PArray response = PArray.valueOf(connections);
-            router.route(Call.createReturnCall(call, response));
+            router.route(call.reply(response));
         }
 
     }

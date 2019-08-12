@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -25,15 +25,16 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import org.praxislive.code.userapi.Ref;
 import org.praxislive.core.Call;
-import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
 import org.praxislive.core.ControlAddress;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.PacketRouter;
+import org.praxislive.core.Value;
 import org.praxislive.core.services.TaskService;
 import org.praxislive.core.types.PError;
 import org.praxislive.core.types.PReference;
@@ -68,17 +69,17 @@ class RefImpl<T> extends Ref<T> {
                 .orElseThrow(IllegalStateException::new);
         ControlAddress from = ControlAddress.create(context.getComponent().getAddress(), desc.getID());
         TaskService.Task task = () -> PReference.wrap(function.apply(key));
-        Call call = Call.createCall(to, from, context.getTime(), PReference.wrap(task));
+        Call call = Call.create(to, from, context.getTime(), PReference.wrap(task));
         context.getLookup().find(PacketRouter.class)
                 .orElseThrow(IllegalStateException::new)
                 .route(call);
-        activeCalls.add(call.getMatchID());
+        activeCalls.add(call.matchID());
         return this;
     }
 
     private void handleAsyncResponse(Call call) {
-        if (activeCalls.remove(call.getMatchID())) {
-            if (call.getType() == Call.Type.RETURN) {
+        if (activeCalls.remove(call.matchID())) {
+            if (call.isReply()) {
                 try {
                     T val = (T) PReference.from(call.getArgs().get(0)).get().getReference();
                     if (!refType.isInstance(val)) {
@@ -89,10 +90,10 @@ class RefImpl<T> extends Ref<T> {
                     context.getLog().log(LogLevel.ERROR, ex);
                 }
             } else {
-                CallArguments args = call.getArgs();
+                List<Value> args = call.args();
                 if (args.isEmpty()) {
                     context.getLog().log(LogLevel.ERROR, "Error in asyncCompute on "
-                            + call.getToAddress().getID());
+                            + call.to().getID());
                 } else {
                     PError err = PError.from(args.get(0)).orElse(PError.create(args.get(0).toString()));
                     context.getLog().log(LogLevel.ERROR, err);
@@ -231,7 +232,7 @@ class RefImpl<T> extends Ref<T> {
 
         @Override
         public void call(Call call, PacketRouter router) throws Exception {
-            if (call.getType() == Call.Type.RETURN || call.getType() == Call.Type.ERROR) {
+            if (call.isReply() || call.isError()) {
                 rd.ref.handleAsyncResponse(call);
             } else {
                 throw new IllegalArgumentException("Reference control received unexpected call : " + call);

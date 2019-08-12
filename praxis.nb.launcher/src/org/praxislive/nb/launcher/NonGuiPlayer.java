@@ -102,14 +102,14 @@ class NonGuiPlayer extends AbstractRoot {
         }
 
         private void processReturn(Call call) throws Exception {
-            if (activeCall != null && call.getMatchID() == activeCall.getMatchID()) {
+            if (activeCall != null && call.matchID() == activeCall.matchID()) {
                 activeCall = null;
                 nextScript();
             }
         }
 
         private void processError(Call call) throws Exception {
-            if (activeCall != null && call.getMatchID() == activeCall.getMatchID()) {
+            if (activeCall != null && call.matchID() == activeCall.matchID()) {
                 activeCall = null;
                 CallArguments args = call.getArgs();
                 if (args.getSize() > 0) {
@@ -145,7 +145,7 @@ class NonGuiPlayer extends AbstractRoot {
                     .orElseThrow(IllegalStateException::new);
                 evalControl = ControlAddress.create(ss, ScriptService.EVAL);
             }
-            activeCall = Call.createCall(evalControl,
+            activeCall = Call.create(evalControl,
                     getAddress(),
                     getExecutionContext().getTime(),
                     PString.valueOf(script));

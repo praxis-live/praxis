@@ -67,12 +67,12 @@ class DefaultComponentFactoryService extends AbstractRoot
 
     @Override
     protected void processCall(Call call, PacketRouter router) {
-        switch (call.getToAddress().getID()) {
+        switch (call.to().getID()) {
             case ComponentFactoryService.NEW_INSTANCE: {
                 try {
                     newInstance.call(call, router);
                 } catch (Exception ex) {
-                    router.route(Call.createErrorCall(call, PError.create(ex)));
+                    router.route(call.error(PError.create(ex)));
                 }
             }
             break;
@@ -80,14 +80,13 @@ class DefaultComponentFactoryService extends AbstractRoot
                 try {
                     newRoot.call(call, router);
                 } catch (Exception ex) {
-                    router.route(Call.createErrorCall(call, PError.create(ex)));
+                    router.route(call.error(PError.create(ex)));
                 }
             }
             break;
             default:
-                if (call.getType() == Call.Type.INVOKE ||
-                        call.getType() == Call.Type.INVOKE_QUIET) {
-                    router.route(Call.createErrorCall(call));
+                if (call.isRequest()) {
+                    router.route(call.error(PError.create("Unknown control ID")));
                 }
 
         }
@@ -98,7 +97,7 @@ class DefaultComponentFactoryService extends AbstractRoot
 
         @Override
         protected Call processInvoke(Call call) throws Exception {
-            ComponentType type = ComponentType.coerce(call.getArgs().get(0));
+            ComponentType type = ComponentType.coerce(call.args().get(0));
             ComponentFactory factory = registry.getComponentFactory(type);
             if (factory.getFactoryService() != ComponentFactoryService.class) {
                 ControlAddress altFactory = getLookup().find(Services.class)
@@ -106,19 +105,19 @@ class DefaultComponentFactoryService extends AbstractRoot
                         .map(cmp -> ControlAddress.create(cmp, ComponentFactoryService.NEW_INSTANCE))
                         .orElseThrow(() -> new IllegalStateException("Alternative factory service not found"));
                         
-                return Call.createCall(altFactory,
-                        call.getToAddress(),
-                        call.getTimecode(),
-                        call.getArgs());
+                return Call.create(altFactory,
+                        call.to(),
+                        call.time(),
+                        call.args());
             } else {
                 Component component = factory.createComponent(type);
-                return Call.createReturnCall(call, PReference.wrap(component));
+                return call.reply(PReference.wrap(component));
             }
         }
 
         @Override
         protected Call processResponse(Call call) throws Exception {
-            return Call.createReturnCall(getActiveCall(), call.getArgs());
+            return getActiveCall().reply(call.args());
         }
 
     }
@@ -130,7 +129,7 @@ class DefaultComponentFactoryService extends AbstractRoot
             ComponentType type = ComponentType.coerce(call.getArgs().get(0));
             ComponentFactory factory = registry.getRootComponentFactory(type);
             Root root = factory.createRootComponent(type);
-            return Call.createReturnCall(call, PReference.wrap(root));
+            return call.reply(PReference.wrap(root));
         }
 
         @Override

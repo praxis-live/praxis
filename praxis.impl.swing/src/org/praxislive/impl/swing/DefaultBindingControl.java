@@ -262,12 +262,12 @@ public class DefaultBindingControl extends AbstractControl {
             Call call = Call.createCall(toAddress, returnAddress,
                     context.getTime(), CallArguments.EMPTY);
 
-            infoMatchID = call.getMatchID();
+            infoMatchID = call.matchID();
             router.route(call);
         }
 
         private void processInfo(Call call) {
-            if (call.getMatchID() == infoMatchID) {
+            if (call.matchID() == infoMatchID) {
                 CallArguments args = call.getArgs();
                 if (args.getSize() > 0) {
                     ComponentInfo compInfo = null;
@@ -303,7 +303,7 @@ public class DefaultBindingControl extends AbstractControl {
         }
 
         private void processResponse(Call call) {
-            if (activeCall != null && call.getMatchID() == activeCall.getMatchID()) {
+            if (activeCall != null && call.matchID() == activeCall.matchID()) {
                 if (activeAdaptor != null) {
                     activeAdaptor.onResponse(call.getArgs());
                     activeAdaptor = null;
@@ -315,22 +315,22 @@ public class DefaultBindingControl extends AbstractControl {
                     }
                 }
                 activeCall = null;
-            } else if (call.getMatchID() == infoMatchID) {
+            } else if (call.matchID() == infoMatchID) {
                 processInfo(call);
             }
         }
 
         private void processError(Call call) {
-            if (activeCall != null && call.getMatchID() == activeCall.getMatchID()) {
+            if (activeCall != null && call.matchID() == activeCall.matchID()) {
                 if (activeAdaptor != null) {
                     activeAdaptor.onError(call.getArgs());
                     activeAdaptor = null;
                 } else {
-                    LOG.log(Level.WARNING, "Error on sync call - {0} - DEACTIVATING", call.getFromAddress());
+                    LOG.log(Level.WARNING, "Error on sync call - {0} - DEACTIVATING", call.from());
                     syncTimer.stop();
                 }
                 activeCall = null;
-            } else if (call.getMatchID() == infoMatchID) {
+            } else if (call.matchID() == infoMatchID) {
                 processInfoError(call);
             }
         }
@@ -339,11 +339,11 @@ public class DefaultBindingControl extends AbstractControl {
             long now = context.getTime();
             if (activeCall != null) {
                 if (activeCall.getType() == Call.Type.INVOKE) {
-                    if ((now - activeCall.getTimecode()) < invokeTimeOut) {
+                    if ((now - activeCall.time()) < invokeTimeOut) {
                         return;
                     }
                 } else {
-                    if ((now - activeCall.getTimecode()) < quietTimeOut) {
+                    if ((now - activeCall.time()) < quietTimeOut) {
                         return;
                     }
                 }

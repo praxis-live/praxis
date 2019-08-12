@@ -88,7 +88,7 @@ public class CompilerCommandInstaller implements CommandInstaller {
                     .flatMap(sm -> sm.locate(CodeCompilerService.class))
                     .orElseThrow(ServiceUnavailableException::new);
             ControlAddress addLibsControl = ControlAddress.create(service, "add-libs");
-            return Call.createCall(addLibsControl, env.getAddress(), env.getTime(), libs);
+            return Call.create(addLibsControl, env.getAddress(), env.getTime(), libs);
         }
         
     }

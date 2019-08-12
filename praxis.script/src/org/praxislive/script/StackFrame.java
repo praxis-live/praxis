@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -22,8 +22,11 @@
 
 package org.praxislive.script;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import org.praxislive.core.Call;
 import org.praxislive.core.CallArguments;
+import org.praxislive.core.Value;
 
 /**
  *
@@ -39,8 +42,18 @@ public interface StackFrame {
 
     public void postResponse(Call call);
 
+    @Deprecated
     public void postResponse(State state, CallArguments args);
+    
+    public default void postResponse(State state, List<? extends Value> args) {
+        postResponse(state, CallArguments.create(args));
+    }
 
+    @Deprecated
     public CallArguments getResult();
+    
+    public default List<? extends Value> result() {
+        return getResult().stream().collect(Collectors.toList());
+    }
 
 }

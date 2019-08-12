@@ -95,7 +95,7 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
 
     private void processInvoke(Call call, PacketRouter router) throws Exception {
         CallArguments args = call.getArgs();
-        long time = call.getTimecode();
+        long time = call.time();
         if (args.getSize() > 0 && isLatest(time)) {
             TaskService.Task task = createTask(args);
             // no exception so valid args
@@ -122,7 +122,7 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
     }
 
     private void processReturn(Call call, PacketRouter router) throws Exception {
-        if (taskCall == null || taskCall.getMatchID() != call.getMatchID()) {
+        if (taskCall == null || taskCall.matchID() != call.matchID()) {
             //LOG.warning("Unexpected Call received\n" + call.toString());
             return;
         }
@@ -138,11 +138,11 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
         } else {
             LOG.warning("No keys able to be set");
         }
-        valueChanged(call.getTimecode());
+        valueChanged(call.time());
     }
 
     private void processError(Call call, PacketRouter router) throws Exception {
-        if (taskCall == null || taskCall.getMatchID() != call.getMatchID()) {
+        if (taskCall == null || taskCall.matchID() != call.matchID()) {
             //LOG.warning("Unexpected Call received\n" + call.toString());
             return;
         }
@@ -150,7 +150,7 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
             router.route(Call.createErrorCall(activeCall, call.getArgs()));
             activeCall = null;
         }
-        taskError(call.getTimecode());
+        taskError(call.time());
     }
 
     private void respond(Call call, CallArguments args, PacketRouter router) {
@@ -256,7 +256,7 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
             router = getLookup().find(PacketRouter.class)
                     .orElseThrow(() -> new IllegalStateException("No packet router"));
         }
-        taskCall = Call.createCall(to, getAddress(), time, PReference.wrap(task));
+        taskCall = Call.create(to, getAddress(), time, PReference.wrap(task));
         router.route(taskCall);
     }
 

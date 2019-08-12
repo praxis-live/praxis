@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -22,10 +22,9 @@
  */
 package org.praxislive.code;
 
+import java.util.List;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.praxislive.code.userapi.Inject;
 import org.praxislive.code.userapi.OnChange;
 import org.praxislive.code.userapi.OnError;
@@ -35,7 +34,6 @@ import org.praxislive.code.userapi.ReadOnly;
 import org.praxislive.code.userapi.Transient;
 import org.praxislive.code.userapi.Type;
 import org.praxislive.core.Call;
-import org.praxislive.core.CallArguments;
 import org.praxislive.core.Control;
 import org.praxislive.core.PacketRouter;
 import org.praxislive.core.Port;
@@ -142,9 +140,9 @@ public class PropertyControl extends Property implements Control {
     public void call(Call call, PacketRouter router) throws Exception {
         Call.Type type = call.getType();
         if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
-            CallArguments args = call.getArgs();
-            int argCount = args.getSize();
-            long time = call.getTimecode();
+            List<Value> args = call.args();
+            int argCount = args.size();
+            long time = call.time();
             if (argCount > 0 && !readOnly) {
                 if (isLatest(time)) {
                     finishAnimating();
@@ -157,11 +155,11 @@ public class PropertyControl extends Property implements Control {
                     }
                 }
                 if (type == Call.Type.INVOKE) {
-                    router.route(Call.createReturnCall(call, args));
+                    router.route(call.reply(args));
                 }
             } else {
                 // ignore quiet hint?
-                router.route(Call.createReturnCall(call, get()));
+                router.route(call.reply(get()));
             }
         } else {
 //            throw new IllegalValueException();

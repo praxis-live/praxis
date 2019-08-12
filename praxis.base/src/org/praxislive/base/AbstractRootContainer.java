@@ -48,15 +48,14 @@ public abstract class AbstractRootContainer extends AbstractRoot implements Cont
         delegate = new ContainerImpl(this);
         registerControl(StartableProtocol.START, (call, router) -> {
             setRunning();
-            router.route(Call.createReturnCall(call));
+            router.route(call.reply());
         });
         registerControl(StartableProtocol.STOP, (call, router) -> {
             setIdle();
-            router.route(Call.createReturnCall(call));
+            router.route(call.reply());
         });
         registerControl(StartableProtocol.IS_RUNNING, (call, router) -> {
-            router.route(Call.createReturnCall(call,
-                    PBoolean.valueOf(getState() == State.ACTIVE_RUNNING)));
+            router.route(call.reply(PBoolean.valueOf(getState() == State.ACTIVE_RUNNING)));
         });
     }
 
@@ -104,20 +103,18 @@ public abstract class AbstractRootContainer extends AbstractRoot implements Cont
 
     @Override
     protected void processCall(Call call, PacketRouter router) {
-        Control control = findControl(call.getToAddress());
+        Control control = findControl(call.to());
         try {
             if (control != null) {
                 control.call(call, router);
             } else {
-                Call.Type type = call.getType();
-                if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
-                    router.route(Call.createErrorCall(call, PString.valueOf("Unknown control address : " + call.getToAddress())));
+                if (call.isRequest()) {
+                    router.route(call.error(PError.create("Unknown control address : " + call.to())));
                 }
             }
         } catch (Exception ex) {
-            Call.Type type = call.getType();
-            if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
-                router.route(Call.createErrorCall(call, PError.create(ex)));
+            if (call.isRequest()) {
+                router.route(call.error(PError.create(ex)));
             }
         }
     }

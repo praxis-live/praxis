@@ -74,7 +74,7 @@ public abstract class AbstractSingleCallFrame implements StackFrame {
     }
 
     public final void postResponse(Call response) {
-        if (call != null && response.getMatchID() == call.getMatchID()) {
+        if (call != null && response.matchID() == call.matchID()) {
             call = null;
             result = response.getArgs();
             if (response.getType() == Call.Type.RETURN) {
