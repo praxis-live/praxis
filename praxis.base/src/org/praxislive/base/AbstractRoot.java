@@ -103,7 +103,7 @@ public abstract class AbstractRoot implements Root {
             if (id == null || hub == null) {
                 throw new NullPointerException();
             }
-            this.address = ComponentAddress.create("/" + id);
+            this.address = ComponentAddress.of("/" + id);
             this.hub = hub;
             this.time = hub.getClock().getTime();
             this.pendingPackets = new PacketQueue(time);

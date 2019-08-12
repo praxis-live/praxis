@@ -75,7 +75,7 @@ public class VideoComponents implements ComponentFactoryProvider {
 
         private void add(String type, Class<? extends VideoCodeDelegate> cls, String path) {
             add(data(
-                    new VideoCodeFactory(ComponentType.create(type), cls, source(path))
+                    new VideoCodeFactory(ComponentType.of(type), cls, source(path))
             ));
         }
         

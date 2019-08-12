@@ -54,12 +54,12 @@ abstract class StringBinding extends PropertyControl.Binding {
             String def,
             String[] suggested,
             boolean emptyIsDefault) {
-        this.mime = mime == null ? PString.EMPTY : PString.valueOf(mime);
-        this.template = template == null ? PString.EMPTY : PString.valueOf(template);
-        this.def = def == null ? PString.EMPTY : PString.valueOf(def);
+        this.mime = mime == null ? PString.EMPTY : PString.of(mime);
+        this.template = template == null ? PString.EMPTY : PString.of(template);
+        this.def = def == null ? PString.EMPTY : PString.of(def);
         if (suggested.length > 0) {
             this.suggested = Stream.of(suggested)
-                    .map(PString::valueOf)
+                    .map(PString::of)
                     .collect(Collectors.toList());
         } else {
             this.suggested = Collections.EMPTY_LIST;
@@ -74,9 +74,9 @@ abstract class StringBinding extends PropertyControl.Binding {
         }
         allowed = Stream.of(allowedValues)
                 .distinct()
-                .map(PString::valueOf)
+                .map(PString::of)
                 .collect(Collectors.toList());
-        PString d = PString.valueOf(def);
+        PString d = PString.of(def);
         if (!allowed.contains(d)) {
             d = allowed.get(0);
         }
@@ -99,7 +99,7 @@ abstract class StringBinding extends PropertyControl.Binding {
 
     @Override
     public void set(double value) throws Exception {
-        set(PNumber.valueOf(value));
+        set(PNumber.of(value));
     }
 
     abstract void setImpl(PString value) throws Exception;
@@ -108,35 +108,35 @@ abstract class StringBinding extends PropertyControl.Binding {
     public ArgumentInfo getArgumentInfo() {
         PMap keys = PMap.EMPTY;
         if (!allowed.isEmpty()) {
-            keys = PMap.create(PString.KEY_ALLOWED_VALUES,
-                    PArray.valueOf(allowed));
+            keys = PMap.of(PString.KEY_ALLOWED_VALUES,
+                    PArray.of(allowed));
         } else if (!mime.isEmpty()) {
             if (!template.isEmpty()) {
-                keys = PMap.create(
+                keys = PMap.of(
                         PString.KEY_MIME_TYPE, mime,
                         PString.KEY_TEMPLATE, template);
             } else {
-                keys = PMap.create(PString.KEY_MIME_TYPE, mime);
+                keys = PMap.of(PString.KEY_MIME_TYPE, mime);
             }
         } else if (!suggested.isEmpty()) {
             if (emptyIsDefault) {
-                keys = PMap.create(PString.KEY_SUGGESTED_VALUES,
-                    PArray.valueOf(suggested),
+                keys = PMap.of(PString.KEY_SUGGESTED_VALUES,
+                    PArray.of(suggested),
                     PString.KEY_EMPTY_IS_DEFAULT,
                     true);
             } else {
-                keys = PMap.create(PString.KEY_SUGGESTED_VALUES,
-                    PArray.valueOf(suggested));
+                keys = PMap.of(PString.KEY_SUGGESTED_VALUES,
+                    PArray.of(suggested));
             }
         } else if (emptyIsDefault) {
-            keys = PMap.create(PString.KEY_EMPTY_IS_DEFAULT, true);
+            keys = PMap.of(PString.KEY_EMPTY_IS_DEFAULT, true);
         }
-        return ArgumentInfo.create(PString.class, keys);
+        return ArgumentInfo.of(PString.class, keys);
     }
 
     @Override
     public Value getDefaultValue() {
-        return PString.valueOf(def);
+        return PString.of(def);
     }
 
     static boolean isBindableFieldType(Class<?> type) {
@@ -253,7 +253,7 @@ abstract class StringBinding extends PropertyControl.Binding {
         @Override
         public Value get() {
             try {
-                return PString.valueOf(field.get(delegate));
+                return PString.of(field.get(delegate));
             } catch (Exception ex) {
                 return PString.EMPTY;
             }
@@ -293,7 +293,7 @@ abstract class StringBinding extends PropertyControl.Binding {
         @Override
         public Value get() {
             try {
-                return PString.valueOf(field.get(delegate));
+                return PString.of(field.get(delegate));
             } catch (Exception ex) {
                 return PString.EMPTY;
             }

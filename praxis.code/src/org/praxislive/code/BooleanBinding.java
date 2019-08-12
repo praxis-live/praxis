@@ -70,7 +70,7 @@ abstract class BooleanBinding extends PropertyControl.Binding {
         PBoolean def = PBoolean.FALSE;
         Type.Boolean ann = field.getAnnotation(Type.Boolean.class);
         if (ann != null) {
-            def = PBoolean.valueOf(ann.def());
+            def = PBoolean.of(ann.def());
         }
         if (field.getType() == boolean.class) {
             return new BooleanField(field, def);
@@ -128,7 +128,7 @@ abstract class BooleanBinding extends PropertyControl.Binding {
         @Override
         public Value get() {
             try {
-                return PBoolean.valueOf(field.getBoolean(delegate));
+                return PBoolean.of(field.getBoolean(delegate));
             } catch (Exception ex) {
                 return PBoolean.FALSE;
             }

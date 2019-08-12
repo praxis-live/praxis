@@ -57,7 +57,7 @@ public class Looper extends AbstractComponent {
         NumberProperty loopSize = NumberProperty.create(new LoopSizeBinding(), 0, 60, 1);
         registerControl("loop-size", loopSize);
         NumberProperty position = NumberProperty.create(new PositionBinding(), 0, 1, 0,
-                PMap.create(ControlInfo.KEY_TRANSIENT, true));
+                PMap.of(ControlInfo.KEY_TRANSIENT, true));
         registerControl("position", position);
         registerPort("position", position.createPort());
         NumberProperty in = NumberProperty.create(new InBinding(), 0, 1, 0);
@@ -83,10 +83,10 @@ public class Looper extends AbstractComponent {
         registerControl("record", record);
         registerPort("record", record.createPort());
         BooleanProperty playing = BooleanProperty.create(this, new PlayingBinding(), false,
-                PMap.create(ControlInfo.KEY_TRANSIENT, true));
+                PMap.of(ControlInfo.KEY_TRANSIENT, true));
         registerControl("playing", playing);
         BooleanProperty recording = BooleanProperty.create(this, new RecordingBinding(), false,
-                PMap.create(ControlInfo.KEY_TRANSIENT, true));
+                PMap.of(ControlInfo.KEY_TRANSIENT, true));
         registerControl("recording", recording);
     }
 

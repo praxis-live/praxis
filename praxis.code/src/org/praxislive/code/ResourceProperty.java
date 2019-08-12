@@ -146,7 +146,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
                     if (ret instanceof Value) {
                         return (Value) ret;
                     } else {
-                        return PReference.wrap(ret);
+                        return PReference.of(ret);
                     }
                 } catch (Exception exception) {
                     caughtException = exception;
@@ -332,7 +332,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
 
         @Override
         public void receive(long time, double value) {
-            receive(time, PNumber.valueOf(value));
+            receive(time, PNumber.of(value));
         }
 
         @Override

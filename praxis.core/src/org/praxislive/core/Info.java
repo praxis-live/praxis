@@ -212,7 +212,7 @@ public class Info {
             if (protocols == null) {
                 protocols = new CopyOnWriteArraySet<>();
             }
-            protocols.add(PString.valueOf(Protocol.Type.of(protocol).name()));
+            protocols.add(PString.of(Protocol.Type.of(protocol).name()));
             return this;
         }
 
@@ -224,20 +224,20 @@ public class Info {
          */
         public ComponentInfoBuilder merge(ComponentInfo info) {
             for (String id : info.getControls()) {
-                controls.put(id, info.getControlInfo(id));
+                controls.put(id, info.controlInfo(id));
             }
             for (String id : info.getPorts()) {
-                ports.put(id, info.getPortInfo(id));
+                ports.put(id, info.portInfo(id));
             }
-            for (String key : info.getProperties().getKeys()) {
-                property(key, info.getProperties().get(key));
+            for (String key : info.properties().getKeys()) {
+                property(key, info.properties().get(key));
             }
             info.protocols().forEach(this::protocol);
             return this;
         }
 
         protected ComponentInfo build() {
-            return new ComponentInfo(protocols == null ? PArray.EMPTY : PArray.valueOf(protocols),
+            return new ComponentInfo(protocols == null ? PArray.EMPTY : PArray.of(protocols),
                     controls.build(),
                     ports.build(),
                     properties == null ? PMap.EMPTY : properties.build(),
@@ -364,7 +364,7 @@ public class Info {
          * @return this
          */
         public PropertyInfoBuilder input(Class<? extends Value> type) {
-            return input(ArgumentInfo.create(type));
+            return input(ArgumentInfo.of(type));
         }
 
         /**
@@ -418,7 +418,7 @@ public class Info {
          * @return this
          */
         public ReadOnlyPropertyInfoBuilder output(Class<? extends Value> type) {
-            return output(ArgumentInfo.create(type));
+            return output(ArgumentInfo.of(type));
         }
 
         /**
@@ -605,7 +605,7 @@ public class Info {
          * @return this
          */
         public NumberInfoBuilder min(double min) {
-            return property(PNumber.KEY_MINIMUM, PNumber.valueOf(min));
+            return property(PNumber.KEY_MINIMUM, PNumber.of(min));
         }
 
         /**
@@ -615,7 +615,7 @@ public class Info {
          * @return this
          */
         public NumberInfoBuilder max(double max) {
-            return property(PNumber.KEY_MAXIMUM, PNumber.valueOf(max));
+            return property(PNumber.KEY_MAXIMUM, PNumber.of(max));
         }
 
         /**
@@ -625,7 +625,7 @@ public class Info {
          * @return this
          */
         public NumberInfoBuilder skew(double skew) {
-            return property(PNumber.KEY_MINIMUM, PNumber.valueOf(skew));
+            return property(PNumber.KEY_MINIMUM, PNumber.of(skew));
         }
 
     }
@@ -649,7 +649,7 @@ public class Info {
          */
         public StringInfoBuilder allowed(String... values) {
             return property(ArgumentInfo.KEY_ALLOWED_VALUES,
-                    Stream.of(values).map(PString::valueOf).collect(PArray.collector()));
+                    Stream.of(values).map(PString::of).collect(PArray.collector()));
         }
 
         /**
@@ -660,7 +660,7 @@ public class Info {
          */
         public StringInfoBuilder suggested(String... values) {
             return property(ArgumentInfo.KEY_SUGGESTED_VALUES,
-                    Stream.of(values).map(PString::valueOf).collect(PArray.collector()));
+                    Stream.of(values).map(PString::of).collect(PArray.collector()));
         }
 
         /**
@@ -679,7 +679,7 @@ public class Info {
          * @return this
          */
         public StringInfoBuilder template(String template) {
-            return property(ArgumentInfo.KEY_TEMPLATE, PString.valueOf(template));
+            return property(ArgumentInfo.KEY_TEMPLATE, PString.of(template));
         }
 
         /**
@@ -689,7 +689,7 @@ public class Info {
          * @return this
          */
         public StringInfoBuilder mime(String mime) {
-            return property(ArgumentInfo.KEY_MIME_TYPE, PString.valueOf(mime));
+            return property(ArgumentInfo.KEY_MIME_TYPE, PString.of(mime));
         }
 
     }

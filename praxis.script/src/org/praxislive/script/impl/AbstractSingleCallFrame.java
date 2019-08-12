@@ -66,7 +66,7 @@ public abstract class AbstractSingleCallFrame implements StackFrame {
                 }
                 env.getPacketRouter().route(call);
             } catch (Exception ex) {
-                result = CallArguments.create(PReference.wrap(ex));
+                result = CallArguments.create(PReference.of(ex));
                 state = State.Error;
             }
         }

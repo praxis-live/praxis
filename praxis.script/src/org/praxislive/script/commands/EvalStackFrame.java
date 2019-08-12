@@ -83,7 +83,7 @@ public class EvalStackFrame implements StackFrame {
                 return processNextCommand(context);
             }
         } catch (Exception ex) {
-            result = CallArguments.create(PReference.wrap(ex));
+            result = CallArguments.create(PReference.of(ex));
             state = State.Error;
             return null;
         } finally {

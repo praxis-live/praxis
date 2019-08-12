@@ -92,7 +92,7 @@ class CodeProperty<D extends CodeDelegate>
                             .orElseThrow(ServiceUnavailableException::new),
                             CodeContextFactoryService.NEW_CONTEXT);
                 }
-                taskCall = Call.create(contextFactory, context.getAddress(this), time, PReference.wrap(task));
+                taskCall = Call.create(contextFactory, context.getAddress(this), time, PReference.of(task));
                 router.route(taskCall);
                 // managed to start task ok
                 setLatest(time);
@@ -101,7 +101,7 @@ class CodeProperty<D extends CodeDelegate>
                 }
                 activeCall = call;
             } catch (Exception ex) {
-                router.route(call.error(PError.create(ex)));
+                router.route(call.error(PError.of(ex)));
             }
         } else {
             router.route(call.reply(keys));
@@ -125,7 +125,7 @@ class CodeProperty<D extends CodeDelegate>
             LogBuilder log = result.getLog();
             context.log(log);
         } catch (Exception ex) {
-            router.route(activeCall.error(PError.create(ex)));
+            router.route(activeCall.error(PError.of(ex)));
         }
     }
 
@@ -142,10 +142,10 @@ class CodeProperty<D extends CodeDelegate>
             try {
                 err = PError.coerce(args.get(0));
             } catch (ValueFormatException ex) {
-                err = PError.create(ex, args.get(0).toString());
+                err = PError.of(ex, args.get(0).toString());
             }
         } else {
-            err = PError.create("");
+            err = PError.of("");
         }
         context.getLog().log(LogLevel.ERROR, err);
         context.flush();
@@ -180,8 +180,8 @@ class CodeProperty<D extends CodeDelegate>
         private ControlInfo createInfo(CodeFactory<D> factory) {
             return ControlInfo.createPropertyInfo(
                     new ArgumentInfo[]{
-                        ArgumentInfo.create(PString.class,
-                                PMap.create(
+                        ArgumentInfo.of(PString.class,
+                                PMap.of(
                                         PString.KEY_MIME_TYPE, MIME_TYPE,
                                         ArgumentInfo.KEY_TEMPLATE, factory.getSourceTemplate(),
                                         ClassBodyContext.KEY, factory.getClassBodyContext().getClass().getName()

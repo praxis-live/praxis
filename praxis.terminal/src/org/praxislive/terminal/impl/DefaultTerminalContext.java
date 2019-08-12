@@ -55,7 +55,7 @@ public class DefaultTerminalContext extends AbstractControl implements Terminal.
                 findService(ScriptService.class),
                 ScriptService.EVAL);
         Call call = Call.create(to, getAddress(),
-                getLookup().find(ExecutionContext.class).get().getTime(), PString.valueOf(script));
+                getLookup().find(ExecutionContext.class).get().getTime(), PString.of(script));
         route(call);
         activeCall = call;
     }

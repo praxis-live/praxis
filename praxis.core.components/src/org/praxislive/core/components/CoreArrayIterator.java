@@ -71,7 +71,7 @@ public class CoreArrayIterator extends CoreCodeDelegate {
     }
 
     @T(1) void trigger() {
-        int count = array.getSize();
+        int count = array.size();
         boolean r = reset;
         reset = false;
         if (count == 0) {
@@ -116,7 +116,7 @@ public class CoreArrayIterator extends CoreCodeDelegate {
         int max = max(min, maxSkip);
         int idx = index;
         int oldIdx = idx;
-        int count = array.getSize();
+        int count = array.size();
         
         int delta;
         

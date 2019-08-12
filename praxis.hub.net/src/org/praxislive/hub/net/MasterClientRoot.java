@@ -112,7 +112,7 @@ class MasterClientRoot extends AbstractRoot {
                         throw new UnsupportedOperationException();
                 }
             } catch (Exception ex) {
-                router.route(Call.createErrorCall(call, PError.create(ex)));
+                router.route(Call.createErrorCall(call, PError.of(ex)));
             }
         } else if (client != null) {
             dispatcher.handleCall(call);
@@ -336,7 +336,7 @@ class MasterClientRoot extends AbstractRoot {
                     if (client != null) {
                         dispatch(call);
                     } else {
-                        router.route(call.error(PError.create("Couldn't connect to client")));
+                        router.route(call.error(PError.of("Couldn't connect to client")));
                     }
                 }
             }

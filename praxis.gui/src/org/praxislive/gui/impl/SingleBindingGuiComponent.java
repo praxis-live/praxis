@@ -49,8 +49,8 @@ public abstract class SingleBindingGuiComponent extends AbstractGuiComponent {
     protected void initControls() {
         super.initControls();
         registerControl("binding", ArgumentProperty.create(
-                ArgumentInfo.create(ControlAddress.class,
-                    PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true)),
+                ArgumentInfo.of(ControlAddress.class,
+                    PMap.of(ArgumentInfo.KEY_ALLOW_EMPTY, true)),
                 new AddressBinding(),
                 PString.EMPTY));
     }

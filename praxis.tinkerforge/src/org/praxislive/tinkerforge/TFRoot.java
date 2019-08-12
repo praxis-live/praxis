@@ -252,7 +252,7 @@ public class TFRoot extends AbstractRoot {
                     builder.append(line);
                     builder.append("\n");
                 }
-                cache = PString.valueOf(builder);
+                cache = PString.of(builder);
             }
             return cache;
         }

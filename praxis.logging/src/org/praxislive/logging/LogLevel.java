@@ -39,7 +39,7 @@ public enum LogLevel {
     
     private LogLevel(int level) {
         this.level = level;
-        this.pstring = PString.valueOf(name());
+        this.pstring = PString.of(name());
     }
     
     public boolean isLoggable(LogLevel other) {

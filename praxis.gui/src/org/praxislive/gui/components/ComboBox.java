@@ -198,9 +198,9 @@ public class ComboBox extends SingleBindingGuiComponent {
         boolean intersect = false;
         PArray infoValues = PArray.EMPTY;
         if (boundInfo != null) {
-            Value p = boundInfo.getProperties().get(ArgumentInfo.KEY_ALLOWED_VALUES);
+            Value p = boundInfo.properties().get(ArgumentInfo.KEY_ALLOWED_VALUES);
             if (p == null) {
-                p = boundInfo.getProperties().get(ArgumentInfo.KEY_SUGGESTED_VALUES);
+                p = boundInfo.properties().get(ArgumentInfo.KEY_SUGGESTED_VALUES);
             } else {
                 LOG.log(Level.FINEST, "Found allowed-values : {0}", p);
                 intersect = true;
@@ -322,7 +322,7 @@ public class ComboBox extends SingleBindingGuiComponent {
                 send(CallArguments.create(arg));
                 updateCurrent(current);
             } else if (obj != null) {
-                arg = PString.valueOf(obj);
+                arg = PString.of(obj);
                 send(CallArguments.create(arg));
                 updateCurrent(current);
             }

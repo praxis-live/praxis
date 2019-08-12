@@ -105,7 +105,7 @@ public abstract class AbstractSingleArgProperty extends AbstractProperty {
             if (argProps == null) {
                 argProps = PMap.builder();
             }
-            argProps.put(PString.valueOf(key), value);
+            argProps.put(PString.of(key), value);
             return (B) this;
         }
         
@@ -121,7 +121,7 @@ public abstract class AbstractSingleArgProperty extends AbstractProperty {
         @Override
         protected ControlInfo buildInfo() {
             PMap props = argProps == null ? PMap.EMPTY : argProps.build();
-            arguments(ArgumentInfo.create(typeClass, props));
+            arguments(ArgumentInfo.of(typeClass, props));
             return super.buildInfo();
         }
         

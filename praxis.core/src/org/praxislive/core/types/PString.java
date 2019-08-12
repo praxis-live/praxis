@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -38,7 +38,7 @@ public class PString extends Value implements Comparable<PString> {
     public final static String KEY_MIME_TYPE = ArgumentInfo.KEY_MIME_TYPE;
     public final static String KEY_EMPTY_IS_DEFAULT = ArgumentInfo.KEY_EMPTY_IS_DEFAULT;
     
-    public final static PString EMPTY = PString.valueOf("");
+    public final static PString EMPTY = PString.of("");
     
     private String value;
     
@@ -72,6 +72,7 @@ public class PString extends Value implements Comparable<PString> {
         
     }
 
+    @Deprecated
     public static PString coerce(Value arg) {
         if (arg instanceof PString) {
             return (PString) arg;
@@ -84,13 +85,27 @@ public class PString extends Value implements Comparable<PString> {
         return Optional.of(coerce(arg));
     }
     
-    public static PString valueOf(String str) {
+    public static PString of(String str) {
         if (str == null) {
             throw new NullPointerException();
         }
         return new PString(str);
     }
     
+    @Deprecated
+    public static PString valueOf(String str) {
+        return PString.of(str);
+    }
+    
+    public static PString of(Object obj) {
+        if (obj instanceof PString) {
+            return (PString) obj;
+        } else {
+            return new PString(String.valueOf(obj));
+        }
+    }
+    
+    @Deprecated
     public static PString valueOf(Object obj) {
         if (obj == null) {
             throw new NullPointerException();
@@ -99,7 +114,7 @@ public class PString extends Value implements Comparable<PString> {
     }
 
     public static ArgumentInfo info() {
-        return ArgumentInfo.create(PString.class, null);
+        return ArgumentInfo.of(PString.class, null);
     }
     
     public static ArgumentInfo info(String ... allowed) {
@@ -108,11 +123,11 @@ public class PString extends Value implements Comparable<PString> {
         } else {
             PString[] arr = new PString[allowed.length];
             for (int i=0; i < arr.length; i++) {
-                arr[i] = PString.valueOf(allowed[i]);
+                arr[i] = PString.of(allowed[i]);
             }
-            PMap props = PMap.create(KEY_ALLOWED_VALUES,
-                    PArray.valueOf(arr));
-            return ArgumentInfo.create(PString.class, props);
+            PMap props = PMap.of(KEY_ALLOWED_VALUES,
+                    PArray.of(arr));
+            return ArgumentInfo.of(PString.class, props);
         }
     }
 

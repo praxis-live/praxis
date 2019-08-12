@@ -85,7 +85,7 @@ public class NumberProperty extends AbstractSingleArgProperty {
                 return lastValue;
             }
         }
-        lastValue = PNumber.valueOf(val);
+        lastValue = PNumber.of(val);
         return lastValue;
     }
 
@@ -117,7 +117,7 @@ public class NumberProperty extends AbstractSingleArgProperty {
             binding = new DefaultBinding(def);
         }
         ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.info()};
-        Value[] defaults = new Value[]{PNumber.valueOf(def)};
+        Value[] defaults = new Value[]{PNumber.of(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new NumberProperty(binding, binding, PNumber.MIN_VALUE, PNumber.MAX_VALUE, info);
     }
@@ -149,7 +149,7 @@ public class NumberProperty extends AbstractSingleArgProperty {
             binding = new DefaultBinding(def);
         }
         ArgumentInfo[] arguments = new ArgumentInfo[]{PNumber.info(min, max)};
-        Value[] defaults = new Value[]{PNumber.valueOf(def)};
+        Value[] defaults = new Value[]{PNumber.of(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new NumberProperty(binding, binding, min, max, info);
     }
@@ -205,19 +205,19 @@ public class NumberProperty extends AbstractSingleArgProperty {
         }
         
         public Builder minimum(double min) {
-            putArgumentProperty(PNumber.KEY_MINIMUM, PNumber.valueOf(min));
+            putArgumentProperty(PNumber.KEY_MINIMUM, PNumber.of(min));
             minimum = min;
             return this;
         }
         
         public Builder maximum(double max) {
-            putArgumentProperty(PNumber.KEY_MAXIMUM, PNumber.valueOf(max));
+            putArgumentProperty(PNumber.KEY_MAXIMUM, PNumber.of(max));
             maximum = max;
             return this;
         }
         
         public Builder defaultValue(double value) {
-            defaults(PNumber.valueOf(value));
+            defaults(PNumber.of(value));
             def = value;
             return this;
         }
@@ -249,7 +249,7 @@ public class NumberProperty extends AbstractSingleArgProperty {
                 read = write; 
             }
             ControlInfo info = buildInfo();
-            if (info.getType() == ControlInfo.Type.ReadOnlyProperty) {
+            if (info.controlType() == ControlInfo.Type.ReadOnlyProperty) {
                 write = null;
             }
             return new NumberProperty(read, write, minimum, maximum, info);

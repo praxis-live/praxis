@@ -125,7 +125,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      */
     public final void transmit(String componentID, String portID, String value) {
-        this.transmit(componentID, portID, PString.valueOf(value));
+        this.transmit(componentID, portID, PString.of(value));
     }
 
     /**
@@ -260,7 +260,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final double d(String s) {
-        return d(PString.valueOf(s));
+        return d(PString.of(s));
     }
 
     /**
@@ -307,7 +307,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final int i(String s) {
-        return i(PString.valueOf(s));
+        return i(PString.of(s));
     }
 
     /**
@@ -344,7 +344,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final boolean b(String s) {
-        return b(PString.valueOf(s));
+        return b(PString.of(s));
     }
 
     /**
@@ -400,7 +400,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final PArray array(String s) {
-        return array(PString.valueOf(s));
+        return array(PString.of(s));
     }
 
     /**
@@ -1596,7 +1596,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final PArray append(PArray array, String value) {
-        return PArray.append(array, PString.valueOf(value));
+        return PArray.append(array, PString.of(value));
     }
 
     /**
@@ -1607,7 +1607,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final PArray append(PArray array, double value) {
-        return PArray.append(array, PNumber.valueOf(value));
+        return PArray.append(array, PNumber.of(value));
     }
 
     /**
@@ -1902,7 +1902,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final PArray splice(PArray array, String value, int index) {
-        return PArray.insert(array, index, PString.valueOf(value));
+        return PArray.insert(array, index, PString.of(value));
     }
 
     /**
@@ -1914,7 +1914,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final PArray splice(PArray array, double value, int index) {
-        return PArray.insert(array, index, PNumber.valueOf(value));
+        return PArray.insert(array, index, PNumber.of(value));
     }
 
     /**
@@ -2107,7 +2107,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final PArray subset(PArray array, int start) {
-        return subset(array, start, array.getSize() - start);
+        return subset(array, start, array.size() - start);
     }
 
     /**

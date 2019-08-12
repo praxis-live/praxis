@@ -84,7 +84,7 @@ class MasterCoreRoot extends BasicCoreRoot {
                 Logger.getLogger(MasterCoreRoot.class.getName()).log(Level.SEVERE, null, ex);
 //                throw new RuntimeException(ex);
             }
-            slaveClients[i] = ComponentAddress.create("/" + id);
+            slaveClients[i] = ComponentAddress.of("/" + id);
         }
     }
 
@@ -156,7 +156,7 @@ class MasterCoreRoot extends BasicCoreRoot {
         protected Call processResponse(Call call) throws Exception {
             Call active = getActiveCall();
             String id = active.getArgs().get(0).toString();
-            String source = call.from().getComponentAddress().getRootID();
+            String source = call.from().getComponentAddress().rootID();
             if (source.startsWith(SLAVE_PREFIX)) {
                 Root.Controller ctrl = getHubAccessor().getRootController(source);
                 getHubAccessor().registerRootController(id, ctrl);
@@ -183,7 +183,7 @@ class MasterCoreRoot extends BasicCoreRoot {
             String remoteProxy = remotes.get(id);
             if (remoteProxy != null) {
                 ControlAddress to = ControlAddress.create(
-                        ComponentAddress.create("/" + remoteProxy),
+                        ComponentAddress.of("/" + remoteProxy),
                         RootManagerService.REMOVE_ROOT);
                 return Call.create(to, call.to(), call.time(), call.args());
             } else {

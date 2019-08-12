@@ -86,7 +86,7 @@ public class PortAddress extends Value {
             throw new ValueFormatException();
         }
         String id = parts[1].intern();
-        ComponentAddress comp = ComponentAddress.valueOf(parts[0]);
+        ComponentAddress comp = ComponentAddress.parse(parts[0]);
         address = address.intern();
         return new PortAddress(comp, id, address);
     }
@@ -132,6 +132,6 @@ public class PortAddress extends Value {
     }
 
     public static ArgumentInfo info() {
-        return ArgumentInfo.create(PortAddress.class, null);
+        return ArgumentInfo.of(PortAddress.class, null);
     }
 }

@@ -93,7 +93,7 @@ public class DefaultCodeFactoryService extends AbstractRoot {
     }
 
     private PMap createCompilerTask(ClassBodyContext<?> cbc, LogLevel logLevel, String source) {
-        return PMap.create(
+        return PMap.of(
                 CodeCompilerService.KEY_CLASS_BODY_CONTEXT,
                 cbc.getClass().getName(),
                 CodeCompilerService.KEY_LOG_LEVEL,
@@ -136,7 +136,7 @@ public class DefaultCodeFactoryService extends AbstractRoot {
     private void extractCompilerLog(Value response, LogBuilder logBuilder) throws Exception {
         PMap data = PMap.coerce(response);
         PArray log = PArray.coerce(data.get(CodeCompilerService.KEY_LOG));
-        for (int i = 0; i < log.getSize(); i += 2) {
+        for (int i = 0; i < log.size(); i += 2) {
             logBuilder.log(LogLevel.valueOf(log.get(i).toString()), log.get(i + 1).toString());
         }
     }
@@ -152,7 +152,7 @@ public class DefaultCodeFactoryService extends AbstractRoot {
                     .orElseGet( () -> CODE_CACHE.get(new ClassCacheKey(cbc, src)));
             if (cls != null) {
                 return Call.createReturnCall(call,
-                        PReference.wrap(createComponent(codeFactory, cls)));
+                        PReference.of(createComponent(codeFactory, cls)));
             } else {
                 return Call.create(
                         findCompilerService(),
@@ -170,7 +170,7 @@ public class DefaultCodeFactoryService extends AbstractRoot {
             CodeDelegate delegate = cls.newInstance();
             CodeComponent<CodeDelegate> cmp = codeFactory.task().createComponent(delegate);
             CODE_CACHE.putIfAbsent(new ClassCacheKey(codeFactory.getClassBodyContext(), codeFactory.getSourceTemplate()), cls);
-            return Call.createReturnCall(getActiveCall(), PReference.wrap(cmp));
+            return Call.createReturnCall(getActiveCall(), PReference.of(cmp));
         }
 
         private CodeFactory<CodeDelegate> findCodeFactory() throws Exception {
@@ -214,7 +214,7 @@ public class DefaultCodeFactoryService extends AbstractRoot {
                 LogBuilder log = new LogBuilder(task.getLogLevel());
                 CodeDelegate delegate = cls.newInstance();
                 return Call.createReturnCall(call,
-                        PReference.wrap(createContext(task, log, delegate)));
+                        PReference.of(createContext(task, log, delegate)));
             } else {
                 return Call.create(
                         findCompilerService(),
@@ -233,7 +233,7 @@ public class DefaultCodeFactoryService extends AbstractRoot {
             LogBuilder log = new LogBuilder(task.getLogLevel());
             extractCompilerLog(call.getArgs().get(0), log);
             return Call.createReturnCall(getActiveCall(),
-                    PReference.wrap(createContext(task, log, delegate)));
+                    PReference.of(createContext(task, log, delegate)));
         }
 
         private CodeContextFactoryService.Task<CodeDelegate> findTask() throws Exception {

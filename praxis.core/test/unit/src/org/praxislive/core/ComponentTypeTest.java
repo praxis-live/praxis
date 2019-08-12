@@ -89,7 +89,7 @@ public class ComponentTypeTest {
             try {
                 System.out.println("Testing - " + types[i]);
                 System.out.println("Created Type - "
-                        + ComponentType.valueOf(types[i]));
+                        + ComponentType.parse(types[i]));
                 if (! allowed[i] ) {
                     fail("Illegal type allowed through");
                 }

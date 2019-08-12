@@ -264,7 +264,7 @@ public abstract class AbstractComponent implements Component {
                     controls,
                     ports,
                     interfaceSet,
-                    dynamic ? PMap.create(ComponentInfo.KEY_DYNAMIC, true) : PMap.EMPTY);
+                    dynamic ? PMap.of(ComponentInfo.KEY_DYNAMIC, true) : PMap.EMPTY);
         }
         return info;
     }

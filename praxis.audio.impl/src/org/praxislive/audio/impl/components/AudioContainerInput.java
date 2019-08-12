@@ -56,7 +56,7 @@ public class AudioContainerInput extends AbstractComponent {
                 context.unregisterPort(id, containerPort);
             }
             if (ctxt != null) {
-                id = getAddress().getID();
+                id = getAddress().componentID();
                 try {
                     ctxt.registerPort(id, containerPort);
                 } catch (RegistrationException ex) {

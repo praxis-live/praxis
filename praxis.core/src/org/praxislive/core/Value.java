@@ -111,7 +111,7 @@ public abstract class Value {
      * @return ArgumentInfo info
      */
     public static ArgumentInfo info() {
-        return ArgumentInfo.create(Value.class, null);
+        return ArgumentInfo.of(Value.class, null);
     }
     
     public static class Type<T extends Value> {

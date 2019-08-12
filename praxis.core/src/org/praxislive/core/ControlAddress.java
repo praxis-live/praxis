@@ -85,7 +85,7 @@ public class ControlAddress extends Value {
             throw new ValueFormatException();
         }
         String id = parts[1].intern();
-        ComponentAddress comp = ComponentAddress.valueOf(parts[0]);
+        ComponentAddress comp = ComponentAddress.parse(parts[0]);
 //        return new ControlAddress(comp, id, address);
         address = address.intern();
         return new ControlAddress(comp, id, address);

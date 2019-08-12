@@ -106,8 +106,8 @@ public class MidiControlIn extends AbstractMidiInComponent {
             }
         }, maximum);
         ArgumentProperty bd = ArgumentProperty.create(
-                ArgumentInfo.create(ControlAddress.class,
-                    PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true)), 
+                ArgumentInfo.of(ControlAddress.class,
+                    PMap.of(ArgumentInfo.KEY_ALLOW_EMPTY, true)), 
                 new AddressBinding(),
                 PString.EMPTY);
         registerControl("channel", ch);
@@ -145,14 +145,14 @@ public class MidiControlIn extends AbstractMidiInComponent {
         double max = maximum;
         if (min == 0) {
             if (max == 127) {
-                return PNumber.valueOf(value);
+                return PNumber.of(value);
             } else {
                 double val = (value / 127.0) * max;
-                return PNumber.valueOf(val);
+                return PNumber.of(val);
             }
         } else {
             double val = ((value / 127.0) * (max - min)) + min;
-            return PNumber.valueOf(val);
+            return PNumber.of(val);
         }
     }
 

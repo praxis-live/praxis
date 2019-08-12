@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -44,6 +44,7 @@ public final class ArgumentInfo extends Value {
     public final static String KEY_TEMPLATE = "template";
     public final static String KEY_MIME_TYPE = "mime-type";
 
+    @Deprecated
     public static enum Presence {
 
         Always, Optional, Variable
@@ -73,11 +74,17 @@ public final class ArgumentInfo extends Value {
     public Class<? extends Value> getType() {
         return type.asClass();
     }
-    
+ 
+    @Deprecated
     public Value.Type<? extends Value> type() {
         return type;
     }
+    
+    public Value.Type<? extends Value> argumentType() {
+        return type;
+    }
 
+    @Deprecated
     public Presence getPresence() {
         return presence;
     }
@@ -86,6 +93,15 @@ public final class ArgumentInfo extends Value {
      *
      * @return PMap properties
      */
+    public PMap properties() {
+        return properties;
+    }
+    
+    /**
+     *
+     * @return PMap properties
+     */
+    @Deprecated
     public PMap getProperties() {
         return properties;
     }
@@ -95,9 +111,9 @@ public final class ArgumentInfo extends Value {
         String str = string;
         if (str == null) {
 //            str = type.getName() + " " + presence.name() + " {" + escape(properties.toString()) + "}";
-            str = PArray.valueOf(
-                    PString.valueOf(type.name()),
-                    PString.valueOf(presence.name()),
+            str = PArray.of(
+                    PString.of(type.name()),
+                    PString.of(presence.name()),
                     properties
             
             ).toString();
@@ -137,6 +153,18 @@ public final class ArgumentInfo extends Value {
      * @param argClass
      * @return ArgumentInfo
      */
+    public static ArgumentInfo of(Class<? extends Value> argClass) {
+        return create(argClass, Presence.Always, PMap.EMPTY);
+
+    }
+    /**
+     * Create an ArgumentInfo from the Value class and optional PMap of
+     * additional properties.
+     *
+     * @param argClass
+     * @return ArgumentInfo
+     */
+    @Deprecated
     public static ArgumentInfo create(Class<? extends Value> argClass) {
         return create(argClass, Presence.Always, PMap.EMPTY);
 
@@ -150,6 +178,20 @@ public final class ArgumentInfo extends Value {
      * @param properties
      * @return ArgumentInfo
      */
+    public static ArgumentInfo of(Class<? extends Value> argClass,
+            PMap properties) {
+        return create(argClass, Presence.Always, properties);
+
+    }
+    /**
+     * Create an ArgumentInfo from the Value class and optional PMap of
+     * additional properties.
+     *
+     * @param argClass
+     * @param properties
+     * @return ArgumentInfo
+     */
+    @Deprecated
     public static ArgumentInfo create(Class<? extends Value> argClass,
             PMap properties) {
         return create(argClass, Presence.Always, properties);
@@ -164,6 +206,7 @@ public final class ArgumentInfo extends Value {
      * @param properties
      * @return ArgumentInfo
      */
+    @Deprecated
     public static ArgumentInfo create(Class<? extends Value> argClass,
             Presence presence, PMap properties) {
         if (argClass == null || presence == null) {
@@ -184,11 +227,12 @@ public final class ArgumentInfo extends Value {
      * @return ArgumentInfo
      * @throws ValueFormatException if Value cannot be coerced.
      */
+    @Deprecated
     public static ArgumentInfo coerce(Value arg) throws ValueFormatException {
         if (arg instanceof ArgumentInfo) {
             return (ArgumentInfo) arg;
         } else {
-            return valueOf(arg.toString());
+            return parse(arg.toString());
         }
     }
     
@@ -200,8 +244,8 @@ public final class ArgumentInfo extends Value {
         }
     }
 
-    private static ArgumentInfo valueOf(String string) throws ValueFormatException {
-        PArray arr = PArray.valueOf(string);
+    public static ArgumentInfo parse(String string) throws ValueFormatException {
+        PArray arr = PArray.parse(string);
         try {
             Value.Type<? extends Value> type = Value.Type.fromName(arr.get(0).toString()).get();
             Presence presence = Presence.valueOf(arr.get(1).toString());
@@ -211,5 +255,5 @@ public final class ArgumentInfo extends Value {
             throw new ValueFormatException(ex);
         }
     }
-
+    
 }

@@ -48,7 +48,7 @@ class InputPortControl implements Control {
     public void call(Call call, PacketRouter router) throws Exception {
         List<Value> args = call.args();
         if (args.size() != 1) {
-            router.route(call.error(PError.create(IllegalArgumentException.class,
+            router.route(call.error(PError.of(IllegalArgumentException.class,
                     "Input port requires single argument")));
         }
         link.receive(call.time(), args.get(0));
@@ -65,10 +65,10 @@ class InputPortControl implements Control {
             control = new InputPortControl(link);
             info = ControlInfo.createFunctionInfo(
                     new ArgumentInfo[]{
-                        ArgumentInfo.create(Value.class)
+                        ArgumentInfo.of(Value.class)
                     },
                     new ArgumentInfo[0],
-                    PMap.create("input-port", id)
+                    PMap.of("input-port", id)
             );
         }
         

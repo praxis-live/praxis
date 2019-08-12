@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -21,6 +21,8 @@
  */
 package org.praxislive.core;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -73,7 +75,7 @@ public class ComponentInfo extends Value {
     
     public boolean hasProtocol(Class<? extends Protocol> protocol) {
         String name = Protocol.Type.of(protocol).name();
-        for (int i = 0; i < protocols.getSize(); i++) {
+        for (int i = 0; i < protocols.size(); i++) {
             if (protocols.get(i).toString().equals(name)) {
                 return true;
             }
@@ -81,10 +83,25 @@ public class ComponentInfo extends Value {
         return false;
     }
 
+    public List<String> controls() {
+        return Arrays.asList(controls.getKeys());
+    }
+    
+    @Deprecated
     public String[] getControls() {
         return controls.getKeys();
     }
 
+    public ControlInfo controlInfo(String control) {
+        try {
+            return ControlInfo.coerce(controls.get(control));
+        } catch (ValueFormatException ex) {
+            Logger.getLogger(ComponentInfo.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+    }
+    
+    @Deprecated
     public ControlInfo getControlInfo(String control) {
         try {
             return ControlInfo.coerce(controls.get(control));
@@ -94,10 +111,25 @@ public class ComponentInfo extends Value {
         }
     }
 
+    public List<String> ports() {
+        return Arrays.asList(ports.getKeys());
+    }
+    
+    @Deprecated
     public String[] getPorts() {
         return ports.getKeys();
     }
 
+    public PortInfo portInfo(String port) {
+        try {
+            return PortInfo.coerce(ports.get(port));
+        } catch (ValueFormatException ex) {
+            Logger.getLogger(ComponentInfo.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+    }
+    
+    @Deprecated
     public PortInfo getPortInfo(String port) {
         try {
             return PortInfo.coerce(ports.get(port));
@@ -107,6 +139,11 @@ public class ComponentInfo extends Value {
         }
     }
 
+    public PMap properties() {
+        return properties;
+    }
+    
+    @Deprecated
     public PMap getProperties() {
         return properties;
     }
@@ -122,8 +159,8 @@ public class ComponentInfo extends Value {
     }
 
     private String buildString() {
-        PArray arr = PArray.valueOf(
-                PString.valueOf(INFO_PREFIX),
+        PArray arr = PArray.of(
+                PString.of(INFO_PREFIX),
                 controls,
                 ports,
                 protocols,
@@ -174,6 +211,7 @@ public class ComponentInfo extends Value {
         return hash;
     }
 
+    @Deprecated
     public static ComponentInfo create(
             Map<String, ControlInfo> controls,
             Map<String, PortInfo> ports,
@@ -202,18 +240,19 @@ public class ComponentInfo extends Value {
         }
         PArray protos = protocols.stream()
                 .map(p -> Protocol.Type.of(p).name())
-                .map(PString::valueOf)
+                .map(PString::of)
                 .collect(PArray.collector());
 
         return new ComponentInfo(protos, ctrls, prts, properties, null);
 
     }
 
+    @Deprecated
     public static ComponentInfo coerce(Value arg) throws ValueFormatException {
         if (arg instanceof ComponentInfo) {
             return (ComponentInfo) arg;
         } else {
-            return valueOf(arg.toString());
+            return parse(arg.toString());
         }
     }
     
@@ -226,24 +265,24 @@ public class ComponentInfo extends Value {
     }
 
     public static ArgumentInfo info() {
-        return ArgumentInfo.create(ComponentInfo.class);
+        return ArgumentInfo.of(ComponentInfo.class);
     }
 
-    private static ComponentInfo valueOf(String string) throws ValueFormatException {
+    public static ComponentInfo parse(String string) throws ValueFormatException {
         try {
-            PArray arr = PArray.valueOf(string);
+            PArray arr = PArray.parse(string);
             // @TODO size? interfaces optional?
-            if (arr.getSize() < 4 || !INFO_PREFIX.equals(arr.get(0).toString())) {
+            if (arr.size() < 4 || !INFO_PREFIX.equals(arr.get(0).toString())) {
                 throw new ValueFormatException();
             }
             // arr(1) is controls
             PArray ctrls = PArray.coerce(arr.get(1));
-            int len = ctrls.getSize();
+            int len = ctrls.size();
             PMap controls;
             if (len == 0) {
                 controls = PMap.EMPTY;
             } else {
-                PMap.Builder cBld = PMap.builder(ctrls.getSize() / 2);
+                PMap.Builder cBld = PMap.builder(ctrls.size() / 2);
                 for (int i = 0; i < len; i += 2) {
                     String id = ctrls.get(i).toString();
                     if (!ControlAddress.isValidID(id)) {
@@ -256,12 +295,12 @@ public class ComponentInfo extends Value {
 
             // arr(2) is ports
             PArray pts = PArray.coerce(arr.get(2));
-            len = pts.getSize();
+            len = pts.size();
             PMap ports;
             if (len == 0) {
                 ports = PMap.EMPTY;
             } else {
-                PMap.Builder pBld = PMap.builder(pts.getSize() / 2);
+                PMap.Builder pBld = PMap.builder(pts.size() / 2);
                 for (int i = 0; i < len; i += 2) {
                     String id = pts.get(i).toString();
                     if (!PortAddress.isValidID(id)) {
@@ -274,13 +313,13 @@ public class ComponentInfo extends Value {
 
             // optional arr(3) is interfaces
             PArray protocols = PArray.EMPTY;
-            if (arr.getSize() > 3) {
+            if (arr.size() > 3) {
                 protocols = PArray.coerce(arr.get(3));
             }
 
             // optional arr(4) is properties
             PMap properties;
-            if (arr.getSize() > 4) {
+            if (arr.size() > 4) {
                 properties = PMap.coerce(arr.get(4));
             } else {
                 properties = PMap.EMPTY;

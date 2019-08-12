@@ -122,19 +122,19 @@ class PatternParser {
             return PString.EMPTY;
         } else if ("0123456789-.".indexOf(token.charAt(0)) > -1) {
             try {
-                return PNumber.valueOf(token);
+                return PNumber.parse(token);
             } catch (ValueFormatException ex) {
                 // fall through
             }
         }
-        return PString.valueOf(token);
+        return PString.of(token);
     }
 
     private static Value getQuotedArgument(String token) {
         if (token.isEmpty()) {
             return PString.EMPTY;
         } else {
-            return PString.valueOf(token);
+            return PString.of(token);
         }
     }
 

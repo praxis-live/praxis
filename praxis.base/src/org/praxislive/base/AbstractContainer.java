@@ -87,7 +87,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         if (containerAddress == null || childID == null) {
             return null;
         } else {
-            return ComponentAddress.create(containerAddress, childID);
+            return ComponentAddress.of(containerAddress, childID);
         }
     }
 
@@ -146,19 +146,19 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
     protected void connect(String component1, String port1, String component2, String port2)
             throws PortConnectionException {
         handleConnection(true,
-                PString.valueOf(component1),
-                PString.valueOf(port1),
-                PString.valueOf(component2),
-                PString.valueOf(port2));
+                PString.of(component1),
+                PString.of(port1),
+                PString.of(component2),
+                PString.of(port2));
     }
 
     protected void disconnect(String component1, String port1, String component2, String port2) {
         try {
             handleConnection(false,
-                    PString.valueOf(component1),
-                    PString.valueOf(port1),
-                    PString.valueOf(component2),
-                    PString.valueOf(port2));
+                    PString.of(component1),
+                    PString.of(port1),
+                    PString.of(component2),
+                    PString.of(port2));
         } catch (PortConnectionException ex) {
             Logger.getLogger(AbstractContainer.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -172,7 +172,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             Component c2 = getChild(c2id.toString());
             final Port p2 = c2.getPort(p2id.toString());
 
-            final PArray connection = PArray.valueOf(c1id, p1id, c2id, p2id);
+            final PArray connection = PArray.of(c1id, p1id, c2id, p2id);
 
             if (connect) {
                 p1.connect(p2);
@@ -235,7 +235,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         @Override
         public void call(Call call, PacketRouter router) throws Exception {
             PArray response = childMap.keySet().stream()
-                    .map(PString::valueOf)
+                    .map(PString::of)
                     .collect(PArray.collector());
             router.route(call.reply(response));
         }
@@ -274,7 +274,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
 
         @Override
         public void call(Call call, PacketRouter router) throws Exception {
-            PArray response = PArray.valueOf(connections);
+            PArray response = PArray.of(connections);
             router.route(call.reply(response));
         }
 

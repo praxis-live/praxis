@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -21,7 +21,6 @@
  */
 package org.praxislive.core.types;
 
-import org.praxislive.core.Value;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -31,8 +30,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-//import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.EnumSet;
@@ -93,6 +90,11 @@ public final class PBytes extends Value {
         return new ByteArrayInputStream(bytes);
     }
 
+    public int size() {
+        return bytes.length;
+    }
+    
+    @Deprecated
     public int getSize() {
         return bytes.length;
     }
@@ -174,7 +176,7 @@ public final class PBytes extends Value {
      * @return transformed data
      */
     public <T extends DataObject> PBytes transformIn(T container, Consumer<T> transformer) {
-        OutputStream os = new OutputStream(getSize());
+        OutputStream os = new OutputStream(size());
         DataOutputStream dos = new DataOutputStream(os);
         forEachIn(container, s -> {
             transformer.accept(s);
@@ -230,6 +232,19 @@ public final class PBytes extends Value {
         return new PBytes(bytes.clone(), null);
     }
 
+    public static PBytes parse(String str) throws ValueFormatException {
+        if (str.trim().isEmpty()) {
+            return PBytes.EMPTY;
+        }
+        try {
+            byte[] bytes = Base64.getMimeDecoder().decode(str);
+            return new PBytes(bytes, str);
+        } catch (Exception ex) {
+            throw new ValueFormatException(ex);
+        }
+    }
+    
+    @Deprecated
     public static PBytes valueOf(String str) throws ValueFormatException {
         if (str.trim().isEmpty()) {
             return PBytes.EMPTY;
@@ -247,6 +262,28 @@ public final class PBytes extends Value {
      * @param list
      * @return PBytes of data
      */
+    public static PBytes of(List<? extends DataObject> list) {
+        if (list.isEmpty()) {
+            return PBytes.EMPTY;
+        }
+        try {
+            OutputStream os = new OutputStream();
+            DataOutputStream dos = new DataOutputStream(os);
+            for (DataObject s : list) {
+                s.writeTo(dos);
+            }
+            dos.flush();
+            return os.toBytes();
+        } catch (Exception ex) {
+            throw new IllegalArgumentException(ex);
+        }
+    }
+    /**
+     * Encode the provided List of DataObject subclasses into a new PBytes
+     * @param list
+     * @return PBytes of data
+     */
+    @Deprecated
     public static PBytes valueOf(List<? extends DataObject> list) {
         if (list.isEmpty()) {
             return PBytes.EMPTY;
@@ -279,11 +316,12 @@ public final class PBytes extends Value {
         return os.toBytes();
     }
 
+    @Deprecated
     public static PBytes coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PBytes) {
             return (PBytes) arg;
         } else {
-            return valueOf(arg.toString());
+            return parse(arg.toString());
         }
     }
 
@@ -296,7 +334,7 @@ public final class PBytes extends Value {
     }
 
     public static ArgumentInfo info() {
-        return ArgumentInfo.create(PBytes.class, PMap.EMPTY);
+        return ArgumentInfo.of(PBytes.class, PMap.EMPTY);
     }
 
     public static class OutputStream extends ByteArrayOutputStream {

@@ -55,7 +55,7 @@ public abstract class AbstractRootContainer extends AbstractRoot implements Cont
             router.route(call.reply());
         });
         registerControl(StartableProtocol.IS_RUNNING, (call, router) -> {
-            router.route(call.reply(PBoolean.valueOf(getState() == State.ACTIVE_RUNNING)));
+            router.route(call.reply(PBoolean.of(getState() == State.ACTIVE_RUNNING)));
         });
     }
 
@@ -109,12 +109,12 @@ public abstract class AbstractRootContainer extends AbstractRoot implements Cont
                 control.call(call, router);
             } else {
                 if (call.isRequest()) {
-                    router.route(call.error(PError.create("Unknown control address : " + call.to())));
+                    router.route(call.error(PError.of("Unknown control address : " + call.to())));
                 }
             }
         } catch (Exception ex) {
             if (call.isRequest()) {
-                router.route(call.error(PError.create(ex)));
+                router.route(call.error(PError.of(ex)));
             }
         }
     }
@@ -138,9 +138,9 @@ public abstract class AbstractRootContainer extends AbstractRoot implements Cont
 
     private Component findComponent(ComponentAddress address) {
         Component comp = delegate;
-        for (int i = 1; i < address.getDepth(); i++) {
+        for (int i = 1; i < address.depth(); i++) {
             if (comp instanceof Container) {
-                comp = ((Container) comp).getChild(address.getComponentID(i));
+                comp = ((Container) comp).getChild(address.componentID(i));
             } else {
                 return null;
             }

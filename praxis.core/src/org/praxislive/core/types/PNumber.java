@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -21,7 +21,6 @@
  */
 package org.praxislive.core.types;
 
-import org.praxislive.core.Value;
 import java.util.Optional;
 import org.praxislive.core.Value;
 import org.praxislive.core.ValueFormatException;
@@ -33,8 +32,8 @@ import org.praxislive.core.ArgumentInfo;
  */
 public final class PNumber extends Value implements Comparable<PNumber> {
 
-    public final static PNumber ONE = PNumber.valueOf(1);
-    public final static PNumber ZERO = PNumber.valueOf(0);
+    public final static PNumber ONE = PNumber.of(1);
+    public final static PNumber ZERO = PNumber.of(0);
 
     public final static String KEY_MINIMUM = "minimum";
     public final static String KEY_MAXIMUM = "maximum";
@@ -121,6 +120,11 @@ public final class PNumber extends Value implements Comparable<PNumber> {
         return isInteger;
     }
 
+    public static PNumber of(double val) {
+        return valueOf(val, null);
+    }
+    
+    @Deprecated
     public static PNumber valueOf(double val) {
         return valueOf(val, null);
     }
@@ -136,11 +140,16 @@ public final class PNumber extends Value implements Comparable<PNumber> {
         return new PNumber(val, str);
     }
 
+    public static PNumber of(int val) {
+        return new PNumber(val, null);
+    }
+    
+    @Deprecated
     public static PNumber valueOf(int val) {
         return new PNumber(val, null);
     }
 
-    public static PNumber valueOf(String str) throws ValueFormatException {
+    public static PNumber parse(String str) throws ValueFormatException {
         try {
             if (str.indexOf('.') > -1) {
                 return valueOf(Double.parseDouble(str), str);
@@ -155,7 +164,13 @@ public final class PNumber extends Value implements Comparable<PNumber> {
             throw new ValueFormatException(ex);
         }
     }
+    
+    @Deprecated
+    public static PNumber valueOf(String str) throws ValueFormatException {
+        return parse(str);
+    }
 
+    @Deprecated
     public static PNumber coerce(
             Value arg) throws ValueFormatException {
         if (arg instanceof PNumber) {
@@ -163,7 +178,7 @@ public final class PNumber extends Value implements Comparable<PNumber> {
         } else if (arg instanceof PBoolean) {
             return ((PBoolean) arg).value() ? ONE : ZERO;
         } else {
-            return valueOf(arg.toString());
+            return parse(arg.toString());
         }
     }
 
@@ -176,35 +191,35 @@ public final class PNumber extends Value implements Comparable<PNumber> {
     }
 
     public static ArgumentInfo info() {
-        return ArgumentInfo.create(PNumber.class, null);
+        return ArgumentInfo.of(PNumber.class, null);
     }
 
     public static ArgumentInfo info(double min, double max) {
-        PMap map = PMap.create(
+        PMap map = PMap.of(
                 KEY_MINIMUM, min,
                 KEY_MAXIMUM, max);
-        return ArgumentInfo.create(PNumber.class, map);
+        return ArgumentInfo.of(PNumber.class, map);
     }
 
     public static ArgumentInfo info(double min, double max, double skew) {
         if (skew < 0.01) {
             skew = 0.01;
         }
-        PMap map = PMap.create(
+        PMap map = PMap.of(
                 KEY_MINIMUM, min,
                 KEY_MAXIMUM, max,
                 KEY_SKEW, skew);
-        return ArgumentInfo.create(PNumber.class, map);
+        return ArgumentInfo.of(PNumber.class, map);
     }
 
     public static ArgumentInfo integerInfo() {
-        return ArgumentInfo.create(PNumber.class, PMap.create(KEY_IS_INTEGER, true));
+        return ArgumentInfo.of(PNumber.class, PMap.of(KEY_IS_INTEGER, true));
     }
 
     public static ArgumentInfo integerInfo(int min, int max) {
-        PMap map = PMap.create(KEY_MINIMUM, min,
+        PMap map = PMap.of(KEY_MINIMUM, min,
                 KEY_MAXIMUM, max, KEY_IS_INTEGER, true);
-        return ArgumentInfo.create(PNumber.class, map);
+        return ArgumentInfo.of(PNumber.class, map);
     }
 
 }

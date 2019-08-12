@@ -65,7 +65,7 @@ public class ResourceCmds implements CommandInstaller {
             try {
                 File f = new File(PResource.coerce(args.get(0)).value());
                 String s = Utils.loadStringFromFile(f);
-                return CallArguments.create(PString.valueOf(s));
+                return CallArguments.create(PString.of(s));
             } catch (Exception ex) {
                 throw new ExecutionException(ex);
             }

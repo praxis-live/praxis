@@ -61,7 +61,7 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
 
     @Override
     protected void set(long time, double value) throws Exception {
-        set(time, PNumber.valueOf(value));
+        set(time, PNumber.of(value));
     }
 
     @Override
@@ -187,7 +187,7 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
         }
 
         public Builder suggestedValues(Value ... values) {
-            putArgumentProperty(ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.valueOf(values));
+            putArgumentProperty(ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.of(values));
             return this;
         }
         
@@ -206,7 +206,7 @@ public class ArgumentProperty extends AbstractSingleArgProperty {
                 read = write; 
             }
             ControlInfo info = buildInfo();
-            if (info.getType() == ControlInfo.Type.ReadOnlyProperty) {
+            if (info.controlType() == ControlInfo.Type.ReadOnlyProperty) {
                 write = null;
             }
             return new ArgumentProperty(read, write, info);

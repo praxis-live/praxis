@@ -129,7 +129,7 @@ public abstract class AbstractAsyncControl extends AbstractControl {
             } catch (Exception ex) {
                 LOG.log(Level.FINE, "Exception thrown processing call", ex);
                 callQueue.poll();
-                router.route(Call.createErrorCall(call, PError.create(ex)));
+                router.route(Call.createErrorCall(call, PError.of(ex)));
             }
         }
 

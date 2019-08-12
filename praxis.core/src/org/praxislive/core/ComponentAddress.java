@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -44,8 +44,8 @@ public final class ComponentAddress extends Value {
     
     private static final String ADDRESS_REGEX = "\\G/([_\\-\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*)";
     private static final String ID_REGEX = "[_\\-\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*";
-    private static final Pattern idPattern = Pattern.compile(ID_REGEX);
-    private static final Pattern addressPattern = Pattern.compile(ADDRESS_REGEX);
+    private static final Pattern ID_PATTERN = Pattern.compile(ID_REGEX);
+    private static final Pattern ADDRESS_PATTERN = Pattern.compile(ADDRESS_REGEX);
     
     private final String[] address;
     private final String addressString;
@@ -60,6 +60,16 @@ public final class ComponentAddress extends Value {
      *
      * @return int Depth (always >=1)
      */
+    public int depth() {
+        return address.length;
+    }
+
+    /**
+     * Number of ID parts to this address
+     *
+     * @return int Depth (always >=1)
+     */
+    @Deprecated
     public int getDepth() {
         return address.length;
     }
@@ -70,17 +80,46 @@ public final class ComponentAddress extends Value {
      * @param depth
      * @return String ID
      */
+    public String componentID(int depth) {
+        return address[depth];
+    }
+    /**
+     * Get ID at given depth in address.
+     *
+     * @param depth
+     * @return String ID
+     */
+    @Deprecated
     public String getComponentID(int depth) {
         return address[depth];
     }
 
     /**
+     * Equivalent to componentID(depth() - 1).
+     *
+     * @return String
+     */
+    public String componentID() {
+        return address[address.length - 1];
+    }
+    
+    /**
      * Equivalent to getComponentID(getDepth() - 1).
      *
      * @return String
      */
+    @Deprecated
     public String getID() {
         return address[address.length - 1];
+    }
+    
+    /**
+     * Equivalent to componentID(0).
+     *
+     * @return String
+     */
+    public String rootID() {
+        return address[0];
     }
     
     /**
@@ -88,19 +127,26 @@ public final class ComponentAddress extends Value {
      *
      * @return String
      */
+    @Deprecated
     public String getRootID() {
         return address[0];
     }
 
-    public ComponentAddress getParentAddress() {
+    public ComponentAddress parent() {
         if (address.length == 1) {
             return null;
         } else {
             String s = addressString;
-            s = s.substring(0, s.lastIndexOf('/')).intern();
+            s = s.substring(0, s.lastIndexOf('/'));
+            s = cache(s);
             String[] a = Arrays.copyOfRange(address, 0, address.length - 1);
             return new ComponentAddress(a, s);
         }
+    }
+    
+    @Deprecated
+    public ComponentAddress getParentAddress() {
+        return parent();
     }
 
     @Override
@@ -130,23 +176,61 @@ public final class ComponentAddress extends Value {
      * @return ComponentAddress
      * @throws org.praxislive.core.ValueFormatException
      */
-    public static ComponentAddress valueOf(String addressString) throws ValueFormatException {
+    public static ComponentAddress parse(String addressString) throws ValueFormatException {
 
         String[] address = parseAddress(addressString);
-//        return new ComponentAddress(address, addressString);
-        return new ComponentAddress(address, addressString.intern());
+        return new ComponentAddress(address, cache(addressString));
 
     }
+    
+    /**
+     * Create an address from the supplied String
+     *
+     * @param addressString
+     * @return ComponentAddress
+     * @throws org.praxislive.core.ValueFormatException
+     */
+    @Deprecated
+    public static ComponentAddress valueOf(String addressString) throws ValueFormatException {
+        return parse(addressString);
+    }
 
+    public static ComponentAddress of(String address) {
+        try {
+            return parse(address);
+        } catch (ValueFormatException ex) {
+            throw new IllegalArgumentException(ex);
+        }
+    }
+    
+    @Deprecated
     public static ComponentAddress create(String address) {
         try {
-            return valueOf(address);
+            return parse(address);
         } catch (ValueFormatException ex) {
             throw new IllegalArgumentException(ex);
         }
     }
 
 
+    /**
+     * Create a ComponentAddress by adding the supplied path to the end of the
+     * supplied ComponentAddress.
+     *
+     * @param address
+     * @param path
+     * @return ComponentAddress
+     * @throws IllegalArgumentException
+     */
+    public static ComponentAddress of(ComponentAddress address, String path) {
+        try {
+            return parse(address.toString() + '/' + path);
+        } catch (ValueFormatException ex) {
+            throw new IllegalArgumentException(ex);
+        }
+        
+    }
+    
     /**
      * Create a ComponentAddress by adding the supplied ID to the end of the
      * supplied ComponentAddress path.
@@ -156,9 +240,10 @@ public final class ComponentAddress extends Value {
      * @return ComponentAddress
      * @throws IllegalArgumentException
      */
+    @Deprecated
     public static ComponentAddress create(ComponentAddress address, String id) {
         try {
-            return valueOf(address.toString() + '/' + id);
+            return parse(address.toString() + '/' + id);
         } catch (ValueFormatException ex) {
             throw new IllegalArgumentException(ex);
         }
@@ -171,11 +256,12 @@ public final class ComponentAddress extends Value {
      * @return
      * @throws org.praxislive.core.ValueFormatException
      */
+    @Deprecated
     public static ComponentAddress coerce(Value arg) throws ValueFormatException {
         if (arg instanceof ComponentAddress) {
             return (ComponentAddress) arg;
         } else {
-            return valueOf(arg.toString());
+            return parse(arg.toString());
         }
     }
     
@@ -193,18 +279,18 @@ public final class ComponentAddress extends Value {
      * @return
      */
     public static boolean isValidID(String id) {
-        return idPattern.matcher(id).matches();
+        return ID_PATTERN.matcher(id).matches();
     }
 
 
     
     private static String[] parseAddress(String addressString) throws ValueFormatException {
-        Matcher match = addressPattern.matcher(addressString);
+        Matcher match = ADDRESS_PATTERN.matcher(addressString);
         ArrayList<String> addressList = new ArrayList<String>();
         int end = 0;
         while (match.find()) {
-//            addressList.add(match.group(1));
-            addressList.add(match.group(1).intern());
+            String id = match.group(1);
+            addressList.add(cache(id));
             end = match.end();
         }
         if (addressList.size() < 1 || end < addressString.length()) {
@@ -216,66 +302,10 @@ public final class ComponentAddress extends Value {
 
 
     public static ArgumentInfo info() {
-        return ArgumentInfo.create(ComponentAddress.class, PMap.EMPTY);
+        return ArgumentInfo.of(ComponentAddress.class, PMap.EMPTY);
     }
 
-    
-//    private final static Pattern idChecker = Pattern.compile(ID_REGEX);
-//    public static boolean isValidID(String id) {
-//        return idChecker.matcher(id).matches();
-//    }
-    
-    
-// this is quicker by roughly factor of 3 but harder to maintain    
-//    private static String[] parseAddress(String addressString) throws ValueFormatException {
-//
-//        if (addressString.length() < 2 || addressString.charAt(0) != SEPERATOR) {
-//            //address has to be have at least a starting slash and one letter
-//            throw new ValueFormatException();
-//        }
-//
-//        StringBuilder stringBuilder = new StringBuilder();
-//        ArrayList<String> addressList = new ArrayList<String>();
-//
-//        int length = addressString.length();
-//
-//        // parse loop
-//        for (int i = 1; i < length; i++) {
-//            char ch = addressString.charAt(i);
-//            // split at slashes
-//            // throw error if no id between slashes or slash at end
-//            if (ch == SEPERATOR) {
-//                if (stringBuilder.length() > 0 && i < (length - 1)) {
-//                    addressList.add(stringBuilder.toString());
-//                    stringBuilder.setLength(0);
-//                } else {
-//                    throw new ValueFormatException("Zero length id string found");
-//                }
-//            } else if (ch == '_') {
-//                stringBuilder.append(ch);
-//            } else {
-//                if (stringBuilder.length() == 0) {
-//                    if (Character.isLetter(ch)) {
-//                        stringBuilder.append(ch);
-//                    } else {
-//                        throw new ValueFormatException("First character of id isn't valid");
-//                    }
-//                } else {
-//                    if (Character.isLetterOrDigit(ch)) {
-//                        stringBuilder.append(ch);
-//                    } else {
-//                        throw new ValueFormatException("Invalid character found in id");
-//                    }
-//                }
-//            }
-//        } // parse loop end
-//
-//        // add final bit of buffer
-//        if (stringBuilder.length() > 0) {
-//            addressList.add(stringBuilder.toString());
-//        }
-//
-//        return addressList.toArray(new String[addressList.size()]);
-//
-//    }
+    static String cache(String string) {
+        return string;
+    }
 }

@@ -49,7 +49,7 @@ public class Components implements ComponentFactoryProvider {
         private void build() {
         
             add(data(new CoreCodeFactory(
-                    ComponentType.create("core:tracker"),
+                    ComponentType.of("core:tracker"),
                     CoreTracker.class,
                     source(CoreTracker.TEMPLATE_PATH)
             )));

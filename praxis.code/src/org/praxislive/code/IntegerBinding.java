@@ -79,7 +79,7 @@ abstract class IntegerBinding extends PropertyControl.Binding {
 
     @Override
     public Value getDefaultValue() {
-        return PNumber.valueOf(def);
+        return PNumber.of(def);
     }
 
     static boolean isBindableFieldType(Class<?> type) {
@@ -108,11 +108,11 @@ abstract class IntegerBinding extends PropertyControl.Binding {
         }
         if (suggested.length > 0) {
             PArray vals = IntStream.of(suggested)
-                    .mapToObj(PNumber::valueOf)
+                    .mapToObj(PNumber::of)
                     .collect(PArray.collector());
             props.put(ArgumentInfo.KEY_SUGGESTED_VALUES, vals);
         }
-        ArgumentInfo info = ArgumentInfo.create(PNumber.class, props.build());
+        ArgumentInfo info = ArgumentInfo.of(PNumber.class, props.build());
         Class<?> type = field.getType();
         if (type == int.class) { // || type == Double.class) {
             return new IntField(field, info, min, max, def);
@@ -137,7 +137,7 @@ abstract class IntegerBinding extends PropertyControl.Binding {
         @Override
         public Value get() {
             if (!last.isInteger() || last.value() != value) {
-                last = PNumber.valueOf(value);
+                last = PNumber.of(value);
             }
             return last;
         }
@@ -213,7 +213,7 @@ abstract class IntegerBinding extends PropertyControl.Binding {
         public Value get() {
             int value = get(0);
             if (!last.isInteger() || last.toIntValue() != value) {
-                last = PNumber.valueOf(value);
+                last = PNumber.of(value);
             }
             return last;
 

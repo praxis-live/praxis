@@ -64,7 +64,7 @@ public abstract class Output {
      * @param value
      */
     public void send(String value) {
-        send(PString.valueOf(value));
+        send(PString.of(value));
     }
 
     /**
@@ -73,7 +73,7 @@ public abstract class Output {
      * @param value
      */
     public void send(boolean value) {
-        send(PBoolean.valueOf(value));
+        send(PBoolean.of(value));
     }
 
     /**

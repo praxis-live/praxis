@@ -64,7 +64,7 @@ public class CoreArrayRandom extends CoreCodeDelegate {
             index = -1;
             out.send();
         } else {
-            index = (int) random(array.getSize());
+            index = (int) random(array.size());
             out.send(array.get(index));
         }
     }

@@ -34,7 +34,7 @@ public abstract class ControlPort implements Port {
     public final static String READY = "ready";
     public final static String ERROR = "error";
 
-    public final static PString BANG = PString.valueOf("");
+    public final static PString BANG = PString.of("");
 
     public static abstract class Input extends ControlPort {
 

@@ -129,7 +129,7 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
                 throw new NullPointerException();
             }
             try {
-                this.address = ComponentAddress.valueOf("/" + ID);
+                this.address = ComponentAddress.parse("/" + ID);
             } catch (ValueFormatException ex) {
                 throw new IllegalArgumentException(ex);
             }
@@ -367,14 +367,14 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
             } else {
                 Call.Type type = call.getType();
                 if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
-                    router.route(Call.createErrorCall(call, PString.valueOf("Unknown control address : " + call.to())));
+                    router.route(Call.createErrorCall(call, PString.of("Unknown control address : " + call.to())));
                 }
             }
         } catch (Exception ex) {
             Call.Type type = call.getType();
             LOG.log(Level.FINE, "Exception thrown from call\n" + call, ex);
             if (type == Call.Type.INVOKE || type == Call.Type.INVOKE_QUIET) {
-                router.route(Call.createErrorCall(call, PReference.wrap(ex)));
+                router.route(Call.createErrorCall(call, PReference.of(ex)));
             }
         }
     }
@@ -390,15 +390,15 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
 
     protected Component getComponent(ComponentAddress address) {
         // add caching
-        return findComponent(address, address.getDepth());
+        return findComponent(address, address.depth());
     }
 
     private Component findComponent(ComponentAddress address, int depth) {
-        if (address.getComponentID(0).equals(this.ID)) {
+        if (address.componentID(0).equals(this.ID)) {
             Component comp = this;
             for (int i = 1; i < depth; i++) {
                 if (comp instanceof Container) {
-                    comp = ((Container) comp).getChild(address.getComponentID(i));
+                    comp = ((Container) comp).getChild(address.componentID(i));
                 } else {
                     return null;
                 }

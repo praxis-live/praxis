@@ -274,8 +274,8 @@ public class DefaultBindingControl extends AbstractControl {
                     try {
                         compInfo = ComponentInfo.coerce(args.get(0));
                         // @TODO on null?
-                        bindingInfo = compInfo.getControlInfo(boundAddress.getID());
-                        ControlInfo.Type type = bindingInfo.getType();
+                        bindingInfo = compInfo.controlInfo(boundAddress.getID());
+                        ControlInfo.Type type = bindingInfo.controlType();
                         isProperty = (type == ControlInfo.Type.Property)
                                 || (type == ControlInfo.Type.ReadOnlyProperty);
 

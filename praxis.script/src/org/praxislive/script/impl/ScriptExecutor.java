@@ -163,7 +163,7 @@ public class ScriptExecutor {
             } catch (Exception ex) {
                 queue.poll();
                 env.getPacketRouter().route(
-                        Call.createErrorCall(call, PReference.wrap(ex)));
+                        Call.createErrorCall(call, PReference.of(ex)));
             }
         }
     }

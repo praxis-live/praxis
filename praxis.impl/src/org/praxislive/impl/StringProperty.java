@@ -75,7 +75,7 @@ public class StringProperty extends AbstractSingleArgProperty {
 
     @Override
     protected Value get() {
-        return PString.valueOf(reader.getBoundValue());
+        return PString.of(reader.getBoundValue());
     }
     
     
@@ -126,7 +126,7 @@ public class StringProperty extends AbstractSingleArgProperty {
             allowedValues = new LinkedHashSet<String>(Arrays.asList(values));
             arguments = new ArgumentInfo[]{PString.info(values)};
         }
-        Value[] defaults = new Value[]{PString.valueOf(def)};
+        Value[] defaults = new Value[]{PString.of(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new StringProperty(binding, binding, allowedValues, info);
     }
@@ -179,7 +179,7 @@ public class StringProperty extends AbstractSingleArgProperty {
         }
         
         public Builder defaultValue(String def) {
-            defaults(PString.valueOf(def));
+            defaults(PString.of(def));
             defaultValue = def;
             return this;
         }
@@ -188,18 +188,18 @@ public class StringProperty extends AbstractSingleArgProperty {
             allowed = new LinkedHashSet<String>(Arrays.asList(values));
             PString[] arr = new PString[values.length];
             for (int i=0; i < arr.length; i++) {
-                arr[i] = PString.valueOf(values[i]);
+                arr[i] = PString.of(values[i]);
             }
-            putArgumentProperty(ArgumentInfo.KEY_ALLOWED_VALUES, PArray.valueOf(arr));
+            putArgumentProperty(ArgumentInfo.KEY_ALLOWED_VALUES, PArray.of(arr));
             return this;
         }
         
         public Builder suggestedValues(String ... values) {
             PString[] arr = new PString[values.length];
             for (int i=0; i < arr.length; i++) {
-                arr[i] = PString.valueOf(values[i]);
+                arr[i] = PString.of(values[i]);
             }
-            putArgumentProperty(ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.valueOf(arr));
+            putArgumentProperty(ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.of(arr));
             return this;
         }
         
@@ -209,12 +209,12 @@ public class StringProperty extends AbstractSingleArgProperty {
         }
         
         public Builder mimeType(String mime) {
-            putArgumentProperty(PString.KEY_MIME_TYPE, PString.valueOf(mime));
+            putArgumentProperty(PString.KEY_MIME_TYPE, PString.of(mime));
             return this;
         }
         
         public Builder template(String template) {
-            putArgumentProperty(ArgumentInfo.KEY_TEMPLATE, PString.valueOf(template));
+            putArgumentProperty(ArgumentInfo.KEY_TEMPLATE, PString.of(template));
             return this;
         }
         
@@ -246,7 +246,7 @@ public class StringProperty extends AbstractSingleArgProperty {
                 read = write; 
             }
             ControlInfo info = buildInfo();
-            if (info.getType() == ControlInfo.Type.ReadOnlyProperty) {
+            if (info.controlType() == ControlInfo.Type.ReadOnlyProperty) {
                 write = null;
             }
             return new StringProperty(read, write, allowed, info);

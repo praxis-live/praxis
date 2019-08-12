@@ -78,12 +78,12 @@ public class XYController extends AbstractGuiComponent {
     @Override
     protected void initControls() {
         super.initControls();
-        ArgumentInfo bindingInfo = ArgumentInfo.create(ControlAddress.class, PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true));
+        ArgumentInfo bindingInfo = ArgumentInfo.of(ControlAddress.class, PMap.of(ArgumentInfo.KEY_ALLOW_EMPTY, true));
         registerControl("binding-x", ArgumentProperty.create(bindingInfo, new XAddressBinding(), PString.EMPTY));
         registerControl("binding-y", ArgumentProperty.create(bindingInfo, new YAddressBinding(), PString.EMPTY));
         
-        ArgumentInfo info = ArgumentInfo.create(Value.class,
-                PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true, ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
+        ArgumentInfo info = ArgumentInfo.of(Value.class,
+                PMap.of(ArgumentInfo.KEY_ALLOW_EMPTY, true, ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
         registerControl("minimum-x", ArgumentProperty.create(info, new MinBinding(xPrefs), PString.EMPTY));
         registerControl("minimum-y", ArgumentProperty.create(info, new MinBinding(yPrefs), PString.EMPTY));
         registerControl("maximum-x", ArgumentProperty.create(info, new MaxBinding(xPrefs), PString.EMPTY));
@@ -344,7 +344,7 @@ public class XYController extends AbstractGuiComponent {
                 if (value instanceof PString) {
                     prefs.scale = (PString) value;
                 } else {
-                    prefs.scale = PString.valueOf(value);
+                    prefs.scale = PString.of(value);
                 }
             }
             updateAdaptors();

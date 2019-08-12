@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -50,7 +50,7 @@ public class PMap extends Value {
     }
 
     public Value get(String key) {
-        int size = array.getSize();
+        int size = array.size();
         for (int i = 0; i < size; i += 2) {
             if (array.get(i).toString().equals(key)) {
                 return array.get(i + 1);
@@ -104,7 +104,7 @@ public class PMap extends Value {
     }
 
     public int getSize() {
-        return array.getSize() / 2;
+        return array.size() / 2;
     }
 
     public String[] getKeys() {
@@ -181,29 +181,34 @@ public class PMap extends Value {
             return (Value) obj;
         }
         if (obj instanceof Boolean) {
-            return ((Boolean) obj).booleanValue() ? PBoolean.TRUE : PBoolean.FALSE;
+            return ((Boolean) obj) ? PBoolean.TRUE : PBoolean.FALSE;
         }
         if (obj instanceof Integer) {
-            return PNumber.valueOf(((Integer) obj).intValue());
+            return PNumber.of(((Integer) obj));
         }
         if (obj instanceof Number) {
-            return PNumber.valueOf(((Number) obj).doubleValue());
+            return PNumber.of(((Number) obj).doubleValue());
         }
         if (obj == null) {
             return PString.EMPTY;
         }
-        return PString.valueOf(obj);
+        return PString.of(obj);
     }
 
-    public static PMap create(String key, Object value) {
+    public static PMap of(String key, Object value) {
         if (key == null) {
             throw new NullPointerException();
         }
-        PArray array = PArray.valueOf(PString.valueOf(key), objToValue(value));
+        PArray array = PArray.of(PString.of(key), objToValue(value));
         return new PMap(array, null);
     }
 
-    public static PMap create(String key1, Object value1,
+    @Deprecated
+    public static PMap create(String key, Object value) {
+        return PMap.of(key, value);
+    }
+
+    public static PMap of(String key1, Object value1,
             String key2, Object value2) {
         if (key1 == null || key2 == null) {
             throw new NullPointerException();
@@ -211,13 +216,19 @@ public class PMap extends Value {
         if (key1.equals(key2)) {
             throw new IllegalArgumentException("Duplicate keys");
         }
-        PArray array = PArray.valueOf(
-                PString.valueOf(key1), objToValue(value1),
-                PString.valueOf(key2), objToValue(value2));
+        PArray array = PArray.of(
+                PString.of(key1), objToValue(value1),
+                PString.of(key2), objToValue(value2));
         return new PMap(array, null);
     }
 
+    @Deprecated
     public static PMap create(String key1, Object value1,
+            String key2, Object value2) {
+        return PMap.of(key1, value1, key2, value2);
+    }
+
+    public static PMap of(String key1, Object value1,
             String key2, Object value2,
             String key3, Object value3) {
         if (key1 == null || key2 == null || key3 == null) {
@@ -226,19 +237,26 @@ public class PMap extends Value {
         if (key1.equals(key2) || key2.equals(key3) || key3.equals(key1)) {
             throw new IllegalArgumentException("Duplicate keys");
         }
-        PArray array = PArray.valueOf(
-                PString.valueOf(key1), objToValue(value1),
-                PString.valueOf(key2), objToValue(value2),
-                PString.valueOf(key3), objToValue(value3));
+        PArray array = PArray.of(
+                PString.of(key1), objToValue(value1),
+                PString.of(key2), objToValue(value2),
+                PString.of(key3), objToValue(value3));
         return new PMap(array, null);
     }
 
-    public static PMap valueOf(String str) throws ValueFormatException {
-        PArray arr = PArray.valueOf(str);
+    @Deprecated
+    public static PMap create(String key1, Object value1,
+            String key2, Object value2,
+            String key3, Object value3) {
+        return PMap.of(key1, value1, key2, value2, key3, value3);
+    }
+
+    public static PMap parse(String str) throws ValueFormatException {
+        PArray arr = PArray.parse(str);
         if (arr.isEmpty()) {
             return PMap.EMPTY;
         }
-        int size = arr.getSize();
+        int size = arr.size();
         if (size % 2 != 0) {
             throw new ValueFormatException("Uneven number of tokens passed to PMap.valueOf()");
         }
@@ -255,18 +273,24 @@ public class PMap extends Value {
 //        }
         PMap.Builder builder = builder(size / 2);
         for (int i = 0; i < size; i += 2) {
-            builder.put(
-                    PString.coerce(arr.get(i)),
+            builder.putImpl(
+                    PString.of(arr.get(i)),
                     arr.get(i + 1));
         }
         return builder.build(str);
     }
 
+    @Deprecated
+    public static PMap valueOf(String str) throws ValueFormatException {
+        return parse(str);
+    }
+
+    @Deprecated
     public static PMap coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PMap) {
             return (PMap) arg;
         } else {
-            return valueOf(arg.toString());
+            return parse(arg.toString());
         }
     }
     
@@ -316,42 +340,42 @@ public class PMap extends Value {
 //        }
         
         public Builder put(String key, Value value) {
-            putImpl(PString.valueOf(key), value);
+            putImpl(PString.of(key), value);
             return this;
         }
 
         public Builder put(String key, boolean value) {
-            putImpl(PString.valueOf(key), PBoolean.valueOf(value));
+            putImpl(PString.of(key), PBoolean.of(value));
             return this;
         }
 
         public Builder put(String key, int value) {
-            putImpl(PString.valueOf(key), PNumber.valueOf(value));
+            putImpl(PString.of(key), PNumber.of(value));
             return this;
         }
 
         public Builder put(String key, double value) {
-            putImpl(PString.valueOf(key), PNumber.valueOf(value));
+            putImpl(PString.of(key), PNumber.of(value));
             return this;
         }
 
         public Builder put(String key, String value) {
-            putImpl(PString.valueOf(key), PString.valueOf(value));
+            putImpl(PString.of(key), PString.of(value));
             return this;
         }
         
         public Builder put(String key, Object value) {
-            putImpl(PString.valueOf(key), objToValue(value));
+            putImpl(PString.of(key), objToValue(value));
             return this;
         }
 
         public PMap build() {
-            PArray array = PArray.valueOf(storage);
+            PArray array = PArray.of(storage);
             return new PMap(array, null);
         }
 
         private PMap build(String str) {
-            PArray array = PArray.valueOf(storage);
+            PArray array = PArray.of(storage);
             return new PMap(array, str);
         }
 

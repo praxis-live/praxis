@@ -84,7 +84,7 @@ public class CoreComponents implements ComponentFactoryProvider {
 
         private void add(String type, Class<? extends CoreCodeDelegate> cls, String path) {
             add(data(
-                    new CoreCodeFactory(ComponentType.create(type), cls, source(path))
+                    new CoreCodeFactory(ComponentType.of(type), cls, source(path))
             ));
         }
 

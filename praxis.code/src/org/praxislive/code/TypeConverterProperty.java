@@ -112,7 +112,7 @@ class TypeConverterProperty<T> extends AbstractAsyncProperty<T> {
 
         @Override
         public Value execute() throws Exception {
-            return PReference.wrap(converter.fromArgument(key));
+            return PReference.of(converter.fromArgument(key));
         }
 
     }
@@ -241,7 +241,7 @@ class TypeConverterProperty<T> extends AbstractAsyncProperty<T> {
 
         @Override
         public void receive(long time, double value) {
-            receive(time, PNumber.valueOf(value));
+            receive(time, PNumber.of(value));
         }
 
         @Override

@@ -215,7 +215,7 @@ public class PBytesTest {
         assertEquals(data.y, 50 * -2, 0.001);
         assertEquals(data.z, Math.PI, 0.001);
         assertEquals(count[0], 2);
-        assertEquals(bytes.getSize(), 8 * 3 * 2);
+        assertEquals(bytes.size(), 8 * 3 * 2);
     }
 
     /**
@@ -318,7 +318,7 @@ public class PBytesTest {
     public void testDeserialize() throws IOException {
         int[] ints = new int[]{1,2,3,4,5};
         PBytes bytes = PBytes.serialize(ints);
-        System.out.println("Serialized size : " + bytes.getSize());
+        System.out.println("Serialized size : " + bytes.size());
         System.out.println("Base64 : " + bytes.toString());
         int[] out = bytes.deserialize(int[].class);
         assertArrayEquals(ints, out);

@@ -152,7 +152,7 @@ public class FileCmds implements CommandInstaller {
                 throw new ExecutionException();
             }
             try {
-                return CallArguments.create(PResource.valueOf(
+                return CallArguments.create(PResource.of(
                         resolve(namespace, args.get(0).toString())
                 ));
             } catch (Exception ex) {
@@ -180,10 +180,10 @@ public class FileCmds implements CommandInstaller {
                 }
                 
                 List<PResource> ret = list.stream()
-                        .map(path -> PResource.valueOf(path.toUri()))
+                        .map(path -> PResource.of(path.toUri()))
                         .collect(Collectors.toList());
                 
-                return CallArguments.create(PArray.valueOf(ret));
+                return CallArguments.create(PArray.of(ret));
             } catch (Exception ex) {
                 throw new ExecutionException(ex);
             }
@@ -210,10 +210,10 @@ public class FileCmds implements CommandInstaller {
                 }
                 
                 List<PString> ret = list.stream()
-                        .map(path -> PString.valueOf(path.getFileName()))
+                        .map(path -> PString.of(path.getFileName()))
                         .collect(Collectors.toList());
                 
-                return CallArguments.create(PArray.valueOf(ret));
+                return CallArguments.create(PArray.of(ret));
             } catch (Exception ex) {
                 throw new ExecutionException(ex);
             }
@@ -236,7 +236,7 @@ public class FileCmds implements CommandInstaller {
                         throw new ExecutionException("Not a valid directory");
                     }
                 }
-                PResource dir = PResource.valueOf(uri);
+                PResource dir = PResource.of(uri);
                 Variable pwd = namespace.getVariable(Env.PWD);
                 if (pwd != null) {
                     pwd.setValue(dir);
@@ -256,7 +256,7 @@ public class FileCmds implements CommandInstaller {
 
         @Override
         public CallArguments process(Env context, Namespace namespace, CallArguments args) throws ExecutionException {
-            return CallArguments.create(PResource.valueOf(getPWD(namespace)));
+            return CallArguments.create(PResource.of(getPWD(namespace)));
         }
         
     }    

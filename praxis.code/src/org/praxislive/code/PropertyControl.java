@@ -70,7 +70,7 @@ public class PropertyControl extends Property implements Control {
         this.info = info;
         this.binding = binding;
         this.readOnly = info == null
-                || info.getType() == ControlInfo.Type.ReadOnlyProperty;
+                || info.controlType() == ControlInfo.Type.ReadOnlyProperty;
         this.onChange = onChange;
         this.onError = onError;
     }
@@ -201,7 +201,7 @@ public class PropertyControl extends Property implements Control {
         public abstract Value get();
 
         public double get(double def) {
-            return PNumber.from(get()).orElse(PNumber.valueOf(def)).value();
+            return PNumber.from(get()).orElse(PNumber.of(def)).value();
         }
 
         public abstract ArgumentInfo getArgumentInfo();
@@ -242,7 +242,7 @@ public class PropertyControl extends Property implements Control {
         @Override
         public Value get() {
             if (argValue == null) {
-                return PNumber.valueOf(dblValue);
+                return PNumber.of(dblValue);
             } else {
                 return argValue;
             }
@@ -376,7 +376,7 @@ public class PropertyControl extends Property implements Control {
                         new ArgumentInfo[]{binding.getArgumentInfo()},
                         new Value[]{binding.getDefaultValue()},
                         field.isAnnotationPresent(Transient.class)
-                                ? PMap.create(ControlInfo.KEY_TRANSIENT, true)
+                                ? PMap.of(ControlInfo.KEY_TRANSIENT, true)
                                 : PMap.EMPTY);
             }
             return new Descriptor(id, index, info, binding, propertyField, onChange, onError);

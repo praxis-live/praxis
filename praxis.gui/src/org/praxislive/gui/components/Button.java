@@ -91,8 +91,8 @@ public class Button extends SingleBindingGuiComponent {
     protected void initControls() {
         super.initControls();
         registerControl("values", ArrayProperty.create(new ValuesBinding(), PArray.EMPTY));
-        onClick = ArgumentProperty.create(ArgumentInfo.create(PString.class,
-                PMap.create(PString.KEY_MIME_TYPE, "text/x-praxis-script")));
+        onClick = ArgumentProperty.create(ArgumentInfo.of(PString.class,
+                PMap.of(PString.KEY_MIME_TYPE, "text/x-praxis-script")));
         registerControl("on-click", onClick);
         registerControl("_on-click-log", new OnClickLog());
     }
@@ -161,7 +161,7 @@ public class Button extends SingleBindingGuiComponent {
                     getAddress(), "_on-click-log");
             Call call = Call.createQuiet(to, from,
                     getLookup().find(ExecutionContext.class).get().getTime(),
-                    PString.valueOf(script));
+                    PString.of(script));
             getPacketRouter().route(call);
             
         } catch (Exception ex) {

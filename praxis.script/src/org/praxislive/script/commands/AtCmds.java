@@ -142,7 +142,7 @@ public class AtCmds implements CommandInstaller {
 
                     ControlAddress to;
                     CallArguments args;
-                    int depth = ctxt.getDepth();
+                    int depth = ctxt.depth();
                     if (depth == 1) {
                         to = ControlAddress.create(
                                 env.getLookup().find(Services.class)
@@ -150,19 +150,19 @@ public class AtCmds implements CommandInstaller {
                                 .orElseThrow(ServiceUnavailableException::new),
                                 RootManagerService.ADD_ROOT);
                         args = CallArguments.create(new Value[]{
-                                    PString.valueOf(ctxt.getRootID()), type});
+                                    PString.of(ctxt.rootID()), type});
                     } else {
-                        to = ControlAddress.create(ctxt.getParentAddress(),
+                        to = ControlAddress.create(ctxt.parent(),
                                 ContainerProtocol.ADD_CHILD);
                         args = CallArguments.create(new Value[]{
-                                    PString.valueOf(ctxt.getComponentID(depth - 1)), type});
+                                    PString.of(ctxt.componentID(depth - 1)), type});
                     }
                     active = Call.createCall(to, env.getAddress(), env.getTime(), args);
                     env.getPacketRouter().route(active);
 
                 } catch (Exception ex) {
                     state = State.Error;
-                    result = CallArguments.create(PReference.wrap(ex));
+                    result = CallArguments.create(PReference.of(ex));
                 }
             }
             if (stage == 2) {
@@ -173,7 +173,7 @@ public class AtCmds implements CommandInstaller {
                     return ScriptCmds.INLINE_EVAL.createStackFrame(child, CallArguments.create(script));
                 } catch (Exception ex) {
                     state = State.Error;
-                    result = CallArguments.create(PReference.wrap(ex));
+                    result = CallArguments.create(PReference.of(ex));
                 }
             }
 
@@ -224,8 +224,8 @@ public class AtCmds implements CommandInstaller {
         @Override
         protected Call createCall(Env env, CallArguments args) throws Exception {
             ComponentAddress comp = ComponentAddress.coerce(args.get(0));
-            if (comp.getDepth() == 1) {
-                return createRootRemovalCall(env, comp.getRootID());
+            if (comp.depth() == 1) {
+                return createRootRemovalCall(env, comp.rootID());
             } else {
                 return createChildRemovalCall(env, comp);
             }
@@ -237,14 +237,14 @@ public class AtCmds implements CommandInstaller {
                             .flatMap(sm -> sm.locate(RootManagerService.class))
                             .orElseThrow(ServiceUnavailableException::new),
                     RootManagerService.REMOVE_ROOT);
-            return Call.create(to, env.getAddress(), env.getTime(), PString.valueOf(id));
+            return Call.create(to, env.getAddress(), env.getTime(), PString.of(id));
         }
 
         private Call createChildRemovalCall(Env env, ComponentAddress comp) throws Exception {
-            ControlAddress to = ControlAddress.create(comp.getParentAddress(),
+            ControlAddress to = ControlAddress.create(comp.parent(),
                     ContainerProtocol.REMOVE_CHILD);
             return Call.create(to, env.getAddress(), env.getTime(),
-                    PString.valueOf(comp.getComponentID(comp.getDepth() - 1)));
+                    PString.of(comp.componentID(comp.depth() - 1)));
         }
     }
 }

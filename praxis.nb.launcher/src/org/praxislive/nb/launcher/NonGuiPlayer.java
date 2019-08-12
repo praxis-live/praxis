@@ -148,7 +148,7 @@ class NonGuiPlayer extends AbstractRoot {
             activeCall = Call.create(evalControl,
                     getAddress(),
                     getExecutionContext().getTime(),
-                    PString.valueOf(script));
+                    PString.of(script));
             getPacketRouter().route(activeCall);
         }
 

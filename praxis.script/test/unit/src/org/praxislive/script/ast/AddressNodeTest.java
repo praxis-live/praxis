@@ -110,7 +110,7 @@ public class AddressNodeTest {
         }
 
         public Value getValue() {
-            return ComponentAddress.create("/test/address");
+            return ComponentAddress.of("/test/address");
         }
 
         public Command getCommand(String id) {

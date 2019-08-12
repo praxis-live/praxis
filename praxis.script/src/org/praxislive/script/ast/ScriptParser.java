@@ -101,7 +101,7 @@ public class ScriptParser {
                 return absoluteAddressOrStringNode(text);
             }
         }
-        return new LiteralNode(PString.valueOf(text));
+        return new LiteralNode(PString.of(text));
     }
 
     private boolean isDigit(char ch) {
@@ -124,9 +124,9 @@ public class ScriptParser {
 
     private Node numberOrStringNode(String text) {
         try {
-            return new LiteralNode(PNumber.valueOf(text));
+            return new LiteralNode(PNumber.parse(text));
         } catch (Exception ex) {
-            return new LiteralNode(PString.valueOf(text));
+            return new LiteralNode(PString.of(text));
         }
     }
 
@@ -145,19 +145,19 @@ public class ScriptParser {
             } else if (text.lastIndexOf('!') > -1) {
                 return new LiteralNode(PortAddress.valueOf(text));
             } else {
-                return new LiteralNode(ComponentAddress.valueOf(text));
+                return new LiteralNode(ComponentAddress.parse(text));
             }
         } catch (ValueFormatException ex) {
-            return new LiteralNode(PString.valueOf(text));
+            return new LiteralNode(PString.of(text));
         }
     }
 
     private Node getQuotedNode(Token tok) {
-        return new LiteralNode(PString.valueOf(tok.getText()));
+        return new LiteralNode(PString.of(tok.getText()));
     }
 
     private Node getBracedNode(Token tok) {
-        return new LiteralNode(PString.valueOf(tok.getText()));
+        return new LiteralNode(PString.of(tok.getText()));
     }
 
     private Node getSubcommandNode(Token tok) throws InvalidSyntaxException {

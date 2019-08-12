@@ -75,12 +75,12 @@ class RangeSlider extends AbstractGuiComponent {
     protected void initControls() {
         super.initControls();
 
-        ArgumentInfo bindingInfo = ArgumentInfo.create(ControlAddress.class, PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true));
+        ArgumentInfo bindingInfo = ArgumentInfo.of(ControlAddress.class, PMap.of(ArgumentInfo.KEY_ALLOW_EMPTY, true));
         registerControl("binding-low", ArgumentProperty.create(bindingInfo, new AddressBinding(false), PString.EMPTY));
         registerControl("binding-high", ArgumentProperty.create(bindingInfo, new AddressBinding(true), PString.EMPTY));
 
-        ArgumentInfo info = ArgumentInfo.create(Value.class,
-                PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true, ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
+        ArgumentInfo info = ArgumentInfo.of(Value.class,
+                PMap.of(ArgumentInfo.KEY_ALLOW_EMPTY, true, ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
         registerControl("minimum", ArgumentProperty.create(info, new MinBinding(), PString.EMPTY));
         registerControl("maximum", ArgumentProperty.create(info, new MaxBinding(), PString.EMPTY));
     }

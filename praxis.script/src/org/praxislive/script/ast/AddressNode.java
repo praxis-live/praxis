@@ -88,7 +88,7 @@ public class AddressNode extends Node {
         } else if (full.lastIndexOf('!') > -1) {
             return PortAddress.valueOf(full);
         } else {
-            return ComponentAddress.valueOf(full);
+            return ComponentAddress.parse(full);
         }
     }
 

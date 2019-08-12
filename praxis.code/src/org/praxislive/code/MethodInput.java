@@ -217,7 +217,7 @@ abstract class MethodInput {
 
         @Override
         void receive(long time, double value) {
-            invoke(time, PNumber.valueOf(value));
+            invoke(time, PNumber.of(value));
         }
 
         @Override

@@ -37,8 +37,8 @@ import org.praxislive.tracker.Patterns;
 class PatternsTypeConverter extends TypeConverter<Patterns> {
 
     private final static ArgumentInfo INFO
-            = ArgumentInfo.create(PString.class,
-                    PMap.create(PString.KEY_MIME_TYPE, PatternSupport.MIME));
+            = ArgumentInfo.of(PString.class,
+                    PMap.of(PString.KEY_MIME_TYPE, PatternSupport.MIME));
 
     @Override
     public Value toArgument(Patterns value) {

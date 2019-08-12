@@ -48,12 +48,12 @@ abstract class ValueBinding extends PropertyControl.Binding {
 
     @Override
     public void set(double value) throws Exception {
-        set(PNumber.valueOf(value));
+        set(PNumber.of(value));
     }
 
     @Override
     public ArgumentInfo getArgumentInfo() {
-        return ArgumentInfo.create(type.asClass());
+        return ArgumentInfo.of(type.asClass());
     }
 
     @Override
@@ -182,9 +182,9 @@ abstract class ValueBinding extends PropertyControl.Binding {
         @Override
         public ArgumentInfo getArgumentInfo() {
             return defaultValue.isEmpty() ?
-                    ArgumentInfo.create(type.asClass(),
-                            PMap.create(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true)) :
-                    ArgumentInfo.create(type.asClass());
+                    ArgumentInfo.of(type.asClass(),
+                            PMap.of(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true)) :
+                    ArgumentInfo.of(type.asClass());
         }
 
     }

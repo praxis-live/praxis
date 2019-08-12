@@ -57,16 +57,16 @@ public class ComponentInfoTest {
         interfaces.add(StartableProtocol.class);
         
         Map<String, ControlInfo> controls = new LinkedHashMap<>();
-        controls.put("p1", ControlInfo.createPropertyInfo(new ArgumentInfo[]{PNumber.info(0, 1)}, new Value[]{PNumber.ONE}, PMap.create(ControlInfo.KEY_TRANSIENT, true)));
-        controls.put("p1", ControlInfo.createPropertyInfo(new ArgumentInfo[]{ArgumentInfo.create(PString.class, PMap.create("template", "public void draw(){"))}, new Value[]{PString.EMPTY}, PMap.EMPTY));
-        controls.put("ro1", ControlInfo.createReadOnlyPropertyInfo(new ArgumentInfo[]{PNumber.info(0, 1)}, PMap.create(ControlInfo.KEY_TRANSIENT, true)));
-        controls.put("t1", ControlInfo.createActionInfo(PMap.create("key", "value")));
+        controls.put("p1", ControlInfo.createPropertyInfo(new ArgumentInfo[]{PNumber.info(0, 1)}, new Value[]{PNumber.ONE}, PMap.of(ControlInfo.KEY_TRANSIENT, true)));
+        controls.put("p1", ControlInfo.createPropertyInfo(new ArgumentInfo[]{ArgumentInfo.of(PString.class, PMap.of("template", "public void draw(){"))}, new Value[]{PString.EMPTY}, PMap.EMPTY));
+        controls.put("ro1", ControlInfo.createReadOnlyPropertyInfo(new ArgumentInfo[]{PNumber.info(0, 1)}, PMap.of(ControlInfo.KEY_TRANSIENT, true)));
+        controls.put("t1", ControlInfo.createActionInfo(PMap.of("key", "value")));
         
         Map<String, PortInfo> ports = new LinkedHashMap<>();
         ports.put("in", PortInfo.create(ControlPort.class, PortInfo.Direction.IN, PMap.EMPTY));
         ports.put("out", PortInfo.create(ControlPort.class, PortInfo.Direction.OUT, PMap.EMPTY));
         
-        PMap properties = PMap.create(ComponentInfo.KEY_DYNAMIC, true);
+        PMap properties = PMap.of(ComponentInfo.KEY_DYNAMIC, true);
         
         info = ComponentInfo.create(controls, ports, interfaces, properties);
     }
@@ -84,19 +84,19 @@ public class ComponentInfoTest {
         System.out.println("coerce");
         String ci = info.toString();
         System.out.println(ci);
-        ComponentInfo info2 = ComponentInfo.coerce(PString.valueOf(ci));
+        ComponentInfo info2 = ComponentInfo.coerce(PString.of(ci));
         System.out.println(info2);
-        System.out.println(info.getControlInfo("p1"));
-        System.out.println(info2.getControlInfo("p1"));
-        System.out.println(info.getControlInfo("ro1"));
-        System.out.println(info2.getControlInfo("ro1"));
+        System.out.println(info.controlInfo("p1"));
+        System.out.println(info2.controlInfo("p1"));
+        System.out.println(info.controlInfo("ro1"));
+        System.out.println(info2.controlInfo("ro1"));
 //        assertTrue(Value.equivalent(Value.class, info.getControlInfo("p1").getOutputsInfo()[0], info2.getControlInfo("p1").getOutputsInfo()[0]));
 //        assertTrue(Value.equivalent(Value.class, info.getControlInfo("ro1").getOutputsInfo()[0], info2.getControlInfo("ro1").getOutputsInfo()[0]));
 //        assertTrue(Value.equivalent(Value.class, info, info2));
         assertTrue(info.equivalent(info2));
-        assertTrue(info.getControlInfo("p1").equivalent(info2.getControlInfo("p1")));
-        assertTrue(info.getControlInfo("ro1").getOutputsInfo()[0].equivalent(info2.getControlInfo("ro1").getOutputsInfo()[0]));
-        assertTrue(info.getPortInfo("in").equivalent(info2.getPortInfo("in")));
+        assertTrue(info.controlInfo("p1").equivalent(info2.controlInfo("p1")));
+        assertTrue(info.controlInfo("ro1").getOutputsInfo()[0].equivalent(info2.controlInfo("ro1").getOutputsInfo()[0]));
+        assertTrue(info.portInfo("in").equivalent(info2.portInfo("in")));
     }
 
     

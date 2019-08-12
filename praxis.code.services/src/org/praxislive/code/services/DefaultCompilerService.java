@@ -97,7 +97,7 @@ public class DefaultCompilerService extends AbstractRoot {
                             .extendClasspath(libJARs)
                             .compile(code);
             PMap classes = convertClasses(classFiles);
-            PMap response = PMap.create(CodeCompilerService.KEY_CLASSES, classes,
+            PMap response = PMap.of(CodeCompilerService.KEY_CLASSES, classes,
                     CodeCompilerService.KEY_LOG, log.toCallArguments().stream().collect(PArray.collector()),
                     EXT_CLASSPATH, convertClasspath());
             return CallArguments.create(response);
@@ -129,7 +129,7 @@ public class DefaultCompilerService extends AbstractRoot {
         
         private PArray convertClasspath() {
             return libJARs.stream()
-                    .map(f -> PResource.valueOf(f.toURI()))
+                    .map(f -> PResource.of(f.toURI()))
                     .collect(PArray.collector());
         }
         
@@ -151,7 +151,7 @@ public class DefaultCompilerService extends AbstractRoot {
             libJARs.addAll(jars);
             return CallArguments.create(
                     libJARs.stream()
-                            .map(f -> PResource.valueOf(f.toURI()))
+                            .map(f -> PResource.of(f.toURI()))
                             .collect(PArray.collector())
             );
         }

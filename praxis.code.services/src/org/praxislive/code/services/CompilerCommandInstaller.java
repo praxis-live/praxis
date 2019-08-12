@@ -83,7 +83,7 @@ public class CompilerCommandInstaller implements CommandInstaller {
 
         @Override
         protected Call createCall(Env env, CallArguments args) throws Exception {
-            PArray libs = array ? PArray.coerce(args.get(0)) : PArray.valueOf((Value)args.get(0));
+            PArray libs = array ? PArray.coerce(args.get(0)) : PArray.of((Value)args.get(0));
             ComponentAddress service = env.getLookup().find(Services.class)
                     .flatMap(sm -> sm.locate(CodeCompilerService.class))
                     .orElseThrow(ServiceUnavailableException::new);

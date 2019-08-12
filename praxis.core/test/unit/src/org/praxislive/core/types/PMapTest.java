@@ -47,10 +47,10 @@ public class PMapTest {
      */
     @Test
     public void testCoerce() throws Exception {
-        PMap m = PMap.create("template", "public void draw(){");
+        PMap m = PMap.of("template", "public void draw(){");
         String mStr = m.toString();
         System.out.println(mStr);
-        PMap m2 = PMap.valueOf(mStr);
+        PMap m2 = PMap.parse(mStr);
         assertTrue(Utils.equivalent(m, m2));
     }
 

@@ -77,20 +77,20 @@ public class VideoOutput extends AbstractComponent {
         device = ArgumentProperty.builder()
                 .emptyIsDefault()
                 .suggestedValues(
-                        PNumber.valueOf(1),
-                        PNumber.valueOf(2),
-                        PNumber.valueOf(3),
-                        PNumber.valueOf(4))
+                        PNumber.of(1),
+                        PNumber.of(2),
+                        PNumber.of(3),
+                        PNumber.of(4))
                 .build();
         width = ArgumentProperty.builder().emptyIsDefault().build();
         height = ArgumentProperty.builder().emptyIsDefault().build();
         rotation = ArgumentProperty.builder()
                 .emptyIsDefault()
                 .suggestedValues(
-                        PNumber.valueOf(0),
-                        PNumber.valueOf(90),
-                        PNumber.valueOf(180),
-                        PNumber.valueOf(270))
+                        PNumber.of(0),
+                        PNumber.of(90),
+                        PNumber.of(180),
+                        PNumber.of(270))
                 .build();
         
         registerControl("device", device);
@@ -130,7 +130,7 @@ public class VideoOutput extends AbstractComponent {
         }
         ComponentAddress ad = getAddress();
         if (ad != null) {
-            defaultTitle = DEF_TITLE_PREFIX + "/" + ad.getRootID();
+            defaultTitle = DEF_TITLE_PREFIX + "/" + ad.rootID();
         } else {
             defaultTitle = DEF_TITLE_PREFIX;
         }

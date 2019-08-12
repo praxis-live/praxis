@@ -52,7 +52,7 @@ public class PArrayTest {
      */
     @Test
     public void testGet() throws Exception {
-        PArray arr1 = PArray.valueOf("1 2 3 4");
+        PArray arr1 = PArray.parse("1 2 3 4");
         assertEquals(arr1.get(3), arr1.get(-1));
         PArray arr2 = IntStream.range(-10, 10)
                 .mapToObj(arr1::get)
@@ -60,7 +60,7 @@ public class PArrayTest {
         System.out.println(arr2);
         assertEquals(arr1.get(0).toString(), arr2.get(2).toString());
         
-        PArray arr3 = PArray.valueOf("");
+        PArray arr3 = PArray.parse("");
         assertEquals(arr3.get(0).toString(), "");
         
         
@@ -72,12 +72,12 @@ public class PArrayTest {
     @Test
     public void testCoerce() throws Exception {
         System.out.println("coerce");
-        PArray startArr = PArray.valueOf(PString.valueOf("this has spaces"), PString.valueOf("is"),
-                PString.valueOf("an"),
-                PArray.valueOf(PString.valueOf("embedded"), PString.valueOf("\\\\array")));
+        PArray startArr = PArray.of(PString.of("this has spaces"), PString.of("is"),
+                PString.of("an"),
+                PArray.of(PString.of("embedded"), PString.of("\\\\array")));
         String arrStr = startArr.toString();
         System.out.println(arrStr);
-        PArray a1 = PArray.valueOf(arrStr);
+        PArray a1 = PArray.parse(arrStr);
         System.out.println("Array 1");
 //        for (Value a : a1) {
 //            System.out.println(a);
@@ -89,27 +89,27 @@ public class PArrayTest {
 //            System.out.println(a);
 //        }
         System.out.println(a2.stream().map(Value::toString).collect(Collectors.joining(" | ")));
-        assertEquals(2, a2.getSize());
+        assertEquals(2, a2.size());
     }
     
     @Test
     public void testCollector() throws Exception {
-        PArray arr1 = PArray.valueOf("a3 104 {some string} c#5");
+        PArray arr1 = PArray.parse("a3 104 {some string} c#5");
         PArray arr2 = arr1.stream().collect(PArray.collector());
         
         System.out.println(arr1);
         System.out.println(arr2);
         
-        assertEquals(arr1.getSize(), arr2.getSize());
+        assertEquals(arr1.size(), arr2.size());
         
         assertTrue(arr1.equivalent(arr2));
         
-        PArray arr4 = PArray.valueOf("A3 104 C#5");
+        PArray arr4 = PArray.parse("A3 104 C#5");
         PArray arr3 = arr1.stream()
                 .map(Object::toString)
                 .filter(s -> !s.contains(" "))
                 .map(String::toUpperCase)
-                .map(PString::valueOf)
+                .map(PString::of)
                 .collect(PArray.collector());
         
         System.out.println(arr3);

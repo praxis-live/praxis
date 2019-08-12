@@ -78,7 +78,7 @@ public class Tabs extends AbstractGuiContainer {
         val = cmp.getClientProperty(Keys.Address);
         if (val instanceof ComponentAddress) {
             ComponentAddress ad = (ComponentAddress) val;
-            setTabName(cmp, ad.getID());
+            setTabName(cmp, ad.componentID());
             return;
         }
         // no address???

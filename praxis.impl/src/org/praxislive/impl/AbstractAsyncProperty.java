@@ -256,7 +256,7 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
             router = getLookup().find(PacketRouter.class)
                     .orElseThrow(() -> new IllegalStateException("No packet router"));
         }
-        taskCall = Call.create(to, getAddress(), time, PReference.wrap(task));
+        taskCall = Call.create(to, getAddress(), time, PReference.of(task));
         router.route(taskCall);
     }
 
@@ -277,7 +277,7 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
 
         @Override
         public void receive(long time, double value) {
-            receive(time, PNumber.valueOf(value));
+            receive(time, PNumber.of(value));
         }
 
         @Override

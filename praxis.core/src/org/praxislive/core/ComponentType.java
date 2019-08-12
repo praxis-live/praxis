@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -35,7 +35,7 @@ public class ComponentType extends Value {
             "([\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*)";
     private final static Pattern TYPE_PATTERN = Pattern.compile(TYPE_REGEX);
 
-    private String typeString;
+    private final String typeString;
 
     private ComponentType(String str) {
         this.typeString = str;
@@ -60,18 +60,31 @@ public class ComponentType extends Value {
         }
     }
     
-    public static ComponentType create(String str) {
+    public static ComponentType of(String str) {
         try {
-            return valueOf(str);
+            return parse(str);
         } catch (ValueFormatException ex) {
             throw new IllegalArgumentException(ex);
         }
+    }
+    
+    @Deprecated
+    public static ComponentType create(String str) {
+        return of(str);
     }
     
     private static boolean isValidTypeString(String str) {
         return TYPE_PATTERN.matcher(str).matches();
     }
 
+    public static ComponentType parse(String str) throws ValueFormatException {
+        if (isValidTypeString(str)) {
+            return new ComponentType(str);
+        }
+        throw new ValueFormatException("Invalid String representation of Type");
+    }
+
+    @Deprecated
     public static ComponentType valueOf(String str) throws ValueFormatException {
         if (isValidTypeString(str)) {
             return new ComponentType(str);
@@ -80,15 +93,15 @@ public class ComponentType extends Value {
     }
 
     public static ArgumentInfo info() {
-        return ArgumentInfo.create(ComponentType.class, null);
+        return ArgumentInfo.of(ComponentType.class, null);
     }
 
-
+    @Deprecated
     public static ComponentType coerce(Value arg) throws ValueFormatException {
         if (arg instanceof ComponentType) {
             return (ComponentType) arg;
         } else {
-            return valueOf(arg.toString());
+            return parse(arg.toString());
         }
     }
     

@@ -39,11 +39,11 @@ class PraxisPacketCodec extends OSCPacketCodec {
     
     Value toArgument(Object o) {
         if (o instanceof Double) {
-            return PNumber.valueOf((Double) o);
+            return PNumber.of((Double) o);
         } else if (o instanceof Integer) {
-            return PNumber.valueOf((Integer) o);
+            return PNumber.of((Integer) o);
         } else {
-            return PString.valueOf(o);
+            return PString.of(o);
         }
     }
 

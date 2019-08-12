@@ -59,7 +59,7 @@ public abstract class CodeFactory<D extends CodeDelegate> {
             ClassBodyContext<D> cbc,
             String type,
             String template) {
-        this(cbc, ComponentType.create(type), template);
+        this(cbc, ComponentType.of(type), template);
     }
     
     public final ComponentType getComponentType() {

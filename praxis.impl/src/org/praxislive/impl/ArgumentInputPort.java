@@ -44,7 +44,7 @@ public class ArgumentInputPort extends AbstractControlInputPort {
 
     @Override
     public void receive(long time, double value) {
-        binding.receive(time, PNumber.valueOf(value));
+        binding.receive(time, PNumber.of(value));
     }
 
     @Override

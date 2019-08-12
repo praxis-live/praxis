@@ -96,7 +96,7 @@ public class CoreRoutingGate extends CoreCodeDelegate {
     void updatePattern() {
         try {
             PArray arr = PArray.coerce(pattern.get());
-            pt = new double[arr.getSize()];
+            pt = new double[arr.size()];
             for (int i = 0; i < pt.length; i++) {
                 double d = PNumber.coerce(arr.get(i)).value();
                 pt[i] = d;

@@ -143,8 +143,8 @@ abstract class OSCDispatcher {
             fromString = getRemoteSysPrefix() + fromString;
         }
         ControlAddress from = ControlAddress.valueOf(fromString);
-        PString rootID = PString.valueOf(msg.getArg(2));
-        ComponentType rootType = ComponentType.valueOf(msg.getArg(3).toString());
+        PString rootID = PString.of(msg.getArg(2));
+        ComponentType rootType = ComponentType.parse(msg.getArg(3).toString());
         Call call = Call.create(to, from, time, Arrays.asList(rootID, rootType));
         send(call);
         localToRemoteID.put(call.matchID(), id);
@@ -158,7 +158,7 @@ abstract class OSCDispatcher {
             fromString = getRemoteSysPrefix() + fromString;
         }
         ControlAddress from = ControlAddress.valueOf(fromString);
-        PString rootID = PString.valueOf(msg.getArg(2));
+        PString rootID = PString.of(msg.getArg(2));
         Call call = Call.create(to, from, time, rootID);
         send(call);
         localToRemoteID.put(call.matchID(), id);
@@ -247,7 +247,7 @@ abstract class OSCDispatcher {
             }
             itr.remove();
             LOG.log(Level.FINE, "Purging call\n{0}", info.localCall);
-            Call err = info.localCall.error(PError.create("Timeout"));
+            Call err = info.localCall.error(PError.of("Timeout"));
             send(err);
         }
     }

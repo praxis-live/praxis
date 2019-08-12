@@ -49,7 +49,7 @@ public class PatternParserTest {
         assertEquals(result.getPatternCount(), 2);
         
         Pattern p = result.getPattern(0);
-        assertEquals(p.getValueAt(0, 0), PNumber.valueOf(1));
+        assertEquals(p.getValueAt(0, 0), PNumber.of(1));
         assertEquals(p.getValueAt(1, 2), null);
         assertEquals(p.getValueAt(2, 1).toString(), "2");
         

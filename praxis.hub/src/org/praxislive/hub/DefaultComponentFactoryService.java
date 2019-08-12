@@ -72,7 +72,7 @@ class DefaultComponentFactoryService extends AbstractRoot
                 try {
                     newInstance.call(call, router);
                 } catch (Exception ex) {
-                    router.route(call.error(PError.create(ex)));
+                    router.route(call.error(PError.of(ex)));
                 }
             }
             break;
@@ -80,13 +80,13 @@ class DefaultComponentFactoryService extends AbstractRoot
                 try {
                     newRoot.call(call, router);
                 } catch (Exception ex) {
-                    router.route(call.error(PError.create(ex)));
+                    router.route(call.error(PError.of(ex)));
                 }
             }
             break;
             default:
                 if (call.isRequest()) {
-                    router.route(call.error(PError.create("Unknown control ID")));
+                    router.route(call.error(PError.of("Unknown control ID")));
                 }
 
         }
@@ -111,7 +111,7 @@ class DefaultComponentFactoryService extends AbstractRoot
                         call.args());
             } else {
                 Component component = factory.createComponent(type);
-                return call.reply(PReference.wrap(component));
+                return call.reply(PReference.of(component));
             }
         }
 
@@ -129,7 +129,7 @@ class DefaultComponentFactoryService extends AbstractRoot
             ComponentType type = ComponentType.coerce(call.getArgs().get(0));
             ComponentFactory factory = registry.getRootComponentFactory(type);
             Root root = factory.createRootComponent(type);
-            return call.reply(PReference.wrap(root));
+            return call.reply(PReference.of(root));
         }
 
         @Override

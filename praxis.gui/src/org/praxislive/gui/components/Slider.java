@@ -72,11 +72,11 @@ class Slider extends SingleBindingGuiComponent {
     @Override
     protected void initControls() {
         super.initControls();
-        ArgumentInfo info = ArgumentInfo.create(Value.class,
-                PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true, ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
+        ArgumentInfo info = ArgumentInfo.of(Value.class,
+                PMap.of(ArgumentInfo.KEY_ALLOW_EMPTY, true, ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
         registerControl("minimum", ArgumentProperty.create(info, new MinBinding(), PString.EMPTY));
         registerControl("maximum", ArgumentProperty.create(info, new MaxBinding(), PString.EMPTY));
-        info = ArgumentInfo.create(PString.class, PMap.create(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
+        info = ArgumentInfo.of(PString.class, PMap.of(ArgumentInfo.KEY_EMPTY_IS_DEFAULT, true));
         registerControl("scale", ArgumentProperty.create(info, new ScaleBinding(), PString.EMPTY));
     }
 
@@ -231,7 +231,7 @@ class Slider extends SingleBindingGuiComponent {
             } else if (value instanceof PString) {
                 prefScale = (PString) value;
             } else {
-                prefScale = PString.valueOf(value);
+                prefScale = PString.of(value);
             }
             if (adaptor != null) {
                 adaptor.setPreferredScale(prefScale);

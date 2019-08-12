@@ -155,7 +155,7 @@ public class FileField extends SingleBindingGuiComponent {
             System.out.println("File Dialog returned " + ret);
             if (ret == JFileChooser.APPROVE_OPTION) {
                 URI u = chooser.getSelectedFile().toURI();
-                uri = PResource.valueOf(u);
+                uri = PResource.of(u);
                 adaptor.send(uri);
                 updateField();
 

@@ -67,8 +67,8 @@ public class FloatRangeProperty extends AbstractProperty {
     private Value[] holder = new Value[2];
     @Override
     protected CallArguments getArguments() {
-        holder[0] = PNumber.valueOf(binding.getBoundLowValue());
-        holder[1] = PNumber.valueOf(binding.getBoundHighValue());
+        holder[0] = PNumber.of(binding.getBoundLowValue());
+        holder[1] = PNumber.of(binding.getBoundHighValue());
         return CallArguments.create(holder);
     }
 
@@ -88,7 +88,7 @@ public class FloatRangeProperty extends AbstractProperty {
         }
         ArgumentInfo inf = PNumber.info(min, max);
         ArgumentInfo[] arguments = new ArgumentInfo[]{inf, inf};
-        Value[] defaults = new Value[]{PNumber.valueOf(low), PNumber.valueOf(high)};
+        Value[] defaults = new Value[]{PNumber.of(low), PNumber.of(high)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new FloatRangeProperty(binding, min, max, info);
     }

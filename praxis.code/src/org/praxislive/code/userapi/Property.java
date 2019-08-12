@@ -432,7 +432,7 @@ public abstract class Property {
 
         @Override
         public void update(double value) {
-            update(PNumber.valueOf(value));
+            update(PNumber.of(value));
         }
 
         @Override

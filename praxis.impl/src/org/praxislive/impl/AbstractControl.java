@@ -115,7 +115,7 @@ public abstract class AbstractControl implements AbstractComponent.ControlEx {
             if (controlProps == null) {
                 controlProps = PMap.builder();
             }
-            controlProps.put(PString.valueOf(key), value);
+            controlProps.put(PString.of(key), value);
             return (B) this;
         }
         

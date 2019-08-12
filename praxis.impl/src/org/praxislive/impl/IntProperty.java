@@ -85,7 +85,7 @@ public class IntProperty extends AbstractSingleArgProperty {
                 return lastValue;
             }
         }
-        lastValue = PNumber.valueOf(val);
+        lastValue = PNumber.of(val);
         return lastValue;
     }
     
@@ -168,19 +168,19 @@ public class IntProperty extends AbstractSingleArgProperty {
         }
         
         public Builder minimum(int min) {
-            putArgumentProperty(PNumber.KEY_MINIMUM, PNumber.valueOf(min));
+            putArgumentProperty(PNumber.KEY_MINIMUM, PNumber.of(min));
             minimum = min;
             return this;
         }
         
         public Builder maximum(int max) {
-            putArgumentProperty(PNumber.KEY_MAXIMUM, PNumber.valueOf(max));
+            putArgumentProperty(PNumber.KEY_MAXIMUM, PNumber.of(max));
             maximum = max;
             return this;
         }
         
         public Builder defaultValue(int value) {
-            defaults(PNumber.valueOf(value));
+            defaults(PNumber.of(value));
             def = value;
             return this;
         }
@@ -188,9 +188,9 @@ public class IntProperty extends AbstractSingleArgProperty {
         public Builder suggestedValues(int ... values) {
             PNumber[] arr = new PNumber[values.length];
             for (int i=0; i < arr.length; i++) {
-                arr[i] = PNumber.valueOf(values[i]);
+                arr[i] = PNumber.of(values[i]);
             }
-            putArgumentProperty(ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.valueOf(arr));
+            putArgumentProperty(ArgumentInfo.KEY_SUGGESTED_VALUES, PArray.of(arr));
             return this;
         }
         
@@ -221,7 +221,7 @@ public class IntProperty extends AbstractSingleArgProperty {
                 read = write; 
             }
             ControlInfo info = buildInfo();
-            if (info.getType() == ControlInfo.Type.ReadOnlyProperty) {
+            if (info.controlType() == ControlInfo.Type.ReadOnlyProperty) {
                 write = null;
             }
             return new IntProperty(read, write, minimum, maximum, info);

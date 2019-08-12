@@ -137,7 +137,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
         if (containerAddress == null || childID == null) {
             return null;
         } else {
-            return ComponentAddress.create(containerAddress, childID);
+            return ComponentAddress.of(containerAddress, childID);
         }
     }
 
@@ -234,9 +234,9 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             }
             List<PString> children = new ArrayList<PString>(childMap.size());
             for (String child : childMap.keySet()) {
-                children.add(PString.valueOf(child));
+                children.add(PString.of(child));
             }
-            return CallArguments.create(PArray.valueOf(children));
+            return CallArguments.create(PArray.of(children));
         }
     }
 
@@ -266,7 +266,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
                 Component c2 = getChild(c2id.toString());
                 final Port p2 = c2.getPort(p2id.toString());
 
-                final PArray connection = PArray.valueOf(c1id, p1id, c2id, p2id);
+                final PArray connection = PArray.of(c1id, p1id, c2id, p2id);
 
                 if (connect) {
                     p1.connect(p2);
@@ -320,7 +320,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
 
         @Override
         protected CallArguments process(long time, CallArguments args, boolean quiet) throws Exception {
-            return CallArguments.create(PArray.valueOf(connections));
+            return CallArguments.create(PArray.of(connections));
         }
     }
 }

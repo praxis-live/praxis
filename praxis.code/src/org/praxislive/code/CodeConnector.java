@@ -194,7 +194,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         return ComponentInfo.create(controlInfo,
                 portInfo,
                 Collections.singleton(ComponentProtocol.class),
-                PMap.create(
+                PMap.of(
                         ComponentInfo.KEY_DYNAMIC, true,
                         ComponentInfo.KEY_COMPONENT_TYPE, factory.getComponentType()
                 ));
@@ -574,7 +574,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
         Class<? extends Value> valueCls = typeAnnotation.value() == Value.class
                 ? typeAnnotation.cls() : typeAnnotation.value();
         PMap properties = createPropertyMap(typeAnnotation.properties());
-        return ArgumentInfo.create(valueCls, properties);
+        return ArgumentInfo.of(valueCls, properties);
     }
 
     private PMap createPropertyMap(String... properties) {
@@ -598,7 +598,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
                 : (Class<Value>) typeAnnotation.value();
         Value.Type<Value> valueType = Value.Type.of(valueCls);
         String defaultString = typeAnnotation.def();
-        return valueType.converter().apply(PString.valueOf(defaultString)).orElse(PString.EMPTY);
+        return valueType.converter().apply(PString.of(defaultString)).orElse(PString.EMPTY);
     }
 
     public static interface Plugin {

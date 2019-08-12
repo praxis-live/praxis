@@ -39,8 +39,8 @@ import org.praxislive.core.types.PString;
 class DeviceProperty extends AbstractBasicProperty {
 
     private final static ControlInfo INFO = ControlInfo.createPropertyInfo(
-            new ArgumentInfo[]{ArgumentInfo.create(PString.class,
-                        PMap.create(ArgumentInfo.KEY_SUGGESTED_VALUES,
+            new ArgumentInfo[]{ArgumentInfo.of(PString.class,
+                        PMap.of(ArgumentInfo.KEY_SUGGESTED_VALUES,
                                 TFCodeContext.AUTO))},
             new Value[]{PString.EMPTY},
             PMap.EMPTY
@@ -55,7 +55,7 @@ class DeviceProperty extends AbstractBasicProperty {
 
     @Override
     protected Value get() {
-        return PString.valueOf(context.getUID());
+        return PString.of(context.getUID());
     }
 
 //    @Override

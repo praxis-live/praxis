@@ -102,7 +102,7 @@ public abstract class AbstractAsyncControl implements Control {
         } catch (Exception ex) {
             Call active = callQueue.poll();
             if (active != null) {
-                router.route(active.error(PError.create(ex)));
+                router.route(active.error(PError.of(ex)));
             }
         }
         doInvokeLoop(router);
@@ -131,7 +131,7 @@ public abstract class AbstractAsyncControl implements Control {
             } catch (Exception ex) {
                 LOG.log(Level.FINE, "Exception thrown processing call", ex);
                 callQueue.poll();
-                router.route(call.error(PError.create(ex)));
+                router.route(call.error(PError.of(ex)));
             }
         }
 

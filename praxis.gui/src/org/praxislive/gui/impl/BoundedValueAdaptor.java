@@ -114,8 +114,8 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
         if (info != null) {
             ArgumentInfo[] aIn = info.getInputsInfo();
             if (aIn.length > 0) {
-                infMin = coerce(aIn[0].getProperties().get("minimum"));
-                infMax = coerce(aIn[0].getProperties().get("maximum"));
+                infMin = coerce(aIn[0].properties().get("minimum"));
+                infMax = coerce(aIn[0].properties().get("maximum"));
             }
         }
         PNumber calcMin = PMath.getMaximum(infMin, prefMin);
@@ -137,7 +137,7 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
         } else if (info != null) {
             ArgumentInfo[] args = info.getOutputsInfo();
             if (args.length > 0) {
-                skew = args[0].getProperties().getDouble(PNumber.KEY_SKEW, skew);
+                skew = args[0].properties().getDouble(PNumber.KEY_SKEW, skew);
             }
         }
         
@@ -204,7 +204,7 @@ public class BoundedValueAdaptor extends ControlBinding.Adaptor {
         public void stateChanged(ChangeEvent e) {
             if (!isUpdating) {
                 value = convertToDouble(model.getValue());
-                send(CallArguments.create(PNumber.valueOf(value)));
+                send(CallArguments.create(PNumber.of(value)));
             }
         }
     }

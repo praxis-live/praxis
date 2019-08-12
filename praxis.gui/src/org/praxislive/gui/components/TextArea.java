@@ -116,7 +116,7 @@ public class TextArea extends SingleBindingGuiComponent {
         }
 
         private void send(String text) {
-            PString val = PString.valueOf(text);
+            PString val = PString.of(text);
             send(CallArguments.create(val));
         }
 

@@ -95,7 +95,7 @@ public class AbstractRootIT {
         }
 
         public void processCall(Call call, PacketRouter router) {
-            router.route(Call.createReturnCall(call, PString.valueOf("OK")));
+            router.route(Call.createReturnCall(call, PString.of("OK")));
         }
     }
     
@@ -123,7 +123,7 @@ public class AbstractRootIT {
 
         public void processCall(Call call, PacketRouter router) {
             assertEquals(del.active, Thread.currentThread());
-            router.route(Call.createReturnCall(call, PString.valueOf("OK")));
+            router.route(Call.createReturnCall(call, PString.of("OK")));
         }
         
         class Delegate extends AbstractRoot.Delegate {

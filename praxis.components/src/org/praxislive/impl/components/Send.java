@@ -57,8 +57,8 @@ public class Send extends AbstractComponent {
 
     public Send() {
         registerControl("address", ArgumentProperty.create(
-                ArgumentInfo.create(ControlAddress.class,
-                        PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true)),
+                ArgumentInfo.of(ControlAddress.class,
+                        PMap.of(ArgumentInfo.KEY_ALLOW_EMPTY, true)),
                 new AddressBinding(),
                 PString.EMPTY));
         registerPort(PortEx.IN, ArgumentInputPort.create(new InputBinding()));

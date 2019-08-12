@@ -272,7 +272,7 @@ public class DefaultAudioRoot extends AbstractRoot {
             }
         }
 
-        ClientID clientID = new ClientID("PraxisLIVE-" + getAddress().getRootID());
+        ClientID clientID = new ClientID("PraxisLIVE-" + getAddress().rootID());
 
         AudioConfiguration ctxt = new AudioConfiguration(srate,
                 bus.getSourceCount(),

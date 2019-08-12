@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -45,7 +45,7 @@ public class PReference extends Value {
         refClass = ref.getClass();
     }
     
-    //@Deprecated
+    @Deprecated
     public Object getReference() {
         return ref;
     }
@@ -86,15 +86,19 @@ public class PReference extends Value {
         return false; // can PReference ever be empty???
     }
 
-
-    
-    public static PReference wrap(Object obj) {
+    public static PReference of(Object obj) {
         if (obj == null) {
             throw new NullPointerException();
         }
         return new PReference(obj);
     }
+    
+    @Deprecated
+    public static PReference wrap(Object obj) {
+        return of(obj);
+    }
 
+    @Deprecated
     public static PReference coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PReference) {
             return (PReference) arg;
@@ -111,13 +115,13 @@ public class PReference extends Value {
     }
     
     public static ArgumentInfo info() {
-        return ArgumentInfo.create(PReference.class, null);
+        return ArgumentInfo.of(PReference.class, null);
     }
 
     public static ArgumentInfo info(Class<?> clas) {
 //        PMap properties = PMap.valueOf(REFERENCE_TYPE, PString.valueOf(clas.getName()));
-        PMap properties = PMap.create(REFERENCE_TYPE, clas.getName());
-        return ArgumentInfo.create(PReference.class, properties);
+        PMap properties = PMap.of(REFERENCE_TYPE, clas.getName());
+        return ArgumentInfo.of(PReference.class, properties);
     }
     
     

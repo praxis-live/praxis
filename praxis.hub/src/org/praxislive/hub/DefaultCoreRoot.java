@@ -130,7 +130,7 @@ public class DefaultCoreRoot extends AbstractRoot {
                         new Object[]{ext.getClass(), extID, ex});
                 continue;
             }
-            ComponentAddress ad = ComponentAddress.create("/" + extID);
+            ComponentAddress ad = ComponentAddress.of("/" + extID);
             for (Class<? extends Service> service : services) {
                 LOG.log(Level.CONFIG, "Registering service {0}", service);
                 hubAccess.registerService(service, ad);
@@ -257,9 +257,9 @@ public class DefaultCoreRoot extends AbstractRoot {
                 knownIDs = ids;
                 List<PString> list = new ArrayList<>(ids.length);
                 for (String id : ids) {
-                    list.add(PString.valueOf(id));
+                    list.add(PString.of(id));
                 }
-                ret = PArray.valueOf(list);
+                ret = PArray.of(list);
             }
             return CallArguments.create(ret);
         }

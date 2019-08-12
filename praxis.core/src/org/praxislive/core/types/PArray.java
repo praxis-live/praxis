@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -61,10 +61,16 @@ public final class PArray extends Value implements Iterable<Value> {
         }
     }
 
+    @Deprecated
     public Value[] getAll() {
         return data.clone();
     }
 
+    public int size() {
+        return data.length;
+    }
+    
+    @Deprecated
     public int getSize() {
         return data.length;
     }
@@ -164,10 +170,20 @@ public final class PArray extends Value implements Iterable<Value> {
         }
     }
 
+    public static PArray of(Collection<? extends Value> collection) {
+        return valueOf(collection.toArray(new Value[collection.size()]), false);
+    }
+
+    @Deprecated
     public static PArray valueOf(Collection<? extends Value> collection) {
         return valueOf(collection.toArray(new Value[collection.size()]), false);
     }
 
+    public static PArray of(Value... args) {
+        return valueOf(args, true);
+    }
+    
+    @Deprecated
     public static PArray valueOf(Value... args) {
         return valueOf(args, true);
     }
@@ -187,10 +203,10 @@ public final class PArray extends Value implements Iterable<Value> {
 
     @Deprecated
     public static PArray valueOf(CallArguments args) {
-        return valueOf(args.getAll());
+        return of(args.getAll());
     }
 
-    public static PArray valueOf(String str) throws ValueFormatException {
+    public static PArray parse(String str) throws ValueFormatException {
         if (str.length() == 0) {
             return PArray.EMPTY;
         }
@@ -203,11 +219,11 @@ public final class PArray extends Value implements Iterable<Value> {
                 switch (type) {
                     case PLAIN:
                     case QUOTED:
-                        list.add(PString.valueOf(t.getText()));
+                        list.add(PString.of(t.getText()));
                         break;
                     case BRACED:
                         String s = t.getText();
-                        list.add(PString.valueOf(s));
+                        list.add(PString.of(s));
                         break;
                     case EOL:
                         break tokenize;
@@ -227,11 +243,17 @@ public final class PArray extends Value implements Iterable<Value> {
 
     }
 
+    @Deprecated
+    public static PArray valueOf(String str) throws ValueFormatException {
+        return parse(str);
+    }
+
+    @Deprecated
     public static PArray coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PArray) {
             return (PArray) arg;
         } else {
-            return valueOf(arg.toString());
+            return parse(arg.toString());
         }
     }
 
@@ -244,22 +266,22 @@ public final class PArray extends Value implements Iterable<Value> {
     }
 
     public static ArgumentInfo info() {
-        return ArgumentInfo.create(PArray.class, null);
+        return ArgumentInfo.of(PArray.class, null);
     }
 
     public static <T extends Value> Collector<T, ?, PArray> collector() {
 
-        return Collector.<T, List<T>, PArray>of(
-                ArrayList::new,
+        return Collector.<T, List<T>, PArray>of(ArrayList::new,
                 List::add,
                 (list1, list2) -> {
                     list1.addAll(list2);
                     return list1;
                 },
-                PArray::valueOf
+                PArray::of
         );
     }
 
+    @Deprecated
     public static PArray concat(PArray a, PArray b) {
         Value[] values = new Value[a.data.length + b.data.length];
         System.arraycopy(a.data, 0, values, 0, a.data.length);
@@ -267,12 +289,14 @@ public final class PArray extends Value implements Iterable<Value> {
         return new PArray(values, null);
     }
 
+    @Deprecated
     public static PArray subset(PArray array, int start, int count) {
         Value[] values = new Value[count];
         System.arraycopy(array.data, start, values, 0, count);
         return new PArray(values, null);
     }
 
+    @Deprecated
     public static PArray insert(PArray array, int index, Value value) {
         Value[] values = new Value[array.data.length + 1];
         System.arraycopy(array.data, 0, values, 0, index);
@@ -282,6 +306,7 @@ public final class PArray extends Value implements Iterable<Value> {
         return new PArray(values, null);
     }
     
+    @Deprecated
     public static PArray append(PArray array, Value value) {
         Value[] values = new Value[array.data.length + 1];
         System.arraycopy(array.data, 0, values, 0, array.data.length);

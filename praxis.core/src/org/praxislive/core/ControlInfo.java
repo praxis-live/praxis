@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -22,6 +22,7 @@
 package org.praxislive.core;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import org.praxislive.core.types.PArray;
 import org.praxislive.core.types.PMap;
@@ -84,22 +85,20 @@ public class ControlInfo extends Value {
         
         switch (type) {
             case Action:
-                return PArray.valueOf(
-                        PString.valueOf(type),
+                return PArray.of(
+                        PString.of(type),
                         properties)
                         .toString();
             case Function:
-                return PArray.valueOf(
-                        PString.valueOf(type),
-                        PArray.valueOf(inputs),
-                        PArray.valueOf(outputs),
+                return PArray.of(PString.of(type),
+                        PArray.of(inputs),
+                        PArray.of(outputs),
                         properties)
                         .toString();
             default:
-                return PArray.valueOf(
-                        PString.valueOf(type),
-                        PArray.valueOf(outputs),
-                        PArray.valueOf(defaults),
+                return PArray.of(PString.of(type),
+                        PArray.of(outputs),
+                        PArray.of(defaults),
                         properties)
                         .toString();
                 
@@ -144,22 +143,47 @@ public class ControlInfo extends Value {
         return type == Type.ReadOnlyProperty || type == Type.Property;
     }
 
+    public Type controlType() {
+        return type;
+    }
+    
+    @Deprecated
     public Type getType() {
         return type;
     }
 
+    public PMap properties() {
+        return properties;
+    }
+    
+    @Deprecated
     public PMap getProperties() {
         return properties;
     }
+    
+    public List<Value> defaults() {
+        return Arrays.asList(defaults.clone());
+    }
 
+    @Deprecated
     public Value[] getDefaults() {
         return defaults.clone();
     }
+    
+    public List<ArgumentInfo> inputs() {
+        return Arrays.asList(inputs.clone());
+    }
 
+    @Deprecated
     public ArgumentInfo[] getInputsInfo() {
         return inputs.clone();
     }
 
+    public List<ArgumentInfo> outputs() {
+        return Arrays.asList(outputs.clone());
+    }
+    
+    @Deprecated
     public ArgumentInfo[] getOutputsInfo() {
         return outputs.clone();
     }
@@ -213,11 +237,12 @@ public class ControlInfo extends Value {
 
     }
 
+    @Deprecated
     public static ControlInfo coerce(Value arg) throws ValueFormatException {
         if (arg instanceof ControlInfo) {
             return (ControlInfo) arg;
         } else {
-            return valueOf(arg.toString());
+            return parse(arg.toString());
         }
     }
 
@@ -229,9 +254,9 @@ public class ControlInfo extends Value {
         }
     }
     
-    private static ControlInfo valueOf(String string) throws ValueFormatException {
+    public static ControlInfo parse(String string) throws ValueFormatException {
         try {
-            PArray arr = PArray.valueOf(string);
+            PArray arr = PArray.parse(string);
             Type type = Type.valueOf(arr.get(0).toString());
             switch (type) {
                 case Function :
@@ -250,19 +275,19 @@ public class ControlInfo extends Value {
     private static ControlInfo parseFunction(String string, PArray array) throws Exception {
         // array(1) is inputs
         PArray args = PArray.coerce(array.get(1));
-        ArgumentInfo[] inputs = new ArgumentInfo[args.getSize()];
+        ArgumentInfo[] inputs = new ArgumentInfo[args.size()];
         for (int i=0; i<inputs.length; i++) {
             inputs[i] = ArgumentInfo.coerce(args.get(i));
         }
         // array(2) is outputs
         args = PArray.coerce(array.get(2));
-        ArgumentInfo[] outputs = new ArgumentInfo[args.getSize()];
+        ArgumentInfo[] outputs = new ArgumentInfo[args.size()];
         for (int i=0; i<outputs.length; i++) {
             outputs[i] = ArgumentInfo.coerce(args.get(i));
         }
         // optional array(3) is properties
         PMap properties;
-        if (array.getSize() > 3) {
+        if (array.size() > 3) {
             properties = PMap.coerce(array.get(3));
         } else {
             properties = PMap.EMPTY;
@@ -273,7 +298,7 @@ public class ControlInfo extends Value {
     private static ControlInfo parseAction(String string, PArray array) throws Exception {
         // optional array(1) is properties
         PMap properties;
-        if (array.getSize() > 1) {
+        if (array.size() > 1) {
             properties = PMap.coerce(array.get(1));
         } else {
             properties = PMap.EMPTY;
@@ -284,7 +309,7 @@ public class ControlInfo extends Value {
     private static ControlInfo parseProperty(String string, Type type, PArray array) throws Exception {
         // array(1) is outputs
         PArray args = PArray.coerce(array.get(1));
-        ArgumentInfo[] outputs = new ArgumentInfo[args.getSize()];
+        ArgumentInfo[] outputs = new ArgumentInfo[args.size()];
         for (int i=0; i<outputs.length; i++) {
             outputs[i] = ArgumentInfo.coerce(args.get(i));
         }
@@ -292,13 +317,13 @@ public class ControlInfo extends Value {
                 EMPTY_INFO : outputs;
         // array(2) is defaults
         args = PArray.coerce(array.get(2));
-        Value[] defs = new Value[args.getSize()];
+        Value[] defs = new Value[args.size()];
         for (int i=0; i<defs.length; i++) {
             defs[i] = PString.coerce(args.get(i));
         }
         // optional array(3) is properties
         PMap properties;
-        if (array.getSize() > 3) {
+        if (array.size() > 3) {
             properties = PMap.coerce(array.get(3));
         } else {
             properties = PMap.EMPTY;

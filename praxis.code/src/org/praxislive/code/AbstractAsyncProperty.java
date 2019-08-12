@@ -145,10 +145,10 @@ public abstract class AbstractAsyncProperty<V> implements Control {
             try {
                 err = PError.coerce(args.get(0));
             } catch (ValueFormatException ex) {
-                err = PError.create(ex, args.get(0).toString());
+                err = PError.of(ex, args.get(0).toString());
             }
         } else {
-            err = PError.create("");
+            err = PError.of("");
         }
         taskError(latest, err);
     }
@@ -250,7 +250,7 @@ public abstract class AbstractAsyncProperty<V> implements Control {
             router = getLookup().find(PacketRouter.class)
                     .orElseThrow(() -> new IllegalStateException("No PacketRouter found"));
         }
-        taskCall = Call.create(to, context.getAddress(this), time, PReference.wrap(task));
+        taskCall = Call.create(to, context.getAddress(this), time, PReference.of(task));
         router.route(taskCall);
     }
 

@@ -218,19 +218,19 @@ class SlaveCoreRoot extends BasicCoreRoot {
             return true; // assume defaults???
         }
         try {
-            PMap params = PMap.valueOf(msg.getArg(0).toString());
+            PMap params = PMap.parse(msg.getArg(0).toString());
             String masterUserDir = params.getString(Utils.KEY_MASTER_USER_DIRECTORY, null);
             if (masterUserDir != null) {
                 remoteUserDir = URI.create(masterUserDir);
             }
             
-            PMap services = PMap.valueOf(params.getString(Utils.KEY_REMOTE_SERVICES, ""));
+            PMap services = PMap.parse(params.getString(Utils.KEY_REMOTE_SERVICES, ""));
             if (!services.isEmpty()) {
                 for (String serviceName : services.getKeys()) {
                     Class<? extends Service> service = (Class<? extends Service>)
                             Class.forName(serviceName, true,
                             Thread.currentThread().getContextClassLoader());
-                    ComponentAddress serviceAddress = ComponentAddress.create(
+                    ComponentAddress serviceAddress = ComponentAddress.of(
                             MASTER_SYS_PREFIX + services.getString(serviceName, null));
                     getHubAccessor().registerService(service, serviceAddress);
                 }

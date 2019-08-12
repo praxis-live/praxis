@@ -71,7 +71,7 @@ public class AudioComponents implements ComponentFactoryProvider {
         
         private void add(String type, Class<? extends AudioCodeDelegate> cls, String path) {
             add(data(
-                    new AudioCodeFactory(ComponentType.create(type), cls, source(path))
+                    new AudioCodeFactory(ComponentType.of(type), cls, source(path))
             ));
         }
         

@@ -77,7 +77,7 @@ public class BooleanProperty extends AbstractSingleArgProperty {
 
     @Override
     protected Value get() {
-        return PBoolean.valueOf(binding.getBoundValue());
+        return PBoolean.of(binding.getBoundValue());
     }
     
 
@@ -103,7 +103,7 @@ public class BooleanProperty extends AbstractSingleArgProperty {
             binding = new DefaultBinding(def);
         }
         ArgumentInfo[] arguments = new ArgumentInfo[]{PBoolean.info()};
-        Value[] defaults = new Value[]{PBoolean.valueOf(def)};
+        Value[] defaults = new Value[]{PBoolean.of(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new BooleanProperty(binding, info);
     }
@@ -121,7 +121,7 @@ public class BooleanProperty extends AbstractSingleArgProperty {
             binding = new DefaultBinding(def);
         }
         ArgumentInfo[] arguments = new ArgumentInfo[]{PBoolean.info()};
-        Value[] defaults = new Value[]{PBoolean.valueOf(def)};
+        Value[] defaults = new Value[]{PBoolean.of(def)};
         ControlInfo info = ControlInfo.createPropertyInfo(arguments, defaults, properties);
         return new BooleanProperty(binding, info);
     }
@@ -167,7 +167,7 @@ public class BooleanProperty extends AbstractSingleArgProperty {
         }
         
         public Builder defaultValue(boolean def) {
-            defaults(PBoolean.valueOf(def));
+            defaults(PBoolean.of(def));
             this.def = def;
             return this;
         }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -22,7 +22,6 @@
 
 package org.praxislive.core.types;
 
-import org.praxislive.core.Value;
 import java.util.Optional;
 import org.praxislive.core.Value;
 import org.praxislive.core.ValueFormatException;
@@ -65,27 +64,38 @@ public final class PBoolean extends Value {
         return false;
     }
     
+    public static PBoolean of(boolean value) {
+        return value ? TRUE : FALSE;
+    }
+    
+    @Deprecated
     public static PBoolean valueOf(boolean value) {
         return value ? TRUE : FALSE;
     }
     
-    public static PBoolean valueOf(String str) throws ValueFormatException {
+    public static PBoolean parse(String str) throws ValueFormatException {
         if (str.equals("true")) {
             return TRUE;
         } else if (str.equals("false")) {
             return FALSE;
         } else {
-            return PNumber.valueOf(str).value() > 0.5 ? TRUE : FALSE;
+            return PNumber.parse(str).value() > 0.5 ? TRUE : FALSE;
         }
     }
+    
+    @Deprecated
+    public static PBoolean valueOf(String str) throws ValueFormatException {
+        return parse(str);
+    }
        
+    @Deprecated
     public static PBoolean coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PBoolean) {
             return (PBoolean) arg;
         } else if (arg instanceof PNumber) {
             return ((PNumber) arg).value() > 0.5 ? TRUE : FALSE;
         } else {
-            return valueOf(arg.toString());
+            return parse(arg.toString());
         }
     }
     
@@ -98,7 +108,7 @@ public final class PBoolean extends Value {
     }
     
     public static ArgumentInfo info() {
-        return ArgumentInfo.create(PBoolean.class, null);
+        return ArgumentInfo.of(PBoolean.class, null);
     }
 
 }

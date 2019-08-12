@@ -62,7 +62,7 @@ abstract class BytesBinding extends PropertyControl.Binding {
 
     @Override
     public ArgumentInfo getArgumentInfo() {
-        return ArgumentInfo.create(PBytes.class, PMap.EMPTY);
+        return ArgumentInfo.of(PBytes.class, PMap.EMPTY);
     }
 
     @Override

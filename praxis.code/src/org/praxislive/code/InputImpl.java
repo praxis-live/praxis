@@ -127,7 +127,7 @@ class InputImpl extends Input {
 
         @Override
         public void receive(long time, Value value) {
-            Value v = value instanceof Value ? (Value) value : PString.valueOf(value);
+            Value v = value instanceof Value ? (Value) value : PString.of(value);
             input.update(time, v);
         }
         

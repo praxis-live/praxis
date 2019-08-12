@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -72,14 +72,19 @@ public final class PResource extends Value implements Comparable<PResource> {
         return false;
     }
     
-    public static PResource valueOf(URI uri) {
+    public static PResource of(URI uri) {
         if (uri.isAbsolute()) {
             return new PResource(uri);
         }
         throw new IllegalArgumentException();
     }
     
-    public static PResource valueOf(String str) throws ValueFormatException {
+    @Deprecated
+    public static PResource valueOf(URI uri) {
+        return of(uri);
+    }
+    
+    public static PResource parse(String str) throws ValueFormatException {
         try {
             URI uri = new URI(str);
             if (uri.isAbsolute()) {
@@ -90,12 +95,18 @@ public final class PResource extends Value implements Comparable<PResource> {
             throw new ValueFormatException(ex);
         }
     }
+
+    @Deprecated
+    public static PResource valueOf(String str) throws ValueFormatException {
+        return parse(str);
+    }
     
+    @Deprecated
     public static PResource coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PResource) {
             return (PResource) arg;
         } else {
-            return valueOf(arg.toString());
+            return parse(arg.toString());
         }
     }
     
@@ -108,16 +119,16 @@ public final class PResource extends Value implements Comparable<PResource> {
     }
     
     public static ArgumentInfo info() {
-        return ArgumentInfo.create(PResource.class, null);
+        return ArgumentInfo.of(PResource.class, null);
     }
 
     public static ArgumentInfo info(boolean allowEmpty) {
         if (allowEmpty) {
-            return ArgumentInfo.create(PResource.class,
+            return ArgumentInfo.of(PResource.class,
 //                    PMap.valueOf(PString.valueOf(KEY_ALLOW_EMPTY), PBoolean.TRUE));
-                    PMap.create(ArgumentInfo.KEY_ALLOW_EMPTY, true));
+PMap.of(ArgumentInfo.KEY_ALLOW_EMPTY, true));
         } else {
-            return ArgumentInfo.create(PResource.class, null);
+            return ArgumentInfo.of(PResource.class, null);
         }
     }
 

@@ -66,7 +66,7 @@ public abstract class AbstractInlineCommand implements InlineCommand {
                     result = AbstractInlineCommand.this.process(env, namespace, args);
                     state = State.OK;
                 } catch (ExecutionException ex) {
-                    result = CallArguments.create(PReference.wrap(ex));
+                    result = CallArguments.create(PReference.of(ex));
                     state = State.Error;
                 }
             }

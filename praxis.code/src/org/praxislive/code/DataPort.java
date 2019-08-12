@@ -155,7 +155,7 @@ public abstract class DataPort<T> implements Port {
             this.type = type;
             this.info = PortInfo.create(DataPort.class,
                     PortInfo.Direction.IN,
-                    PMap.create("category", typeToCategory(type)));
+                    PMap.of("category", typeToCategory(type)));
         }
 
         @Override
@@ -321,7 +321,7 @@ public abstract class DataPort<T> implements Port {
             this.type = type;
             this.info = PortInfo.create(DataPort.class,
                     PortInfo.Direction.OUT,
-                    PMap.create("category", typeToCategory(type)));
+                    PMap.of("category", typeToCategory(type)));
         }
 
         @Override

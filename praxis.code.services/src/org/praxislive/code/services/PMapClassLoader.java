@@ -47,7 +47,7 @@ class PMapClassLoader extends ClassLoader {
         }
         try {
             PBytes data = PBytes.coerce(dataArg);
-            byte[] bytes = new byte[data.getSize()];
+            byte[] bytes = new byte[data.size()];
             data.read(bytes);
             return defineClass(name, bytes, 0, bytes.length);
         } catch (ValueFormatException ex) {

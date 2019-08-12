@@ -97,7 +97,7 @@ public class AbstractComponentFactory implements ComponentFactory {
     }
     
     protected void addComponent(String type, Data<? extends Component> info) {
-        componentMap.put(ComponentType.create(type), info.toMetaData());
+        componentMap.put(ComponentType.of(type), info.toMetaData());
     }
 
     protected void addRoot(String type, Class<? extends Root> cls) {
@@ -105,7 +105,7 @@ public class AbstractComponentFactory implements ComponentFactory {
     }
     
     protected void addRoot(String type, Data<? extends Root> info) {
-        rootMap.put(ComponentType.create(type), info.toMetaData());
+        rootMap.put(ComponentType.of(type), info.toMetaData());
     }
     
     public static <T> Data<T> data(Class<T> cls) {
@@ -178,7 +178,7 @@ public class AbstractComponentFactory implements ComponentFactory {
         }
         
         public Data<T> replacement(String type) {
-            replacement = ComponentType.create(type);
+            replacement = ComponentType.of(type);
             deprecated = true;
             return this;
         }

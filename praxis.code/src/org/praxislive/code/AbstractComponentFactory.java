@@ -136,7 +136,7 @@ public class AbstractComponentFactory implements ComponentFactory {
         }
 
         public Data replacement(String type) {
-            replacement = ComponentType.create(type);
+            replacement = ComponentType.of(type);
             deprecated = true;
             return this;
         }

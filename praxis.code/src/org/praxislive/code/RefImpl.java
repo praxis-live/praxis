@@ -68,8 +68,8 @@ class RefImpl<T> extends Ref<T> {
                 .map(ad -> ControlAddress.create(ad, TaskService.SUBMIT))
                 .orElseThrow(IllegalStateException::new);
         ControlAddress from = ControlAddress.create(context.getComponent().getAddress(), desc.getID());
-        TaskService.Task task = () -> PReference.wrap(function.apply(key));
-        Call call = Call.create(to, from, context.getTime(), PReference.wrap(task));
+        TaskService.Task task = () -> PReference.of(function.apply(key));
+        Call call = Call.create(to, from, context.getTime(), PReference.of(task));
         context.getLookup().find(PacketRouter.class)
                 .orElseThrow(IllegalStateException::new)
                 .route(call);
@@ -95,7 +95,7 @@ class RefImpl<T> extends Ref<T> {
                     context.getLog().log(LogLevel.ERROR, "Error in asyncCompute on "
                             + call.to().getID());
                 } else {
-                    PError err = PError.from(args.get(0)).orElse(PError.create(args.get(0).toString()));
+                    PError err = PError.from(args.get(0)).orElse(PError.of(args.get(0).toString()));
                     context.getLog().log(LogLevel.ERROR, err);
                 }
             }

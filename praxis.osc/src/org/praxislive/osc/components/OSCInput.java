@@ -139,15 +139,15 @@ public class OSCInput extends AbstractComponent {
             return ((Boolean) obj).booleanValue() ? PBoolean.TRUE : PBoolean.FALSE;
         }
         if (obj instanceof Integer) {
-            return PNumber.valueOf(((Integer) obj).intValue());
+            return PNumber.of(((Integer) obj).intValue());
         }
         if (obj instanceof Number) {
-            return PNumber.valueOf(((Number) obj).doubleValue());
+            return PNumber.of(((Number) obj).doubleValue());
         }
         if (obj == null) {
             return PString.EMPTY;
         }
-        return PString.valueOf(obj);
+        return PString.of(obj);
     }
     
     private class SendAddressBinding implements ArgumentProperty.Binding {

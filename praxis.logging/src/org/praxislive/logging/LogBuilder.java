@@ -47,7 +47,7 @@ public final class LogBuilder {
 
     public void log(LogLevel level, String msg) {
         if (isLoggable(level)) {
-            PString m = PString.valueOf(msg);
+            PString m = PString.of(msg);
             log.add(level.asPString());
             log.add(m);
         }
@@ -62,7 +62,7 @@ public final class LogBuilder {
     
     public void log(LogLevel level, Exception ex) {
         if (isLoggable(level)) {
-            PError e = PError.create(ex);
+            PError e = PError.of(ex);
             log.add(level.asPString());
             log.add(e);
         }
@@ -70,7 +70,7 @@ public final class LogBuilder {
     
     public void log(LogLevel level, Exception ex, String msg) {
         if (isLoggable(level)) {
-            PError e = PError.create(ex, msg);
+            PError e = PError.of(ex, msg);
             log.add(level.asPString());
             log.add(e);
         }
@@ -78,7 +78,7 @@ public final class LogBuilder {
     
     public void log(LogLevel level, Class<? extends Exception> type, String msg) {
         if (isLoggable(level)) {
-            PError e = PError.create(type, msg);
+            PError e = PError.of(type, msg);
             log.add(level.asPString());
             log.add(e);
         }

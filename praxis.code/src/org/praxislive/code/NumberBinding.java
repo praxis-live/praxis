@@ -88,7 +88,7 @@ abstract class NumberBinding extends PropertyControl.Binding {
 
     @Override
     public Value getDefaultValue() {
-        return PNumber.valueOf(def);
+        return PNumber.of(def);
     }
 
     static boolean isBindableFieldType(Class<?> type) {
@@ -137,7 +137,7 @@ abstract class NumberBinding extends PropertyControl.Binding {
         @Override
         public Value get() {
             if (last.value() != value) {
-                last = PNumber.valueOf(value);
+                last = PNumber.of(value);
             }
             return last;
         }
@@ -205,7 +205,7 @@ abstract class NumberBinding extends PropertyControl.Binding {
         public Value get() {
             double value = get(0);
             if (last.value() != value) {
-                last = PNumber.valueOf(value);
+                last = PNumber.of(value);
             }
             return last;
 
@@ -257,7 +257,7 @@ abstract class NumberBinding extends PropertyControl.Binding {
         public Value get() {
             double value = get(0);
             if ((float)last.value() != value) {
-                last = PNumber.valueOf(value);
+                last = PNumber.of(value);
             }
             return last;
 

@@ -104,7 +104,7 @@ public class BasicCoreRoot extends AbstractRoot {
         try {
             controls.get(call.to().getID()).call(call, router);
         } catch (Exception ex) {
-            router.route(Call.createErrorCall(call, PError.create(ex)));
+            router.route(Call.createErrorCall(call, PError.of(ex)));
         }
     }
 
@@ -133,7 +133,7 @@ public class BasicCoreRoot extends AbstractRoot {
                         new Object[]{ext.getClass(), extID, ex});
                 continue;
             }
-            ComponentAddress ad = ComponentAddress.create("/" + extID);
+            ComponentAddress ad = ComponentAddress.of("/" + extID);
             for (Class<? extends Service> service : services) {
                 LOG.log(Level.CONFIG, "Registering service {0}", service);
                 hubAccess.registerService(service, ad);
@@ -252,7 +252,7 @@ public class BasicCoreRoot extends AbstractRoot {
                 String[] ids = hubAccess.getRootIDs();
                 if (!Arrays.equals(ids, knownIDs)) {
                     knownIDs = ids;
-                    ret = Stream.of(ids).map(PString::valueOf).collect(PArray.collector());
+                    ret = Stream.of(ids).map(PString::of).collect(PArray.collector());
                 }
                 router.route(call.reply(ret));
             } else {

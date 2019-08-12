@@ -72,7 +72,7 @@ class DefaultTaskService extends AbstractRoot implements RootHub.ServiceProvider
             try {
                 submitTask(call);
             } catch (Exception ex) {
-                router.route(call.error(PError.create(ex)));
+                router.route(call.error(PError.of(ex)));
             }
         }
     }
@@ -101,7 +101,7 @@ class DefaultTaskService extends AbstractRoot implements RootHub.ServiceProvider
                         }
                     }
                     Call call = futures.get(future);
-                    call = call.error(PError.create(ex));
+                    call = call.error(PError.of(ex));
                     getRouter().route(call);
                     completed.add(future);
                 }

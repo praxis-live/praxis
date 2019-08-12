@@ -44,7 +44,7 @@ public class LogService implements Service {
             ControlInfo.createFunctionInfo(
             new ArgumentInfo[]{
                 ArgumentInfo.create(PString.class, ArgumentInfo.Presence.Variable,
-                        PMap.create(PString.KEY_ALLOWED_VALUES, PArray.valueOf(
+                        PMap.of(PString.KEY_ALLOWED_VALUES, PArray.of(
                                 LogLevel.ERROR.asPString(),
                                 LogLevel.WARNING.asPString(),
                                 LogLevel.INFO.asPString(),
