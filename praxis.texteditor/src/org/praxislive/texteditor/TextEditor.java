@@ -31,6 +31,7 @@ import javax.swing.text.JTextComponent;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public abstract class TextEditor {
     
     /**
