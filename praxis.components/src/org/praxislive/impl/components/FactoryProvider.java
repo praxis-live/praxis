@@ -51,8 +51,8 @@ public class FactoryProvider implements ComponentFactoryProvider {
 
             // CONTAINER
             addComponent("core:container", data(UserContainer.class));
-            addComponent("core:container:in", data(ContainerInput.class));
-            addComponent("core:container:out", data(ContainerOutput.class));
+            addComponent("core:container:in", data(ContainerInput.class).deprecated());
+            addComponent("core:container:out", data(ContainerOutput.class).deprecated());
             
         }
     }

@@ -92,7 +92,8 @@ public abstract class AbstractComponent implements Component {
         registerProtocol(ComponentProtocol.class);
     }
 
-    public ControlEx getControl(String id) {
+    @Override
+    public Control getControl(String id) {
         return controlMap.get(id);
     }
 
@@ -157,7 +158,8 @@ public abstract class AbstractComponent implements Component {
         info = null;
     }
 
-    public PortEx getPort(String id) {
+    @Override
+    public Port getPort(String id) {
         return portMap.get(id);
     }
 
