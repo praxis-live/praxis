@@ -27,6 +27,7 @@ import java.awt.Image;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public interface IconProvider {
     
     public Image getIcon(int width, int height);   

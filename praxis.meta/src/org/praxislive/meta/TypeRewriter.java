@@ -30,6 +30,7 @@ import org.praxislive.core.Value;
  *
  * @author Neil C Smith <http://neilcsmith.net>
  */
+@Deprecated
 public abstract class TypeRewriter {
     
     private final static TypeRewriter IDENTTY = new IdentityConverter();

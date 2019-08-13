@@ -26,6 +26,7 @@ package org.praxislive.meta;
  * 
  * @author Neil C Smith
  */
+@Deprecated
 public interface DisplayNameProvider {
     
     public String getDisplayName();
