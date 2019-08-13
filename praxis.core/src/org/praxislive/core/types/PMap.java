@@ -22,6 +22,8 @@
 package org.praxislive.core.types;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.praxislive.core.Value;
@@ -103,12 +105,22 @@ public class PMap extends Value {
         return def;
     }
 
+    public int size() {
+        return array.size() / 2;
+    }
+    
+    @Deprecated
     public int getSize() {
         return array.size() / 2;
     }
+    
+    public List<String> keys() {
+        return Collections.unmodifiableList(Arrays.asList(getKeys()));
+    }
 
+    @Deprecated
     public String[] getKeys() {
-        int size = getSize();
+        int size = size();
         String[] keys = new String[size];
         for (int i = 0; i < size; i++) {
             keys[i] = array.get(i * 2).toString();
@@ -137,8 +149,8 @@ public class PMap extends Value {
         }
         try {
             PMap other = PMap.coerce(arg);
-            int size = getSize();
-            if (size != other.getSize()) {
+            int size = size();
+            if (size != other.size()) {
                 return false;
             }
             size *= 2;
