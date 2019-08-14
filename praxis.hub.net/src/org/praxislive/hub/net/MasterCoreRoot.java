@@ -73,7 +73,6 @@ class MasterCoreRoot extends BasicCoreRoot {
 
     @Override
     protected void activating() {
-        super.activating();
         FileServer.Info fileServerInfo = activateFileServer();
         slaveClients = new ComponentAddress[slaves.length];
         for (int i = 0; i < slaves.length; i++) {
@@ -86,6 +85,7 @@ class MasterCoreRoot extends BasicCoreRoot {
             }
             slaveClients[i] = ComponentAddress.of("/" + id);
         }
+        setRunning();
     }
 
     @Override

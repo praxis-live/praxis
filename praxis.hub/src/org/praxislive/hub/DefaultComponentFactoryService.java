@@ -66,6 +66,11 @@ class DefaultComponentFactoryService extends AbstractRoot
     }
 
     @Override
+    protected void activating() {
+        setRunning();
+    }
+
+    @Override
     protected void processCall(Call call, PacketRouter router) {
         switch (call.to().getID()) {
             case ComponentFactoryService.NEW_INSTANCE: {

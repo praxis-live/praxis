@@ -76,11 +76,11 @@ class MasterClientRoot extends AbstractRoot {
 
     @Override
     protected void activating() {
-        super.activating();
         ExecutionContext context = getExecutionContext();
         context.addClockListener(MasterClientRoot.this::tick);
         lastPurgeTime = context.getTime();
         dispatcher.remoteSysPrefix = getAddress().toString() + "/_remote";
+        setRunning();
     }
 
     @Override

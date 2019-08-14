@@ -67,6 +67,11 @@ class DefaultTaskService extends AbstractRoot implements RootHub.ServiceProvider
     }
 
     @Override
+    protected void activating() {
+        setRunning();
+    }
+    
+    @Override
     protected void processCall(Call call, PacketRouter router) {
         if (call.isRequest()) {
             try {
