@@ -87,7 +87,7 @@ public class CompilerCommandInstaller implements CommandInstaller {
             ComponentAddress service = env.getLookup().find(Services.class)
                     .flatMap(sm -> sm.locate(CodeCompilerService.class))
                     .orElseThrow(ServiceUnavailableException::new);
-            ControlAddress addLibsControl = ControlAddress.create(service, "add-libs");
+            ControlAddress addLibsControl = ControlAddress.of(service, "add-libs");
             return Call.create(addLibsControl, env.getAddress(), env.getTime(), libs);
         }
         
@@ -113,7 +113,7 @@ public class CompilerCommandInstaller implements CommandInstaller {
             ComponentAddress service = env.getLookup().find(Services.class)
                     .flatMap(sm -> sm.locate(CodeCompilerService.class))
                     .orElseThrow(ServiceUnavailableException::new);
-            ControlAddress releaseControl = ControlAddress.create(service, "release");
+            ControlAddress releaseControl = ControlAddress.of(service, "release");
             return Call.createCall(releaseControl, env.getAddress(), env.getTime(), args);
         }
         

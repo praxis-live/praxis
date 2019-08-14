@@ -154,10 +154,10 @@ public class Button extends SingleBindingGuiComponent {
             if (script.isEmpty()) {
                 return;
             }
-            ControlAddress to = ControlAddress.create(
+            ControlAddress to = ControlAddress.of(
                     findService(ScriptService.class),
                     ScriptService.EVAL);
-            ControlAddress from = ControlAddress.create(
+            ControlAddress from = ControlAddress.of(
                     getAddress(), "_on-click-log");
             Call call = Call.createQuiet(to, from,
                     getLookup().find(ExecutionContext.class).get().getTime(),

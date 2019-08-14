@@ -196,7 +196,7 @@ public class DefaultCoreRoot extends AbstractRoot {
             if (!ComponentAddress.isValidID(args.get(0).toString())) {
                 throw new IllegalArgumentException("Invalid Component ID");
             }
-            ControlAddress to = ControlAddress.create(
+            ControlAddress to = ControlAddress.of(
                     findService(RootFactoryService.class),
                     RootFactoryService.NEW_ROOT_INSTANCE);
             return Call.create(to, getAddress(), call.time(), args.get(1));

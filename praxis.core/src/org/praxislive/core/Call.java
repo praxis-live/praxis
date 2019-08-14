@@ -555,7 +555,7 @@ public final class Call extends Packet {
         if (toAddress == null || fromAddress == null) {
             throw new NullPointerException();
         }
-        String root = toAddress.getComponentAddress().rootID();
+        String root = toAddress.component().rootID();
         return new Call(root, toAddress, fromAddress, timeCode, args, type);
     }
 
@@ -656,7 +656,7 @@ public final class Call extends Packet {
         }
         ControlAddress toAddress = inwardCall.from();
         ControlAddress fromAddress = inwardCall.to();
-        String root = toAddress.getComponentAddress().componentID(0);
+        String root = toAddress.component().componentID(0);
         long timeCode = inwardCall.time();
         int matchID = inwardCall.id();
         return new Call(root, toAddress, fromAddress, timeCode, args, type, matchID);

@@ -258,7 +258,7 @@ public class DefaultBindingControl extends AbstractControl {
 
         private void sendInfoRequest() {
             ControlAddress returnAddress = getReturnAddress();
-            ControlAddress toAddress = ControlAddress.create(boundAddress.getComponentAddress(), ComponentProtocol.INFO);
+            ControlAddress toAddress = ControlAddress.of(boundAddress.component(), ComponentProtocol.INFO);
             Call call = Call.createCall(toAddress, returnAddress,
                     context.getTime(), CallArguments.EMPTY);
 
@@ -274,7 +274,7 @@ public class DefaultBindingControl extends AbstractControl {
                     try {
                         compInfo = ComponentInfo.coerce(args.get(0));
                         // @TODO on null?
-                        bindingInfo = compInfo.controlInfo(boundAddress.getID());
+                        bindingInfo = compInfo.controlInfo(boundAddress.controlID());
                         ControlInfo.Type type = bindingInfo.controlType();
                         isProperty = (type == ControlInfo.Type.Property)
                                 || (type == ControlInfo.Type.ReadOnlyProperty);

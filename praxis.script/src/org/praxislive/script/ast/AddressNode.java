@@ -74,7 +74,7 @@ public class AddressNode extends Node {
             if (address.charAt(1) == '/') {
                 return parseComplexAddress(ctxt);
             } else {
-                return ControlAddress.create(ctxt, address.substring(1));
+                return ControlAddress.of(ctxt, address.substring(1));
             }
         } catch (Exception ex) {
             throw new IllegalArgumentException(ex);
@@ -84,9 +84,9 @@ public class AddressNode extends Node {
     private Value parseComplexAddress(ComponentAddress ctxt) throws Exception {
         String full = ctxt.toString() + address.substring(1);
         if (full.lastIndexOf('.') > -1) {
-            return ControlAddress.valueOf(full);
+            return ControlAddress.parse(full);
         } else if (full.lastIndexOf('!') > -1) {
-            return PortAddress.valueOf(full);
+            return PortAddress.parse(full);
         } else {
             return ComponentAddress.parse(full);
         }

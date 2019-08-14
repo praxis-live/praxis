@@ -274,7 +274,7 @@ public abstract class CodeContext<D extends CodeDelegate> {
         if (ad != null) {
             for (Map.Entry<String, ControlDescriptor> ce : controls.entrySet()) {
                 if (ce.getValue().getControl() == control) {
-                    return ControlAddress.create(ad, ce.getKey());
+                    return ControlAddress.of(ad, ce.getKey());
                 }
             }
         }

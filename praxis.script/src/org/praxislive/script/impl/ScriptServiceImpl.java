@@ -76,9 +76,9 @@ public class ScriptServiceImpl extends AbstractRoot {
         }
         exID++;
         String id = "_exec_" + exID;  
-        EnvImpl env = new EnvImpl(ControlAddress.create(getAddress(), id));
+        EnvImpl env = new EnvImpl(ControlAddress.of(getAddress(), id));
 //        ScriptExecutor ex = new ScriptExecutor(env, true);
-        ScriptExecutor ex = new ScriptExecutor(env, from.getComponentAddress());
+        ScriptExecutor ex = new ScriptExecutor(env, from.component());
         registerControl(id, new ScriptControl(ex));
         contexts.put(from, new ScriptContext(id, ex));
         return ex;

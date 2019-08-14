@@ -57,8 +57,8 @@ public class AbstractRootIT {
         LinkedBlockingQueue<Packet> responseQueue = new LinkedBlockingQueue<>();
         RootHubImpl hub = new RootHubImpl(root, responseQueue);
         hub.ctrl.start(Thread::new);
-        hub.ctrl.submitPacket(Call.create(ControlAddress.create("/test.hello"),
-                ControlAddress.create("/hub.world"),
+        hub.ctrl.submitPacket(Call.create(ControlAddress.of("/test.hello"),
+                ControlAddress.of("/hub.world"),
                 hub.getClock().getTime() + TimeUnit.SECONDS.toNanos(1)));
         try {
             Call reply = (Call) responseQueue.poll(2, TimeUnit.SECONDS);
@@ -75,8 +75,8 @@ public class AbstractRootIT {
         LinkedBlockingQueue<Packet> responseQueue = new LinkedBlockingQueue<>();
         RootHubImpl hub = new RootHubImpl(root, responseQueue);
         hub.ctrl.start(Thread::new);
-        hub.ctrl.submitPacket(Call.create(ControlAddress.create("/test.hello"),
-                ControlAddress.create("/hub.world"),
+        hub.ctrl.submitPacket(Call.create(ControlAddress.of("/test.hello"),
+                ControlAddress.of("/hub.world"),
                 hub.getClock().getTime() + TimeUnit.SECONDS.toNanos(1)));
         try {
             Call reply = (Call) responseQueue.poll(2, TimeUnit.SECONDS);

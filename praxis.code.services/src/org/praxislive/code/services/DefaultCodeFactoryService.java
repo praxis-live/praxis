@@ -88,7 +88,7 @@ public class DefaultCodeFactoryService extends AbstractRoot {
     }
 
     private ControlAddress findCompilerService() throws Exception {
-        return ControlAddress.create(findService(CodeCompilerService.class),
+        return ControlAddress.of(findService(CodeCompilerService.class),
                 CodeCompilerService.COMPILE);
     }
 

@@ -143,7 +143,7 @@ class NonGuiPlayer extends AbstractRoot {
                     .find(Services.class)
                     .flatMap(s -> s.locate(ScriptService.class))
                     .orElseThrow(IllegalStateException::new);
-                evalControl = ControlAddress.create(ss, ScriptService.EVAL);
+                evalControl = ControlAddress.of(ss, ScriptService.EVAL);
             }
             activeCall = Call.create(evalControl,
                     getAddress(),

@@ -166,7 +166,7 @@ public final class CodeComponent<D extends CodeDelegate> implements Component {
     private void initLogInfo() {
         ControlAddress toAddress = getLookup().find(Services.class)
                 .flatMap(srvs -> srvs.locate(LogService.class))
-                .map(srv -> ControlAddress.create(srv, LogService.LOG))
+                .map(srv -> ControlAddress.of(srv, LogService.LOG))
                 .orElse(null);
         
         LogLevel level = getLookup().find(LogLevel.class).orElse(LogLevel.ERROR);
@@ -175,7 +175,7 @@ public final class CodeComponent<D extends CodeDelegate> implements Component {
             level = LogLevel.ERROR;
         }
         
-        ControlAddress fromAddress = ControlAddress.create(address, "_log");
+        ControlAddress fromAddress = ControlAddress.of(address, "_log");
         logInfo = new LogInfo(level, toAddress, fromAddress);
     }
 

@@ -87,7 +87,7 @@ class CodeProperty<D extends CodeDelegate>
                                 context.getLogLevel(),
                                 context.getDelegate().getClass());
                 if (contextFactory == null) {
-                    contextFactory = ControlAddress.create(
+                    contextFactory = ControlAddress.of(
                             context.locateService(CodeContextFactoryService.class)
                             .orElseThrow(ServiceUnavailableException::new),
                             CodeContextFactoryService.NEW_CONTEXT);

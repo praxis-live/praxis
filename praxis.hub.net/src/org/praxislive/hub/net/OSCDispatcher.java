@@ -104,12 +104,12 @@ abstract class OSCDispatcher {
 
     void handleSND(OSCMessage msg, long time) throws Exception {
         int id = extractID(msg);
-        ControlAddress to = ControlAddress.valueOf(msg.getArg(1).toString());
+        ControlAddress to = ControlAddress.parse(msg.getArg(1).toString());
         String fromString = msg.getArg(2).toString();
         if (fromString.startsWith(SYS_PREFIX)) {
             fromString = getRemoteSysPrefix() + fromString;
         }
-        ControlAddress from = ControlAddress.valueOf(fromString);
+        ControlAddress from = ControlAddress.parse(fromString);
         Call call = Call.create(to, from, time, extractCallArguments(msg, 3));
         send(call);
         localToRemoteID.put(call.matchID(), id);
@@ -142,7 +142,7 @@ abstract class OSCDispatcher {
         if (fromString.startsWith(SYS_PREFIX)) {
             fromString = getRemoteSysPrefix() + fromString;
         }
-        ControlAddress from = ControlAddress.valueOf(fromString);
+        ControlAddress from = ControlAddress.parse(fromString);
         PString rootID = PString.of(msg.getArg(2));
         ComponentType rootType = ComponentType.parse(msg.getArg(3).toString());
         Call call = Call.create(to, from, time, Arrays.asList(rootID, rootType));
@@ -157,7 +157,7 @@ abstract class OSCDispatcher {
         if (fromString.startsWith(SYS_PREFIX)) {
             fromString = getRemoteSysPrefix() + fromString;
         }
-        ControlAddress from = ControlAddress.valueOf(fromString);
+        ControlAddress from = ControlAddress.parse(fromString);
         PString rootID = PString.of(msg.getArg(2));
         Call call = Call.create(to, from, time, rootID);
         send(call);

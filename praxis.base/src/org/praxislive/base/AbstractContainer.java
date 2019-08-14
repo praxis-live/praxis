@@ -202,7 +202,7 @@ public abstract class AbstractContainer extends AbstractComponent implements Con
             if (!ComponentAddress.isValidID(args.get(0).toString())) {
                 throw new IllegalArgumentException("Invalid Component ID");
             }
-            ControlAddress to = ControlAddress.create(findService(ComponentFactoryService.class),
+            ControlAddress to = ControlAddress.of(findService(ComponentFactoryService.class),
                     ComponentFactoryService.NEW_INSTANCE);
             return Call.create(to, call.to(), call.time(), args.get(1));
         }

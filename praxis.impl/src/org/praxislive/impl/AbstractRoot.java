@@ -380,9 +380,9 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
     }
 
     protected org.praxislive.core.Control getControl(ControlAddress address) {
-        Component comp = getComponent(address.getComponentAddress());
+        Component comp = getComponent(address.component());
         if (comp != null) {
-            return comp.getControl(address.getID());
+            return comp.getControl(address.controlID());
         } else {
             return null;
         }
@@ -522,11 +522,11 @@ public abstract class AbstractRoot extends AbstractContainer implements Root {
         private void idling() {
             if (exit) {
                 try {
-                    ControlAddress to = ControlAddress.create(findService(SystemManagerService.class),
+                    ControlAddress to = ControlAddress.of(findService(SystemManagerService.class),
                             SystemManagerService.SYSTEM_EXIT);
                     getPacketRouter().route(Call.createCall(
                             to,
-                            ControlAddress.create(getAddress(), "_exit-log"),
+                            ControlAddress.of(getAddress(), "_exit-log"),
                             context.time,
                             CallArguments.EMPTY));
                 } catch (Exception ex) {

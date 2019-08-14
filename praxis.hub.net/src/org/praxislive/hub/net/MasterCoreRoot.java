@@ -143,10 +143,10 @@ class MasterCoreRoot extends BasicCoreRoot {
 
             ControlAddress to;
             if (proxy != null) {
-                to = ControlAddress.create(proxy, RootManagerService.ADD_ROOT);
+                to = ControlAddress.of(proxy, RootManagerService.ADD_ROOT);
                 return Call.create(to, call.to(), call.time(), args);
             } else {
-                to = ControlAddress.create(findService(RootFactoryService.class),
+                to = ControlAddress.of(findService(RootFactoryService.class),
                         RootFactoryService.NEW_ROOT_INSTANCE);
                 return Call.create(to, call.to(), call.time(), args.get(1));
             }
@@ -156,7 +156,7 @@ class MasterCoreRoot extends BasicCoreRoot {
         protected Call processResponse(Call call) throws Exception {
             Call active = getActiveCall();
             String id = active.getArgs().get(0).toString();
-            String source = call.from().getComponentAddress().rootID();
+            String source = call.from().component().rootID();
             if (source.startsWith(SLAVE_PREFIX)) {
                 Root.Controller ctrl = getHubAccessor().getRootController(source);
                 getHubAccessor().registerRootController(id, ctrl);
@@ -182,7 +182,7 @@ class MasterCoreRoot extends BasicCoreRoot {
             String id = call.args().get(0).toString();
             String remoteProxy = remotes.get(id);
             if (remoteProxy != null) {
-                ControlAddress to = ControlAddress.create(
+                ControlAddress to = ControlAddress.of(
                         ComponentAddress.of("/" + remoteProxy),
                         RootManagerService.REMOVE_ROOT);
                 return Call.create(to, call.to(), call.time(), call.args());

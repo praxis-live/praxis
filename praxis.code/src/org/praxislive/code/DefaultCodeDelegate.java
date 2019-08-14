@@ -187,7 +187,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
             return null;
         }
     }
-
+    
     /**
      * Return a Lookup for finding instances of features.
      * 

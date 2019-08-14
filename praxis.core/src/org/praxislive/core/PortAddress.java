@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -23,6 +23,7 @@ package org.praxislive.core;
 
 import java.util.Optional;
 import java.util.regex.Pattern;
+import static org.praxislive.core.ComponentAddress.cache;
 
 /**
  *
@@ -33,7 +34,9 @@ public class PortAddress extends Value {
     public static final String SEPERATOR = "!";
     private static final String SEP_REGEX = "\\!";
     private static final String ID_REGEX = "[_\\-\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*";
-    
+    private static final Pattern SEP_PATTERN = Pattern.compile(SEP_REGEX);
+    private static final Pattern ID_PATTERN = Pattern.compile(ID_REGEX);
+
     private final ComponentAddress component;
     private final String portID;
     private final String addressString;
@@ -44,10 +47,20 @@ public class PortAddress extends Value {
         this.addressString = address;
     }
 
+    public ComponentAddress component() {
+        return this.component;
+    }
+
+    @Deprecated
     public ComponentAddress getComponentAddress() {
         return this.component;
     }
-    
+
+    public String portID() {
+        return this.portID;
+    }
+
+    @Deprecated
     public String getID() {
         return this.portID;
     }
@@ -70,53 +83,63 @@ public class PortAddress extends Value {
             return false;
         }
     }
-    
-    private static Pattern splitPoint = Pattern.compile(SEP_REGEX);
 
-    public static PortAddress valueOf(String address) throws ValueFormatException {
-        String[] parts = splitPoint.split(address);
+    public static PortAddress parse(String address) throws ValueFormatException {
+        String[] parts = SEP_PATTERN.split(address);
         if (parts.length != 2) {
             throw new ValueFormatException();
         }
-//        String id = parts[1];
-//        if (!(isValidID(id))) {
-//            throw new ValueFormatException();
-//        }
         if (!(isValidID(parts[1]))) {
             throw new ValueFormatException();
         }
-        String id = parts[1].intern();
+        String id = cache(parts[1]);
         ComponentAddress comp = ComponentAddress.parse(parts[0]);
-        address = address.intern();
+        address = cache(address);
         return new PortAddress(comp, id, address);
     }
 
-    public static PortAddress create(String address) {
+    @Deprecated
+    public static PortAddress valueOf(String address) throws ValueFormatException {
+        return parse(address);
+    }
+
+    public static PortAddress of(String address) {
         try {
-            return valueOf(address);
+            return parse(address);
         } catch (ValueFormatException ex) {
             throw new IllegalArgumentException(ex);
         }
     }
 
-    public static PortAddress create(ComponentAddress component, String id) {
+    @Deprecated
+    public static PortAddress create(String address) {
+        return PortAddress.of(address);
+    }
+
+    public static PortAddress of(ComponentAddress component, String id) {
         if (!(isValidID(id))) {
             throw new IllegalArgumentException();
         }
-        id = id.intern();
+        id = cache(id);
         String address = component.toString() + SEPERATOR + id;
-        address = address.intern();
+        address = cache(address);
         return new PortAddress(component, id, address);
     }
-    
+
+    @Deprecated
+    public static PortAddress create(ComponentAddress component, String id) {
+        return of(component, id);
+    }
+
+    @Deprecated
     public static PortAddress coerce(Value arg) throws ValueFormatException {
         if (arg instanceof PortAddress) {
             return (PortAddress) arg;
         } else {
-            return valueOf(arg.toString());
+            return parse(arg.toString());
         }
     }
-    
+
     public static Optional<PortAddress> from(Value arg) {
         try {
             return Optional.of(coerce(arg));
@@ -124,11 +147,9 @@ public class PortAddress extends Value {
             return Optional.empty();
         }
     }
-    
-    private static Pattern idChecker = Pattern.compile(ID_REGEX);
 
     public static boolean isValidID(String id) {
-        return idChecker.matcher(id).matches();
+        return ID_PATTERN.matcher(id).matches();
     }
 
     public static ArgumentInfo info() {

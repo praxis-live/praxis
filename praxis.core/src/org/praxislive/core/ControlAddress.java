@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  * 
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -23,6 +23,7 @@ package org.praxislive.core;
 
 import java.util.Optional;
 import java.util.regex.Pattern;
+import static org.praxislive.core.ComponentAddress.cache;
 
 /**
  *
@@ -33,6 +34,8 @@ public class ControlAddress extends Value {
     public static final String SEPARATOR = ".";
     private static final String SEP_REGEX = "\\.";
     private static final String ID_REGEX = "[_\\-\\p{javaLetter}][_\\-\\p{javaLetterOrDigit}]*";
+    private static final Pattern ID_PATTERN = Pattern.compile(ID_REGEX);
+    private static final Pattern SEP_PATTERN = Pattern.compile(SEP_REGEX);
     
     private final ComponentAddress component;
     private final String controlID;
@@ -44,10 +47,20 @@ public class ControlAddress extends Value {
         this.addressString = address;
     }
 
+    public ComponentAddress component() {
+        return this.component;
+    }
+    
+    @Deprecated
     public ComponentAddress getComponentAddress() {
         return this.component;
     }
 
+    public String controlID() {
+        return this.controlID;
+    }
+    
+    @Deprecated
     public String getID() {
         return this.controlID;
     }
@@ -70,51 +83,61 @@ public class ControlAddress extends Value {
             return false;
         }
     }
-    private static Pattern splitPoint = Pattern.compile(SEP_REGEX);
 
-    public static ControlAddress valueOf(String address) throws ValueFormatException {
-        String[] parts = splitPoint.split(address);
+    public static ControlAddress parse(String address) throws ValueFormatException {
+        String[] parts = SEP_PATTERN.split(address);
         if (parts.length != 2) {
             throw new ValueFormatException();
         }
-//        String id = parts[1];
-//        if (!(isValidID(id))) {
-//            throw new ValueFormatException();
-//        }
         if (!(isValidID(parts[1]))) {
             throw new ValueFormatException();
         }
-        String id = parts[1].intern();
+        String id = cache(parts[1]);
         ComponentAddress comp = ComponentAddress.parse(parts[0]);
-//        return new ControlAddress(comp, id, address);
-        address = address.intern();
+        address = cache(address);
         return new ControlAddress(comp, id, address);
     }
 
-    public static ControlAddress create(String address) {
+    @Deprecated
+    public static ControlAddress valueOf(String address) throws ValueFormatException {
+        return parse(address);
+    }
+
+    public static ControlAddress of(String address) {
         try {
-            return valueOf(address);
+            return parse(address);
         } catch (ValueFormatException ex) {
             throw new IllegalArgumentException(ex);
         }
     }
+    
+    @Deprecated
+    public static ControlAddress create(String address) {
+        return ControlAddress.of(address);
+    }
 
-    public static ControlAddress create(ComponentAddress component, String id) {
+    public static ControlAddress of(ComponentAddress component, String id) {
         if (!(isValidID(id))) {
             throw new IllegalArgumentException();
         }
-        id = id.intern();
+        id = cache(id);
         String address = component.toString() + SEPARATOR + id;
-        address = address.intern();
+        address = cache(address);
         return new ControlAddress(component, id, address);
 
     }
     
+    @Deprecated
+    public static ControlAddress create(ComponentAddress component, String id) {
+        return of(component, id);
+    }
+    
+    @Deprecated
     public static ControlAddress coerce(Value arg) throws ValueFormatException {
         if (arg instanceof ControlAddress) {
             return (ControlAddress) arg;
         } else {
-            return valueOf(arg.toString());
+            return parse(arg.toString());
         }
     }
     
@@ -126,10 +149,8 @@ public class ControlAddress extends Value {
         }
     }
     
-    private static Pattern idChecker = Pattern.compile(ID_REGEX);
-
     public static boolean isValidID(String id) {
-        return idChecker.matcher(id).matches();
+        return ID_PATTERN.matcher(id).matches();
 
 //        int length = id.length();
 //        if (length == 0) {

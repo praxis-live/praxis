@@ -209,7 +209,7 @@ public abstract class AbstractAsyncProperty<T> extends AbstractControl {
             ComponentAddress service = getLookup().find(Services.class)
                     .flatMap(sm -> sm.locate(TaskService.class))
                     .orElseThrow(IllegalStateException::new);
-            taskSubmitAddress = ControlAddress.create(service, TaskService.SUBMIT);
+            taskSubmitAddress = ControlAddress.of(service, TaskService.SUBMIT);
         }
         return taskSubmitAddress;
     }

@@ -80,7 +80,7 @@ public class Send extends AbstractComponent {
             if (destination != null) {
                 PacketRouter router = getPacketRouter();
                 if (router != null) {
-                    Call call = Call.createQuiet(destination, ControlAddress.create(getAddress(), "_log"), time, arg);
+                    Call call = Call.createQuiet(destination, ControlAddress.of(getAddress(), "_log"), time, arg);
                     router.route(call);
                 }
             }
@@ -147,7 +147,7 @@ public class Send extends AbstractComponent {
                 if ((callTime - lastSend) > 500_000_000) {
                     router.route(
                             Call.createQuietCall(logService,
-                                    ControlAddress.create(getAddress(), "_log"),
+                                    ControlAddress.of(getAddress(), "_log"),
                                     call.time(),
                                     logBuilder.toCallArguments()));
 
@@ -161,7 +161,7 @@ public class Send extends AbstractComponent {
         private void initLog() throws ServiceUnavailableException {
             LogLevel level = getLookup().find(LogLevel.class).orElse(LogLevel.ERROR);
             logBuilder.setLevel(level);
-            logService = ControlAddress.create(findService(LogService.class),
+            logService = ControlAddress.of(findService(LogService.class),
                     LogService.LOG);
         }
 

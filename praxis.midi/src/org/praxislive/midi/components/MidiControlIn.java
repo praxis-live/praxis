@@ -125,7 +125,7 @@ public class MidiControlIn extends AbstractMidiInComponent {
         if (c == null) {
             returnAddress = null;
         } else {
-            returnAddress = ControlAddress.create(c, "_log");
+            returnAddress = ControlAddress.of(c, "_log");
         }
     }
 

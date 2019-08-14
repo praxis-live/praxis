@@ -65,9 +65,9 @@ class RefImpl<T> extends Ref<T> {
     @Override
     public <K> Ref<T> asyncCompute(K key, Function<K, ? extends T> function) {
         ControlAddress to = context.locateService(TaskService.class)
-                .map(ad -> ControlAddress.create(ad, TaskService.SUBMIT))
+                .map(ad -> ControlAddress.of(ad, TaskService.SUBMIT))
                 .orElseThrow(IllegalStateException::new);
-        ControlAddress from = ControlAddress.create(context.getComponent().getAddress(), desc.getID());
+        ControlAddress from = ControlAddress.of(context.getComponent().getAddress(), desc.getID());
         TaskService.Task task = () -> PReference.of(function.apply(key));
         Call call = Call.create(to, from, context.getTime(), PReference.of(task));
         context.getLookup().find(PacketRouter.class)
@@ -93,7 +93,7 @@ class RefImpl<T> extends Ref<T> {
                 List<Value> args = call.args();
                 if (args.isEmpty()) {
                     context.getLog().log(LogLevel.ERROR, "Error in asyncCompute on "
-                            + call.to().getID());
+                            + call.to().controlID());
                 } else {
                     PError err = PError.from(args.get(0)).orElse(PError.of(args.get(0).toString()));
                     context.getLog().log(LogLevel.ERROR, err);

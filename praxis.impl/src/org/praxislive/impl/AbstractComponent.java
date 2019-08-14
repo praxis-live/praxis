@@ -102,7 +102,7 @@ public abstract class AbstractComponent implements Component {
         if (thisAddress != null) {
             for (Map.Entry<String, ControlEx> entry : controlMap.entrySet()) {
                 if (entry.getValue() == control) {
-                    return ControlAddress.create(thisAddress, entry.getKey());
+                    return ControlAddress.of(thisAddress, entry.getKey());
                 }
             }
         }

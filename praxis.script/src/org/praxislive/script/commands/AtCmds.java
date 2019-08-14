@@ -144,7 +144,7 @@ public class AtCmds implements CommandInstaller {
                     CallArguments args;
                     int depth = ctxt.depth();
                     if (depth == 1) {
-                        to = ControlAddress.create(
+                        to = ControlAddress.of(
                                 env.getLookup().find(Services.class)
                                 .flatMap(sm -> sm.locate(RootManagerService.class))
                                 .orElseThrow(ServiceUnavailableException::new),
@@ -152,7 +152,7 @@ public class AtCmds implements CommandInstaller {
                         args = CallArguments.create(new Value[]{
                                     PString.of(ctxt.rootID()), type});
                     } else {
-                        to = ControlAddress.create(ctxt.parent(),
+                        to = ControlAddress.of(ctxt.parent(),
                                 ContainerProtocol.ADD_CHILD);
                         args = CallArguments.create(new Value[]{
                                     PString.of(ctxt.componentID(depth - 1)), type});
@@ -232,7 +232,7 @@ public class AtCmds implements CommandInstaller {
         }
 
         private Call createRootRemovalCall(Env env, String id) throws Exception {
-            ControlAddress to = ControlAddress.create(
+            ControlAddress to = ControlAddress.of(
                     env.getLookup().find(Services.class)
                             .flatMap(sm -> sm.locate(RootManagerService.class))
                             .orElseThrow(ServiceUnavailableException::new),
@@ -241,7 +241,7 @@ public class AtCmds implements CommandInstaller {
         }
 
         private Call createChildRemovalCall(Env env, ComponentAddress comp) throws Exception {
-            ControlAddress to = ControlAddress.create(comp.parent(),
+            ControlAddress to = ControlAddress.of(comp.parent(),
                     ContainerProtocol.REMOVE_CHILD);
             return Call.create(to, env.getAddress(), env.getTime(),
                     PString.of(comp.componentID(comp.depth() - 1)));

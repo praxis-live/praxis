@@ -89,18 +89,18 @@ public class ConnectionCmds implements CommandInstaller {
         protected Call createCall(Env env, CallArguments args) throws Exception {
             PortAddress p1 = PortAddress.coerce(args.get(0));
             PortAddress p2 = PortAddress.coerce(args.get(1));
-            ComponentAddress c1 = p1.getComponentAddress();
-            ComponentAddress c2 = p2.getComponentAddress();
+            ComponentAddress c1 = p1.component();
+            ComponentAddress c2 = p2.component();
             ComponentAddress container = c1.parent();
             if (container == null || !c2.parent().equals(container)) {
                 throw new IllegalArgumentException("Ports don't share a common parent");
             }
             CallArguments sendArgs = CallArguments.create(
                     PString.of(c1.componentID(c1.depth() - 1)),
-                    PString.of(p1.getID()),
+                    PString.of(p1.portID()),
                     PString.of(c2.componentID(c1.depth() - 1)),
-                    PString.of(p2.getID()));
-            ControlAddress to = ControlAddress.create(container,
+                    PString.of(p2.portID()));
+            ControlAddress to = ControlAddress.of(container,
                     connect ? ContainerProtocol.CONNECT : ContainerProtocol.DISCONNECT);
             return Call.createCall(to, env.getAddress(), env.getTime(), sendArgs);
 

@@ -102,7 +102,7 @@ public class BasicCoreRoot extends AbstractRoot {
     @Override
     protected void processCall(Call call, PacketRouter router) {
         try {
-            controls.get(call.to().getID()).call(call, router);
+            controls.get(call.to().controlID()).call(call, router);
         } catch (Exception ex) {
             router.route(Call.createErrorCall(call, PError.of(ex)));
         }
@@ -199,7 +199,7 @@ public class BasicCoreRoot extends AbstractRoot {
             if (!ComponentAddress.isValidID(args.get(0).toString())) {
                 throw new IllegalArgumentException("Invalid Component ID");
             }
-            ControlAddress to = ControlAddress.create(findService(RootFactoryService.class),
+            ControlAddress to = ControlAddress.of(findService(RootFactoryService.class),
                     RootFactoryService.NEW_ROOT_INSTANCE);
             return Call.create(to, call.to(), call.time(), args.get(1));
         }

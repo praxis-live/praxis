@@ -72,7 +72,7 @@ class DefaultComponentFactoryService extends AbstractRoot
 
     @Override
     protected void processCall(Call call, PacketRouter router) {
-        switch (call.to().getID()) {
+        switch (call.to().controlID()) {
             case ComponentFactoryService.NEW_INSTANCE: {
                 try {
                     newInstance.call(call, router);
@@ -107,7 +107,7 @@ class DefaultComponentFactoryService extends AbstractRoot
             if (factory.getFactoryService() != ComponentFactoryService.class) {
                 ControlAddress altFactory = getLookup().find(Services.class)
                         .flatMap(srvs -> srvs.locate(factory.getFactoryService()))
-                        .map(cmp -> ControlAddress.create(cmp, ComponentFactoryService.NEW_INSTANCE))
+                        .map(cmp -> ControlAddress.of(cmp, ComponentFactoryService.NEW_INSTANCE))
                         .orElseThrow(() -> new IllegalStateException("Alternative factory service not found"));
                         
                 return Call.create(altFactory,

@@ -141,9 +141,9 @@ public class ScriptParser {
     private Node absoluteAddressOrStringNode(String text) {
         try {
             if (text.lastIndexOf('.') > -1) {
-                return new LiteralNode(ControlAddress.valueOf(text));
+                return new LiteralNode(ControlAddress.parse(text));
             } else if (text.lastIndexOf('!') > -1) {
-                return new LiteralNode(PortAddress.valueOf(text));
+                return new LiteralNode(PortAddress.parse(text));
             } else {
                 return new LiteralNode(ComponentAddress.parse(text));
             }

@@ -99,9 +99,9 @@ class MasterClientRoot extends AbstractRoot {
 
     @Override
     protected void processCall(Call call, PacketRouter router) {
-        if (call.to().getComponentAddress().equals(getAddress())) {
+        if (call.to().component().equals(getAddress())) {
             try {
-                switch (call.to().getID()) {
+                switch (call.to().controlID()) {
                     case RootManagerService.ADD_ROOT:
                         addRootControl.call(call, router);
                         break;

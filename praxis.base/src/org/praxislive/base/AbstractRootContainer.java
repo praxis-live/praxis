@@ -128,9 +128,9 @@ public abstract class AbstractRootContainer extends AbstractRoot implements Cont
     }
 
     private Control findControl(ControlAddress address) {
-        Component comp = findComponent(address.getComponentAddress());
+        Component comp = findComponent(address.component());
         if (comp != null) {
-            return comp.getControl(address.getID());
+            return comp.getControl(address.controlID());
         } else {
             return null;
         }

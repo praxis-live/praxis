@@ -140,7 +140,7 @@ class SlaveCoreRoot extends BasicCoreRoot {
 
     @Override
     protected void processCall(Call call, PacketRouter router) {
-        if (call.to().getComponentAddress().equals(getAddress())) {
+        if (call.to().component().equals(getAddress())) {
             super.processCall(call, router);
         } else {
             dispatcher.handleCall(call);
@@ -279,12 +279,12 @@ class SlaveCoreRoot extends BasicCoreRoot {
 
         @Override
         ControlAddress getAddRootAddress() {
-            return ControlAddress.create(getAddress(), RootManagerService.ADD_ROOT);
+            return ControlAddress.of(getAddress(), RootManagerService.ADD_ROOT);
         }
 
         @Override
         ControlAddress getRemoveRootAddress() {
-            return ControlAddress.create(getAddress(), RootManagerService.REMOVE_ROOT);
+            return ControlAddress.of(getAddress(), RootManagerService.REMOVE_ROOT);
         }
 
     }
