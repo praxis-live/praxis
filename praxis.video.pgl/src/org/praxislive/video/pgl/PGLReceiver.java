@@ -37,6 +37,7 @@ import processing.core.PGraphics;
  *
  * @author neilcsmith
  */
+@Deprecated
 public final class PGLReceiver extends AbstractExecutionContextComponent {
     
     private final Delegator delegator;

@@ -29,6 +29,7 @@ import org.praxislive.impl.AbstractComponentFactory;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
+@Deprecated
 public class PGLComponentFactoryProvider implements ComponentFactoryProvider {
 
 
@@ -47,8 +48,8 @@ public class PGLComponentFactoryProvider implements ComponentFactoryProvider {
         private void build() {      
 
             addComponent("video:gl:filter", data(PGLFilter.class).deprecated());
-            addComponent("video:gl:receive", data(PGLReceiver.class));
-            addComponent("video:gl:send", data(PGLSender.class));
+            addComponent("video:gl:receive", data(PGLReceiver.class).deprecated());
+            addComponent("video:gl:send", data(PGLSender.class).deprecated());
         }
 
     }

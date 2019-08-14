@@ -43,6 +43,7 @@ import processing.opengl.PShader;
  *
  * @author Neil C Smith (http://neilcsmith.net)
  */
+@Deprecated
 public class PGLFilter extends AbstractExecutionContextComponent {
 
     private final static Logger LOG = Logger.getLogger(PGLFilter.class.getName());

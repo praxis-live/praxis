@@ -38,6 +38,7 @@ import processing.core.PGraphics;
  *
  * @author neilcsmith
  */
+@Deprecated
 public final class PGLSender extends AbstractExecutionContextComponent {
     
     private final Delegator delegator;
