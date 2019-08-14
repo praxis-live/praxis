@@ -62,7 +62,7 @@ public class AbstractRootIT {
                 hub.getClock().getTime() + TimeUnit.SECONDS.toNanos(1)));
         try {
             Call reply = (Call) responseQueue.poll(2, TimeUnit.SECONDS);
-            assertSame("OK", reply.getArgs().get(0).toString());
+            assertSame("OK", reply.args().get(0).toString());
         } catch (Exception ex) {
             fail();
         }
@@ -80,7 +80,7 @@ public class AbstractRootIT {
                 hub.getClock().getTime() + TimeUnit.SECONDS.toNanos(1)));
         try {
             Call reply = (Call) responseQueue.poll(2, TimeUnit.SECONDS);
-            assertSame("OK", reply.getArgs().get(0).toString());
+            assertSame("OK", reply.args().get(0).toString());
         } catch (Exception ex) {
             fail();
         }
@@ -95,7 +95,7 @@ public class AbstractRootIT {
         }
 
         public void processCall(Call call, PacketRouter router) {
-            router.route(Call.createReturnCall(call, PString.of("OK")));
+            router.route(call.reply(PString.of("OK")));
         }
     }
     
@@ -123,7 +123,7 @@ public class AbstractRootIT {
 
         public void processCall(Call call, PacketRouter router) {
             assertEquals(del.active, Thread.currentThread());
-            router.route(Call.createReturnCall(call, PString.of("OK")));
+            router.route(call.reply(PString.of("OK")));
         }
         
         class Delegate extends AbstractRoot.Delegate {
