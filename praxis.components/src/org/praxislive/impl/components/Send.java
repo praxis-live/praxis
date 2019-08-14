@@ -48,6 +48,7 @@ import org.praxislive.logging.LogService;
  * @author Neil C Smith (http://neilcsmith.net)
  *
  */
+@Deprecated
 public class Send extends AbstractComponent {
 
     private final LogControl LOG;

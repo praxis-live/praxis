@@ -26,9 +26,12 @@ import java.util.Optional;
 import java.util.Random;
 import org.praxislive.code.userapi.Constants;
 import org.praxislive.code.userapi.Property;
+import org.praxislive.core.Call;
 import org.praxislive.core.Component;
+import org.praxislive.core.ComponentAddress;
 import org.praxislive.core.Container;
 import org.praxislive.core.Control;
+import org.praxislive.core.ControlAddress;
 import org.praxislive.core.ControlPort;
 import org.praxislive.core.Lookup;
 import org.praxislive.core.Port;
@@ -187,6 +190,96 @@ public class DefaultCodeDelegate extends CodeDelegate {
             return null;
         }
     }
+    
+    /**
+     * Send a message to a Control.
+     * 
+     * @param destination address of control
+     * @param value message value
+     */
+    public final void tell(ControlAddress destination, String value) {
+        tell(destination, PString.of(value));
+    }
+
+    /**
+     * Send a message to a Control.
+     * 
+     * @param destination address of control
+     * @param value message value
+     */
+    public final void tell(ControlAddress destination, double value) {
+        tell(destination, PNumber.of(value));
+    }
+
+    /**
+     * Send a message to a Control.
+     * 
+     * @param destination address of control
+     * @param value message value
+     */
+    public final void tell(ControlAddress destination, Value value) {
+        Call call = Call.createQuiet(destination, self("_log"), getContext().getTime(), value);
+        getContext().getComponent().getPacketRouter().route(call);
+    }
+    
+    /**
+     * Send a message to a Control in the given number of seconds or fractions
+     * of second from now.
+     * 
+     * @param seconds from now
+     * @param destination address of control
+     * @param value message value
+     */
+    public final void tellIn(double seconds, ControlAddress destination, String value) {
+        tellIn(seconds, destination, PString.of(value));
+    }
+
+    /**
+     * Send a message to a Control in the given number of seconds or fractions
+     * of second from now.
+     * 
+     * @param seconds from now
+     * @param destination address of control
+     * @param value message value
+     */
+    public final void tellIn(double seconds, ControlAddress destination, double value) {
+        tellIn(seconds, destination, PNumber.of(value));
+    }
+
+    /**
+     * Send a message to a Control in the given number of seconds or fractions
+     * of second from now.
+     * 
+     * @param seconds from now
+     * @param destination address of control
+     * @param value message value
+     */
+    public final void tellIn(double seconds, ControlAddress destination, Value value) {
+        long time = getContext().getTime() + ((long) (seconds * 1_000_000_000));
+        Call call = Call.createQuiet(destination, self("_log"), time, value);
+        getContext().getComponent().getPacketRouter().route(call);
+    }
+
+    /**
+     * Get this component's address.
+     * 
+     * @return address of self
+     */
+    public final ComponentAddress self() {
+        return getContext().getComponent().getAddress();
+    }
+
+    /**
+     * Get the address of a control on this component.
+     * 
+     * @param control id of control
+     * @return address of control
+     */
+    public final ControlAddress self(String control) {
+        return ControlAddress.of(self(), control);
+    }
+    
+    
     
     /**
      * Return a Lookup for finding instances of features.

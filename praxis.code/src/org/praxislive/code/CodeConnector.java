@@ -223,6 +223,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     protected void addDefaultControls() {
         addControl(createInfoControl(Integer.MIN_VALUE));
         addControl(createCodeControl(Integer.MIN_VALUE + 1));
+        addControl(new LogControl.Descriptor(Integer.MIN_VALUE + 2));
     }
 
     protected ControlDescriptor createInfoControl(int index) {
@@ -232,7 +233,7 @@ public abstract class CodeConnector<D extends CodeDelegate> {
     protected ControlDescriptor createCodeControl(int index) {
         return new CodeProperty.Descriptor<>(factory, index);
     }
-
+    
     protected void addDefaultPorts() {
         // no op hook
     }

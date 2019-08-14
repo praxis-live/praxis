@@ -31,6 +31,7 @@ import org.praxislive.impl.DefaultControlOutputPort;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public class StartTrigger extends AbstractExecutionContextComponent {
 
     private DefaultControlOutputPort output;

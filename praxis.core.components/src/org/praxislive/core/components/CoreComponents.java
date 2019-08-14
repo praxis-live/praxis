@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -55,6 +55,7 @@ public class CoreComponents implements ComponentFactoryProvider {
             // built-in
             // CORE
             add("core:property", CoreProperty.class, CoreProperty.TEMPLATE_PATH);
+            add("core:start-trigger", CoreStartTrigger.class, CoreStartTrigger.TEMPLATE_PATH);
             add("core:variable", CoreVariable.class, CoreVariable.TEMPLATE_PATH);
 
             // ARRAY
@@ -74,6 +75,7 @@ public class CoreComponents implements ComponentFactoryProvider {
             add("core:routing:inhibitor", CoreRoutingInhibitor.class, CoreRoutingInhibitor.TEMPLATE_PATH);
             add("core:routing:join", CoreRoutingJoin.class, CoreRoutingJoin.TEMPLATE_PATH);
             add("core:routing:order", CoreRoutingOrder.class, CoreRoutingOrder.TEMPLATE_PATH);
+            add("core:routing:send", CoreRoutingSend.class, CoreRoutingSend.TEMPLATE_PATH);
 
             // TIMING
             add("core:timing:animator", CoreTimingAnimator.class, CoreTimingAnimator.TEMPLATE_PATH);

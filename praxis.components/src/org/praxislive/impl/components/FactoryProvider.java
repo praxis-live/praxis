@@ -44,10 +44,10 @@ public class FactoryProvider implements ComponentFactoryProvider {
         }
 
         private void build() {
-            addComponent("core:start-trigger", StartTrigger.class);
+//            addComponent("core:start-trigger", StartTrigger.class);
 
             //ROUTING
-            addComponent("core:routing:send", Send.class);
+//            addComponent("core:routing:send", Send.class);
 
             // CONTAINER
             addComponent("core:container", data(UserContainer.class));
