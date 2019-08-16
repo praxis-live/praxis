@@ -45,9 +45,8 @@ public class CoreRoutingSend extends CoreCodeDelegate {
 
     // PXJ-BEGIN:body
     
-    @P(1) Optional<ControlAddress> address;
-    @P(2) @Transient @Deprecated
-    boolean logErrors;
+    @P(1) @Config.Port(false) Optional<ControlAddress> address;
+    @P(2) @Transient @Deprecated @Config.Port(false) boolean logErrors;
     
     @In(1) void in(Value value) {
         address.ifPresent(destination -> tell(destination, value));
