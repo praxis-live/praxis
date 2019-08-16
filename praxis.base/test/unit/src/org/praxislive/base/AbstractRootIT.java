@@ -137,7 +137,7 @@ public class AbstractRootIT {
             
             void start() {
                 active = getThreadFactory().newThread(() -> {
-                    while (doUpdate(hub.getClock().getTime(), true)) {
+                    while (doUpdate(hub.getClock().getTime())) {
                         try {
                             doTimedPoll(1, TimeUnit.MILLISECONDS);
                         } catch (InterruptedException ex) {

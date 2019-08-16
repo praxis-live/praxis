@@ -21,6 +21,9 @@
  */
 package org.praxislive.base;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
@@ -28,6 +31,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -72,6 +76,7 @@ public abstract class AbstractRoot implements Root {
     private final AtomicReference<State> state;
     private final AtomicReference<Delegate> delegate;
     private final Queue<Object> queue;
+    private final Queue<Object> pending;
     private final Lock lock;
 
     private volatile long time;
@@ -93,6 +98,7 @@ public abstract class AbstractRoot implements Root {
         state = new AtomicReference<>(State.NEW);
         delegate = new AtomicReference<>();
         queue = new ConcurrentLinkedQueue<>();
+        pending = new ArrayDeque<>();
         lock = new ReentrantLock();
         lookup = Lookup.EMPTY;
     }
@@ -396,10 +402,12 @@ public abstract class AbstractRoot implements Root {
         }
 
         long now = context.time;
-        Object obj = queue.poll();
-
-        while (obj != null) {
-
+        
+        for (Object obj = queue.poll(); obj != null; obj = queue.poll()) {
+            pending.add(obj);
+        }
+        
+        for (Object obj = pending.poll(); obj != null; obj = pending.poll()) {
             if (obj instanceof Packet) {
                 Packet pkt = (Packet) obj;
                 if ((pkt.time() - now) > 0) {
@@ -420,8 +428,6 @@ public abstract class AbstractRoot implements Root {
             if (interrupted) {
                 break;
             }
-
-            obj = queue.poll();
 
         }
 
@@ -455,6 +461,8 @@ public abstract class AbstractRoot implements Root {
      */
     protected class Controller implements Root.Controller {
 
+        private final AtomicBoolean updateQueued = new AtomicBoolean();
+        
         private ScheduledExecutorService exec;
         private ScheduledFuture<?> updateTask;
         private ThreadFactory threadFactory;
@@ -503,7 +511,9 @@ public abstract class AbstractRoot implements Root {
             if (del != null) {
                 del.onQueueReceipt();
             } else {
-                exec.execute(this::doPoll);
+                if (updateQueued.compareAndSet(false, true)) {
+                    exec.execute(this::doPoll);
+                }
             }
         }
 
@@ -544,6 +554,7 @@ public abstract class AbstractRoot implements Root {
         }
 
         private void doPoll() {
+            updateQueued.set(false);
             Delegate del = delegate.get();
             if (del != null) {
                 // do nothing
@@ -621,15 +632,14 @@ public abstract class AbstractRoot implements Root {
          *
          * @param time new clock time (directly from or related to
          * {@link RootHub#getClock()}
-         * @param poll whether to poll the queue as part of the update
          * @return false if the Root has been terminated or the delegate
          * detached
          */
-        protected final boolean doUpdate(long time, boolean poll) {
+        protected final boolean doUpdate(long time) {
             if (delegate.get() == this) {
                 if (lock.tryLock()) {
                     try {
-                        return update(time, poll);
+                        return update(time, true);
                     } catch (Throwable t) {
                         LOG.log(Level.SEVERE, "Uncaught error", t);
                     } finally {
