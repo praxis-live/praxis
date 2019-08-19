@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -575,7 +575,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final double abs(double n) {
-        return (n < 0) ? -n : n;
+        return Math.abs(n);
     }
 
     /**
@@ -646,7 +646,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final int max(int a, int b) {
-        return PApplet.max(a, b);
+        return Math.max(a, b);
     }
 
     /**
@@ -658,17 +658,24 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final int max(int a, int b, int c) {
-        return PApplet.max(a, b, c);
+        return max(a, max(b, c));
     }
 
     /**
      * Calculate the maximum value in the provided array.
      *
-     * @param list value list - must not be empty
+     * @param values value list - must not be empty
      * @return maximum value
      */
-    public final int max(int[] values) {
-        return PApplet.max(values);
+    public final int max(int ... values) {
+        if (values.length == 0) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        int value = values[0];
+        for (int i = 1; i < values.length; i++) {
+            value = max(value, values[i]);
+        }
+        return value;
     }
 
     /**
@@ -679,7 +686,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final double max(double a, double b) {
-        return (a > b) ? a : b;
+        return Math.max(a, b);
     }
 
     /**
@@ -691,26 +698,24 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final double max(double a, double b, double c) {
-        return (a > b) ? ((a > c) ? a : c) : ((b > c) ? b : c);
+        return max(a, max(b, c));
     }
 
     /**
      * Calculate the maximum value in the provided array.
      *
-     * @param list value list - must not be empty
+     * @param values value list - must not be empty
      * @return maximum value
      */
-    public final double max(double[] values) {
+    public final double max(double ... values) {
         if (values.length == 0) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        double max = values[0];
+        double value = values[0];
         for (int i = 1; i < values.length; i++) {
-            if (values[i] > max) {
-                max = values[i];
-            }
+            value = max(value, values[i]);
         }
-        return max;
+        return value;
     }
 
     /**
@@ -721,7 +726,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final int min(int a, int b) {
-        return PApplet.min(a, b);
+        return Math.min(a, b);
     }
 
     /**
@@ -733,17 +738,24 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final int min(int a, int b, int c) {
-        return PApplet.min(a, b, c);
+        return min(a, min(b, c));
     }
 
     /**
      * Calculate the minimum value in the provided array.
      *
-     * @param list value list - must not be empty
+     * @param values value list - must not be empty
      * @return minimum value
      */
-    public final int min(int[] values) {
-        return PApplet.min(values);
+    public final int min(int ... values) {
+        if (values.length == 0) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        int value = values[0];
+        for (int i = 1; i < values.length; i++) {
+            value = min(value, values[i]);
+        }
+        return value;
     }
 
     /**
@@ -754,7 +766,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final double min(double a, double b) {
-        return (a < b) ? a : b;
+        return Math.min(a, b);
     }
 
     /**
@@ -766,26 +778,24 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @return
      */
     public final double min(double a, double b, double c) {
-        return (a < b) ? ((a < c) ? a : c) : ((b < c) ? b : c);
+        return min(a, min(b, c));
     }
 
     /**
      * Calculate the minimum value in the provided array.
      *
-     * @param list value list - must not be empty
+     * @param values value list - must not be empty
      * @return minimum value
      */
-    public final double min(double[] list) {
-        if (list.length == 0) {
+    public final double min(double ... values) {
+        if (values.length == 0) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        double min = list[0];
-        for (int i = 1; i < list.length; i++) {
-            if (list[i] < min) {
-                min = list[i];
-            }
+        double value = values[0];
+        for (int i = 1; i < values.length; i++) {
+            value = min(value, values[i]);
         }
-        return min;
+        return value;
     }
 
     /**
@@ -1199,6 +1209,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * 
      * @return
      */
+    @Deprecated
     public final int minute() {
         return PApplet.minute();
     }
@@ -1208,6 +1219,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * 
      * @return
      */
+    @Deprecated
     public final int hour() {
         return PApplet.hour();
     }
@@ -1217,6 +1229,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * 
      * @return
      */
+    @Deprecated
     public final int day() {
         return PApplet.day();
     }
@@ -1226,6 +1239,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * 
      * @return
      */
+    @Deprecated
     public final int month() {
         return PApplet.month();
     }
@@ -1235,6 +1249,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * 
      * @return
      */
+    @Deprecated
     public final int year() {
         return PApplet.year();
     }
@@ -1245,6 +1260,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final byte[] sort(byte[] list) {
         return PApplet.sort(list);
     }
@@ -1257,6 +1273,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final byte[] sort(byte[] list, int count) {
         return PApplet.sort(list, count);
     }
@@ -1267,6 +1284,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final char[] sort(char[] list) {
         return PApplet.sort(list);
     }
@@ -1279,6 +1297,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final char[] sort(char[] list, int count) {
         return PApplet.sort(list, count);
     }
@@ -1289,6 +1308,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final int[] sort(int[] list) {
         return PApplet.sort(list);
     }
@@ -1301,6 +1321,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final int[] sort(int[] list, int count) {
         return PApplet.sort(list, count);
     }
@@ -1311,6 +1332,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final float[] sort(float[] list) {
         return PApplet.sort(list);
     }
@@ -1323,6 +1345,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final float[] sort(float[] list, int count) {
         return PApplet.sort(list, count);
     }
@@ -1333,6 +1356,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final double[] sort(double[] list) {
         return sort(list, list.length);
     }
@@ -1345,6 +1369,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final double[] sort(double[] list, int count) {
         double[] outgoing = new double[list.length];
         System.arraycopy(list, 0, outgoing, 0, list.length);
@@ -1358,6 +1383,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final String[] sort(String[] list) {
         return PApplet.sort(list);
     }
@@ -1370,6 +1396,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final String[] sort(String[] list, int count) {
         return PApplet.sort(list, count);
     }
@@ -1386,6 +1413,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param dstPosition
      * @param length
      */
+    @Deprecated
     public final void arrayCopy(Object src, int srcPosition, Object dst, int dstPosition, int length) {
         PApplet.arrayCopy(src, srcPosition, dst, dstPosition, length);
     }
@@ -1399,6 +1427,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param dst
      * @param length
      */
+    @Deprecated
     public final void arrayCopy(Object src, Object dst, int length) {
         PApplet.arrayCopy(src, dst, length);
     }
@@ -1409,6 +1438,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param src
      * @param dst
      */
+    @Deprecated
     public final void arrayCopy(Object src, Object dst) {
         PApplet.arrayCopy(src, dst);
     }
@@ -1419,6 +1449,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final boolean[] expand(boolean[] list) {
         return PApplet.expand(list);
     }
@@ -1430,6 +1461,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param newSize
      * @return
      */
+    @Deprecated
     public final boolean[] expand(boolean[] list, int newSize) {
         return PApplet.expand(list, newSize);
     }
@@ -1440,6 +1472,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final byte[] expand(byte[] list) {
         return PApplet.expand(list);
     }
@@ -1451,6 +1484,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param newSize
      * @return
      */
+    @Deprecated
     public final byte[] expand(byte[] list, int newSize) {
         return PApplet.expand(list, newSize);
     }
@@ -1461,6 +1495,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final char[] expand(char[] list) {
         return PApplet.expand(list);
     }
@@ -1472,6 +1507,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param newSize
      * @return
      */
+    @Deprecated
     public final char[] expand(char[] list, int newSize) {
         return PApplet.expand(list, newSize);
     }
@@ -1482,6 +1518,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final int[] expand(int[] list) {
         return PApplet.expand(list);
     }
@@ -1493,6 +1530,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param newSize
      * @return
      */
+    @Deprecated
     public final int[] expand(int[] list, int newSize) {
         return PApplet.expand(list, newSize);
     }
@@ -1503,6 +1541,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final long[] expand(long[] list) {
         return PApplet.expand(list);
     }
@@ -1514,6 +1553,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param newSize
      * @return
      */
+    @Deprecated
     public final long[] expand(long[] list, int newSize) {
         return PApplet.expand(list, newSize);
     }
@@ -1524,6 +1564,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final float[] expand(float[] list) {
         return PApplet.expand(list);
     }
@@ -1535,6 +1576,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param newSize
      * @return
      */
+    @Deprecated
     public final float[] expand(float[] list, int newSize) {
         return PApplet.expand(list, newSize);
     }
@@ -1545,6 +1587,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final double[] expand(double[] list) {
         return PApplet.expand(list);
     }
@@ -1556,6 +1599,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param newSize
      * @return
      */
+    @Deprecated
     public final double[] expand(double[] list, int newSize) {
         return PApplet.expand(list, newSize);
     }
@@ -1566,6 +1610,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final String[] expand(String[] list) {
         return PApplet.expand(list);
     }
@@ -1577,6 +1622,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param newSize
      * @return
      */
+    @Deprecated
     public final String[] expand(String[] list, int newSize) {
         return PApplet.expand(list, newSize);
     }
@@ -1587,6 +1633,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param array
      * @return
      */
+    @Deprecated
     public final Object expand(Object array) {
         return PApplet.expand(array);
     }
@@ -1598,6 +1645,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param newSize
      * @return
      */
+    @Deprecated
     public final Object expand(Object list, int newSize) {
         return PApplet.expand(list, newSize);
     }
@@ -1609,6 +1657,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final byte[] append(byte[] array, byte value) {
         return PApplet.append(array, value);
     }
@@ -1620,6 +1669,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final char[] append(char[] array, char value) {
         return PApplet.append(array, value);
     }
@@ -1631,6 +1681,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final int[] append(int[] array, int value) {
         return PApplet.append(array, value);
     }
@@ -1642,6 +1693,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final float[] append(float[] array, float value) {
         return PApplet.append(array, value);
     }
@@ -1653,6 +1705,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final double[] append(double array[], double value) {
         array = expand(array, array.length + 1);
         array[array.length - 1] = value;
@@ -1666,6 +1719,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final String[] append(String[] array, String value) {
         return PApplet.append(array, value);
     }
@@ -1677,6 +1731,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final PArray append(PArray array, Value value) {
         return PArray.append(array, value);
     }
@@ -1688,6 +1743,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final PArray append(PArray array, String value) {
         return PArray.append(array, PString.of(value));
     }
@@ -1699,6 +1755,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final PArray append(PArray array, double value) {
         return PArray.append(array, PNumber.of(value));
     }
@@ -1710,6 +1767,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final Object append(Object array, Object value) {
         return PApplet.append(array, value);
     }
@@ -1720,6 +1778,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final boolean[] shorten(boolean[] list) {
         return PApplet.shorten(list);
     }
@@ -1730,6 +1789,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final byte[] shorten(byte[] list) {
         return PApplet.shorten(list);
     }
@@ -1740,6 +1800,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final char[] shorten(char[] list) {
         return PApplet.shorten(list);
     }
@@ -1750,6 +1811,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final int[] shorten(int[] list) {
         return PApplet.shorten(list);
     }
@@ -1760,6 +1822,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final float[] shorten(float[] list) {
         return PApplet.shorten(list);
     }
@@ -1770,6 +1833,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final double[] shorten(double list[]) {
         return subset(list, 0, list.length - 1);
     }
@@ -1780,6 +1844,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final String[] shorten(String[] list) {
         return PApplet.shorten(list);
     }
@@ -1790,6 +1855,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final Object shorten(Object list) {
         return PApplet.shorten(list);
     }
@@ -1802,6 +1868,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final boolean[] splice(boolean[] list, boolean value, int index) {
         return PApplet.splice(list, value, index);
     }
@@ -1814,6 +1881,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final boolean[] splice(boolean[] list, boolean[] value, int index) {
         return PApplet.splice(list, value, index);
     }
@@ -1826,6 +1894,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final byte[] splice(byte[] list, byte value, int index) {
         return PApplet.splice(list, value, index);
     }
@@ -1838,6 +1907,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final byte[] splice(byte[] list, byte[] value, int index) {
         return PApplet.splice(list, value, index);
     }
@@ -1850,6 +1920,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final char[] splice(char[] list, char value, int index) {
         return PApplet.splice(list, value, index);
     }
@@ -1862,6 +1933,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final char[] splice(char[] list, char[] value, int index) {
         return PApplet.splice(list, value, index);
     }
@@ -1874,6 +1946,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final int[] splice(int[] list, int value, int index) {
         return PApplet.splice(list, value, index);
     }
@@ -1886,6 +1959,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final int[] splice(int[] list, int[] value, int index) {
         return PApplet.splice(list, value, index);
     }
@@ -1898,6 +1972,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final float[] splice(float[] list, float value, int index) {
         return PApplet.splice(list, value, index);
     }
@@ -1910,6 +1985,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final float[] splice(float[] list, float[] value, int index) {
         return PApplet.splice(list, value, index);
     }
@@ -1922,6 +1998,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final double[] splice(double list[],
             double value, int index) {
         double[] outgoing = new double[list.length + 1];
@@ -1940,6 +2017,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final double[] splice(double list[],
             double value[], int index) {
         double[] outgoing = new double[list.length + value.length];
@@ -1958,6 +2036,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final String[] splice(String[] list, String value, int index) {
         return PApplet.splice(list, value, index);
     }
@@ -1970,6 +2049,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final String[] splice(String[] list, String[] value, int index) {
         return PApplet.splice(list, value, index);
     }
@@ -1982,6 +2062,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final PArray splice(PArray array, Value value, int index) {
         return PArray.insert(array, index, value);
     }
@@ -1994,6 +2075,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final PArray splice(PArray array, String value, int index) {
         return PArray.insert(array, index, PString.of(value));
     }
@@ -2006,6 +2088,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final PArray splice(PArray array, double value, int index) {
         return PArray.insert(array, index, PNumber.of(value));
     }
@@ -2018,6 +2101,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param index
      * @return
      */
+    @Deprecated
     public final Object splice(Object list, Object value, int index) {
         return PApplet.splice(list, value, index);
     }
@@ -2029,6 +2113,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param start
      * @return
      */
+    @Deprecated
     public final boolean[] subset(boolean[] list, int start) {
         return PApplet.subset(list, start);
     }
@@ -2042,6 +2127,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final boolean[] subset(boolean[] list, int start, int count) {
         return PApplet.subset(list, start, count);
     }
@@ -2053,6 +2139,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param start
      * @return
      */
+    @Deprecated
     public final byte[] subset(byte[] list, int start) {
         return PApplet.subset(list, start);
     }
@@ -2066,6 +2153,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final byte[] subset(byte[] list, int start, int count) {
         return PApplet.subset(list, start, count);
     }
@@ -2077,6 +2165,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param start
      * @return
      */
+    @Deprecated
     public final char[] subset(char[] list, int start) {
         return PApplet.subset(list, start);
     }
@@ -2090,6 +2179,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final char[] subset(char[] list, int start, int count) {
         return PApplet.subset(list, start, count);
     }
@@ -2101,6 +2191,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param start
      * @return
      */
+    @Deprecated
     public final int[] subset(int[] list, int start) {
         return PApplet.subset(list, start);
     }
@@ -2114,6 +2205,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final int[] subset(int[] list, int start, int count) {
         return PApplet.subset(list, start, count);
     }
@@ -2125,6 +2217,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param start
      * @return
      */
+    @Deprecated
     public final float[] subset(float[] list, int start) {
         return PApplet.subset(list, start);
     }
@@ -2138,6 +2231,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final float[] subset(float[] list, int start, int count) {
         return PApplet.subset(list, start, count);
     }
@@ -2149,6 +2243,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param start
      * @return
      */
+    @Deprecated
     public final double[] subset(double list[], int start) {
         return subset(list, start, list.length - start);
     }
@@ -2162,6 +2257,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final double[] subset(double list[], int start, int count) {
         double output[] = new double[count];
         System.arraycopy(list, start, output, 0, count);
@@ -2175,6 +2271,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param start
      * @return
      */
+    @Deprecated
     public final String[] subset(String[] list, int start) {
         return PApplet.subset(list, start);
     }
@@ -2188,6 +2285,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final String[] subset(String[] list, int start, int count) {
         return PApplet.subset(list, start, count);
     }
@@ -2199,6 +2297,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param start
      * @return
      */
+    @Deprecated
     public final PArray subset(PArray array, int start) {
         return subset(array, start, array.size() - start);
     }
@@ -2212,6 +2311,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final PArray subset(PArray array, int start, int count) {
         return PArray.subset(array, start, count);
     }
@@ -2223,6 +2323,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param start
      * @return
      */
+    @Deprecated
     public final Object subset(Object list, int start) {
         return PApplet.subset(list, start);
     }
@@ -2236,6 +2337,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param count
      * @return
      */
+    @Deprecated
     public final Object subset(Object list, int start, int count) {
         return PApplet.subset(list, start, count);
     }
@@ -2247,6 +2349,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param b
      * @return
      */
+    @Deprecated
     public final boolean[] concat(boolean[] a, boolean[] b) {
         return PApplet.concat(a, b);
     }
@@ -2258,6 +2361,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param b
      * @return
      */
+    @Deprecated
     public final byte[] concat(byte[] a, byte[] b) {
         return PApplet.concat(a, b);
     }
@@ -2269,6 +2373,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param b
      * @return
      */
+    @Deprecated
     public final char[] concat(char[] a, char[] b) {
         return PApplet.concat(a, b);
     }
@@ -2280,6 +2385,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param b
      * @return
      */
+    @Deprecated
     public final int[] concat(int[] a, int[] b) {
         return PApplet.concat(a, b);
     }
@@ -2291,6 +2397,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param b
      * @return
      */
+    @Deprecated
     public final float[] concat(float[] a, float[] b) {
         return PApplet.concat(a, b);
     }
@@ -2302,6 +2409,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param b
      * @return
      */
+    @Deprecated
     public final double[] concat(double a[], double b[]) {
         double c[] = new double[a.length + b.length];
         System.arraycopy(a, 0, c, 0, a.length);
@@ -2316,6 +2424,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param b
      * @return
      */
+    @Deprecated
     public final String[] concat(String[] a, String[] b) {
         return PApplet.concat(a, b);
     }
@@ -2327,6 +2436,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param b
      * @return
      */
+    @Deprecated
     public final PArray concat(PArray a, PArray b) {
         return PArray.concat(a, b);
     }
@@ -2338,6 +2448,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param b
      * @return
      */
+    @Deprecated
     public final Object concat(Object a, Object b) {
         return PApplet.concat(a, b);
     }
@@ -2348,6 +2459,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final boolean[] reverse(boolean[] list) {
         return PApplet.reverse(list);
     }
@@ -2358,6 +2470,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final byte[] reverse(byte[] list) {
         return PApplet.reverse(list);
     }
@@ -2368,6 +2481,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final char[] reverse(char[] list) {
         return PApplet.reverse(list);
     }
@@ -2378,6 +2492,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final int[] reverse(int[] list) {
         return PApplet.reverse(list);
     }
@@ -2388,6 +2503,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final float[] reverse(float[] list) {
         return PApplet.reverse(list);
     }
@@ -2398,6 +2514,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final double[] reverse(double[] list) {
         double[] outgoing = new double[list.length];
         int length1 = list.length - 1;
@@ -2413,6 +2530,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final String[] reverse(String[] list) {
         return PApplet.reverse(list);
     }
@@ -2423,6 +2541,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param list
      * @return
      */
+    @Deprecated
     public final Object reverse(Object list) {
         return PApplet.reverse(list);
     }
@@ -2433,6 +2552,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param str
      * @return
      */
+    @Deprecated
     public final String trim(String str) {
         return PApplet.trim(str);
     }
@@ -2443,6 +2563,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param array
      * @return
      */
+    @Deprecated
     public final String[] trim(String[] array) {
         return PApplet.trim(array);
     }
@@ -2454,6 +2575,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param separator
      * @return
      */
+    @Deprecated
     public final String join(String[] list, char separator) {
         return PApplet.join(list, separator);
     }
@@ -2465,6 +2587,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param separator
      * @return
      */
+    @Deprecated
     public final String join(String[] list, String separator) {
         return PApplet.join(list, separator);
     }
@@ -2476,6 +2599,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final String[] splitTokens(String value) {
         return PApplet.splitTokens(value);
     }
@@ -2488,6 +2612,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param delim
      * @return
      */
+    @Deprecated
     public final String[] splitTokens(String value, String delim) {
         return PApplet.splitTokens(value, delim);
     }
@@ -2500,6 +2625,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param delim
      * @return
      */
+    @Deprecated
     public final String[] split(String value, char delim) {
         return PApplet.split(value, delim);
     }
@@ -2512,6 +2638,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param delim
      * @return
      */
+    @Deprecated
     public final String[] split(String value, String delim) {
         return PApplet.split(value, delim);
     }
@@ -2534,6 +2661,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param regexp
      * @return
      */
+    @Deprecated
     public final String[] match(String str, String regexp) {
         return PApplet.match(str, regexp);
     }
@@ -2544,6 +2672,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param regexp
      * @return
      */
+    @Deprecated
     public final String[][] matchAll(String str, String regexp) {
         return PApplet.matchAll(str, regexp);
     }
@@ -2820,6 +2949,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final String hex(byte value) {
         return PApplet.hex(value);
     }
@@ -2830,6 +2960,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final String hex(char value) {
         return PApplet.hex(value);
     }
@@ -2840,6 +2971,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final String hex(int value) {
         return PApplet.hex(value);
     }
@@ -2851,6 +2983,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param digits
      * @return
      */
+    @Deprecated
     public final String hex(int value, int digits) {
         return PApplet.hex(value, digits);
     }
@@ -2861,6 +2994,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final int unhex(String value) {
         return PApplet.unhex(value);
     }
@@ -2871,6 +3005,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final String binary(byte value) {
         return PApplet.binary(value);
     }
@@ -2881,6 +3016,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final String binary(char value) {
         return PApplet.binary(value);
     }
@@ -2891,6 +3027,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final String binary(int value) {
         return PApplet.binary(value);
     }
@@ -2902,6 +3039,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param digits
      * @return
      */
+    @Deprecated
     public final String binary(int value, int digits) {
         return PApplet.binary(value, digits);
     }
@@ -2912,6 +3050,7 @@ public class DefaultCodeDelegate extends CodeDelegate {
      * @param value
      * @return
      */
+    @Deprecated
     public final int unbinary(String value) {
         return PApplet.unbinary(value);
     }
