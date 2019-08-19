@@ -22,8 +22,11 @@
 package org.praxislive.data;
 
 import org.praxislive.base.AbstractRootContainer;
+import org.praxislive.base.BindingContextControl;
 import org.praxislive.core.ComponentInfo;
+import org.praxislive.core.ControlAddress;
 import org.praxislive.core.Info;
+import org.praxislive.core.Lookup;
 import org.praxislive.core.protocols.ComponentProtocol;
 import org.praxislive.core.protocols.ContainerProtocol;
 import org.praxislive.core.protocols.StartableProtocol;
@@ -43,6 +46,25 @@ public class DataRoot extends AbstractRootContainer {
                 .merge(ContainerProtocol.API_INFO)
                 .merge(StartableProtocol.API_INFO)
         );
+    }
+
+    private BindingContextControl bindings;
+
+    @Override
+    protected void activating() {
+        bindings = new BindingContextControl(ControlAddress.of(getAddress(), "_bindings"),
+                getExecutionContext(),
+                getRouter());
+        registerControl("_bindings", bindings);
+    }
+    
+    @Override
+    public Lookup getLookup() {
+        if (bindings != null) {
+            return Lookup.of(super.getLookup(), bindings);
+        } else {
+            return super.getLookup();
+        }
     }
 
     @Override
