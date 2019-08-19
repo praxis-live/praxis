@@ -22,8 +22,6 @@
 package org.praxislive.base;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
@@ -402,11 +400,11 @@ public abstract class AbstractRoot implements Root {
         }
 
         long now = context.time;
-        
+
         for (Object obj = queue.poll(); obj != null; obj = queue.poll()) {
             pending.add(obj);
         }
-        
+
         for (Object obj = pending.poll(); obj != null; obj = pending.poll()) {
             if (obj instanceof Packet) {
                 Packet pkt = (Packet) obj;
@@ -462,7 +460,7 @@ public abstract class AbstractRoot implements Root {
     protected class Controller implements Root.Controller {
 
         private final AtomicBoolean updateQueued = new AtomicBoolean();
-        
+
         private ScheduledExecutorService exec;
         private ScheduledFuture<?> updateTask;
         private ThreadFactory threadFactory;
@@ -597,8 +595,8 @@ public abstract class AbstractRoot implements Root {
     /**
      * An abstract delegate class that may be attached to this Root to drive it
      * from another source (eg. audio callback or UI event queue). Subclasses
-     * should call {@link #doUpdate(long, boolean)} regularly to update the
-     * clock time.
+     * should call {@link #doUpdate(long)} regularly to update the clock time
+     * and process pending tasks.
      * <p>
      * The delegate should prefer calling
      * {@link #doTimedPoll(long, java.util.concurrent.TimeUnit)} to thread
@@ -625,10 +623,7 @@ public abstract class AbstractRoot implements Root {
 
         /**
          * Update the Root time and process tasks, inbound calls and clock
-         * listeners. Delegates should only not request polling of the queue if
-         * they are regularly calling {@link #pollQueue()} or
-         * {@link #doTimedPoll(long, java.util.concurrent.TimeUnit)}. If in
-         * doubt, always poll.
+         * listeners.
          *
          * @param time new clock time (directly from or related to
          * {@link RootHub#getClock()}
