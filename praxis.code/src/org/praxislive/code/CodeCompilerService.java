@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -26,7 +26,6 @@ import org.praxislive.core.ArgumentInfo;
 import org.praxislive.core.ControlInfo;
 import org.praxislive.core.services.Service;
 import org.praxislive.core.types.PMap;
-import org.praxislive.core.types.PReference;
 
 /**
  *
@@ -37,8 +36,8 @@ public class CodeCompilerService implements Service {
     public final static String COMPILE = "compile";
     public final static ControlInfo COMPILE_INFO = 
             ControlInfo.createFunctionInfo(
-            new ArgumentInfo[]{PReference.info(PMap.class)},
-            new ArgumentInfo[]{PReference.info(PMap.class)},
+            new ArgumentInfo[]{ArgumentInfo.of(PMap.class)},
+            new ArgumentInfo[]{ArgumentInfo.of(PMap.class)},
             PMap.EMPTY);
 
     // parameter keys
