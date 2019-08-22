@@ -40,52 +40,72 @@ public class Constants {
     private Constants() {
     }
     
-    public final static BlendMode REPLACE = BlendMode.Replace;
-    public final static BlendMode BLEND = BlendMode.Blend;
-    public final static BlendMode ADD = BlendMode.Add;
-    public final static BlendMode SUBTRACT = BlendMode.Subtract;
-    public final static BlendMode MULTIPLY = BlendMode.Multiply;
+    public static final BlendMode REPLACE = BlendMode.Replace;
+    public static final BlendMode BLEND = BlendMode.Blend;
+    public static final BlendMode ADD = BlendMode.Add;
+    public static final BlendMode SUBTRACT = BlendMode.Subtract;
+    public static final BlendMode MULTIPLY = BlendMode.Multiply;
 
-    public final static DrawingMode CENTER = DrawingMode.Center;
-    public final static DrawingMode CORNER = DrawingMode.Corner;
-    public final static DrawingMode CORNERS = DrawingMode.Corners;
-    public final static DrawingMode RADIUS = DrawingMode.Radius;
+    public static final DrawingMode CENTER = DrawingMode.Center;
+    public static final DrawingMode CORNER = DrawingMode.Corner;
+    public static final DrawingMode CORNERS = DrawingMode.Corners;
+    public static final DrawingMode RADIUS = DrawingMode.Radius;
     
     //POINTS, Lines, TRIANGLES, TRIANGLE_FAN, TRIANGLE_STRIP, QUADS, or QUAD_STRIP
-    public final static ShapeMode POINTS = ShapeMode.Points;
-    public final static ShapeMode LINES = ShapeMode.Lines;
-    public final static ShapeMode TRIANGLES = ShapeMode.Triangles;
-    public final static ShapeMode TRIANGLE_FAN = ShapeMode.TriangleFan;
-    public final static ShapeMode TRIANGLE_STRIP = ShapeMode.TriangleStrip;
-    public final static ShapeMode QUADS = ShapeMode.Quads;
-    public final static ShapeMode QUAD_STRIP = ShapeMode.QuadStrip;
+    public static final ShapeMode POINTS = ShapeMode.Points;
+    public static final ShapeMode LINES = ShapeMode.Lines;
+    public static final ShapeMode TRIANGLES = ShapeMode.Triangles;
+    public static final ShapeMode TRIANGLE_FAN = ShapeMode.TriangleFan;
+    public static final ShapeMode TRIANGLE_STRIP = ShapeMode.TriangleStrip;
+    public static final ShapeMode QUADS = ShapeMode.Quads;
+    public static final ShapeMode QUAD_STRIP = ShapeMode.QuadStrip;
     
-    public final static TextureMode IMAGE = TextureMode.Image;
-    public final static TextureMode NORMAL = TextureMode.Normal;
+    public static final TextureMode IMAGE = TextureMode.Image;
+    public static final TextureMode NORMAL = TextureMode.Normal;
     
-    public final static TextureWrap CLAMP = TextureWrap.Clamp;
-    public final static TextureWrap REPEAT = TextureWrap.Repeat;
+    public static final TextureWrap CLAMP = TextureWrap.Clamp;
+    public static final TextureWrap REPEAT = TextureWrap.Repeat;
     
-    public final static ShapeEndMode OPEN = ShapeEndMode.Open;
-    public final static ShapeEndMode CLOSE = ShapeEndMode.Close;
+    public static final ShapeEndMode OPEN = ShapeEndMode.Open;
+    public static final ShapeEndMode CLOSE = ShapeEndMode.Close;
     
-    public final static ShapeType GROUP = ShapeType.Group;
-    public final static ShapeType PATH = ShapeType.Path;
-    public final static ShapeType GEOMETRY = ShapeType.Geometry;
+    public static final ShapeType GROUP = ShapeType.Group;
+    public static final ShapeType PATH = ShapeType.Path;
+    public static final ShapeType GEOMETRY = ShapeType.Geometry;
     
-    public final static ColorMode RGB = ColorMode.RGB;
-    public final static ColorMode HSB = ColorMode.HSB;
+    public static final ColorMode RGB = ColorMode.RGB;
+    public static final ColorMode HSB = ColorMode.HSB;
     
-    public final static String DEFAULT_VERTEX_SHADER = 
+    public static final String DEFAULT_VERTEX_SHADER = 
             ShaderConstants.DEFAULT_VERTEX_SHADER;
-    public final static String DEFAULT_FRAGMENT_SHADER = 
+    public static final String DEFAULT_FRAGMENT_SHADER = 
             ShaderConstants.DEFAULT_FRAGMENT_SHADER;
-    public final static String GLSL_VERTEX_MIME = "text/x-glsl-vert";
-    public final static String GLSL_FRAGMENT_MIME = "text/x-glsl-frag";
+    public static final String GLSL_VERTEX_MIME = "text/x-glsl-vert";
+    public static final String GLSL_FRAGMENT_MIME = "text/x-glsl-frag";
     
-    public final static Hint ENABLE_DEPTH_TEST = Hint.ENABLE_DEPTH_TEST;
-    public final static Hint DISABLE_DEPTH_TEST = Hint.DISABLE_DEPTH_TEST;
-
+    public static final Hint ENABLE_DEPTH_TEST = Hint.ENABLE_DEPTH_TEST;
+    public static final Hint DISABLE_DEPTH_TEST = Hint.DISABLE_DEPTH_TEST;
+    public static final Hint ENABLE_DEPTH_SORT = Hint.ENABLE_DEPTH_SORT;
+    public static final Hint DISABLE_DEPTH_SORT = Hint.DISABLE_DEPTH_SORT;
+    public static final Hint DISABLE_OPENGL_ERRORS = Hint.DISABLE_OPENGL_ERRORS;
+    public static final Hint ENABLE_OPENGL_ERRORS = Hint.ENABLE_OPENGL_ERRORS;
+    public static final Hint DISABLE_DEPTH_MASK = Hint.DISABLE_DEPTH_MASK;
+    public static final Hint ENABLE_DEPTH_MASK = Hint.ENABLE_DEPTH_MASK;
+    public static final Hint DISABLE_OPTIMIZED_STROKE = Hint.DISABLE_OPTIMIZED_STROKE;
+    public static final Hint ENABLE_OPTIMIZED_STROKE = Hint.ENABLE_OPTIMIZED_STROKE;
+    public static final Hint ENABLE_STROKE_PERSPECTIVE = Hint.ENABLE_STROKE_PERSPECTIVE;
+    public static final Hint DISABLE_STROKE_PERSPECTIVE = Hint.DISABLE_STROKE_PERSPECTIVE;
+    public static final Hint DISABLE_TEXTURE_MIPMAPS = Hint.DISABLE_TEXTURE_MIPMAPS;
+    public static final Hint ENABLE_TEXTURE_MIPMAPS = Hint.ENABLE_TEXTURE_MIPMAPS;
+    public static final Hint ENABLE_STROKE_PURE = Hint.ENABLE_STROKE_PURE;
+    public static final Hint DISABLE_STROKE_PURE = Hint.DISABLE_STROKE_PURE;
+    public static final Hint ENABLE_BUFFER_READING = Hint.ENABLE_BUFFER_READING;
+    public static final Hint DISABLE_BUFFER_READING = Hint.DISABLE_BUFFER_READING;
+    public static final Hint DISABLE_KEY_REPEAT = Hint.DISABLE_KEY_REPEAT;
+    public static final Hint ENABLE_KEY_REPEAT = Hint.ENABLE_KEY_REPEAT;
+    public static final Hint DISABLE_ASYNC_SAVEFRAME = Hint.DISABLE_ASYNC_SAVEFRAME;
+    public static final Hint ENABLE_ASYNC_SAVEFRAME = Hint.ENABLE_ASYNC_SAVEFRAME;
+    
     public static enum BlendMode {
 
         Replace(PConstants.REPLACE),
@@ -225,7 +245,37 @@ public class Constants {
     public static enum Hint {
         
         ENABLE_DEPTH_TEST(PConstants.ENABLE_DEPTH_TEST),
-        DISABLE_DEPTH_TEST(PConstants.DISABLE_DEPTH_TEST);
+        DISABLE_DEPTH_TEST(PConstants.DISABLE_DEPTH_TEST),
+
+        ENABLE_DEPTH_SORT(PConstants.ENABLE_DEPTH_SORT),
+        DISABLE_DEPTH_SORT(PConstants.DISABLE_DEPTH_SORT),
+
+        DISABLE_OPENGL_ERRORS(PConstants.DISABLE_OPENGL_ERRORS),
+        ENABLE_OPENGL_ERRORS(PConstants.ENABLE_OPENGL_ERRORS),
+
+        DISABLE_DEPTH_MASK(PConstants.DISABLE_DEPTH_MASK),
+        ENABLE_DEPTH_MASK(PConstants.ENABLE_DEPTH_MASK),
+        
+        DISABLE_OPTIMIZED_STROKE(PConstants.DISABLE_OPTIMIZED_STROKE),
+        ENABLE_OPTIMIZED_STROKE(PConstants.ENABLE_OPTIMIZED_STROKE),
+
+        ENABLE_STROKE_PERSPECTIVE(PConstants.ENABLE_STROKE_PERSPECTIVE),
+        DISABLE_STROKE_PERSPECTIVE(PConstants.DISABLE_STROKE_PERSPECTIVE),
+
+        DISABLE_TEXTURE_MIPMAPS(PConstants.DISABLE_TEXTURE_MIPMAPS),
+        ENABLE_TEXTURE_MIPMAPS(PConstants.ENABLE_TEXTURE_MIPMAPS),
+        
+        ENABLE_STROKE_PURE(PConstants.ENABLE_STROKE_PURE),
+        DISABLE_STROKE_PURE(PConstants.DISABLE_STROKE_PURE),
+        
+        ENABLE_BUFFER_READING(PConstants.ENABLE_BUFFER_READING),
+        DISABLE_BUFFER_READING(PConstants.DISABLE_BUFFER_READING),
+        
+        DISABLE_KEY_REPEAT(PConstants.DISABLE_KEY_REPEAT),
+        ENABLE_KEY_REPEAT(PConstants.ENABLE_KEY_REPEAT),
+        
+        DISABLE_ASYNC_SAVEFRAME(PConstants.DISABLE_ASYNC_SAVEFRAME),
+        ENABLE_ASYNC_SAVEFRAME(PConstants.ENABLE_ASYNC_SAVEFRAME);
         
         private final int value;
         
