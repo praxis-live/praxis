@@ -193,6 +193,11 @@ public class PGLGraphics3D extends PGraphics3D {
     public void style(PStyle s) {
         if (s == null) {
             defaultSettings();
+            sphereDetailU = 0;
+            sphereDetailV = 0;
+            for (int i = 1; i < HINT_COUNT; i++) {
+                hint(-i);
+            }
         } else {
             super.style(s);
         }
