@@ -120,6 +120,7 @@ class SlaveCoreRoot extends BasicCoreRoot {
                         SlaveCoreRoot.this.tick(source);
                     }
                 });
+        super.activating();
         setRunning();
     }
 
