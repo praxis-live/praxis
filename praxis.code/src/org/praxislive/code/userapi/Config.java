@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -42,6 +42,19 @@ public abstract class Config {
          * @return false to suppress port creation
          */
         boolean value();
+    }
+
+    /**
+     * Mark a feature as "preferred" - particularly important for presenting to
+     * humans.
+     * <p>
+     * This will add a key to the info for this feature. It is up to an editor
+     * whether to use or ignore this key (eg. the PraxisLIVE graph editor will
+     * show properties marked this way on the graph itself).
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Preferred {
+
     }
 
 }

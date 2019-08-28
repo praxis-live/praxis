@@ -23,6 +23,7 @@
 package org.praxislive.code;
 
 import java.util.List;
+import org.praxislive.code.userapi.Config;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import org.praxislive.code.userapi.Inject;
@@ -375,11 +376,20 @@ public class PropertyControl extends Property implements Control {
                 info = ControlInfo.createPropertyInfo(
                         new ArgumentInfo[]{binding.getArgumentInfo()},
                         new Value[]{binding.getDefaultValue()},
-                        field.isAnnotationPresent(Transient.class)
-                                ? PMap.of(ControlInfo.KEY_TRANSIENT, true)
-                                : PMap.EMPTY);
+                        buildProperties(field));
             }
             return new Descriptor(id, index, info, binding, propertyField, onChange, onError);
+        }
+        
+        private static PMap buildProperties(Field field) {
+            PMap.Builder builder = PMap.builder(2);
+            if (field.isAnnotationPresent(Transient.class)) {
+                builder.put(ControlInfo.KEY_TRANSIENT, true);
+            }
+            if (field.isAnnotationPresent(Config.Preferred.class)) {
+                builder.put("preferred", true);
+            }
+            return builder.build();
         }
 
         static Descriptor create(CodeConnector<?> connector, Inject ann, Field field) {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.praxislive.code.userapi.Config;
 import org.praxislive.code.userapi.OnChange;
 import org.praxislive.code.userapi.OnError;
 import org.praxislive.code.userapi.P;
@@ -64,6 +65,11 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
             new Value[]{PString.EMPTY},
             PMap.EMPTY);
 
+    private final static ControlInfo PREF_INFO = ControlInfo.createPropertyInfo(
+            new ArgumentInfo[]{PResource.info(true)},
+            new Value[]{PString.EMPTY},
+            PMap.of("preferred", true));
+
     private final Loader<V> loader;
     private Field field;
     private Method onChange;
@@ -93,7 +99,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
             context.getLog().log(LogLevel.ERROR, ex);
         }
     }
-    
+
     @Override
     protected TaskService.Task createTask(CallArguments keys) throws Exception {
         Value arg = keys.get(0);
@@ -173,19 +179,19 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
         }
 
         public abstract V load(URI uri) throws IOException;
-        
+
         public V getEmptyValue() {
             return null;
         }
 
     }
-    
+
     public static Loader<String> getStringLoader() {
         return StringLoader.INSTANCE;
     }
-    
+
     private static class StringLoader extends Loader<String> {
-        
+
         private final static StringLoader INSTANCE = new StringLoader();
 
         private StringLoader() {
@@ -209,7 +215,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
         public String getEmptyValue() {
             return "";
         }
-        
+
     }
 
     public static class Descriptor<V> extends ControlDescriptor {
@@ -217,6 +223,7 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
         private final Loader<V> loader;
         private final Field field;
         private final Method onChange, onError;
+        private final ControlInfo info;
 
         private ResourceProperty<V> control;
 
@@ -233,11 +240,13 @@ public final class ResourceProperty<V> extends AbstractAsyncProperty<V> {
             this.field = field;
             this.onChange = onChange;
             this.onError = onError;
+            this.info = field.isAnnotationPresent(Config.Preferred.class) ?
+                    PREF_INFO : INFO;
         }
 
         @Override
         public ControlInfo getInfo() {
-            return INFO;
+            return info;
         }
 
         @Override

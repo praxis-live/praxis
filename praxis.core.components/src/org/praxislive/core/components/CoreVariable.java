@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2018 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License version 3 only, as
@@ -45,7 +45,7 @@ public class CoreVariable extends CoreCodeDelegate {
 
     // PXJ-BEGIN:body
     
-    @P(1) Property value;
+    @P(1) @Config.Preferred Property value;
 
     @Out(1) Output out;
         
