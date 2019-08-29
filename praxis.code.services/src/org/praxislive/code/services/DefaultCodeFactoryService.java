@@ -165,12 +165,20 @@ public class DefaultCodeFactoryService extends AbstractRoot {
 
         @Override
         protected Call processResponse(Call call) throws Exception {
-            CodeFactory<CodeDelegate> codeFactory = findCodeFactory();
-            Class<? extends CodeDelegate> cls = extractCodeDelegateClass(call.getArgs().get(0));
-            CodeDelegate delegate = cls.newInstance();
-            CodeComponent<CodeDelegate> cmp = codeFactory.task().createComponent(delegate);
-            CODE_CACHE.putIfAbsent(new ClassCacheKey(codeFactory.getClassBodyContext(), codeFactory.getSourceTemplate()), cls);
-            return Call.createReturnCall(getActiveCall(), PReference.of(cmp));
+            try {
+                CodeFactory<CodeDelegate> codeFactory = findCodeFactory();
+                Class<? extends CodeDelegate> cls = extractCodeDelegateClass(call.getArgs().get(0));
+                CodeDelegate delegate = cls.newInstance();
+                CodeComponent<CodeDelegate> cmp = codeFactory.task().createComponent(delegate);
+                CODE_CACHE.putIfAbsent(new ClassCacheKey(codeFactory.getClassBodyContext(), codeFactory.getSourceTemplate()), cls);
+                return Call.createReturnCall(getActiveCall(), PReference.of(cmp));
+            } catch (Throwable throwable) {
+                if (throwable instanceof Exception) {
+                    throw (Exception) throwable;
+                } else {
+                    throw new Exception(throwable);
+                }
+            }
         }
 
         private CodeFactory<CodeDelegate> findCodeFactory() throws Exception {
@@ -227,13 +235,21 @@ public class DefaultCodeFactoryService extends AbstractRoot {
 
         @Override
         protected Call processResponse(Call call) throws Exception {
-            CodeContextFactoryService.Task<CodeDelegate> task = findTask();
-            Class<? extends CodeDelegate> cls = extractCodeDelegateClass(call.getArgs().get(0));
-            CodeDelegate delegate = cls.newInstance();
-            LogBuilder log = new LogBuilder(task.getLogLevel());
-            extractCompilerLog(call.getArgs().get(0), log);
-            return Call.createReturnCall(getActiveCall(),
-                    PReference.of(createContext(task, log, delegate)));
+            try {
+                CodeContextFactoryService.Task<CodeDelegate> task = findTask();
+                Class<? extends CodeDelegate> cls = extractCodeDelegateClass(call.getArgs().get(0));
+                CodeDelegate delegate = cls.newInstance();
+                LogBuilder log = new LogBuilder(task.getLogLevel());
+                extractCompilerLog(call.getArgs().get(0), log);
+                return Call.createReturnCall(getActiveCall(),
+                        PReference.of(createContext(task, log, delegate)));
+            } catch (Throwable throwable) {
+                if (throwable instanceof Exception) {
+                    throw (Exception) throwable;
+                } else {
+                    throw new Exception(throwable);
+                }
+            }
         }
 
         private CodeContextFactoryService.Task<CodeDelegate> findTask() throws Exception {
